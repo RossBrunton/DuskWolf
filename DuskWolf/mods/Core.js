@@ -1,0 +1,72 @@
+//Part of the DuskWolf engine
+//Licensed under the MIT license, see COPYING.txt for details
+"use strict";
+
+mods.Core = function(events) {
+	mods.IModule.call(this, events);
+};
+mods.Core.prototype = new mods.IModule();
+mods.Core.constructor = mods.Core;
+
+mods.Core.prototype.addActions = function() {
+	this._events.registerAction("print", function(what) {duskWolf.info(what.text);return true;}, this);
+	this._events.registerAction("error", function(what) {duskWolf.error(what.text);return true;}, this);
+	this._events.registerAction("warn", function(what) {duskWolf.warn(what.text);return true;}, this);
+	this._events.registerAction("inc", this._increment, this);
+	this._events.registerAction("mul", this._multiply, this);
+	this._events.registerAction("div", this._divide, this);
+	this._events.registerAction("modulo", this._modulo, this);
+	this._events.registerAction("vartree", this._vartree, this);
+	//events.registerAction("timer", function(what:XML):Boolean {if(!what.attribute("to").length()){DuskWolf.error("No target to set it to for!");}else{events.setVar(what.attribute("to"), String(timer.currentCount/10));}return true;});
+}
+
+mods.Core.prototype._increment = function(data) {
+	if(!data.to){duskWolf.error("No target to increment to.");return;}
+	if(!data.value){duskWolf.error("No value to increment.");return;}
+	if(!data.by) data.by = 1;
+	
+	this._events.setVar(data.to, Number(data.value)+Number(data.by));
+}
+
+mods.Core.prototype._multiply = function(data) {
+	if(!data.to){duskWolf.error("No target to multiply to.");return;}
+	if(!data.value){duskWolf.error("No value to multiply.");return;}
+	if(!data.by) data.by = 2;
+	
+	this._events.setVar(data.to, Number(data.value)*Number(data.by));
+}
+
+mods.Core.prototype._divide = function(data) {
+	if(!data.to){duskWolf.error("No target to divide to.");return;}
+	if(!data.value){duskWolf.error("No value to divide.");return;}
+	if(!data.by) data.by = 2;
+	
+	this._events.setVar(data.to, Number(data.value)/Number(data.by));
+}
+
+mods.Core.prototype._modulo = function(data) {
+	if(!data.to){duskWolf.error("No target to modulo to.");return;}
+	if(!data.value){duskWolf.error("No value to modulo.");return;}
+	if(!data.by) data.by = 10;
+	
+	this._events.setVar(data.to, Number(data.value)%Number(data.by));
+}
+
+mods.Core.prototype._vartree = function(data) {
+	if(!data.data){duskWolf.error("No data to use!");return;}
+	if(!data.root){duskWolf.error("No root name!");return;}
+	
+	var tree = data.root;
+	
+	this._processVarTree = function(d, root, first) {
+		for(var p in d){
+			if(typeof(d[p]) != "object"){
+				this._events.setVar(root+"-"+p, d[p]);
+			}else{
+				this._processVarTree(d[p], root+"-"+p);
+			}
+		}
+	}
+	
+	this._processVarTree(data.data, data.root);
+}
