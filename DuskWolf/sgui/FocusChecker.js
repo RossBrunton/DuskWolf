@@ -32,9 +32,9 @@ sgui.FocusChecker = function(parent, events, comName) {
 		this._inactiveImg = this._events.getVar("sg-def-fc-i");
 		this._focusedImg = this._events.getVar("sg-def-fc-f");
 		this._activeImg = this._events.getVar("sg-def-fc-a");
-
+		
 		this._registerStuff(this._focusStuff);
-
+		
 		this.setImage(this._inactiveImg);
 	}
 };
@@ -54,11 +54,11 @@ sgui.FocusChecker.prototype._focusStuff = function(data) {
 };
 
 /** Turns the focus checker to the image set by <code>image-inactive</code>. */
-sgui.FocusChecker.prototype.onLooseFocus = function() {this.setImage(this._inactiveImg);};
+sgui.FocusChecker.prototype.onLooseFocus = function() {if(this._inactiveImg) this.setImage(this._inactiveImg);};
 /** Turns the focus checker to the image set by <code>image-focused</code>. */
-sgui.FocusChecker.prototype.onGetFocus = function() {this.setImage(this._focusedImg);};
+sgui.FocusChecker.prototype.onGetFocus = function() {if(this._focusedImg) this.setImage(this._focusedImg);};
 
 /** Turns the focus checker to the image set by <code>image-focused</code>. */
-sgui.FocusChecker.prototype.onDeactive = function() {this.setImage(this._focusedImg);};
+sgui.FocusChecker.prototype.onDeactive = function() {if(this._focusedImg) this.setImage(this._focusedImg);};
 /** Turns the focus checker to the image set by <code>image-active</code>. */
-sgui.FocusChecker.prototype.onActive = function() {this.setImage(this._activeImg);};
+sgui.FocusChecker.prototype.onActive = function() {if(this._activeImg) this.setImage(this._activeImg);};

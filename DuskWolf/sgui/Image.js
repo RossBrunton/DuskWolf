@@ -49,34 +49,29 @@ sgui.Image.prototype._imageStuff = function(data) {
 
 sgui.Image.prototype._imageDraw = function(c) {
 	if(this._img){
-		if(this._width && this._height){
-			/*if(navigator.userAgent.indexOf(" Chrome/") != -1 || navigator.userAgent.indexOf(" MSIE ") != -1){
-				//From http://stackoverflow.com/questions/4875850/how-to-create-a-pixelized-svg-image-from-a-bitmap/4879849
-				var zoomx = this.getWidth()/this._img.width;
-				var zoomy = this.getHeight()/this._img.height;
-				
-				// Create an offscreen canvas, draw an image to it, and fetch the pixels
-				var offtx = document.createElement('canvas').getContext('2d');
-				offtx.drawImage(this._img, 0, 0);
-				var wkp = offtx.getImageData(0, 0, this._img.width, this._img.height).data;
+	/*if(navigator.userAgent.indexOf(" Chrome/") != -1 || navigator.userAgent.indexOf(" MSIE ") != -1){
+		//From http://stackoverflow.com/questions/4875850/how-to-create-a-pixelized-svg-image-from-a-bitmap/4879849
+		var zoomx = this.getWidth()/this._img.width;
+		var zoomy = this.getHeight()/this._img.height;
 		
-				// Draw the zoomed-up pixels to a different canvas context
-				for (var x=0; x < this._img.width; ++x){
-					for (var y=0; y < this._img.height; ++y){
-						// Find the starting index in the one-dimensional image data
-						var i = (y*this._img.width + x)*4;
-						if(wkp[i+3]){
-							c.fillStyle = "rgba("+wkp[i]+","+wkp[i+1]+","+wkp[i+2]+","+(wkp[i+3]/255)+")";
-							c.fillRect(x*zoomx, y*zoomy, zoomx, zoomy);
-						}
-					}
+		// Create an offscreen canvas, draw an image to it, and fetch the pixels
+		var offtx = document.createElement('canvas').getContext('2d');
+		offtx.drawImage(this._img, 0, 0);
+		var wkp = offtx.getImageData(0, 0, this._img.width, this._img.height).data;
+
+		// Draw the zoomed-up pixels to a different canvas context
+		for (var x=0; x < this._img.width; ++x){
+			for (var y=0; y < this._img.height; ++y){
+				// Find the starting index in the one-dimensional image data
+				var i = (y*this._img.width + x)*4;
+				if(wkp[i+3]){
+					c.fillStyle = "rgba("+wkp[i]+","+wkp[i+1]+","+wkp[i+2]+","+(wkp[i+3]/255)+")";
+					c.fillRect(x*zoomx, y*zoomy, zoomx, zoomy);
 				}
-			}else{*/
-				c.drawImage(this._img, 0, 0, this.getWidth(), this.getHeight());
-			//}
-		}else{
-			c.drawImage(this._img, 0, 0);
+			}
 		}
+	}else{*/
+		c.drawImage(this._img, 0, 0, this.getWidth(), this.getHeight());
 	}
 };
 
@@ -84,5 +79,6 @@ sgui.Image.prototype._imageDraw = function(c) {
  * @param image The name of the image, should be a constant in <code>Data</code>.
  */
 sgui.Image.prototype.setImage = function(name) {
+	if(!name) {duskWolf.warn(this.comName+" tried to set image to nothing."); return;}
 	this._img = data.grabImage(name);
 };

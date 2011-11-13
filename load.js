@@ -22,11 +22,11 @@ function __import__(file) {
 			$("head").append("<script type='text/javascript' src='"+__domain__+"/"+__dir__+"/"+file+"'></script>");
 		}else{
 			//Multiple files
-			if(log) console.log("Importing "+file.join(", ")+" from "+__domain__+"/"+__dir__+"/"+file+"...");
+			if(log) console.log("Importing "+file.join(", ")+" from "+__domain__+"/"+__dir__+"...");
 			if(logDiv) $("#info").append("<b>Importing:</b><br/>"+file.join("<br/>")+"<br/>");
 			var imString = "";
 			for(var i = 0; i < file.length; i++){
-				imString += "<script type='text/javascript' src='"+__domain__+"/"+__dir__+"/"+file[i]+"'></script>";
+				imString += "<script type='text/javascript' src='"+__domain__+"/"+__dir__+"/"+file[i]+"' async='async'></script>";
 			}
 			$("head").append(imString);
 		}

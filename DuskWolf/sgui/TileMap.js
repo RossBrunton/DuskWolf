@@ -3,7 +3,6 @@
 "use strict";
 
 loadComponent("Grid");
-loadComponent("Tile");
 
 /** A tilemap is just a grid of tiles.
  * 
@@ -25,12 +24,11 @@ sgui.TileMap = function (parent, events, comName) {
 		
 		this._registerStuff(this._tileMapStuff);
 		
-		delete new sgui.Tile(parent, events, comName);
-		
 		if(!this._events.getVar("sg-def-tm-spacing-h")) this._events.setVar("sg-def-tm-spacing-h", "0");
 		if(!this._events.getVar("sg-def-tm-spacing-v")) this._events.setVar("sg-def-tm-spacing-v", "0");
 		if(!this._events.getVar("sg-def-tm-rows")) this._events.setVar("sg-def-tm-rows", "-1");
 		if(!this._events.getVar("sg-def-tm-cols")) this._events.setVar("sg-def-tm-cols", "-1");
+		if(!this._events.getVar("sg-def-tm-dec")) this._events.setVar("sg-def-tm-dec", "0");
 		
 		this._hspacing = this._events.getVar("sg-def-tm-spacing-h");
 		this._vspacing = this._events.getVar("sg-def-tm-spacing-v");
@@ -43,22 +41,26 @@ sgui.TileMap.prototype.className = "TileMap";
 
 sgui.TileMap.prototype._tileMapStuff = function(data) {
 	if(typeof(this._prop("map", data, null, false)) != "string" && this._prop("map", data, null, false)){
-		var map = this._prop("map", data, null, false)
+		var map = this._prop("map", data, null, false);
+		
+		var dec = (("dec" in map)?map.dec:this._events.getVar("sg-def-tm-dec")) == "1";
+		loadComponent(dec?"DecimalTile":"Tile");
+		
 		//Get data
 		if(!("rows" in map)) map.rows = this._events.getVar("sg-def-tm-rows");
 		if(!("cols" in map)) map.cols = this._events.getVar("sg-def-tm-cols");
 		
-		if(map.rows == "-1") map.rows = Number(this._events.getVar("sys-sg-width"))/(map.width?map.width:Number(this._events.getVar("sg-def-tile-twidth")));
-		if(map.cols == "-1") map.cols = Number(this._events.getVar("sys-sg-height"))/(map.height?map.height:Number(this._events.getVar("sg-def-tile-theight")));
+		if(map.rows == "-1") map.rows = Number(this._events.getVar("sys-sg-width"))/(map.width?map.width:Number((new sgui[dec?"DecimalTile":"Tile"](this, this._events, "void")).getWidth()));
+		if(map.cols == "-1") map.cols = Number(this._events.getVar("sys-sg-height"))/(map.height?map.height:Number((new sgui[dec?"DecimalTile":"Tile"](this, this._events, "void")).getHeight()));
 		
-		map.type = "Tile";
+		map.type = dec?"DecimalTile":"Tile";
 		this.populate(map);
 		
 		var tiles = map.map.split(/\s/g);
 		
 		var i = 0;
-		mainLoop:for(var yi = 0; yi < map.rows; yi++){
-			for(var xi = 0; xi < map.cols; xi++){
+		mainLoop:for(var yi = 0; yi < map.cols; yi++){
+			for(var xi = 0; xi < map.rows; xi++){
 				while(!tiles[i]){if(!tiles[i+1]){break mainLoop;}else{i++;}}
 				
 				this.getComponent(xi+","+yi).doStuff({"tile":tiles[i]});

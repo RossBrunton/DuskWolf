@@ -26,18 +26,20 @@
  * 
  * @see Tile
  */
-sgui.Tile = function(parent, events, comName) {
+sgui.DecimalTile = function(parent, events, comName) {
 	if(parent !== undefined){
 		sgui.Component.call(this, parent, events, comName);
-	
+		
 		/** This is the actual image. */
 		this._img = null;
 		
-		if(!this._events.getVar("sg-def-tile-tsize")) this._events.setVar("sg-def-tile-tsize", "5");
+		if(!this._events.getVar("sg-def-tile-theight")) this._events.setVar("sg-def-tile-theight", "32");
+		if(!this._events.getVar("sg-def-tile-twidth")) this._events.setVar("sg-def-tile-twidth", "32");
 		
-		this._tsize = this._events.getVar("sg-def-tile-tsize");
-		this._width = 1<<this._tsize;
-		this._height = 1<<this._tsize;
+		this._theight = this._events.getVar("sg-def-tile-theight");
+		this._twidth = this._events.getVar("sg-def-tile-twidth");
+		this._width = this._events.getVar("sg-def-tile-twidth");
+		this._height = this._events.getVar("sg-def-tile-theight");
 		this._tx = 0;
 		this._ty = 0;
 		
@@ -49,29 +51,30 @@ sgui.Tile = function(parent, events, comName) {
 		this._registerDrawHandler(this._tileDraw);
 	}
 };
-sgui.Tile.prototype = new sgui.Component();
-sgui.Tile.constructor = sgui.Tile;
+sgui.DecimalTile.prototype = new sgui.Component();
+sgui.DecimalTile.constructor = sgui.DecimalTile;
 
 
 /** @inheritDoc */
-sgui.Tile.prototype.className = "Tile";
+sgui.DecimalTile.prototype.className = "DecimalTile";
 
 
 /** Generic image stuff!
  */
-sgui.Tile.prototype._tileStuff = function(data) {
+sgui.DecimalTile.prototype._tileStuff = function(data) {
 	//Set image
 	if(this._prop("src", data, null, true)){
 		this.setImage(this._prop("src", data, null, true, 2));
 	}
 	
-	this._tsize = this._prop("tile-size", data, this._tsize, true);
+	this._twidth = this._prop("tile-width", data, this._twidth, true);
+	this._theight = this._prop("tile-height", data, this._theight, true);
 	
 	this._tx = this._prop("tile", data, this._tx+","+this._ty, true).split(",")[0];
 	this._ty = this._prop("tile", data, this._tx+","+this._ty, true).split(",")[1];
 };
 
-sgui.Tile.prototype._tileDraw = function(c) {
+sgui.DecimalTile.prototype._tileDraw = function(c) {
 	/*if(navigator.userAgent.indexOf(" Chrome/") != -1 || navigator.userAgent.indexOf(" MSIE ") != -1){
 		//From http://stackoverflow.com/questions/4875850/how-to-create-a-pixelized-svg-image-from-a-bitmap/4879849
 		var zoomx = this.getWidth()/this._twidth;
@@ -96,13 +99,13 @@ sgui.Tile.prototype._tileDraw = function(c) {
 	}else{*/
 	
 	if(this._img){
-		c.drawImage(this._img, this._tx<<this._tsize, this._ty<<this._tsize, this.getWidth(), this.getHeight(), 0, 0, 1<<this._tsize, 1<<this._tsize);
+		c.drawImage(this._img, this._twidth*this._tx, this._theight*this._ty, this._twidth, this._theight, 0, 0, this.getWidth(), this.getHeight());
 	}
 };
 
 /** This sets the image that will be displayed.
  * @param image The name of the image, should be a constant in <code>Data</code>.
  */
-sgui.Tile.prototype.setImage = function(name) {
+sgui.DecimalTile.prototype.setImage = function(name) {
 	this._img = data.grabImage(name);
 };

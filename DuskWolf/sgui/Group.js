@@ -10,6 +10,7 @@ sgui.Group = function(parent, events, comName) {
 		sgui.Component.call(this, parent, events, comName);
 		
 		this._components = {};
+		this._drawOrder = [];
 		this._focusedCom = "";
 		
 		/** Whether this is the active component that will receive all keypresses. */
@@ -26,6 +27,7 @@ sgui.Group = function(parent, events, comName) {
 		//Add the groupStuff handler
 		this._registerStuff(this._groupStuff);
 		this._registerDrawHandler(this._groupDraw);
+		this._registerFrameHandler(this._groupFrame);
 	}
 };
 sgui.Group.prototype = new sgui.IContainer();
@@ -55,6 +57,7 @@ sgui.Group.prototype.newComponent = function(com, type) { //Component
 	loadComponent(type);
 	
 	this._components[com] = new sgui[type](this, this._events, com.toLowerCase());
+	this._drawOrder[this._drawOrder.length] = com;
 	this.bookRedraw();
 	
 	return this._components[com];
@@ -63,9 +66,9 @@ sgui.Group.prototype.newComponent = function(com, type) { //Component
 sgui.Group.prototype._groupStuff = function(data) {
 	//Component properties
 	if (data.children) {
-		for (var i = data.children.length-1; i >= 0; i--) {
+		for (var i = 0; i < data.children.length; i++) {
 			if (this.getComponent(data.children[i].name.toLowerCase(), data.children[i].type)) {
-				this.getComponent(data.children[i].name.toLowerCase()).doStuff(this._events.replaceVar(data.children[i]));
+				this.getComponent(data.children[i].name.toLowerCase()).doStuff(this._events.replaceVar(data.children[i]), this._thread);
 			} else {
 				duskWolf.warn(data.children[i].name + " has not been given a type and does not exist, ignoring.");
 			}
@@ -74,7 +77,7 @@ sgui.Group.prototype._groupStuff = function(data) {
 	
 	if (data.allChildren) {
 		for (var c in this._components) {
-			this._components[c].doStuff(this._events.replaceVar(data.allChildren));
+			this._components[c].doStuff(this._events.replaceVar(data.allChildren), this._thread);
 		}
 	}
 	
@@ -86,8 +89,17 @@ sgui.Group.prototype._groupStuff = function(data) {
 
 sgui.Group.prototype._groupDraw = function(c) {
 	//Draw children
+	for(var i = 0; i < this._drawOrder.length; i++) {
+		if(this._drawOrder[i] in this._components) {
+			this._components[this._drawOrder[i]].draw(c);
+		}
+	}
+};
+
+sgui.Group.prototype._groupFrame = function() {
+	//Draw children
 	for(var p in this._components){
-		this._components[p].draw(c);
+		this._components[p].frame();
 	}
 };
 
@@ -114,6 +126,7 @@ sgui.Group.prototype.getComponent = function(com, type) { //Component
  */
 sgui.Group.prototype.deleteComponent = function(com) { //Boolean
 	if (this._components[com.toLowerCase()]){
+		if(this.getFocusName() == com.toLowerCase) this.focus("blank");
 		delete this._components[com.toLowerCase()];
 		return true;
 	}

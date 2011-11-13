@@ -18,10 +18,10 @@ __import__("mods/__init__.js");
  * 
  * Running Actions:
  * 
- * To actually run an action, you need to call <run> with the array of actions, and the thread you want it to run in.
+ * To actually run an action, you need to call <Events.run> with the array of actions, and the thread you want it to run in.
  * 
- * If you want to wait for something to happen (as in, say you want to wait for user input, or a file to load), you should call <awaitNext>, which reterns the current thread that you are waiting in.
- * When you want to start running again, call <next> with the thread to continue in.
+ * If you want to wait for something to happen (as in, say you want to wait for user input, or a file to load), you should call <Events._awaitNext>, which reterns the current thread that you are waiting in.
+ * When you want to start running again, call <Events._next> with the thread to continue in.
  * 
  * Listeners:
  * 
@@ -87,14 +87,14 @@ __import__("mods/__init__.js");
  * Threads:
  * 
  * Threads (which are not done by the CPU) allow you to do multiple things at once, for example, you can animate a background while still having the player move.
- *  Basically, each thread maintains it's own list of actions it has to run, and an <awaitNext> call will only cause execution on the current thread to stop.
+ *  Basically, each thread maintains it's own list of actions it has to run, and an <Events._awaitNext> call will only cause execution on the current thread to stop.
  *  In the actions thing, you can use the "thread" action to switch threads.
- *  You can get the current thread by reading <thread> of this, which will not work if you cave called <awaitNext>
+ *  You can get the current thread by reading <Events.thread> of this, which will not work if you cave called <Events._awaitNext>.
  * 
  * Modules:
  * 
- * Modules are classes that implement <IModule> and generally provide a simple interface to let you DO something...
- *  Generally, a module calls <addAction> with details it needs, and when that action is found when running code the function registered is called.
+ * Modules are classes that implement <mods.IModule> and generally let you DO something usefull, rather than simple printing of vars...
+ *  Generally, a module calls <mods.IModule.addAction> with details it needs, and when that action is found when running code the function registered is called.
  * 
  * The root JSON File:
  * 
@@ -116,7 +116,10 @@ __import__("mods/__init__.js");
  * Calls the function with the name given by name, once the code is finished, it resumes from the next action after this.
  * 
  * > {"a":"if", "cond":"...", ("then":[...],) ("else":[...])}
- * Evaluates the condition using the rules above, if it is true, then the "Then" array is ran, else the "else" array is ran instead. Simple.
+ * Evaluates the condition using the rules above, if it is true, then the "then" array is ran, else the "else" array is ran instead. Simple.
+ * 
+ * > {"a":"ifset", "value":"...", ("then":[...],) ("else":[...])}
+ * Runs the actions specified by "then" if the value string is not empty, otherwise it runs "else". This can be used to check if vars are defined, "$1;$2;" will run the "then" actions if ether one of the vars is not a blank string, and if they are both unset, then it will run the "else" actions.
  * 
  * > {"a":"while", "cond":"...", "actions":[...]}
  * It keeps repeating the actions if the condition is true.
@@ -160,11 +163,20 @@ __import__("mods/__init__.js");
  * Fired once, to signal that the game should start running, you should listen for this rather than just dumping code in the main array so that other things are loaded. The properties are the same as the ones in <DuskWolf>.
  * 
  * See:
- * 	<modules.Module>
+ * 	<mods.IModule>
+ */
+
+/** Function: Events
+ * 
+ * [undefined] Creates a new Events system thing, initiates all the defualt actions and goes through all the modules, initing them.
+ * 
+ * Params:
+ * 	game - [<Game>] The game object this is attached to.
+ * 
  */
 window.Events = function(game) {
 	/** Variable: _game
-	 * [<Game>] A link to the main game this is running as.
+	 * [<Game>] A link to the main game this is running for.
 	 */
 	this._game = game;
 	
@@ -173,18 +185,33 @@ window.Events = function(game) {
 	 * [object] A list of every action, each action is an array in the form [function to be called, scope to call function in]. You should add actions using <addAction>, rather than adding it to this directly.
 	 */
 	this._actions = {};
-	/** variable: _functions
+	/** Variable: _functions
 	 * [object] A list of all the functions assigned, in the form of an array of actions. Generally, you shouldn't need to create functions outside the JSON files, so you can't do it.
 	 */
 	this._functions = {};
+	/** Variable: _listeners
+	 * [array] A list of all the listeners in use, this is an array of the action that set it, whith all it's properties.
+	 */
 	this._listeners = [];
+	/** Variable: _vars
+	 * [object] This is all the variables! You should set/retreive these using <getVar>() and <setVar>(), and the like.
+	 */
 	this._vars = {};
+	/** Variable: _threads
+	 * [object] This is all the threads that have been created. Each thread is an object with a "buffer" property, a "nexts" property and an "actions" property.
+	 * 
+	 * Nexts is the number of times <awaitNext>() has been called, and is the number of times we have to call <next>() for the program to continue.
+	 * 
+	 * Actions is the current list of actions that the engine is slowly working it's way through. Buffer is a "temprary storage area" for actions that should be ran next, and is inserted into `actions` before any more actions are ran.
+	 * 
+	 * The buffer is required so that the order of actions is intuitive, <run>() calls that were called first should be ran first.
+	 */
 	this._threads = {};
 	this._frameHandlers = {};
 	this._keyHandlers = {};
 	
 	/** Variable: thread
-	 * [string] The currently running thread. Assuming you have not called <awaitNext>, you can read this to get your current thread. Setting it will most likely break something.
+	 * [string] The currently running thread. Assuming you have not called <awaitNext>, you can read this to get your current thread. Setting it to anything will most likely break something.
 	 */
 	this.thread = "";
 	
@@ -202,6 +229,7 @@ window.Events = function(game) {
 	this.registerAction("function", this._addFunction, this);
 	this.registerAction("listen", this.addListener, this);
 	this.registerAction("if", this._iffy, this);
+	this.registerAction("ifset", this._ifset, this);
 	this.registerAction("while", this._whiley, this);
 	this.registerAction("call", this._callFunction, this);
 	this.registerAction("fire", this.fire, this);
@@ -217,7 +245,7 @@ window.Events = function(game) {
 	
 	//Load everything!
 	for(var x = data.scripts.length-1; x >= 0; x--){
-		this.run(data.scripts[x]);
+		this.run(data.scripts[x], "_init");
 	}
 	
 	//Set some vars
@@ -235,8 +263,7 @@ Events.prototype.everyFrame = function() {
 	}
 	
 	for(var h in this._frameHandlers){
-		this._frameHandlers[h][1].__action = this._frameHandlers[h][0];
-		this._frameHandlers[h][1].__action();
+		this._frameHandlers[h][0].call(this._frameHandlers[h][1]);
 	}
 	
 	//Keep running actions untill we have to stop
@@ -253,14 +280,14 @@ Events.prototype.everyFrame = function() {
 
 Events.prototype.keyPress = function(e) {
 	for(var h in this._keyHandlers){
-		this._keyHandlers[h][1].__action = this._keyHandlers[h][0].call(this._keyHandlers[h][1], e);
+		this._keyHandlers[h][0].call(this._keyHandlers[h][1], e);
 	}
 }
 
 Events.prototype.run = function(what, t) {
 	if(!t) t = "main";
-	if(typeof(what) == "string") what = JSON.parse(what);
 	
+	if(typeof(what) == "string") what = JSON.parse(what);
 	//Add all the commands to the buffer to be added before running any more commands
 	for(var i = 0; i < what.length; i++){
 		this._getThread(t, true).buffer[this._getThread(t, true).buffer.length] = what[i];
@@ -269,7 +296,6 @@ Events.prototype.run = function(what, t) {
 
 Events.prototype.next = function(t, decrement) {
 	if(decrement === undefined) decrement = true;
-	
 	//Check if we are waiting for any nexts
 	if(decrement){
 		this._getThread(t).nexts --;
@@ -325,7 +351,7 @@ Events.prototype.clone = function(o) {
 
 Events.prototype.awaitNext = function(t, count) {
 	if(count === undefined) count = 1;
-	_getThread(t).nexts += count;
+	this._getThread(t).nexts += count;
 	return t;
 }
 
@@ -469,7 +495,7 @@ Events.prototype.fire = function(data) {
 	
 	for(var l = this._listeners.length-1; l >= 0; l--){
 		if(this._listeners[l].event == data.event){
-			var fail;
+			var fail = false;
 			for(var p in this._listeners[l]){
 				if((["name", "actions", "event", "__proto__", "a"]).indexOf(p) == -1 && this._listeners[l][p] && ((this._listeners[l][p] != data[p] && this._listeners[l][p][0] != "!") || ("!"+this._listeners[l][p] == data[p] && this._listeners[l][p][0] == "!"))){
 					fail = true;
@@ -491,6 +517,16 @@ Events.prototype._iffy = function(what) {
 	if(this._cond(what.cond)) {
 		if(what.then) this.run(what.then, this.thread);
 	}else if(what["else"]) this.run(what["else"], this.thread);
+};
+
+Events.prototype._ifSet = function(what) {
+	if(!("value" in what)){duskWolf.error("No value for ifset.");return;}
+	
+	if(what.value !== "") {
+		if("then" in what) this.run(what.then, this.thread);
+	}else if("else" in what) {
+		this.run(what["else"], this.thread);
+	}
 };
 
 Events.prototype._whiley = function(what) {

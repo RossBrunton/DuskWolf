@@ -68,7 +68,7 @@ sgui.Single.prototype._singleStuff = function(data) {
 	//Component properties
 	if (data.child) {
 		if (data.child.name && this.getComponent(data.child.name.toLowerCase(), data.child.type)) {
-			this.getComponent(data.child.name.toLowerCase()).doStuff(this._events.replaceVar(data.child));
+			this.getComponent(data.child.name.toLowerCase()).doStuff(this._events.replaceVar(data.child), this._thread);
 		} else {
 			duskWolf.warn(data.child.name + " has not been given a type and does not exist, ignoring.");
 		}

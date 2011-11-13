@@ -9,6 +9,11 @@
  * See:
  * 	<Events>
  */
+
+/** Function: Game
+ * 
+ * [undefined] this just creates a new instance of this. It will create a new <Data> object on the main window, and then call <Game.start> ().
+ */
 window.Game = function() {
 	/** Variable: _events
 	 * [<Events>] This is the current events system.
@@ -23,24 +28,22 @@ window.Game = function() {
 	
 /** Function: start
  * 
- * This starts (or restarts) the events system, it is automatically called when this is constructed.
+ * [undefined] This starts (or restarts) the events system, it is automatically called when this is constructed.
  * 
- * Once the events system has been inited, the event "sys-event-load" event is fired, then "sys-event-start", both on the thread main.
+ * Once the events system has been inited, the event "sys-event-load" event is fired, then "sys-event-start", both on the thread "_init".
  * You should listen for these rather than doing actions directly at the start, this guaruntees that all JSONS and modules and such have loaded correctly.
  */
 Game.prototype.start = function() {
-	duskWolf.info("Creating new game.");
-	
 	this._events = new Events(this);
 	this._events.run([
 	{"a":"fire", "ver":duskWolf.ver, "ver-id":duskWolf.verId, "gameName":duskWolf.NAME, "event":"sys-event-load"},
 	{"a":"fire", "ver":duskWolf.ver, "ver-id":duskWolf.verId, "gameName":duskWolf.NAME, "event":"sys-event-start"},
-	{"a":"var", "name":"_started", "value":"1"}]);
+	{"a":"var", "name":"_started", "value":"1"}], "_init");
 };
 
 /** Function: everyFrame
  * 
- * This is called every frame based on the frame rate, it doesn't do anything besides call this._events.everyFrame().
+ * [undefined] This is called every frame based on the frame rate, it doesn't do anything besides call <Events.everyFrame> () of the events system in use.
  * 
  * See:
  * 	<DuskWolf.frameRate>
@@ -48,16 +51,16 @@ Game.prototype.start = function() {
 Game.prototype.everyFrame = function() {
 	try {
 		this._events.everyFrame();
-		//setTimeout("try {game.everyFrame()} catch(e) {duskWolf.error(e.message);}", 1000/duskWolf.frameRate);
 		framesRan++;
 		if(framesRan == 100){
 			duskWolf.info("100 frames took "+((new Date()).getTime()-timo)+"ms, "+(100/(((new Date()).getTime()-timo)/1000))+"fps.");
 			timo = (new Date()).getTime();
 			framesRan = 0;
 		}
-	} catch(e) {duskWolf.error(e.message);};
+	} catch(e) {duskWolf.error(e);};
 };
 
+//Timer stuff, temporary
 window.framesRan = 0;
 window.timo = (new Date()).getTime();
 

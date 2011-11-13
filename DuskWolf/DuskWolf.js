@@ -4,18 +4,18 @@
 
 /** Class: DuskWolf
  * 
- * This is the DuskWolf engine. Do you you want some documentation? Sucks to be you then!
+ * This is the DuskWolf engine.
  * 
- * The loader loads this class as a global object, to access the constants you just have to use `duskWolf.gameName` or so.
+ * The loader loads this class as a global object named "duskWolf", to access these constants you just need to read that.
  * 
- * You could read readme.md, but I doubt you'd be able to figure out that you can open it in a text editor.
+ * You could read readme.md for more information, but I doubt you'd be able to figure out that you can open it in a text editor.
  */
 window.DuskWolf = function() {
 };
 
 /** Function: error
  * 
- * This traces an error message if <logLevel> is 1 or above. You should keep an eye out for these.
+ * [undefined] This traces an error message if <logLevel> is 1 or above. You should keep an eye out for these.
  * 
  * An error is considered to be something that should NOT happen, and that will probably break something else.
  * 
@@ -32,7 +32,7 @@ DuskWolf.prototype.error = function(text) {
 
 /** Function: warn
  * 
- * This traces a warning message if <logLevel> is 2 or above.
+ * [undefined] This traces a warning message if <logLevel> is 2 or above.
  * 
  * A warning is something that is probably a bad idea, but doesn't exactly break something.
  * 
@@ -49,7 +49,7 @@ DuskWolf.prototype.warn = function(text){
 
 /** Function: info
  * 
- * This traces a message if <logLevel> is 3 or above. Use this for anything interesting that happens!
+ * [undefined] This traces a message if <logLevel> is 3 or above. Use this for anything interesting that happens!
  * 
  * Params:
  * 	text - [string] The error to be traced, it will be converted to a string.
@@ -64,7 +64,7 @@ DuskWolf.prototype.info = function(text) {
 
 /** Function: log
  * 
- * This traces a message if <logLevel> is 4 or above. This should be used for your debugging.
+ * [undefined] This traces a message if <logLevel> is 4 or above. This should be used for your debugging.
  * 
  * Params:
  * 	text - [string] The error to be traced, it will be converted to a string.
@@ -97,12 +97,12 @@ DuskWolf.prototype.htmlLogLevel = 4;
 /** Constant: ver
  * [string] Version of your game. Does not have to be a dot seperated list of numbers or anything, any string will do.
  */
-DuskWolf.prototype.ver = "0.0.1-alpha";
+DuskWolf.prototype.ver = "0.0.2-alpha";
 
 /** Constant: verId
  * [number] Version of the game, this may not be human readable, and should be used to check if a save file is older than a certain version, or something. It is assumed that later numbers are newer versions.
  */
-DuskWolf.prototype.verId = 1;
+DuskWolf.prototype.verId = 2;
 
 /** Constant: gameName
  * [string] Name of the game. 
@@ -117,7 +117,7 @@ DuskWolf.prototype.author = "SavageWolf";
 /** Constant: frameRate
  * [number] The frame rate, in frames per second.
  */
-DuskWolf.prototype.frameRate = 30;
+DuskWolf.prototype.frameRate =  30;
 
 /** Constant: canvas
  * [string] The name of the HTML canvas object SimpleGui uses.
@@ -135,4 +135,4 @@ DuskWolf.prototype.logElem = "dwlog";
 /** Constant: gameDir
  * [string] The folder where game assets (images, JSONs etc.) are found.
  */
-DuskWolf.prototype.gameDir = "Example";
+DuskWolf.prototype.gameDir = "test/Example";

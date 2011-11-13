@@ -1,5 +1,12 @@
 [
 	"This is a random file I use to test things, you may find it interesting, probably.",
+	
+	{"a":"local-load", "name":"loads"},
+	{"a":"var", "name":"loads", "value":"${$loads;,1}"},
+	{"a":"local-save", "name":"loads", "vars":"loads"},
+	{"a":"comment", "cond":"$loads; = 10", "then":[{"a":"local-clear", "name":"loads"}]},
+	{"a":"print", "text":"[$loads;]"},
+	
 	{"a":"function", "name":"Test", "actions":[
 		{"a":"print", "text":"Hello again, world!"}
 	]},
@@ -23,11 +30,11 @@
 		{"name":"B", "type":"FocusChecker", "x":"200", "y":"120", "scale-y":"2", "flow-up":"A", "flow-down":"sin"},
 		{"name":"sin", "type":"DirListener", "child":{"name":"Image", "type":"Image", "src":"test.png"}, "action-left":[{"a":"print", "text":"Hello!"}]},
 		{"name":"Men", "type":"VMenu", "y":"50", "flow-down":"Gri", "populate":{"type":"HMenu", "height":"16", "populate":{"type":"FocusChecker", "height":"16", "width":"16"}}},
-		{"name":"Gri", "type":"Grid", "x":"50", "populate":{"type":"Image", "src":"test.png"}},
-		{"name":"Tiley", "type":"Tile", "src":"tile.png", "tile":"1,1", "x":"100", "y":"300", "width":"64"},
-		{"name":"TM1", "type":"TileMap", "map":{"src":"tile.png", "map":"1,1 1,0 0,1", "width":"64"}},
-		{"name":"TM2", "x":"4", "y":"4", "type":"TileMap", "map":{"src":"tile.png", "map":"1,1 1,0 0,1", "width":"64"}},
-		{"name":"TM3", "x":"8", "y":"8", "type":"TileMap", "map":{"src":"tile.png", "map":"1,1 1,0 0,1", "width":"64"}}
+		{"name":"Tiley", "type":"Tile", "src":"tile.png", "tile":"1,1", "x":"100", "y":"300"},
+		{"name":"TM1", "type":"TileMap", "map":{"src":"Tiles.png", "map":"
+1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0
+0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 1,0 1,0 1,0 0,0 0,0 0,0 0,0 1,0 0,0 0,0 0,0 1,0 1,0 0,0 1,0
+"}, "fade":"0.05"}
 	]},
 	
 	{"a":"listen", "event":"sys-event-frame", "actions":[

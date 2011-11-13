@@ -7,6 +7,7 @@ window.sgui = {"Component":"Component",
 "IContainer":"IContainer",
 "Group":"Group",
 "Pane":"Pane",
+"Rect":"Rect",
 "Image":"Image",
 "FocusChecker":"FocusChecker",
 "HMenu":"Menu",
@@ -16,6 +17,7 @@ window.sgui = {"Component":"Component",
 "Grid":"Grid",
 "Label":"Label",
 "Tile":"Tile",
+"DecimalTile":"DecimalTile",
 "TileMap":"TileMap"};
 
 window.loadComponent = function(name) {

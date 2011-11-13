@@ -8,11 +8,12 @@ loadComponent("Pane");
 mods.SimpleGui = function(events) {
 	mods.IModule.call(this, events);
 	
-	this.__interface = mods.IModule;
-	this.__interface(events);
-	
 	this._events.registerKeyHandler("SGuiKey", function(event) {
 		this._getActivePane().keypress(event);
+	}, this);
+	
+	this._events.registerFrameHandler("SGuiFrame", function() {
+		this._getActivePane().frame();
 	}, this);
 	
 	this._events.registerFrameHandler("SGuiDrawer", this.draw, this);

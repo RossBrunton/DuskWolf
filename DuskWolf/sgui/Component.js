@@ -1,6 +1,79 @@
 //Part of the DuskWolf engine
 //Licensed under the MIT license, see COPYING.txt for details
 
+/** Class: sgui.Component
+ * 
+ * A component is a single "thing" that exists in the Simple Gui system. Everything in the Simple GUI system must have this as a base class.
+ * 
+ * This class doesn't actually do anything in itself,
+ * 
+ * <p>Components can be "active", a component which is active will receive keyboard events, and should act like the user is looking at it. When a component becomes active, it's <code>onActive</code> method is called, when it looses it, <code>onDeactive</code> is called. For a component to be active, all it's parent groups must be too.</p>
+ * 
+ * <p>Components can also be "focused", focused components will be made active when the group it is in becomes active. Focus is generally changed by the arrow keys (only active components can handle key events, remember), if a key is pressed, <code>(direction)Action</code> returns true, and <code>(direction)Flow</code> is not empty, focus changes to that element in this one's group. You can also call the <code>focus</code> method of your group, but don't expect to become active.</p>
+ * 
+ * <p>Components "handle" events, like a keypress or being added to the stage, to do this they must use <code>register(Type)Handler()</code> with the function they wish to be run when that thing occurs.</p>
+ * 
+ * <p>A special type of handler is the Stuff handler, the function is given an XML object containing properties (like the ones below), and should use it to process them. Groups send the Stuff relating to a specific component (Like <code>&lt;sg-label name='texty'&gt;</code> for the label named "text") to that component for processing.</p>
+ * 
+ * <p>Note that most properties support a <code>to</code> attribute (Which is not listed to make it easier to read), this attribute is the name of a var, and stores the value of the property in it.</p>
+ * 
+ * <p><b>This component (and thus, all of them) have the following properties:</b></p>
+ * 
+ * <p><code>&lt;x&gt;(x)&lt;/x&gt;</code> --
+ * The x coordinate of this component, starting from the left of its container at 0.</p>
+ * 
+ * <p><code>&lt;y&gt;(y)&lt;/y&gt;</code> --
+ * The y coordinate of this component, starting from the top of its container at 0.</p>
+ * 
+ * <p><code>&lt;scale-x&gt;(scale)&lt;/scale-x&gt;</code> --
+ * The relative width of this object, a value of two means it's two times as wide, for example.</p>
+ * 
+ * <p><code>&lt;scale-y&gt;(scale)&lt;/scale-y&gt;</code> --
+ * The relative height of this object, a value of two means it's two times as tall, for example.</p>
+ * 
+ * <p><code>&lt;height&gt;(height)&lt;/height&gt;</code> --
+ * The height of the component, in pixels. This will chage the value of <code>&lt;scale-y&gt;</code>.</p>
+ * 
+ * <p><code>&lt;width&gt;(width)&lt;/width&gt;</code> --
+ * The width of the component, in pixels. This will chage the value of <code>&lt;scale-x&gt;</code>.</p>
+ * 
+ * <p><code>&lt;alpha&gt;(alpha)&lt;/alpha&gt;</code> --
+ * How transparent an object is, from 0 (transparent) to 1 (solid). 0.5 for half transparency, for example. An alpha of "0" doesn't stop the user from interacting with it.</p>
+ * 
+ * <p><code>&lt;visible&gt;(visible)&lt;/visible&gt;</code> --
+ * If it's "1", then the object is displayed and the user can see it. If it's "0" it's invisible but the user can still interact with it. This has no effect on <code>&lt;alpha&gt;</code>.</p>
+ * 
+ * <p><code>&lt;action&gt;(code)&lt;/action&gt;</code> --
+ * <code>code</code> will be ran if the action key is pressed while this button is active, good practice is to have a <code>fire</code> action here.</p>
+ * 
+ * <p><code>&lt;flow-up&gt;(component)&lt;/flow-up&gt;</code> --
+ * The component in this one's container that will be flowed into when the up button is pressed. If it is not a valid name, "blank" is flowed into.</p>
+ * 
+ * <p><code>&lt;flow-down&gt;(component)&lt;/flow-down&gt;</code> --
+ * The component in this one's container that will be flowed into when the down button is pressed. If it is not a valid name, "blank" is flowed into.</p>
+ * 
+ * <p><code>&lt;flow-left&gt;(component)&lt;/flow-left&gt;</code> --
+ * The component in this one's container that will be flowed into when the left button is pressed. If it is not a valid name, "blank" is flowed into.</p>
+ * 
+ * <p><code>&lt;flow-right&gt;(component)&lt;/flow-right&gt;</code> --
+ * The component in this one's container that will be flowed into when the right button is pressed. If it is not a valid name, "blank" is flowed into.</p>
+ * 
+ * <p><code>&lt;enabled&gt;(component)&lt;/enabled&gt;</code> --
+ * If this is "0", then the commponent can't be flowed into.</p>
+ * 
+ * <p><code>&lt;delete/&gt;</code> --
+ * If this property is found, then the component will be destroyed, you should probably put it at the end of all actions or something.</p>
+ * 
+ * <p><code>&lt;fade-in [speed='(speed)']&gt;(speed)&lt;/fade-in&gt;</code> --
+ * The component's alpha will be set to 0, and increased by <code>speed</code> (default is 0.05) every frame. It stops events while it is doing this.</p>
+ * 
+ * <p><code>&lt;fade-out [speed='(speed)']&gt;(speed)&lt;/fade-in&gt;</code> --
+ * The component's alpha will be set to 1, and decreased by <code>speed</code> (default is 0.05) every frame. It stops events while it is doing this.</p>
+ * 
+ * @see Group
+ * @see modules.SimpleGui
+ */
+	 
 /** Creates a new component, note that if you want to use a "blank component", you should use a <code>NullCom</code>.
  * 
  * @param _group The group this component is in.
@@ -14,36 +87,36 @@ sgui.Component = function (parent, events, componentName) {
 		this._events = events;
 		this.comName = componentName;
 		
-		this._x = 0;
-		this._y = 0;
-		this._scaleX = 1;
-		this._scaleY = 1;
-		this._visible = true;
+		this.x = 0;
+		this.y = 0;
+		this.scaleX = 1;
+		this.scaleY = 1;
+		this.visible = true;
+		this.alpha = 1;
 		this._height = 0;
 		this._width = 0;
 		
 		this._redrawBooked = false;
 
 		/** The name of the group's component that will be focused when the left key is pressed and <code>leftDirection</code> returns true.*/
-		this._leftFlow = "";
+		this.leftFlow = "";
 		/** The name of the group's component that will be focused when the right key is pressed and <code>rightDirection</code> returns true.*/
-		this._rightFlow = "";
+		this.rightFlow = "";
 		/** The name of the group's component that will be focused when the up key is pressed and <code>upDirection</code> returns true.*/
-		this._upFlow = "";
+		this.upFlow = "";
 		/** The name of the group's component that will be focused when the down key is pressed and <code>downDirection</code> returns true.*/
-		this._downFlow = "";
+		this.downFlow = "";
 
 		this._stuffActions = [];
 		this._keyHandlers = [];
+		this._frameHandlers = [];
 		this._actionHandlers = [];
-		//private var oEFHandlers:Vector.<Array>;
 		this._drawHandlers = [];
 
-		//private var fade:Number;
+		this._fade = 0;
+		this._fadeEnd = 0;
 
 		this._action = [];
-		
-		this._c = null;
 
 		/** Whether the component can become focused, if false it cannot be flowed into. */
 		this.enabled = true;
@@ -52,15 +125,13 @@ sgui.Component = function (parent, events, componentName) {
 
 		/**The thread this component is currently running in. Note that this is not cleared if the component is not waiting. */
 		this._thread = "";
-		this._open = 0;
+		this.open = 0;
 		
 		//Add the core stuff
 		this._registerStuff(this._coreStuff);
 
 		//Add the action property handler
 		this._registerActionHandler("actionProp", this._actionProp, this);
-
-		this._c = $("#"+duskWolf.canvas)[0].getContext("2d");
 	}
 };
 
@@ -69,11 +140,11 @@ sgui.Component.prototype.className = "Component";
 sgui.Component.prototype.isAContainer = false;
 
 
-/*private function onEnterFrame(e:Event):void {
-	for(var a:int = oEFHandlers.length-1; a >= 0; a--){
-		oEFHandlers[a][1](e);
+sgui.Component.prototype.frame = function() {
+	for(var a = this._frameHandlers.length-1; a >= 0; a--){
+		this._frameHandlers[a].call(this);
 	}
-}*/
+}
 
 /** This registers a handler to respond to a keypress. Only one key can have a handler, though SHIFT and CTRL modifiers on that same key can have different (or no) handlers.
  * <p>If there is no event for a key which has shift set to true, but there is one where shift is set to false that one will be called. You can also set the keycode to be -1, and it will handle all keys.</p>
@@ -97,9 +168,9 @@ sgui.Component.prototype._registerKeyHandler = function (key, shift, ctrl, funct
  * @param name The name of the handler, this is for identifying it.
  * @param funct The function to call, it will be passed a single parameter, the Event, and should return void.
  */
-/*protected function registerOEFHandler(name, funct, scope) {
-	this.frameHandlers[name] = funct;
-}*/
+sgui.Component.prototype._registerFrameHandler = function(funct) {
+	this._frameHandlers.push(funct);
+}
 
 /** This adds a handler that will call the function when the "Action button" is pressed. This is when the button should do whatever it's function was to do.
  * @param name The name of the handler, this is for identifying it.
@@ -111,7 +182,7 @@ sgui.Component.prototype._registerActionHandler = function (name, funct, scope) 
 
 sgui.Component.prototype._actionProp = function (e) {
 	if(this._action){
-		events.run(this._XML, this._thread);
+		this._events.run(this._action, "_"+this.comName);
 		return true;
 	}
 }
@@ -152,8 +223,7 @@ sgui.Component.prototype.keypress = function (e) {
 		case 32:
 			var actionRet;
 			for(var s in this._actionHandlers){
-				this._actionHandlers[s][1].__scoper = this._actionHandlers[s][0];
-				actionRet = this._actionHandlers[s][1].__scoper(e)?true:actionRet;
+				actionRet = this._actionHandlers[s][0].call(this._actionHandlers[s][1], e)?true:actionRet;
 			}
 			
 			if(actionRet){
@@ -207,12 +277,12 @@ sgui.Component.prototype._registerStuff = function(stuff) {
  */
 sgui.Component.prototype.doStuff = function(data, thread) {
 	this._thread = thread?thread:this._thread;
-	if(!this._open){
-		this._open ++;
+	if(!this.open){
+		this.open ++;
 		for(var i = this._stuffActions.length-1; i >= 0; i--){
 			this._stuffActions[i].call(this, data);
 		}
-		this._open--;
+		this.open--;
 	}else{
 		duskWolf.warn(comName+": Already doing something in another thread.");
 	}
@@ -260,26 +330,26 @@ sgui.Component.prototype._prop = function(name, data, def, valOnly, bookRedraw) 
 
 sgui.Component.prototype._coreStuff = function(data) {
 	//Location
-	this._x = this._prop("x", data, this._x, true, 1);
-	this._y = this._prop("y", data, this._y, true, 1);
+	this.x = this._prop("x", data, this.x, true, 1);
+	this.y = this._prop("y", data, this.y, true, 1);
 	
 	//Size
-	this._scaleX = this._prop("scale-x", data, this._scaleX, true, 1);
-	this._scaleY = this._prop("scale-y", data, this._scaleY, true, 1);
+	this.scaleX = this._prop("scale-x", data, this.scaleX, true, 1);
+	this.scaleY = this._prop("scale-y", data, this.scaleY, true, 1);
 	
 	this.setHeight(this._prop("height", data, this.getHeight(), true, 1));
 	this.setWidth(this._prop("width", data, this.getWidth(), true, 1));
 	
 	//Visibility
-	//alpha = Number(procVar("alpha", data, alpha));*/
-	this._visible = this._prop("visible", data, this._visible?"1":"0", true, 1)=="1";
+	this.alpha = this._prop("alpha", data, this.alpha, true, 1);
+	this.visible = this._prop("visible", data, this.visible?"1":"0", true, 1)=="1";
 	
 	//Flowing
-	this._upFlow = this._prop("flow-up", data, this._upFlow, true);
-	this._downFlow = this._prop("flow-down", data, this._downFlow, true);
-	this._leftFlow = this._prop("flow-left", data, this._leftFlow, true);
-	this._rightFlow = this._prop("flow-right", data, this._rightFlow, true);
-	this._enabled = this._prop("enabled", data, this._enabled?"1":"0", true)=="1";
+	this.upFlow = this._prop("flow-up", data, this.upFlow, true);
+	this.downFlow = this._prop("flow-down", data, this.downFlow, true);
+	this.leftFlow = this._prop("flow-left", data, this.leftFlow, true);
+	this.rightFlow = this._prop("flow-right", data, this.rightFlow, true);
+	this.enabled = this._prop("enabled", data, this.enabled?"1":"0", true)=="1";
 	
 	//Delete it
 	if(this._prop("delete", data, "0", true, 1) == "1"){
@@ -287,44 +357,47 @@ sgui.Component.prototype._coreStuff = function(data) {
 	}
 	
 	//Action
-	this._action = this._prop("action", data, this._action, true);
-	/*
-	//Fading
-	if(data.child("fade-in").length()){
-		awaitNext();
-		alpha = 0;
-		
-		if(data.child("fade-in").attribute("speed").length()){
-			fade = Number(data.child("fade-in").attribute("speed").toString());
-		}else{
-			fade = 0.05;
-		}
-		
-		registerOEFHandler("fade", fadeEffect);
-	}
+	this._action = this._prop("action", data, this._action);
 	
-	if(data.child("fade-out").length()){
-		awaitNext();
-		alpha = 1;
+	//Fading
+	if("fade" in data) {
+		this._awaitNext();
 		
-		if(data.child("fade-out").attribute("speed").length()){
-			fade = -Number(data.child("fade-out").attribute("speed").toString());
+		if(typeof(data.fade) == "object" && "from" in data.fade) {
+			this._alpha = Number(data.fade.from);
 		}else{
-			fade = -0.05;
+			this._alpha = 0;
 		}
 		
-		registerOEFHandler("fade", fadeEffect);
-	}*/
+		if(typeof(data.fade) == "object" && data["fade"].speed) {
+			this._fade = Number(data["fade"].speed);
+		}else{
+			this._fade = Number(this._prop("fade", data, 0.05, true));
+		}
+		
+		if(typeof(data.fade) == "object" && data["fade-in"].to) {
+			this._fadeEnd = Number(data.fade.to);
+		}else{
+			this._fadeEnd = 1;
+		}
+		
+		this._registerFrameHandler(this._fadeEffect);
+	}
 }
 
-/*private function fadeEffect(e:Event):void {
-	if((alpha < 1 && fade > 0) || (alpha > 0 && fade < 0)){
-		alpha += fade;
+sgui.Component.prototype._fadeEffect = function() {
+	if(this._fade == 0) return;
+	
+	if((this._alpha < this._fadeEnd && this._fade > 0) || (this._alpha > this._fadeEnd && this._fade < 0)) {
+		this._alpha += this._fade;
+		this.bookRedraw();
 	}else{
-		alpha = (fade >= 0)?1:0;
-		next();
+		this._alpha = this._fadeEnd;
+		this.bookRedraw();
+		this._fade = 0;
+		this._next();
 	}
-}*/
+}
 
 /** This just calls <code>Events.awaitNext()</code>, but calling this function is required for the checking if this component is open to work. 
  * @param count The number of nexts to wait for.
@@ -332,8 +405,8 @@ sgui.Component.prototype._coreStuff = function(data) {
  */
 sgui.Component.prototype._awaitNext = function(count) {
 	if(count === undefined) count = 1;
-	this._open += count;
-	this._events.awaitNext(thread, count);
+	this.open += count;
+	this._events.awaitNext(this._thread, count);
 }
 
 /** This just calls <code>Events.next()</code>, but calling this function is required for the checking if this component is open to work. It also gets the thread right.
@@ -341,8 +414,8 @@ sgui.Component.prototype._awaitNext = function(count) {
  */
 sgui.Component.prototype._next = function(count) {
 	if(count === undefined) count = 1;
-	this._open -= count;
-	this._events.next(thread);
+	this.open -= count;
+	this._events.next(this._thread);
 }
 
 /** This adds a handler that will call the function when the component is added to the stage. Amusing.
@@ -353,11 +426,12 @@ sgui.Component.prototype._registerDrawHandler = function(funct) {
 }
 
 sgui.Component.prototype.draw = function(c) {
-	if(!this._visible) return;
+	if(!this.visible) return;
 	
 	state = c.save();
-	if(this._x || this._y) c.translate(this._x, this._y);
-	if(this._scaleX || this._scaleY) c.scale(this._scaleX, this._scaleY);
+	if(this.x || this.y) c.translate(this.x, this.y);
+	if(this.scaleX || this.scaleY) c.scale(this.scaleX, this.scaleY);
+	if(this.alpha != 1) c.globalAlpha = this.alpha;
 	
 	for(var i = this._drawHandlers.length-1; i >= 0; i--){
 		this._drawHandlers[i].call(this, c);
@@ -408,7 +482,7 @@ sgui.Component.prototype.toString = function() {return "[sgui "+this.className+"
 
 sgui.NullCom = function(parent, events, comName) {
 	sgui.Component.call(this, parent, events, comName);
-	this._visible = false;
+	this.visible = false;
 };
 sgui.NullCom.prototype = new sgui.Component();
 sgui.NullCom.constructor = sgui.NullCom;

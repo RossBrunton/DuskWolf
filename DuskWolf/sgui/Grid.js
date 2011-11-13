@@ -50,8 +50,8 @@ sgui.Grid.prototype._gridStuff = function(data) {
 		var pop = this._prop("populate", data, null, false);
 		
 		//Get data
-		pop.rows = pop.count?pop.rows:this._events.getVar("sg-def-grid-rows");
-		pop.cols = pop.count?pop.cols:this._events.getVar("sg-def-grid-cols");
+		pop.rows = pop.rows?pop.rows:this._events.getVar("sg-def-grid-rows");
+		pop.cols = pop.cols?pop.cols:this._events.getVar("sg-def-grid-cols");
 		pop.type = pop.type?pop.type:this._events.getVar("sg-def-grid-type");
 		
 		this.populate(pop);
