@@ -33,11 +33,9 @@ sgui.Tile = function(parent, events, comName) {
 		/** This is the actual image. */
 		this._img = null;
 		
-		if(!this._events.getVar("sg-def-tile-tsize")) this._events.setVar("sg-def-tile-tsize", "5");
-		
-		this._tsize = this._events.getVar("sg-def-tile-tsize");
-		this._width = 1<<this._tsize;
-		this._height = 1<<this._tsize;
+		this._ssize = this._theme("tile-ssize");
+		this._width = 1<<this._ssize;
+		this._height = 1<<this._ssize;
 		this._tx = 0;
 		this._ty = 0;
 		
@@ -65,38 +63,15 @@ sgui.Tile.prototype._tileStuff = function(data) {
 		this.setImage(this._prop("src", data, null, true, 2));
 	}
 	
-	this._tsize = this._prop("tile-size", data, this._tsize, true);
+	this._ssize = this._prop("sprite-size", data, this._ssize, true);
 	
 	this._tx = this._prop("tile", data, this._tx+","+this._ty, true).split(",")[0];
 	this._ty = this._prop("tile", data, this._tx+","+this._ty, true).split(",")[1];
 };
 
 sgui.Tile.prototype._tileDraw = function(c) {
-	/*if(navigator.userAgent.indexOf(" Chrome/") != -1 || navigator.userAgent.indexOf(" MSIE ") != -1){
-		//From http://stackoverflow.com/questions/4875850/how-to-create-a-pixelized-svg-image-from-a-bitmap/4879849
-		var zoomx = this.getWidth()/this._twidth;
-		var zoomy = this.getHeight()/this._theight;
-		
-		// Create an offscreen canvas, draw an image to it, and fetch the pixels
-		var offtx = document.createElement('canvas').getContext('2d');
-		offtx.drawImage(this._img, this._tx*this._twidth, this._ty*this._theight, this._twidth, this._theight, 0, 0, this._twidth, this._theight);
-		var wkp = offtx.getImageData(0, 0, this._img.width, this._img.height).data;
-
-		// Draw the zoomed-up pixels to a different canvas context
-		for (var x=0; x < this._img.width; ++x){
-			for (var y=0; y < this._img.height; ++y){
-				// Find the starting index in the one-dimensional image data
-				var i = (y*this._img.width + x)*4;
-				if(wkp[i+3]){
-					this._c.fillStyle = "rgba("+wkp[i]+","+wkp[i+1]+","+wkp[i+2]+","+(wkp[i+3]/255)+")";
-					this._c.fillRect(x*zoomx, y*zoomy, zoomx, zoomy);
-				}
-			}
-		}
-	}else{*/
-	
 	if(this._img){
-		c.drawImage(this._img, this._tx<<this._tsize, this._ty<<this._tsize, this.getWidth(), this.getHeight(), 0, 0, 1<<this._tsize, 1<<this._tsize);
+		c.drawImage(this._img, this._tx<<this._ssize, this._ty<<this._ssize, 1<<this._ssize, 1<<this._ssize, 0, 0, this.getWidth(), this.getHeight());
 	}
 };
 
@@ -106,3 +81,33 @@ sgui.Tile.prototype._tileDraw = function(c) {
 sgui.Tile.prototype.setImage = function(name) {
 	this._img = data.grabImage(name);
 };
+
+sgui.Tile.prototype.getTile = function() {
+	return this._tx+","+this._ty;
+};
+
+sgui.Tile.prototype.setTile = function(x, y) {
+	if(y === null) {x = x.split(",")[0]; y = x.split(",")[1];}
+	
+	this._tx = x;
+	this._ty = y;
+};
+
+sgui.Tile.prototype.snapX = function(down) {
+	if(down)
+		this.x = Math.ceil(this.x/this.getWidth())*this.getWidth();
+	else
+		this.x = Math.floor(this.x/this.getWidth())*this.getWidth();
+}
+
+sgui.Tile.prototype.snapY = function(right) {
+	if(right)
+		this.y = Math.ceil(this.y/this.getHeight())*this.getHeight();
+	else
+		this.y = Math.floor(this.y/this.getHeight())*this.getHeight();
+}
+
+sgui.Tile.prototype.gridGo = function(x, y) {
+	this.x = x*this.getWidth();
+	this.y = y*this.getHeight();
+}

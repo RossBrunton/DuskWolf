@@ -115,5 +115,6 @@ Format: 1.51
 
 Alter Language: JavaScript
 
-   Add Ignored Variable Prefix in Index: _
+   Add Ignored Function Prefixes in Index: _ __
+   Add Ignored Variable Prefixes in Index: _ __
    Add Ignored Interface Prefix in Index: I

@@ -21,7 +21,7 @@ sgui.Single = function(parent, events, comName) {
 	if (parent !== undefined){
 		sgui.Component.call(this, parent, events, comName);
 		
-		this._component = {};
+		this._component = null;
 		
 		/** This creates a new group and adds the "blank" component. See <code>Component</code> for parameter details.
 		 * @see Component
@@ -31,6 +31,7 @@ sgui.Single = function(parent, events, comName) {
 		//Add the groupStuff handler
 		this._registerStuff(this._singleStuff);
 		this._registerDrawHandler(this._singleDraw);
+		this._registerFrameHandler(this._singleFrame);
 	}
 };
 sgui.Single.prototype = new sgui.IContainer();
@@ -90,7 +91,7 @@ sgui.Single.prototype._singleDraw = function(c) {
  * @return The component, or <code>null</code> if it wasn't found and you don't want to create it.
  */
 sgui.Single.prototype.getComponent = function(com, type) { //Component
-	if (this._component.comName.toLowerCase() == com.toLowerCase() || com == "*" || com === "") {
+	if (this._component.comName == com.toLowerCase() || com == "*" || com === "") {
 		return this._component;
 	};
 	
@@ -106,6 +107,10 @@ sgui.Single.prototype.deleteComponent = function(com) { //Boolean
 		this.newComponent("blank", "NullCom");
 		return true;
 	}
+};
+
+sgui.Single.prototype._singleFrame = function() {
+	this.getComponent("").frame();
 };
 
 /** Checks to see if it's possible to flow to the specified component, and if so, then does it.

@@ -45,6 +45,15 @@ window.Data = function() {
 	}
 	
 	if("mods" in this._root) modsAvalable = this._root.mods;
+	
+	//Import modules
+	var ims = ["mods/IModule.js"];
+
+	for(var i = modsAvalable.length-1; i >= 0; i--) {
+		ims[ims.length] = "mods/"+modsAvalable[i]+".js";
+	}
+
+	__import__(ims);
 }
 /** Variable: __hold__
  * [string] This is a global temporary variable used when retrieving files from AJAX, it's a horrible hack... Ugh...
@@ -68,7 +77,7 @@ var modsAvalable;
  */
 Data.prototype.grabJson = function(file, async) {
 	if(this._loaded[file+".json"] === undefined) {
-		duskWolf.info("Downloading JSON "+file+" from "+__domain__+"/"+duskWolf.gameDir+"/"+file+".json...");
+		duskWolf.info("Downloading JSON "+file+"...");
 		
 		$.ajax({"async":async==true, "dataType":"text", "error":function(jqXHR, textStatus, errorThrown) {
 			duskWolf.error("Error getting "+file+", "+errorThrown);
@@ -77,15 +86,28 @@ Data.prototype.grabJson = function(file, async) {
 			__hold__ = json;
 		}, "url":__domain__+"/"+duskWolf.gameDir+"/"+file+".json"});
 		
-		this._loaded[file+".json"] = __hold__.replace(/\t/g, " ").replace(/\/\*.*?\*\//g, "").replace(/\n/g, " ");
+		this._loaded[file+".json"] = __hold__.replace(/\t/g, " ").replace(/\/\*(?:.|\n)*?\*\//g, "").replace(/\n/g, " ");
 	}
 	
 	return JSON.parse(this._loaded[file+".json"]);
 }
 
+/** Function: grabImage
+ * 
+ * [Image] This downloads an image from a remote location. It downloads without blocking, so be aware of that!
+ * 
+ * If you call this without asigning the return value to anything, the image should download in the background.
+ * 
+ * Params:
+ * 	file - [string] A path to the file located in <__domain__> / <DuskWolf.gameDir>.
+ * 	The file extension is not added automatically.
+ * 
+ * Return:
+ * 	A DOM image object with the src attribute set to the image path.
+ */
 Data.prototype.grabImage = function(file) {
 	if(this._loaded[file] === undefined) {
-		duskWolf.info("Downloading image "+file+" from "+__domain__+"/"+duskWolf.gameDir+"/"+file+"...");
+		duskWolf.info("Downloading image "+file+"...");
 		
 		this._loaded[file] = new Image()
 		this._loaded[file].src = __domain__+"/"+duskWolf.gameDir+"/"+file;

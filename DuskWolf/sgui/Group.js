@@ -53,7 +53,8 @@ sgui.Group.prototype.containerKeypress = function(e) {
  */
 sgui.Group.prototype.newComponent = function(com, type) { //Component
 	//Find the type
-	if (!type){duskWolf.error("Cannot create a new component of type null!");return;}
+	if (!type) {duskWolf.error("Cannot create a new component of type null!");return;}
+	if (!(type in sgui)) {duskWolf.error(type + " is not a valid component type.");type = "NullCom";}
 	loadComponent(type);
 	
 	this._components[com] = new sgui[type](this, this._events, com.toLowerCase());
@@ -96,10 +97,10 @@ sgui.Group.prototype._groupDraw = function(c) {
 	}
 };
 
-sgui.Group.prototype._groupFrame = function() {
+sgui.Group.prototype._groupFrame = function(e) {
 	//Draw children
 	for(var p in this._components){
-		this._components[p].frame();
+		this._components[p].frame(e);
 	}
 };
 

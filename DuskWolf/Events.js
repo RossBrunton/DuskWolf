@@ -21,7 +21,7 @@ __import__("mods/__init__.js");
  * To actually run an action, you need to call <Events.run> with the array of actions, and the thread you want it to run in.
  * 
  * If you want to wait for something to happen (as in, say you want to wait for user input, or a file to load), you should call <Events._awaitNext>, which reterns the current thread that you are waiting in.
- * When you want to start running again, call <Events._next> with the thread to continue in.
+ * When you want to start running again, call <Events.next> with the thread to continue in.
  * 
  * Listeners:
  * 
@@ -45,14 +45,11 @@ __import__("mods/__init__.js");
  * > n != m
  * Breaks down to 1 if and only if n is not equal to m, like "==", but opposite.
  * 
- * > n < m
- * Breaks down to 1 if and only if n is less than m, 1 < 2 becomes 1, but 2 < 1 becomes 0.
- * 
- * > n > m
- * Breaks down to 1 if and only if n is greater than m, 1 > 2 becomes 0, and 2 > 1 becomes 1.
+ * > n < m, n > m
+ * Breaks down to 1 if and only if n is less than m for the former, and n is greater than m for the latter, 1 < 2 becomes 1, but 2 < 1 becomes 0.
  * 
  * > n <= m, n >= m
- * Same as "<" and ">", but breaks down to 1 if they are equal.
+ * Same as "<" and ">", but breaks down to 1 if they are equal as well.
  * 
  * > !n
  * Inverts n, !0 becomes 1, and !1 becomes 0.
@@ -82,14 +79,16 @@ __import__("mods/__init__.js");
  * Like the above, but they are multiplied together instead of added.
  * 
  * > $-name;
- * Name, which should be a number, is inverted, if name was 4, for example, this would be replaced with -4.
+ * Name, which should be a number, is inverted, if the var name was 4, for example, this would be replaced with -4.
  * 
  * Threads:
  * 
  * Threads (which are not done by the CPU) allow you to do multiple things at once, for example, you can animate a background while still having the player move.
- *  Basically, each thread maintains it's own list of actions it has to run, and an <Events._awaitNext> call will only cause execution on the current thread to stop.
+ *  Basically, each thread maintains it's own list of actions it has to run, and an <Events.awaitNext> call will only cause execution on the current thread to stop.
  *  In the actions thing, you can use the "thread" action to switch threads.
- *  You can get the current thread by reading <Events.thread> of this, which will not work if you cave called <Events._awaitNext>.
+ *  You can get the current thread by reading <Events.thread> of this, which will not work if you cave called <Events.awaitNext>.
+ * 
+ * Thread names starting with a "_" are system or internal threads, you should not use a thread name with an underscore at the start.
  * 
  * Modules:
  * 
@@ -159,20 +158,19 @@ __import__("mods/__init__.js");
  * > {"a":"fire", "ver":"...", "ver-id":"...", "gameName":"...", "event":"sys-event-load"}
  * Fired once, to signal that the game should start loading and processing any information it needs, like defining variables. The properties are the same as the ones in <DuskWolf>.
  * 
- * > {"a":"fire", "ver":"...", "ver-id":"...", "gameName":"...", "event":"sys-event-load"}
+ * > {"a":"fire", "ver":"...", "ver-id":"...", "gameName":"...", "event":"sys-event-start"}
  * Fired once, to signal that the game should start running, you should listen for this rather than just dumping code in the main array so that other things are loaded. The properties are the same as the ones in <DuskWolf>.
  * 
  * See:
- * 	<mods.IModule>
+ * * <mods.IModule>
  */
 
 /** Function: Events
  * 
- * [undefined] Creates a new Events system thing, initiates all the defualt actions and goes through all the modules, initing them.
+ * Creates a new Events system thing, initiates all the defualt actions and goes through all the modules, initing them.
  * 
  * Params:
- * 	game - [<Game>] The game object this is attached to.
- * 
+ * 	game 	- [<Game>] The game object this is attached to.
  */
 window.Events = function(game) {
 	/** Variable: _game
@@ -180,7 +178,6 @@ window.Events = function(game) {
 	 */
 	this._game = game;
 	
-	//Init vars
 	/** Variable: _actions
 	 * [object] A list of every action, each action is an array in the form [function to be called, scope to call function in]. You should add actions using <addAction>, rather than adding it to this directly.
 	 */
@@ -194,33 +191,53 @@ window.Events = function(game) {
 	 */
 	this._listeners = [];
 	/** Variable: _vars
-	 * [object] This is all the variables! You should set/retreive these using <getVar>() and <setVar>(), and the like.
+	 * [object] This is all the variables! You should set/retreive these using <getVar> and <setVar>, and the like.
 	 */
 	this._vars = {};
 	/** Variable: _threads
 	 * [object] This is all the threads that have been created. Each thread is an object with a "buffer" property, a "nexts" property and an "actions" property.
 	 * 
-	 * Nexts is the number of times <awaitNext>() has been called, and is the number of times we have to call <next>() for the program to continue.
+	 * Nexts is the number of times <awaitNext> has been called, and is the number of times we have to call <next> for the program to continue.
 	 * 
 	 * Actions is the current list of actions that the engine is slowly working it's way through. Buffer is a "temprary storage area" for actions that should be ran next, and is inserted into `actions` before any more actions are ran.
 	 * 
-	 * The buffer is required so that the order of actions is intuitive, <run>() calls that were called first should be ran first.
+	 * The buffer is required so that the order of actions is intuitive, <run> calls that were called first should be ran first.
 	 */
 	this._threads = {};
+	/** Variable: _frameHandlers
+	 * [object] This is all the frame handlers, they are arrays in the form [function, scope].
+	 */
 	this._frameHandlers = {};
+	/** Variable: _keyHandlers
+	 * [object] The list of keyhandlers, they are arrays of the form [function, scope].
+	 */
 	this._keyHandlers = {};
+	/** Variable: _keyUpHandlers
+	 * [object] The list of keyuphandlers, they are arrays of the form [function, scope].
+	 */
+	this._keyUpHandlers = {};
+	/** Variable: _modsInited
+	 * [array] This is an array of all the mods that have been initiated.
+	 */
+	this._modsInited = {};
 	
 	/** Variable: thread
 	 * [string] The currently running thread. Assuming you have not called <awaitNext>, you can read this to get your current thread. Setting it to anything will most likely break something.
 	 */
 	this.thread = "";
 	
+	//Set some vars
+	this.setVar("sys-game-ver", duskWolf.ver);
+	this.setVar("sys-game-verid", duskWolf.verId);
+	this.setVar("sys-game-name", duskWolf.gameName);
+	this.setVar("sys-game-author", duskWolf.author);
+	this.setVar("sys-game-frameRate", duskWolf.frameRate);
+	
 	//Init modules
-	this._modsInited = [];
 	for(var a = modsAvalable.length-1; a >= 0; a--){
 		var name = modsAvalable[a];
 		if(name != "IModule"){
-			this._modsInited[a] = new mods[name](this);
+			this._modsInited[name] = new mods[name](this);
 		}
 	}
 	
@@ -239,7 +256,7 @@ window.Events = function(game) {
 	this.registerAction("thread", this._threadTo, this);
 	this.registerAction("varDump", function(what){duskWolf.info(this._vars);}, this);
 	
-	for(var b = this._modsInited.length-1; b >= 0; b--){
+	for(var b in this._modsInited){
 		this._modsInited[b].addActions();
 	}
 	
@@ -247,21 +264,25 @@ window.Events = function(game) {
 	for(var x = data.scripts.length-1; x >= 0; x--){
 		this.run(data.scripts[x], "_init");
 	}
-	
-	//Set some vars
-	this.setVar("sys-game-ver", duskWolf.ver);
-	this.setVar("sys-game-verid", String(duskWolf.verId));
-	this.setVar("sys-game-name", duskWolf.gameName);
-	this.setVar("sys-game-author", duskWolf.author);
-	this.setVar("sys-game-frameRate", String(duskWolf.frameRate));
 };
 
+/** Function: everyFrame
+ * 
+ * This function is called every frame by the game object, unless you didn't create this from a game object...
+ * 
+ * It will run any active actions waiting to be ran, fire all the frameHandlers and fires the event "sys-event-frame" on the thread "_frame".
+ * 
+ * See:
+ * * <DuskWolf.frameRate>
+ * * <Events.registerFrameHandler>
+ */
 Events.prototype.everyFrame = function() {
 	//Fire event
 	if(this.getVar("_started") == "1"){
 		this.run([{"a":"fire", "event":"sys-event-frame"}], "_frame");
 	}
 	
+	//Frame handlers
 	for(var h in this._frameHandlers){
 		this._frameHandlers[h][0].call(this._frameHandlers[h][1]);
 	}
@@ -278,22 +299,83 @@ Events.prototype.everyFrame = function() {
 	}
 }
 
-Events.prototype.keyPress = function(e) {
+/** Function: keypress
+ * 
+ * This is called by game if a key is pressed, for obvious reasons, if you don't have a game instance this won't be called.
+ * 
+ * It loops through all the keyHandlers, and runs them.
+ * 
+ * Params:
+ * 	e		- [object] The event that was fired, it is a JQuery keydown event.
+ * 
+ * See:
+ * * <Events.registerKeyHandler>
+ */
+Events.prototype.keypress = function(e) {
 	for(var h in this._keyHandlers){
 		this._keyHandlers[h][0].call(this._keyHandlers[h][1], e);
 	}
 }
 
-Events.prototype.run = function(what, t) {
-	if(!t) t = "main";
-	
-	if(typeof(what) == "string") what = JSON.parse(what);
-	//Add all the commands to the buffer to be added before running any more commands
-	for(var i = 0; i < what.length; i++){
-		this._getThread(t, true).buffer[this._getThread(t, true).buffer.length] = what[i];
+/** Function: keyup
+ * 
+ * This is called by game if a key is released, after being pressed.
+ * 
+ * It loops through all the keyUpHandlers, and runs them.
+ * 
+ * Params:
+ * 	e		- [object] The event that was fired, it is a JQuery keyup event.
+ * 
+ * See:
+ * * <Events.registerKeyUpHandler>
+ */
+Events.prototype.keyup = function(e) {
+	for(var h in this._keyUpHandlers){
+		this._keyUpHandlers[h][0].call(this._keyUpHandlers[h][1], e);
 	}
 }
 
+/** Function: run
+ * 
+ * This is the function you call to run actions!
+ * 	It is given an array of actions, the actions to run, and a thread to run them on.
+ * 
+ * You cannot run a single command object with this, you must specify an array with the single action in it.
+ * 
+ * Params:
+ * 	what	- [string/array] The actions to run, if it is a string, it will be put through JSON.parse first.
+ * 	thread	- [string] The thread to run it on. If this is undefined, the thread "main" is assumed.
+ */
+Events.prototype.run = function(what, thread) {
+	if(!thread) thread = "main";
+	
+	if(typeof(what) == "string") what = JSON.parse(what);
+	
+	//Add all the commands to the buffer to be added before running any more commands
+	for(var i = 0; i < what.length; i++){
+		this._getThread(thread, true).buffer[this._getThread(thread, true).buffer.length] = what[i];
+	}
+}
+
+/** Function: next
+ * 
+ * This performs an action, it takes the next action on the specified thread (if it exists) and runs it.
+ * 
+ * This is called in two places, firstly in the frame loop, where it is called every frame in a while loop until all actions are depleted.
+ * 	It is also called by the programmer, you, who calls it so that the next action is ran.
+ * 	Note that you don't need to call this when you have finished your command actions, the frame loop should do it.
+ * 
+ * If the thread is waiting on any nexts (From <Events.awaitNext>), then the normal frame loop will not run any actions, you will have to call this function yourself, manually.
+ * 
+ * Params:
+ * 	t			- [string] The thread on which the next action will be ran.
+ * 	decrement	- [boolean] Whether the nexts on the thread should be decremented before running the command.
+ * 					If this is false, and there are nexts waiting on the thread no actions will be ran.
+ * 					It defaults to true.
+ * 
+ * Returns:
+ * 	[boolean] Whether any actions were ran, if this returns false you should not call it again immediatly because nothing'll happen.
+ */
 Events.prototype.next = function(t, decrement) {
 	if(decrement === undefined) decrement = true;
 	//Check if we are waiting for any nexts
@@ -319,7 +401,7 @@ Events.prototype.next = function(t, decrement) {
 	}
 	
 	//Get the last one from the stack and remove it
-	var current = this.clone(this._getThread(t).stack.pop());
+	var current = this._clone(this._getThread(t).stack.pop());
 	
 	if(typeof(current) == "string") return true;
 	
@@ -339,29 +421,69 @@ Events.prototype.next = function(t, decrement) {
 	return true;
 }
 
-Events.prototype.clone = function(o) {
+/** Function: _clone
+ * 
+ * This copies a simple object. This won't work on more complicated objects with prototypes and such.
+ * 
+ * It just loops through them and copies all the values to another object, which is returned.
+ * 
+ * Params:
+ * 	o		- [object] The source object to copy.
+ * 
+ * Returns:
+ * 	[object] An object with the same properties of the source one.
+ */
+Events.prototype._clone = function(o) {
 	if(o == null || typeof(o) != 'object') return o;
 
 	var tmp = o.constructor(); 
-	for(var p in o) tmp[p] = this.clone(o[p]);
+	for(var p in o) tmp[p] = this._clone(o[p]);
 
 	return tmp;
 };
 
-
+/** Function: awaitNext
+ * 
+ * This increments the "nexts" value on the specified thread. This means that for each time you call awaitNext you must also call <next>.
+ * 
+ * Until you call all the required nexts, this thread won't do anything, so you can use this to do animation or something.
+ * 
+ * Params:
+ * 	t		- [string] The thread to wait on. If undefined the current thread will be used.
+ * 	count	- [number] The number of nexts to wait on, defaults to 1 if not given.
+ * 
+ * Returns:
+ * 	[string] The thread that has been asked to wait. This will be equal to the t param.
+ */
 Events.prototype.awaitNext = function(t, count) {
+	if(t === undefined) t = this.thread;
 	if(count === undefined) count = 1;
+	
 	this._getThread(t).nexts += count;
 	return t;
-}
+};
 
+/** Function: replaceVar
+ * 
+ * This takes an object (such as an action), and replaces all of the properties containing vars with their correct values.
+ * 	It will only replace properties that are strings, and won't touch the names of them.
+ * 
+ * You can also have it replace the vars of all the children of any arrays it finds, if you like...
+ * 
+ * Params:
+ * 	data		- [object] The data that should have the properties evaluated.
+ * 	children	- [boolean] If true then this function will be called with all the children of any arrays it finds in the data.
+ * 
+ * Returns:
+ * 	[object] The data with all the properties evaluated and replaced.
+ */
 Events.prototype.replaceVar = function(data, children) {
 	for(var p in data){
 		if(typeof(data[p]) == "string"){
 			data[p] = this._parseVar(data[p]);
 		}else if(children && typeof(data[p]) == "array"){
 			for(var i = data[p].length-1; i >= 0; i--){
-				this.replaceVar(data[p][i], false);
+				data[p][i] = this.replaceVar(data[p][i], false);
 			}
 		}
 	}
@@ -369,6 +491,19 @@ Events.prototype.replaceVar = function(data, children) {
 	return data;
 };
 
+/** Function: _parseVar
+ * 
+ * This takes a string, and replaces all the vars it can find with their values, see the section at the top of the page about them.
+ * 
+ * It will only break down 20 times until it gives up.
+ * 
+ * Params:
+ * 	data		- [string] The string to replace the vars in.
+ * 	rec			- [number] Used internally, the function tracks how many times it has checked by incrementing this each time.
+ * 
+ * Returns:
+ * 	[string/number] A fully parsed string, where all the variables are replaced. If when broken down the string can be a number, then it is returned as one.
+ */ 
 Events.prototype._parseVar = function(data, rec) {
 	if(!rec) rec = 0;
 	rec++;
@@ -414,21 +549,88 @@ Events.prototype._parseVar = function(data, rec) {
 	
 	if(rec == 20) duskWolf.error("Overflow parsing var, got to "+data+".");
 	if(done && rec < 20) return this._parseVar.call(this, data, rec);
-	else return data.replace(/\$;/g, "$");
+	else return isNaN(data.replace(/\$;/g, "$"))?data.replace(/\$;/g, "$"):Number(data.replace(/\$;/g, "$"));
 };
 
+/** Function: registerAction
+ * 
+ * This registers a new action, when the action is going to be ran the function given here is ran in the specified scope.
+ * 	The scope would most likely be "this".
+ * 	The function will be passed the whole action as a parameter.
+ * 
+ * Params:
+ * 	name		- [string] The name of the action to listen for, this should be the one the action has the "a" property set to.
+ * 	funct		- [function([object]){[undefined]}] The function to be called to run the action. Said action will be passed as a parameter.
+ * 	scope		- [object] The scope that the function will be ran in.
+ */
 Events.prototype.registerAction = function(name, funct, scope) {
 	this._actions[name] = [funct, scope];
 };
 
-Events.prototype.registerFrameHandler = function(name, funct, scope){
+/** Function: registerFrameHandler
+ * 
+ * This registers a function to be called every frame. The function specified will be called (in the specified scope) <DuskWolf.frameRate> frames a second.
+ * 
+ * Params:
+ * 	name		- [string] The name of the frameHandler.
+ * 	funct		- [function(){[undefined]}] The function to be called every frame.
+ * 	scope		- [object] The scope in which to run the function, generally this object will be "this" inside the function.
+ */
+Events.prototype.registerFrameHandler = function(name, funct, scope) {
 	this._frameHandlers[name] = [funct, scope];
 };
 
-Events.prototype.registerKeyHandler = function(name, funct, scope){
+/** Function: registerKeyHandler
+ * 
+ * This registers a function that will be called when a key (any key) is pressed. Note that the initiation process should disable scrolling for arrow keys and all that.
+ * 
+ * Params:
+ * 	name		- [string] The name of the handler.
+ * 	funct		- [function([object]){[undefined]}] The function to be called, it is called with a JQuery keypress object.
+ * 	scope		- [object] The scope to run the object in.
+ */
+Events.prototype.registerKeyHandler = function(name, funct, scope) {
 	this._keyHandlers[name] = [funct, scope];
 };
 
+/** Function: registerKeyUpHandler
+ * 
+ * This registers a function that will be called when a key (any key) is released after being pressed.
+ * 
+ * Params:
+ * 	name		- [string] The name of the handler.
+ * 	funct		- [function([object]){[undefined]}] The function to be called, it is called with a JQuery keypress object.
+ * 	scope		- [object] The scope to run the object in.
+ */
+Events.prototype.registerKeyUpHandler = function(name, funct, scope) {
+	this._keyUpHandlers[name] = [funct, scope];
+};
+
+/** Function: getMod
+ * 
+ * This gets a module, if it exists, returns null otherwise.
+ * 
+ * Params:
+ * 	name		- [string] The name of the module to get.
+ * 
+ * Returns:
+ * 	[<mods.IModule>] A module with that name.
+ */
+Events.prototype.getMod = function(name) {
+	if(name in this._modsInited) {
+		return this._modsInited[name];
+	}
+	
+	return null;
+};
+
+/** Function: _addFunction
+ * 
+ * Used internally to do the action "function", you should use the <run> function instead of calling this directly.
+ * 
+ * Params:
+ * 	data		- [object] The action to use, it should be a normal "function" action object.
+ */
 Events.prototype._addFunction = function(data) {
 	if(!data.name) {duskWolf.error("No name for this function!");return;}
 	if(!data.actions) {duskWolf.error("Defining "+data.name+", no actions.");return;}
@@ -436,6 +638,13 @@ Events.prototype._addFunction = function(data) {
 	this._functions[data.name] = data.actions;
 };
 
+/** Function: _callFunction
+ * 
+ * Used internally to do the action "call", you should use the <run> function instead of calling this directly.
+ * 
+ * Params:
+ * 	data		- [object] The action to use, it should be a normal "call" action object.
+ */
 Events.prototype._callFunction = function(data) {
 	if(!data.name) {duskWolf.error("No name for this function!");return;}
 	
@@ -444,6 +653,13 @@ Events.prototype._callFunction = function(data) {
 	} else duskWolf.error("Function "+data.name+" does not exist!");
 };
 
+/** Function: _threadTo
+ * 
+ * Used internally to do the action "thread", you should use the <run> function instead of calling this directly.
+ * 
+ * Params:
+ * 	data		- [object] The action to use, it should be a normal "thread" action object.
+ */
 Events.prototype._threadTo = function(data) {
 	if(!data.name) {duskWolf.error("No thread name!");return;}
 	if(!data.actions) {duskWolf.error("Threading to "+data.name+", no actions.");return;}
@@ -451,6 +667,17 @@ Events.prototype._threadTo = function(data) {
 	this.run(data.actions, data.name);
 };
 
+/** Function: _getThread
+ * 
+ * This gets a thread. It can also create a new thread if it does not exist yet.
+ * 
+ * Params:
+ * 	name		- [string] The name of the thread to find or create.
+ * 	create		- [boolean] Whether to create a new thread if it doesn't exist. Defaults to false.
+ * 
+ * Returns:
+ * 	[object] A "thread", see <_threads> for information on properties. If the thread doesn't exist and create is false, it returns null.
+ */
 Events.prototype._getThread = function(name, create) {
 	if(this._threads[name]){
 		return this._threads[name];
@@ -603,8 +830,8 @@ Events.prototype._cond = function(cond) {
 };
 
 Events.prototype._setVarInternal = function(data) {
-	if(!data.name) {duskWolf.error("No name given for var."); return;}
-	if(!data.value) {duskWolf.error("No value given for "+data.name+"."); return;}
+	if(data.name === undefined) {duskWolf.error("No name given for var."); return;}
+	if(data.value === undefined) {duskWolf.error("No value given for "+data.name+"."); return;}
 	
 	this.setVar(data.name.toLowerCase(), data.value);
 };

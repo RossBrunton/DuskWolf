@@ -4,26 +4,26 @@
 
 /** Class: DuskWolf
  * 
- * This is the DuskWolf engine.
+ * This is the DuskWolf game engine. 
  * 
  * The loader loads this class as a global object named "duskWolf", to access these constants you just need to read that.
  * 
- * You could read readme.md for more information, but I doubt you'd be able to figure out that you can open it in a text editor.
+ * Uh, as for general documentation of the project, names starting with a "_" are private, and you shouldn't be using them unless you are directly editing the class.
+ * 
+ * The DuskWolf engine is created by SavageWolf (Ross Brunton) who can be contacted by email at savagewolf8@gmail.com if you so desire.
+ * 
+ * You could read readme.md for more information about the engine, but I doubt you'd be able to figure out that you can open it in a text editor.
  */
-window.DuskWolf = function() {
-};
+window.DuskWolf = function() {};
 
 /** Function: error
  * 
- * [undefined] This traces an error message if <logLevel> is 1 or above. You should keep an eye out for these.
+ * This traces an error message if <logLevel> is 1 or above. You should keep an eye out for these.
  * 
  * An error is considered to be something that should NOT happen, and that will probably break something else.
  * 
  * Params:
- * 	text - [string] The error to be traced, it will be converted to a string.
- * 
- * See:
- * 	<DuskWolf.logLevel>
+ * 	text - [string] The error to be traced.
  */
 DuskWolf.prototype.error = function(text) {
 	if(this.logLevel >= 1) console.error(text);
@@ -32,15 +32,12 @@ DuskWolf.prototype.error = function(text) {
 
 /** Function: warn
  * 
- * [undefined] This traces a warning message if <logLevel> is 2 or above.
+ * This traces a warning message if <logLevel> is 2 or above.
  * 
  * A warning is something that is probably a bad idea, but doesn't exactly break something.
  * 
  * Params:
- * 	text - [string] The error to be traced, it will be converted to a string.
- * 
- * See:
- * 	<DuskWolf.logLevel>
+ * 	text - [string] The warning to be traced.
  */
 DuskWolf.prototype.warn = function(text){
 	if(this.logLevel >= 2) console.warn(text);
@@ -49,13 +46,10 @@ DuskWolf.prototype.warn = function(text){
 
 /** Function: info
  * 
- * [undefined] This traces a message if <logLevel> is 3 or above. Use this for anything interesting that happens!
+ * This traces a message if <logLevel> is 3 or above. Use this for anything interesting that happens!
  * 
  * Params:
- * 	text - [string] The error to be traced, it will be converted to a string.
- * 
- * See:
- * 	<DuskWolf.logLevel>
+ * 	text - [string] The message to be traced.
  */
 DuskWolf.prototype.info = function(text) {
 	if(this.logLevel >= 3) console.info(text);
@@ -64,13 +58,10 @@ DuskWolf.prototype.info = function(text) {
 
 /** Function: log
  * 
- * [undefined] This traces a message if <logLevel> is 4 or above. This should be used for your debugging.
+ * This traces a message if <logLevel> is 4 or above. This should be used for your debugging.
  * 
  * Params:
- * 	text - [string] The error to be traced, it will be converted to a string.
- * 
- * See:
- * 	<DuskWolf.logLevel>
+ * 	text - [string] The message to be traced.
  */
 DuskWolf.prototype.log = function(text) {
 	if(this.logLevel >= 4) console.log(text);
@@ -79,7 +70,9 @@ DuskWolf.prototype.log = function(text) {
 
 /** Constant: logLevel
  * 
- * [number] This determines what output functions work or not. Anything below or equal to this number will be sent to the console.
+ * [number] This determines what output functions print their output to the console or not. Anything below or equal to this number will be sent to the console.
+ * 
+ * To access the console in Chrome(ium) you just need to hit CTRL+SHIFT+J, in Firefox you need to install Firebug.
  * 
  * 1 - error
  * 2 - warning
@@ -97,12 +90,12 @@ DuskWolf.prototype.htmlLogLevel = 4;
 /** Constant: ver
  * [string] Version of your game. Does not have to be a dot seperated list of numbers or anything, any string will do.
  */
-DuskWolf.prototype.ver = "0.0.2-alpha";
+DuskWolf.prototype.ver = "0.0.3-alpha";
 
 /** Constant: verId
  * [number] Version of the game, this may not be human readable, and should be used to check if a save file is older than a certain version, or something. It is assumed that later numbers are newer versions.
  */
-DuskWolf.prototype.verId = 2;
+DuskWolf.prototype.verId = 3;
 
 /** Constant: gameName
  * [string] Name of the game. 
@@ -117,7 +110,7 @@ DuskWolf.prototype.author = "SavageWolf";
 /** Constant: frameRate
  * [number] The frame rate, in frames per second.
  */
-DuskWolf.prototype.frameRate =  30;
+DuskWolf.prototype.frameRate = 30;
 
 /** Constant: canvas
  * [string] The name of the HTML canvas object SimpleGui uses.
@@ -135,4 +128,4 @@ DuskWolf.prototype.logElem = "dwlog";
 /** Constant: gameDir
  * [string] The folder where game assets (images, JSONs etc.) are found.
  */
-DuskWolf.prototype.gameDir = "test/Example";
+DuskWolf.prototype.gameDir = __datadir__;

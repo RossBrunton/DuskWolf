@@ -19,7 +19,7 @@ sgui.Pane.prototype.className = "Pane";
 
 sgui.Pane.prototype._paneStuff = function (data) {
 	//Active
-	if (!this._active && this._prop("active", data, this._active, true) === "1") {
+	if (!this._active && this._prop("active", data, this._active, true)) {
 		this._sgui.setActivePane(this.comName);
 	}
 };

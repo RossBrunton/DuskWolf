@@ -5,6 +5,25 @@
 __import__("sgui/__init__.js");
 loadComponent("Pane");
 
+/** Class: mods.SimpleGui
+ * 
+ * This provides a simple system for creating canvas UIs.
+ * 
+ * Generally, everything in the Simple GUI system is a <sgui.Component>.
+ * 	And all components are in another container component, until you get to the top, which are components of type <sgui.Pane>.
+ * 
+ * Components have "properties", like x and y, that can be set, or read from to a var.
+ * 
+ * <p>To access a component, and set it's properties, you use like <code>&lt;pane name='panefullPun'&gt;&lt;group name='group'&gt;&lt;label name='texty'&gt;&lt;text&gt;Hello!&lt;/text&gt;&lt;/label&gt;&lt;/group&gt;&lt;/pane&gt;</code>.</p>
+ * 
+ * <p>The "root" components are panes, only one pane can be active at a time, and that one receives all input. You must use <code>&lt;pane&gt;</code> as the root element for setting properties, otherwise you will get a "not found" warning.</p>
+ * 
+ * 
+ * Inheritance:
+ * 	mods.LocalSaver { <mods.IModule>
+ * 
+ * Provided Actions:
+ */
 mods.SimpleGui = function(events) {
 	mods.IModule.call(this, events);
 	
@@ -12,8 +31,10 @@ mods.SimpleGui = function(events) {
 		this._getActivePane().keypress(event);
 	}, this);
 	
-	this._events.registerFrameHandler("SGuiFrame", function() {
-		this._getActivePane().frame();
+	this._events.registerFrameHandler("SGuiFrame", function(e) {
+		for(var p in this._panes){
+			this._panes[p].frame(e);
+		}
 	}, this);
 	
 	this._events.registerFrameHandler("SGuiDrawer", this.draw, this);
@@ -25,7 +46,29 @@ mods.SimpleGui = function(events) {
 
 	this._events.setVar("sys-sg-width", $("#"+duskWolf.canvas)[0].width);
 	this._events.setVar("sys-sg-height", $("#"+duskWolf.canvas)[0].height);
+	
 	$("#"+duskWolf.canvas)[0].getContext("2d").mozImageSmoothingEnabled = false;
+	$("#"+duskWolf.canvas)[0].getContext("2d").textBaseline = "middle";
+	
+	//Themes
+	this._events.setVar("theme-defualt-border", "#cccccc");
+	this._events.setVar("theme-defualt-box", "#eeeeee");
+	this._events.setVar("theme-defualt-tile-ssize", 4);
+	this._events.setVar("theme-defualt-dtile-swidth", 16);
+	this._events.setVar("theme-defualt-dtile-sheight", 16);
+	this._events.setVar("theme-defualt-fc-inactive", "inactive.png");
+	this._events.setVar("theme-defualt-fc-focused", "focused.png");
+	this._events.setVar("theme-defualt-fc-active", "active.png");
+	this._events.setVar("theme-defualt-tm-spacing-h", 0);
+	this._events.setVar("theme-defualt-tm-spacing-v", 0);
+	this._events.setVar("theme-defualt-tm-rows", -1);
+	this._events.setVar("theme-defualt-tm-cols", -1);
+	this._events.setVar("theme-defualt-tm-dec", -1);
+	this._events.setVar("theme-defualt-plat-ssize", 4);
+	this._events.setVar("theme-defualt-plat-tsize", 5);
+	this._events.setVar("theme-defualt-plat-scroll-speed", 4);
+	
+	this._events.setVar("theme", "defualt");
 };
 mods.SimpleGui.prototype = new mods.IModule();
 mods.SimpleGui.constructor = mods.SimpleGui;

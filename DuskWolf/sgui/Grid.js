@@ -35,6 +35,9 @@ sgui.Grid = function (parent, events, comName) {
 		
 		this._hspacing = this._events.getVar("sg-def-grid-spacing-h");
 		this._vspacing = this._events.getVar("sg-def-grid-spacing-v");
+		
+		this.rows = 0;
+		this.cols = 0;
 	}
 };
 sgui.Grid.prototype = new sgui.Group();
@@ -78,15 +81,27 @@ sgui.Grid.prototype.populate = function(pop) {
 	}
 	
 	//Add them
-	for(var hy = 0; hy < pop.cols; hy++){
-		for(var hx = 0; hx < pop.rows; hx++){
+	for(var hy = 0; hy < pop.rows; hy++){
+		for(var hx = 0; hx < pop.cols; hx++){
 			var com = this.newComponent(hx+","+hy, pop.type);
 			com.doStuff(pop, this._thread);
 			com.doStuff({"y":(hy*com.getHeight()+hy*this._vspacing), "x":(hx*com.getWidth()+hx*this._vspacing)}, this._thread);
 		}
 	}
 	
+	this.rows = pop.rows;
+	this.cols = pop.cols;
+	
 	this.focus("0,0");
+};
+
+sgui.Grid.prototype.ajust = function() {
+	for(var hy = 0; hy < this.rows; hy++){
+		for(var hx = 0; hx < this.cols; hx++){
+			var com = this.getComponent(hx+","+hy);
+			com.doStuff({"y":(hy*com.getHeight()+hy*this._vspacing), "x":(hx*com.getWidth()+hx*this._hspacing)}, this._thread);
+		}
+	}
 };
 
 /** Manages the flowing left of the children. 

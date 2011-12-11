@@ -55,8 +55,15 @@ sgui.Label.prototype._labelStuff = function(data) {
 sgui.Label.prototype._labelDraw = function(c) {
 	if(this._text){
 		c.font = this.getHeight()+"px "+this._font;
-		c.fillText(this._text, 0, 0, this.getWidth()?this.getWidth():undefined);
+		if(this.getWidth()>0) {
+			c.fillText(this._text, 0, this.getHeight()>>1, this.getWidth());
+		}else{
+			c.fillText(this._text, 0, this.getHeight()>>1);
+		}
 	}
+	
+	//c.strokeStyle = "#000000";
+	//c.strokeRect (0, 0, this.getWidth(), this.getHeight());
 };
 
 /** This sets the image that will be displayed.
@@ -64,13 +71,23 @@ sgui.Label.prototype._labelDraw = function(c) {
  */
 sgui.Label.prototype.setText = function(txt) {
 	this._text = txt;
+	this.bookRedraw();
 };
 
-sgui.Label.prototype.getWidth = function(value) {
-	if(this._width != -1) return this._width;
+sgui.Label.prototype.getText = function(txt) {
+	return this._text;
+};
+
+sgui.Label.prototype.getWidth = function(test) {
+	if(this._width != -1 && test === undefined) return this._width;
+	if(test === undefined) test = this._text;
 	
-	var state = this._c.save();
-	this._c.font = this.getHeight()+"px "+this._font;
-	return this._c.measureText(this._text).width;
-	this._c.restore(state);
+	var c = $("#"+duskWolf.canvas)[0].getContext("2d");
+	
+	var state = c.save();
+	c.font = this.getHeight()+"px "+this._font;
+	var hold = c.measureText(test).width;
+	c.restore(state);
+	
+	return hold;
 }

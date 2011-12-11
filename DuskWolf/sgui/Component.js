@@ -7,13 +7,25 @@
  * 
  * This class doesn't actually do anything in itself,
  * 
- * <p>Components can be "active", a component which is active will receive keyboard events, and should act like the user is looking at it. When a component becomes active, it's <code>onActive</code> method is called, when it looses it, <code>onDeactive</code> is called. For a component to be active, all it's parent groups must be too.</p>
+ * Components can be "active", a component which is active will receive keyboard events, and should act like the user is looking at it.
+ * 	When a component becomes active, it's <onActive> method is called, when it looses it, <onDeactive> is called.
+ * 	For a component to be active, all it's parent groups must be too.
  * 
- * <p>Components can also be "focused", focused components will be made active when the group it is in becomes active. Focus is generally changed by the arrow keys (only active components can handle key events, remember), if a key is pressed, <code>(direction)Action</code> returns true, and <code>(direction)Flow</code> is not empty, focus changes to that element in this one's group. You can also call the <code>focus</code> method of your group, but don't expect to become active.</p>
+ * Components can also be "focused", focused components will be made active when the container it is in becomes active.
+ * 	Focus is generally changed by the arrow keys (only active components can handle key events, remember).
+ * 	If a direcftion key is pressed, a function like <upAction> returns true, and a variable like <upFlow> is not empty, focus changes the element named <upFlow> in this one's container.
+ * 	You can also call the <_container.focus> method of your container, but don't expect to become active.
  * 
- * <p>Components "handle" events, like a keypress or being added to the stage, to do this they must use <code>register(Type)Handler()</code> with the function they wish to be run when that thing occurs.</p>
+ * Components handle some things, like an action or frame, to do this they must register them, using functions like <_registerFrameHandler> and <_registerAction> with the function they wish to be run when that thing occurs.
  * 
- * <p>A special type of handler is the Stuff handler, the function is given an XML object containing properties (like the ones below), and should use it to process them. Groups send the Stuff relating to a specific component (Like <code>&lt;sg-label name='texty'&gt;</code> for the label named "text") to that component for processing.</p>
+ * Handleable Things:
+ * Frame		- Called every frame at the frame rate. Will be called <DuskWolf.frameRate> times a second, unless the computer is lagging.
+ * Key			- Called when a key is pressed while the component is active, can be passed a number of arguments saying what key to be pressed, and whether shift or ctrl is required.
+ * Action		- Called when the "action key" is pressed while this component is active.
+ * 
+ * A special type of handler is the Stuff handler, the function is given a JSON object containing properties (like the ones below), and should use it to process them.
+ * 	This is used for the component to change it's look and behaviours and such via JSON.
+ * 	Containers typically send the Stuff relating to a specific component (by using the "children" array, or "child" property, for example) to that component for processing.
  * 
  * <p>Note that most properties support a <code>to</code> attribute (Which is not listed to make it easier to read), this attribute is the name of a var, and stores the value of the property in it.</p>
  * 
@@ -140,9 +152,9 @@ sgui.Component.prototype.className = "Component";
 sgui.Component.prototype.isAContainer = false;
 
 
-sgui.Component.prototype.frame = function() {
+sgui.Component.prototype.frame = function(e) {
 	for(var a = this._frameHandlers.length-1; a >= 0; a--){
-		this._frameHandlers[a].call(this);
+		this._frameHandlers[a].call(this, e);
 	}
 }
 
@@ -177,11 +189,11 @@ sgui.Component.prototype._registerFrameHandler = function(funct) {
  * @param funct The function to call, it will be passed a single parameter, the KeyboardEvent. It should return a Boolean, if true then the action will not "bubble"; the container that this component is in will not handle the event.
  */
 sgui.Component.prototype._registerActionHandler = function (name, funct, scope) {
-	this._actionHandlers[name] =  [funct, scope];
+	this._actionHandlers[name] = funct;
 }
 
-sgui.Component.prototype._actionProp = function (e) {
-	if(this._action){
+sgui.Component.prototype._actionProp = function(e) {
+	if(this._action.length){
 		this._events.run(this._action, "_"+this.comName);
 		return true;
 	}
@@ -198,7 +210,7 @@ sgui.Component.prototype.keypress = function (e) {
 	
 	for(var y = this._keyHandlers.length-1; y >= 0; y--){
 		if(this._keyHandlers[y][0] < 0 && this._keyHandlers[y][1] == e.shiftKey && this._keyHandlers[y][2] == e.ctrlKey){
-			if(this._keyHandlers[y][3].call(this._keyHandlers[y][4], e)){
+			if(this._keyHandlers[y][3].call(this, e)){
 				return true;
 			}
 		}
@@ -206,7 +218,7 @@ sgui.Component.prototype.keypress = function (e) {
 	
 	for (var z = this._keyHandlers.length-1; z >= 0; z--) {
 		if (this._keyHandlers[z][0] < 0 && this._keyHandlers[z][1] == false && this._keyHandlers[z][2] == e.ctrlKey) {
-			if (this._keyHandlers[z][3].call(this._keyHandlers[z][4], e)) {
+			if (this._keyHandlers[z][3].call(this, e)) {
 				return true;
 			}
 		}
@@ -221,9 +233,9 @@ sgui.Component.prototype.keypress = function (e) {
 		
 		//Action key
 		case 32:
-			var actionRet;
+			var actionRet = false;
 			for(var s in this._actionHandlers){
-				actionRet = this._actionHandlers[s][0].call(this._actionHandlers[s][1], e)?true:actionRet;
+				actionRet = this._actionHandlers[s].call(this, e)?true:actionRet;
 			}
 			
 			if(actionRet){
@@ -233,13 +245,13 @@ sgui.Component.prototype.keypress = function (e) {
 		default:
 			for(var a = this._keyHandlers.length-1; a >= 0; a--){
 				if(this._keyHandlers[a][0] == e.which && this._keyHandlers[a][1] == e.shiftKey && this._keyHandlers[a][2] == e.ctrlKey){
-					return this._keyHandlers[a][3].call(this._keyHandlers[a][4], e);
+					return this._keyHandlers[a][3].call(this, e);
 				}
 			}
 			
 			for(var b = this._keyHandlers.length-1; b >= 0; b--){
 				if(this._keyHandlers[b][0] == e.which && this._keyHandlers[b][1] == false && this._keyHandlers[b][2] == e.ctrlKey){
-					return this._keyHandlers[b][3].call(this._keyHandlers[b][4], e);
+					return this._keyHandlers[b][3].call(this, e);
 				}
 			}
 	}
@@ -276,15 +288,18 @@ sgui.Component.prototype._registerStuff = function(stuff) {
  * @param xml The properties to process.
  */
 sgui.Component.prototype.doStuff = function(data, thread) {
-	this._thread = thread?thread:this._thread;
-	if(!this.open){
+	thread = thread?thread:this._thread;
+	
+	if(!this.open || this._thread == thread){
 		this.open ++;
-		for(var i = this._stuffActions.length-1; i >= 0; i--){
+		this._thread = thread?thread:this._thread;
+		
+		for(var i = 0; i < this._stuffActions.length; i++){
 			this._stuffActions[i].call(this, data);
 		}
 		this.open--;
 	}else{
-		duskWolf.warn(comName+": Already doing something in another thread.");
+		duskWolf.warn(this.comName+" is already doing something in another thread.");
 	}
 }
 
@@ -297,8 +312,7 @@ sgui.Component.prototype.doStuff = function(data, thread) {
  * @param def The defualt value, if <code>name</code> does not exist or the XML tag is empty, this will be returned and/or set.
  * @return The value that the property contains , of <code>def</code>
  */
- 
-//Can ether be in the form "prop:{"value":20, "to":"test"}" or just "prop:20", handle each one
+
 sgui.Component.prototype._prop = function(name, data, def, valOnly, bookRedraw) {
 	if(bookRedraw == 3) this.bookRedraw();
 	if(!data[name]) return def;
@@ -314,18 +328,22 @@ sgui.Component.prototype._prop = function(name, data, def, valOnly, bookRedraw) 
 		if(bookRedraw == 1) this.bookRedraw();
 		
 		if(valOnly){
-			return String(data[name].value);
+			return data[name].value;
 		}else{
 			return data[name];
 		}
 	}else{
 		if(bookRedraw == 1 && data[name] != def) this.bookRedraw();
 		if(valOnly){
-			return String(data[name]);
+			return data[name];
 		}else{
 			return data[name];
 		}
 	}
+}
+
+sgui.Component.prototype._theme = function(value) {
+	return this._events.getVar("theme-"+this._events.getVar("theme")+"-"+value);
 }
 
 sgui.Component.prototype._coreStuff = function(data) {
@@ -375,7 +393,7 @@ sgui.Component.prototype._coreStuff = function(data) {
 			this._fade = Number(this._prop("fade", data, 0.05, true));
 		}
 		
-		if(typeof(data.fade) == "object" && data["fade-in"].to) {
+		if(typeof(data.fade) == "object" && data["fade"].to) {
 			this._fadeEnd = Number(data.fade.to);
 		}else{
 			this._fadeEnd = 1;
@@ -461,20 +479,20 @@ sgui.Component.prototype.onActive = function() {}
 /** This returns the width of the component, in pixels, you can override this if you want to lie about the width or something.
  * @return The component's height.
  */
-sgui.Component.prototype.getWidth = function() {return this._width;}
+sgui.Component.prototype.getWidth = function() {return Number(this._width);}
 /** This returns the height of the component, in pixels, you can override this if you want to lie about the height or something.
  * @return The component's height.
  */
-sgui.Component.prototype.getHeight = function() {return this._height;}
+sgui.Component.prototype.getHeight = function() {return Number(this._height);}
 
 /** This should set the width of the component, override it if you want to do any fancy stuff.
  * @param value The new width, in pixels.
  */
-sgui.Component.prototype.setHeight = function(value) {this._height = value;}
+sgui.Component.prototype.setHeight = function(value) {this._height = Number(value);}
 /** This should set the height of the component, override it if you want to do any fancy stuff.
  * @param value The new height, in pixels.
  */
-sgui.Component.prototype.setWidth = function(value) {this._width = value;}
+sgui.Component.prototype.setWidth = function(value) {this._width = Number(value);}
 
 sgui.Component.prototype.toString = function() {return "[sgui "+this.className+" "+this.comName+"]";};
 

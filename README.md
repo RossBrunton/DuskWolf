@@ -16,6 +16,17 @@ These are modules that are currently implemented.
 A system that allows you to create a GUI system, just using JSONs and canvas. It is broken down into "components", which are single elements of the Gui, like buttons and images. Those components can be created or accessed by nesting them inside "container" components, which then can be nested inside others and so on.
 It is designed so that it is simple to set and read properties from components, all you have to do is specify the tree to the component, and read and set whatever properties you like!
 
+## Plat ##
+A basic platformer engine, currently incomplete.
+
+## Local Saver ##
+Just a basic saving and loading thing. You can save vars to the JavaScript session storage thing using a RegExp, nothing much.
+
 # Super Interesting Legal Stuff #
 This is licensed under the MIT License, see COPYING.txt for details.
 Generally, you can do whatever you want with it. I'd appreciate it if you mentioned me, but you don't strictly HAVE to...
+
+# FLattr #
+Here is a Flattr button, bask in it's awe.
+
+[![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=SavageWolf&url=https://github.com/SavageWolf/DuskWolf&title=DuskWolf&language=en_GB&tags=github&category=software)

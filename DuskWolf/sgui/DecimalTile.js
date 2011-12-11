@@ -33,13 +33,10 @@ sgui.DecimalTile = function(parent, events, comName) {
 		/** This is the actual image. */
 		this._img = null;
 		
-		if(!this._events.getVar("sg-def-tile-theight")) this._events.setVar("sg-def-tile-theight", "32");
-		if(!this._events.getVar("sg-def-tile-twidth")) this._events.setVar("sg-def-tile-twidth", "32");
-		
-		this._theight = this._events.getVar("sg-def-tile-theight");
-		this._twidth = this._events.getVar("sg-def-tile-twidth");
-		this._width = this._events.getVar("sg-def-tile-twidth");
-		this._height = this._events.getVar("sg-def-tile-theight");
+		this._sheight = this._theme("dtile-sheight");
+		this._swidth = this._theme("dtile-swidth");
+		this._width = this._theme("dtile-twidth");
+		this._height = this._theme("dtile-theight");
 		this._tx = 0;
 		this._ty = 0;
 		
@@ -67,8 +64,8 @@ sgui.DecimalTile.prototype._tileStuff = function(data) {
 		this.setImage(this._prop("src", data, null, true, 2));
 	}
 	
-	this._twidth = this._prop("tile-width", data, this._twidth, true);
-	this._theight = this._prop("tile-height", data, this._theight, true);
+	this._swidth = this._prop("sprite-width", data, this._swidth, true);
+	this._sheight = this._prop("sprite-height", data, this._sheight, true);
 	
 	this._tx = this._prop("tile", data, this._tx+","+this._ty, true).split(",")[0];
 	this._ty = this._prop("tile", data, this._tx+","+this._ty, true).split(",")[1];
@@ -99,7 +96,7 @@ sgui.DecimalTile.prototype._tileDraw = function(c) {
 	}else{*/
 	
 	if(this._img){
-		c.drawImage(this._img, this._twidth*this._tx, this._theight*this._ty, this._twidth, this._theight, 0, 0, this.getWidth(), this.getHeight());
+		c.drawImage(this._img, this._swidth*this._tx, this._sheight*this._ty, this._swidth, this._sheight, 0, 0, this.getWidth(), this.getHeight());
 	}
 };
 
@@ -108,4 +105,15 @@ sgui.DecimalTile.prototype._tileDraw = function(c) {
  */
 sgui.DecimalTile.prototype.setImage = function(name) {
 	this._img = data.grabImage(name);
+};
+
+sgui.Tile.prototype.getTile = function() {
+	return this._tx+","+this._ty;
+};
+
+sgui.Tile.prototype.setTile = function(x, y) {
+	if(y === null) {x = x.split(",")[0]; y = x.split(",")[1];}
+	
+	this._tx = x;
+	this._ty = y;
 };

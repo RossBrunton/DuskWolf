@@ -18,7 +18,11 @@ window.sgui = {"Component":"Component",
 "Label":"Label",
 "Tile":"Tile",
 "DecimalTile":"DecimalTile",
-"TileMap":"TileMap"};
+"TileMap":"TileMap",
+"Saybox":"Saybox",
+"PlatMain":"PlatMain",
+"PlatEntity":"PlatEntity"
+};
 
 window.loadComponent = function(name) {
 	if(typeof(sgui[name]) != "string") return;

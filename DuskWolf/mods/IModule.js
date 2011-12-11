@@ -17,7 +17,7 @@
 /**
  * Function: mods.IModule
  * 
- * [undefined] This will take the events system, and store it in this._events so the module can use it.
+ * This will take the events system, and store it in this._events so the module can use it.
  * 
  * Params:
  * 	events - [<Events>] The events system that this will be used for.
@@ -33,7 +33,7 @@ mods.IModule = function(events) {
 
 /** Function: addActions
  * 
- * [undefined] Called when it's time to add the actions, implementers should add all the actions that need registering here.
+ * Called when it's time to add the actions, implementers should add all the actions that need registering here.
  * 
  * See:
  * 	<Events.registerAction>

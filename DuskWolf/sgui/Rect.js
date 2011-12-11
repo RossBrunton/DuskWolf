@@ -8,8 +8,8 @@ sgui.Rect = function(parent, events, comName) {
 		sgui.Component.call(this, parent, events, comName);
 	
 		/** This is the actual image. */
-		this._colour = "#ffffff";
-		this._bColour = "#000000";
+		this._colour = this._theme("box");
+		this._bColour = this._theme("border");
 		this._bWidth = 1;
 		
 		/** This creates a new rect! See <code>Component</code> for parameter details.
@@ -45,6 +45,6 @@ sgui.Rect.prototype._rectDraw = function(c) {
 	c.strokeStyle = this._bColour;
 	c.lineWidth = this._bWidth;
 	
-	c.fillRect (this._x, this._y, this._width, this._height);
-	if(this._bWidth) c.strokeRect (this._x, this._y, this._width, this._height);
+	c.fillRect (0, 0, this.getWidth(), this.getHeight());
+	if(this._bWidth) c.strokeRect (0, 0, this.getWidth(), this.getHeight());
 };

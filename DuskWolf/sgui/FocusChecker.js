@@ -29,9 +29,9 @@ sgui.FocusChecker = function(parent, events, comName) {
 		 * @see sg.Component
 		 */
 			
-		this._inactiveImg = this._events.getVar("sg-def-fc-i");
-		this._focusedImg = this._events.getVar("sg-def-fc-f");
-		this._activeImg = this._events.getVar("sg-def-fc-a");
+		this._inactiveImg = this._theme("fc-inactive");
+		this._focusedImg = this._theme("fc-focused");
+		this._activeImg = this._theme("fc-active");
 		
 		this._registerStuff(this._focusStuff);
 		

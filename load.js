@@ -2,7 +2,8 @@
 //Licensed under the MIT license, see COPYING.txt for details
 //"use strict";
 
-var __dir__ = "test/DuskWolf";
+var __duskdir__ = "test/DuskWolf";
+var __datadir__ = "test/Example";
 var __domain__ = "http://www.savagewolf.org";
 var log = true;
 var logDiv = true;
@@ -17,16 +18,16 @@ function __import__(file) {
 	if(loaded.indexOf(file) == -1) {
 		if(typeof(file) == "string") {
 			//Single file
-			if(log) console.log("Importing "+file+" from "+__domain__+"/"+__dir__+"/"+file+"...");
+			if(log) console.log("Importing "+file+" from "+__domain__+"/"+__duskdir__+"/"+file+"...");
 			if(logDiv) $("#info").append("<b>Importing</b> "+file+"...<br/>");
-			$("head").append("<script type='text/javascript' src='"+__domain__+"/"+__dir__+"/"+file+"'></script>");
+			$("head").append("<script type='text/javascript' src='"+__domain__+"/"+__duskdir__+"/"+file+"'></script>");
 		}else{
 			//Multiple files
-			if(log) console.log("Importing "+file.join(", ")+" from "+__domain__+"/"+__dir__+"...");
+			if(log) console.log("Importing "+file.join(", ")+" from "+__domain__+"/"+__duskdir__+"...");
 			if(logDiv) $("#info").append("<b>Importing:</b><br/>"+file.join("<br/>")+"<br/>");
 			var imString = "";
 			for(var i = 0; i < file.length; i++){
-				imString += "<script type='text/javascript' src='"+__domain__+"/"+__dir__+"/"+file[i]+"' async='async'></script>";
+				imString += "<script type='text/javascript' src='"+__domain__+"/"+__duskdir__+"/"+file[i]+"' async='async'></script>";
 			}
 			$("head").append(imString);
 		}
@@ -34,7 +35,7 @@ function __import__(file) {
 	}
 }
 
-//Block arrow keys from moving page
+//Block keys from moving page
 document.onkeydown = function(e) {
 	if(e.keyCode >= 37 && e.keyCode <= 40) return false;
 }

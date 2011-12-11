@@ -1,0 +1,7 @@
+[
+	"This is a sample of the platforming.",
+	
+	{"a":"listen", "event":"sys-event-start", "actions":[
+		{"a":"plat-room", "room":"example"}
+	]}
+]

@@ -21,33 +21,33 @@ mods.Core.prototype.addActions = function() {
 }
 
 mods.Core.prototype._increment = function(data) {
-	if(!data.to){duskWolf.error("No target to increment to.");return;}
-	if(!data.value){duskWolf.error("No value to increment.");return;}
-	if(!data.by) data.by = 1;
+	if(data.to === null){duskWolf.error("No target to increment to.");return;}
+	if(data.value === null){duskWolf.error("No value to increment.");return;}
+	if(data.by === null) data.by = 1;
 	
 	this._events.setVar(data.to, Number(data.value)+Number(data.by));
 }
 
 mods.Core.prototype._multiply = function(data) {
-	if(!data.to){duskWolf.error("No target to multiply to.");return;}
-	if(!data.value){duskWolf.error("No value to multiply.");return;}
-	if(!data.by) data.by = 2;
+	if(data.to === null){duskWolf.error("No target to multiply to.");return;}
+	if(data.value === null){duskWolf.error("No value to multiply.");return;}
+	if(data.by === null) data.by = 2;
 	
 	this._events.setVar(data.to, Number(data.value)*Number(data.by));
 }
 
 mods.Core.prototype._divide = function(data) {
-	if(!data.to){duskWolf.error("No target to divide to.");return;}
-	if(!data.value){duskWolf.error("No value to divide.");return;}
-	if(!data.by) data.by = 2;
+	if(data.to === null){duskWolf.error("No target to divide to.");return;}
+	if(data.value === null){duskWolf.error("No value to divide.");return;}
+	if(data.by === null) data.by = 2;
 	
 	this._events.setVar(data.to, Number(data.value)/Number(data.by));
 }
 
 mods.Core.prototype._modulo = function(data) {
-	if(!data.to){duskWolf.error("No target to modulo to.");return;}
-	if(!data.value){duskWolf.error("No value to modulo.");return;}
-	if(!data.by) data.by = 10;
+	if(data.to === null){duskWolf.error("No target to modulo to.");return;}
+	if(data.value === null){duskWolf.error("No value to modulo.");return;}
+	if(data.by === null) data.by = 10;
 	
 	this._events.setVar(data.to, Number(data.value)%Number(data.by));
 }

@@ -14,6 +14,7 @@
  * 	* <mods.Core>
  * 	* <mods.SimpleGui>
  * 	* <mods.LocalSaver>
+ * 	* <mods.Math>
  * 
  * See:
  * 	* <Events>
@@ -25,12 +26,4 @@ window.mods = {};
 /** Variable: modsAvalable
  * [array] A global array of strings. Each one is a module that should be imported, they are the names of files in the folder "mods". This is ether set by <Data> (if it's specified in the root.json) or here with default values.
  */
-if(!("modsAvalable" in window)) {window.modsAvalable = ["Core", "SimpleGui", "LocalSaver"];};
-
-var ims = ["mods/IModule.js"];
-
-for(var i = modsAvalable.length-1; i >= 0; i--) {
-	ims[ims.length] = "mods/"+modsAvalable[i]+".js";
-}
-
-__import__(ims);
+window.modsAvalable = ["Core", "SimpleGui", "LocalSaver", "Math"];
