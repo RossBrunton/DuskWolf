@@ -33,12 +33,13 @@ sgui.PlatMain.prototype._platMainStuff = function(data) {
 	this._tsize = this._prop("tile-size", data, this._tsize, true, 0);
 	
 	if(this._prop("load", data, null, false)){
-		if(data.load.spawn) this._spawn = data.spawn;
+		if(data.load.spawn != undefined) this._spawn = data.load.spawn;
 		
 		this.doStuff({"children":[
-			{"name":"scheme", "type":"TileMap", "src":"schematics.png", "tile-size":this._tsize, "map":{"map":this._events.getVar("proom-"+data.load.room+"-scheme"), "sprite-size":this._ssize, "rows":this._events.getVar("proom-"+data.load.room+"-rows"), "cols":this._events.getVar("proom-"+data.load.room+"-cols")}, "width":this.getWidth(), "height":this.getHeight()},
-			{"name":"visible", "type":"TileMap", "tile-size":this._tsize, "width":this.getWidth(), "height":this.getHeight()},
-			{"name":"hero", "type":"PlatHero", "sprite-size":this._ssize, "width":1<<this._tsize, "height":1<<this._tsize, "src":"hero.png", "tile":"0,0"},
+			{"name":"scheme", "type":"TileMap", "src":"pimg/schematics.png", "visible":false, "tile-size":this._tsize, "map":{"map":this._events.getVar("proom-"+data.load.room+"-scheme"), "sprite-size":this._ssize, "rows":this._events.getVar("proom-"+data.load.room+"-rows"), "cols":this._events.getVar("proom-"+data.load.room+"-cols")}, "width":this.getWidth(), "height":this.getHeight()},
+			{"name":"back", "type":"TileMap", "src":this._events.getVar("proom-"+data.load.room+"-backSrc"), "tile-size":this._tsize, "map":{"map":this._events.getVar("proom-"+data.load.room+"-back"), "sprite-size":this._ssize, "rows":this._events.getVar("proom-"+data.load.room+"-rows"), "cols":this._events.getVar("proom-"+data.load.room+"-cols")}, "width":this.getWidth(), "height":this.getHeight()},
+			{"name":"hero", "type":"PlatHero", "sprite-size":this._ssize, "width":1<<this._tsize, "height":1<<this._tsize, "src":"pimg/hero.png", "tile":"0,0"},
+			{"name":"over", "type":"TileMap", "src":this._events.getVar("proom-"+data.load.room+"-overSrc"), "tile-size":this._tsize, "map":{"map":this._events.getVar("proom-"+data.load.room+"-over"), "sprite-size":this._ssize, "rows":this._events.getVar("proom-"+data.load.room+"-rows"), "cols":this._events.getVar("proom-"+data.load.room+"-cols")}, "width":this.getWidth(), "height":this.getHeight()}
 		]});
 		
 		var crd = this.getComponent("scheme").lookTile(this._spawn, 1).split(",");
@@ -70,7 +71,8 @@ sgui.PlatMain.prototype._update = function() {
 	if(this.y > 0) this.y = 0;
 	
 	this.getComponent("scheme").setBoundsCoord(-this.x, -this.y);
-	this.getComponent("visible").setBoundsCoord(-this.x, -this.y);
+	this.getComponent("over").setBoundsCoord(-this.x, -this.y);
+	this.getComponent("back").setBoundsCoord(-this.x, -this.y);
 	
 	this.bookRedraw();
 };

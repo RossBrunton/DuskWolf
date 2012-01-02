@@ -59,32 +59,32 @@ mods.LocalSaver.prototype.addActions = function() {
  * 	You should use the standard ways of running actions, rather than calling this directly.
  * 
  * Params:
- * 	data		- [object] A "local-save" action.
+ * 	a			- [object] A "local-save" action.
  */
-mods.LocalSaver.prototype._save = function(data) {
-	if(!("name" in data)){duskWolf.error("No save data name given!");return;}
-	if(!("vars" in data)){duskWolf.error("No vars to save!");return;}
+mods.LocalSaver.prototype._save = function(a) {
+	if(!("name" in a)){duskWolf.error("No save data name given!");return;}
+	if(!("vars" in a)){duskWolf.error("No vars to save!");return;}
 	
-	if("regexp" in data && data.regexp == "1") {
-		if(typeof(data.vars) == "array"){
+	if("regexp" in a && a.regexp == "1") {
+		if(typeof(a.vars) == "array"){
 			//An array of regex checks
 			var hold = [];
-			for(var i = data.vars.length-1; i >= 0; i--) {
-				hold = hold.concat(this._events.getVars(RegExp(data.vars[i])));
+			for(var i = a.vars.length-1; i >= 0; i--) {
+				hold = hold.concat(this._events.getVars(RegExp(a.vars[i])));
 			}
-			localStorage["dw_"+data.name] = JSON.stringify(hold);
+			localStorage["dw_"+a.name] = JSON.stringify(hold);
 		}else{
-			localStorage["dw_"+data.name] = JSON.stringify(this._events.getVars(RegExp(data.vars)));
+			localStorage["dw_"+a.name] = JSON.stringify(this._events.getVars(RegExp(a.vars)));
 		}
 	}else{
-		if(typeof(data.vars) == "array"){
+		if(typeof(a.vars) == "array"){
 			var hold = [];
-			for(var i = data.vars.length-1; i >= 0; i--) {
-				hold = hold[hold.length] = [data.vars[i], this._events.getVar(data.vars[i])];
+			for(var i = a.vars.length-1; i >= 0; i--) {
+				hold = hold[hold.length] = [a.vars[i], this._events.getVar(a.vars[i])];
 			}
-			localStorage["dw_"+data.name] = JSON.stringify(hold);
+			localStorage["dw_"+a.name] = JSON.stringify(hold);
 		}else{
-			localStorage["dw_"+data.name] = JSON.stringify([[data.vars, this._events.getVar(data.vars)]]);
+			localStorage["dw_"+a.name] = JSON.stringify([[a.vars, this._events.getVar(a.vars)]]);
 		}
 	}
 };
@@ -95,12 +95,12 @@ mods.LocalSaver.prototype._save = function(data) {
  * 	You should use the standard ways of running actions, rather than calling this directly.
  * 
  * Params:
- * 	data		- [object] A "local-load" action.
+ * 	a			- [object] A "local-load" action.
  */
-mods.LocalSaver.prototype._load = function(data) {
-	if(!("name" in data)){duskWolf.error("No save data name given!");return;}
+mods.LocalSaver.prototype._load = function(a) {
+	if(!("name" in a)){duskWolf.error("No save data name given!");return;}
 	
-	this._events.setVars(JSON.parse(localStorage["dw_"+data.name]));
+	this._events.setVars(JSON.parse(localStorage["dw_"+a.name]));
 };
 
 /** Function: _clear
@@ -109,10 +109,10 @@ mods.LocalSaver.prototype._load = function(data) {
  * 	You should use the standard ways of running actions, rather than calling this directly.
  * 
  * Params:
- * 	data		- [object] A "local-clear" action.
+ * 	a			- [object] A "local-clear" action.
  */
 mods.LocalSaver.prototype._clear = function(data) {
-	if(!("name" in data)){duskWolf.error("No save data name given!");return;}
+	if(!("name" in a)){duskWolf.error("No save data name given!");return;}
 	
-	delete localStorage["dw_"+data.name];
+	delete localStorage["dw_"+a.name];
 };

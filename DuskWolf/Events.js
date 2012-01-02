@@ -199,7 +199,7 @@ window.Events = function(game) {
 	 * 
 	 * Nexts is the number of times <awaitNext> has been called, and is the number of times we have to call <next> for the program to continue.
 	 * 
-	 * Actions is the current list of actions that the engine is slowly working it's way through. Buffer is a "temprary storage area" for actions that should be ran next, and is inserted into `actions` before any more actions are ran.
+	 * Actions is the current list of actions that the engine is slowly working it's way through. Buffer is a "temprary storage area" for actions that should be ran next, and is inserted into "actions" before any more actions are ran.
 	 * 
 	 * The buffer is required so that the order of actions is intuitive, <run> calls that were called first should be ran first.
 	 */
@@ -244,13 +244,13 @@ window.Events = function(game) {
 	//Register actions
 	this.registerAction("comment", function(what){}, this);
 	this.registerAction("function", this._addFunction, this);
-	this.registerAction("listen", this.addListener, this);
+	this.registerAction("listen", this._addListener, this);
 	this.registerAction("if", this._iffy, this);
 	this.registerAction("ifset", this._ifset, this);
 	this.registerAction("while", this._whiley, this);
 	this.registerAction("call", this._callFunction, this);
-	this.registerAction("fire", this.fire, this);
-	this.registerAction("unlisten", this.unlisten, this);
+	this.registerAction("fire", this._fire, this);
+	this.registerAction("unlisten", this._unlisten, this);
 	this.registerAction("var", this._setVarInternal, this);
 	this.registerAction("delvar", this.delVarInternal, this);
 	this.registerAction("thread", this._threadTo, this);
@@ -692,18 +692,32 @@ Events.prototype._getThread = function(name, create) {
 	return null;
 }
 
-Events.prototype.addListener = function(data) {
+/** Function: _addListener
+ * 
+ * Used internally to do the action "listen", you should use the <run> function instead of calling this directly.
+ * 
+ * Params:
+ * 	data		- [object] The action to use, it should be a normal "listen" action object.
+ */
+Events.prototype._addListener = function(data) {
 	if(!data.event){duskWolf.error("This listener won't listen to anything!");return;}
 	
 	this._listeners[this._listeners.length] = data;
 }
-	
-Events.prototype.unlisten = function(data) {
+
+/** Function: _unlisten
+ * 
+ * Used internally to do the action "unlisten", you should use the <run> function instead of calling this directly.
+ * 
+ * Params:
+ * 	data		- [object] The action to use, it should be a normal "unlisten" action object.
+ */
+Events.prototype._unlisten = function(data) {
 	for(var l = this._listeners.length-1; l >= 0; l--){
-		if(this._listeners[l].event == data.event){
-			var fail;
+		if(this._listeners[l] && this._listeners[l].event == data.event){
+			var fail = false;
 			for(var p in this._listeners[l]){
-				if((["actions", "event", "__proto__", "a"]).indexOf(p) == -1 && this._listeners[l][p] && ((this._listeners[l][p] != data[p] && this._listeners[l][p][0] != "!") || ("!"+this._listeners[l][p] == data[p] && this._listeners[l][p][0] == "!"))){
+				if((["actions", "event", "__proto__", "a"]).indexOf(p) == -1 && data[p] && ((this._listeners[l][p] != data[p] && this._listeners[l][p][0] != "!") || ("!"+this._listeners[l][p] == data[p] && this._listeners[l][p][0] == "!"))){
 					fail = true;
 					break;
 				}
@@ -717,11 +731,18 @@ Events.prototype.unlisten = function(data) {
 	}
 };
 
-Events.prototype.fire = function(data) {
+/** Function: _fire
+ * 
+ * Used internally to do the action "fire", you should use the <run> function instead of calling this directly.
+ * 
+ * Params:
+ * 	data		- [object] The action to use, it should be a normal "fire" action object.
+ */
+Events.prototype._fire = function(data) {
 	if(!data.event){duskWolf.error("This won't fire anything!");return;}
 	
 	for(var l = this._listeners.length-1; l >= 0; l--){
-		if(this._listeners[l].event == data.event){
+		if(this._listeners[l] && this._listeners[l].event == data.event){
 			var fail = false;
 			for(var p in this._listeners[l]){
 				if((["name", "actions", "event", "__proto__", "a"]).indexOf(p) == -1 && this._listeners[l][p] && ((this._listeners[l][p] != data[p] && this._listeners[l][p][0] != "!") || ("!"+this._listeners[l][p] == data[p] && this._listeners[l][p][0] == "!"))){
@@ -738,6 +759,13 @@ Events.prototype.fire = function(data) {
 	}
 };
 
+/** Function: _iffy
+ * 
+ * Used internally to do the action "if", you should use the <run> function instead of calling this directly.
+ * 
+ * Params:
+ * 	data		- [object] The action to use, it should be a normal "if" action object.
+ */
 Events.prototype._iffy = function(what) {
 	if(!what.cond){duskWolf.error("No condition for if.");return;}
 	
@@ -746,6 +774,13 @@ Events.prototype._iffy = function(what) {
 	}else if(what["else"]) this.run(what["else"], this.thread);
 };
 
+/** Function: _ifSet
+ * 
+ * Used internally to do the action "ifSet", you should use the <run> function instead of calling this directly.
+ * 
+ * Params:
+ * 	data		- [object] The action to use, it should be a normal "ifSet" action object.
+ */
 Events.prototype._ifSet = function(what) {
 	if(!("value" in what)){duskWolf.error("No value for ifset.");return;}
 	
@@ -756,6 +791,13 @@ Events.prototype._ifSet = function(what) {
 	}
 };
 
+/** Function: _whiley
+ * 
+ * Used internally to do the action "while", you should use the <run> function instead of calling this directly.
+ * 
+ * Params:
+ * 	data		- [object] The action to use, it should be a normal "while" action object.
+ */
 Events.prototype._whiley = function(what) {
 	if(!what.cond){duskWolf.error("No condition for while.");return;}
 	if(!what.actions){duskWolf.error("Nothing for while to loop through.");return;}
@@ -767,6 +809,16 @@ Events.prototype._whiley = function(what) {
 	}
 };
 
+/** Function: _cond
+ * 
+ * This is used in the likes of "while" and "if", give it a string and it will evaluate it, breaking it down into ether true or false. See the section on "Conditions" in the class description.
+ * 
+ * Params:
+ * 	cond		- [string] The string to evaluate.
+ * 
+ * Returns:
+ * 	[boolean] Ether true or false, if the condition breaks down to "1" then true, "0" then false.
+ */
 Events.prototype._cond = function(cond) {
 	var originalCond = cond;
 	cond = "("+cond.replace(/\s/g, "")+")";
@@ -829,6 +881,16 @@ Events.prototype._cond = function(cond) {
 	return false;
 };
 
+/** Function: _setVarInternal
+ * 
+ * Used internally to do the action "var", you should use the public function <setVar> to do this, rather than this.
+ * 
+ * Params:
+ * 	data		- [object] The action to use, it should be a normal "var" action object.
+ * 
+ * See:
+ * 	* <setVar>
+ */
 Events.prototype._setVarInternal = function(data) {
 	if(data.name === undefined) {duskWolf.error("No name given for var."); return;}
 	if(data.value === undefined) {duskWolf.error("No value given for "+data.name+"."); return;}
@@ -836,6 +898,21 @@ Events.prototype._setVarInternal = function(data) {
 	this.setVar(data.name.toLowerCase(), data.value);
 };
 
+/** Function: setVar
+ * 
+ * This sets the value of a variable. It is recommended to use this, rather than running actions. Variables are described in the class description.
+ * 
+ * Params:
+ * 	name		- [string] The name of the var to set, should only use alphanumeric characters, "-" and "_".
+ *	value		- [any] The value to set the named var to. It can be any type.
+ * 
+ * Returns:
+ * 	[any] The value that was set, same as the param "value".
+ * 
+ * See:
+ * 	* <setVars>
+ * 	* <getVar>
+ */
 Events.prototype.setVar = function(name, value) {
 	if(name.indexOf(",") != -1) duskWolf.warning("setVar", "A variable name with a comma in it may cause problems.");
 	
@@ -844,16 +921,53 @@ Events.prototype.setVar = function(name, value) {
 	return value;
 };
 
+/** Function: setVars
+ * 
+ * This sets multiple variables at once! Just supply it with an array of [key, value] pairs and away you go!
+ * 
+ * Params:
+ * 	list		- [array] The vars and values to set, an array of arrays in the form [name, value].
+ * 
+ * See:
+ * 	* <setVar>
+ */
 Events.prototype.setVars = function(list) {
 	for(var i = list.length-1; i>= 0; i--){
 		this.setVar(list[i][0], list[i][1]);
 	}
 };
 
+/** Function: getVar
+ * 
+ * This returns the value of a variable, and is the only way to get a variable. If the variable is undefined, an empty string is returned.
+ * 
+ * Params:
+ * 	name		- [string] The name of the var to retrieve.
+ * 
+ * Returns:
+ * 	[any] The value of the variable, or an empty string if the variable is undefined.
+ * 
+ * See:
+ * 	* <setVar>
+ * 	* <getVars>
+ */
 Events.prototype.getVar = function(name) {
 	return this._vars[name.toLowerCase()]!==null?this._vars[name.toLowerCase()]:"";
 };
 
+/** Function: getVars
+ * 
+ * This returns the value of all variables matching a regexp.
+ * 
+ * Params:
+ * 	expr		- [regexp] The regexp to check.
+ * 
+ * Returns:
+ * 	[array] An array of [key, value] pairs. You should be able to call <setVars> on them to set the variables back.
+ * 
+ * See:
+ * 	* <getVar>
+ */
 Events.prototype.getVars = function(expr) {
 	var ret = [];
 	for(var p in this._vars){
@@ -865,12 +979,33 @@ Events.prototype.getVars = function(expr) {
 	return ret;
 };
 
+/** Function: _delVarInternal
+ * 
+ * Used internally to do the action "delvar", you should use the public function <delVar> to do this, rather than this.
+ * 
+ * Params:
+ * 	data		- [object] The action to use, it should be a normal "delvar" action object.
+ * 
+ * See:
+ * 	* <delVar>
+ */
 Events.prototype._delVarInternal = function(data) {
 	if(!data.name) {duskWolf.error("No name given for var."); return;}
 	
 	this.delVar(data.name.toLowerCase());
 };
 
+/** Function: delVar
+ * 
+ * This deletes a variable, probably freeing up memory, probably speeding up var lookup times, probably fuelling your inner force that says that everything must be organised.
+ * 
+ * Params:
+ * 	name		- [string] The name of the var to delete.
+ * 
+ * See:
+ * 	* <setVar>
+ * 	* <getVar>
+ */
 Events.prototype.delVar = function(name) {
 	delete this._vars[name.toLowerCase()];
 };

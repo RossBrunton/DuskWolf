@@ -44,7 +44,7 @@ window.__start__ = function() {
 		duskWolf.error(e);
 	}
 	
-	setInterval("if('game' in window) game.everyFrame()", 1000/duskWolf.frameRate);
+	if('game' in window) setInterval("game.everyFrame()", 1000/duskWolf.frameRate);
 	
 	$(document).bind("keydown", function(e){try {if("game" in window) game.keypress(e);} catch(e) {duskWolf.error(e);}});
 	$(document).bind("keyup", function(e){try {if("game" in window) game.keyup(e);} catch(e) {duskWolf.error(e);}});

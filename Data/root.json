@@ -1,0 +1,4 @@
+{
+	"files":["Examples/plat"],
+	"mods":["Core", "SimpleGui", "LocalSaver", "Math", "Plat", "Keyboard"]
+}

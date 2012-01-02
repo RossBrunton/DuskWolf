@@ -11,7 +11,7 @@
  * This is a base class, that while not an actual "interface" (as JS does not support them), will complain if you have not implemented a function.
  * 
  * See:
- * 	<Events>
+ * * <Events>
  */
 
 /**
@@ -21,9 +21,6 @@
  * 
  * Params:
  * 	events - [<Events>] The events system that this will be used for.
- * 
- * See:
- * 	<Events>
  */
 mods.IModule = function(events) {
 	if(events !== undefined) {
@@ -36,6 +33,6 @@ mods.IModule = function(events) {
  * Called when it's time to add the actions, implementers should add all the actions that need registering here.
  * 
  * See:
- * 	<Events.registerAction>
+ * * <Events.registerAction>
  */
 mods.IModule.prototype.addActions = function() {duskWolf.warn("Module has not implemented \"addActions\".");}

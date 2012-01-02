@@ -107,6 +107,7 @@ sgui.Component = function (parent, events, componentName) {
 		this.alpha = 1;
 		this._height = 0;
 		this._width = 0;
+		this._mark = null;
 		
 		this._redrawBooked = false;
 
@@ -315,7 +316,7 @@ sgui.Component.prototype.doStuff = function(data, thread) {
 
 sgui.Component.prototype._prop = function(name, data, def, valOnly, bookRedraw) {
 	if(bookRedraw == 3) this.bookRedraw();
-	if(!data[name]) return def;
+	if(data[name] === undefined) return def;
 	if(bookRedraw == 2) this.bookRedraw();
 	
 	if(typeof(data[name]) == "object"){
@@ -323,7 +324,7 @@ sgui.Component.prototype._prop = function(name, data, def, valOnly, bookRedraw) 
 			this._events.setVar(data[name].to, data[name].value?data[name].value:def);
 		}
 		
-		if(!data[name].value && valOnly) return String(def);
+		if(!data[name].value && valOnly) return def;
 		
 		if(bookRedraw == 1) this.bookRedraw();
 		
@@ -334,11 +335,7 @@ sgui.Component.prototype._prop = function(name, data, def, valOnly, bookRedraw) 
 		}
 	}else{
 		if(bookRedraw == 1 && data[name] != def) this.bookRedraw();
-		if(valOnly){
-			return data[name];
-		}else{
-			return data[name];
-		}
+		return data[name];
 	}
 }
 
@@ -360,14 +357,17 @@ sgui.Component.prototype._coreStuff = function(data) {
 	
 	//Visibility
 	this.alpha = this._prop("alpha", data, this.alpha, true, 1);
-	this.visible = this._prop("visible", data, this.visible?"1":"0", true, 1)=="1";
+	this.visible = this._prop("visible", data, this.visible, true, 1);
+	
+	//Mark
+	this._mark = this._prop("mark", data, this._mark, true, 1);
 	
 	//Flowing
 	this.upFlow = this._prop("flow-up", data, this.upFlow, true);
 	this.downFlow = this._prop("flow-down", data, this.downFlow, true);
 	this.leftFlow = this._prop("flow-left", data, this.leftFlow, true);
 	this.rightFlow = this._prop("flow-right", data, this.rightFlow, true);
-	this.enabled = this._prop("enabled", data, this.enabled?"1":"0", true)=="1";
+	this.enabled = this._prop("enabled", data, this.enabled, true);
 	
 	//Delete it
 	if(this._prop("delete", data, "0", true, 1) == "1"){
@@ -455,16 +455,32 @@ sgui.Component.prototype.draw = function(c) {
 		this._drawHandlers[i].call(this, c);
 	}
 	
+	if(this._mark !== null) {
+		c.strokeStyle = this._mark;
+		
+		c.strokeRect(0, 0, this.getWidth(), this.getHeight());
+	}
+	
 	c.restore(state);
 	this._redrawBooked = false;
 }
 
 sgui.Component.prototype.bookRedraw = function() {
-	if(this._redrawBooked) return;
+	if(this._redrawBooked || !this._container) return;
 	
 	this._redrawBooked = true;
 	this._container.bookRedraw();
 }
+
+sgui.Component.prototype.mark = function(colour) {
+	if(colour === undefined) colour = "#ff0000";
+	
+	this._mark = colour;
+};
+
+sgui.Component.prototype.unmark = function() {
+	this._mark = null;
+};
 
 /** This should be called when the component looses focus. */
 sgui.Component.prototype.onLooseFocus = function() {}

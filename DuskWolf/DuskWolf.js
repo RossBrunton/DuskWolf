@@ -90,12 +90,12 @@ DuskWolf.prototype.htmlLogLevel = 4;
 /** Constant: ver
  * [string] Version of your game. Does not have to be a dot seperated list of numbers or anything, any string will do.
  */
-DuskWolf.prototype.ver = "0.0.3-alpha";
+DuskWolf.prototype.ver = "0.0.4-alpha";
 
 /** Constant: verId
  * [number] Version of the game, this may not be human readable, and should be used to check if a save file is older than a certain version, or something. It is assumed that later numbers are newer versions.
  */
-DuskWolf.prototype.verId = 3;
+DuskWolf.prototype.verId = 4;
 
 /** Constant: gameName
  * [string] Name of the game. 
@@ -121,7 +121,7 @@ DuskWolf.prototype.frameRate = 30;
 DuskWolf.prototype.canvas = "canvas";
 
 /** Constant: logElem
- * [string] The name of the HTML canvas that this will output to based on htmlLogLevel. Leave it blank if there is none.
+ * [string] The name of the HTML div that this will output to based on htmlLogLevel. Leave it blank if there is none.
  */
 DuskWolf.prototype.logElem = "dwlog";
 

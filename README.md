@@ -5,7 +5,10 @@ It is mainly designed for making games, specifically RPGs, but I suppose you cou
 
 # Setting Up and Creating Documentation #
 To set it up, just copy the DuskWolf folder (Containing all of the main engine), a folder containing your JSONs (Copy over "Example" if you are lazy) and load.js to your server, it can't run on your local machine, then build a normal HTML page which includes load.js and JQuery in the header, and call __start__() when the page has finished loading.
-You will need to change some configs in  DuskWolf/DuskWolf.js and load.js, though!
+
+You will want to see the default and example files until I get around to making a user guide.
+
+However, if you want, it is really easy to create a simple HTTP server on localhost, just cd into the folder, and run "$python -m SimpleHTTPServer", then navigate to 127.0.0.1:8000, good ol' python. Note that this server will be public, so if anyone wanted, they could also connect to that HTTP server.
 
 Documentation is not complete yet, and so you can't create much documentation. Ha-ha!
 

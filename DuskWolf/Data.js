@@ -8,7 +8,7 @@
  * 
  * It is created as the global variable "data" when <Game> is constructed.
  * 
- * All paths it uses are relative to the global constant __domain__ and <DuskWolf.gameDir>.
+ * All paths it uses are relative to the var <DuskWolf.gameDir>.
  * 
  * See:
  * * <Events>
@@ -44,21 +44,22 @@ window.Data = function() {
 		}
 	}
 	
-	if("mods" in this._root) modsAvalable = this._root.mods;
+	if("mods" in this._root) window.modsAvalable = this._root.mods;
 	
 	//Import modules
 	var ims = ["mods/IModule.js"];
 
-	for(var i = modsAvalable.length-1; i >= 0; i--) {
-		ims[ims.length] = "mods/"+modsAvalable[i]+".js";
+	for(var i = window.modsAvalable.length-1; i >= 0; i--) {
+		ims[ims.length] = "mods/"+window.modsAvalable[i]+".js";
 	}
-
+	
 	__import__(ims);
 }
 /** Variable: __hold__
  * [string] This is a global temporary variable used when retrieving files from AJAX, it's a horrible hack... Ugh...
  */
 var __hold__;
+
 //See mods/__init__.js for documentation.
 var modsAvalable;
 
@@ -66,7 +67,7 @@ var modsAvalable;
  * 
  * [object] This downloads and parses a JSON file from an online place. It blocks until the file is downloaded, and returns that file.
  * 
- * This is a little more lax than usual, before the file is parsed, tabs and newlines are replaced by spaces, and /* comments are removed, letting you use them.
+ * This is a little more lax than the normal JSON parser. before the file is parsed, tabs and newlines are replaced by spaces, and /* comments are removed, letting you use them in the file.
  * 
  * Params:
  * 	file - [string] The name of the file to load, is relative to <__domain__> / <DuskWolf.gameDir> and the "json" file extension is added by this.
@@ -84,7 +85,7 @@ Data.prototype.grabJson = function(file, async) {
 			__hold__ = null;
 		}, "success":function(json, textStatus, jqXHR) {
 			__hold__ = json;
-		}, "url":__domain__+"/"+duskWolf.gameDir+"/"+file+".json"});
+		}, "url":duskWolf.gameDir+"/"+file+".json"});
 		
 		this._loaded[file+".json"] = __hold__.replace(/\t/g, " ").replace(/\/\*(?:.|\n)*?\*\//g, "").replace(/\n/g, " ");
 	}
@@ -99,7 +100,7 @@ Data.prototype.grabJson = function(file, async) {
  * If you call this without asigning the return value to anything, the image should download in the background.
  * 
  * Params:
- * 	file - [string] A path to the file located in <__domain__> / <DuskWolf.gameDir>.
+ * 	file - [string] A path to the file located in <DuskWolf.gameDir>.
  * 	The file extension is not added automatically.
  * 
  * Return:
@@ -110,7 +111,7 @@ Data.prototype.grabImage = function(file) {
 		duskWolf.info("Downloading image "+file+"...");
 		
 		this._loaded[file] = new Image()
-		this._loaded[file].src = __domain__+"/"+duskWolf.gameDir+"/"+file;
+		this._loaded[file].src = duskWolf.gameDir+"/"+file;
 		return this._loaded[file];
 	}else{
 		return this._loaded[file];

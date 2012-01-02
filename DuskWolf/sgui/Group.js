@@ -127,8 +127,9 @@ sgui.Group.prototype.getComponent = function(com, type) { //Component
  */
 sgui.Group.prototype.deleteComponent = function(com) { //Boolean
 	if (this._components[com.toLowerCase()]){
-		if(this.getFocusName() == com.toLowerCase) this.focus("blank");
+		if(this._getFocusName() == com.toLowerCase()) this.focus("blank");
 		delete this._components[com.toLowerCase()];
+		delete this._drawOrder[this._drawOrder.indexOf(com.toLowerCase())];
 		return true;
 	}
 };

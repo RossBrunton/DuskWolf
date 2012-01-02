@@ -28,7 +28,7 @@ mods.SimpleGui = function(events) {
 	mods.IModule.call(this, events);
 	
 	this._events.registerKeyHandler("SGuiKey", function(event) {
-		this._getActivePane().keypress(event);
+		this.getActivePane().keypress(event);
 	}, this);
 	
 	this._events.registerFrameHandler("SGuiFrame", function(e) {
@@ -66,7 +66,7 @@ mods.SimpleGui = function(events) {
 	this._events.setVar("theme-defualt-tm-dec", -1);
 	this._events.setVar("theme-defualt-plat-ssize", 4);
 	this._events.setVar("theme-defualt-plat-tsize", 5);
-	this._events.setVar("theme-defualt-plat-scroll-speed", 4);
+	this._events.setVar("theme-defualt-plat-scroll-speed", 6);
 	
 	this._events.setVar("theme", "defualt");
 };
@@ -79,9 +79,9 @@ mods.SimpleGui.prototype.addActions = function() {
 	this._events.registerAction("draw", function(data){this.draw();}, this);
 };
 
-mods.SimpleGui.prototype._newPane = function(name) { //Returns pane
+mods.SimpleGui.prototype.newPane = function(name) { //Returns pane
 	//Check if it exists
-	if(this._getPane(name, true)){duskWolf.error("Pane "+name+" already exists!");return null;}
+	if(this.getPane(name, true)){duskWolf.error("Pane "+name+" already exists!");return null;}
 	
 	//Create the pane
 	this._panes[name.toLowerCase()] = new sgui.Pane(this, this._events, name);
@@ -89,24 +89,24 @@ mods.SimpleGui.prototype._newPane = function(name) { //Returns pane
 	return this._panes[name.toLowerCase()];
 };
 
-mods.SimpleGui.prototype._getPane = function(name, noNew) { //Returns pane
+mods.SimpleGui.prototype.getPane = function(name, noNew) { //Returns pane
 	if(this._panes[name.toLowerCase()]) return this._panes[name.toLowerCase()];
-	return noNew?null:this._newPane(name);
+	return noNew?null:this.newPane(name);
 };
 
 mods.SimpleGui.prototype._doComponent = function(data) {
-	if(!data.name) {duskWolf.error("No name given for a pane.");return;}
-	this._getPane(data.name).doStuff(this._events.replaceVar(data, true), this._events.thread);
+	if(data.name === undefined) {duskWolf.error("No name given for a pane.");return;}
+	this.getPane(data.name).doStuff(this._events.replaceVar(data, true), this._events.thread);
 };
 
 mods.SimpleGui.prototype.setActivePane = function(to) {
-	if(this._getActivePane()) this._getActivePane().onDeactive();
-	this._getPane(to);
+	if(this.getActivePane()) this.getActivePane().onDeactive();
+	this.getPane(to);
 	this._activePane = to.toLowerCase();
-	this._getActivePane().onActive();
+	this.getActivePane().onActive();
 };
 
-mods.SimpleGui.prototype._getActivePane = function() { //Pane
+mods.SimpleGui.prototype.getActivePane = function() {
 	return this._panes[this._activePane];
 };
 
@@ -126,7 +126,7 @@ mods.SimpleGui.prototype._doPath = function(data) {
 	if(!data.path){duskWolf.error("No path given!");return;}
 	
 	var fragments = data.path.split(".");
-	var digger = this._getPane(fragments[0]);
+	var digger = this.getPane(fragments[0]);
 	
 	for(var i = 1; i < fragments.length; i++){
 		if(digger.isAContainer && digger.getComponent(fragments[i])){

@@ -143,7 +143,7 @@ sgui.TileMap.prototype.tilePointIn = function(x, y, exactX, exactY) {
 		return this.getComponent(xpt+","+Math.floor(ypt));
 	}else if(exactY){
 		return this.getComponent(Math.floor(xpt)+","+ypt);
-	}else {
+	}else{
 		return this.getComponent(Math.floor(xpt)+","+Math.floor(ypt));
 	}
 };

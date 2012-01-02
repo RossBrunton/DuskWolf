@@ -15,7 +15,7 @@ mods.Keyboard.prototype = new mods.IModule();
 mods.Keyboard.constructor = mods.Keyboard;
 	
 mods.Keyboard.prototype.addActions = function() {
-	
+	this._events.registerAction("ifKey", this._ifkey, this);
 };
 
 mods.Keyboard.prototype._handleKeypress = function(e) {
@@ -32,4 +32,12 @@ mods.Keyboard.prototype.isKeyPressed = function(code) {
 	if(!(code in this._keys))return false;
 	
 	return this._keys[code];
+}
+
+mods.Keyboard.prototype._ifKey = function(a) {
+	if(!what.key){duskWolf.error("No key to check.");return;}
+	
+	if(this.isKeyPressed(a.key)) {
+		if("then" in a) this.run(a.then, this._events.thread);
+	}else if("else" in a) this.run(what["else"], this.thread);
 }

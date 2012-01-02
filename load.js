@@ -1,12 +1,17 @@
 //Part of the DuskWolf engine
 //Licensed under the MIT license, see COPYING.txt for details
-//"use strict";
+"use strict";
 
-var __duskdir__ = "test/DuskWolf";
-var __datadir__ = "test/Example";
-var __domain__ = "http://www.savagewolf.org";
+//Three vars required
+// __duskdir__ Location of DuskWolf
+// __datadir__ Location of game data
+
+var __duskdir__ = __duskdir__?__duskdir__:"";
+var __datadir__ = __datadir__?__datadir__:"";
+
 var log = true;
-var logDiv = true;
+var logDiv = "info";
+
 var loaded = [];
 
 function __load__() {
@@ -18,16 +23,16 @@ function __import__(file) {
 	if(loaded.indexOf(file) == -1) {
 		if(typeof(file) == "string") {
 			//Single file
-			if(log) console.log("Importing "+file+" from "+__domain__+"/"+__duskdir__+"/"+file+"...");
-			if(logDiv) $("#info").append("<b>Importing</b> "+file+"...<br/>");
-			$("head").append("<script type='text/javascript' src='"+__domain__+"/"+__duskdir__+"/"+file+"'></script>");
+			if(log) console.log("Importing "+file+" from "+__duskdir__+"/"+file+"...");
+			if(logDiv) $("#"+logDiv).append("<b>Importing</b> "+file+"...<br/>");
+			$("head").append("<script type='text/javascript' src='"+__duskdir__+"/"+file+"'></script>");
 		}else{
 			//Multiple files
-			if(log) console.log("Importing "+file.join(", ")+" from "+__domain__+"/"+__duskdir__+"...");
-			if(logDiv) $("#info").append("<b>Importing:</b><br/>"+file.join("<br/>")+"<br/>");
+			if(log) console.log("Importing "+file.join(", ")+" from "+__duskdir__+"...");
+			if(logDiv) $("#"+logDiv).append("<b>Importing:</b><br/>"+file.join("<br/>")+"<br/>");
 			var imString = "";
 			for(var i = 0; i < file.length; i++){
-				imString += "<script type='text/javascript' src='"+__domain__+"/"+__duskdir__+"/"+file[i]+"' async='async'></script>";
+				imString += "<script type='text/javascript' src='"+__duskdir__+"/"+file[i]+"' async='async'></script>";
 			}
 			$("head").append(imString);
 		}

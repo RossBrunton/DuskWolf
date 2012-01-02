@@ -68,7 +68,7 @@ sgui.Grid.prototype._gridStuff = function(data) {
  */
 sgui.Grid.prototype.populate = function(pop) {
 	//Delete all the existing ones
-	for(var i = 0; true; i ++){
+	/*for(var i = 0; true; i ++){
 		for(var j = 0; true; j ++){
 			if(!this.deleteComponent(String(i)+","+String(j))){
 				break;
@@ -78,6 +78,9 @@ sgui.Grid.prototype.populate = function(pop) {
 		if(!this.getComponent((i+1)+",0", false)){
 			break;
 		}
+	}*/
+	for(var x in this._components){
+		if(x != "blank") this.deleteComponent(x);
 	}
 	
 	//Add them

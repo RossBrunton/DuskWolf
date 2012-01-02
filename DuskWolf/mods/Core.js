@@ -2,6 +2,33 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
+/** Class: mods.Core
+ * 
+ * This provides a few actions that are not necessary for operation of the Events system, but are useful nonetheless.
+ * 	It generally contains action that do things for your convenience.
+ * 
+ * Inheritance:
+ * 	mods.Core { <mods.IModule>
+ * 
+ * Provided Actions:
+ * 
+ * > {"a":"print", "text":"..."}
+ * 	Prints the text to the normal log locations if <DuskWolf.logLevel> or <DuskWolf.htmlLogLevel> are greater than or equal to 3.
+ * 	All it does is call <DuskWolf.info>, and should be used in the same places.
+ * 
+ * > {"a":"error", "text":"..."}
+ * 	Prints the text to the normal log locations if <DuskWolf.logLevel> or <DuskWolf.htmlLogLevel> are greater than or equal to 1.
+ * 	All it does is call <DuskWolf.error>, and should be used in the same places.
+ * 
+ * > {"a":"warn", "text":"..."}
+ * 	Prints the text to the normal log locations if <DuskWolf.logLevel> or <DuskWolf.htmlLogLevel> are greater than or equal to 2.
+ * 	All it does is call <DuskWolf.warn>, and should be used in the same places.
+ * 
+ * > {"a":"inc", "to":"...", "value":123, "by":123}
+ * 	Increments the value by "by", and stores the result in "to". It's just a simple "add" function.
+ */
+
+
 mods.Core = function(events) {
 	mods.IModule.call(this, events);
 };

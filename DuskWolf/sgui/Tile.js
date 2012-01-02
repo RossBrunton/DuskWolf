@@ -87,7 +87,7 @@ sgui.Tile.prototype.getTile = function() {
 };
 
 sgui.Tile.prototype.setTile = function(x, y) {
-	if(y === null) {x = x.split(",")[0]; y = x.split(",")[1];}
+	if(y === undefined) {x = x.split(",")[0]; y = x.split(",")[1];}
 	
 	this._tx = x;
 	this._ty = y;
@@ -98,16 +98,16 @@ sgui.Tile.prototype.snapX = function(down) {
 		this.x = Math.ceil(this.x/this.getWidth())*this.getWidth();
 	else
 		this.x = Math.floor(this.x/this.getWidth())*this.getWidth();
-}
+};
 
 sgui.Tile.prototype.snapY = function(right) {
 	if(right)
 		this.y = Math.ceil(this.y/this.getHeight())*this.getHeight();
 	else
 		this.y = Math.floor(this.y/this.getHeight())*this.getHeight();
-}
+};
 
 sgui.Tile.prototype.gridGo = function(x, y) {
 	this.x = x*this.getWidth();
 	this.y = y*this.getHeight();
-}
+};

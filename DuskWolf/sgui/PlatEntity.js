@@ -13,6 +13,8 @@ sgui.PlatEntity = function (parent, events, comName) {
 		
 		this.dy = 0;
 		this.dx = 0;
+		
+		this._jumps = 0;
 	}
 };
 sgui.PlatEntity.prototype = new sgui.Tile();
@@ -21,6 +23,7 @@ sgui.PlatEntity.constructor = sgui.PlatEntity;
 sgui.PlatEntity.prototype.className = "PlatEntity";
 
 sgui.PlatEntity.prototype._platEntityFrame = function(data) {
+	// Vertical motion
 	this.y += this.dy;
 	
 	if(this.dy < this._events.getVar("plat-terminal")){
@@ -34,6 +37,9 @@ sgui.PlatEntity.prototype._platEntityFrame = function(data) {
 		this.dy = 0;
 		
 		this.snapY(false);
+		
+		//Reset jumps
+		this._jumps = 0;
 	}
 	
 	//Top
@@ -44,7 +50,7 @@ sgui.PlatEntity.prototype._platEntityFrame = function(data) {
 		this.snapY(true);
 	}
 	
-	//
+	// Horizontal motion
 	
 	if(this.dx > this._events.getVar("plat-slowdown")){
 		this.dx -= this._events.getVar("plat-slowdown");
@@ -81,6 +87,7 @@ sgui.PlatHero = function (parent, events, comName) {
 		sgui.PlatEntity.call(this, parent, events, comName);
 		
 		this._registerFrameHandler(this._platHeroFrame);
+		this._markAt = null;
 	}
 };
 sgui.PlatHero.prototype = new sgui.PlatEntity();
@@ -96,8 +103,18 @@ sgui.PlatHero.prototype._platHeroFrame = function(data) {
 	}
 	
 	if(this._events.getMod("Keyboard").isKeyPressed(38) && this.dy > -4) {
-		this.dy -= this._events.getVar("plat-jump");
-	}/*else if(this._events.getMod("Keyboard").isKeyPressed(40) && this.dy < 4) {
-		this.dy ++;
-	}*/
+		if((this._jumps == 0 && this._events.getVar("plat-skill-jump"))
+		|| (this._jumps == 1 && this._events.getVar("plat-skill-dubjump"))) {
+			this.dy = -this._events.getVar("plat-jump");
+			this._jumps ++;
+		}
+	}
+	
+	if(this._container.getComponent("scheme").tilePointIn(this.x+(this.getWidth()/2), this.y+(this.getHeight()/2)).getTile().split(",")[1] == "1"
+	&& this._container.getComponent("scheme").tilePointIn(this.x+(this.getWidth()/2), this.y+(this.getHeight()/2)).getTile().split(",")[0] != this._markAt) {
+		this._markAt = this._container.getComponent("scheme").tilePointIn(this.x+(this.getWidth()/2), this.y+(this.getHeight()/2)).getTile().split(",")[0];
+		this._events.run([
+			{"a":"fire", "up":false, "mark":this._markAt, "event":"plat-mark"}
+		], this._events.thread);
+	}
 };
