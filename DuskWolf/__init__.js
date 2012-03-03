@@ -26,6 +26,17 @@ window.game = null;
  * 	Use this wherever you want, it's like static or something.
  */
 window.data = null;
+
+/** Variable: __duskdir__
+ * [string] This is the folder containing the DuskWolf engine itself; all the classes and such.
+ * 	It is a normal URL, and you can use it in the same way you would use a hyperlink in terms of relative files and such.
+ * 	It is a global var defined in the enviroment, for example, in a script in the HTML HEAD tag.
+ */
+
+/** Variable: __datadir__
+ * [string] This is the folder containing the game data, such as images and such.
+ * 	It is similar to <__duskdir__> in usage, and the folder must contain the root.json file.
+ */
  
  /** Function: __start__
  * 
@@ -34,7 +45,7 @@ window.data = null;
  * It adds handlers to all the events, and imports all the main classes.
  */
 window.__start__ = function() {
-	__import__(["DuskWolf.js", "Game.js", "Events.js", "Data.js"]);
+	__import__(["DuskWolf.js", "Data.js", "Game.js", "Events.js"]);
 	
 	window.duskWolf = new DuskWolf();
 	

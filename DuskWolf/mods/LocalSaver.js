@@ -30,9 +30,12 @@
  * Erases the specified block.
  */
 
-/** Function: LocalSaver
+/** Function: mods.LocalSaver
  * 
- * Constructor, creates a new instance of this. Doesn't really do anything of interest though.
+ * Constructor, creates a new instance of this. Doesn't really do anything else of interest though.
+ * 
+ * Params:
+ *	events	- [<Events>] The events system that this will be used for.
  */
 mods.LocalSaver = function(events) {
 	mods.IModule.call(this, events);

@@ -32,8 +32,10 @@ sgui.PlatEntity.prototype._platEntityFrame = function(data) {
 	
 	//Bottom
 	var yDown = false;
-	if(this._container.getComponent("scheme").tilePointIn(this.x+4, this.y+this.getHeight()).getTile() == "1,0"
-	|| this._container.getComponent("scheme").tilePointIn(this.x+this.getWidth()-4, this.y+this.getHeight()).getTile() == "1,0") {
+	if((this.path("../../scheme").tilePointIn(this.x+4, this.y+this.getHeight())[0] == 1
+	&& this.path("../../scheme").tilePointIn(this.x+4, this.y+this.getHeight())[1] == 0)
+	|| (this.path("../../scheme").tilePointIn(this.x+this.getWidth()-4, this.y+this.getHeight())[0] == 1
+	&& this.path("../../scheme").tilePointIn(this.x+this.getWidth()-4, this.y+this.getHeight())[1] == 0)) {
 		this.dy = 0;
 		
 		this.snapY(false);
@@ -43,8 +45,10 @@ sgui.PlatEntity.prototype._platEntityFrame = function(data) {
 	}
 	
 	//Top
-	if(this._container.getComponent("scheme").tilePointIn(this.x+4, this.y).getTile() == "1,0"
-	|| this._container.getComponent("scheme").tilePointIn(this.x+this.getWidth()-4, this.y).getTile() == "1,0") {
+	if((this.path("../../scheme").tilePointIn(this.x+4, this.y)[0] == 1
+	&& this.path("../../scheme").tilePointIn(this.x+4, this.y)[1] == 0)
+	|| (this.path("../../scheme").tilePointIn(this.x+this.getWidth()-4, this.y)[0] == 1
+	&& this.path("../../scheme").tilePointIn(this.x+this.getWidth()-4, this.y)[1] == 0)) {
 		this.dy = 0;
 		
 		this.snapY(true);
@@ -62,16 +66,20 @@ sgui.PlatEntity.prototype._platEntityFrame = function(data) {
 	
 	this.x += this.dx;
 	//Right
-	if(this._container.getComponent("scheme").tilePointIn(this.x+this.getWidth(), this.y+4).getTile() == "1,0"
-	|| this._container.getComponent("scheme").tilePointIn(this.x+this.getWidth(), this.y+this.getHeight()-4).getTile() == "1,0") {
+	if((this.path("../../scheme").tilePointIn(this.x+this.getWidth(), this.y+4)[0] == 1
+	&& this.path("../../scheme").tilePointIn(this.x+this.getWidth(), this.y+4)[1] == 0)
+	|| (this.path("../../scheme").tilePointIn(this.x+this.getWidth(), this.y+this.getHeight()-4)[0] == 1
+	&& this.path("../../scheme").tilePointIn(this.x+this.getWidth(), this.y+this.getHeight()-4)[1] == 0)) {
 		this.dx = 0;
 		
 		this.snapX(false);
 	}
 	
 	//Left
-	if(this._container.getComponent("scheme").tilePointIn(this.x, this.y+4).getTile() == "1,0"
-	|| this._container.getComponent("scheme").tilePointIn(this.x, this.y+this.getHeight()-4).getTile() == "1,0") {
+	if((this.path("../../scheme").tilePointIn(this.x, this.y+4)[0] == 1
+	&& this.path("../../scheme").tilePointIn(this.x, this.y+4)[1] == 0)
+	|| (this.path("../../scheme").tilePointIn(this.x, this.y+this.getHeight()-4)[0] == 1
+	&& this.path("../../scheme").tilePointIn(this.x, this.y+this.getHeight()-4)[1] == 0)) {
 		this.dx = 0;
 		
 		this.snapX(true);
@@ -110,9 +118,9 @@ sgui.PlatHero.prototype._platHeroFrame = function(data) {
 		}
 	}
 	
-	if(this._container.getComponent("scheme").tilePointIn(this.x+(this.getWidth()/2), this.y+(this.getHeight()/2)).getTile().split(",")[1] == "1"
-	&& this._container.getComponent("scheme").tilePointIn(this.x+(this.getWidth()/2), this.y+(this.getHeight()/2)).getTile().split(",")[0] != this._markAt) {
-		this._markAt = this._container.getComponent("scheme").tilePointIn(this.x+(this.getWidth()/2), this.y+(this.getHeight()/2)).getTile().split(",")[0];
+	if(this.path("../../scheme").tilePointIn(this.x+(this.getWidth()/2), this.y+(this.getHeight()/2))[1] == 1
+	&& this.path("../../scheme").tilePointIn(this.x+(this.getWidth()/2), this.y+(this.getHeight()/2))[0] != this._markAt) {
+		this._markAt = this.path("../../scheme").tilePointIn(this.x+(this.getWidth()/2), this.y+(this.getHeight()/2))[0];
 		this._events.run([
 			{"a":"fire", "up":false, "mark":this._markAt, "event":"plat-mark"}
 		], this._events.thread);

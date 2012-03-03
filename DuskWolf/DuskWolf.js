@@ -88,14 +88,14 @@ DuskWolf.prototype.logLevel = 4;
 DuskWolf.prototype.htmlLogLevel = 4;
 
 /** Constant: ver
- * [string] Version of your game. Does not have to be a dot seperated list of numbers or anything, any string will do.
+ * [string] Version of the DW engine. Does not have to be a dot seperated list of numbers or anything, any string will do.
  */
-DuskWolf.prototype.ver = "0.0.4-alpha";
+DuskWolf.prototype.ver = "0.0.5-alpha";
 
 /** Constant: verId
- * [number] Version of the game, this may not be human readable, and should be used to check if a save file is older than a certain version, or something. It is assumed that later numbers are newer versions.
+ * [number] Version of the DW engine, this may not be human readable, and should be used to check if a save file is older than a certain version, or something. It is assumed that later numbers are newer versions.
  */
-DuskWolf.prototype.verId = 4;
+DuskWolf.prototype.verId = 5;
 
 /** Constant: gameName
  * [string] Name of the game. 
@@ -125,7 +125,7 @@ DuskWolf.prototype.canvas = "canvas";
  */
 DuskWolf.prototype.logElem = "dwlog";
 
-/** Constant: gameDir
- * [string] The folder where game assets (images, JSONs etc.) are found.
+/** Constant: dev
+ * [boolean] If true, then some features for developers are added, such as no caching for scripts and FPS info.
  */
-DuskWolf.prototype.gameDir = __datadir__;
+DuskWolf.prototype.dev = true;

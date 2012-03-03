@@ -34,35 +34,53 @@ sgui.PlatMain.prototype._platMainStuff = function(data) {
 	
 	if(this._prop("load", data, null, false)){
 		if(data.load.spawn != undefined) this._spawn = data.load.spawn;
-		
 		this.doStuff({"children":[
-			{"name":"scheme", "type":"TileMap", "src":"pimg/schematics.png", "visible":false, "tile-size":this._tsize, "map":{"map":this._events.getVar("proom-"+data.load.room+"-scheme"), "sprite-size":this._ssize, "rows":this._events.getVar("proom-"+data.load.room+"-rows"), "cols":this._events.getVar("proom-"+data.load.room+"-cols")}, "width":this.getWidth(), "height":this.getHeight()},
-			{"name":"back", "type":"TileMap", "src":this._events.getVar("proom-"+data.load.room+"-backSrc"), "tile-size":this._tsize, "map":{"map":this._events.getVar("proom-"+data.load.room+"-back"), "sprite-size":this._ssize, "rows":this._events.getVar("proom-"+data.load.room+"-rows"), "cols":this._events.getVar("proom-"+data.load.room+"-cols")}, "width":this.getWidth(), "height":this.getHeight()},
-			{"name":"hero", "type":"PlatHero", "sprite-size":this._ssize, "width":1<<this._tsize, "height":1<<this._tsize, "src":"pimg/hero.png", "tile":"0,0"},
-			{"name":"over", "type":"TileMap", "src":this._events.getVar("proom-"+data.load.room+"-overSrc"), "tile-size":this._tsize, "map":{"map":this._events.getVar("proom-"+data.load.room+"-over"), "sprite-size":this._ssize, "rows":this._events.getVar("proom-"+data.load.room+"-rows"), "cols":this._events.getVar("proom-"+data.load.room+"-cols")}, "width":this.getWidth(), "height":this.getHeight()}
+			{"name":"scheme", "type":"TileMap", "src":"pimg/schematics.png", "visible":false, "tile-size":this._tsize, "sprite-size":this._ssize, "map":{"map":this._events.getVar("proom-"+data.load.room+"-scheme"), "rows":this._events.getVar("proom-"+data.load.room+"-rows"), "cols":this._events.getVar("proom-"+data.load.room+"-cols")}, "width":this.getWidth(), "height":this.getHeight()},
+			{"name":"back", "type":"TileMap", "src":this._events.getVar("proom-"+data.load.room+"-backSrc"), "tile-size":this._tsize, "sprite-size":this._ssize, "map":{"map":this._events.getVar("proom-"+data.load.room+"-back"), "rows":this._events.getVar("proom-"+data.load.room+"-rows"), "cols":this._events.getVar("proom-"+data.load.room+"-cols")}, "width":this.getWidth(), "height":this.getHeight()},
+			{"name":"entities", "type":"Group", "children":[
+				{"name":"hero", "type":"PlatHero", "sprite-size":this._ssize, "width":1<<this._tsize, "height":1<<this._tsize, "src":"pimg/hero.png", "tile":"0,0"},
+			]},
+			{"name":"over", "type":"TileMap", "src":this._events.getVar("proom-"+data.load.room+"-overSrc"), "tile-size":this._tsize, "sprite-size":this._ssize, "map":{"map":this._events.getVar("proom-"+data.load.room+"-over"), "rows":this._events.getVar("proom-"+data.load.room+"-rows"), "cols":this._events.getVar("proom-"+data.load.room+"-cols")}, "width":this.getWidth(), "height":this.getHeight()}
 		]});
 		
-		var crd = this.getComponent("scheme").lookTile(this._spawn, 1).split(",");
-		this.getComponent("hero").gridGo(crd[0], crd[1]);
+		var crd = this.getComponent("scheme").lookTile(this._spawn, 1);
+		this.path("entities/hero").gridGo(crd[0], crd[1]);
+		this.autoScroll(200);
 	}
 };
 
 sgui.PlatMain.prototype._platMainFrame = function(e) {
 	// Center the player
-	if(this.getComponent("hero")){
-		for(var i = this._scrollSpeed; i > 0; i--) {
-			if(this.getComponent("hero").x < (-this.x)+this.getWidth()/2) {
-				this.scrollRight();
-			}else if(this.getComponent("hero").x > (-this.x)+this.getWidth()/2) {
-				this.scrollLeft();
-			}
+	this.autoScroll(this._scrollSpeed);
+};
+
+sgui.PlatMain.prototype.autoScroll = function(by) {
+	// Center the player
+
+	if(this.getComponent("entities")){
+		for(var i = by; i > 0; i--) {
+			var fragile = false;
 			
-			if(this.getComponent("hero").y < (-this.y)+this.getHeight()/2) {
-				this.scrollDown();
-			}else if(this.getComponent("hero").y > (-this.y)+this.getHeight()/2) {
-				this.scrollUp();
+			if(this.path("entities/hero").x < Math.floor(((-this.x)+this.getWidth()/2)+1)) {
+				if(!this.scrollRight()) break;
+			}else if(this.path("entities/hero").x > Math.floor(((-this.x)+this.getWidth()/2)-1)) {
+				if(!this.scrollLeft()) break;
+			}else{
+				break;
 			}
 		}
+		
+		for(var i = by; i > 0; i--) {
+			if(this.path("entities/hero").y < Math.floor(((-this.y)+this.getHeight()/2)+1)) {
+				if(!this.scrollDown()) break;
+			}else if(this.path("entities/hero").y > Math.floor(((-this.y)+this.getHeight()/2)-1)) {
+				if(!this.scrollUp()) break;
+			}else{
+				break;
+			}
+		}
+		
+		this._update();
 	}
 };
 
@@ -77,56 +95,36 @@ sgui.PlatMain.prototype._update = function() {
 	this.bookRedraw();
 };
 
-sgui.PlatMain.prototype.scrollLeft = function(by) {
-	if(by === undefined) by = 1;
-	if(by === 0) return true;
-	
-	if(this.getComponent("scheme").getRelativeTile(this.getComponent("scheme").visibleCols(), 0)){
+sgui.PlatMain.prototype.scrollLeft = function() {
+	if(this.getComponent("scheme").inRelativeRange(this.getComponent("scheme").visibleCols(), 0)){
 		this.x --;
-		this._update();
-		this.scrollLeft(by-1);
 		return true;
 	}
 	
 	return false;
 };
 
-sgui.PlatMain.prototype.scrollRight = function(by) {
-	if(by === undefined) by = 1;
-	if(by === 0) return true;
-	
-	if(this.getComponent("scheme").getRelativeTile(0, 0)){
+sgui.PlatMain.prototype.scrollRight = function() {
+	if(this.getComponent("scheme").inRelativeRange(0, 0)){
 		this.x ++;
-		this._update();
-		this.scrollRight(by-1);
 		return true;
 	}
 	
 	return false;
 };
 
-sgui.PlatMain.prototype.scrollDown = function(by) {
-	if(by === undefined) by = 1;
-	if(by === 0) return true;
-	
-	if(this.getComponent("scheme").getRelativeTile(0, 0)){
+sgui.PlatMain.prototype.scrollDown = function() {
+	if(this.getComponent("scheme").inRelativeRange(0, 0)){
 		this.y ++;
-		this._update();
-		this.scrollDown(by-1);
 		return true;
 	}
 	
 	return false;
 };
 
-sgui.PlatMain.prototype.scrollUp = function(by) {
-	if(by === undefined) by = 1;
-	if(by === 0) return true;
-	
-	if(this.getComponent("scheme").getRelativeTile(0, this.getComponent("scheme").visibleRows())){
+sgui.PlatMain.prototype.scrollUp = function() {
+	if(this.getComponent("scheme").inRelativeRange(0, this.getComponent("scheme").visibleRows())){
 		this.y --;
-		this._update();
-		this.scrollUp(by-1);
 		return true;
 	}
 	

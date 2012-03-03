@@ -170,7 +170,7 @@ __import__("mods/__init__.js");
  * Creates a new Events system thing, initiates all the defualt actions and goes through all the modules, initing them.
  * 
  * Params:
- * 	game 	- [<Game>] The game object this is attached to.
+ * 	game	- [<Game>] The game object this is attached to.
  */
 window.Events = function(game) {
 	/** Variable: _game
@@ -237,7 +237,10 @@ window.Events = function(game) {
 	for(var a = modsAvalable.length-1; a >= 0; a--){
 		var name = modsAvalable[a];
 		if(name != "IModule"){
-			this._modsInited[name] = new mods[name](this);
+			if(typeof(mods[name]) != "function")
+				duskWolf.warn("module "+name+" failed to load.");
+			else
+				this._modsInited[name] = new mods[name](this);
 		}
 	}
 	

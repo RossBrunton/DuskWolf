@@ -9,6 +9,9 @@
 /** Function: mods.Plat
  * 
  * Constructor, creates a new instance of this. Doesn't really do anything of interest though.
+ * 
+ * Params:
+ *	events	- [<Events>] The events system that this will be used for.
  */
 mods.Plat = function(events) {
 	mods.IModule.call(this, events);
@@ -52,6 +55,12 @@ mods.Plat.prototype._setRoom = function(dat) {
 	this._events.run(data.grabJson("prooms/"+dat.room.replace(/\-/g, "_")), this._events.thread);
 	this._events.run([
 		{"a":"unlisten", "event":"plat-mark"},
-		{"a":"sg-path", "path":"plat-main.main", "load":{"room":dat.room, "spawn":dat.spawn}},
+		/*{"a":"if", "cond":(dat.nofade?"0","1"), "then":[*/
+			{"a":"sg-path", "pane":"plat-main", "path":"/main", "fade":{"from":1, "to":0, "speed":-0.05}},
+		/*]},*/
+		{"a":"sg-path", "pane":"plat-main", "path":"/main", "load":{"room":dat.room, "spawn":dat.spawn}},
+		/*{"a":"if", "cond":(dat.nofade?"0","1"), "then":[*/
+			{"a":"sg-path", "pane":"plat-main", "path":"/main", "fade":{"from":0, "to":1, "speed":0.05}},
+		/*]},*/
 		{"a":"call", "name":"plat-post-"+dat.room}], this._events.thread);
 };

@@ -8,7 +8,7 @@
  * 
  * The global variable "mods" is created when mods/__init__.js is ran, and all the module classes are attached to that object.
  * 
- * Also when init.js is ran, if there is a global variable "modsAvalable" (An array of strings), all the values inside it will be imported. If the var does not exist, a default list is imported.
+ * If the root.json does not contain a "mods" property, a defualt list of modules is set here.
  * 
  * Defualt Modules:
  * 	* <mods.Core>

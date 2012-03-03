@@ -57,6 +57,14 @@
  * > infinity
  * JavaScript's Infinity constant. A number becomes this when it gets too large or small to handle.
  */
+
+/** Function: mods.Math
+ * 
+ * Constructor, creates a new instance of this. Doesn't really do anything else of interest though.
+ * 
+ * Params:
+ *	events	- [<Events>] The events system that this will be used for.
+ */
 mods.Math = function(events) {
 	mods.IModule.call(this, events);
 };

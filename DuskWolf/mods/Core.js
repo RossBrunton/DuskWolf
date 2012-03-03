@@ -26,9 +26,23 @@
  * 
  * > {"a":"inc", "to":"...", "value":123, "by":123}
  * 	Increments the value by "by", and stores the result in "to". It's just a simple "add" function.
+ * > {"a":"mul", "to":"...", "value":123, ("by":123)}
+ *	This multiplies "by" and "value" together, and stores the value in the var specified by "to". If no value is specified for "by", it is multiplied by 2.
+ * 
+ * > {"a":"div", "to":"...", "value":123, ("by":123)}
+ *	This divides "value" by "by", and stores the value in the var specified by "to". If no value is specified for "by", it is divided by 2.
+ * 
+ * > {"a":"modulo", "to":"...", "value":123, ("by":123)}
+ *	This takes the modulo "by" of "value", storing it in "to". The modulo X of N is the remainder when you divide N by X. If no "by" value is specified, 10 is assumed.
  */
 
-
+/** Function: mods.Core
+ * 
+ * Constructor, creates a new instance of this. Doesn't really do anything else of interest though.
+ * 
+ * Params:
+ *	events	- [<Events>] The events system that this will be used for.
+ */
 mods.Core = function(events) {
 	mods.IModule.call(this, events);
 };
@@ -45,7 +59,7 @@ mods.Core.prototype.addActions = function() {
 	this._events.registerAction("modulo", this._modulo, this);
 	this._events.registerAction("vartree", this._vartree, this);
 	//events.registerAction("timer", function(what:XML):Boolean {if(!what.attribute("to").length()){DuskWolf.error("No target to set it to for!");}else{events.setVar(what.attribute("to"), String(timer.currentCount/10));}return true;});
-}
+};
 
 mods.Core.prototype._increment = function(data) {
 	if(data.to === null){duskWolf.error("No target to increment to.");return;}
@@ -53,7 +67,7 @@ mods.Core.prototype._increment = function(data) {
 	if(data.by === null) data.by = 1;
 	
 	this._events.setVar(data.to, Number(data.value)+Number(data.by));
-}
+};
 
 mods.Core.prototype._multiply = function(data) {
 	if(data.to === null){duskWolf.error("No target to multiply to.");return;}
@@ -61,7 +75,7 @@ mods.Core.prototype._multiply = function(data) {
 	if(data.by === null) data.by = 2;
 	
 	this._events.setVar(data.to, Number(data.value)*Number(data.by));
-}
+};
 
 mods.Core.prototype._divide = function(data) {
 	if(data.to === null){duskWolf.error("No target to divide to.");return;}
@@ -69,7 +83,7 @@ mods.Core.prototype._divide = function(data) {
 	if(data.by === null) data.by = 2;
 	
 	this._events.setVar(data.to, Number(data.value)/Number(data.by));
-}
+};
 
 mods.Core.prototype._modulo = function(data) {
 	if(data.to === null){duskWolf.error("No target to modulo to.");return;}
@@ -77,11 +91,18 @@ mods.Core.prototype._modulo = function(data) {
 	if(data.by === null) data.by = 10;
 	
 	this._events.setVar(data.to, Number(data.value)%Number(data.by));
-}
+};
 
 mods.Core.prototype._vartree = function(data) {
 	if(!data.data){duskWolf.error("No data to use!");return;}
 	if(!data.root){duskWolf.error("No root name!");return;}
+	
+	if(data.inherit){
+		var source = this._events.getVars(RegExp("^"+data.inherit+"-", "i"));
+		for(var i = source.length-1; i >= 0; i--) {
+			this._events.setVar(source[i][0].replace(RegExp("^"+data.inherit+"-", "i"), data.root+"-"), source[i][1]);
+		}
+	}
 	
 	var tree = data.root;
 	
@@ -96,4 +117,4 @@ mods.Core.prototype._vartree = function(data) {
 	}
 	
 	this._processVarTree(data.data, data.root);
-}
+};

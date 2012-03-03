@@ -46,24 +46,29 @@ Format: 1.51
 # --------------------------------------------------------------------------
 
 
-File: Data  (Data.js)
-File: DuskWolf  (DuskWolf.js)
-File: Events  (Events.js)
-File: Game  (Game.js)
 File: Global  (__init__.js)
+File: DuskWolf  (DuskWolf.js)
+File: Game  (Game.js)
+File: Events  (Events.js)
+File: Data  (Data.js)
 
 Group: Mods  {
 
    File: mods  (mods/__init__.js)
-   File: mods.Core  (mods/Core.js)
-   File: mods.IModule  (mods/IModule.js)
-   File: mods.LocalSaver  (mods/LocalSaver.js)
-   File: mods.Math  (mods/Math.js)
-   File: mods.Plat  (mods/Plat.js)
-   File: mods.SimpleGui  (mods/SimpleGui.js)
+   File: Core  (no auto-title, mods/Core.js)
+   File: Data  (no auto-title, mods/Data.js)
+   File: IModule  (no auto-title, mods/IModule.js)
+   File: Keyboard  (no auto-title, mods/Keyboard.js)
+   File: LocalSaver  (no auto-title, mods/LocalSaver.js)
+   File: Math  (no auto-title, mods/Math.js)
+   File: Plat  (no auto-title, mods/Plat.js)
+   File: SimpleGui  (no auto-title, mods/SimpleGui.js)
    }  # Group: Mods
 
-File: sgui.Component  (sgui/Component.js)
+Group: SGui  {
+
+   File: Component  (no auto-title, sgui/Component.js)
+   }  # Group: SGui
 
 Group: Index  {
 

@@ -3,13 +3,25 @@
 "use strict";
 
 /**  */
+
+/** Function: mods.Keyboard
+ * 
+ * Constructor, creates a new instance of this. Doesn't really do anything else of interest though.
+ * 
+ * Params:
+ *	events	- [<Events>] The events system that this will be used for.
+ */
 mods.Keyboard = function(events) {
 	mods.IModule.call(this, events);
 	
 	this._events.registerKeyHandler("KeyboardKey", this._handleKeypress, this);
 	this._events.registerKeyUpHandler("KeyboardUpKey", this._handleKeyup, this);
 	
-	this._keys = {}
+	this._keys = {};
+	
+	this._events.setVar("key-a", 65);
+	this._events.setVar("key-b", 66);
+	this._events.setVar("key-c", 67);
 };
 mods.Keyboard.prototype = new mods.IModule();
 mods.Keyboard.constructor = mods.Keyboard;

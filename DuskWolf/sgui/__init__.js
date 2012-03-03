@@ -21,7 +21,8 @@ window.sgui = {"Component":"Component",
 "TileMap":"TileMap",
 "Saybox":"Saybox",
 "PlatMain":"PlatMain",
-"PlatEntity":"PlatEntity"
+"PlatEntity":"PlatEntity",
+"PlatHero":"PlatEntity"
 };
 
 window.loadComponent = function(name) {

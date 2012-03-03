@@ -2,15 +2,15 @@
 	"Generic tile map thing. With some kind of beetles",
 	
 	{"a":"listen", "event":"sys-event-load", "actions":[
-		{"a":"var", "name":"sg-def-fc-i", "value":"unfocused.png"},
-		{"a":"var", "name":"sg-def-fc-f", "value":"focused.png"},
-		{"a":"var", "name":"sg-def-fc-a", "value":"active.png"}
+		{"a":"var", "name":"sg-def-fc-i", "value":"Examples/unfocused.png"},
+		{"a":"var", "name":"sg-def-fc-f", "value":"Examples/focused.png"},
+		{"a":"var", "name":"sg-def-fc-a", "value":"Examples/active.png"}
 	]},
 	
 	{"a":"listen", "event":"sys-event-start", "actions":[
 		{"a":"print", "text":"Hello..."},
 		{"a":"pane", "name":"Test", "focus":"A", "active":"1", "children":[
-			{"name":"TM", "type":"TileMap", "map":{"src":"Tiles.png", "map":"
+			{"name":"TM", "type":"TileMap", "map":{"src":"Examples/Tiles.png", "map":"
 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0 1,0
 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 1,0 1,0 1,0 0,0 0,0 0,0 0,0 1,0 0,0 0,0 0,0 1,0 1,0 0,0 1,0 0,0
 			"}, "fade":"0.05"},

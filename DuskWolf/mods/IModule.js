@@ -20,7 +20,7 @@
  * This will take the events system, and store it in this._events so the module can use it.
  * 
  * Params:
- * 	events - [<Events>] The events system that this will be used for.
+ * 	events	- [<Events>] The events system that this will be used for.
  */
 mods.IModule = function(events) {
 	if(events !== undefined) {

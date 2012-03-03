@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-//Three vars required
+//Two vars required
 // __duskdir__ Location of DuskWolf
 // __datadir__ Location of game data
 
@@ -21,6 +21,7 @@ function __load__() {
 
 function __import__(file) {
 	if(loaded.indexOf(file) == -1) {
+		$.ajaxSetup({"async":false});
 		if(typeof(file) == "string") {
 			//Single file
 			if(log) console.log("Importing "+file+" from "+__duskdir__+"/"+file+"...");
@@ -28,14 +29,11 @@ function __import__(file) {
 			$("head").append("<script type='text/javascript' src='"+__duskdir__+"/"+file+"'></script>");
 		}else{
 			//Multiple files
-			if(log) console.log("Importing "+file.join(", ")+" from "+__duskdir__+"...");
-			if(logDiv) $("#"+logDiv).append("<b>Importing:</b><br/>"+file.join("<br/>")+"<br/>");
-			var imString = "";
 			for(var i = 0; i < file.length; i++){
-				imString += "<script type='text/javascript' src='"+__duskdir__+"/"+file[i]+"' async='async'></script>";
+				__import__(file[i]);
 			}
-			$("head").append(imString);
 		}
+		$.ajaxSetup({"async":true});
 		loaded[loaded.length] = file;
 	}
 }
@@ -43,4 +41,4 @@ function __import__(file) {
 //Block keys from moving page
 document.onkeydown = function(e) {
 	if(e.keyCode >= 37 && e.keyCode <= 40) return false;
-}
+};

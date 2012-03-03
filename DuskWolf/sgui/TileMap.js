@@ -20,7 +20,7 @@ loadComponent("Grid");
  */
 sgui.TileMap = function (parent, events, comName) {
 	if(parent !== undefined){
-		sgui.Grid.call(this, parent, events, comName);
+		sgui.Component.call(this, parent, events, comName);
 		
 		this._registerStuff(this._tileMapStuff);
 		
@@ -32,75 +32,68 @@ sgui.TileMap = function (parent, events, comName) {
 		
 		this._twidth = this._theme("tm-tile-width");
 		this._theight = this._theme("tm-tile-height");
-		this._tsize = this._theme("tm-tile-size");
-		
-		this.dec = this._theme("tm-dec");
+		this._tsize = this._theme("tm-tsize");
+		this._ssize = this._theme("tm-ssize");
 		
 		this._lbound = 0;
 		this._ubound = 0;
 		this._rbound = 0;
 		this._bbound = 0;
 		
+		this.rows = -1;
+		this.cols = -1;
+		
 		this._defImg = "";
+		this._img = null;
 		
 		this._registerDrawHandler(this._tileMapDraw);
 	}
 };
-sgui.TileMap.prototype = new sgui.Grid();
+sgui.TileMap.prototype = new sgui.Component();
 sgui.TileMap.constructor = sgui.TileMap;
 
 sgui.TileMap.prototype.className = "TileMap";
 
-sgui.TileMap.prototype._tileMapStuff = function(data) {
-	this._lbound = this._prop("bound-l", data, this._lbound, true, 1);
-	this._rbound = this._prop("bound-r", data, this._rbound, true, 1);
-	this._ubound = this._prop("bound-u", data, this._ubound, true, 1);
-	this._bbound = this._prop("bound-b", data, this._bbound, true, 1);
+sgui.TileMap.prototype._tileMapStuff = function(stuff) {
+	this._lbound = this._prop("bound-l", stuff, this._lbound, true, 1);
+	this._rbound = this._prop("bound-r", stuff, this._rbound, true, 1);
+	this._ubound = this._prop("bound-u", stuff, this._ubound, true, 1);
+	this._bbound = this._prop("bound-b", stuff, this._bbound, true, 1);
 	
-	this._twidth = this._prop("tile-width", data, this._twidth, true, 1);
-	this._theight = this._prop("tile-height", data, this._theight, true, 1);
-	this._tsize = this._prop("tile-size", data, this._tsize, true, 1);
+	this._tsize = this._prop("tile-size", stuff, this._tsize, true, 1);
+	this._ssize = this._prop("sprite-size", stuff, this._ssize, true, 1);
+	this._tiles = new Array();
 	
-	this._defImg = this._prop("src", data, this._defImg, true, 0);
+	this._defImg = this._prop("src", stuff, this._defImg, true, 0);
 	
-	if(typeof(this._prop("map", data, null, false)) != "string" && this._prop("map", data, null, false)){
-		var map = this._prop("map", data, null, false);
+	if(typeof(this._prop("map", stuff, null, false)) != "string" && this._prop("map", stuff, null, false)){
+		var map = this._prop("map", stuff, null, false);
 		
-		var dec = (("dec" in map)?map.dec:this.dec) == "1";
-		loadComponent(dec?"DecimalTile":"Tile");
-		
-		//Get data
+		//Get stuff
 		if(!("rows" in map)) map.rows = this._theme("tm-rows");
 		if(!("cols" in map)) map.cols = this._theme("tm-cols");
 		
-		if(!("src" in map)) map.src = this._defImg;
+		if("src" in map) {
+			this._img = data.grabImage(map.src);
+		}else{
+			this._img = data.grabImage(this._defImg);
+		}
 		
-		var singleW = dec?this._twidth:1<<this._tsize;
-		var singleH = dec?this._theight:1<<this._tsize;
+		var singleW = 1<<this._tsize;
+		var singleH = 1<<this._tsize;
 		
 		if(map.rows == "-1") map.rows = Math.floor((this.getHeight()/singleH));
 		if(map.cols == "-1") map.cols = Math.floor((this.getWidth()/singleW));
 		
-		map.type = dec?"DecimalTile":"Tile";
-		this.populate(map);
+		var tiles = map.map.split(/\s+/g);
 		
-		var tiles = map.map.split(/\s/g);
-		
-		var i = 0;
-		mainLoop:for(var yi = 0; yi < map.rows; yi++){
-			for(var xi = 0; xi < map.cols; xi++){
-				while(!tiles[i]){if(tiles.length == i){break mainLoop;}else{i++;}}
-				
-				this.getComponent(xi+","+yi).doStuff({"tile":tiles[i]});
-				this.getComponent(xi+","+yi).setWidth(singleW);
-				this.getComponent(xi+","+yi).setHeight(singleH);
-				i ++;
-			}
+		for(var i = 0; i < tiles.length; i++){
+			if(tiles[i].indexOf(",") === -1) continue;
+			this._tiles[this._tiles.length] = tiles[i].split(",");
 		}
 		
-		this.dec = dec;
-		
-		this.ajust();
+		this.rows = map.rows;
+		this.cols = map.cols;
 		
 		this.setBoundsCoord(0, 0, this.getWidth(), this.getHeight());
 	}
@@ -134,61 +127,61 @@ sgui.TileMap.prototype.setBoundsCoord = function(l, u, r, b) {
 };
 
 sgui.TileMap.prototype.tilePointIn = function(x, y, exactX, exactY) {
-	var xpt = this.dec?(x/this._twidth):(x/(1<<this._tsize));
-	var ypt = this.dec?(y/this._theight):(y/(1<<this._tsize));
+	var xpt = (x/(1<<this._tsize));
+	var ypt = (y/(1<<this._tsize));
 	
 	if(exactX && exactY){
-		return this.getComponent(xpt+","+ypt);
+		return this.getTile(xpt, ypt);
 	}else if(exactX){
-		return this.getComponent(xpt+","+Math.floor(ypt));
+		return this.getTile(xpt, Math.floor(ypt));
 	}else if(exactY){
-		return this.getComponent(Math.floor(xpt)+","+ypt);
+		return this.getTile(Math.floor(xpt), ypt);
 	}else{
-		return this.getComponent(Math.floor(xpt)+","+Math.floor(ypt));
+		return this.getTile(Math.floor(xpt), Math.floor(ypt));
 	}
 };
 
 sgui.TileMap.prototype._tileMapDraw = function(c) {
-	for(var c in this._components){
-		this._components[c].visible = false;
-	}
+	if(!this._img) return;
 	
-	for(var yi = this._ubound; yi <= this._bbound; yi++){
-		if(!this.getComponent("0,"+yi)) continue;
-		
-		for(var xi = this._lbound; xi <= this._rbound; xi++){
-			if(!this.getComponent(xi+","+yi)) continue;
-			this.getComponent(xi+","+yi).visible = true;
+	var i = 0;
+	for (var yi = 0; yi < this.rows; yi++) {
+		for (var xi = 0; xi < this.cols; xi++) {
+			if(this._tiles[i] && xi >= this._lbound && xi <= this._rbound && yi >= this._ubound && yi <= this._bbound) {
+				c.drawImage(this._img, this._tiles[i][0]<<this._ssize, this._tiles[i][1]<<this._ssize, 1<<this._ssize, 1<<this._ssize, xi<<this._tsize, yi<<this._tsize, 1<<this._tsize, 1<<this._tsize);
+			}
+			i++;
 		}
 	}
+};
+
+sgui.TileMap.prototype.getTile = function(x, y) {
+	return this._tiles[(y*this.cols)+x];
 };
 
 sgui.TileMap.prototype.getRelativeTile = function(xcoord, ycoord) {
-	return this.getComponent((xcoord+this._lbound)+","+(ycoord+this._ubound))
+	return this.getTile((xcoord+this._lbound), (ycoord+this._ubound));
+};
+
+sgui.TileMap.prototype.inRelativeRange = function(xcoord, ycoord) {
+	if(xcoord+this._lbound < 0 || xcoord+this._lbound >= this.cols || ycoord+this._ubound < 0 || ycoord+this._ubound >= this.rows) return false;
+	return true;
 };
 
 sgui.TileMap.prototype.visibleCols = function() {
-	if(this.dec){
-		return Math.floor(this.getWidth()/this._twidth);
-	}else{
-		return Math.floor(this.getWidth()/(1<<this._tsize));
-	}
+	return Math.floor(this.getWidth()/(1<<this._tsize));
 };
 
 sgui.TileMap.prototype.visibleRows = function() {
-	if(this.dec){
-		return Math.floor(this.getHeight()/this._theight);
-	}else{
-		return Math.floor(this.getHeight()/(1<<this._tsize));
-	}
+	return Math.floor(this.getHeight()/(1<<this._tsize));
 };
 
 sgui.TileMap.prototype.lookTile = function(x, y) {
-	for(var c in this._components){
-		if(this._components[c].getTile && this._components[c].getTile() == x+","+y){
-			return c;
+	for(var t in this._tiles){
+		if(this._tiles[t][0] == x && this._tiles[t][1] == y) {
+			return [t % this.cols, Math.floor(t/this.cols)];
 		}
 	}
 	
-	return null;
+	return [0, 0];
 };

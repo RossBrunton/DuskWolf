@@ -23,7 +23,11 @@ window.Game = function() {
 	this._events = null;
 	
 	duskWolf.info(duskWolf.gameName+" ver "+duskWolf.ver+" is starting.");
-
+	
+	//Timer
+	this._framesRan = 0;
+	this._time = (new Date()).getTime();
+	
 	window.data = new Data();
 	this.start();
 };
@@ -52,19 +56,17 @@ Game.prototype.start = function() {
  */
 Game.prototype.everyFrame = function() {
 	try {
-		this._events.everyFrame();
-		framesRan++;
-		if(framesRan == 100){
-			duskWolf.info("100 frames took "+((new Date()).getTime()-timo)+"ms, "+(100/(((new Date()).getTime()-timo)/1000))+"fps.");
-			timo = (new Date()).getTime();
-			framesRan = 0;
+		game._events.everyFrame();
+		if(duskWolf.dev) {
+			game._framesRan++;
+			if(game._framesRan == 100){
+				duskWolf.info("100 frames took "+((new Date()).getTime()-game._time)+"ms, "+(Math.round(100000000/((new Date()).getTime()-game._time))/1000)+"fps.");
+				game._time = (new Date()).getTime();
+				game._framesRan = 0;
+			}
 		}
 	} catch(e) {duskWolf.error(e);};
 };
-
-//Timer stuff, temporary
-window.framesRan = 0;
-window.timo = (new Date()).getTime();
 
 /** Function: keypress
  * 

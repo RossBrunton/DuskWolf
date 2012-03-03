@@ -1,6 +1,6 @@
 //Part of the DuskWolf engine
 //Licensed under the MIT license, see COPYING.txt for details
-"use strict";
+//"use strict";
 
 /** Class: Data
  * 
@@ -8,7 +8,7 @@
  * 
  * It is created as the global variable "data" when <Game> is constructed.
  * 
- * All paths it uses are relative to the var <DuskWolf.gameDir>.
+ * All paths it uses are relative to the var <__datadir__>.
  * 
  * See:
  * * <Events>
@@ -35,6 +35,9 @@ window.Data = function() {
 	 * [object] This is the root JSON, it is obtained from root.json and provides all the basic stuff that describes the game.
 	 */
 	this._root = this.grabJson("root");
+	
+	//Enable/disable cache
+	$.ajaxSetup({"cache": !duskWolf.dev});
 	
 	if(!this._root) {duskWolf.error("Root json could not be loaded. Oh dear..."); return;}
 	if(!("files" in this._root)) {duskWolf.error("Root json does not specify a list of files..."); return;}
@@ -70,7 +73,7 @@ var modsAvalable;
  * This is a little more lax than the normal JSON parser. before the file is parsed, tabs and newlines are replaced by spaces, and /* comments are removed, letting you use them in the file.
  * 
  * Params:
- * 	file - [string] The name of the file to load, is relative to <__domain__> / <DuskWolf.gameDir> and the "json" file extension is added by this.
+ * 	file - [string] The name of the file to load, is relative to <__datadir__> and the "json" file extension is added to this automatically.
  * 	async - [boolean] Not implemented yet.
  * 
  * Return:
@@ -85,7 +88,7 @@ Data.prototype.grabJson = function(file, async) {
 			__hold__ = null;
 		}, "success":function(json, textStatus, jqXHR) {
 			__hold__ = json;
-		}, "url":duskWolf.gameDir+"/"+file+".json"});
+		}, "url":__datadir__+"/"+file+".json"});
 		
 		this._loaded[file+".json"] = __hold__.replace(/\t/g, " ").replace(/\/\*(?:.|\n)*?\*\//g, "").replace(/\n/g, " ");
 	}
@@ -100,7 +103,7 @@ Data.prototype.grabJson = function(file, async) {
  * If you call this without asigning the return value to anything, the image should download in the background.
  * 
  * Params:
- * 	file - [string] A path to the file located in <DuskWolf.gameDir>.
+ * 	file - [string] A path to the file located in <__datadir__>.
  * 	The file extension is not added automatically.
  * 
  * Return:
@@ -111,7 +114,7 @@ Data.prototype.grabImage = function(file) {
 		duskWolf.info("Downloading image "+file+"...");
 		
 		this._loaded[file] = new Image()
-		this._loaded[file].src = duskWolf.gameDir+"/"+file;
+		this._loaded[file].src = __datadir__+"/"+file;
 		return this._loaded[file];
 	}else{
 		return this._loaded[file];

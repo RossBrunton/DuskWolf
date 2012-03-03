@@ -5,31 +5,10 @@
  * 
  * A component is a single "thing" that exists in the Simple Gui system. Everything in the Simple GUI system must have this as a base class.
  * 
- * This class doesn't actually do anything in itself,
+ * This class doesn't actually do anything in itself, classes that inherit from it do.
+ * 	The properties for this apply to all components.
  * 
- * Components can be "active", a component which is active will receive keyboard events, and should act like the user is looking at it.
- * 	When a component becomes active, it's <onActive> method is called, when it looses it, <onDeactive> is called.
- * 	For a component to be active, all it's parent groups must be too.
- * 
- * Components can also be "focused", focused components will be made active when the container it is in becomes active.
- * 	Focus is generally changed by the arrow keys (only active components can handle key events, remember).
- * 	If a direcftion key is pressed, a function like <upAction> returns true, and a variable like <upFlow> is not empty, focus changes the element named <upFlow> in this one's container.
- * 	You can also call the <_container.focus> method of your container, but don't expect to become active.
- * 
- * Components handle some things, like an action or frame, to do this they must register them, using functions like <_registerFrameHandler> and <_registerAction> with the function they wish to be run when that thing occurs.
- * 
- * Handleable Things:
- * Frame		- Called every frame at the frame rate. Will be called <DuskWolf.frameRate> times a second, unless the computer is lagging.
- * Key			- Called when a key is pressed while the component is active, can be passed a number of arguments saying what key to be pressed, and whether shift or ctrl is required.
- * Action		- Called when the "action key" is pressed while this component is active.
- * 
- * A special type of handler is the Stuff handler, the function is given a JSON object containing properties (like the ones below), and should use it to process them.
- * 	This is used for the component to change it's look and behaviours and such via JSON.
- * 	Containers typically send the Stuff relating to a specific component (by using the "children" array, or "child" property, for example) to that component for processing.
- * 
- * <p>Note that most properties support a <code>to</code> attribute (Which is not listed to make it easier to read), this attribute is the name of a var, and stores the value of the property in it.</p>
- * 
- * <p><b>This component (and thus, all of them) have the following properties:</b></p>
+ * Supported Properties:
  * 
  * <p><code>&lt;x&gt;(x)&lt;/x&gt;</code> --
  * The x coordinate of this component, starting from the left of its container at 0.</p>
@@ -82,8 +61,9 @@
  * <p><code>&lt;fade-out [speed='(speed)']&gt;(speed)&lt;/fade-in&gt;</code> --
  * The component's alpha will be set to 1, and decreased by <code>speed</code> (default is 0.05) every frame. It stops events while it is doing this.</p>
  * 
- * @see Group
- * @see modules.SimpleGui
+ * See:
+ * * <mods.SimpleGui>
+ * * <sgui.IContainer>
  */
 	 
 /** Creates a new component, note that if you want to use a "blank component", you should use a <code>NullCom</code>.
@@ -110,6 +90,9 @@ sgui.Component = function (parent, events, componentName) {
 		this._mark = null;
 		
 		this._redrawBooked = false;
+		
+		this.cache = false;
+		this._cacheCanvas = null;
 
 		/** The name of the group's component that will be focused when the left key is pressed and <code>leftDirection</code> returns true.*/
 		this.leftFlow = "";
@@ -140,11 +123,22 @@ sgui.Component = function (parent, events, componentName) {
 		this._thread = "";
 		this.open = 0;
 		
+		this._floatSpeed = 0;
+		this._floatTime = 0;
+		this._floatDir = "u";
+		
+		this._fade;
+		this._fadeTo;
+		
 		//Add the core stuff
 		this._registerStuff(this._coreStuff);
 
 		//Add the action property handler
 		this._registerActionHandler("actionProp", this._actionProp, this);
+		
+		//Effects
+		this._registerFrameHandler(this._fadeEffect);
+		this._registerFrameHandler(this._floatEffect);
 	}
 };
 
@@ -382,9 +376,9 @@ sgui.Component.prototype._coreStuff = function(data) {
 		this._awaitNext();
 		
 		if(typeof(data.fade) == "object" && "from" in data.fade) {
-			this._alpha = Number(data.fade.from);
+			this.alpha = data.fade.from;
 		}else{
-			this._alpha = 0;
+			this.alpha = 0;
 		}
 		
 		if(typeof(data.fade) == "object" && data["fade"].speed) {
@@ -393,28 +387,64 @@ sgui.Component.prototype._coreStuff = function(data) {
 			this._fade = Number(this._prop("fade", data, 0.05, true));
 		}
 		
-		if(typeof(data.fade) == "object" && data["fade"].to) {
-			this._fadeEnd = Number(data.fade.to);
+		if(typeof(data.fade) == "object" && "to" in data.fade) {
+			this._fadeEnd = data.fade.to;
 		}else{
 			this._fadeEnd = 1;
 		}
+	}
+	
+	//Floating
+	if("float" in data) {
+		this._awaitNext();
 		
-		this._registerFrameHandler(this._fadeEffect);
+		if(typeof(data.float) == "object" && "for" in data.float) {
+			this._floatTime = data.float["for"];
+		}else{
+			this._floatTime = 10;
+		}
+		
+		if(typeof(data.float) == "object" && "speed" in data.float) {
+			this._floatSpeed = data.float.speed;
+		}else{
+			this._floatSpeed = this._prop("fade", data, 5, true);
+		}
+		
+		if(typeof(data.float) == "object" && "dir" in data.float) {
+			this._floatDir = data.float.dir;
+		}else{
+			this._floatDir = "u";
+		}
 	}
 }
 
 sgui.Component.prototype._fadeEffect = function() {
 	if(this._fade == 0) return;
 	
-	if((this._alpha < this._fadeEnd && this._fade > 0) || (this._alpha > this._fadeEnd && this._fade < 0)) {
-		this._alpha += this._fade;
+	if((this.alpha < this._fadeEnd && this._fade > 0) || (this.alpha > this._fadeEnd && this._fade < 0)) {
+		this.alpha += this._fade;
 		this.bookRedraw();
 	}else{
-		this._alpha = this._fadeEnd;
+		this.alpha = this._fadeEnd;
 		this.bookRedraw();
 		this._fade = 0;
 		this._next();
 	}
+}
+
+sgui.Component.prototype._floatEffect = function() {
+	if(this._floatTime == 0) return;
+	this._floatTime--;
+	
+	switch(this._floatDir){
+		case "d": this.y += this._floatSpeed;break;
+		case "l": this.x -= this._floatSpeed;break;
+		case "r": this.x += this._floatSpeed;break;
+		default:
+		case "u": this.y -= this._floatSpeed;break;
+	}
+	
+	if(this._floatTime == 0) this._next();
 }
 
 /** This just calls <code>Events.awaitNext()</code>, but calling this function is required for the checking if this component is open to work. 
@@ -447,7 +477,7 @@ sgui.Component.prototype.draw = function(c) {
 	if(!this.visible) return;
 	
 	state = c.save();
-	if(this.x || this.y) c.translate(this.x, this.y);
+	if(this.x || this.y) c.translate(~~this.x, ~~this.y);
 	if(this.scaleX || this.scaleY) c.scale(this.scaleX, this.scaleY);
 	if(this.alpha != 1) c.globalAlpha = this.alpha;
 	
@@ -470,7 +500,43 @@ sgui.Component.prototype.bookRedraw = function() {
 	
 	this._redrawBooked = true;
 	this._container.bookRedraw();
-}
+};
+
+sgui.Component.prototype.path = function(path) {
+	if(!path){duskWolf.error("path is undefined.");return null;}
+	
+	if(path.indexOf("/") !== -1){
+		var first = path.split("/", 1)[0];
+		var second = path.substr(first.length+1);
+	}else{
+		var first = path;
+		var second = "";
+	}
+	
+	switch(first) {
+		case "..":
+			return this._container.path(second);
+			break;
+		
+		case "":
+			if(this.className == "Pane") 
+				return this.path(second);
+			else
+				return this._container.path(second);
+			
+			break;
+		
+		default:
+			if(this.isAContainer){
+				if(!second) return this.getComponent(first);
+				else return this.getComponent(first).path(second);
+			}else{
+				duskWolf.warn(path + " from " + this.comName + " was not found.");
+			}
+	}
+	
+	return null;
+};
 
 sgui.Component.prototype.mark = function(colour) {
 	if(colour === undefined) colour = "#ff0000";

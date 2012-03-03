@@ -56,14 +56,11 @@ sgui.Label.prototype._labelDraw = function(c) {
 	if(this._text){
 		c.font = this.getHeight()+"px "+this._font;
 		if(this.getWidth()>0) {
-			c.fillText(this._text, 0, this.getHeight()>>1, this.getWidth());
+			c.fillText(this._text, 0, this.getHeight()>>1, ~~this.getWidth());
 		}else{
 			c.fillText(this._text, 0, this.getHeight()>>1);
 		}
 	}
-	
-	//c.strokeStyle = "#000000";
-	//c.strokeRect (0, 0, this.getWidth(), this.getHeight());
 };
 
 /** This sets the image that will be displayed.
