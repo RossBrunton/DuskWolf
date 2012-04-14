@@ -284,18 +284,17 @@ sgui.Component.prototype._registerStuff = function(stuff) {
  */
 sgui.Component.prototype.doStuff = function(data, thread) {
 	thread = thread?thread:this._thread;
-	
-	if(!this.open || this._thread == thread){
-		this.open ++;
+	/*if(!this.open || this._thread == thread){
+		this.open ++;*/
 		this._thread = thread?thread:this._thread;
 		
 		for(var i = 0; i < this._stuffActions.length; i++){
 			this._stuffActions[i].call(this, data);
 		}
-		this.open--;
+		/*this.open--;
 	}else{
-		duskWolf.warn(this.comName+" is already doing something in another thread.");
-	}
+		duskWolf.warn(this.comName+" is already doing something in another thread, "+this._thread);
+	}*/
 }
 
 /** This will process an individual property, though it's main purpose is to allow the <code>to</code> attribute to work. It takes an XML, a property name and a default value and returns the inner text, or the default if there is none.

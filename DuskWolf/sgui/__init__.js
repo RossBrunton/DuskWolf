@@ -2,7 +2,8 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-window.sgui = {"Component":"Component",
+window.sgui = {
+"Component":"Component",
 "NullCom":"Component",
 "IContainer":"IContainer",
 "Group":"Group",
@@ -21,11 +22,11 @@ window.sgui = {"Component":"Component",
 "TileMap":"TileMap",
 "Saybox":"Saybox",
 "PlatMain":"PlatMain",
-"PlatEntity":"PlatEntity",
-"PlatHero":"PlatEntity"
+"PlatEntity":"PlatEntity"
 };
 
 window.loadComponent = function(name) {
 	if(typeof(sgui[name]) != "string") return;
 	__import__("sgui/"+sgui[name]+".js");
+	if(typeof(sgui[name]) != "function") duskWolf.warn("Component "+name+" failed to load.");
 };

@@ -111,9 +111,20 @@ mods.SimpleGui = function(events) {
 	this._cacheCanvas = document.createElement("canvas");
 	this._cacheCanvas.height = this._events.getVar("sys-sg-height");
 	this._cacheCanvas.width = this._events.getVar("sys-sg-width");
+	this._cacheCanvas.style.imageRendering = "-webkit-optimize-contrast";
 	
 	this._cacheCanvas.getContext("2d").mozImageSmoothingEnabled = false;
 	this._cacheCanvas.getContext("2d").textBaseline = "middle";
+	
+	//Render
+	/*this._coolRender = true;
+	if(window.webkitRequestAnimationFrame)
+		window.webkitRequestAnimationFrame(this._render, $("#"+duskWolf.canvas)[0]);
+	else if(window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame) {
+		var fun = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+		fun(this._render);
+	}else this._coolRender = false;*/
+	
 	
 	//Themes
 	this._events.setVar("theme-default-border", "#cccccc");
@@ -130,8 +141,6 @@ mods.SimpleGui = function(events) {
 	this._events.setVar("theme-default-tm-cols", -1);
 	this._events.setVar("theme-default-tm-ssize", 4);
 	this._events.setVar("theme-default-tm-tsize", 5);
-	this._events.setVar("theme-default-plat-ssize", 4);
-	this._events.setVar("theme-default-plat-tsize", 5);
 	this._events.setVar("theme-default-plat-scroll-speed", 10);
 	
 	this._events.setVar("theme", "default");
@@ -197,14 +206,20 @@ mods.SimpleGui.prototype.draw = function() {
 	$("#"+duskWolf.canvas)[0].getContext("2d").drawImage(this._cacheCanvas, 0, 0, this._events.getVar("sys-sg-width"), this._events.getVar("sys-sg-height"));
 	this._redrawBooked = false;
 	
+	this._render();
+	
 	return true;
+};
+
+mods.SimpleGui.prototype._render = function(event) {
+	$("#"+duskWolf.canvas)[0].getContext("2d").drawImage(this._cacheCanvas, 0, 0, this._events.getVar("sys-sg-width"), this._events.getVar("sys-sg-height"));
 };
 
 mods.SimpleGui.prototype._doPath = function(action) {
 	if(!action.path){duskWolf.error("No path given!");return;}
 	if(!action.pane){duskWolf.error("No pane given!");return;}
 	
-	this.path(action.pane, action.path).doStuff(action);
+	this.path(action.pane, action.path).doStuff(action, this._events.thread);
 };
 
 mods.SimpleGui.prototype.path = function(pane, path) {

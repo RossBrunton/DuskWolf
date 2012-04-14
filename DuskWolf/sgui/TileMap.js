@@ -2,8 +2,6 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-loadComponent("Grid");
-
 /** A tilemap is just a grid of tiles.
  * 
  * <p>However, it does have a <code>&lt;map&gt;</code> property, which allows quick creation of a map, based on a tilesheet. The content of that property is a whitespace separated list (Preferably using tabs) of coordinates relating to the position on the tilesheet.</p>
@@ -45,6 +43,9 @@ sgui.TileMap = function (parent, events, comName) {
 		
 		this._defImg = "";
 		this._img = null;
+		
+		this._all = null;
+		this._drawn = false;
 		
 		this._registerDrawHandler(this._tileMapDraw);
 	}
@@ -95,32 +96,59 @@ sgui.TileMap.prototype._tileMapStuff = function(stuff) {
 		this.rows = map.rows;
 		this.cols = map.cols;
 		
+		this._all = document.createElement("canvas");
+		this._all.width = (this.cols<<this._tsize) + this.getWidth();
+		this._all.height = (this.rows<<this._tsize) + this.getHeight();
+		this._all.style.imageRendering = "-webkit-optimize-contrast";
+		
+		this.drawAll();
+		
 		this.setBoundsCoord(0, 0, this.getWidth(), this.getHeight());
 	}
 };
 
-sgui.TileMap.prototype.setBounds = function(l, u, r, b) {
+sgui.TileMap.prototype.drawAll = function() {
+	this._drawn = false;
+	
+	if(!this._img.complete) return false;
+	
+	var i = 0;
+	for (var yi = 0; yi < this.rows; yi++) {
+		for (var xi = 0; xi < this.cols; xi++) {
+			if(this._tiles[i]) {
+				this._all.getContext("2d").drawImage(this._img, this._tiles[i][0]<<this._ssize, this._tiles[i][1]<<this._ssize, 1<<this._ssize, 1<<this._ssize, xi<<this._tsize, yi<<this._tsize, 1<<this._tsize, 1<<this._tsize);
+			}
+			i++;
+		}
+	}
+	
+	this._drawn = true;
+	return true;
+};
+
+sgui.TileMap.prototype.setBoundsCoord = function(l, u, r, b) {
 	this._lbound = l;
 	this._rbound = r;
 	this._ubound = u;
 	this._bbound = b;
 	this.bookRedraw();
-}
+};
 
-sgui.TileMap.prototype.setBoundsCoord = function(l, u, r, b) {
-	if(r === undefined) r = l+this.getWidth();
-	if(b === undefined) b = u+this.getHeight();
+sgui.TileMap.prototype.setBounds = function(l, u, r, b) {
+	if(r === undefined) r = l+this.cols;
+	if(b === undefined) b = u+this.rows;
 	
 	if(this.dec){
-		this._lbound = Math.floor(l/this._twidth);
+		/*this._lbound = Math.floor(l/this._twidth);
 		this._rbound = Math.ceil(r/this._twidth);
 		this._ubound = Math.floor(u/this._theight);
-		this._bbound = Math.ceil(b/this._theight);
+		this._bbound = Math.ceil(b/this._theight);*/
+		duskWolf.warn("Decimal tilemaps have not been fully implemented!");
 	}else{
-		this._lbound = Math.floor(l/(1<<this._tsize));
-		this._rbound = Math.ceil(r/(1<<this._tsize));
-		this._ubound = Math.floor(u/(1<<this._tsize));
-		this._bbound = Math.ceil(b/(1<<this._tsize));
+		this._lbound = l<<this._tsize;
+		this._rbound = r<<this._tsize;
+		this._ubound = u<<this._tsize;
+		this._bbound = b<<this._tsize;
 	}
 	
 	this.bookRedraw();
@@ -143,28 +171,25 @@ sgui.TileMap.prototype.tilePointIn = function(x, y, exactX, exactY) {
 
 sgui.TileMap.prototype._tileMapDraw = function(c) {
 	if(!this._img) return;
-	
-	var i = 0;
-	for (var yi = 0; yi < this.rows; yi++) {
-		for (var xi = 0; xi < this.cols; xi++) {
-			if(this._tiles[i] && xi >= this._lbound && xi <= this._rbound && yi >= this._ubound && yi <= this._bbound) {
-				c.drawImage(this._img, this._tiles[i][0]<<this._ssize, this._tiles[i][1]<<this._ssize, 1<<this._ssize, 1<<this._ssize, xi<<this._tsize, yi<<this._tsize, 1<<this._tsize, 1<<this._tsize);
-			}
-			i++;
-		}
-	}
+	if(!this._drawn) this.drawAll();
+	c.drawImage(this._all, this._lbound, this._ubound, this.getWidth(), this.getHeight(), 0, 0, this.getWidth(), this.getHeight());
 };
 
 sgui.TileMap.prototype.getTile = function(x, y) {
-	return this._tiles[(y*this.cols)+x];
+	if(this._tiles[(y*this.cols)+x]) {
+		return this._tiles[(y*this.cols)+x];
+	}else{
+		duskWolf.warn("Tile "+x+","+y+" not found on "+this.comName);
+		return "0,0";
+	}
 };
 
 sgui.TileMap.prototype.getRelativeTile = function(xcoord, ycoord) {
-	return this.getTile((xcoord+this._lbound), (ycoord+this._ubound));
+	return this.getTile((xcoord+this._lbound >> this._tsize), (ycoord+this._ubound >> this._tsize));
 };
 
 sgui.TileMap.prototype.inRelativeRange = function(xcoord, ycoord) {
-	if(xcoord+this._lbound < 0 || xcoord+this._lbound >= this.cols || ycoord+this._ubound < 0 || ycoord+this._ubound >= this.rows) return false;
+	if(xcoord+(this._lbound>>this._tsize) < 0 || xcoord+(this._lbound>>this._tsize) >= this.cols || ycoord+(this._ubound>>this._tsize) < 0 || ycoord+(this._ubound>>this._tsize) >= this.rows) return false;
 	return true;
 };
 

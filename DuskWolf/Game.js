@@ -28,6 +28,16 @@ window.Game = function() {
 	this._framesRan = 0;
 	this._time = (new Date()).getTime();
 	
+	/* * Variable: _crashed
+	 * [Boolean] If true, then an error has occured, and no more everyFrame events will be performed.
+	 **/
+	this._crashed = false;
+	
+	/** Variable: _counter
+	 * [Number] Used to keep track of time.
+	 **/
+	this._counter = 0;
+	
 	window.data = new Data();
 	this.start();
 };
@@ -47,22 +57,28 @@ Game.prototype.start = function() {
 	{"a":"var", "name":"_started", "value":"1"}], "_init");
 };
 
-/** Function: everyFrame
+/** Function: enRender
  * 
- * This is called every frame based on the frame rate, it doesn't do anything besides call <Events.everyFrame> of the events system in use.
+ * This is called 60 times a second (or less, if the computer is laggy).
+ * 	It manages the frame rate, and calls <Events.everyFrame> of the events system in use every frame.
  * 
  * See:
  * 	<DuskWolf.frameRate>
  */
-Game.prototype.everyFrame = function() {
+Game.prototype.onRender = function() {
+	//if(game._crashed) return;
 	try {
-		game._events.everyFrame();
-		if(duskWolf.dev) {
-			game._framesRan++;
-			if(game._framesRan == 100){
-				duskWolf.info("100 frames took "+((new Date()).getTime()-game._time)+"ms, "+(Math.round(100000000/((new Date()).getTime()-game._time))/1000)+"fps.");
-				game._time = (new Date()).getTime();
-				game._framesRan = 0;
+		this._counter += duskWolf.frameRate/60;
+		while(this._counter > 1) {
+			this._counter --;
+			game._events.everyFrame();
+			if(duskWolf.dev) {
+				game._framesRan++;
+				if(game._framesRan == 100){
+					duskWolf.info("100 frames took "+((new Date()).getTime()-game._time)+"ms, "+(Math.round(100000000/((new Date()).getTime()-game._time))/1000)+"fps.");
+					game._time = (new Date()).getTime();
+					game._framesRan = 0;
+				}
 			}
 		}
 	} catch(e) {duskWolf.error(e);};

@@ -73,14 +73,16 @@ var modsAvalable;
  * This is a little more lax than the normal JSON parser. before the file is parsed, tabs and newlines are replaced by spaces, and /* comments are removed, letting you use them in the file.
  * 
  * Params:
- * 	file - [string] The name of the file to load, is relative to <__datadir__> and the "json" file extension is added to this automatically.
+ * 	file - [string] The name of the file to load, is relative to <__datadir__> and the "json" file extension is added to this automatically if the file name does not contain a ".".
  * 	async - [boolean] Not implemented yet.
  * 
  * Return:
  * 	The contents of the file file, parsed as a JSON object.
  */
 Data.prototype.grabJson = function(file, async) {
-	if(this._loaded[file+".json"] === undefined) {
+	if(file.indexOf(".") === -1) file += ".json";
+	
+	if(this._loaded[file] === undefined) {
 		duskWolf.info("Downloading JSON "+file+"...");
 		
 		$.ajax({"async":async==true, "dataType":"text", "error":function(jqXHR, textStatus, errorThrown) {
@@ -88,12 +90,12 @@ Data.prototype.grabJson = function(file, async) {
 			__hold__ = null;
 		}, "success":function(json, textStatus, jqXHR) {
 			__hold__ = json;
-		}, "url":__datadir__+"/"+file+".json"});
+		}, "url":__datadir__+"/"+file});
 		
-		this._loaded[file+".json"] = __hold__.replace(/\t/g, " ").replace(/\/\*(?:.|\n)*?\*\//g, "").replace(/\n/g, " ");
+		this._loaded[file] = __hold__.replace(/\t/g, " ").replace(/\/\*(?:.|\n)*?\*\//g, "").replace(/\n/g, " ");
 	}
 	
-	return JSON.parse(this._loaded[file+".json"]);
+	return JSON.parse(this._loaded[file]);
 }
 
 /** Function: grabImage

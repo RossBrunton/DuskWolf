@@ -34,6 +34,20 @@
  * 
  * > {"a":"modulo", "to":"...", "value":123, ("by":123)}
  *	This takes the modulo "by" of "value", storing it in "to". The modulo X of N is the remainder when you divide N by X. If no "by" value is specified, 10 is assumed.
+ * 
+ * > {"a":"vartree", "root":"...", "data":{...}, ("inherit":"...")}
+ * 	This allows you to quickly create "objects" (called vartrees) from a JSON object.
+ * 	The objects are just a list of vars, with a dash (-) to separate properties.
+ * 	This is easier to see by an example, as below:
+ * 	
+ * 	The action {"a":"vartree", "root":"test", "data":{"a":1, "b":{"c":"Y", "d":"Z"}}} would create the following vars.
+ * 	
+ * 	test-a		- 1
+ * 	test-b-c	- "Y"
+ * 	test-b-d	- "Z"
+ * 
+ * 	The inherit property lets you "inherit" the data from another vartree, specified by the root.
+ * 	In the above example, running an action later with "root":"boo" and "inherit":"test" would create the vars "boo-a", "boo-b-c" and "boo-b-d" with the above values.
  */
 
 /** Function: mods.Core
@@ -49,6 +63,13 @@ mods.Core = function(events) {
 mods.Core.prototype = new mods.IModule();
 mods.Core.constructor = mods.Core;
 
+/** Function: addActions
+ * 
+ * Registers the actions and sets the vars this uses, see the class description for a list of avalable ones.
+ * 
+ * See:
+ * * <mods.IModule.addActions>
+ */
 mods.Core.prototype.addActions = function() {
 	this._events.registerAction("print", function(what) {duskWolf.info(what.text);return true;}, this);
 	this._events.registerAction("error", function(what) {duskWolf.error(what.text);return true;}, this);
@@ -61,6 +82,14 @@ mods.Core.prototype.addActions = function() {
 	//events.registerAction("timer", function(what:XML):Boolean {if(!what.attribute("to").length()){DuskWolf.error("No target to set it to for!");}else{events.setVar(what.attribute("to"), String(timer.currentCount/10));}return true;});
 };
 
+/** Function: _increment
+ * 
+ * Used internally to handle the "inc" action.
+ *	You should use the standard ways of running actions, rather than calling this directly.
+ * 
+ * Params:
+ *	data		- [object] A "inc" action.
+ */
 mods.Core.prototype._increment = function(data) {
 	if(data.to === null){duskWolf.error("No target to increment to.");return;}
 	if(data.value === null){duskWolf.error("No value to increment.");return;}
@@ -69,6 +98,14 @@ mods.Core.prototype._increment = function(data) {
 	this._events.setVar(data.to, Number(data.value)+Number(data.by));
 };
 
+/** Function: _multiply
+ * 
+ * Used internally to handle the "mul" action.
+ *	You should use the standard ways of running actions, rather than calling this directly.
+ * 
+ * Params:
+ *	data		- [object] A "mul" action.
+ */
 mods.Core.prototype._multiply = function(data) {
 	if(data.to === null){duskWolf.error("No target to multiply to.");return;}
 	if(data.value === null){duskWolf.error("No value to multiply.");return;}
@@ -77,6 +114,14 @@ mods.Core.prototype._multiply = function(data) {
 	this._events.setVar(data.to, Number(data.value)*Number(data.by));
 };
 
+/** Function: _divide
+ * 
+ * Used internally to handle the "div" action.
+ *	You should use the standard ways of running actions, rather than calling this directly.
+ * 
+ * Params:
+ *	data		- [object] A "div" action.
+ */
 mods.Core.prototype._divide = function(data) {
 	if(data.to === null){duskWolf.error("No target to divide to.");return;}
 	if(data.value === null){duskWolf.error("No value to divide.");return;}
@@ -85,6 +130,14 @@ mods.Core.prototype._divide = function(data) {
 	this._events.setVar(data.to, Number(data.value)/Number(data.by));
 };
 
+/** Function: _modulo
+ * 
+ * Used internally to handle the "modulo" action.
+ *	You should use the standard ways of running actions, rather than calling this directly.
+ * 
+ * Params:
+ *	data		- [object] An "modulo" action.
+ */
 mods.Core.prototype._modulo = function(data) {
 	if(data.to === null){duskWolf.error("No target to modulo to.");return;}
 	if(data.value === null){duskWolf.error("No value to modulo.");return;}
@@ -93,6 +146,14 @@ mods.Core.prototype._modulo = function(data) {
 	this._events.setVar(data.to, Number(data.value)%Number(data.by));
 };
 
+/** Function: _vartree
+ * 
+ * Used internally to handle the "vartree" action.
+ *	You should use the standard ways of running actions, rather than calling this directly.
+ * 
+ * Params:
+ *	data		- [object] A "vartree" action.
+ */
 mods.Core.prototype._vartree = function(data) {
 	if(!data.data){duskWolf.error("No data to use!");return;}
 	if(!data.root){duskWolf.error("No root name!");return;}

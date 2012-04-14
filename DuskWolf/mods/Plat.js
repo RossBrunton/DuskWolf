@@ -2,6 +2,9 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
+__import__("platAi/__init__.js");
+loadPai("Pai");
+
 /** Class: mods.Plat
  * 
  */
@@ -17,15 +20,25 @@ mods.Plat = function(events) {
 	mods.IModule.call(this, events);
 	
 	//Vars
-	this._events.setVar("plat-gravity", 1.5);
-	this._events.setVar("plat-jump", 17);
-	this._events.setVar("plat-terminal", 10);
-	this._events.setVar("plat-slowdown", 2);
-	this._events.setVar("plat-speed", 10);
-	this._events.setVar("plat-accel", 4);
+	this._events.setVar("plat-seek", "hero");
+	this._events.setVar("plat-seektype", "player");
 	
 	this._events.setVar("plat-skill-jump", true);
 	this._events.setVar("plat-skill-dubjump", true);
+	
+	this._events.setVar("pentity-default-gravity", 1.5);
+	this._events.setVar("pentity-default-terminal", 10);
+	this._events.setVar("pentity-default-pai", "Stayer");
+	this._events.setVar("pentity-default-haccel", 4);
+	this._events.setVar("pentity-default-hspeed", 10);
+	this._events.setVar("pentity-default-jump", 17);
+	this._events.setVar("pentity-default-slowdown", 2);
+	this._events.setVar("pentity-default-img", "pimg/hero.png");
+	this._events.setVar("pentity-default-solid", true);
+	this._events.setVar("pentity-default-anchor", false);
+	
+	this._events.setVar("plat-ssize", 4);
+	this._events.setVar("plat-tsize", 5);
 	
 	this._events.run([
 	{"a":"listen", "event":"sys-event-load", "actions":[

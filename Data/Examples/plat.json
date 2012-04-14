@@ -1,6 +1,11 @@
 [
 	"This is a sample of the platforming.",
 	
+	{"a":"vartree", "root":"pentity-player", "inherit":"pentity-default", "data":{"pai":"Controlled"}},
+	{"a":"vartree", "root":"pentity-walk", "inherit":"pentity-default", "data":{"pai":"BackForth"}},
+	{"a":"vartree", "root":"pentity-block", "inherit":"pentity-default", "data":{"pai":"Stayer", "anchor":true, "gravity":0}},
+	{"a":"vartree", "root":"pentity-fall", "inherit":"pentity-default", "data":{"pai":"Fall", "anchor":true, "gravity":0, "img":"pimg/techFallBlock.png"}},
+	
 	{"a":"listen", "event":"sys-event-start", "actions":[
 		{"a":"plat-room", "room":"example"}
 	]}

@@ -14,7 +14,14 @@ sgui.PlatEntity = function (parent, events, comName) {
 		this.dy = 0;
 		this.dx = 0;
 		
-		this._jumps = 0;
+		this._pai = null;
+		this._eProps = {};
+		this.typeChange("default");
+		
+		this._ssize = this._events.getVar("plat-ssize");
+		
+		this.setWidth(1 << this._events.getVar("plat-tsize"));
+		this.setHeight(1 << this._events.getVar("plat-tsize"));
 	}
 };
 sgui.PlatEntity.prototype = new sgui.Tile();
@@ -22,12 +29,15 @@ sgui.PlatEntity.constructor = sgui.PlatEntity;
 
 sgui.PlatEntity.prototype.className = "PlatEntity";
 
-sgui.PlatEntity.prototype._platEntityFrame = function(data) {
+sgui.PlatEntity.prototype._platEntityFrame = function(e) {
+	//Ai
+	this._pai.everyFrame();
+	
 	// Vertical motion
 	this.y += this.dy;
 	
-	if(this.dy < this._events.getVar("plat-terminal")){
-		this.dy += this._events.getVar("plat-gravity");
+	if(this.dy < this.eProp("terminal")){
+		this.dy += this.eProp("gravity");
 	}
 	
 	//Bottom
@@ -40,8 +50,7 @@ sgui.PlatEntity.prototype._platEntityFrame = function(data) {
 		
 		this.snapY(false);
 		
-		//Reset jumps
-		this._jumps = 0;
+		this._pai.onLand();
 	}
 	
 	//Top
@@ -52,14 +61,15 @@ sgui.PlatEntity.prototype._platEntityFrame = function(data) {
 		this.dy = 0;
 		
 		this.snapY(true);
+		this._pai.onBonk();
 	}
 	
 	// Horizontal motion
 	
-	if(this.dx > this._events.getVar("plat-slowdown")){
-		this.dx -= this._events.getVar("plat-slowdown");
-	}else if(this.dx < -this._events.getVar("plat-slowdown")){
-		this.dx += this._events.getVar("plat-slowdown");
+	if(this.dx > this.eProp("slowdown")){
+		this.dx -= this.eProp("slowdown");
+	}else if(this.dx < -this.eProp("slowdown")){
+		this.dx += this.eProp("slowdown");
 	}else{
 		this.dx = 0;
 	}
@@ -73,6 +83,8 @@ sgui.PlatEntity.prototype._platEntityFrame = function(data) {
 		this.dx = 0;
 		
 		this.snapX(false);
+		
+		this._pai.onHitRight();
 	}
 	
 	//Left
@@ -83,46 +95,49 @@ sgui.PlatEntity.prototype._platEntityFrame = function(data) {
 		this.dx = 0;
 		
 		this.snapX(true);
+		this._pai.onHitLeft();
 	}
 	
 	this.bookRedraw();
 };
 
-//---------------
-
-sgui.PlatHero = function (parent, events, comName) {
-	if(parent !== undefined){
-		sgui.PlatEntity.call(this, parent, events, comName);
-		
-		this._registerFrameHandler(this._platHeroFrame);
-		this._markAt = null;
-	}
+sgui.PlatEntity.prototype.typeChange = function(type) {
+	this._type = type;
+	
+	this.setTile(0, 0);
+	this.setImage(this.eProp("img"));
+	
+	loadPai(this.eProp("pai"));
+	this._pai = new pai[this.eProp("pai")](this, this._events);
 };
-sgui.PlatHero.prototype = new sgui.PlatEntity();
-sgui.PlatHero.constructor = sgui.PlatHero;
 
-sgui.PlatHero.prototype.className = "PlatHero";
+sgui.PlatEntity.prototype.collideLeft = function(collider) {
+	this._pai.onCollideLeft(collider);
+};
 
-sgui.PlatHero.prototype._platHeroFrame = function(data) {
-	if(this._events.getMod("Keyboard").isKeyPressed(37) && this.dx > -this._events.getVar("plat-speed")) {
-		this.dx -= this._events.getVar("plat-accel");
-	}else if(this._events.getMod("Keyboard").isKeyPressed(39) && this.dx < this._events.getVar("plat-speed")) {
-		this.dx += this._events.getVar("plat-accel");
+sgui.PlatEntity.prototype.collideRight = function(collider) {
+	this._pai.onCollideRight(collider);
+};
+
+sgui.PlatEntity.prototype.collideTop = function(collider) {
+	this._pai.onCollideTop(collider);
+};
+
+sgui.PlatEntity.prototype.collideBottom = function(collider) {
+	this._pai.onCollideBottom(collider);
+};
+
+sgui.PlatEntity.prototype.eProp = function(prop, set) {
+	if(set !== undefined) {
+		this._eProps[prop] = set;
+		return set;
 	}
 	
-	if(this._events.getMod("Keyboard").isKeyPressed(38) && this.dy > -4) {
-		if((this._jumps == 0 && this._events.getVar("plat-skill-jump"))
-		|| (this._jumps == 1 && this._events.getVar("plat-skill-dubjump"))) {
-			this.dy = -this._events.getVar("plat-jump");
-			this._jumps ++;
-		}
-	}
-	
-	if(this.path("../../scheme").tilePointIn(this.x+(this.getWidth()/2), this.y+(this.getHeight()/2))[1] == 1
-	&& this.path("../../scheme").tilePointIn(this.x+(this.getWidth()/2), this.y+(this.getHeight()/2))[0] != this._markAt) {
-		this._markAt = this.path("../../scheme").tilePointIn(this.x+(this.getWidth()/2), this.y+(this.getHeight()/2))[0];
-		this._events.run([
-			{"a":"fire", "up":false, "mark":this._markAt, "event":"plat-mark"}
-		], this._events.thread);
+	if(this._eProps && prop in this._eProps) {
+		return this._eProps[prop];
+	}else{
+		return this._events.getVar("pentity-"+this._type+"-"+prop);
 	}
 };
+
+

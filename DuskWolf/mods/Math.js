@@ -12,35 +12,35 @@
  * 
  * Provided Actions:
  * 
- * > {"a":"sin", "to":"...", "value":"...", ("deg":true)}
+ * > {"a":"sin", "to":"...", "value":123, ("deg":true)}
  * Takes the sine of the value specified and stores it in "to".
  * 	Uses radians unless "deg" is specified, in which case degrees are used.
  * 	For convenience, it is rounded to 10 decimal places.
  * 
- * > {"a":"cos", "to":"...", "value":"...", ("deg":true)}
+ * > {"a":"cos", "to":"...", "value":123, ("deg":true)}
  * Takes the cosine of the value specified and stores it in "to".
  * 	Similar to the sin action.
  * 
- * > {"a":"tan", "to":"...", "value":"...", ("deg":true)}
+ * > {"a":"tan", "to":"...", "value":123, ("deg":true)}
  * Takes the tangent of the value specified and stores it in "to".
  * 	Similar to the sin action.
  * 	If the value is Pi/2, then Infinity is stored.
  * 
- * > {"a":"asin", "to":"...", "value":"...", ("deg":true)}
+ * > {"a":"asin", "to":"...", "value":123, ("deg":true)}
  * Takes the inverse sine of the value specified and stores it in "to".
  * 	Uses radians unless "deg" is specified, in which case degrees are used.
  * 	For convenience, it is rounded to 10 decimal places.
  * 
- * > {"a":"acos", "to":"...", "value":"...", ("deg":true)}
+ * > {"a":"acos", "to":"...", "value":123, ("deg":true)}
  * Takes the inverse cosine of the value specified and stores it in "to".
  * 	Similar to the asin action.
  * 
- * > {"a":"atan", "to":"...", "value":"...", ("deg":true)}
+ * > {"a":"atan", "to":"...", "value":123, ("deg":true)}
  * Takes the inverse tangent of the value specified and stores it in "to".
  * 	Similar to the asin action.
  * 	If the value given is Infinity, then this will store pi/2.
  * 
- * > {"a":"round", "to":"...", "value":"...", ("places":123)}
+ * > {"a":"round", "to":"...", "value":123, ("places":0)}
  * Rounds the value to the specified number of decimal places, 0 by defualt.
  * 
  * Variables:

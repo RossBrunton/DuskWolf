@@ -20,7 +20,8 @@ __import__("mods/__init__.js");
  * 
  * To actually run an action, you need to call <Events.run> with the array of actions, and the thread you want it to run in.
  * 
- * If you want to wait for something to happen (as in, say you want to wait for user input, or a file to load), you should call <Events._awaitNext>, which reterns the current thread that you are waiting in.
+ * To register a new action from a module, call <Events.registerAction> from your module's <IModule.addActions> call with a function and scope.
+ * If you want to wait for something to happen (as in, say you want to wait for user input, or a file to load), you should call <Events.awaitNext>, which reterns the current thread that you are waiting in.
  * When you want to start running again, call <Events.next> with the thread to continue in.
  * 
  * Listeners:
@@ -79,7 +80,12 @@ __import__("mods/__init__.js");
  * Like the above, but they are multiplied together instead of added.
  * 
  * > $-name;
- * Name, which should be a number, is inverted, if the var name was 4, for example, this would be replaced with -4.
+ * Name, which resolve to a number, is inverted, if the var "name" was 4, for example, this would be replaced with -4.
+ * 
+ * Hashfunctions:
+ * 
+ * Hashfunctions work similar to variables, except that they call functions instead of being static values. They are provided by modules using <Events.registerHashFunc> in a similar way to actions.
+ * 	The syntax for calling them is #NAME(arg1, arg2); The names are not case sensitive, and there can be any number of arguments.
  * 
  * Threads:
  * 
@@ -153,13 +159,16 @@ __import__("mods/__init__.js");
  * Built-in Events:
  * 
  * > {"a":"fire", "event":"sys-event-frame"}
- * Fired every frame, it will be fired about <DuskWolf.frameRate> times a second. Note that on slow computers or large drawings this may be less than that.
+ * Fired every frame, it will be fired about <DuskWolf.frameRate> times a second.
+ * 	Note that on slow computers or large drawings this may be less than that.
  * 
  * > {"a":"fire", "ver":"...", "ver-id":"...", "gameName":"...", "event":"sys-event-load"}
- * Fired once, to signal that the game should start loading and processing any information it needs, like defining variables. The properties are the same as the ones in <DuskWolf>.
+ * Fired once, to signal that the game should start loading and processing any information it needs, like defining variables.
+ * 	The properties are the same as the ones in <DuskWolf>.
  * 
  * > {"a":"fire", "ver":"...", "ver-id":"...", "gameName":"...", "event":"sys-event-start"}
- * Fired once, to signal that the game should start running, you should listen for this rather than just dumping code in the main array so that other things are loaded. The properties are the same as the ones in <DuskWolf>.
+ * Fired once, to signal that the game should start running, you should listen for this rather than just dumping code in the main array so that other things are loaded.
+ * 	The properties are the same as the ones in <DuskWolf>.
  * 
  * See:
  * * <mods.IModule>
@@ -179,9 +188,13 @@ window.Events = function(game) {
 	this._game = game;
 	
 	/** Variable: _actions
-	 * [object] A list of every action, each action is an array in the form [function to be called, scope to call function in]. You should add actions using <addAction>, rather than adding it to this directly.
+	 * [object] A list of every action, each action is an array in the form [function to be called, scope to call function in]. You should add actions using <addAction>, rather than adding it to this object directly.
 	 */
 	this._actions = {};
+	/** Variable: _hashFuncs
+	 * [object] A list of every hashfunction, it is an array in the form [function to be called, scope to call function in]. You should add actions using <addHashFunct>, rather than adding it to this object directly.
+	 */
+	this._hashFuncts = {};
 	/** Variable: _functions
 	 * [object] A list of all the functions assigned, in the form of an array of actions. Generally, you shouldn't need to create functions outside the JSON files, so you can't do it.
 	 */
@@ -257,7 +270,9 @@ window.Events = function(game) {
 	this.registerAction("var", this._setVarInternal, this);
 	this.registerAction("delvar", this.delVarInternal, this);
 	this.registerAction("thread", this._threadTo, this);
-	this.registerAction("varDump", function(what){duskWolf.info(this._vars);}, this);
+	this.registerAction("vardump", function(what){duskWolf.info(this._vars);}, this);
+	
+	this.registerHashFunct("HEL", function(fun, args) {return "Hello "+args+"!";}, this);
 	
 	for(var b in this._modsInited){
 		this._modsInited[b].addActions();
@@ -382,6 +397,7 @@ Events.prototype.run = function(what, thread) {
 Events.prototype.next = function(t, decrement) {
 	if(decrement === undefined) decrement = true;
 	//Check if we are waiting for any nexts
+	
 	if(decrement){
 		this._getThread(t).nexts --;
 	}
@@ -550,15 +566,43 @@ Events.prototype._parseVar = function(data, rec) {
 		data = data.replace(matches[k], this.getVar(matches[k].replace("$", "").replace(";", "")));
 	}
 	
+	matches = data.match(/#[-a-zA-Z0-9]+\([^;\(\)#\$]+\);?/gi);
+	if(matches) for(k = matches.length-1; k >= 0; k--) {
+		done = true;
+		var fname = matches[k].split("(")[0].replace("#", "");
+		var args = matches[k].split("(")[1].split(")")[0].split(",");
+		data = data.replace(matches[k], this.hashFunction(fname, args));
+	}
+	
 	if(rec == 20) duskWolf.error("Overflow parsing var, got to "+data+".");
 	if(done && rec < 20) return this._parseVar.call(this, data, rec);
 	else return isNaN(data.replace(/\$;/g, "$"))?data.replace(/\$;/g, "$"):Number(data.replace(/\$;/g, "$"));
 };
 
+/** Function: hashFunction
+ * 
+ * This does a hashFunction, and returns the value that it would return.
+ * 
+ * Params:
+ * 	name		- [string] The name of the hashfunction to call.
+ * 	args		- [string, string, ...] The arguments to the hashfunction.
+ * 
+ * Returns:
+ * 	[string] The return value of the hashfunction.
+ */
+Events.prototype.hashFunction = function(name, args) {
+	if(!this._hashFuncts[name.toLowerCase()]){
+		duskWolf.warn("No hashfunction named #"+name+".");
+		return "";
+	};
+	
+	return this._hashFuncts[name.toLowerCase()][0].call(this._hashFuncts[name.toLowerCase()][1], name, args);
+};
+
 /** Function: registerAction
  * 
- * This registers a new action, when the action is going to be ran the function given here is ran in the specified scope.
- * 	The scope would most likely be "this".
+ * This registers a new action, when the action encountered, the function supplied is ran in the specified scope.
+ * 	The scope would most likely be "this" from wherever you are calling it.
  * 	The function will be passed the whole action as a parameter.
  * 
  * Params:
@@ -568,6 +612,21 @@ Events.prototype._parseVar = function(data, rec) {
  */
 Events.prototype.registerAction = function(name, funct, scope) {
 	this._actions[name] = [funct, scope];
+};
+
+/** Function: registerHashFunct
+ * 
+ * This registers a new hashfunction, and the Javascript function to run said action.
+ * 	The scope would most likely be "this", and is the scope in which the function will be ran.
+ * 	The function will be passed an array of the params, which will all be strings.
+ * 
+ * Params:
+ * 	name		- [string] The name of the function, for example the hashfunction with the name EXP would be called via #EXP(1, 2);
+ * 	funct		- [function([string], [string, string, ...]){[string]}] The function to be called to do the hashfunction, the first argument is the name, the second an array of params. This should return the value to replace with.
+ * 	scope		- [object] The scope that the function will be ran in.
+ */
+Events.prototype.registerHashFunct = function(name, funct, scope) {
+	this._hashFuncts[name.toLowerCase()] = [funct, scope];
 };
 
 /** Function: registerFrameHandler
@@ -955,7 +1014,8 @@ Events.prototype.setVars = function(list) {
  * 	* <getVars>
  */
 Events.prototype.getVar = function(name) {
-	return this._vars[name.toLowerCase()]!==null?this._vars[name.toLowerCase()]:"";
+	if(this._vars[name.toLowerCase()] === undefined) return "";
+	return this._vars[name.toLowerCase()];
 };
 
 /** Function: getVars

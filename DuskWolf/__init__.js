@@ -55,8 +55,23 @@ window.__start__ = function() {
 		duskWolf.error(e);
 	}
 	
-	if('game' in window) setInterval("game.everyFrame()", 1000/duskWolf.frameRate);
-	
 	$(document).bind("keydown", function(e){try {if("game" in window) game.keypress(e);} catch(e) {duskWolf.error(e);}});
 	$(document).bind("keyup", function(e){try {if("game" in window) game.keyup(e);} catch(e) {duskWolf.error(e);}});
+	
+	__onRender__();
+};
+
+/** Function: __onRender__
+ * 
+ * This is called using window.requestAnimationFrame, and is called every 60th of a second, or so.
+ * 
+ * It calls <game.onRender>, which manages the frame rate.
+ */
+window.__onRender__ = function() {
+	game.onRender();
+	
+	if(window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame) {
+		var fun = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+		fun(window.__onRender__);
+	}else setTimeout(window.__onRender__, 1000/60);
 };

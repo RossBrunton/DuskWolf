@@ -90,12 +90,12 @@ DuskWolf.prototype.htmlLogLevel = 4;
 /** Constant: ver
  * [string] Version of the DW engine. Does not have to be a dot seperated list of numbers or anything, any string will do.
  */
-DuskWolf.prototype.ver = "0.0.5-alpha";
+DuskWolf.prototype.ver = "0.0.6-alpha";
 
 /** Constant: verId
  * [number] Version of the DW engine, this may not be human readable, and should be used to check if a save file is older than a certain version, or something. It is assumed that later numbers are newer versions.
  */
-DuskWolf.prototype.verId = 5;
+DuskWolf.prototype.verId = 6;
 
 /** Constant: gameName
  * [string] Name of the game. 
