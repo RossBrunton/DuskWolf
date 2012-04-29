@@ -19,6 +19,8 @@
  * Checks if the key specified by the JS keycode "key" is pressed.
  * 	If so, then the "then" actions are ran, else, the "else" actions are ran.
  * 
+ * 
+ * 
  * Provided Events:
  * 
  * > {"a":"fire", "event":"key-event-down", "key":123, "shift":false, "ctrl":false, "alt":false}
@@ -29,11 +31,6 @@
  * This is fired when the key specified by the keycode is released after having been pressed.
  * 	The "ctrl", "alt", and "shift" properties depend on whether those keys were pressed as modifiers.
  * 
- * Variables:
- * 	> key-a
- * 	> key-b
- * 	> ...
- * 	These are the keycodes for all the main keys.
  */
 
 /** Function: mods.Keyboard
@@ -49,11 +46,24 @@ mods.Keyboard = function(events) {
 	this._events.registerKeyHandler("KeyboardKey", this._handleKeypress, this);
 	this._events.registerKeyUpHandler("KeyboardUpKey", this._handleKeyup, this);
 	
+	/** Variable: _keys
+	 * [object] A list of keys that are pressed. It is an array with the indexes being the keycodes.
+	 */
 	this._keys = {};
 	
-	this._events.setVar("key-a", 65);
-	this._events.setVar("key-b", 66);
-	this._events.setVar("key-c", 67);
+	/** Variable: _codes
+	 * [object] An object with the properties the same as keycodes.
+	 * 	Each property key is a number, which contains a two element array.
+	 * 	The first element is a representation of the character, and the second is a boolean, which is true if the character is printable. 
+	 */
+	this._codes = {
+		"8":["BACKSPACE", false],
+		
+		"65":["a", true],
+		"66":["b", true],
+		"67":["c", true],
+		"68":["d", true],
+	};
 };
 mods.Keyboard.prototype = new mods.IModule();
 mods.Keyboard.constructor = mods.Keyboard;
@@ -74,7 +84,7 @@ mods.Keyboard.prototype.addActions = function() {
  * This handles the keypress event, which is obviously something this module has to do.
  * 
  * Params:
- * 	e	- [object] A jQuery keypress event object.
+ * 	e		- [object] A jQuery keypress event object.
  */
 mods.Keyboard.prototype._handleKeypress = function(e) {
 	this._events.run([{"a":"fire", "key":e.keyCode, "shift":e.shiftKey, "ctrl":e.ctrlKey, "alt":e.altKey, "event":"key-event-down"}], "_keyboard");
@@ -86,21 +96,55 @@ mods.Keyboard.prototype._handleKeypress = function(e) {
  * This handles the keyup event, which is dispatched when a pressed key is released.
  * 
  * Params:
- * 	e	- [object] A jQuery keyup event object.
+ * 	e		- [object] A jQuery keyup event object.
  */
 mods.Keyboard.prototype._handleKeyup = function(e) {
 	this._events.run([{"a":"fire", "key":e.keyCode, "shift":e.shiftKey, "ctrl":e.ctrlKey, "alt":e.altKey, "event":"key-event-up"}], "_keyboard");
 	this._keys[e.keyCode] = false;
 };
 
+/** Function: isKeyPressed
+ * 
+ * This checks whether the key is pressed, and returns whether it is pressed.
+ * 
+ * Params:
+ * 	code	- [number] A keycode to check.
+ * 
+ * Returns:
+ * 	[Boolean] Whether the key is pressed.
+ */
 mods.Keyboard.prototype.isKeyPressed = function(code) {
 	if(!(code in this._keys)) return false;
 	
 	return this._keys[code];
 };
 
+/** Function: lookupCode
+ * 
+ * This looks up a keycode, and returns the letter it represents, as well as some other stuff.
+ * 
+ * Params:
+ * 	code	- [number] A keycode to lookup.
+ * 
+ * Returns:
+ * 	[array] Information on that key. The first argument is a string representation, the second a boolean saying if it is printable.
+ */
+mods.Keyboard.prototype.lookupCode = function(code) {
+	if(!(code in this._codes)) return ["UNKNOWN", false];
+	
+	return this._codes[code];
+};
+
+/** Function: _ifKey
+ * 
+ * Used internally to handle the "ifKey" action.
+ *	You should use the standard ways of running actions, rather than calling this directly.
+ * 
+ * Params:
+ *	data		- [object] A "ifKey" action.
+ */
 mods.Keyboard.prototype._ifKey = function(a) {
-	if(!what.key){duskWolf.error("No key to check.");return;}
+	if(!a.key){duskWolf.error("No key to check.");return;}
 	
 	if(this.isKeyPressed(a.key)) {
 		if("then" in a) this.run(a.then, this._events.thread);

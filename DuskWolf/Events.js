@@ -101,17 +101,6 @@ __import__("mods/__init__.js");
  * Modules are classes that implement <mods.IModule> and generally let you DO something usefull, rather than simple printing of vars...
  *  Generally, a module calls <mods.IModule.addAction> with details it needs, and when that action is found when running code the function registered is called.
  * 
- * The root JSON File:
- * 
- * When DuskWolf starts, it loads a file (or fails if the file can't be found) named root.json from the folder specified by <DuskWolf.gameDir>, this file contains configuration files and such like for the game.
- *  It should be an oject with the following properties:
- * 
- * > "files":[...]
- * An array of filenames, these files will be retrieved, and all the actions ran inside them ran. They are relative to <DuskWolf.gameDir>.
- * 
- * > "mods":[...]
- * An array of modules to import (they are strings), these are the only modules imported.
- * 
  * Built-in Actions:
  * 
  * > {"a":"function", "name":"...", "actions"=[...]}
@@ -139,8 +128,8 @@ __import__("mods/__init__.js");
  * > {"a":"unlisten", ("event":"...",) ("name":"...",) ("prop1":"...", ("attr2":"...", ...)), "actions":[...]}
  * Deletes the listener that would be fired if the rules for "listen" were true. Note that the event property is optional.
  * 
- * > {"a":"var", "name":"...", "value":"..."}
- * Sets the var specified with the value specified. Note that the value will be converted to a string if it is not already one.
+ * > {"a":"var", "name":"...", "value":{...}, ["inherit":"..."]}
+ * Sets the var specified with the value specified. If inherit is specified, then the variable, if an object, will "inherit" the properties of the specified var.
  * 
  * > {"a":"thread", "name":"...", "actions":[...]}
  * The actions specified will now run in that thread. The current thread will continue going to the next line.
@@ -150,11 +139,11 @@ __import__("mods/__init__.js");
  * 
  * System Vars:
  * 
- * sys-game-ver 		- The version of the game, same as DuskWolf.ver.
- * sys-game-verid 		- The version id of the game, same as DuskWolf.verId.
- * sys-game-name 		- The name of the game, same as DuskWolf.gameName.
- * sys-game-author 		- The author of the game, same as DuskWolf.author.
- * sys-game-frameRate 	- The frame rate, in frames per second. This is usually 30. Setting this has no affect on the frame rate.
+ * sys.game.ver 		- The version of the game, same as DuskWolf.ver.
+ * sys.game.verid 		- The version id of the game, same as DuskWolf.verId.
+ * sys.game.name 		- The name of the game, same as DuskWolf.gameName.
+ * sys.game.author 		- The author of the game, same as DuskWolf.author.
+ * sys.game.frameRate 	- The frame rate, in frames per second. This is usually 30. Setting this has no affect on the frame rate.
  * 
  * Built-in Events:
  * 
@@ -240,19 +229,19 @@ window.Events = function(game) {
 	this.thread = "";
 	
 	//Set some vars
-	this.setVar("sys-game-ver", duskWolf.ver);
-	this.setVar("sys-game-verid", duskWolf.verId);
-	this.setVar("sys-game-name", duskWolf.gameName);
-	this.setVar("sys-game-author", duskWolf.author);
-	this.setVar("sys-game-frameRate", duskWolf.frameRate);
+	this.setVar("sys.game.ver", duskWolf.ver);
+	this.setVar("sys.game.verid", duskWolf.verId);
+	this.setVar("sys.game.name", duskWolf.gameName);
+	this.setVar("sys.game.author", duskWolf.author);
+	this.setVar("sys.game.frameRate", duskWolf.frameRate);
 	
 	//Init modules
 	for(var a = modsAvalable.length-1; a >= 0; a--){
 		var name = modsAvalable[a];
 		if(name != "IModule"){
-			if(typeof(mods[name]) != "function")
+			if(typeof(mods[name]) != "function") {
 				duskWolf.warn("module "+name+" failed to load.");
-			else
+			} else
 				this._modsInited[name] = new mods[name](this);
 		}
 	}
@@ -296,7 +285,7 @@ window.Events = function(game) {
  */
 Events.prototype.everyFrame = function() {
 	//Fire event
-	if(this.getVar("_started") == "1"){
+	if(this.getVar("sys.started")){
 		this.run([{"a":"fire", "event":"sys-event-frame"}], "_frame");
 	}
 	
@@ -528,7 +517,7 @@ Events.prototype._parseVar = function(data, rec) {
 	rec++;
 	var done = false;
 	
-	var matches = data.match(/\$-[-a-zA-Z0-9]+;?/gi);
+	var matches = data.match(/\$-[-\.a-zA-Z0-9]+;?/gi);
 	if(matches) for(var k = matches.length-1; k >= 0; k--){
 		done = true;
 		data = data.replace(matches[k], String(-1*Number(this.getVar(matches[k].replace("$-", "").replace(";", "")))));
@@ -560,7 +549,7 @@ Events.prototype._parseVar = function(data, rec) {
 		data = data.replace(matches[k], sum);
 	}
 	
-	matches = data.match(/\$[-a-zA-Z0-9]+;?/gi);
+	matches = data.match(/\$[\.-a-zA-Z0-9]+;?/gi);
 	if(matches) for(k = matches.length-1; k >= 0; k--) {
 		done = true;
 		data = data.replace(matches[k], this.getVar(matches[k].replace("$", "").replace(";", "")));
@@ -695,7 +684,7 @@ Events.prototype.getMod = function(name) {
  */
 Events.prototype._addFunction = function(data) {
 	if(!data.name) {duskWolf.error("No name for this function!");return;}
-	if(!data.actions) {duskWolf.error("Defining "+data.name+", no actions.");return;}
+	if(!data.actions) {duskWolf.error("Error defining "+data.name+", no actions.");return;}
 	
 	this._functions[data.name] = data.actions;
 };
@@ -953,11 +942,11 @@ Events.prototype._cond = function(cond) {
  * See:
  * 	* <setVar>
  */
-Events.prototype._setVarInternal = function(data) {
-	if(data.name === undefined) {duskWolf.error("No name given for var."); return;}
-	if(data.value === undefined) {duskWolf.error("No value given for "+data.name+"."); return;}
+Events.prototype._setVarInternal = function(a) {
+	if(a.name === undefined) {a.error("No name given for var."); return;}
+	if(a.value === undefined) {a.error("No value given for "+a.name+"."); return;}
 	
-	this.setVar(data.name.toLowerCase(), data.value);
+	this.setVar(a.name, a.value, a.inherit);
 };
 
 /** Function: setVar
@@ -965,8 +954,9 @@ Events.prototype._setVarInternal = function(data) {
  * This sets the value of a variable. It is recommended to use this, rather than running actions. Variables are described in the class description.
  * 
  * Params:
- * 	name		- [string] The name of the var to set, should only use alphanumeric characters, "-" and "_".
+ * 	name		- [string] The name of the var to set, should only use alphanumeric characters, "-", "." and "_".
  *	value		- [any] The value to set the named var to. It can be any type.
+ * 	inherit		- [string] The name of any existing var. If present, then that var will be set to the "name", and then the properties of values (which should be an object) will be set so that those properties still exist.
  * 
  * Returns:
  * 	[any] The value that was set, same as the param "value".
@@ -975,10 +965,30 @@ Events.prototype._setVarInternal = function(data) {
  * 	* <setVars>
  * 	* <getVar>
  */
-Events.prototype.setVar = function(name, value) {
+Events.prototype.setVar = function(name, value, inherit) {
+	name = String(name);
 	if(name.indexOf(",") != -1) duskWolf.warning("setVar", "A variable name with a comma in it may cause problems.");
 	
-	this._vars[name.toLowerCase()] = value;
+	name = name.toLowerCase();
+	var fragments = name.split(".");
+	var obj = this._vars;
+	if(fragments.length > 1){
+		for(var point = 0; point < fragments.length-1; point ++) {
+			if(obj[fragments[point]] === undefined) obj[fragments[point]] = {};
+			obj = obj[fragments[point]];
+		}
+	}
+	
+	if(inherit !== undefined) {
+		obj[fragments[fragments.length-1]] = this._clone(this.getVar(inherit));
+		for(var p in value){
+			obj[fragments[fragments.length-1]][p] = value[p];
+		}
+		
+		return value;
+	}
+	
+	obj[fragments[fragments.length-1]] = value;
 	
 	return value;
 };
@@ -1001,7 +1011,7 @@ Events.prototype.setVars = function(list) {
 
 /** Function: getVar
  * 
- * This returns the value of a variable, and is the only way to get a variable. If the variable is undefined, an empty string is returned.
+ * This returns the value of a variable, and is the only way to get a variable. If the variable is undefined, undefined is returned.
  * 
  * Params:
  * 	name		- [string] The name of the var to retrieve.
@@ -1014,8 +1024,24 @@ Events.prototype.setVars = function(list) {
  * 	* <getVars>
  */
 Events.prototype.getVar = function(name) {
-	if(this._vars[name.toLowerCase()] === undefined) return "";
-	return this._vars[name.toLowerCase()];
+	name = name.toLowerCase();
+	
+	var fragments = name.split(".");
+	var obj = this._vars;
+	if(fragments.length > 1){
+		for(var point = 0; point < fragments.length-1; point ++) {
+			if(obj[fragments[point]] === undefined) {
+				return undefined;
+			}
+			obj = obj[fragments[point]];
+		}
+	}
+	
+	if(obj[fragments[fragments.length-1]] !== undefined){
+		return obj[fragments[fragments.length-1]];
+	}
+	
+	return undefined;
 };
 
 /** Function: getVars
@@ -1070,5 +1096,5 @@ Events.prototype._delVarInternal = function(data) {
  * 	* <getVar>
  */
 Events.prototype.delVar = function(name) {
-	delete this._vars[name.toLowerCase()];
+	duskWolf.warn("Deleting stuff is not enabled. You have to live with it.");
 };

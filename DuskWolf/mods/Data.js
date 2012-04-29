@@ -13,15 +13,19 @@
  * 
  * > {"a":"import", "file":"...", ("thread":"...")}
  * Downloads a JSON from a file relative to the data dir, and runs it.
- * 	The file extension ".json" is added automatically.
+ * 	The file extension ".json" is added automatically if needed.
  * 	The actions will be ran on <Events.thread>, the current thread, if the thread property is not specified.
  * 
  * > {"a":"fetch", "file":"..."}
  * Downloads the specified image in the background, allowing it to appear instantly when needed.
  * 
+ * Provided HashFunctions:
+ * 
+ * > #FILE(location);
+ * 	Downloads the file, and returns the contents. This is relative to the data dir.
  */
 
-/** Function: mods.LocalSaver
+/** Function: mods.Data
  * 
  * Constructor, creates a new instance of this. Doesn't really do anything else of interest though.
  * 
@@ -44,6 +48,8 @@ mods.Data.constructor = mods.Data;
 mods.Data.prototype.addActions = function() {
 	this._events.registerAction("import", this._get, this);
 	this._events.registerAction("fetch", this._get, this);
+	
+	this._events.registerHashFunct("FILE", this._file, this);
 };
 
 /** Function: _get
@@ -65,4 +71,21 @@ mods.Data.prototype._get = function(action) {
 	}else{
 		data.grabImage(action.file);
 	}
+};
+
+/** Function: _file
+ * 
+ * Used internally to handle the "FILE" hashfunction.
+ *	You should use the standard ways of running hashfunctions, rather than calling this directly.
+ * 
+ * Params:
+ *	data		- [object] A "FILE" hashfunct.
+ * 
+ * Returns:
+ * 	[string] The output of the hashfunct.
+ */
+mods.Data.prototype._file = function(name, args) {
+	if(!args[0]){duskWolf.error("No file to retreive.");return;}
+	
+	return data.grabFile(args[0]);
 };

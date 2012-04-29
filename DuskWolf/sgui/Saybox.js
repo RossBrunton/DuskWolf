@@ -10,11 +10,14 @@ sgui.Saybox = function (parent, events, comName) {
 	if(parent !== undefined){
 		sgui.Group.call(this, parent, events, comName);
 		
-		this._registerStuff(this._sayBoxStuff);
 		this._registerFrameHandler(this._sayBoxFrame);
 		this._registerActionHandler("SayBox", this._sayBoxAction, this);
 		
-		this._width = this._events.getVar("sys-sg-width");
+		this._registerPropMask("speaker", "_speaker", true);
+		this._registerPropMask("speed", "_speed", true);
+		this._registerProp("say", this._startSay, null, ["speaker", "speed"]);
+		
+		this._width = this._events.getVar("sys.sg.width");
 		this._height = 200;
 		
 		this._text = "";
@@ -36,14 +39,9 @@ sgui.Saybox.constructor = sgui.SayBox;
 
 sgui.Saybox.prototype.className = "Saybox";
 
-sgui.Saybox.prototype._sayBoxStuff = function(data) {
-	this._speaker = this._prop("speaker", data, this._speaker);
-	this._speed = Number(this._prop("speed", data, this._speed));
-	
-	if("say" in data){
-		this._text = this._prop("say", data, this._text);
-		this._speak();
-	}
+sgui.Saybox.prototype._startSay = function(name, value) {
+	this._text = value;
+	this._speak();
 };
 
 sgui.Saybox.prototype._sayBoxFrame = function(e) {
@@ -62,7 +60,7 @@ sgui.Saybox.prototype._sayBoxFrame = function(e) {
 			return;
 		}
 		
-		this.getComponent("bodyTexts").getComponent(String(this._currentLine)).setText(this.getComponent("bodyTexts").getComponent(String(this._currentLine)).getText() + this._lines[this._currentLine][this._currentChar]);
+		this.getComponent("bodyTexts").getComponent("0,"+String(this._currentLine)).prop("text", this.getComponent("bodyTexts").getComponent("0,"+this._currentLine).prop("text") + this._lines[this._currentLine][this._currentChar]);
 		this._currentChar++;
 		this._charCache--;
 	}
@@ -76,11 +74,11 @@ sgui.Saybox.prototype._sayBoxAction = function(data) {
 };
 
 sgui.Saybox.prototype._build = function() {
-	this.doStuff({"children":[
-		{"name":"body", "type":"Rect", "x":"20", "y":"30", "width":(this.getWidth()-40), "height":(this.getHeight()-50)},
-		{"name":"title", "type":"Rect", "x":"30", "y":"0", "width":"200", "height":"30"},
-		{"name":"bodyTexts", "x":"25", "y":"35", "type":"VMenu", "spacing":"2", "populate":{"type":"Label", "height":"16", "width":(this.getWidth()-50), "count":"8"}},
-		{"name":"titleText", "type":"Label", "x":"35", "y":"5", "width":"190", "height":"20"}
+	this.parseProps({"children":[
+		{"name":"body", "type":"Rect", "x":20, "y":30, "width":(this.prop("width")-40), "height":(this.prop("height")-50)},
+		{"name":"title", "type":"Rect", "x":30, "y":0, "width":200, "height":30},
+		{"name":"bodyTexts", "x":25, "y":35, "type":"Grid", "rows":8, "cols":1, "populate":{"type":"Label", "height":"18", "width":(this.prop("width")-50)}},
+		{"name":"titleText", "type":"Label", "x":35, "y":5, "width":190, "height":20}
 	]});
 };
 
@@ -88,11 +86,12 @@ sgui.Saybox.prototype._speak = function() {
 	//Clear existing lines
 	for(var i = 7; i >= 0; i--) {
 		this._lines[i] = "";
-		this.getComponent("bodyTexts").getComponent(String(i)).setText("");
+		duskWolf.log(this);
+		this.getComponent("bodyTexts").getComponent("0,"+i).prop("text", "");
 	}
 	
 	//Speaker
-	this.doStuff({"children":[
+	this.parseProps({"children":[
 		{"name":"titleText", "text":this._speaker}
 	]});
 	
@@ -102,7 +101,7 @@ sgui.Saybox.prototype._speak = function() {
 	
 	this._lines[0] = words[0];
 	for(var w = 1; w < words.length; w++) {
-		if(this.getComponent("bodyTexts").getComponent(String(line)).getWidth(this._lines[line]+" "+words[w]) > this.getWidth()-50) {
+		if(this.getComponent("bodyTexts").getComponent("0,"+line).measure(this._lines[line]+" "+words[w]) > this.prop("width")-50) {
 			if(line == 7){
 				duskWolf.warn("Supplied text was larger than box size.");
 				break;

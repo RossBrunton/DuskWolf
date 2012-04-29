@@ -20,18 +20,25 @@ sgui.TileMap = function (parent, events, comName) {
 	if(parent !== undefined){
 		sgui.Component.call(this, parent, events, comName);
 		
-		this._registerStuff(this._tileMapStuff);
+		this._registerProp("map", this._doMap, null, ["src", "tile-size", "sprite-size"]);
+		this._registerPropMask("bound-l", "_lbound", true);
+		this._registerPropMask("bound-r", "_rbound", true);
+		this._registerPropMask("bound-u", "_ubound", true);
+		this._registerPropMask("bound-b", "_bbound", true);
+		this._registerPropMask("tile-size", "_tsize", true);
+		this._registerPropMask("sprite-size", "_ssize", true);
+		this._registerPropMask("src", "_defImg", true);
 		
-		this._hspacing = this._theme("tm-spacing-h");
-		this._vspacing = this._theme("tm-spacing-v");
+		this._hspacing = this._theme("tm.spacing.h", 0);
+		this._vspacing = this._theme("tm.spacing.v", 0);
 		
-		this.setWidth(this._events.getVar("sys-sg-width"));
-		this.setHeight(this._events.getVar("sys-sg-height"));
+		this.prop("width", this._events.getVar("sys.sg.width"));
+		this.prop("height", this._events.getVar("sys.sg.height"));
 		
-		this._twidth = this._theme("tm-tile-width");
-		this._theight = this._theme("tm-tile-height");
-		this._tsize = this._theme("tm-tsize");
-		this._ssize = this._theme("tm-ssize");
+		/*this._twidth = this._theme("tm.tile.width");
+		this._theight = this._theme("tm.tile.height");*/
+		this._tsize = this._theme("tm.tsize", 4);
+		this._ssize = this._theme("tm.ssize", 5);
 		
 		this._lbound = 0;
 		this._ubound = 0;
@@ -46,6 +53,7 @@ sgui.TileMap = function (parent, events, comName) {
 		
 		this._all = null;
 		this._drawn = false;
+		this._tiles = [];
 		
 		this._registerDrawHandler(this._tileMapDraw);
 	}
@@ -55,24 +63,14 @@ sgui.TileMap.constructor = sgui.TileMap;
 
 sgui.TileMap.prototype.className = "TileMap";
 
-sgui.TileMap.prototype._tileMapStuff = function(stuff) {
-	this._lbound = this._prop("bound-l", stuff, this._lbound, true, 1);
-	this._rbound = this._prop("bound-r", stuff, this._rbound, true, 1);
-	this._ubound = this._prop("bound-u", stuff, this._ubound, true, 1);
-	this._bbound = this._prop("bound-b", stuff, this._bbound, true, 1);
-	
-	this._tsize = this._prop("tile-size", stuff, this._tsize, true, 1);
-	this._ssize = this._prop("sprite-size", stuff, this._ssize, true, 1);
-	this._tiles = new Array();
-	
-	this._defImg = this._prop("src", stuff, this._defImg, true, 0);
-	
-	if(typeof(this._prop("map", stuff, null, false)) != "string" && this._prop("map", stuff, null, false)){
-		var map = this._prop("map", stuff, null, false);
+sgui.TileMap.prototype._doMap = function(name, value) {
+	if(typeof(value) != "string" && value){
+		var map = value;
+		this._tiles = [];
 		
 		//Get stuff
-		if(!("rows" in map)) map.rows = this._theme("tm-rows");
-		if(!("cols" in map)) map.cols = this._theme("tm-cols");
+		if(!("rows" in map)) map.rows = this._theme("tm-rows", 5);
+		if(!("cols" in map)) map.cols = this._theme("tm-cols", 5);
 		
 		if("src" in map) {
 			this._img = data.grabImage(map.src);
@@ -83,8 +81,8 @@ sgui.TileMap.prototype._tileMapStuff = function(stuff) {
 		var singleW = 1<<this._tsize;
 		var singleH = 1<<this._tsize;
 		
-		if(map.rows == "-1") map.rows = Math.floor((this.getHeight()/singleH));
-		if(map.cols == "-1") map.cols = Math.floor((this.getWidth()/singleW));
+		if(map.rows == "-1") map.rows = Math.floor((this.prop("height")/singleH));
+		if(map.cols == "-1") map.cols = Math.floor((this.prop("width")/singleW));
 		
 		var tiles = map.map.split(/\s+/g);
 		
@@ -97,15 +95,15 @@ sgui.TileMap.prototype._tileMapStuff = function(stuff) {
 		this.cols = map.cols;
 		
 		this._all = document.createElement("canvas");
-		this._all.width = (this.cols<<this._tsize) + this.getWidth();
-		this._all.height = (this.rows<<this._tsize) + this.getHeight();
+		this._all.width = (this.cols<<this._tsize) + this.prop("width");
+		this._all.height = (this.rows<<this._tsize) + this.prop("height");
 		this._all.style.imageRendering = "-webkit-optimize-contrast";
 		
 		this.drawAll();
 		
-		this.setBoundsCoord(0, 0, this.getWidth(), this.getHeight());
+		this.setBoundsCoord(0, 0, this.prop("width"), this.prop("height"));
 	}
-};
+}
 
 sgui.TileMap.prototype.drawAll = function() {
 	this._drawn = false;
@@ -172,14 +170,14 @@ sgui.TileMap.prototype.tilePointIn = function(x, y, exactX, exactY) {
 sgui.TileMap.prototype._tileMapDraw = function(c) {
 	if(!this._img) return;
 	if(!this._drawn) this.drawAll();
-	c.drawImage(this._all, this._lbound, this._ubound, this.getWidth(), this.getHeight(), 0, 0, this.getWidth(), this.getHeight());
+	c.drawImage(this._all, this._lbound, this._ubound, this.prop("width"), this.prop("height"), 0, 0, this.prop("width"), this.prop("height"));
 };
 
 sgui.TileMap.prototype.getTile = function(x, y) {
 	if(this._tiles[(y*this.cols)+x]) {
 		return this._tiles[(y*this.cols)+x];
 	}else{
-		duskWolf.warn("Tile "+x+","+y+" not found on "+this.comName);
+		duskWolf.warn("Tile "+x+","+y+" not found on "+this.comName+", wanting "+((y*this.cols)+x)+" when only "+this._tiles.length+" exist.");
 		return "0,0";
 	}
 };
@@ -194,11 +192,11 @@ sgui.TileMap.prototype.inRelativeRange = function(xcoord, ycoord) {
 };
 
 sgui.TileMap.prototype.visibleCols = function() {
-	return Math.floor(this.getWidth()/(1<<this._tsize));
+	return Math.floor(this.prop("width")/(1<<this._tsize));
 };
 
 sgui.TileMap.prototype.visibleRows = function() {
-	return Math.floor(this.getHeight()/(1<<this._tsize));
+	return Math.floor(this.prop("height")/(1<<this._tsize));
 };
 
 sgui.TileMap.prototype.lookTile = function(x, y) {

@@ -18,10 +18,10 @@ sgui.PlatEntity = function (parent, events, comName) {
 		this._eProps = {};
 		this.typeChange("default");
 		
-		this._ssize = this._events.getVar("plat-ssize");
+		this._ssize = this._events.getVar("plat.ssize");
 		
-		this.setWidth(1 << this._events.getVar("plat-tsize"));
-		this.setHeight(1 << this._events.getVar("plat-tsize"));
+		this.prop("width", 1 << this._events.getVar("plat.tsize"));
+		this.prop("height", 1 << this._events.getVar("plat.tsize"));
 	}
 };
 sgui.PlatEntity.prototype = new sgui.Tile();
@@ -42,10 +42,10 @@ sgui.PlatEntity.prototype._platEntityFrame = function(e) {
 	
 	//Bottom
 	var yDown = false;
-	if((this.path("../../scheme").tilePointIn(this.x+4, this.y+this.getHeight())[0] == 1
-	&& this.path("../../scheme").tilePointIn(this.x+4, this.y+this.getHeight())[1] == 0)
-	|| (this.path("../../scheme").tilePointIn(this.x+this.getWidth()-4, this.y+this.getHeight())[0] == 1
-	&& this.path("../../scheme").tilePointIn(this.x+this.getWidth()-4, this.y+this.getHeight())[1] == 0)) {
+	if((this.path("../../scheme").tilePointIn(this.x+4, this.y+this.prop("height"))[0] == 1
+	&& this.path("../../scheme").tilePointIn(this.x+4, this.y+this.prop("height"))[1] == 0)
+	|| (this.path("../../scheme").tilePointIn(this.x+this.prop("width")-4, this.y+this.prop("height"))[0] == 1
+	&& this.path("../../scheme").tilePointIn(this.x+this.prop("width")-4, this.y+this.prop("height"))[1] == 0)) {
 		this.dy = 0;
 		
 		this.snapY(false);
@@ -56,8 +56,8 @@ sgui.PlatEntity.prototype._platEntityFrame = function(e) {
 	//Top
 	if((this.path("../../scheme").tilePointIn(this.x+4, this.y)[0] == 1
 	&& this.path("../../scheme").tilePointIn(this.x+4, this.y)[1] == 0)
-	|| (this.path("../../scheme").tilePointIn(this.x+this.getWidth()-4, this.y)[0] == 1
-	&& this.path("../../scheme").tilePointIn(this.x+this.getWidth()-4, this.y)[1] == 0)) {
+	|| (this.path("../../scheme").tilePointIn(this.x+this.prop("width")-4, this.y)[0] == 1
+	&& this.path("../../scheme").tilePointIn(this.x+this.prop("width")-4, this.y)[1] == 0)) {
 		this.dy = 0;
 		
 		this.snapY(true);
@@ -76,10 +76,10 @@ sgui.PlatEntity.prototype._platEntityFrame = function(e) {
 	
 	this.x += this.dx;
 	//Right
-	if((this.path("../../scheme").tilePointIn(this.x+this.getWidth(), this.y+4)[0] == 1
-	&& this.path("../../scheme").tilePointIn(this.x+this.getWidth(), this.y+4)[1] == 0)
-	|| (this.path("../../scheme").tilePointIn(this.x+this.getWidth(), this.y+this.getHeight()-4)[0] == 1
-	&& this.path("../../scheme").tilePointIn(this.x+this.getWidth(), this.y+this.getHeight()-4)[1] == 0)) {
+	if((this.path("../../scheme").tilePointIn(this.x+this.prop("width"), this.y+4)[0] == 1
+	&& this.path("../../scheme").tilePointIn(this.x+this.prop("width"), this.y+4)[1] == 0)
+	|| (this.path("../../scheme").tilePointIn(this.x+this.prop("width"), this.y+this.prop("height")-4)[0] == 1
+	&& this.path("../../scheme").tilePointIn(this.x+this.prop("width"), this.y+this.prop("height")-4)[1] == 0)) {
 		this.dx = 0;
 		
 		this.snapX(false);
@@ -90,8 +90,8 @@ sgui.PlatEntity.prototype._platEntityFrame = function(e) {
 	//Left
 	if((this.path("../../scheme").tilePointIn(this.x, this.y+4)[0] == 1
 	&& this.path("../../scheme").tilePointIn(this.x, this.y+4)[1] == 0)
-	|| (this.path("../../scheme").tilePointIn(this.x, this.y+this.getHeight()-4)[0] == 1
-	&& this.path("../../scheme").tilePointIn(this.x, this.y+this.getHeight()-4)[1] == 0)) {
+	|| (this.path("../../scheme").tilePointIn(this.x, this.y+this.prop("height")-4)[0] == 1
+	&& this.path("../../scheme").tilePointIn(this.x, this.y+this.prop("height")-4)[1] == 0)) {
 		this.dx = 0;
 		
 		this.snapX(true);
@@ -103,9 +103,10 @@ sgui.PlatEntity.prototype._platEntityFrame = function(e) {
 
 sgui.PlatEntity.prototype.typeChange = function(type) {
 	this._type = type;
+	this._eProps = this._events.getVar("pentity."+this._type);
 	
-	this.setTile(0, 0);
-	this.setImage(this.eProp("img"));
+	this.prop("tile", "0,0");
+	this.prop("src", this.eProp("img"));
 	
 	loadPai(this.eProp("pai"));
 	this._pai = new pai[this.eProp("pai")](this, this._events);
@@ -135,8 +136,6 @@ sgui.PlatEntity.prototype.eProp = function(prop, set) {
 	
 	if(this._eProps && prop in this._eProps) {
 		return this._eProps[prop];
-	}else{
-		return this._events.getVar("pentity-"+this._type+"-"+prop);
 	}
 };
 

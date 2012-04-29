@@ -32,27 +32,24 @@ sgui.DirListener = function(parent, events, comName) {
 		this._down = [];
 		this._left = [];
 		this._right = [];
-
-		this._registerStuff(this._dirListenerStuff);
+		
+		this._registerPropMask("action-up", "_up", false);
+		this._registerPropMask("action-down", "_down", false);
+		this._registerPropMask("action-left", "_left", false);
+		this._registerPropMask("action-right", "_right", false);
 	}
 };
 sgui.DirListener.prototype = new sgui.Single();
 sgui.DirListener.constructor = sgui.DirListener;
 
-sgui.DirListener.prototype._dirListenerStuff = function(data) {
-	//Directions
-	this._up = this._prop("action-up", data, this._up);
-	this._down = this._prop("action-down", data, this._down);
-	this._left = this._prop("action-left", data, this._left);
-	this._right = this._prop("action-right", data, this._right);
-};
+sgui.DecimalTile.prototype.className = "DirListener";
 
 /** This is called when the up key is pressed, and in this object it runs some actions.
  * @return If some code was ran. If no code was ran, then control should flow out of this.
  */
 sgui.DirListener.prototype._upAction = function() {
 	if(this._up){
-		this._events.run(this._up, "_sg-dirListener");
+		this._events.run(this._up, "_"+this.comName);
 		return false;
 	}
 	
@@ -64,7 +61,7 @@ sgui.DirListener.prototype._upAction = function() {
  */
 sgui.DirListener.prototype._downAction = function() {
 	if(this._down){
-		this._events.run(this._down, "_sg-dirListener");
+		this._events.run(this._down, "_"+this.comName);
 		return false;
 	}
 	
@@ -76,7 +73,7 @@ sgui.DirListener.prototype._downAction = function() {
  */
 sgui.DirListener.prototype._leftAction = function() {
 	if(this._left){
-		this._events.run(this._left, "_sg-dirListener");
+		this._events.run(this._left, "_"+this.comName);
 		return false;
 	}
 	
@@ -88,7 +85,7 @@ sgui.DirListener.prototype._leftAction = function() {
  */
 sgui.DirListener.prototype._rightAction = function() {
 	if(this._right){
-		this._events.run(this._right, "_sg-dirListener");
+		this._events.run(this._right, "_"+this.comName);
 		return false;
 	}
 	

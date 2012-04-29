@@ -1,6 +1,6 @@
 //Part of the DuskWolf engine
 //Licensed under the MIT license, see COPYING.txt for details
-"use strict";
+//"use strict";
 
 //Two vars required
 // __duskdir__ Location of DuskWolf

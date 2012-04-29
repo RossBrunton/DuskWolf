@@ -24,8 +24,9 @@
  * 	Prints the text to the normal log locations if <DuskWolf.logLevel> or <DuskWolf.htmlLogLevel> are greater than or equal to 2.
  * 	All it does is call <DuskWolf.warn>, and should be used in the same places.
  * 
- * > {"a":"inc", "to":"...", "value":123, "by":123}
+ * > {"a":"inc", "to":"...", "value":123, ("by":123)}
  * 	Increments the value by "by", and stores the result in "to". It's just a simple "add" function.
+ * 
  * > {"a":"mul", "to":"...", "value":123, ("by":123)}
  *	This multiplies "by" and "value" together, and stores the value in the var specified by "to". If no value is specified for "by", it is multiplied by 2.
  * 
@@ -36,18 +37,15 @@
  *	This takes the modulo "by" of "value", storing it in "to". The modulo X of N is the remainder when you divide N by X. If no "by" value is specified, 10 is assumed.
  * 
  * > {"a":"vartree", "root":"...", "data":{...}, ("inherit":"...")}
- * 	This allows you to quickly create "objects" (called vartrees) from a JSON object.
- * 	The objects are just a list of vars, with a dash (-) to separate properties.
- * 	This is easier to see by an example, as below:
- * 	
- * 	The action {"a":"vartree", "root":"test", "data":{"a":1, "b":{"c":"Y", "d":"Z"}}} would create the following vars.
- * 	
- * 	test-a		- 1
- * 	test-b-c	- "Y"
- * 	test-b-d	- "Z"
+ * 	[DEPRECIATED]
  * 
- * 	The inherit property lets you "inherit" the data from another vartree, specified by the root.
- * 	In the above example, running an action later with "root":"boo" and "inherit":"test" would create the vars "boo-a", "boo-b-c" and "boo-b-d" with the above values.
+ * Provided HashFunctions:
+ * 
+ * > #DIV(original, by);
+ * 	Divides the original number by the "by" value, which is 2 if ommited.
+ * 
+ * > #MOD(original, by);
+ * 	Takes "original" modulo "by", in which "by" is 10 if ommited.
  */
 
 /** Function: mods.Core
@@ -71,15 +69,17 @@ mods.Core.constructor = mods.Core;
  * * <mods.IModule.addActions>
  */
 mods.Core.prototype.addActions = function() {
-	this._events.registerAction("print", function(what) {duskWolf.info(what.text);return true;}, this);
-	this._events.registerAction("error", function(what) {duskWolf.error(what.text);return true;}, this);
-	this._events.registerAction("warn", function(what) {duskWolf.warn(what.text);return true;}, this);
+	this._events.registerAction("print", function(a) {duskWolf.info(a.text);return true;}, this);
+	this._events.registerAction("error", function(a) {duskWolf.error(a.text);return true;}, this);
+	this._events.registerAction("warn", function(a) {duskWolf.warn(a.text);return true;}, this);
 	this._events.registerAction("inc", this._increment, this);
 	this._events.registerAction("mul", this._multiply, this);
 	this._events.registerAction("div", this._divide, this);
 	this._events.registerAction("modulo", this._modulo, this);
 	this._events.registerAction("vartree", this._vartree, this);
-	//events.registerAction("timer", function(what:XML):Boolean {if(!what.attribute("to").length()){DuskWolf.error("No target to set it to for!");}else{events.setVar(what.attribute("to"), String(timer.currentCount/10));}return true;});
+	
+	this._events.registerHashFunct("DIV", this._div, this);
+	this._events.registerHashFunct("MOD", this._mod, this);
 };
 
 /** Function: _increment
@@ -91,9 +91,9 @@ mods.Core.prototype.addActions = function() {
  *	data		- [object] A "inc" action.
  */
 mods.Core.prototype._increment = function(data) {
-	if(data.to === null){duskWolf.error("No target to increment to.");return;}
-	if(data.value === null){duskWolf.error("No value to increment.");return;}
-	if(data.by === null) data.by = 1;
+	if(data.to === undefined){duskWolf.error("No target to increment to.");return;}
+	if(data.value === undefined){duskWolf.error("No value to increment.");return;}
+	if(data.by === undefined) data.by = 1;
 	
 	this._events.setVar(data.to, Number(data.value)+Number(data.by));
 };
@@ -107,9 +107,9 @@ mods.Core.prototype._increment = function(data) {
  *	data		- [object] A "mul" action.
  */
 mods.Core.prototype._multiply = function(data) {
-	if(data.to === null){duskWolf.error("No target to multiply to.");return;}
-	if(data.value === null){duskWolf.error("No value to multiply.");return;}
-	if(data.by === null) data.by = 2;
+	if(data.to === undefined){duskWolf.error("No target to multiply to.");return;}
+	if(data.value === undefined){duskWolf.error("No value to multiply.");return;}
+	if(data.by === undefined) data.by = 2;
 	
 	this._events.setVar(data.to, Number(data.value)*Number(data.by));
 };
@@ -123,9 +123,9 @@ mods.Core.prototype._multiply = function(data) {
  *	data		- [object] A "div" action.
  */
 mods.Core.prototype._divide = function(data) {
-	if(data.to === null){duskWolf.error("No target to divide to.");return;}
-	if(data.value === null){duskWolf.error("No value to divide.");return;}
-	if(data.by === null) data.by = 2;
+	if(data.to === undefined){duskWolf.error("No target to divide to.");return;}
+	if(data.value === undefined){duskWolf.error("No value to divide.");return;}
+	if(data.by === undefined) data.by = 2;
 	
 	this._events.setVar(data.to, Number(data.value)/Number(data.by));
 };
@@ -139,9 +139,9 @@ mods.Core.prototype._divide = function(data) {
  *	data		- [object] An "modulo" action.
  */
 mods.Core.prototype._modulo = function(data) {
-	if(data.to === null){duskWolf.error("No target to modulo to.");return;}
-	if(data.value === null){duskWolf.error("No value to modulo.");return;}
-	if(data.by === null) data.by = 10;
+	if(data.to === undefined){duskWolf.error("No target to modulo to.");return;}
+	if(data.value === undefined){duskWolf.error("No value to modulo.");return;}
+	if(data.by === undefined) data.by = 10;
 	
 	this._events.setVar(data.to, Number(data.value)%Number(data.by));
 };
@@ -178,4 +178,40 @@ mods.Core.prototype._vartree = function(data) {
 	}
 	
 	this._processVarTree(data.data, data.root);
+};
+
+/** Function: _div
+ * 
+ * Used internally to handle the "DIV" hashfunction.
+ *	You should use the standard ways of running hashfunctions, rather than calling this directly.
+ * 
+ * Params:
+ *	data		- [object] A "DIV" hashfunct.
+ * 
+ * Returns:
+ * 	[number] The output of the hashfunct.
+ */
+mods.Core.prototype._div = function(name, args) {
+	if(args[0] === undefined){duskWolf.error("Nothing to divide.");return;}
+	if(args[1] === undefined) args[1] = 2;
+	
+	return Number(args[0])/Number(args[1]);
+};
+
+/** Function: _mod
+ * 
+ * Used internally to handle the "MOD" hashfunction.
+ *	You should use the standard ways of running hashfunctions, rather than calling this directly.
+ * 
+ * Params:
+ *	data		- [object] A "MOD" hashfunct.
+ * 
+ * Returns:
+ * 	[number] The output of the hashfunct.
+ */
+mods.Core.prototype._mod = function(name, args) {
+	if(args[0] === undefined){duskWolf.error("Nothing to modulo.");return;}
+	if(args[1] === undefined) args[1] = 10;
+	
+	return Number(args[0])%Number(args[1]);
 };

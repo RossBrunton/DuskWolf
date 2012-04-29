@@ -21,16 +21,16 @@ pai.Controlled.prototype.everyFrame = function() {
 	}
 	
 	if(this._events.getMod("Keyboard").isKeyPressed(38) && this._entity.dy > -4) {
-		if((this._jumps == 0 && this._events.getVar("plat-skill-jump"))
-		|| (this._jumps == 1 && this._events.getVar("plat-skill-dubjump"))) {
+		if((this._jumps == 0 && this._events.getVar("plat.skill.jump"))
+		|| (this._jumps == 1 && this._events.getVar("plat.skill.dubjump"))) {
 			this._entity.dy = -this._entity.eProp("jump");
 			this._jumps ++;
 		}
 	}
 	
-	if(this._entity.path("../../scheme").tilePointIn(this._entity.x+(this._entity.getWidth()/2), this._entity.y+(this._entity.getHeight()/2))[1] == 1
-	&& this._entity.path("../../scheme").tilePointIn(this._entity.x+(this._entity.getWidth()/2), this._entity.y+(this._entity.getHeight()/2))[0] != this._markAt) {
-		this._markAt = this._entity.path("../../scheme").tilePointIn(this._entity.x+(this._entity.getWidth()/2), this._entity.y+(this._entity.getHeight()/2))[0];
+	if(this._entity.path("../../scheme").tilePointIn(this._entity.x+(this._entity.prop("width")/2), this._entity.y+(this._entity.prop("height")/2))[1] == 1
+	&& this._entity.path("../../scheme").tilePointIn(this._entity.x+(this._entity.prop("width")/2), this._entity.y+(this._entity.prop("height")/2))[0] != this._markAt) {
+		this._markAt = this._entity.path("../../scheme").tilePointIn(this._entity.x+(this._entity.prop("width")/2), this._entity.y+(this._entity.prop("height")/2))[0];
 		this._events.run([
 			{"a":"fire", "up":false, "mark":this._markAt, "event":"plat-mark"}
 		], this._events.thread);

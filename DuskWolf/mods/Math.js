@@ -45,16 +45,16 @@
  * 
  * Variables:
  * 
- * > pi
+ * > math.pi
  * The constant pi, same as JavaScript's Math.PI constant.
  * 
- * > e
+ * > math.e
  * The constant e, same as JavaScript's Math.E constant.
  * 
- * > phi
+ * > math.phi
  * The constant phi, the golden ratio. The value is 1.61803398874989.
  * 
- * > infinity
+ * > math.infinity
  * JavaScript's Infinity constant. A number becomes this when it gets too large or small to handle.
  */
 
@@ -88,10 +88,10 @@ mods.Math.prototype.addActions = function() {
 	this._events.registerAction("round", this._round, this);
 	
 	//Constants
-	this._events.setVar("pi", Math.PI);
-	this._events.setVar("e", Math.E);
-	this._events.setVar("phi", 1.61803398874989);
-	this._events.setVar("infinity", Infinity);
+	this._events.setVar("math.pi", Math.PI);
+	this._events.setVar("math.e", Math.E);
+	this._events.setVar("math.phi", 1.61803398874989);
+	this._events.setVar("math.infinity", Infinity);
 };
 
 /** Function: _trig

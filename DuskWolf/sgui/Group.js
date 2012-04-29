@@ -18,16 +18,16 @@ sgui.Group = function(parent, events, comName) {
 		/** Whether this is the focused component in its group. */
 		this._focused = false;
 		
-		/** This creates a new group and adds the "blank" component. See <code>Component</code> for parameter details.
-		 * @see Component
-		 */
-		this.newComponent("blank", "NullCom");
-		this.focus("blank");
-			
 		//Add the groupStuff handler
-		this._registerStuff(this._groupStuff);
+		this._registerProp("focus", function(name, value){if(this._focusedCom != value) return this.focus(value)}, function(name, value){return this._focusedCom;});
+		this._registerProp("children", this._children, function(name, value){return this._components;});
+		this._registerProp("allChildren", this._allChildren, function(name, value){return this._components;});
+		
 		this._registerDrawHandler(this._groupDraw);
 		this._registerFrameHandler(this._groupFrame);
+		
+		this._newComponent("blank", "NullCom");
+		this.prop("focus", "blank");
 	}
 };
 sgui.Group.prototype = new sgui.IContainer();
@@ -51,7 +51,7 @@ sgui.Group.prototype.containerKeypress = function(e) {
  * @param type The type of the component, should be the name of one of the components in <code>SimpleGui.COMS</code>. If not specified a NullCom is made.
  * @return The component that was added.
  */
-sgui.Group.prototype.newComponent = function(com, type) { //Component
+sgui.Group.prototype._newComponent = function(com, type) { //Component
 	//Find the type
 	if (!type) {duskWolf.error("Cannot create a new component of type null!");return;}
 	if (!(type in sgui)) {duskWolf.error(type + " is not a valid component type.");type = "NullCom";}
@@ -64,27 +64,32 @@ sgui.Group.prototype.newComponent = function(com, type) { //Component
 	return this._components[com];
 };
 
-sgui.Group.prototype._groupStuff = function(data) {
-	//Component properties
-	if (data.children) {
-		for (var i = 0; i < data.children.length; i++) {
-			if (this.getComponent(data.children[i].name.toLowerCase(), data.children[i].type)) {
-				this.getComponent(data.children[i].name.toLowerCase()).doStuff(this._events.replaceVar(data.children[i]), this._thread);
+sgui.Group.prototype._children = function(name, value) {
+	if("length" in value) {
+		for (var i = 0; i < value.length; i++) {
+			if (value[i].name && this.getComponent(value[i].name.toLowerCase(), value[i].type)) {
+				this.getComponent(value[i].name.toLowerCase()).parseProps(value[i], this._thread);
+			} else if(value[i].name) {
+				duskWolf.warn(value.name + " has not been given a type and does not exist, ignoring.");
 			} else {
-				duskWolf.warn(data.children[i].name + " has not been given a type and does not exist, ignoring.");
+				duskWolf.warn("A component has no name in "+this.comName+".");
 			}
 		}
-	}
-	
-	if (data.allChildren) {
-		for (var c in this._components) {
-			this._components[c].doStuff(this._events.replaceVar(data.allChildren), this._thread);
+	}else{
+		duskWolf.log(value);
+		if(value.name && this._getComponent(value.name.toLowerCase(), value.type)) {
+			return this._getComponent(value.name.toLowerCase()).parseProps(value, this._thread);
+		} else if(value.name) {
+			duskWolf.warn(value.name + " has not been given a type and does not exist, ignoring.");
+		} else {
+			duskWolf.warn("A component has no name in "+this.comName+".");
 		}
 	}
-	
-	//Focus
-	if (this._getFocusName() != this._prop("focus", data, this._getFocusName(), true)) {
-		this.focus(this._prop("focus", data, this._getFocusName(), true));
+};
+
+sgui.Group.prototype._allChildren = function(name, value) {
+	for (var c in this._components) {
+		this._components[c].parseProps(value, this._thread);
 	}
 };
 
@@ -118,7 +123,7 @@ sgui.Group.prototype.getComponent = function(com, type) { //Component
 		return this._components[com.toLowerCase()];
 	};
 	
-	return type?this.newComponent(com, type):null;
+	return type?this._newComponent(com, type):null;
 };
 
 /** Deletes a component from this group. That's it.
@@ -130,6 +135,7 @@ sgui.Group.prototype.deleteComponent = function(com) { //Boolean
 		if(this._getFocusName() == com.toLowerCase()) this.focus("blank");
 		delete this._components[com.toLowerCase()];
 		delete this._drawOrder[this._drawOrder.indexOf(com.toLowerCase())];
+		this.bookRedraw();
 		return true;
 	}
 };
@@ -139,7 +145,7 @@ sgui.Group.prototype.deleteComponent = function(com) { //Boolean
  * @param com The name of the component to focus.
  * @returns Whether the focus was successful or not; components can "resist" loosing focus by returning <code>false</code> in their <code>onLooseFocus</code> function.
  */
-sgui.Group.prototype.focus = function(com) { //Bool
+sgui.Group.prototype.focus = function(value) { //Bool
 	if (this._components[this._focusedCom]){
 		if (this._components[this._focusedCom].locked){return false;};
 		
@@ -148,8 +154,8 @@ sgui.Group.prototype.focus = function(com) { //Bool
 	}
 	
 	//Loop through all components looking for it
-	if (this._components[com.toLowerCase()]){
-		this._focusedCom = com.toLowerCase();
+	if (this._components[value.toLowerCase()]){
+		this._focusedCom = value.toLowerCase();
 		this._components[this._focusedCom].onGetFocus();
 		this._active?this._components[this._focusedCom].onActive():null;
 		return true;
@@ -166,13 +172,6 @@ sgui.Group.prototype.focus = function(com) { //Bool
  */
 sgui.Group.prototype.getFocus = function() {
 	return this._components[this._focusedCom];
-};
-
-/** Gets the name of the currently focused component. This could be "blank" if nothing is focused.
- * @returns The currently focused component's name.
- */
-sgui.Group.prototype._getFocusName = function() {
-	return this._focusedCom;
 };
 
 /** Checks to see if it's possible to flow to the specified component, and if so, then does it.

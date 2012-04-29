@@ -11,14 +11,18 @@ sgui.PlatMain = function (parent, events, comName) {
 		sgui.Group.call(this, parent, events, comName);
 		
 		this._registerFrameHandler(this._platMainFrame);
-		this._registerStuff(this._platMainStuff);
 		
-		this.setWidth(this._events.getVar("sys-sg-width"));
-		this.setHeight(this._events.getVar("sys-sg-height"));
+		this.prop("width", this._events.getVar("sys.sg.width"));
+		this.prop("height", this._events.getVar("sys.sg.height"));
 		
-		this._tsize = this._events.getVar("plat-tsize");
-		this._ssize = this._events.getVar("plat-ssize");
-		this._scrollSpeed = this._theme("plat-scroll-speed");
+		this._registerPropMask("sprite-size", "_ssize", true);
+		this._registerPropMask("tile-size", "_tsize", true);
+		this._registerPropMask("spawn", "_spawn", true);
+		this._registerProp("room", this._room, null, ["spawn"]);
+		
+		this._tsize = this._events.getVar("plat.tsize");
+		this._ssize = this._events.getVar("plat.ssize");
+		this._scrollSpeed = this._theme("plat.scrollSpeed", 10);
 		this._spawn = 0;
 		this._entities = [];
 	}
@@ -28,38 +32,32 @@ sgui.PlatMain.constructor = sgui.PlatMain;
 
 sgui.PlatMain.prototype.className = "PlatMain";
 
-sgui.PlatMain.prototype._platMainStuff = function(data) {
-	this._spawn = this._prop("spawn", data, this._spawn, true, 0);
-	this._ssize = this._prop("sprite-size", data, this._ssize, true, 0);
-	this._tsize = this._prop("tile-size", data, this._tsize, true, 0);
+sgui.PlatMain.prototype._room = function(name, value) {
+	var room = this._events.getVar("proom."+value);
+	this.parseProps({"children":[
+		{"name":"scheme", "type":"TileMap", "src":"pimg/schematics.png", "visible":false, "tile-size":this._tsize, "sprite-size":this._ssize, "map":{"map":room.scheme, "rows":room.rows, "cols":room.cols, "width":this.prop("width"), "height":this.prop("height")}},
+		{"name":"back", "type":"TileMap", "src":room.backSrc, "tile-size":this._tsize, "sprite-size":this._ssize, "map":{"map":room.back, "rows":room.rows, "cols":room.cols}, "width":this.prop("width"), "height":this.prop("height")},
+		{"name":"entities", "type":"Group", "children":[
+			{"name":this._events.getVar("plat.seek"), "type":"PlatEntity"},
+		]},
+		{"name":"over", "type":"TileMap", "src":room.overSrc, "tile-size":this._tsize, "sprite-size":this._ssize, "map":{"map":room.over, "rows":room.rows, "cols":room.cols}, "width":this.prop("width"), "height":this.prop("height")}
+	]});
 	
-	if(this._prop("load", data, null, false)){
-		if(data.load.spawn != undefined) this._spawn = data.load.spawn;
-		this.doStuff({"children":[
-			{"name":"scheme", "type":"TileMap", "src":"pimg/schematics.png", "visible":false, "tile-size":this._tsize, "sprite-size":this._ssize, "map":{"map":this._events.getVar("proom-"+data.load.room+"-scheme"), "rows":this._events.getVar("proom-"+data.load.room+"-rows"), "cols":this._events.getVar("proom-"+data.load.room+"-cols")}, "width":this.getWidth(), "height":this.getHeight()},
-			{"name":"back", "type":"TileMap", "src":this._events.getVar("proom-"+data.load.room+"-backSrc"), "tile-size":this._tsize, "sprite-size":this._ssize, "map":{"map":this._events.getVar("proom-"+data.load.room+"-back"), "rows":this._events.getVar("proom-"+data.load.room+"-rows"), "cols":this._events.getVar("proom-"+data.load.room+"-cols")}, "width":this.getWidth(), "height":this.getHeight()},
-			{"name":"entities", "type":"Group", "children":[
-				{"name":this._events.getVar("plat-seek"), "type":"PlatEntity"},
-			]},
-			{"name":"over", "type":"TileMap", "src":this._events.getVar("proom-"+data.load.room+"-overSrc"), "tile-size":this._tsize, "sprite-size":this._ssize, "map":{"map":this._events.getVar("proom-"+data.load.room+"-over"), "rows":this._events.getVar("proom-"+data.load.room+"-rows"), "cols":this._events.getVar("proom-"+data.load.room+"-cols")}, "width":this.getWidth(), "height":this.getHeight()}
-		]});
-		
-		this.path("entities/"+this._events.getVar("plat-seek")).typeChange(this._events.getVar("plat-seekType"));
-		var crd = this.getComponent("scheme").lookTile(this._spawn, 1);
-		this.path("entities/"+this._events.getVar("plat-seek")).gridGo(crd[0], crd[1]);
-		
-		this._entities = [];
-		this._entities[0] = this.path("entities/"+this._events.getVar("plat-seek"));
-		var i = 0;
-		while(this._events.getVar("proom-"+data.load.room+"-entities-"+i+"-name") !== "") {
-			this._entities[this._entities.length] = this.path("entities").getComponent(this._events.getVar("proom-"+data.load.room+"-entities-"+i+"-name"), "PlatEntity");
-			this._entities[this._entities.length-1].typeChange(this._events.getVar("proom-"+data.load.room+"-entities-"+i+"-type"));
-			this._entities[this._entities.length-1].gridGo(this._events.getVar("proom-"+data.load.room+"-entities-"+i+"-x"), this._events.getVar("proom-"+data.load.room+"-entities-"+i+"-y"));
-			i ++;
-		}
-		
-		this.autoScroll(200);
+	this.path("entities/"+this._events.getVar("plat.seek")).typeChange(this._events.getVar("plat.seekType"));
+	var crd = this.getComponent("scheme").lookTile(this._spawn, 1);
+	this.path("entities/"+this._events.getVar("plat.seek")).gridGo(crd[0], crd[1]);
+	
+	this._entities = [];
+	this._entities[0] = this.path("entities/"+this._events.getVar("plat.seek"));
+	
+	var waitingEnts = room.entities;
+	for(var i = 0; i < waitingEnts.length; i++) {
+		this._entities[this._entities.length] = this.path("entities").getComponent(waitingEnts[i].name, "PlatEntity");
+		this._entities[this._entities.length-1].typeChange(waitingEnts[i].type);
+		this._entities[this._entities.length-1].gridGo(waitingEnts[i].x, waitingEnts[i].y);
 	}
+	
+	this.autoScroll(200);
 };
 
 sgui.PlatMain.prototype._platMainFrame = function(e) {
@@ -70,8 +68,8 @@ sgui.PlatMain.prototype._platMainFrame = function(e) {
 	for(var i = this._entities.length-1; i >= 0; i--) {
 		for(var j = i; j >= 0; j--) {
 			if(this._entities[i] && this._entities[j] && this._entities[i] != this._entities[j]) {
-				if(Math.abs(this._entities[i].x - this._entities[j].x) < (this._entities[i].getWidth())
-				&& Math.abs(this._entities[i].y - this._entities[j].y) < (this._entities[i].getHeight())){
+				if(Math.abs(this._entities[i].x - this._entities[j].x) < (this._entities[i].prop("width"))
+				&& Math.abs(this._entities[i].y - this._entities[j].y) < (this._entities[i].prop("height"))){
 					//Resolve it!
 					if(Math.abs(this._entities[i].x - this._entities[j].x) > Math.abs(this._entities[i].y - this._entities[j].y)){
 						//Resolve horizontally
@@ -85,7 +83,7 @@ sgui.PlatMain.prototype._platMainFrame = function(e) {
 						
 						if(this._entities[j].eProp("solid") && this._entities[i].eProp("solid")){ 
 							if(!this._entities[j].eProp("anchor") && !this._entities[i].eProp("anchor")) {
-								var delta = ((this._entities[i].getWidth() - Math.abs(this._entities[i].x - this._entities[j].x)) /2) +1;
+								var delta = ((this._entities[i].prop("width") - Math.abs(this._entities[i].x - this._entities[j].x)) /2) +1;
 								if(this._entities[i].x > this._entities[j].x) {
 									this._entities[i].x += delta;
 									if(this._entities[i].dx < 0) this._entities[i].dx = 0;
@@ -98,7 +96,7 @@ sgui.PlatMain.prototype._platMainFrame = function(e) {
 									if(this._entities[j].dx < 0) this._entities[j].dx = 0;
 								}
 							}else if(this._entities[j].eProp("anchor") && !this._entities[i].eProp("anchor")) {
-								var delta = this._entities[i].getWidth() - Math.abs(this._entities[i].x - this._entities[j].x);
+								var delta = this._entities[i].prop("width") - Math.abs(this._entities[i].x - this._entities[j].x);
 								if(this._entities[i].x > this._entities[j].x) {
 									this._entities[i].x += delta;
 									if(this._entities[i].dx < 0) this._entities[i].dx = 0;
@@ -107,7 +105,7 @@ sgui.PlatMain.prototype._platMainFrame = function(e) {
 									if(this._entities[i].dx > 0) this._entities[i].dx = 0;
 								}
 							}else if(!this._entities[j].eProp("anchor") && this._entities[i].eProp("anchor")) {
-								var delta = this._entities[i].getWidth() - Math.abs(this._entities[i].x - this._entities[j].x);
+								var delta = this._entities[i].prop("width") - Math.abs(this._entities[i].x - this._entities[j].x);
 								if(this._entities[j].x > this._entities[i].x) {
 									this._entities[j].x += delta;
 									if(this._entities[j].dx < 0) this._entities[j].dx = 0;
@@ -129,7 +127,7 @@ sgui.PlatMain.prototype._platMainFrame = function(e) {
 						
 						if(this._entities[j].eProp("solid") && this._entities[i].eProp("solid")){ 
 							if(!this._entities[j].eProp("anchor") && !this._entities[i].eProp("anchor")) {
-								var delta = ((this._entities[i].getHeight() - Math.abs(this._entities[i].y - this._entities[j].y)) /2)+1;
+								var delta = ((this._entities[i].prop("height") - Math.abs(this._entities[i].y - this._entities[j].y)) /2)+1;
 								if(this._entities[i].y > this._entities[j].y) {
 									this._entities[i].y += delta;
 									if(this._entities[i].dy < 0) this._entities[i].dy = 0;
@@ -142,7 +140,7 @@ sgui.PlatMain.prototype._platMainFrame = function(e) {
 									if(this._entities[j].dy < 0) this._entities[j].dy = 0;
 								}
 							}else if(this._entities[j].eProp("anchor") && !this._entities[i].eProp("anchor")) {
-								var delta = this._entities[i].getHeight() - Math.abs(this._entities[i].y - this._entities[j].y);
+								var delta = this._entities[i].prop("height") - Math.abs(this._entities[i].y - this._entities[j].y);
 								if(this._entities[i].y > this._entities[j].y) {
 									this._entities[i].y += delta;
 									if(this._entities[i].dy < 0) this._entities[i].dy = 0;
@@ -151,7 +149,7 @@ sgui.PlatMain.prototype._platMainFrame = function(e) {
 									if(this._entities[i].dy > 0) this._entities[i].dy = 0;
 								}
 							}else if(!this._entities[j].eProp("anchor") && this._entities[i].eProp("anchor")) {
-								var delta = this._entities[i].getHeight() - Math.abs(this._entities[i].y - this._entities[j].y);
+								var delta = this._entities[i].prop("height") - Math.abs(this._entities[i].y - this._entities[j].y);
 								if(this._entities[j].y > this._entities[i].y) {
 									this._entities[j].y += delta;
 									if(this._entities[j].dy < 0) this._entities[j].dy = 0;
@@ -171,13 +169,13 @@ sgui.PlatMain.prototype._platMainFrame = function(e) {
 sgui.PlatMain.prototype.autoScroll = function(by) {
 	// Center the player
 
-	if(this.getComponent("entities")){
+	if(this.getComponent("entities") && this.path("entities/"+this._events.getVar("plat.seek"))){
 		for(var i = by; i > 0; i--) {
 			var fragile = false;
 			
-			if(this.path("entities/"+this._events.getVar("plat-seek")).x < Math.floor(((-this.x)+this.getWidth()/2)+1)) {
+			if(this.path("entities/"+this._events.getVar("plat.seek")).x < Math.floor(((-this.x)+this.prop("width")/2)+1)) {
 				if(!this.scrollRight()) break;
-			}else if(this.path("entities/"+this._events.getVar("plat-seek")).x > Math.floor(((-this.x)+this.getWidth()/2)-1)) {
+			}else if(this.path("entities/"+this._events.getVar("plat.seek")).x > Math.floor(((-this.x)+this.prop("width")/2)-1)) {
 				if(!this.scrollLeft()) break;
 			}else{
 				break;
@@ -185,9 +183,9 @@ sgui.PlatMain.prototype.autoScroll = function(by) {
 		}
 		
 		for(var i = by; i > 0; i--) {
-			if(this.path("entities/"+this._events.getVar("plat-seek")).y < Math.floor(((-this.y)+this.getHeight()/2)+1)) {
+			if(this.path("entities/"+this._events.getVar("plat.seek")).y < Math.floor(((-this.y)+this.prop("height")/2)+1)) {
 				if(!this.scrollDown()) break;
-			}else if(this.path("entities/"+this._events.getVar("plat-seek")).y > Math.floor(((-this.y)+this.getHeight()/2)-1)) {
+			}else if(this.path("entities/"+this._events.getVar("plat.seek")).y > Math.floor(((-this.y)+this.prop("height")/2)-1)) {
 				if(!this.scrollUp()) break;
 			}else{
 				break;

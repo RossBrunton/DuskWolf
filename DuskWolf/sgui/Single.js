@@ -29,7 +29,7 @@ sgui.Single = function(parent, events, comName) {
 		this.newComponent("blank", "NullCom");
 			
 		//Add the groupStuff handler
-		this._registerStuff(this._singleStuff);
+		this._registerProp("child", this._child, function(name, value){return this._component;});
 		this._registerDrawHandler(this._singleDraw);
 		this._registerFrameHandler(this._singleFrame);
 	}
@@ -67,12 +67,10 @@ sgui.Single.prototype.newComponent = function(com, type) { //Component
 
 sgui.Single.prototype._singleStuff = function(data) {
 	//Component properties
-	if (data.child) {
-		if (data.child.name && this.getComponent(data.child.name.toLowerCase(), data.child.type)) {
-			this.getComponent(data.child.name.toLowerCase()).doStuff(this._events.replaceVar(data.child), this._thread);
-		} else {
-			duskWolf.warn(data.child.name + " has not been given a type and does not exist, ignoring.");
-		}
+	if (data.child.name && this.getComponent(data.child.name.toLowerCase(), data.child.type)) {
+		this.getComponent(data.child.name.toLowerCase()).parseProps(this._events.replaceVar(data.child), this._thread);
+	} else {
+		duskWolf.warn(data.child.name + " has not been given a type and does not exist, ignoring.");
 	}
 };
 

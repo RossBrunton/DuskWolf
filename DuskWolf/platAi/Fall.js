@@ -15,23 +15,22 @@ pai.Fall.prototype = new pai.Pai();
 pai.Fall.constructor = pai.Fall;
 
 pai.Fall.prototype.everyFrame = function() {
-	
 };
 
 pai.Fall.prototype.onCollideLeft = function(collider) {
-	if(this._entity.eProp("dirs").indexOf("l") !== -1) {
+	if(this._entity.eProp("activates").indexOf("l") !== -1) {
 		this._go();
 	}
 };
 
 pai.Fall.prototype.onCollideRight = function(collider) {
-	if(this._entity.eProp("dirs").indexOf("r") !== -1) {
+	if(this._entity.eProp("activates").indexOf("r") !== -1) {
 		this._go();
 	}
 };
 
 pai.Fall.prototype.onCollideUp = function(collider) {
-	if(this._entity.eProp("dirs").indexOf("u") !== -1) {
+	if(this._entity.eProp("activates").indexOf("u") !== -1) {
 		this._go();
 	}
 };

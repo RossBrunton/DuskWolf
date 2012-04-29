@@ -16,35 +16,26 @@ sgui.Rect = function(parent, events, comName) {
 		 * @see sg.Component
 		 */
 		
-		this._registerStuff(this._rectStuff);
+		this._registerPropMask("colour", "_colour", true);
+		this._registerPropMask("color", "_colour", true);
+		this._registerPropMask("border-colour", "_bColour", true);
+		this._registerPropMask("border-color", "_bColour", true);
+		this._registerPropMask("border-width", "_bWidth", true);
+		
 		this._registerDrawHandler(this._rectDraw);
 	}
 };
 sgui.Rect.prototype = new sgui.Component();
 sgui.Rect.constructor = sgui.Rect;
 
-
 /** @inheritDoc */
 sgui.Rect.prototype.className = "Rect";
-
-
-/** Generic image stuff!
- */
-sgui.Rect.prototype._rectStuff = function(data) {
-	this._colour = this._prop("color", data, this._colour, true, 1);
-	this._colour = this._prop("colour", data, this._colour, true, 1);
-	
-	this._bColour = this._prop("border-color", data, this._bColour, true, 1);
-	this._bColour = this._prop("border-colour", data, this._bColour, true, 1);
-	
-	this._bWidth = this._prop("border-width", data, this._bWidth, true, 1);
-};
 
 sgui.Rect.prototype._rectDraw = function(c) {
 	c.fillStyle = this._colour;
 	c.strokeStyle = this._bColour;
 	c.lineWidth = this._bWidth;
 	
-	c.fillRect (0, 0, this.getWidth(), this.getHeight());
-	if(this._bWidth) c.strokeRect (0, 0, this.getWidth(), this.getHeight());
+	c.fillRect (0, 0, this.prop("width"), this.prop("height"));
+	if(this._bWidth) c.strokeRect (0, 0, this.prop("width"), this.prop("height"));
 };

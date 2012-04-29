@@ -33,10 +33,8 @@ sgui.DecimalTile = function(parent, events, comName) {
 		/** This is the actual image. */
 		this._img = null;
 		
-		this._sheight = this._theme("dtile-sheight");
-		this._swidth = this._theme("dtile-swidth");
-		this._width = this._theme("dtile-twidth");
-		this._height = this._theme("dtile-theight");
+		this._sheight = this._theme("dtile.sheight", 24);
+		this._swidth = this._theme("dtile.swidth", 24);
 		this._tx = 0;
 		this._ty = 0;
 		
@@ -44,74 +42,38 @@ sgui.DecimalTile = function(parent, events, comName) {
 		 * @see sg.Component
 		 */
 		
-		this._registerStuff(this._tileStuff);
+		this._registerProp("src", this._setImage, function(name, value){return this._img});
+		this._registerPropMask("sprite-height", "_swidth", true);
+		this._registerPropMask("sprite-width", "_sheight", true);
+		this._registerProp("tile", function(name, value){this._setTile(value.split(",")[0], value.split(",")[1]);}, function(name){this._getTile();});
 		this._registerDrawHandler(this._tileDraw);
 	}
 };
 sgui.DecimalTile.prototype = new sgui.Component();
 sgui.DecimalTile.constructor = sgui.DecimalTile;
 
-
-/** @inheritDoc */
 sgui.DecimalTile.prototype.className = "DecimalTile";
 
-
-/** Generic image stuff!
- */
-sgui.DecimalTile.prototype._tileStuff = function(data) {
-	//Set image
-	if(this._prop("src", data, null, true)){
-		this.setImage(this._prop("src", data, null, true, 2));
-	}
-	
-	this._swidth = this._prop("sprite-width", data, this._swidth, true);
-	this._sheight = this._prop("sprite-height", data, this._sheight, true);
-	
-	this._tx = this._prop("tile", data, this._tx+","+this._ty, true).split(",")[0];
-	this._ty = this._prop("tile", data, this._tx+","+this._ty, true).split(",")[1];
-};
-
 sgui.DecimalTile.prototype._tileDraw = function(c) {
-	/*if(navigator.userAgent.indexOf(" Chrome/") != -1 || navigator.userAgent.indexOf(" MSIE ") != -1){
-		//From http://stackoverflow.com/questions/4875850/how-to-create-a-pixelized-svg-image-from-a-bitmap/4879849
-		var zoomx = this.getWidth()/this._twidth;
-		var zoomy = this.getHeight()/this._theight;
-		
-		// Create an offscreen canvas, draw an image to it, and fetch the pixels
-		var offtx = document.createElement('canvas').getContext('2d');
-		offtx.drawImage(this._img, this._tx*this._twidth, this._ty*this._theight, this._twidth, this._theight, 0, 0, this._twidth, this._theight);
-		var wkp = offtx.getImageData(0, 0, this._img.width, this._img.height).data;
-
-		// Draw the zoomed-up pixels to a different canvas context
-		for (var x=0; x < this._img.width; ++x){
-			for (var y=0; y < this._img.height; ++y){
-				// Find the starting index in the one-dimensional image data
-				var i = (y*this._img.width + x)*4;
-				if(wkp[i+3]){
-					this._c.fillStyle = "rgba("+wkp[i]+","+wkp[i+1]+","+wkp[i+2]+","+(wkp[i+3]/255)+")";
-					this._c.fillRect(x*zoomx, y*zoomy, zoomx, zoomy);
-				}
-			}
-		}
-	}else{*/
-	
 	if(this._img){
-		c.drawImage(this._img, this._swidth*this._tx, this._sheight*this._ty, this._swidth, this._sheight, 0, 0, this.getWidth(), this.getHeight());
+		c.drawImage(this._img, this._swidth*this._tx, this._sheight*this._ty, this._swidth, this._sheight, 0, 0, this.prop("width"), this.prop("height"));
 	}
 };
 
 /** This sets the image that will be displayed.
  * @param image The name of the image, should be a constant in <code>Data</code>.
  */
-sgui.DecimalTile.prototype.setImage = function(name) {
-	this._img = data.grabImage(name);
+sgui.Image.prototype._setImage = function(name, value) {
+	if(!value) {duskWolf.warn(this.comName+" tried to set image to nothing."); return;}
+	this._img = data.grabImage(value);
+	this.bookRedraw();
 };
 
-sgui.DecimalTile.prototype.getTile = function() {
+sgui.DecimalTile.prototype._getTile = function() {
 	return this._tx+","+this._ty;
 };
 
-sgui.DecimalTile.prototype.setTile = function(x, y) {
+sgui.DecimalTile.prototype._setTile = function(x, y) {
 	if(y === null) {x = x.split(",")[0]; y = x.split(",")[1];}
 	
 	this._tx = x;
@@ -120,19 +82,19 @@ sgui.DecimalTile.prototype.setTile = function(x, y) {
 
 sgui.DecimalTile.prototype.snapX = function(down) {
 	if(down)
-		this.x = Math.ceil(this.x/this.getWidth())*this.getWidth();
+		this.x = Math.ceil(this.x/this.prop("width"))*this.prop("width");
 	else
-		this.x = Math.floor(this.x/this.getWidth())*this.getWidth();
+		this.x = Math.floor(this.x/this.prop("width"))*this.prop("width");
 };
 
 sgui.DecimalTile.prototype.snapY = function(right) {
 	if(right)
-		this.y = Math.ceil(this.y/this.getHeight())*this.getHeight();
+		this.y = Math.ceil(this.y/this.prop("height"))*this.prop("height");
 	else
-		this.y = Math.floor(this.y/this.getHeight())*this.getHeight();
+		this.y = Math.floor(this.y/this.prop("height"))*this.prop("height");
 };
 
 sgui.DecimalTile.prototype.gridGo = function(x, y) {
-	this.x = x*this.getWidth();
-	this.y = y*this.getHeight();
+	this.x = x*this.prop("width");
+	this.y = y*this.prop("height");
 };

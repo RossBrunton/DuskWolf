@@ -1,5 +1,6 @@
 //Part of the DuskWolf engine
 //Licensed under the MIT license, see COPYING.txt for details
+"use strict";
 
 /** Class: sgui.Component
  * 
@@ -108,7 +109,9 @@ sgui.Component = function (parent, events, componentName) {
 		this._frameHandlers = [];
 		this._actionHandlers = [];
 		this._drawHandlers = [];
-
+		this._propHandlers = {};
+		this._propMasks = {};
+		
 		this._fade = 0;
 		this._fadeEnd = 0;
 
@@ -118,6 +121,9 @@ sgui.Component = function (parent, events, componentName) {
 		this.enabled = true;
 		/** Whether the component can loose focus, if false it can't be flowed out of. */
 		this.locked = false;
+		
+		this._focused = false;
+		this._active = false;
 
 		/**The thread this component is currently running in. Note that this is not cleared if the component is not waiting. */
 		this._thread = "";
@@ -130,15 +136,28 @@ sgui.Component = function (parent, events, componentName) {
 		this._fade;
 		this._fadeTo;
 		
-		//Add the core stuff
-		this._registerStuff(this._coreStuff);
-
+		//Add the core properties
+		this._registerPropMask("x", "x", true);
+		this._registerPropMask("y", "y", true);
+		this._registerPropMask("scale-x", "scaleX", true);
+		this._registerPropMask("scale-y", "scaleY", true);
+		this._registerPropMask("width", "_width", true);
+		this._registerPropMask("height", "_height", true);
+		this._registerPropMask("alpha", "alpha", true);
+		this._registerPropMask("visible", "visible", true);
+		this._registerPropMask("mark", "_mark", true);
+		this._registerPropMask("flow-up", "_upFlow", true);
+		this._registerPropMask("flow-down", "_downFlow", true);
+		this._registerPropMask("flow-left", "_leftFlow", true);
+		this._registerPropMask("flow-right", "_rightFlow", true);
+		this._registerPropMask("enabled", "enabled", true);
+		this._registerPropMask("action", "action", true);
+		this._registerProp("delete", function(name, value){if(value) this._container.deleteComponent(this.comName);}, null);
+		this._registerProp("float", this._setFloat, null);
+		this._registerProp("fade", this._setFade, null);
+		
 		//Add the action property handler
 		this._registerActionHandler("actionProp", this._actionProp, this);
-		
-		//Effects
-		this._registerFrameHandler(this._fadeEffect);
-		this._registerFrameHandler(this._floatEffect);
 	}
 };
 
@@ -149,7 +168,7 @@ sgui.Component.prototype.isAContainer = false;
 
 sgui.Component.prototype.frame = function(e) {
 	for(var a = this._frameHandlers.length-1; a >= 0; a--){
-		this._frameHandlers[a].call(this, e);
+		if(this._frameHandlers[a]) this._frameHandlers[a].call(this, e);
 	}
 }
 
@@ -179,12 +198,26 @@ sgui.Component.prototype._registerFrameHandler = function(funct) {
 	this._frameHandlers.push(funct);
 }
 
+sgui.Component.prototype._clearFrameHandler = function(funct) {
+	for(var i in this._frameHandlers) {
+		if(this._frameHandlers[i] == funct) delete this._frameHandlers[i]
+	}
+}
+
 /** This adds a handler that will call the function when the "Action button" is pressed. This is when the button should do whatever it's function was to do.
  * @param name The name of the handler, this is for identifying it.
  * @param funct The function to call, it will be passed a single parameter, the KeyboardEvent. It should return a Boolean, if true then the action will not "bubble"; the container that this component is in will not handle the event.
  */
-sgui.Component.prototype._registerActionHandler = function (name, funct, scope) {
+sgui.Component.prototype._registerActionHandler = function(name, funct, scope) {
 	this._actionHandlers[name] = funct;
+}
+
+sgui.Component.prototype._registerProp = function(name, onSet, onGet, depends) {
+	this._propHandlers[name] = [onSet, onGet, depends];
+}
+
+sgui.Component.prototype._registerPropMask = function(name, mask, redraw) {
+	this._propMasks[name] = [mask, redraw];
 }
 
 sgui.Component.prototype._actionProp = function(e) {
@@ -204,17 +237,19 @@ sgui.Component.prototype.keypress = function (e) {
 	if(this.isAContainer && this.containerKeypress(e)){return true;}
 	
 	for(var y = this._keyHandlers.length-1; y >= 0; y--){
-		if(this._keyHandlers[y][0] < 0 && this._keyHandlers[y][1] == e.shiftKey && this._keyHandlers[y][2] == e.ctrlKey){
+		if(this._keyHandlers[y][0] < 0 && this._keyHandlers[y][1] == e.shiftKey  && this._keyHandlers[y][2] == e.ctrlKey){
 			if(this._keyHandlers[y][3].call(this, e)){
 				return true;
 			}
 		}
 	}
 	
-	for (var z = this._keyHandlers.length-1; z >= 0; z--) {
-		if (this._keyHandlers[z][0] < 0 && this._keyHandlers[z][1] == false && this._keyHandlers[z][2] == e.ctrlKey) {
-			if (this._keyHandlers[z][3].call(this, e)) {
-				return true;
+	if(e.shiftKey){
+		for (var z = this._keyHandlers.length-1; z >= 0; z--) {
+			if (this._keyHandlers[z][0] < 0 && this._keyHandlers[z][1] == false && this._keyHandlers[z][2] == e.ctrlKey) {
+				if (this._keyHandlers[z][3].call(this, e)) {
+					return true;
+				}
 			}
 		}
 	}
@@ -276,25 +311,57 @@ sgui.Component.prototype._downAction = function() {return true;}
  * @see #procVar
  */
 sgui.Component.prototype._registerStuff = function(stuff) {
+	duskWolf.log(this+" is naughty!");
 	this._stuffActions.push(stuff);
 }
 
 /** This is what actually processes all the properties, it should be given an xml as an argument, that XML should contain a list of properties.
  * @param xml The properties to process.
  */
-sgui.Component.prototype.doStuff = function(data, thread) {
+sgui.Component.prototype.parseProps = function(props, thread) {
 	thread = thread?thread:this._thread;
 	/*if(!this.open || this._thread == thread){
 		this.open ++;*/
 		this._thread = thread?thread:this._thread;
 		
 		for(var i = 0; i < this._stuffActions.length; i++){
-			this._stuffActions[i].call(this, data);
+			this._stuffActions[i].call(this, props);
 		}
 		/*this.open--;
 	}else{
 		duskWolf.warn(this.comName+" is already doing something in another thread, "+this._thread);
 	}*/
+	
+	var toProcess = [];
+	for(var p in props) {
+		toProcess[toProcess.length] = p;
+	}
+	
+	//Dependancies system
+	while(toProcess.length) {
+		for(var i = toProcess.length-1; i >= 0; i--) {
+			if(this._propHandlers[toProcess[i]] && this._propHandlers[toProcess[i]][2]) {
+				for(var j = this._propHandlers[toProcess[i]][2].length-1; j >= 0; j--) {
+					if(toProcess.indexOf(this._propHandlers[toProcess[i]][2][j]) !== -1) {
+						j = -2;
+					}
+				}
+				
+				if(j < -1) continue;
+			}
+			
+			if(props[toProcess[i]] && props[toProcess[i]].to !== undefined) {
+				this._events.setVar(props[toProcess[i]].to, this.prop[toProcess[i]]);
+				if(props[toProcess[i]].value !== undefined) {
+					this.prop(toProcess[i], props[toProcess[i]].value);
+				}
+			} else {
+				this.prop(toProcess[i], props[toProcess[i]]);
+			}
+			
+			toProcess.splice(i, 1);
+		}
+	}
 }
 
 /** This will process an individual property, though it's main purpose is to allow the <code>to</code> attribute to work. It takes an XML, a property name and a default value and returns the inner text, or the default if there is none.
@@ -332,94 +399,83 @@ sgui.Component.prototype._prop = function(name, data, def, valOnly, bookRedraw) 
 	}
 }
 
-sgui.Component.prototype._theme = function(value) {
-	return this._events.getVar("theme-"+this._events.getVar("theme")+"-"+value);
+sgui.Component.prototype.prop = function(name, value) {
+	if(this._propHandlers[name] === undefined && this._propMasks[name] === undefined) {
+		return null;
+	}
+	
+	if(value !== undefined) {
+		if(this._propHandlers[name] && this._propHandlers[name][0]) return this._propHandlers[name][0].call(this, name, value);
+		if(this._propMasks[name] !== undefined) {
+			this[this._propMasks[name][0]] = value;
+			if(this._propMasks[name][1]) this.bookRedraw();
+			return value;
+		}
+		if(!this._propHandlers[name][0]) return null;
+		return ;
+	}
+	
+	if(this._propHandlers[name] && this._propHandlers[name][1]) return  this._propHandlers[name][1].call(this, name);
+	if(this._propMasks[name] !== undefined) return this[this._propMasks[name][0]];
 }
 
-sgui.Component.prototype._coreStuff = function(data) {
-	//Location
-	this.x = this._prop("x", data, this.x, true, 1);
-	this.y = this._prop("y", data, this.y, true, 1);
+sgui.Component.prototype._theme = function(value, set) {
+	if(this._events.getVar("theme."+this._events.getVar("theme.current")+"."+value) === undefined && set !== undefined)
+		this._events.setVar("theme."+this._events.getVar("theme.current")+"."+value, set);
 	
-	//Size
-	this.scaleX = this._prop("scale-x", data, this.scaleX, true, 1);
-	this.scaleY = this._prop("scale-y", data, this.scaleY, true, 1);
+	return this._events.getVar("theme."+this._events.getVar("theme.current")+"."+value);
+}
+
+sgui.Component.prototype._setFade = function(name, value) {
+	this._awaitNext();
 	
-	this.setHeight(this._prop("height", data, this.getHeight(), true, 1));
-	this.setWidth(this._prop("width", data, this.getWidth(), true, 1));
-	
-	//Visibility
-	this.alpha = this._prop("alpha", data, this.alpha, true, 1);
-	this.visible = this._prop("visible", data, this.visible, true, 1);
-	
-	//Mark
-	this._mark = this._prop("mark", data, this._mark, true, 1);
-	
-	//Flowing
-	this.upFlow = this._prop("flow-up", data, this.upFlow, true);
-	this.downFlow = this._prop("flow-down", data, this.downFlow, true);
-	this.leftFlow = this._prop("flow-left", data, this.leftFlow, true);
-	this.rightFlow = this._prop("flow-right", data, this.rightFlow, true);
-	this.enabled = this._prop("enabled", data, this.enabled, true);
-	
-	//Delete it
-	if(this._prop("delete", data, "0", true, 1) == "1"){
-		this._container.deleteComponent(this.comName);
+	if("from" in value) {
+		this.prop("alpha", value.from);
+	}else{
+		this.prop("alpha", 0);
 	}
 	
-	//Action
-	this._action = this._prop("action", data, this._action);
-	
-	//Fading
-	if("fade" in data) {
-		this._awaitNext();
-		
-		if(typeof(data.fade) == "object" && "from" in data.fade) {
-			this.alpha = data.fade.from;
-		}else{
-			this.alpha = 0;
-		}
-		
-		if(typeof(data.fade) == "object" && data["fade"].speed) {
-			this._fade = Number(data["fade"].speed);
-		}else{
-			this._fade = Number(this._prop("fade", data, 0.05, true));
-		}
-		
-		if(typeof(data.fade) == "object" && "to" in data.fade) {
-			this._fadeEnd = data.fade.to;
-		}else{
-			this._fadeEnd = 1;
-		}
+	if("speed" in value) {
+		this._fade = Number(value.speed);
+	}else{
+		this._fade = Number(0.05);
 	}
 	
-	//Floating
-	if("float" in data) {
-		this._awaitNext();
-		
-		if(typeof(data.float) == "object" && "for" in data.float) {
-			this._floatTime = data.float["for"];
-		}else{
-			this._floatTime = 10;
-		}
-		
-		if(typeof(data.float) == "object" && "speed" in data.float) {
-			this._floatSpeed = data.float.speed;
-		}else{
-			this._floatSpeed = this._prop("fade", data, 5, true);
-		}
-		
-		if(typeof(data.float) == "object" && "dir" in data.float) {
-			this._floatDir = data.float.dir;
-		}else{
-			this._floatDir = "u";
-		}
+	if("end" in value) {
+		this._fadeEnd = value.to;
+	}else{
+		this._fadeEnd = 1;
 	}
+	
+	this._registerFrameHandler(this._fadeEffect);
+};
+
+sgui.Component.prototype._setFloat = function(name, value) {
+	this._awaitNext();
+	duskWolf.log(value);
+	
+	if("for" in value) {
+		this._floatTime = value["for"];
+	}else{
+		this._floatTime = 10;
+	}
+	
+	if("speed" in value) {
+		this._floatSpeed = value.speed;
+	}else{
+		this._floatSpeed = 5;
+	}
+	
+	if("dir" in value) {
+		this._floatDir = value.dir;
+	}else{
+		this._floatDir = "u";
+	}
+	
+	this._registerFrameHandler(this._floatEffect);
 }
 
 sgui.Component.prototype._fadeEffect = function() {
-	if(this._fade == 0) return;
-	
 	if((this.alpha < this._fadeEnd && this._fade > 0) || (this.alpha > this._fadeEnd && this._fade < 0)) {
 		this.alpha += this._fade;
 		this.bookRedraw();
@@ -428,11 +484,11 @@ sgui.Component.prototype._fadeEffect = function() {
 		this.bookRedraw();
 		this._fade = 0;
 		this._next();
+		this._clearFrameHandler(this._fadeEffect);
 	}
 }
 
 sgui.Component.prototype._floatEffect = function() {
-	if(this._floatTime == 0) return;
 	this._floatTime--;
 	
 	switch(this._floatDir){
@@ -443,7 +499,12 @@ sgui.Component.prototype._floatEffect = function() {
 		case "u": this.y -= this._floatSpeed;break;
 	}
 	
-	if(this._floatTime == 0) this._next();
+	this.bookRedraw();
+	
+	if(this._floatTime == 0) {
+		this._next();
+		this._clearFrameHandler(this._floatEffect);
+	}
 }
 
 /** This just calls <code>Events.awaitNext()</code>, but calling this function is required for the checking if this component is open to work. 
@@ -475,7 +536,7 @@ sgui.Component.prototype._registerDrawHandler = function(funct) {
 sgui.Component.prototype.draw = function(c) {
 	if(!this.visible) return;
 	
-	state = c.save();
+	var state = c.save();
 	if(this.x || this.y) c.translate(~~this.x, ~~this.y);
 	if(this.scaleX || this.scaleY) c.scale(this.scaleX, this.scaleY);
 	if(this.alpha != 1) c.globalAlpha = this.alpha;
@@ -486,8 +547,7 @@ sgui.Component.prototype.draw = function(c) {
 	
 	if(this._mark !== null) {
 		c.strokeStyle = this._mark;
-		
-		c.strokeRect(0, 0, this.getWidth(), this.getHeight());
+		c.strokeRect(0, 0, this.prop("width"), this.prop("height"));
 	}
 	
 	c.restore(state);
@@ -537,43 +597,15 @@ sgui.Component.prototype.path = function(path) {
 	return null;
 };
 
-sgui.Component.prototype.mark = function(colour) {
-	if(colour === undefined) colour = "#ff0000";
-	
-	this._mark = colour;
-};
-
-sgui.Component.prototype.unmark = function() {
-	this._mark = null;
-};
-
 /** This should be called when the component looses focus. */
-sgui.Component.prototype.onLooseFocus = function() {}
+sgui.Component.prototype.onLooseFocus = function() {this._focused = false;this.bookRedraw();}
 /** This should be called when the component gets focus. */
-sgui.Component.prototype.onGetFocus = function() {}
+sgui.Component.prototype.onGetFocus = function() {this._focused = true;this.bookRedraw();}
 
 /** This should be called when the component is no longer the active component. */
-sgui.Component.prototype.onDeactive = function() {}
+sgui.Component.prototype.onDeactive = function() {this._active = false;this.bookRedraw();}
 /** This should be called when the component becomes the active component. */
-sgui.Component.prototype.onActive = function() {}
-
-/** This returns the width of the component, in pixels, you can override this if you want to lie about the width or something.
- * @return The component's height.
- */
-sgui.Component.prototype.getWidth = function() {return Number(this._width);}
-/** This returns the height of the component, in pixels, you can override this if you want to lie about the height or something.
- * @return The component's height.
- */
-sgui.Component.prototype.getHeight = function() {return Number(this._height);}
-
-/** This should set the width of the component, override it if you want to do any fancy stuff.
- * @param value The new width, in pixels.
- */
-sgui.Component.prototype.setHeight = function(value) {this._height = Number(value);}
-/** This should set the height of the component, override it if you want to do any fancy stuff.
- * @param value The new height, in pixels.
- */
-sgui.Component.prototype.setWidth = function(value) {this._width = Number(value);}
+sgui.Component.prototype.onActive = function() {this._active = true;this.bookRedraw();}
 
 sgui.Component.prototype.toString = function() {return "[sgui "+this.className+" "+this.comName+"]";};
 
@@ -581,7 +613,7 @@ sgui.Component.prototype.toString = function() {return "[sgui "+this.className+"
 
 sgui.NullCom = function(parent, events, comName) {
 	sgui.Component.call(this, parent, events, comName);
-	this.visible = false;
+	this.prop("visible", false);
 };
 sgui.NullCom.prototype = new sgui.Component();
 sgui.NullCom.constructor = sgui.NullCom;

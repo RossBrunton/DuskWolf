@@ -10,6 +10,26 @@
  * 
  * All paths it uses are relative to the var <__datadir__>.
  * 
+ * The root JSON File:
+ * 
+ * When DuskWolf starts, it loads a file (or dies if the file can't be found) named root.json from the folder specified by <DuskWolf.gameDir>, this file contains configuration files and such like for the game.
+ *  It should be an oject with the following properties:
+ * 
+ * > "name":"..."
+ * A string that is a human readable name of the game. It is not used anyware outside logging, so it can be a number or something, I suppose...
+ * 
+ * > "version":"..."
+ * The version of the game. This can be in any format, but it should be unique for each game version.
+ * 
+ * > "duskVer":123
+ * The earliest version of DuskWolf this will run on, it should be a number corresponding to <DuskWolf.verId>. If this is smaller than the DuskWolf, then the game won't run.
+ * 
+ * > "files":[...]
+ * An array of filenames, these files will be retrieved, and all the actions ran inside them ran. They are relative to <DuskWolf.gameDir>.
+ * 
+ * > "mods":[...]
+ * An array of modules to import (they are strings), these are the only modules imported.
+ * 
  * See:
  * * <Events>
  * * <Game>
@@ -17,7 +37,7 @@
 
 /** Function: Data
  * 
- * [undefined] Creates a new instance of this.
+ * Creates a new instance of this.
  * 
  * It downloads the root json, and does everything that it needs to do.
  */
@@ -39,7 +59,10 @@ window.Data = function() {
 	//Enable/disable cache
 	$.ajaxSetup({"cache": !duskWolf.dev});
 	
-	if(!this._root) {duskWolf.error("Root json could not be loaded. Oh dear..."); return;}
+	if(!this._root) {duskWolf.error("Root json could not be loaded."); return;}
+	if(this._root.duskVer < duskWolf.verId) {duskWolf.error("DuskWolf version is incompatable."); return;}
+	duskWolf.info(this._root.name+" is loading."); 
+	
 	if(!("files" in this._root)) {duskWolf.error("Root json does not specify a list of files..."); return;}
 	for(var i = this._root.files.length-1; i>= 0; i--) {
 		if(this.grabJson(this._root.files[i])) {
@@ -57,7 +80,8 @@ window.Data = function() {
 	}
 	
 	__import__(ims);
-}
+};
+
 /** Variable: __hold__
  * [string] This is a global temporary variable used when retrieving files from AJAX, it's a horrible hack... Ugh...
  */
@@ -68,7 +92,7 @@ var modsAvalable;
 
 /** Function: grabJson
  * 
- * [object] This downloads and parses a JSON file from an online place. It blocks until the file is downloaded, and returns that file.
+ * This downloads and parses a JSON file from an online place. It blocks until the file is downloaded, and returns that file.
  * 
  * This is a little more lax than the normal JSON parser. before the file is parsed, tabs and newlines are replaced by spaces, and /* comments are removed, letting you use them in the file.
  * 
@@ -77,7 +101,7 @@ var modsAvalable;
  * 	async - [boolean] Not implemented yet.
  * 
  * Return:
- * 	The contents of the file file, parsed as a JSON object.
+ * [object] The contents of the file, parsed as a JSON object.
  */
 Data.prototype.grabJson = function(file, async) {
 	if(file.indexOf(".") === -1) file += ".json";
@@ -96,7 +120,35 @@ Data.prototype.grabJson = function(file, async) {
 	}
 	
 	return JSON.parse(this._loaded[file]);
-}
+};
+
+/** Function: grabFile
+ * 
+ * This downloads a file, and returns the contents. It blocks until the file is downloaded, and returns that file.
+ * 
+ * Params:
+ * 	file - [string] The name of the file to load, is relative to <__datadir__>.
+ * 	async - [boolean] Not implemented yet.
+ * 
+ * Return:
+ * [string] The contents of the file.
+ */
+Data.prototype.grabFile = function(file, async) {
+	if(this._loaded[file] === undefined) {
+		duskWolf.info("Downloading file "+file+"...");
+		
+		$.ajax({"async":async==true, "dataType":"text", "error":function(jqXHR, textStatus, errorThrown) {
+			duskWolf.error("Error getting "+file+", "+errorThrown);
+			__hold__ = null;
+		}, "success":function(json, textStatus, jqXHR) {
+			__hold__ = json;
+		}, "url":__datadir__+"/"+file});
+		
+		this._loaded[file] = __hold__;
+	}
+	
+	return this._loaded[file];
+};
 
 /** Function: grabImage
  * 
@@ -121,4 +173,4 @@ Data.prototype.grabImage = function(file) {
 	}else{
 		return this._loaded[file];
 	}
-}
+};

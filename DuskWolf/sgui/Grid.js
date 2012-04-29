@@ -24,20 +24,17 @@ loadComponent("Group");
 sgui.Grid = function (parent, events, comName) {
 	if(parent !== undefined){
 		sgui.Group.call(this, parent, events, comName);
+
+		this._rows = this._theme("grid.rows", 5);
+		this._cols = this._theme("grid.cols", 5);
+		this._hspacing = this._theme("grid.spacing.h", 0);
+		this._vspacing = this._theme("grid.spacing.v", 0);
 		
-		this._registerStuff(this._gridStuff);
-		
-		if(!this._events.getVar("sg-def-grid-spacing-h")) this._events.setVar("sg-def-grid-spacing-h", "0");
-		if(!this._events.getVar("sg-def-grid-spacing-v")) this._events.setVar("sg-def-grid-spacing-v", "0");
-		if(!this._events.getVar("sg-def-grid-rows")) this._events.setVar("sg-def-grid-rows", "5");
-		if(!this._events.getVar("sg-def-grid-cols")) this._events.setVar("sg-def-grid-cols", "5");
-		if(!this._events.getVar("sg-def-grid-type")) this._events.setVar("sg-def-grid-type", "NullCom");
-		
-		this._hspacing = this._events.getVar("sg-def-grid-spacing-h");
-		this._vspacing = this._events.getVar("sg-def-grid-spacing-v");
-		
-		this.rows = 0;
-		this.cols = 0;
+		this._registerPropMask("spacing-v", "_vspacing", false);
+		this._registerPropMask("spacing-h", "_hspacing", false);
+		this._registerPropMask("rows", "_rows", false);
+		this._registerPropMask("cols", "_cols", false);
+		this._registerProp("populate", this._populate, null, ["rows", "cols"]);
 	}
 };
 sgui.Grid.prototype = new sgui.Group();
@@ -45,64 +42,34 @@ sgui.Grid.constructor = sgui.Grid;
 
 sgui.Grid.prototype.className = "Grid";
 
-sgui.Grid.prototype._gridStuff = function(data) {
-	this._hspacing = this._prop("spacing-h", data, this._hspacing, true, 1);
-	this._vspacing = this._prop("spacing-v", data, this._vspacing, true, 1);
-	
-	if(typeof(this._prop("populate", data, null, false)) != "string" && this._prop("populate", data, null, false)){
-		var pop = this._prop("populate", data, null, false);
-		
-		//Get data
-		pop.rows = pop.rows?pop.rows:this._events.getVar("sg-def-grid-rows");
-		pop.cols = pop.cols?pop.cols:this._events.getVar("sg-def-grid-cols");
-		pop.type = pop.type?pop.type:this._events.getVar("sg-def-grid-type");
-		
-		this.populate(pop);
-	}
-};
-
 /** This creates a new population, erasing any existing ones.
  * @param type The type of component to use, without the "sg-" at the start.
  * @param count The number of elements to create.
  * @param spacing The spacing, in pixels, between them.
  */
-sgui.Grid.prototype.populate = function(pop) {
+sgui.Grid.prototype._populate = function(name, value) {
 	//Delete all the existing ones
-	/*for(var i = 0; true; i ++){
-		for(var j = 0; true; j ++){
-			if(!this.deleteComponent(String(i)+","+String(j))){
-				break;
-			}
-		}
-		
-		if(!this.getComponent((i+1)+",0", false)){
-			break;
-		}
-	}*/
 	for(var x in this._components){
 		if(x != "blank") this.deleteComponent(x);
 	}
 	
 	//Add them
-	for(var hy = 0; hy < pop.rows; hy++){
-		for(var hx = 0; hx < pop.cols; hx++){
-			var com = this.newComponent(hx+","+hy, pop.type);
-			com.doStuff(pop, this._thread);
-			com.doStuff({"y":(hy*com.getHeight()+hy*this._vspacing), "x":(hx*com.getWidth()+hx*this._vspacing)}, this._thread);
+	for(var hy = 0; hy < this.prop("rows"); hy++){
+		for(var hx = 0; hx < this.prop("cols"); hx++){
+			var com = this.getComponent(hx+","+hy, value.type);
+			com.parseProps(value, this._thread);
+			com.parseProps({"y":(hy*com.prop("height")+hy*this._vspacing), "x":(hx*com.prop("width")+hx*this._vspacing)}, this._thread);
 		}
 	}
 	
-	this.rows = pop.rows;
-	this.cols = pop.cols;
-	
-	this.focus("0,0");
+	this.prop("focus", "0,0");
 };
 
 sgui.Grid.prototype.ajust = function() {
 	for(var hy = 0; hy < this.rows; hy++){
 		for(var hx = 0; hx < this.cols; hx++){
 			var com = this.getComponent(hx+","+hy);
-			com.doStuff({"y":(hy*com.getHeight()+hy*this._vspacing), "x":(hx*com.getWidth()+hx*this._hspacing)}, this._thread);
+			com.doStuff({"y":(hy*com.prop("height")+hy*this._vspacing), "x":(hx*com.prop("width")+hx*this._hspacing)}, this._thread);
 		}
 	}
 };
@@ -111,8 +78,8 @@ sgui.Grid.prototype.ajust = function() {
  * @return <code>false</code> if the flow was successful, <code>true</code> if unsuccessful (Most likely we are at the left of the list, so flow out of it).
  */
 sgui.Grid.prototype._leftAction = function() {
-	var cx = this._getFocusName().split(",")[0];
-	var cy = this._getFocusName().split(",")[1];
+	var cx = this.prop("focus").split(",")[0];
+	var cy = this.prop("focus").split(",")[1];
 	if(this.getComponent((cx-1)+","+cy)){
 		this.focus((cx-1)+","+cy);
 		return false;
@@ -125,8 +92,8 @@ sgui.Grid.prototype._leftAction = function() {
  * @return <code>false</code> if the flow was successful, <code>true</code> if unsuccessful (Most likely we are at the right of the list, so flow out of it).
  */
 sgui.Grid.prototype._rightAction = function() {
-	var cx = this._getFocusName().split(",")[0];
-	var cy = this._getFocusName().split(",")[1];
+	var cx = this.prop("focus").split(",")[0];
+	var cy = this.prop("focus").split(",")[1];
 	if(this.getComponent((Number(cx)+1)+","+cy)){
 		this.focus((Number(cx)+1)+","+cy);
 		return false;
@@ -139,8 +106,8 @@ sgui.Grid.prototype._rightAction = function() {
  * @return <code>false</code> if the flow was successful, <code>true</code> if unsuccessful (Most likely we are at the right of the list, so flow out of it).
  */
 sgui.Grid.prototype._upAction = function() {
-	var cx = this._getFocusName().split(",")[0];
-	var cy = this._getFocusName().split(",")[1];
+	var cx = this.prop("focus").split(",")[0];
+	var cy = this.prop("focus").split(",")[1];
 	if(this.getComponent(cx+","+(cy-1))){
 		this.focus(cx+","+(cy-1));
 		return false;
@@ -153,8 +120,8 @@ sgui.Grid.prototype._upAction = function() {
  * @return <code>false</code> if the flow was successful, <code>true</code> if unsuccessful (Most likely we are at the right of the list, so flow out of it).
  */
 sgui.Grid.prototype._downAction = function() {
-	var cx = this._getFocusName().split(",")[0];
-	var cy = this._getFocusName().split(",")[1];
+	var cx = this.prop("focus").split(",")[0];
+	var cy = this.prop("focus").split(",")[1];
 	if(this.getComponent(cx+","+(Number(cy)+1))){
 		this.focus(cx+","+(Number(cy)+1));
 		return false;

@@ -33,7 +33,7 @@ sgui.Tile = function(parent, events, comName) {
 		/** This is the actual image. */
 		this._img = null;
 		
-		this._ssize = this._theme("tile-ssize");
+		this._ssize = this._theme("tile.ssize", 4);
 		this._width = 1<<this._ssize;
 		this._height = 1<<this._ssize;
 		this._tx = 0;
@@ -43,7 +43,9 @@ sgui.Tile = function(parent, events, comName) {
 		 * @see sg.Component
 		 */
 		
-		this._registerStuff(this._tileStuff);
+		this._registerProp("src", this._setImage, function(name){return this._img});
+		this._registerProp("tile", function(name, value){this._setTile(value.split(",")[0], value.split(",")[1]);}, function(name){this._getTile();});
+		this._registerPropMask("sprite-size", "_ssize", true);
 		this._registerDrawHandler(this._tileDraw);
 	}
 };
@@ -54,39 +56,24 @@ sgui.Tile.constructor = sgui.Tile;
 /** @inheritDoc */
 sgui.Tile.prototype.className = "Tile";
 
-
-/** Generic image stuff!
- */
-sgui.Tile.prototype._tileStuff = function(data) {
-	//Set image
-	if(this._prop("src", data, null, true)){
-		this.setImage(this._prop("src", data, null, true, 2));
-	}
-	
-	this._ssize = this._prop("sprite-size", data, this._ssize, true);
-	
-	this._tx = this._prop("tile", data, this._tx+","+this._ty, true).split(",")[0];
-	this._ty = this._prop("tile", data, this._tx+","+this._ty, true).split(",")[1];
-};
-
 sgui.Tile.prototype._tileDraw = function(c) {
 	if(this._img){
-		c.drawImage(this._img, this._tx<<this._ssize, this._ty<<this._ssize, 1<<this._ssize, 1<<this._ssize, 0, 0, this.getWidth(), this.getHeight());
+		c.drawImage(this._img, this._tx<<this._ssize, this._ty<<this._ssize, 1<<this._ssize, 1<<this._ssize, 0, 0, this.prop("width"), this.prop("height"));
 	}
 };
 
 /** This sets the image that will be displayed.
  * @param image The name of the image, should be a constant in <code>Data</code>.
  */
-sgui.Tile.prototype.setImage = function(name) {
-	this._img = data.grabImage(name);
+sgui.Tile.prototype._setImage = function(name, value) {
+	this._img = data.grabImage(value);
 };
 
-sgui.Tile.prototype.getTile = function() {
+sgui.Tile.prototype._getTile = function() {
 	return this._tx+","+this._ty;
 };
 
-sgui.Tile.prototype.setTile = function(x, y) {
+sgui.Tile.prototype._setTile = function(x, y) {
 	if(y === undefined) {x = x.split(",")[0]; y = x.split(",")[1];}
 	
 	this._tx = x;
@@ -95,19 +82,19 @@ sgui.Tile.prototype.setTile = function(x, y) {
 
 sgui.Tile.prototype.snapX = function(down) {
 	if(down)
-		this.x = Math.ceil(this.x/this.getWidth())*this.getWidth();
+		this.x = Math.ceil(this.x/this.prop("width"))*this.prop("width");
 	else
-		this.x = Math.floor(this.x/this.getWidth())*this.getWidth();
+		this.x = Math.floor(this.x/this.prop("width"))*this.prop("width");
 };
 
 sgui.Tile.prototype.snapY = function(right) {
 	if(right)
-		this.y = Math.ceil(this.y/this.getHeight())*this.getHeight();
+		this.y = Math.ceil(this.y/this.prop("height"))*this.prop("height");
 	else
-		this.y = Math.floor(this.y/this.getHeight())*this.getHeight();
+		this.y = Math.floor(this.y/this.prop("height"))*this.prop("height");
 };
 
 sgui.Tile.prototype.gridGo = function(x, y) {
-	this.x = x*this.getWidth();
-	this.y = y*this.getHeight();
+	this.x = x*this.prop("width");
+	this.y = y*this.prop("height");
 };

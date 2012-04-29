@@ -8,21 +8,13 @@ sgui.Pane = function (sguiMod, events, comName) {
 	this._sgui = sguiMod;
 	sgui.Group.call(this, null, events, comName);
 	
-	this._registerStuff(this._paneStuff);
+	this._registerProp("active", function(name, value) {if(value) this._sgui.setActivePane(this.comName)}, function(name) {return this.active;});
 };
 sgui.Pane.prototype = new sgui.Group();
 sgui.Pane.constructor = sgui.Pane;
 
 
 sgui.Pane.prototype.className = "Pane";
-
-
-sgui.Pane.prototype._paneStuff = function (data) {
-	//Active
-	if (!this._active && this._prop("active", data, this._active, true)) {
-		this._sgui.setActivePane(this.comName);
-	}
-};
 
 sgui.Pane.prototype.bookRedraw = function() {
 	if(this._redrawBooked) return;

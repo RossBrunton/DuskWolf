@@ -54,7 +54,7 @@ Game.prototype.start = function() {
 	this._events.run([
 	{"a":"fire", "ver":duskWolf.ver, "ver-id":duskWolf.verId, "gameName":duskWolf.NAME, "event":"sys-event-load"},
 	{"a":"fire", "ver":duskWolf.ver, "ver-id":duskWolf.verId, "gameName":duskWolf.NAME, "event":"sys-event-start"},
-	{"a":"var", "name":"_started", "value":"1"}], "_init");
+	{"a":"var", "name":"sys.started", "value":true}], "_init");
 };
 
 /** Function: enRender

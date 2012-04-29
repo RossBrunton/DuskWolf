@@ -21,6 +21,8 @@ loadComponent("Pane");
  * 
  * Components have properties like "x" and "scale-y".
  * 	For single values, such as "x", they can be specified as ether `"x":123`, `"x":{"value":123, "to":"ex"}` or `"x":{"to":"ex"}`, the var specified by "to", in this case "ex", will be set to the value that is being set.
+ * 	The value for "to" is done second, so it will set the var to 123 before setting it to to.
+ * 	Properties can be any JavaScript type.
  * 	Some properties also take an object, like the float effect which needs "speed", "dir" and "for", in this case the "to"
  * 
  * Two important properties are "name" and "type".
@@ -72,6 +74,9 @@ loadComponent("Pane");
  * sys-sg-height		- The height of the canvas, as read from the canvas DOM object. Changing this will not affect the canvas.
  * theme				- The current theme, default is "default", surprisingly.
  * 
+ * Global Theme Vars:
+ * 
+ * 
  * See:
  * * <sgui.Component>
  * * <sgui.Pane>
@@ -105,45 +110,23 @@ mods.SimpleGui = function(events) {
 	this._redrawBooked = false;
 	this.setActivePane("blank");
 	
-	this._events.setVar("sys-sg-width", $("#"+duskWolf.canvas)[0].width);
-	this._events.setVar("sys-sg-height", $("#"+duskWolf.canvas)[0].height);
+	this._events.setVar("sys.sg.width", $("#"+duskWolf.canvas)[0].width);
+	this._events.setVar("sys.sg.height", $("#"+duskWolf.canvas)[0].height);
 	
 	this._cacheCanvas = document.createElement("canvas");
-	this._cacheCanvas.height = this._events.getVar("sys-sg-height");
-	this._cacheCanvas.width = this._events.getVar("sys-sg-width");
+	this._cacheCanvas.height = this._events.getVar("sys.sg.height");
+	this._cacheCanvas.width = this._events.getVar("sys.sg.width");
 	this._cacheCanvas.style.imageRendering = "-webkit-optimize-contrast";
 	
 	this._cacheCanvas.getContext("2d").mozImageSmoothingEnabled = false;
 	this._cacheCanvas.getContext("2d").textBaseline = "middle";
 	
-	//Render
-	/*this._coolRender = true;
-	if(window.webkitRequestAnimationFrame)
-		window.webkitRequestAnimationFrame(this._render, $("#"+duskWolf.canvas)[0]);
-	else if(window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame) {
-		var fun = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
-		fun(this._render);
-	}else this._coolRender = false;*/
-	
-	
 	//Themes
-	this._events.setVar("theme-default-border", "#cccccc");
-	this._events.setVar("theme-default-box", "#eeeeee");
-	this._events.setVar("theme-default-tile-ssize", 4);
-	this._events.setVar("theme-default-dtile-swidth", 16);
-	this._events.setVar("theme-default-dtile-sheight", 16);
-	this._events.setVar("theme-default-fc-inactive", "inactive.png");
-	this._events.setVar("theme-default-fc-focused", "focused.png");
-	this._events.setVar("theme-default-fc-active", "active.png");
-	this._events.setVar("theme-default-tm-spacing-h", 0);
-	this._events.setVar("theme-default-tm-spacing-v", 0);
-	this._events.setVar("theme-default-tm-rows", -1);
-	this._events.setVar("theme-default-tm-cols", -1);
-	this._events.setVar("theme-default-tm-ssize", 4);
-	this._events.setVar("theme-default-tm-tsize", 5);
-	this._events.setVar("theme-default-plat-scroll-speed", 10);
+	this._events.setVar("theme.default.border", "#cccccc");
+	this._events.setVar("theme.default.box", "#eeeeee");
+	this._events.setVar("theme.default.borderActive", "#ff5555");
 	
-	this._events.setVar("theme", "default");
+	this._events.setVar("theme.current", "default");
 };
 mods.SimpleGui.prototype = new mods.IModule();
 mods.SimpleGui.constructor = mods.SimpleGui;
@@ -178,7 +161,7 @@ mods.SimpleGui.prototype.getPane = function(name, noNew) { //Returns pane
 
 mods.SimpleGui.prototype._doComponent = function(data) {
 	if(data.name === undefined) {duskWolf.error("No name given for a pane.");return;}
-	this.getPane(data.name).doStuff(this._events.replaceVar(data, true), this._events.thread);
+	this.getPane(data.name).parseProps(this._events.replaceVar(data, true), this._events.thread);
 };
 
 mods.SimpleGui.prototype.setActivePane = function(to) {
@@ -195,15 +178,15 @@ mods.SimpleGui.prototype.getActivePane = function() {
 mods.SimpleGui.prototype.draw = function() {
 	if(!this._redrawBooked) return false;
 	
-	$("#"+duskWolf.canvas)[0].getContext("2d").clearRect(0, 0, this._events.getVar("sys-sg-width"), this._events.getVar("sys-sg-height"));
-	this._cacheCanvas.getContext("2d").clearRect(0, 0, this._events.getVar("sys-sg-width"), this._events.getVar("sys-sg-height"));
+	$("#"+duskWolf.canvas)[0].getContext("2d").clearRect(0, 0, this._events.getVar("sys.sg.width"), this._events.getVar("sys.sg.height"));
+	this._cacheCanvas.getContext("2d").clearRect(0, 0, this._events.getVar("sys.sg.width"), this._events.getVar("sys.sg.height"));
 	
 	//Draw panes
 	for(var c in this._panes){
 		this._panes[c].draw(this._cacheCanvas.getContext("2d"));
 	}
 	
-	$("#"+duskWolf.canvas)[0].getContext("2d").drawImage(this._cacheCanvas, 0, 0, this._events.getVar("sys-sg-width"), this._events.getVar("sys-sg-height"));
+	$("#"+duskWolf.canvas)[0].getContext("2d").drawImage(this._cacheCanvas, 0, 0, this._events.getVar("sys.sg.width"), this._events.getVar("sys.sg.height"));
 	this._redrawBooked = false;
 	
 	this._render();
@@ -212,14 +195,14 @@ mods.SimpleGui.prototype.draw = function() {
 };
 
 mods.SimpleGui.prototype._render = function(event) {
-	$("#"+duskWolf.canvas)[0].getContext("2d").drawImage(this._cacheCanvas, 0, 0, this._events.getVar("sys-sg-width"), this._events.getVar("sys-sg-height"));
+	$("#"+duskWolf.canvas)[0].getContext("2d").drawImage(this._cacheCanvas, 0, 0, this._events.getVar("sys.sg.width"), this._events.getVar("sys.sg.height"));
 };
 
 mods.SimpleGui.prototype._doPath = function(action) {
 	if(!action.path){duskWolf.error("No path given!");return;}
 	if(!action.pane){duskWolf.error("No pane given!");return;}
 	
-	this.path(action.pane, action.path).doStuff(action, this._events.thread);
+	this.path(action.pane, action.path).parseProps(action, this._events.thread);
 };
 
 mods.SimpleGui.prototype.path = function(pane, path) {

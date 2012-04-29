@@ -4,4 +4,6 @@ DuskWolf.php
 change
 *~
 *.naturalDocs
+*.pyc
 jquery.js
+
