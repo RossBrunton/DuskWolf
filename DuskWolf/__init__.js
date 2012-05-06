@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-/** Class: Global
+/** Class: window
  * 
  * Global vars and functions. These are visible everywhere.
  * 
@@ -16,10 +16,14 @@
 window.duskWolf = null;
 
 /** Variable: game
- * [<Game>] The global game object, please don't refer to this deep inside the game.
- * 	It hurts the modularity of the system as a whole, y'see.
+ * [<Game>] The global game object, used for managing keydowns and frames and such.
  */
 window.game = null;
+
+/** Variable: events
+ * [<Events>] This is the main events system, and can be referred to anywhere.
+ */
+window.events = null;
 
 /** Variable: data
  * [<Data>] This is the global data object, for loading files and such.

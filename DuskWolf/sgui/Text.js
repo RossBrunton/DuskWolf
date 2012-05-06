@@ -25,8 +25,6 @@ sgui.Label = function(parent, events, comName) {
 		this._colour = this._theme("label.colour", "#000000");
 		this._padding = this._theme("label.padding", 5);
 		
-		window.hook = this;
-		
 		this._registerDrawHandler(this._labelDraw);
 	}
 };
@@ -145,6 +143,11 @@ sgui.TextBox.prototype._boxKey = function(e) {
 	
 	if(keyDat[0] == "BACKSPACE") {
 		this._events.setVar(this.prop("watch"), this._events.getVar(this.prop("watch")).substr(0, this._events.getVar(this.prop("watch")).length-1));
+		return true;
+	}
+	
+	if(keyDat[0] == "ENTER") {
+		this._doAction(e);
 		return true;
 	}
 	

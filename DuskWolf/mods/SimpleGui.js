@@ -19,8 +19,9 @@ loadComponent("Pane");
  * Components are specified as JS objects in their containers, the pane's properties is an event action.
  * 	There is also a sg-path object which allows you to specify objects by filename like paths. 
  * 
- * Components have properties like "x" and "scale-y".
- * 	For single values, such as "x", they can be specified as ether `"x":123`, `"x":{"value":123, "to":"ex"}` or `"x":{"to":"ex"}`, the var specified by "to", in this case "ex", will be set to the value that is being set.
+ * Components have properties like "x" and "width".
+ * 	Properties can be accessed in two ways, one from <sgui.Component.prop>, and one from the actions "pane" and "sg-path".
+ * 	For single values, such as "x", they can be specified in the action as either "x":123, "x":{"value":123, "to":"ex"} or "x":{"to":"ex"}, the var specified by "to", in this case "ex", will be set to the value that is being set, or is currently set.
  * 	The value for "to" is done second, so it will set the var to 123 before setting it to to.
  * 	Properties can be any JavaScript type.
  * 	Some properties also take an object, like the float effect which needs "speed", "dir" and "for", in this case the "to"
@@ -38,16 +39,16 @@ loadComponent("Pane");
  * 	If a direction key is pressed, a function like <sgui.Component.upAction> returns true, and a variable like <upFlow> is not empty, focus changes the element named <sgui.Component.upFlow> in this one's container.
  * 	You can also call the <sgui._container.focus> method of your container, but don't expect to become active.
  * 
+ * There are "themes", that control the default value for some properties, you can create your own theme by making a var that inherits "theme.default" on the theme object, and setting theme.current to the string name.
+ * 	The class definitions of the component docs should tell you what theme elements you need to override.
+ * 
  * Components handle some things, like an action or frame, to do this they must register them, using functions like <sgui.Component._registerFrameHandler> and <sgui.Component._registerAction> with the function they wish to be run when that thing occurs.
  * 
  * Handleable Things:
  * Frame		- Called every frame at the frame rate. Will be called <DuskWolf.frameRate> times a second, unless the computer is lagging.
  * Key			- Called when a key is pressed while the component is active, can be passed a number of arguments saying what key to be pressed, and whether shift or ctrl is required.
  * Action		- Called when the "action key" is pressed while this component is active.
- * 
- * A special type of handler is the Stuff handler, the function is given a JSON object containing properties (like the ones below), and should use it to process them.
- * 	This is used for the component to change it's look and behaviours and such via JSON.
- * 	Containers typically send the Stuff relating to a specific component (by using the "children" array, or "child" property, for example) to that component for processing.
+ * Property		- Called when the property is to be processed or recieved.
  * 
  * The paths are similar to file names.
  * 	From an example container "X" in another container "Y", which itself is in a pane, and with children "a", "b" and "c", with "c" having children "c1" and "c2".
@@ -57,8 +58,7 @@ loadComponent("Pane");
  * ../			- Access this parent "Y".
  * /Y			- Access the child "Y" in the pane.
  * 
- * There are "themes", that control the default value for some properties, you can create your own theme by making a vartree that inherits "theme-default", and setting the default properties to it.
- * 	The class definitions of component docs should tell you what you need to override.
+ * 
  * 
  * Provided Actions:
  * 
@@ -72,10 +72,14 @@ loadComponent("Pane");
  * 
  * sys-sg-width			- The width of the canvas, as read from the canvas DOM object. Changing this will not affect the canvas.
  * sys-sg-height		- The height of the canvas, as read from the canvas DOM object. Changing this will not affect the canvas.
- * theme				- The current theme, default is "default", surprisingly.
+ * theme.current		- The current theme, default is "default", surprisingly.
  * 
  * Global Theme Vars:
  * 
+ * border				- The colour of a border round some components.
+ * borderActive			- The colour of an active border for some components.
+ * box 					- The colour of a background box for anything that needs a background.
+ * 	
  * 
  * See:
  * * <sgui.Component>
@@ -104,15 +108,28 @@ mods.SimpleGui = function(events) {
 	}, this);
 	
 	this._events.registerFrameHandler("SGuiDrawer", this.draw, this);
-
+	
+	/*- Variable: _panes
+	 * [Object] All the panes.
+	 **/
 	this._panes = {};
+	/*- Variable: _activePane
+	 * [String] The name of the currently active pane.
+	 **/
 	this._activePane = "";
+	/*- Variable: _redrawBooked
+	 * [Boolean] If true then the frame handler will draw all the components again. Is set to true by <bookRedraw>.
+	 **/
 	this._redrawBooked = false;
+	
 	this.setActivePane("blank");
 	
 	this._events.setVar("sys.sg.width", $("#"+duskWolf.canvas)[0].width);
 	this._events.setVar("sys.sg.height", $("#"+duskWolf.canvas)[0].height);
 	
+	/*- Variable: _cacheCanvas
+	 * [HTMLCanvas] A cached canvas drawn to before the real one, to improve performance.
+	 **/
 	this._cacheCanvas = document.createElement("canvas");
 	this._cacheCanvas.height = this._events.getVar("sys.sg.height");
 	this._cacheCanvas.width = this._events.getVar("sys.sg.width");
@@ -122,8 +139,8 @@ mods.SimpleGui = function(events) {
 	this._cacheCanvas.getContext("2d").textBaseline = "middle";
 	
 	//Themes
-	this._events.setVar("theme.default.border", "#cccccc");
 	this._events.setVar("theme.default.box", "#eeeeee");
+	this._events.setVar("theme.default.border", "#cccccc");
 	this._events.setVar("theme.default.borderActive", "#ff5555");
 	
 	this._events.setVar("theme.current", "default");
@@ -144,7 +161,17 @@ mods.SimpleGui.prototype.addActions = function() {
 	this._events.registerAction("draw", function(data){this.draw();}, this);
 };
 
-mods.SimpleGui.prototype.newPane = function(name) { //Returns pane
+/** Function: newPane
+ * 
+ * [<sgui.Pane>] Creates a new pane, and returns it.
+ * 
+ * Params:
+ *	name		- [String] The name of the new pane.
+ * 
+ * Returns:
+ * 	The newly created pane.
+ */
+mods.SimpleGui.prototype.newPane = function(name) {
 	//Check if it exists
 	if(this.getPane(name, true)){duskWolf.error("Pane "+name+" already exists!");return null;}
 	
@@ -154,6 +181,17 @@ mods.SimpleGui.prototype.newPane = function(name) { //Returns pane
 	return this._panes[name.toLowerCase()];
 };
 
+/** Function: getPane
+ * 
+ * [<sgui.Pane>] This returns the pane with the specified name. If it doesn't exist and noNew is false, then a new one is created and returned.
+ * 
+ * Params:
+ *	name		- [String] The name of the new pane.
+ * 	noNew		- [Boolean] If true, a new pane is not created, if false (or undefined), then a new one is created.
+ * 
+ * Returns:
+ * 	The pane.
+ */
 mods.SimpleGui.prototype.getPane = function(name, noNew) { //Returns pane
 	if(this._panes[name.toLowerCase()]) return this._panes[name.toLowerCase()];
 	return noNew?null:this.newPane(name);

@@ -94,7 +94,7 @@ mods.Math.prototype.addActions = function() {
 	this._events.setVar("math.infinity", Infinity);
 };
 
-/** Function: _trig
+/*- Function: _trig
  * 
  * Used internally to handle the "sin", "cos" and "tan" actions.
  * 	You should use the standard ways of running actions, rather than calling this directly.
@@ -128,7 +128,7 @@ mods.Math.prototype._trig = function(data) {
 	this._events.setVar(data.to, Math.round(tmp*10000000000)/10000000000);
 };
 
-/** Function: _untrig
+/*- Function: _untrig
  * 
  * Used internally to handle the "asin", "acos" and "atan" actions.
  * 	You should use the standard ways of running actions, rather than calling this directly.
@@ -161,7 +161,7 @@ mods.Math.prototype._untrig = function(data) {
 	this._events.setVar(data.to, data.deg?Math.round(tmp*(180/Math.PI)):tmp);
 };
 
-/** Function: _round
+/*- Function: _round
  * 
  * Used internally to handle the "round" action.
  * 	You should use the standard ways of running actions, rather than calling this directly.

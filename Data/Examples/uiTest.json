@@ -1,5 +1,5 @@
 [
-	"Test of varius UI stuff.",
+	"Test of various UI stuff.",
 	
 	{"a":"listen", "event":"sys-event-load", "actions":[
 		
@@ -9,10 +9,10 @@
 		{"a":"print", "text":"Boo!"},
 		{"a":"var", "name":"count", "value":1},
 		{"a":"pane", "fade":{}, "name":"ui", "focus":"Gary", "active":true, "children":[
-			{"type":"TextBox", "name":"t1", "watch":"a", "flow-down":"t2"},
+			{"type":"TextBox", "name":"t1", "watch":"a", "flow-down":"t2", "action":[{"a":"print","text":"Action pressed!"}]},
 			{"type":"TextBox", "name":"t2", "watch":"b", "flow-up":"t1", "flow-down":"Gary", "y":100},
 			{"name":"Gary", "type":"Grid", "flow-up":"t2", "populate":{"type":"TextBox", "watch":"test", "width":100}}
-		], "allChildren":{"width":500}}
+		], "allChildren":{"width":500, "height":20}}
 	]},
 	
 	{"a":"listen", "event":"sys-event-frame", "actions":[

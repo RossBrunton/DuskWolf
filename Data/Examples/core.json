@@ -1,0 +1,52 @@
+[
+	"This is an example of all the actions in Events and Core!",
+	
+	{"a":"listen", "event":"sys-event-load", "actions":[
+		{"a":"print", "text":"Print statement; logs something to the console."},
+		
+		{"a":"print","text":"Function call!"},
+		{"a":"function","name":"fun","actions":[{"a":"print","text":"Function called!"}]},
+		{"a":"call","name":"fun"},
+		
+		{"a":"print","text":"Listeners!"},
+		{"a":"listen","event":"feed","name":"lis1","food":"orange","actions":[{"a":"print","text":"I like oranges!"}]},
+		{"a":"listen","event":"feed","name":"lis2","actions":[{"a":"print","text":"I like anything!"}]},
+		{"a":"fire","event":"feed","food":"orange"},
+		{"a":"fire","event":"feed","food":"apple"},
+		{"a":"unlisten","event":"feed"},
+		
+		{"a":"print","text":"Conditions!"},
+		{"a":"if","cond":"true","then":[{"a":"print","text":"true!"}],"else":[{"a":"print","text":"¬(true)"}]},
+		{"a":"if","cond":"false","then":[{"a":"print","text":"false!"}],"else":[{"a":"print","text":"¬(false)"}]},
+		{"a":"if","cond":"2 = 2","then":[{"a":"print","text":"2 = 2!"}],"else":[{"a":"print","text":"¬(2=2)..."}]},
+		{"a":"if","cond":"2 = 3","then":[{"a":"print","text":"2 = 3!"}],"else":[{"a":"print","text":"¬(2 = 3)"}]},
+		{"a":"if","cond":"2 < 3","then":[{"a":"print","text":"2 < 3!"}],"else":[{"a":"print","text":"¬(2 < 3)"}]},
+		{"a":"if","cond":"2 > 3","then":[{"a":"print","text":"2 > 3!"}],"else":[{"a":"print","text":"¬(2 > 3)"}]},
+		{"a":"if","cond":"2 != 3","then":[{"a":"print","text":"2 != 3!"}],"else":[{"a":"print","text":"¬(2 != 3)"}]},
+		
+		{"a":"print","text":"Variables!"},
+		{"a":"var","name":"myVar","value":"Moomoomoo"},
+		{"a":"print","text":"This is myVar: $myVar;"},
+		{"a":"delvar","name":"myVar"},
+		{"a":"print","text":"Myvar is gone... ;_; $myVar;"},
+		
+		{"a":"print","text":"Looping!"},
+		{"a":"var","name":"count","value":0},
+		{"a":"while","cond":"$count; < 5","actions":[{"a":"print","text":"count is $count; now!"},{"a":"var","name":"count","value":"#+($count;, 1)"}]},
+		
+		{"a":"print","text":"Threading!"},
+		{"a":"thread","name":"myThread", "actions":[{"a":"print","text":"Thread myThread 1!"},{"a":"print","text":"Thread myThread 2!"}]},
+		{"a":"print","text":"Thread not myThread 1!"},{"a":"print","text":"Thread not myThread 2!"},
+		
+		{"a":"print","text":"Hashfuncts!"},
+		{"a":"print","text":"Add: #+(1, 2, 3)"},
+		{"a":"print","text":"Multiply: #*(1, 2, 3)"},
+		{"a":"print","text":"Divide: #/(6, 2)"},
+		{"a":"print","text":"Modulo: #%(7, 2)"},
+		{"a":"print","text":"Conditions: #IF(2=2, Aye, nay)"}
+	]},
+	
+	{"a":"listen", "event":"sys-event-start", "actions":[
+		
+	]}
+]

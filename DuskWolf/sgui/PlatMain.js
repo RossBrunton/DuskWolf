@@ -18,13 +18,14 @@ sgui.PlatMain = function (parent, events, comName) {
 		this._registerPropMask("sprite-size", "_ssize", true);
 		this._registerPropMask("tile-size", "_tsize", true);
 		this._registerPropMask("spawn", "_spawn", true);
-		this._registerProp("room", this._room, null, ["spawn"]);
+		this._registerProp("room", this._room, function(name){return this._room}, ["spawn"]);
 		
 		this._tsize = this._events.getVar("plat.tsize");
 		this._ssize = this._events.getVar("plat.ssize");
 		this._scrollSpeed = this._theme("plat.scrollSpeed", 10);
 		this._spawn = 0;
 		this._entities = [];
+		this._room = "";
 	}
 };
 sgui.PlatMain.prototype = new sgui.Group();
@@ -57,6 +58,7 @@ sgui.PlatMain.prototype._room = function(name, value) {
 		this._entities[this._entities.length-1].gridGo(waitingEnts[i].x, waitingEnts[i].y);
 	}
 	
+	this._room = value;
 	this.autoScroll(200);
 };
 

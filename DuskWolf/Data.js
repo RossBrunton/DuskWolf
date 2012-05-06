@@ -42,16 +42,16 @@
  * It downloads the root json, and does everything that it needs to do.
  */
 window.Data = function() {
-	/** Variable: _loaded
+	/*- Variable: _loaded
 	 * [object] This is all the files that have been downloaded, it is ether a string (for text based files) or a HTML img tag (for images). The name of the file is the property name, for example _loaded["test.json"] would be the file "test.json".
 	 */
 	this._loaded = {};
-	/** Variable: scripts
+	/*- Variable: scripts
 	 * [array] This is an array of arrays consisting of all the files specified in the root JSON. <Events> loops through these and runs them when it is constructed.
 	 */
 	this.scripts = [];
 	
-	/** Variable: _root
+	/*- Variable: _root
 	 * [object] This is the root JSON, it is obtained from root.json and provides all the basic stuff that describes the game.
 	 */
 	this._root = this.grabJson("root");
@@ -60,7 +60,7 @@ window.Data = function() {
 	$.ajaxSetup({"cache": !duskWolf.dev});
 	
 	if(!this._root) {duskWolf.error("Root json could not be loaded."); return;}
-	if(this._root.duskVer < duskWolf.verId) {duskWolf.error("DuskWolf version is incompatable."); return;}
+	if(this._root.duskVer > duskWolf.verId) {duskWolf.error("DuskWolf version is incompatable."); return;}
 	duskWolf.info(this._root.name+" is loading."); 
 	
 	if(!("files" in this._root)) {duskWolf.error("Root json does not specify a list of files..."); return;}
@@ -82,7 +82,7 @@ window.Data = function() {
 	__import__(ims);
 };
 
-/** Variable: __hold__
+/*- Variable: __hold__
  * [string] This is a global temporary variable used when retrieving files from AJAX, it's a horrible hack... Ugh...
  */
 var __hold__;

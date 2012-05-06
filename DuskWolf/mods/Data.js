@@ -52,7 +52,7 @@ mods.Data.prototype.addActions = function() {
 	this._events.registerHashFunct("FILE", this._file, this);
 };
 
-/** Function: _get
+/*- Function: _get
  * 
  * Used internally to handle both "get" like actions.
  * 	You should use the standard ways of running actions, or the <Data> class rather than calling this directly.
@@ -73,16 +73,17 @@ mods.Data.prototype._get = function(action) {
 	}
 };
 
-/** Function: _file
+/*- Function: _file
  * 
- * Used internally to handle the "FILE" hashfunction.
+ * [string] Used internally to handle the "FILE" hashfunction.
  *	You should use the standard ways of running hashfunctions, rather than calling this directly.
  * 
  * Params:
- *	data		- [object] A "FILE" hashfunct.
+ * 	name		- [string] The string name of the hashfunct.
+ * 	args		- [Array] An array of arguments.
  * 
  * Returns:
- * 	[string] The output of the hashfunct.
+ *	The output of the hashfunct.
  */
 mods.Data.prototype._file = function(name, args) {
 	if(!args[0]){duskWolf.error("No file to retreive.");return;}

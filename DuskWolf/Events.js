@@ -27,39 +27,40 @@ __import__("mods/__init__.js");
  * Listeners:
  * 
  * Listeners listen for something to happen, and then act on it when or if it does happen!
- * Listeners are defined by using {"a":"listen", "event":"...", "actions":[...]}, and they can be fired by using {"a":"fire", "event":"..."}.
+ * Listeners are defined by using {"a":"listen", "event":"...", "actions":[...], ("name":"...")}, and they can be fired by using {"a":"fire", "event":"..."}.
  * There can also be a number of values fired and listened for; if the listener object had the property "foo":"bar", then the fire action must also have "foo":"bar", or the listener would not be called.
  * You can also use "foo":"!bar" on the listener to say that if foo is bar, then the listener should NOT run.
+ * There is also a name property, that lets you identify listeners uniquely. You cannot set a new listener when one already exists with the same name.
  * 
  * Conditions:
  * 
- * Some actions, like if and while, also have conditions, conditions should be a string made of one of the characters below, the condition is then broken down until it reaches 1 (true) or 0 (false).
+ * Some actions, like if and while, also have conditions, conditions should be a string made of one of the characters below, the condition is then broken down until it reaches true or false.
  * 
- * Note that whitespace is removed, so the condition "This String == ThisString" will become 1.
+ * Note that whitespace is removed, so the condition "This String == ThisString" will be true.
  * 
  * > (n)
- * (0) and (1) will be broken down to 0 and 1, respectivley, this allows you to "group conditions" so that they don't interfere.
+ * (false) and (true) will be broken down to false and true, respectivley, this allows you to "group conditions" so that they don't interfere.
  * 
- * > n == m
- * Breaks down to 1 if and only if n is equal to m, for example, 1 == 1 would become 1, but 1 == 2 would become 0.
+ * > n = m
+ * Is true if and only if n is equal to m, for example, 1 = 1 would be true, but 1 = 2 would be false.
  * 
  * > n != m
- * Breaks down to 1 if and only if n is not equal to m, like "==", but opposite.
+ * Is true if and only if n is not equal to m, like "=", but opposite.
  * 
  * > n < m, n > m
- * Breaks down to 1 if and only if n is less than m for the former, and n is greater than m for the latter, 1 < 2 becomes 1, but 2 < 1 becomes 0.
+ * Is true if and only if n is less than m for the former, and n is greater than m for the latter, 1 < 2 becomes true, but 2 < 1 becomes false.
  * 
  * > n <= m, n >= m
- * Same as "<" and ">", but breaks down to 1 if they are equal as well.
+ * Same as "<" and ">", but is true if they are equal as well.
  * 
- * > !n
- * Inverts n, !0 becomes 1, and !1 becomes 0.
+ * > n && m
+ * Is true if and only if both n and m are true.
  * 
- * > n & m
- * Breaks down to 1 if and only if both n and m are 1.
+ * > n || m
+ * Is true if at least n or m is true.
  * 
- * > n | m
- * Breaks down to 1 if at least n or m is 1.
+ * > n + m, n - m, n * m, n / m, n % m
+ * 	Performs the expected operations (add, subtract, multiply, divide, modulo), and becomes the result. 1 + 1 = 2 would be true, for example.
  * 
  * Variables:
  * 
@@ -72,12 +73,6 @@ __import__("mods/__init__.js");
  * 
  * > $na$l;e;
  * Yes, this is possible, firstly $l; is replaced by whatever the var "l" is, and then the result is replaced. For example, if $l; was "m", then the whole thing there would be replaced by the value for "name".
- * 
- * > ${$a;, $b;, 2}
- * The values are added together, in this case the values for a, b and the number 2 are added together. Anything in there which is not a number is ignored.
- * 
- * > ${{$a;, $b;, 2}}
- * Like the above, but they are multiplied together instead of added.
  * 
  * > $-name;
  * Name, which resolve to a number, is inverted, if the var "name" was 4, for example, this would be replaced with -4.
@@ -103,29 +98,29 @@ __import__("mods/__init__.js");
  * 
  * Built-in Actions:
  * 
- * > {"a":"function", "name":"...", "actions"=[...]}
+ * > {"a":"function", "name":"...", "actions":[...]}
  * This defines the function given by name, which will run actions when called. It can be called with the call action.
  * 
- * > {"a":"call", "name":"..."}
- * Calls the function with the name given by name, once the code is finished, it resumes from the next action after this.
+ * > {"a":"call", "name":"...", ("thread":"...")}
+ * Calls the function with the name given by name, once the code is finished, it resumes from the next action after this. If thread is specified, it is ran in that thread.
  * 
  * > {"a":"if", "cond":"...", ("then":[...],) ("else":[...])}
  * Evaluates the condition using the rules above, if it is true, then the "then" array is ran, else the "else" array is ran instead. Simple.
  * 
  * > {"a":"ifset", "value":"...", ("then":[...],) ("else":[...])}
- * Runs the actions specified by "then" if the value string is not empty, otherwise it runs "else". This can be used to check if vars are defined, "$1;$2;" will run the "then" actions if ether one of the vars is not a blank string, and if they are both unset, then it will run the "else" actions.
+ * [DEPRECIATED?] Runs the actions specified by "then" if the value string is not empty, otherwise it runs "else". This can be used to check if vars are defined, "$1;$2;" will run the "then" actions if ether one of the vars is not a blank string, and if they are both unset, then it will run the "else" actions.
  * 
  * > {"a":"while", "cond":"...", "actions":[...]}
  * It keeps repeating the actions if the condition is true.
  * 
- * > {"a":"listen", "event":"...", ("name":"...",) ("prop1":"...", ("attr2":"...", ...)), "actions":[...]}
+ * > {"a":"listen", "event":"...", ("name":"...",) ("prop1":"...", ("prop2":"...", ...)), "actions":[...]}
  * This creates a listener, making it listen for the event specified, which will run actions when it recieves it. See the section on listeners above.
  * The name property will not be actually used on the listener, but is used for identifying it, say, for deleting it.
  * 
- * > {"a":"fire", "event":"...", ("prop1":"...", ("attr2":"...", ...))}
+ * > {"a":"fire", "event":"...", ("prop1":"...", ("prop2":"...", ...))}
  * Fires the specified event, which will trigger the listener which all the properties match, see the section above for details.
  * 
- * > {"a":"unlisten", ("event":"...",) ("name":"...",) ("prop1":"...", ("attr2":"...", ...)), "actions":[...]}
+ * > {"a":"unlisten", ("event":"...",) ("name":"...",) ("prop1":"...", ("prop2":"...", ...)), "actions":[...]}
  * Deletes the listener that would be fired if the rules for "listen" were true. Note that the event property is optional.
  * 
  * > {"a":"var", "name":"...", "value":{...}, ["inherit":"..."]}
@@ -159,6 +154,14 @@ __import__("mods/__init__.js");
  * Fired once, to signal that the game should start running, you should listen for this rather than just dumping code in the main array so that other things are loaded.
  * 	The properties are the same as the ones in <DuskWolf>.
  * 
+ * Built-in HashFunctions:
+ * 
+ * > #IF(cond, then, else);
+ * 	If the condition is true, then "then" is returned, else "else" is returned.
+ * 
+ * > #=(cond);
+ * 	This evaluates a condition, but does not return true or false, this lets you do things like #=(1+1) to get two.
+ * 
  * See:
  * * <mods.IModule>
  */
@@ -171,32 +174,32 @@ __import__("mods/__init__.js");
  * 	game	- [<Game>] The game object this is attached to.
  */
 window.Events = function(game) {
-	/** Variable: _game
+	/*- Variable: _game
 	 * [<Game>] A link to the main game this is running for.
 	 */
 	this._game = game;
 	
-	/** Variable: _actions
+	/*- Variable: _actions
 	 * [object] A list of every action, each action is an array in the form [function to be called, scope to call function in]. You should add actions using <addAction>, rather than adding it to this object directly.
 	 */
 	this._actions = {};
-	/** Variable: _hashFuncs
+	/*- Variable: _hashFuncs
 	 * [object] A list of every hashfunction, it is an array in the form [function to be called, scope to call function in]. You should add actions using <addHashFunct>, rather than adding it to this object directly.
 	 */
 	this._hashFuncts = {};
-	/** Variable: _functions
+	/*- Variable: _functions
 	 * [object] A list of all the functions assigned, in the form of an array of actions. Generally, you shouldn't need to create functions outside the JSON files, so you can't do it.
 	 */
 	this._functions = {};
-	/** Variable: _listeners
+	/*- Variable: _listeners
 	 * [array] A list of all the listeners in use, this is an array of the action that set it, whith all it's properties.
 	 */
 	this._listeners = [];
-	/** Variable: _vars
+	/*- Variable: _vars
 	 * [object] This is all the variables! You should set/retreive these using <getVar> and <setVar>, and the like.
 	 */
 	this._vars = {};
-	/** Variable: _threads
+	/*- Variable: _threads
 	 * [object] This is all the threads that have been created. Each thread is an object with a "buffer" property, a "nexts" property and an "actions" property.
 	 * 
 	 * Nexts is the number of times <awaitNext> has been called, and is the number of times we have to call <next> for the program to continue.
@@ -206,19 +209,19 @@ window.Events = function(game) {
 	 * The buffer is required so that the order of actions is intuitive, <run> calls that were called first should be ran first.
 	 */
 	this._threads = {};
-	/** Variable: _frameHandlers
+	/*- Variable: _frameHandlers
 	 * [object] This is all the frame handlers, they are arrays in the form [function, scope].
 	 */
 	this._frameHandlers = {};
-	/** Variable: _keyHandlers
+	/*- Variable: _keyHandlers
 	 * [object] The list of keyhandlers, they are arrays of the form [function, scope].
 	 */
 	this._keyHandlers = {};
-	/** Variable: _keyUpHandlers
+	/*- Variable: _keyUpHandlers
 	 * [object] The list of keyuphandlers, they are arrays of the form [function, scope].
 	 */
 	this._keyUpHandlers = {};
-	/** Variable: _modsInited
+	/*- Variable: _modsInited
 	 * [array] This is an array of all the mods that have been initiated.
 	 */
 	this._modsInited = {};
@@ -257,11 +260,12 @@ window.Events = function(game) {
 	this.registerAction("fire", this._fire, this);
 	this.registerAction("unlisten", this._unlisten, this);
 	this.registerAction("var", this._setVarInternal, this);
-	this.registerAction("delvar", this.delVarInternal, this);
+	this.registerAction("delvar", this._delVarInternal, this);
 	this.registerAction("thread", this._threadTo, this);
 	this.registerAction("vardump", function(what){duskWolf.info(this._vars);}, this);
 	
-	this.registerHashFunct("HEL", function(fun, args) {return "Hello "+args+"!";}, this);
+	this.registerHashFunct("IF", this._hiffy, this);
+	this.registerHashFunct("=", this._rawCond, this);
 	
 	for(var b in this._modsInited){
 		this._modsInited[b].addActions();
@@ -366,7 +370,7 @@ Events.prototype.run = function(what, thread) {
 
 /** Function: next
  * 
- * This performs an action, it takes the next action on the specified thread (if it exists) and runs it.
+ * [boolean] This performs an action, it takes the next action on the specified thread (if it exists) and runs it.
  * 
  * This is called in two places, firstly in the frame loop, where it is called every frame in a while loop until all actions are depleted.
  * 	It is also called by the programmer, you, who calls it so that the next action is ran.
@@ -381,7 +385,7 @@ Events.prototype.run = function(what, thread) {
  * 					It defaults to true.
  * 
  * Returns:
- * 	[boolean] Whether any actions were ran, if this returns false you should not call it again immediatly because nothing'll happen.
+ *	Whether any actions were ran, if this returns false you should not call it again immediatly because nothing'll happen.
  */
 Events.prototype.next = function(t, decrement) {
 	if(decrement === undefined) decrement = true;
@@ -429,9 +433,9 @@ Events.prototype.next = function(t, decrement) {
 	return true;
 }
 
-/** Function: _clone
+/*- Function: _clone
  * 
- * This copies a simple object. This won't work on more complicated objects with prototypes and such.
+ * [object] This copies a simple object. This won't work on more complicated objects with prototypes and such.
  * 
  * It just loops through them and copies all the values to another object, which is returned.
  * 
@@ -439,7 +443,7 @@ Events.prototype.next = function(t, decrement) {
  * 	o		- [object] The source object to copy.
  * 
  * Returns:
- * 	[object] An object with the same properties of the source one.
+ *	An object with the same properties of the source one.
  */
 Events.prototype._clone = function(o) {
 	if(o == null || typeof(o) != 'object') return o;
@@ -452,7 +456,7 @@ Events.prototype._clone = function(o) {
 
 /** Function: awaitNext
  * 
- * This increments the "nexts" value on the specified thread. This means that for each time you call awaitNext you must also call <next>.
+ * [string] This increments the "nexts" value on the specified thread. This means that for each time you call awaitNext you must also call <next>.
  * 
  * Until you call all the required nexts, this thread won't do anything, so you can use this to do animation or something.
  * 
@@ -461,7 +465,7 @@ Events.prototype._clone = function(o) {
  * 	count	- [number] The number of nexts to wait on, defaults to 1 if not given.
  * 
  * Returns:
- * 	[string] The thread that has been asked to wait. This will be equal to the t param.
+ *	The thread that has been asked to wait. This will be equal to the t param.
  */
 Events.prototype.awaitNext = function(t, count) {
 	if(t === undefined) t = this.thread;
@@ -473,7 +477,7 @@ Events.prototype.awaitNext = function(t, count) {
 
 /** Function: replaceVar
  * 
- * This takes an object (such as an action), and replaces all of the properties containing vars with their correct values.
+ * [object] This takes an object (such as an action), and replaces all of the properties containing vars with their correct values.
  * 	It will only replace properties that are strings, and won't touch the names of them.
  * 
  * You can also have it replace the vars of all the children of any arrays it finds, if you like...
@@ -483,12 +487,12 @@ Events.prototype.awaitNext = function(t, count) {
  * 	children	- [boolean] If true then this function will be called with all the children of any arrays it finds in the data.
  * 
  * Returns:
- * 	[object] The data with all the properties evaluated and replaced.
+ *	The data with all the properties evaluated and replaced.
  */
 Events.prototype.replaceVar = function(data, children) {
 	for(var p in data){
 		if(typeof(data[p]) == "string"){
-			data[p] = this._parseVar(data[p]);
+			data[p] = this.parseVar(data[p]);
 		}else if(children && typeof(data[p]) == "array"){
 			for(var i = data[p].length-1; i >= 0; i--){
 				data[p][i] = this.replaceVar(data[p][i], false);
@@ -499,85 +503,16 @@ Events.prototype.replaceVar = function(data, children) {
 	return data;
 };
 
-/** Function: _parseVar
- * 
- * This takes a string, and replaces all the vars it can find with their values, see the section at the top of the page about them.
- * 
- * It will only break down 20 times until it gives up.
- * 
- * Params:
- * 	data		- [string] The string to replace the vars in.
- * 	rec			- [number] Used internally, the function tracks how many times it has checked by incrementing this each time.
- * 
- * Returns:
- * 	[string/number] A fully parsed string, where all the variables are replaced. If when broken down the string can be a number, then it is returned as one.
- */ 
-Events.prototype._parseVar = function(data, rec) {
-	if(!rec) rec = 0;
-	rec++;
-	var done = false;
-	
-	var matches = data.match(/\$-[-\.a-zA-Z0-9]+;?/gi);
-	if(matches) for(var k = matches.length-1; k >= 0; k--){
-		done = true;
-		data = data.replace(matches[k], String(-1*Number(this.getVar(matches[k].replace("$-", "").replace(";", "")))));
-	}
-	
-	matches = data.match(/\$\{[^\{\}]+\}/gi);
-	if(matches) for(k = matches.length-1; k >= 0; k--){
-		done = true;
-		var fragments = matches[k].replace("${", "").replace("}", "").split(",");
-		var sum = 0;
-		for(var i = fragments.length-1; i >= 0; i--){
-			if(Number(this._parseVar(fragments[i]))) {
-				sum += Number(this._parseVar(fragments[i]));
-			}
-		}
-		data = data.replace(matches[k], sum);
-	}
-	
-	matches = data.match(/\$\{\{[^\{\}]+\}\}/gi);
-	if(matches) for(k = matches.length-1; k >= 0; k--) {
-		done = true;
-		fragments = matches[k].replace("${{", "").replace("}}", "").split(",");
-		sum = 1;
-		for(i = fragments.length-1; i >= 0; i--) {
-			if(Number(this._parseVar(fragments[i])) != NaN){
-				sum *= Number(this._parseVar(fragments[i]));
-			}
-		}
-		data = data.replace(matches[k], sum);
-	}
-	
-	matches = data.match(/\$[\.-a-zA-Z0-9]+;?/gi);
-	if(matches) for(k = matches.length-1; k >= 0; k--) {
-		done = true;
-		data = data.replace(matches[k], this.getVar(matches[k].replace("$", "").replace(";", "")));
-	}
-	
-	matches = data.match(/#[-a-zA-Z0-9]+\([^;\(\)#\$]+\);?/gi);
-	if(matches) for(k = matches.length-1; k >= 0; k--) {
-		done = true;
-		var fname = matches[k].split("(")[0].replace("#", "");
-		var args = matches[k].split("(")[1].split(")")[0].split(",");
-		data = data.replace(matches[k], this.hashFunction(fname, args));
-	}
-	
-	if(rec == 20) duskWolf.error("Overflow parsing var, got to "+data+".");
-	if(done && rec < 20) return this._parseVar.call(this, data, rec);
-	else return isNaN(data.replace(/\$;/g, "$"))?data.replace(/\$;/g, "$"):Number(data.replace(/\$;/g, "$"));
-};
-
 /** Function: hashFunction
  * 
- * This does a hashFunction, and returns the value that it would return.
+ * [string] This does a hashFunction, and returns the value that it would return.
  * 
  * Params:
  * 	name		- [string] The name of the hashfunction to call.
  * 	args		- [string, string, ...] The arguments to the hashfunction.
  * 
  * Returns:
- * 	[string] The return value of the hashfunction.
+ *	The return value of the hashfunction.
  */
 Events.prototype.hashFunction = function(name, args) {
 	if(!this._hashFuncts[name.toLowerCase()]){
@@ -659,13 +594,13 @@ Events.prototype.registerKeyUpHandler = function(name, funct, scope) {
 
 /** Function: getMod
  * 
- * This gets a module, if it exists, returns null otherwise.
+ * [<mods.IModule>] This gets a module, if it exists, returns null otherwise.
  * 
  * Params:
  * 	name		- [string] The name of the module to get.
  * 
  * Returns:
- * 	[<mods.IModule>] A module with that name.
+ *	A module with that name.
  */
 Events.prototype.getMod = function(name) {
 	if(name in this._modsInited) {
@@ -675,7 +610,7 @@ Events.prototype.getMod = function(name) {
 	return null;
 };
 
-/** Function: _addFunction
+/*- Function: _addFunction
  * 
  * Used internally to do the action "function", you should use the <run> function instead of calling this directly.
  * 
@@ -689,22 +624,22 @@ Events.prototype._addFunction = function(data) {
 	this._functions[data.name] = data.actions;
 };
 
-/** Function: _callFunction
+/*- Function: _callFunction
  * 
  * Used internally to do the action "call", you should use the <run> function instead of calling this directly.
  * 
  * Params:
  * 	data		- [object] The action to use, it should be a normal "call" action object.
  */
-Events.prototype._callFunction = function(data) {
-	if(!data.name) {duskWolf.error("No name for this function!");return;}
+Events.prototype._callFunction = function(a) {
+	if(!a.name) {duskWolf.error("No name for this function!");return;}
 	
-	if(this._functions[data.name]){
-		this.run(this._functions[data.name], data.thread?data.thread:this._thread);
-	} else duskWolf.error("Function "+data.name+" does not exist!");
+	if(this._functions[a.name]){
+		this.run(this._functions[a.name], a.thread?a.thread:this.thread);
+	} else duskWolf.error("Function "+a.name+" does not exist!");
 };
 
-/** Function: _threadTo
+/*- Function: _threadTo
  * 
  * Used internally to do the action "thread", you should use the <run> function instead of calling this directly.
  * 
@@ -718,16 +653,16 @@ Events.prototype._threadTo = function(data) {
 	this.run(data.actions, data.name);
 };
 
-/** Function: _getThread
+/*- Function: _getThread
  * 
- * This gets a thread. It can also create a new thread if it does not exist yet.
+ * [object] This gets a thread. It can also create a new thread if it does not exist yet.
  * 
  * Params:
  * 	name		- [string] The name of the thread to find or create.
  * 	create		- [boolean] Whether to create a new thread if it doesn't exist. Defaults to false.
  * 
  * Returns:
- * 	[object] A "thread", see <_threads> for information on properties. If the thread doesn't exist and create is false, it returns null.
+ *	A "thread", see <_threads> for information on properties. If the thread doesn't exist and create is false, it returns null.
  */
 Events.prototype._getThread = function(name, create) {
 	if(this._threads[name]){
@@ -740,23 +675,32 @@ Events.prototype._getThread = function(name, create) {
 		return this._threads[name];
 	}
 	
+	duskWolf.error("Thread "+name+" does not exist!");
 	return null;
-}
+};
 
-/** Function: _addListener
+/*- Function: _addListener
  * 
  * Used internally to do the action "listen", you should use the <run> function instead of calling this directly.
  * 
  * Params:
- * 	data		- [object] The action to use, it should be a normal "listen" action object.
+ * 	a			- [object] The action to use, it should be a normal "listen" action object.
  */
-Events.prototype._addListener = function(data) {
-	if(!data.event){duskWolf.error("This listener won't listen to anything!");return;}
+Events.prototype._addListener = function(a) {
+	if(!a.event){duskWolf.error("This listener won't listen to anything!");return;}
 	
-	this._listeners[this._listeners.length] = data;
-}
+	if(a.name) {
+		for(var p in this._listeners) {
+			if(this._listeners[p].name && this._listeners[p].name == a.name) {
+				return;
+			}
+		}
+	}
+	
+	this._listeners[this._listeners.length] = a;
+};
 
-/** Function: _unlisten
+/*- Function: _unlisten
  * 
  * Used internally to do the action "unlisten", you should use the <run> function instead of calling this directly.
  * 
@@ -782,7 +726,7 @@ Events.prototype._unlisten = function(data) {
 	}
 };
 
-/** Function: _fire
+/*- Function: _fire
  * 
  * Used internally to do the action "fire", you should use the <run> function instead of calling this directly.
  * 
@@ -810,7 +754,7 @@ Events.prototype._fire = function(data) {
 	}
 };
 
-/** Function: _iffy
+/*- Function: _iffy
  * 
  * Used internally to do the action "if", you should use the <run> function instead of calling this directly.
  * 
@@ -818,14 +762,52 @@ Events.prototype._fire = function(data) {
  * 	data		- [object] The action to use, it should be a normal "if" action object.
  */
 Events.prototype._iffy = function(what) {
-	if(!what.cond){duskWolf.error("No condition for if.");return;}
+	if(what.cond === undefined){duskWolf.error("No condition for if.");return;}
 	
-	if(this._cond(what.cond)) {
-		if(what.then) this.run(what.then, this.thread);
-	}else if(what["else"]) this.run(what["else"], this.thread);
+	if(this.cond(what.cond)) {
+		if(what.then !== undefined) this.run(what.then, this.thread);
+	}else if(what["else"] !== undefined) this.run(what["else"], this.thread);
 };
 
-/** Function: _ifSet
+/*- Function: _hiffy
+ * 
+ * [string] Used internally to do the hashfunction "IF".
+ * 	You should use the standard ways of running hashfunctions, rather than calling this directly.
+ * 
+ * Params:
+ * 	name		- [string] The string name of the hashfunct.
+ * 	args		- [Array] An array of arguments.
+ * 
+ * Returns:
+ *	The output of the hashfunct.
+ */
+Events.prototype._hiffy = function(name, args) {
+	if(args[0] === undefined){duskWolf.error("No condition for #IF.");return;}
+	
+	if(this.cond(args[0])) {
+		if(args[1] !== undefined) return args[1];
+	}else if(args[2] !== undefined) return args[2];
+	
+	return "";
+};
+
+/*- Function: _rawCond
+ * 
+ * [string] Used internally to do the hashfunction "=".
+ * 	You should use the standard ways of running hashfunctions, rather than calling this directly.
+ * 
+ * Params:
+ * 	name		- [string] The string name of the hashfunct.
+ * 	args		- [Array] An array of arguments.
+ * 
+ * Returns:
+ *	The output of the hashfunct.
+ */
+Events.prototype._rawCond = function(name, args) {
+	return this.cond(args[0]);
+};
+
+/*- Function: _ifSet
  * 
  * Used internally to do the action "ifSet", you should use the <run> function instead of calling this directly.
  * 
@@ -835,14 +817,14 @@ Events.prototype._iffy = function(what) {
 Events.prototype._ifSet = function(what) {
 	if(!("value" in what)){duskWolf.error("No value for ifset.");return;}
 	
-	if(what.value !== "") {
+	if(!what.value) {
 		if("then" in what) this.run(what.then, this.thread);
 	}else if("else" in what) {
 		this.run(what["else"], this.thread);
 	}
 };
 
-/** Function: _whiley
+/*- Function: _whiley
  * 
  * Used internally to do the action "while", you should use the <run> function instead of calling this directly.
  * 
@@ -853,86 +835,144 @@ Events.prototype._whiley = function(what) {
 	if(!what.cond){duskWolf.error("No condition for while.");return;}
 	if(!what.actions){duskWolf.error("Nothing for while to loop through.");return;}
 	
-	if(this._cond(this._parseVar(what.cond))){
+	if(this.cond(this.parseVar(what.cond))){
 		var funId = (new Date()).getTime();
 		what.actions[what.actions.length] = {"a":"if", "cond":what.cond, "then":[{"a":"call", "name":"_while_"+funId}]};
 		this.run([{"a":"function", "name":"_while_"+funId, "actions":what.actions}, {"a":"call", "name":"_while_"+funId}], this.thread);
 	}
 };
 
-/** Function: _cond
+/*- Function: _isJson
  * 
- * This is used in the likes of "while" and "if", give it a string and it will evaluate it, breaking it down into ether true or false. See the section on "Conditions" in the class description.
+ * [boolean] This takes a string, checks if it is a string in JSON notation.
+ * 
+ * Params:
+ * 	str			- [string] The string to check.
+ * 
+ * Returns:
+ *	Whether the object can be parsed as json.
+ */ 
+Events.prototype._isJson = function(str) {
+	return /^[\],:{}\s]*$/.test(String(str).replace(/\\["\\\/bfnrtu]/g, '@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').replace(/(?:^|:|,)(?:\s*\[)+/g, ''));
+}
+
+/*- Function: _regEscape
+ * 
+ * [string] This takes a string, and replaces any regexp chars that are needed. It's like \Q...\E.
+ * 
+ * Params:
+ * 	str			- [string] The string to escape.
+ * 
+ * Returns:
+ *	The string suitable for regexp.
+ */ 
+Events.prototype._regEscape = function(str) {
+	return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+}
+	
+/** Function: parseVar
+ * 
+ * [string/number] This takes a string, and replaces all the vars it can find with their values, see the section at the top of the page about them.
+ * 
+ * It will only break down 20 times until it gives up.
+ * 
+ * Params:
+ * 	data		- [string] The string to replace the vars in.
+ * 	rec			- [number] Used internally, the function tracks how many times it has checked by incrementing this each time.
+ * 
+ * Returns:
+ *	A fully parsed string, where all the variables are replaced. If when broken down the string can be a number, then it is returned as one.
+ */ 
+Events.prototype.parseVar = function(str, asStr) {
+	str = String(str);
+	
+	var ex = null;
+	var done = true;
+	while(done) {
+		done = false;
+		
+		while(ex = /\$([-\.a-zA-Z0-9]+);?/gi.exec(str)){
+			done = true;
+			str = str.replace(ex[0], this.getVar(ex[1]));
+		}
+		
+		while(ex = /\$-([-\.a-zA-Z0-9]+);?/gi.exec(str)){
+			done = true;
+			str = str.replace(ex[0], -1*this.getVar(ex[1]));
+		}
+		
+		while(ex = /#([^#\(]+)\(([^;#\$]+)\);?/gi.exec(str)){
+			done = true;
+			str = str.replace(ex[0], this.hashFunction(ex[1], ex[2].split(",")));
+		}
+	}
+	
+	//Check if it is JSON
+	if(!asStr && this._isJson(str)) {
+		return JSON.parse(str);
+	} else {
+		return str;
+	}
+};
+
+/** Function: cond
+ * 
+ * [boolean] This is used in the likes of "while" and "if", give it a string and it will evaluate it, breaking it down into ether true or false. See the section on "Conditions" in the class description.
  * 
  * Params:
  * 	cond		- [string] The string to evaluate.
  * 
  * Returns:
- * 	[boolean] Ether true or false, if the condition breaks down to "1" then true, "0" then false.
+ *	Either true or false, if the condition breaks down to "true" then true, "false" then false.
  */
-Events.prototype._cond = function(cond) {
-	var originalCond = cond;
-	cond = "("+cond.replace(/\s/g, "")+")";
-	for(var i = 0; i <= 20; i++){
-		if(cond.search(/\(([01])\)/g) > -1){cond = cond.replace(/\(([01])\)/g, "$1");}
-		
-		var matches = cond.match(/[^\(\)\|&!=<>]+=[^\(\)\|&!=<>]+/g);
-		if(matches) for(var m = matches.length-1; m >= 0; m--){
-			cond = cond.replace(new RegExp("([\(\)\|&!=<>])"+matches[m]+"([\(\)\|&!=<>])", "g"), "$1"+((matches[m].split("=")[0] == matches[m].split("=")[1])?"1":"0")+"$2");
-		}
-		
-		matches = cond.match(/[^\(\)\|&!=<>]+!=[^\(\)\|&!=<>]+/g);
-		if(matches) for(var n = matches.length-1; n >= 0; n--){
-			cond = cond.replace(new RegExp("([\(\)\|&!=<>])"+matches[n]+"([\(\)\|&!=<>])", "g"), "$1"+((matches[n].split("!=")[0] == matches[n].split("!=")[1])?"0":"1")+"$2");
-		}
-		
-		matches = cond.match(/[^\(\)\|&!=<>]+<[^\(\)\|&!=<>]+/g);
-		if(matches) for(n = matches.length-1; n >= 0; n--){
-			cond = cond.replace(new RegExp("([\(\)\|&!=<>])"+matches[n]+"([\(\)\|&!=<>])", "g"), "$1"+((Number(matches[n].split("<")[0]) < Number(matches[n].split("<")[1]))?"1":"0")+"$2");
-		}
-		
-		matches = cond.match(/[^\(\)\|&!=<>]+>[^\(\)\|&!=<>]+/g);
-		if(matches) for(n = matches.length-1; n >= 0; n--){
-			cond = cond.replace(new RegExp("([\(\)\|&!=<>])"+matches[n]+"([\(\)\|&!=<>])", "g"), "$1"+((Number(matches[n].split(">")[0]) > Number(matches[n].split(">")[1]))?"1":"0")+"$2");
-		}
-		
-		matches = cond.match(/[^\(\)\|&!=<>]+>=[^\(\)\|&!=<>]+/g);
-		if(matches) for(n = matches.length-1; n >= 0; n--){
-			cond = cond.replace(new RegExp("([\(\)\|&!=<>])"+matches[n]+"([\(\)\|&!=<>])", "g"), "$1"+((Number(matches[n].split(">=")[0]) >= Number(matches[n].split(">=")[1]))?"1":"0")+"$2");
-		}
-		
-		matches = cond.match(/[^\(\)\|&!=<>]+<=[^\(\)\|&!=<>]+/g);
-		if(matches) for(n = matches.length-1; n >= 0; n--){
-			cond = cond.replace(new RegExp("([\(\)\|&!=<>])"+matches[n]+"([\(\)\|&!=<>])", "g"), "$1"+((Number(matches[n].split("<=")[0]) <= Number(matches[n].split("<=")[1]))?"1":"0")+"$2");
-		}
-		
-		if(cond.search(/\!0/g) > -1){cond = cond.replace(/\!0/g, "1");}
-		if(cond.search(/\!1/g) > -1){cond = cond.replace(/\!1/g, "0");}
-		
-		if(cond.search(/0&0/g) > -1){cond = cond.replace(/0&0/g, "0");}
-		if(cond.search(/0&1/g) > -1){cond = cond.replace(/0&1/g, "0");}
-		if(cond.search(/1&0/g) > -1){cond = cond.replace(/1&0/g, "0");}
-		if(cond.search(/1&1/g) > -1){cond = cond.replace(/1&1/g, "1");}
-		
-		if(cond.search(/0\|0/g) > -1){cond = cond.replace(/0\|0/g, "0");}
-		if(cond.search(/0\|1/g) > -1){cond = cond.replace(/0\|1/g, "1");}
-		if(cond.search(/1\|0/g) > -1){cond = cond.replace(/1\|0/g, "1");}
-		if(cond.search(/1\|1/g) > -1){cond = cond.replace(/1\|1/g, "1");}
-		
-		if(cond == "(1)"){
-			return true;
-		}
-		
-		if(cond == "(0)"){
-			return false;
+Events.prototype.cond = function(cond, asStr) {
+	cond = String(cond);
+	var ex;
+	var ops = ["*", "/", "+", "-", "<", ">", "<=", ">=", "=", "!=", "&&", "||"];
+	
+	while(ex = /\((.*?)\)/.exec(cond)){
+		cond = cond.replace(ex[0], this.cond(ex[1], true));
+	}
+	
+	for(var o = 0; o < ops.length; o ++){
+		var reg = RegExp("([^"+this._regEscape(ops.join(""))+"]+)\\s*("+this._regEscape(ops[o])+")\\s*([^"+this._regEscape(ops.join(""))+"]+)", "i");
+		while(ex = reg.exec(cond)){
+			cond = cond.replace(ex[0], this._doOp(ex[1], ex[3], ex[2]));
 		}
 	}
 	
-	duskWolf.error("Could not break down conditon \""+originalCond+"\", got to "+cond+".");
-	return false;
+	if(!asStr && this._isJson(cond)) {
+		return JSON.parse(cond);
+	} else {
+		return cond;
+	}
 };
 
-/** Function: _setVarInternal
+Events.prototype._doOp = function(lhs, rhs, op) {
+	lhs = this.cond(lhs);
+	if(rhs) rhs = this.cond(rhs);
+	
+	switch(op){
+		case "+": return lhs+rhs;
+		case "-": return lhs-rhs;
+		case "*": return lhs*rhs;
+		case "/": return lhs/rhs;
+		
+		case "=": return lhs==rhs;
+		case "!=": return lhs!=rhs;
+		
+		case "<": return lhs<rhs;
+		case ">": return lhs>rhs;
+		
+		case ">=": return lhs>=rhs;
+		case "<=": return lhs>=rhs;
+		
+		case "&&": return Boolean(lhs)&&Boolean(rhs);
+		case "||": return Boolean(lhs)||Boolean(rhs);
+	}
+};
+
+/*- Function: _setVarInternal
  * 
  * Used internally to do the action "var", you should use the public function <setVar> to do this, rather than this.
  * 
@@ -943,15 +983,15 @@ Events.prototype._cond = function(cond) {
  * 	* <setVar>
  */
 Events.prototype._setVarInternal = function(a) {
-	if(a.name === undefined) {a.error("No name given for var."); return;}
-	if(a.value === undefined) {a.error("No value given for "+a.name+"."); return;}
+	if(a.name === undefined) {duskWolf.error("No name given for var."); return;}
+	if(a.value === undefined) {duskWolf.error("No value given for "+a.name+"."); return;}
 	
 	this.setVar(a.name, a.value, a.inherit);
 };
 
 /** Function: setVar
  * 
- * This sets the value of a variable. It is recommended to use this, rather than running actions. Variables are described in the class description.
+ * [*] This sets the value of a variable. It is recommended to use this, rather than running actions. Variables are described in the class description.
  * 
  * Params:
  * 	name		- [string] The name of the var to set, should only use alphanumeric characters, "-", "." and "_".
@@ -959,7 +999,7 @@ Events.prototype._setVarInternal = function(a) {
  * 	inherit		- [string] The name of any existing var. If present, then that var will be set to the "name", and then the properties of values (which should be an object) will be set so that those properties still exist.
  * 
  * Returns:
- * 	[any] The value that was set, same as the param "value".
+ *	The value that was set, same as the param "value".
  * 
  * See:
  * 	* <setVars>
@@ -1011,13 +1051,13 @@ Events.prototype.setVars = function(list) {
 
 /** Function: getVar
  * 
- * This returns the value of a variable, and is the only way to get a variable. If the variable is undefined, undefined is returned.
+ * [*]This returns the value of a variable, and is the only way to get a variable. If the variable is undefined, undefined is returned.
  * 
  * Params:
  * 	name		- [string] The name of the var to retrieve.
  * 
  * Returns:
- * 	[any] The value of the variable, or an empty string if the variable is undefined.
+ *	The value of the variable, or an empty string if the variable is undefined.
  * 
  * See:
  * 	* <setVar>
@@ -1046,13 +1086,13 @@ Events.prototype.getVar = function(name) {
 
 /** Function: getVars
  * 
- * This returns the value of all variables matching a regexp.
+ * [array] This returns the value of all variables matching a regexp.
  * 
  * Params:
  * 	expr		- [regexp] The regexp to check.
  * 
  * Returns:
- * 	[array] An array of [key, value] pairs. You should be able to call <setVars> on them to set the variables back.
+ *	An array of [key, value] pairs. You should be able to call <setVars> on them to set the variables back.
  * 
  * See:
  * 	* <getVar>
@@ -1068,7 +1108,7 @@ Events.prototype.getVars = function(expr) {
 	return ret;
 };
 
-/** Function: _delVarInternal
+/*- Function: _delVarInternal
  * 
  * Used internally to do the action "delvar", you should use the public function <delVar> to do this, rather than this.
  * 
@@ -1078,10 +1118,10 @@ Events.prototype.getVars = function(expr) {
  * See:
  * 	* <delVar>
  */
-Events.prototype._delVarInternal = function(data) {
-	if(!data.name) {duskWolf.error("No name given for var."); return;}
+Events.prototype._delVarInternal = function(a) {
+	if(!a.name) {duskWolf.error("No name given for var."); return;}
 	
-	this.delVar(data.name.toLowerCase());
+	this.delVar(a.name);
 };
 
 /** Function: delVar
@@ -1096,5 +1136,22 @@ Events.prototype._delVarInternal = function(data) {
  * 	* <getVar>
  */
 Events.prototype.delVar = function(name) {
-	duskWolf.warn("Deleting stuff is not enabled. You have to live with it.");
+	name = name.toLowerCase();
+	
+	var fragments = name.split(".");
+	var obj = this._vars;
+	if(fragments.length > 1){
+		for(var point = 0; point < fragments.length-1; point ++) {
+			if(obj[fragments[point]] === undefined) {
+				return undefined;
+			}
+			obj = obj[fragments[point]];
+		}
+	}
+	
+	if(obj[fragments[fragments.length-1]] !== undefined){
+		delete obj[fragments[fragments.length-1]];
+	}
+	
+	return undefined;
 };

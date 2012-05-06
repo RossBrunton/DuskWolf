@@ -37,14 +37,20 @@
  *	This takes the modulo "by" of "value", storing it in "to". The modulo X of N is the remainder when you divide N by X. If no "by" value is specified, 10 is assumed.
  * 
  * > {"a":"vartree", "root":"...", "data":{...}, ("inherit":"...")}
- * 	[DEPRECIATED]
+ * 	[DEPRECIATED] This used to be a way to specify objects, which has been replaced by using objects themselves.
  * 
  * Provided HashFunctions:
  * 
- * > #DIV(original, by);
+ * > #+(a, b, (c, (d, ...)));
+ * 	Returns the sum of all the numbers!
+ *
+ * > #*(a, b, (c, (d, ...)));
+ * 	Returns the product of all the numbers!
+ * 
+ * > #/(original, by);
  * 	Divides the original number by the "by" value, which is 2 if ommited.
  * 
- * > #MOD(original, by);
+ * > #%(original, by);
  * 	Takes "original" modulo "by", in which "by" is 10 if ommited.
  */
 
@@ -78,11 +84,13 @@ mods.Core.prototype.addActions = function() {
 	this._events.registerAction("modulo", this._modulo, this);
 	this._events.registerAction("vartree", this._vartree, this);
 	
-	this._events.registerHashFunct("DIV", this._div, this);
-	this._events.registerHashFunct("MOD", this._mod, this);
+	this._events.registerHashFunct("/", this._div, this);
+	this._events.registerHashFunct("%", this._mod, this);
+	this._events.registerHashFunct("+", this._sum, this);
+	this._events.registerHashFunct("*", this._prod, this);
 };
 
-/** Function: _increment
+/*- Function: _increment
  * 
  * Used internally to handle the "inc" action.
  *	You should use the standard ways of running actions, rather than calling this directly.
@@ -98,7 +106,7 @@ mods.Core.prototype._increment = function(data) {
 	this._events.setVar(data.to, Number(data.value)+Number(data.by));
 };
 
-/** Function: _multiply
+/*- Function: _multiply
  * 
  * Used internally to handle the "mul" action.
  *	You should use the standard ways of running actions, rather than calling this directly.
@@ -114,7 +122,7 @@ mods.Core.prototype._multiply = function(data) {
 	this._events.setVar(data.to, Number(data.value)*Number(data.by));
 };
 
-/** Function: _divide
+/*- Function: _divide
  * 
  * Used internally to handle the "div" action.
  *	You should use the standard ways of running actions, rather than calling this directly.
@@ -130,7 +138,7 @@ mods.Core.prototype._divide = function(data) {
 	this._events.setVar(data.to, Number(data.value)/Number(data.by));
 };
 
-/** Function: _modulo
+/*- Function: _modulo
  * 
  * Used internally to handle the "modulo" action.
  *	You should use the standard ways of running actions, rather than calling this directly.
@@ -146,7 +154,7 @@ mods.Core.prototype._modulo = function(data) {
 	this._events.setVar(data.to, Number(data.value)%Number(data.by));
 };
 
-/** Function: _vartree
+/*- Function: _vartree
  * 
  * Used internally to handle the "vartree" action.
  *	You should use the standard ways of running actions, rather than calling this directly.
@@ -180,16 +188,61 @@ mods.Core.prototype._vartree = function(data) {
 	this._processVarTree(data.data, data.root);
 };
 
-/** Function: _div
+/*- Function: _sum
  * 
- * Used internally to handle the "DIV" hashfunction.
+ * [number] Used internally to handle the "+" hashfunction.
  *	You should use the standard ways of running hashfunctions, rather than calling this directly.
  * 
  * Params:
- *	data		- [object] A "DIV" hashfunct.
+ *	name		- [string] The string name of the hashfunct.
+ * 	args		- [Array] An array of arguments.
  * 
  * Returns:
- * 	[number] The output of the hashfunct.
+ *	The output of the hashfunct.
+ */
+mods.Core.prototype._sum = function(name, args) {
+	if(args.length < 1){duskWolf.error("Nothing to sum.");return;}
+	var total = 0;
+	for(var i = args.length-1; i >= 0; i--){
+		total += Number(args[i]);
+	}
+	
+	return total;
+};
+
+/*- Function: _prod
+ * 
+ * [number] Used internally to handle the "*" hashfunction.
+ *	You should use the standard ways of running hashfunctions, rather than calling this directly.
+ * 
+ * Params:
+ *	name		- [string] The string name of the hashfunct.
+ * 	args		- [Array] An array of arguments.
+ * 
+ * Returns:
+ *	The output of the hashfunct.
+ */
+mods.Core.prototype._prod = function(name, args) {
+	if(args.length < 1){duskWolf.error("Nothing to product.");return;}
+	var total = 1;
+	for(var i = args.length-1; i >= 0; i--){
+		total *= Number(args[i]);
+	}
+	
+	return total;
+};
+
+/*- Function: _div
+ * 
+ * [number] Used internally to handle the "/" hashfunction.
+ *	You should use the standard ways of running hashfunctions, rather than calling this directly.
+ * 
+ * Params:
+ *	name		- [string] The string name of the hashfunct.
+ * 	args		- [Array] An array of arguments.
+ * 
+ * Returns:
+ *	The output of the hashfunct.
  */
 mods.Core.prototype._div = function(name, args) {
 	if(args[0] === undefined){duskWolf.error("Nothing to divide.");return;}
@@ -198,16 +251,17 @@ mods.Core.prototype._div = function(name, args) {
 	return Number(args[0])/Number(args[1]);
 };
 
-/** Function: _mod
+/*- Function: _mod
  * 
- * Used internally to handle the "MOD" hashfunction.
+ * [number] Used internally to handle the "MOD" hashfunction.
  *	You should use the standard ways of running hashfunctions, rather than calling this directly.
  * 
  * Params:
- *	data		- [object] A "MOD" hashfunct.
+ * 	name		- [string] The string name of the hashfunct.
+ * 	args		- [Array] An array of arguments.
  * 
  * Returns:
- * 	[number] The output of the hashfunct.
+ *	The output of the hashfunct.
  */
 mods.Core.prototype._mod = function(name, args) {
 	if(args[0] === undefined){duskWolf.error("Nothing to modulo.");return;}

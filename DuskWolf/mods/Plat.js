@@ -66,7 +66,7 @@ mods.Plat.prototype.addActions = function() {
 	this._events.registerAction("plat-room", this._setRoom, this);
 };
 
-/** Function: _setRoom
+/*- Function: _setRoom
  * 
  * Used internally to handle the "plat-room" action.
  * 	You should use the standard ways of running actions, rather than calling this directly.
@@ -80,7 +80,6 @@ mods.Plat.prototype._setRoom = function(dat) {
 	duskWolf.info("Setting room "+dat.room+".");
 	this._events.run(data.grabJson("prooms/"+dat.room.replace(/\-/g, "_")), this._events.thread);
 	this._events.run([
-		{"a":"unlisten", "event":"plat-mark"},
 		/*{"a":"if", "cond":(dat.nofade?"0","1"), "then":[*/
 			{"a":"sg-path", "pane":"plat-main", "path":"/main", "fade":{"from":1, "to":0, "speed":-0.05}},
 		/*]},*/
@@ -88,5 +87,5 @@ mods.Plat.prototype._setRoom = function(dat) {
 		/*{"a":"if", "cond":(dat.nofade?"0","1"), "then":[*/
 			{"a":"sg-path", "pane":"plat-main", "path":"/main", "fade":{"from":0, "to":1, "speed":0.05}},
 		/*]},*/
-		{"a":"call", "name":"plat-post-"+dat.room}], this._events.thread);
+		{"a":"fire", "event":"plat-room-load", "room":dat.room}], this._events.thread);
 };

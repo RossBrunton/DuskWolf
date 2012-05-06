@@ -46,11 +46,11 @@ Format: 1.51
 # --------------------------------------------------------------------------
 
 
-File: Global  (__init__.js)
 File: DuskWolf  (DuskWolf.js)
 File: Game  (Game.js)
 File: Events  (Events.js)
 File: Data  (Data.js)
+File: window  (__init__.js)
 
 Group: Mods  {
 

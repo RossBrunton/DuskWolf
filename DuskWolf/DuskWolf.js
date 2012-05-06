@@ -8,7 +8,7 @@
  * 
  * The loader loads this class as a global object named "duskWolf", to access these constants you just need to read that.
  * 
- * Uh, as for general documentation of the project, names starting with a "_" are private, and you shouldn't be using them unless you are directly editing the class.
+ * Uh, as for general documentation of the project, names starting with a "_" are private, and you shouldn't be using them unless you are directly editing the class. Documentation on them should exist (though likely doesn't), but is not in the generated documentation files.
  * 
  * The DuskWolf engine is created by SavageWolf (Ross Brunton) who can be contacted by email at savagewolf8@gmail.com if you so desire.
  * 
@@ -90,12 +90,12 @@ DuskWolf.prototype.htmlLogLevel = 4;
 /** Constant: ver
  * [string] Version of the DW engine. Does not have to be a dot seperated list of numbers or anything, any string will do.
  */
-DuskWolf.prototype.ver = "0.0.7-alpha";
+DuskWolf.prototype.ver = "0.0.8-alpha";
 
 /** Constant: verId
  * [number] Version of the DW engine, this may not be human readable, and should be used to check if a save file is older than a certain version, or something. It is assumed that later numbers are newer versions.
  */
-DuskWolf.prototype.verId = 7;
+DuskWolf.prototype.verId = 8;
 
 /** Constant: gameName
  * [string] Name of the game. 

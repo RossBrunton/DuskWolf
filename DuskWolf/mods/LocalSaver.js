@@ -56,7 +56,7 @@ mods.LocalSaver.prototype.addActions = function() {
 	this._events.registerAction("local-clear", this._clear, this);
 };
 
-/** Function: _save
+/*- Function: _save
  * 
  * Used internally to handle the "local-save" action.
  * 	You should use the standard ways of running actions, rather than calling this directly.
@@ -92,7 +92,7 @@ mods.LocalSaver.prototype._save = function(a) {
 	}
 };
 
-/** Function: _load
+/*- Function: _load
  * 
  * Used internally to handle the "local-load" action.
  * 	You should use the standard ways of running actions, rather than calling this directly.
@@ -106,7 +106,7 @@ mods.LocalSaver.prototype._load = function(a) {
 	this._events.setVars(JSON.parse(localStorage["dw_"+a.name]));
 };
 
-/** Function: _clear
+/*- Function: _clear
  * 
  * Used internally to handle the "local-clear" action.
  * 	You should use the standard ways of running actions, rather than calling this directly.

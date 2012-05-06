@@ -4,39 +4,35 @@
 
 /** Class: sgui.Component
  * 
- * A component is a single "thing" that exists in the Simple Gui system. Everything in the Simple GUI system must have this as a base class.
+ * A component is a single "thing" that exists in the Simple Gui system. Everything in the Simple GUI system must have this (or a subclass of this) as a base class.
  * 
- * This class doesn't actually do anything in itself, classes that inherit from it do.
+ * This class doesn't actually display anything itself, classes that inherit from it do.
  * 	The properties for this apply to all components.
+ * 
+ * See <mods.SimpleGui> for an overview of the sgui system.
  * 
  * Supported Properties:
  * 
- * <p><code>&lt;x&gt;(x)&lt;/x&gt;</code> --
- * The x coordinate of this component, starting from the left of its container at 0.</p>
+ * > x:123
+ *	The x coordinate of this component, starting from the left of its container at 0.
  * 
- * <p><code>&lt;y&gt;(y)&lt;/y&gt;</code> --
- * The y coordinate of this component, starting from the top of its container at 0.</p>
+ * > y:123
+ *	The y coordinate of this component, starting from the top of its container at 0.
  * 
- * <p><code>&lt;scale-x&gt;(scale)&lt;/scale-x&gt;</code> --
- * The relative width of this object, a value of two means it's two times as wide, for example.</p>
+ * > width:123
+ * 	The width of the component, in pixels.
  * 
- * <p><code>&lt;scale-y&gt;(scale)&lt;/scale-y&gt;</code> --
- * The relative height of this object, a value of two means it's two times as tall, for example.</p>
+ * > height:123
+ * 	The height of the component, in pixels.
  * 
- * <p><code>&lt;height&gt;(height)&lt;/height&gt;</code> --
- * The height of the component, in pixels. This will chage the value of <code>&lt;scale-y&gt;</code>.</p>
+ * > alpha:123
+ * 	How transparent the object is, in the range 0 (fully transparent) to 1 (opaque).
  * 
- * <p><code>&lt;width&gt;(width)&lt;/width&gt;</code> --
- * The width of the component, in pixels. This will chage the value of <code>&lt;scale-x&gt;</code>.</p>
+ * > visible:true
+ * 	If this is false, the object will not be drawn on to the canvas.
  * 
- * <p><code>&lt;alpha&gt;(alpha)&lt;/alpha&gt;</code> --
- * How transparent an object is, from 0 (transparent) to 1 (solid). 0.5 for half transparency, for example. An alpha of "0" doesn't stop the user from interacting with it.</p>
- * 
- * <p><code>&lt;visible&gt;(visible)&lt;/visible&gt;</code> --
- * If it's "1", then the object is displayed and the user can see it. If it's "0" it's invisible but the user can still interact with it. This has no effect on <code>&lt;alpha&gt;</code>.</p>
- * 
- * <p><code>&lt;action&gt;(code)&lt;/action&gt;</code> --
- * <code>code</code> will be ran if the action key is pressed while this button is active, good practice is to have a <code>fire</code> action here.</p>
+ * > action:[...]
+ * 	When the action button is pressed when this component is active, the code specified by this property is ran.
  * 
  * <p><code>&lt;flow-up&gt;(component)&lt;/flow-up&gt;</code> --
  * The component in this one's container that will be flowed into when the up button is pressed. If it is not a valid name, "blank" is flowed into.</p>
@@ -63,7 +59,6 @@
  * The component's alpha will be set to 1, and decreased by <code>speed</code> (default is 0.05) every frame. It stops events while it is doing this.</p>
  * 
  * See:
- * * <mods.SimpleGui>
  * * <sgui.IContainer>
  */
 	 
@@ -139,8 +134,8 @@ sgui.Component = function (parent, events, componentName) {
 		//Add the core properties
 		this._registerPropMask("x", "x", true);
 		this._registerPropMask("y", "y", true);
-		this._registerPropMask("scale-x", "scaleX", true);
-		this._registerPropMask("scale-y", "scaleY", true);
+		//this._registerPropMask("scale-x", "scaleX", true);
+		//this._registerPropMask("scale-y", "scaleY", true);
 		this._registerPropMask("width", "_width", true);
 		this._registerPropMask("height", "_height", true);
 		this._registerPropMask("alpha", "alpha", true);
@@ -151,7 +146,7 @@ sgui.Component = function (parent, events, componentName) {
 		this._registerPropMask("flow-left", "_leftFlow", true);
 		this._registerPropMask("flow-right", "_rightFlow", true);
 		this._registerPropMask("enabled", "enabled", true);
-		this._registerPropMask("action", "action", true);
+		this._registerPropMask("action", "_action", true);
 		this._registerProp("delete", function(name, value){if(value) this._container.deleteComponent(this.comName);}, null);
 		this._registerProp("float", this._setFloat, null);
 		this._registerProp("fade", this._setFade, null);
@@ -213,6 +208,9 @@ sgui.Component.prototype._registerActionHandler = function(name, funct, scope) {
 }
 
 sgui.Component.prototype._registerProp = function(name, onSet, onGet, depends) {
+	if(this._propMasks[name] !== undefined) {
+		delete this._propMasks[name];
+	}
 	this._propHandlers[name] = [onSet, onGet, depends];
 }
 
@@ -223,6 +221,17 @@ sgui.Component.prototype._registerPropMask = function(name, mask, redraw) {
 sgui.Component.prototype._actionProp = function(e) {
 	if(this._action.length){
 		this._events.run(this._action, "_"+this.comName);
+		return true;
+	}
+}
+
+sgui.Component.prototype._doAction = function(e) {
+	var actionRet = false;
+	for(var s in this._actionHandlers){
+		actionRet = this._actionHandlers[s].call(this, e)?true:actionRet;
+	}
+	
+	if(actionRet){
 		return true;
 	}
 }
@@ -263,12 +272,7 @@ sgui.Component.prototype.keypress = function (e) {
 		
 		//Action key
 		case 32:
-			var actionRet = false;
-			for(var s in this._actionHandlers){
-				actionRet = this._actionHandlers[s].call(this, e)?true:actionRet;
-			}
-			
-			if(actionRet){
+			if(this._doAction(e)){
 				return true;
 			}
 		
@@ -306,31 +310,11 @@ sgui.Component.prototype._upAction = function() {return true;}
  */
 sgui.Component.prototype._downAction = function() {return true;}
 
-/** Registers a stuff handler. This function will be called with an XML containing a list of properties, and it's assumed that this function will parse them.
- * @param stuff The stuff handler to add, will be passed a single XML as a parameter.
- * @see #procVar
- */
-sgui.Component.prototype._registerStuff = function(stuff) {
-	duskWolf.log(this+" is naughty!");
-	this._stuffActions.push(stuff);
-}
-
 /** This is what actually processes all the properties, it should be given an xml as an argument, that XML should contain a list of properties.
  * @param xml The properties to process.
  */
 sgui.Component.prototype.parseProps = function(props, thread) {
-	thread = thread?thread:this._thread;
-	/*if(!this.open || this._thread == thread){
-		this.open ++;*/
-		this._thread = thread?thread:this._thread;
-		
-		for(var i = 0; i < this._stuffActions.length; i++){
-			this._stuffActions[i].call(this, props);
-		}
-		/*this.open--;
-	}else{
-		duskWolf.warn(this.comName+" is already doing something in another thread, "+this._thread);
-	}*/
+	if(thread) this._thread = thread;
 	
 	var toProcess = [];
 	for(var p in props) {
@@ -364,60 +348,25 @@ sgui.Component.prototype.parseProps = function(props, thread) {
 	}
 }
 
-/** This will process an individual property, though it's main purpose is to allow the <code>to</code> attribute to work. It takes an XML, a property name and a default value and returns the inner text, or the default if there is none.
- * 
- * <p>It will also set any <code>to</code> attributes, for example, <code>&lt;x to='ecs'&gt;100&lt;/x&gt;</code> will set the <code>ecs</code> var to 100, and return 100; <code>&lt;x to='ecs'/&gt;</code> will set <code>ecs</code> to the current x coordinate.</p>
- * 
- * @param name The name of the property you are looking for.
- * @param data The properties XML, the WHOLE properties XML, not just the property you wish to set.
- * @param def The defualt value, if <code>name</code> does not exist or the XML tag is empty, this will be returned and/or set.
- * @return The value that the property contains , of <code>def</code>
- */
-
-sgui.Component.prototype._prop = function(name, data, def, valOnly, bookRedraw) {
-	if(bookRedraw == 3) this.bookRedraw();
-	if(data[name] === undefined) return def;
-	if(bookRedraw == 2) this.bookRedraw();
-	
-	if(typeof(data[name]) == "object"){
-		if(data[name].to){
-			this._events.setVar(data[name].to, data[name].value?data[name].value:def);
-		}
-		
-		if(!data[name].value && valOnly) return def;
-		
-		if(bookRedraw == 1) this.bookRedraw();
-		
-		if(valOnly){
-			return data[name].value;
-		}else{
-			return data[name];
-		}
-	}else{
-		if(bookRedraw == 1 && data[name] != def) this.bookRedraw();
-		return data[name];
-	}
-}
-
 sgui.Component.prototype.prop = function(name, value) {
-	if(this._propHandlers[name] === undefined && this._propMasks[name] === undefined) {
-		return null;
-	}
-	
-	if(value !== undefined) {
-		if(this._propHandlers[name] && this._propHandlers[name][0]) return this._propHandlers[name][0].call(this, name, value);
-		if(this._propMasks[name] !== undefined) {
+	if(this._propMasks[name] !== undefined) {
+		if(value === undefined) {
+			return this[this._propMasks[name][0]];
+		}else{
 			this[this._propMasks[name][0]] = value;
 			if(this._propMasks[name][1]) this.bookRedraw();
 			return value;
 		}
-		if(!this._propHandlers[name][0]) return null;
-		return ;
+	} else if(this._propHandlers[name] !== undefined) {
+		if(value !== undefined) {
+			return this._propHandlers[name][0].call(this, name, value);
+		} else {
+			return this._propHandlers[name][1].call(this, name);
+		}
 	}
 	
-	if(this._propHandlers[name] && this._propHandlers[name][1]) return  this._propHandlers[name][1].call(this, name);
-	if(this._propMasks[name] !== undefined) return this[this._propMasks[name][0]];
-}
+	return null;
+};
 
 sgui.Component.prototype._theme = function(value, set) {
 	if(this._events.getVar("theme."+this._events.getVar("theme.current")+"."+value) === undefined && set !== undefined)
@@ -574,7 +523,8 @@ sgui.Component.prototype.path = function(path) {
 	
 	switch(first) {
 		case "..":
-			return this._container.path(second);
+			if(second) return this._container.path(second);
+			return this._container;
 			break;
 		
 		case "":

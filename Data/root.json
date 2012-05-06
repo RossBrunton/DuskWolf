@@ -2,6 +2,6 @@
 	"name":"Platforming Example",
 	"version":"0.0.7",
 	"duskVer":7,
-	"files":["Examples/plat"],
+	"files":["Examples/core"],
 	"mods":["Core", "SimpleGui", "LocalSaver", "Math", "Plat", "Keyboard", "Data"]
 }

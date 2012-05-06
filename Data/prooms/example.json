@@ -163,7 +163,7 @@
 	"cols":30,
 	
 	"entities":[
-		{"name":"1", "type":"walk", "x":1, "y":1},
+		/*{"name":"1", "type":"walk", "x":1, "y":1},
 		{"name":"2", "type":"walk", "x":2, "y":1},
 		{"name":"3", "type":"walk", "x":3, "y":1},
 		{"name":"4", "type":"walk", "x":4, "y":1},
@@ -267,7 +267,7 @@
 		{"name":"d18", "type":"walk", "x":18, "y":5},
 		{"name":"d19", "type":"walk", "x":19, "y":5},
 		{"name":"d20", "type":"walk", "x":20, "y":5},
-		{"name":"d21", "type":"walk", "x":21, "y":5},
+		{"name":"d21", "type":"walk", "x":21, "y":5},*/
 		{"name":"b", "type":"block", "x":7, "y":25},
 		{"name":"fa1", "type":"fall", "x":21, "y":16},
 		{"name":"fa2", "type":"fall", "x":22, "y":16},
@@ -280,16 +280,16 @@
 	]
 }},
 
-{"a":"function", "name":"plat-post-example", "actions":[
-	{"a":"listen", "event":"plat-mark", "up":false, "mark":1, "actions":[
+{"a":"listen", "event":"plat-room-load", "room":"example", "actions":[
+	{"a":"listen", "name":"SPlaceFind", "event":"plat-mark", "room":"example", "up":false, "mark":1, "actions":[
 		{"a":"print", "text":"You found my secret hiding place!"}
 	]},
 	
-	{"a":"listen", "event":"plat-mark", "up":false, "mark":2, "actions":[
+	{"a":"listen", "name":"rightExit", "event":"plat-mark", "room":"example", "up":false, "mark":2, "actions":[
 		{"a":"plat-room", "room":"example", "spawn":4}
 	]},
 	
-	{"a":"listen", "event":"plat-mark", "up":false, "mark":3, "actions":[
+	{"a":"listen", "name":"test", "event":"plat-mark", "room":"example", "up":false, "mark":3, "actions":[
 		{"a":"print", "text":"Test!"},
 		{"a":"pane", "name":"speak", "active":"true", "children":[
 			{"type":"Saybox", "name":"box", "say":"This is a test! unt oaednth uoaetns uaotneu hsntaoehu snrhtaeo t uhcba,orlu ba,rlmtcbalroeh ualrschu rlsachue snatoeh usntah ulr.,th uaeoh usnatoehu las,r.h tstoe husa.,lh olr"} 

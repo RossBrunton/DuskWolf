@@ -19,8 +19,6 @@
  * Checks if the key specified by the JS keycode "key" is pressed.
  * 	If so, then the "then" actions are ran, else, the "else" actions are ran.
  * 
- * 
- * 
  * Provided Events:
  * 
  * > {"a":"fire", "event":"key-event-down", "key":123, "shift":false, "ctrl":false, "alt":false}
@@ -46,23 +44,59 @@ mods.Keyboard = function(events) {
 	this._events.registerKeyHandler("KeyboardKey", this._handleKeypress, this);
 	this._events.registerKeyUpHandler("KeyboardUpKey", this._handleKeyup, this);
 	
-	/** Variable: _keys
+	/*- Variable: _keys
 	 * [object] A list of keys that are pressed. It is an array with the indexes being the keycodes.
 	 */
 	this._keys = {};
 	
-	/** Variable: _codes
+	/*- Variable: _codes
 	 * [object] An object with the properties the same as keycodes.
 	 * 	Each property key is a number, which contains a two element array.
 	 * 	The first element is a representation of the character, and the second is a boolean, which is true if the character is printable. 
 	 */
 	this._codes = {
 		"8":["BACKSPACE", false],
+		"13":["ENTER", false],
+		
+		"32":[" ", true],
+		
+		"48":["0", true],
+		"49":["1", true],
+		"50":["2", true],
+		"51":["3", true],
+		"52":["4", true],
+		"53":["5", true],
+		"54":["6", true],
+		"55":["7", true],
+		"56":["8", true],
+		"57":["9", true],
 		
 		"65":["a", true],
 		"66":["b", true],
 		"67":["c", true],
 		"68":["d", true],
+		"69":["e", true],
+		"70":["f", true],
+		"71":["g", true],
+		"72":["h", true],
+		"73":["i", true],
+		"74":["j", true],
+		"75":["k", true],
+		"76":["l", true],
+		"77":["m", true],
+		"78":["n", true],
+		"79":["o", true],
+		"80":["p", true],
+		"81":["q", true],
+		"82":["r", true],
+		"83":["s", true],
+		"84":["t", true],
+		"85":["u", true],
+		"86":["v", true],
+		"87":["w", true],
+		"88":["x", true],
+		"89":["y", true],
+		"90":["z", true],
 	};
 };
 mods.Keyboard.prototype = new mods.IModule();
@@ -79,7 +113,7 @@ mods.Keyboard.prototype.addActions = function() {
 	this._events.registerAction("if-key", this._ifkey, this);
 };
 
-/** Function: _handleKeypress
+/*- Function: _handleKeypress
  * 
  * This handles the keypress event, which is obviously something this module has to do.
  * 
@@ -91,7 +125,7 @@ mods.Keyboard.prototype._handleKeypress = function(e) {
 	this._keys[e.keyCode] = true;
 };
 
-/** Function: _handleKeyup
+/*- Function: _handleKeyup
  * 
  * This handles the keyup event, which is dispatched when a pressed key is released.
  * 
@@ -135,7 +169,7 @@ mods.Keyboard.prototype.lookupCode = function(code) {
 	return this._codes[code];
 };
 
-/** Function: _ifKey
+/*- Function: _ifKey
  * 
  * Used internally to handle the "ifKey" action.
  *	You should use the standard ways of running actions, rather than calling this directly.
