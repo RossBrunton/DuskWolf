@@ -46,7 +46,7 @@
 		{"a":"print","text":"Conditions: #IF(2=2, Aye, nay)"}
 	]},
 	
-	{"a":"listen", "event":"sys-event-start", "actions":[
-		
+	{"a":"listen", "event":"sys-event-frame", "actions":[
+		{"a":"var","name":"count","value":"#+($count;, 1)"}
 	]}
 ]

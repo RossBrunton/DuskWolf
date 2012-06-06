@@ -21,6 +21,9 @@
  * > "version":"..."
  * The version of the game. This can be in any format, but it should be unique for each game version.
  * 
+ * > "author":"..."
+ * The author of the game.
+ * 
  * > "duskVer":123
  * The earliest version of DuskWolf this will run on, it should be a number corresponding to <DuskWolf.verId>. If this is smaller than the DuskWolf, then the game won't run.
  * 
@@ -46,40 +49,22 @@ window.Data = function() {
 	 * [object] This is all the files that have been downloaded, it is ether a string (for text based files) or a HTML img tag (for images). The name of the file is the property name, for example _loaded["test.json"] would be the file "test.json".
 	 */
 	this._loaded = {};
-	/*- Variable: scripts
+	/** Variable: scripts
 	 * [array] This is an array of arrays consisting of all the files specified in the root JSON. <Events> loops through these and runs them when it is constructed.
 	 */
 	this.scripts = [];
 	
-	/*- Variable: _root
+	/** Variable: root
 	 * [object] This is the root JSON, it is obtained from root.json and provides all the basic stuff that describes the game.
 	 */
-	this._root = this.grabJson("root");
+	this.root = this.grabJson("root");
 	
 	//Enable/disable cache
 	$.ajaxSetup({"cache": !duskWolf.dev});
 	
-	if(!this._root) {duskWolf.error("Root json could not be loaded."); return;}
-	if(this._root.duskVer > duskWolf.verId) {duskWolf.error("DuskWolf version is incompatable."); return;}
-	duskWolf.info(this._root.name+" is loading."); 
-	
-	if(!("files" in this._root)) {duskWolf.error("Root json does not specify a list of files..."); return;}
-	for(var i = this._root.files.length-1; i>= 0; i--) {
-		if(this.grabJson(this._root.files[i])) {
-			this.scripts[this.scripts.length] = this.grabJson(this._root.files[i]);
-		}
-	}
-	
-	if("mods" in this._root) window.modsAvalable = this._root.mods;
-	
-	//Import modules
-	var ims = ["mods/IModule.js"];
-
-	for(var i = window.modsAvalable.length-1; i >= 0; i--) {
-		ims[ims.length] = "mods/"+window.modsAvalable[i]+".js";
-	}
-	
-	__import__(ims);
+	if(!this.root) {duskWolf.error("Root json could not be loaded."); return;}
+	if(this.root.duskVer > duskWolf.verId) {duskWolf.error("DuskWolf version is incompatable with this program."); return;}
+	duskWolf.info(this.root.name+" is loading."); 
 };
 
 /*- Variable: __hold__
@@ -96,22 +81,25 @@ var modsAvalable;
  * 
  * This is a little more lax than the normal JSON parser. before the file is parsed, tabs and newlines are replaced by spaces, and /* comments are removed, letting you use them in the file.
  * 
+ * If the file is not a valid JSON file or has a ".dws" file extension and the useDwc param is true, then it will be called and will attempt to compile the file.
+ * 
  * Params:
  * 	file - [string] The name of the file to load, is relative to <__datadir__> and the "json" file extension is added to this automatically if the file name does not contain a ".".
- * 	async - [boolean] Not implemented yet.
+ * 	useDwc - [boolean] If true, then the DuskWolf compiler can be invoked to compile the file if needed.
  * 
  * Return:
  * [object] The contents of the file, parsed as a JSON object.
  */
-Data.prototype.grabJson = function(file, async) {
+Data.prototype.grabJson = function(file, useDwc) {
 	if(file.indexOf(".") === -1) file += ".json";
+	if(file.match(/\.dws$/i) && useDwc) return this.grabDws(file);
 	
 	if(this._loaded[file] === undefined) {
 		duskWolf.info("Downloading JSON "+file+"...");
 		
-		$.ajax({"async":async==true, "dataType":"text", "error":function(jqXHR, textStatus, errorThrown) {
-			duskWolf.error("Error getting "+file+", "+errorThrown);
-			__hold__ = null;
+		$.ajax({"async":false, "dataType":"text", "error":function(jqXHR, textStatus, errorThrown) {
+			if(!useDwc) duskWolf.error("Error getting "+file+", "+errorThrown);
+			__hold__ = "";
 		}, "success":function(json, textStatus, jqXHR) {
 			__hold__ = json;
 		}, "url":__datadir__+"/"+file});
@@ -119,7 +107,45 @@ Data.prototype.grabJson = function(file, async) {
 		this._loaded[file] = __hold__.replace(/\t/g, " ").replace(/\/\*(?:.|\n)*?\*\//g, "").replace(/\n/g, " ");
 	}
 	
-	return JSON.parse(this._loaded[file]);
+	if(this._isJson(this._loaded[file])) return JSON.parse(this._loaded[file]);
+	if(useDwc) return this.grabDws(file.replace(/\.json$/i, ""));
+};
+
+/** Function: grabDws
+ * 
+ * This downloads and parses a DWS (DuskWolfScript) file from an online place. It blocks until the file is downloaded, and returns that file.
+ * 
+ * 
+ * Params:
+ * 	file - [string] The name of the file to load, is relative to <__datadir__> and the "dws" file extension is added to this automatically if the file name does not contain a ".".
+ * 
+ * Return:
+ * [object] The contents of the file, compiled and parsed as a JSON object.
+ */
+Data.prototype.grabDws = function(file) {
+	if(file.indexOf(".") === -1) file += ".dws";
+	
+	if(this._loaded[file] === undefined) {
+		duskWolf.info("Downloading DWS "+file+"...");
+		
+		$.ajax({"dataType":"text", "error":function(jqXHR, textStatus, errorThrown) {
+			duskWolf.error("Error getting "+file+", "+errorThrown+". This may also have affected any attempts to get a JSON file beforehand.");
+			__hold__ = null;
+		}, "success":function(json, textStatus, jqXHR) {
+			__hold__ = json;
+		}, "url":__datadir__+"/"+file});
+		
+		this._loaded[file] = __hold__;
+	}
+	
+	try {
+		return JSON.parse(dwc.compile(this._loaded[file]));
+	} catch (e) {
+		duskWolf.error("Could not parse "+file+" as DWS.");
+		duskWolf.error(e);
+		duskWolf.log(dwc.compile(this._loaded[file]));
+		return {};
+	}
 };
 
 /** Function: grabFile
@@ -174,3 +200,17 @@ Data.prototype.grabImage = function(file) {
 		return this._loaded[file];
 	}
 };
+
+/*- Function: _isJson
+ * 
+ * [boolean] This takes a string, checks if it is a string in JSON notation.
+ * 
+ * Params:
+ * 	str			- [string] The string to check.
+ * 
+ * Returns:
+ *	Whether the object can be parsed as json.
+ */
+Data.prototype._isJson = function(str) {
+	return /^[\],:{}\s]*$/.test(String(str).replace(/\\["\\\/bfnrtu]/g, '@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').replace(/(?:^|:|,)(?:\s*\[)+/g, ''));
+}

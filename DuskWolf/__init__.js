@@ -49,7 +49,7 @@ window.data = null;
  * It adds handlers to all the events, and imports all the main classes.
  */
 window.__start__ = function() {
-	__import__(["DuskWolf.js", "Data.js", "Game.js", "Events.js"]);
+	__import__(["dwc.js", "DuskWolf.js", "Data.js", "Game.js", "Events.js"]);
 	
 	window.duskWolf = new DuskWolf();
 	

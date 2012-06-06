@@ -10,38 +10,22 @@
  * Inheritance:
  * 	mods.Math { <mods.IModule>
  * 
- * Provided Actions:
+ * Provided HashFunctions:
  * 
- * > {"a":"sin", "to":"...", "value":123, ("deg":true)}
- * Takes the sine of the value specified and stores it in "to".
- * 	Uses radians unless "deg" is specified, in which case degrees are used.
- * 	For convenience, it is rounded to 10 decimal places.
+ * > #SIN(value, (deg));
+ * > #COS(value, (deg));
+ * > #TAN(value, (deg));
+ * > #ASIN(value, (deg));
+ * > #ACOS(value, (deg));
+ * > #ATAN(value, (deg));
+ * Returns the trig operation of the specified value.
+ *	The functions use radians, unless deg, a boolean, is true.
+ *	The values are rounded to 10 decimal places for convienience, exceyt inverses in degrees, which are rounded to the nearest degree.
+ *	ASIN, ACOS and ATAN are inverses of their respective functions.
+ *	TAN will return Infinity where approprate, and atan will return PI/2 when given Infinity.
  * 
- * > {"a":"cos", "to":"...", "value":123, ("deg":true)}
- * Takes the cosine of the value specified and stores it in "to".
- * 	Similar to the sin action.
- * 
- * > {"a":"tan", "to":"...", "value":123, ("deg":true)}
- * Takes the tangent of the value specified and stores it in "to".
- * 	Similar to the sin action.
- * 	If the value is Pi/2, then Infinity is stored.
- * 
- * > {"a":"asin", "to":"...", "value":123, ("deg":true)}
- * Takes the inverse sine of the value specified and stores it in "to".
- * 	Uses radians unless "deg" is specified, in which case degrees are used.
- * 	For convenience, it is rounded to 10 decimal places.
- * 
- * > {"a":"acos", "to":"...", "value":123, ("deg":true)}
- * Takes the inverse cosine of the value specified and stores it in "to".
- * 	Similar to the asin action.
- * 
- * > {"a":"atan", "to":"...", "value":123, ("deg":true)}
- * Takes the inverse tangent of the value specified and stores it in "to".
- * 	Similar to the asin action.
- * 	If the value given is Infinity, then this will store pi/2.
- * 
- * > {"a":"round", "to":"...", "value":123, ("places":0)}
- * Rounds the value to the specified number of decimal places, 0 by defualt.
+ * > #ROUND(value, places);
+ *	Rounds the value to the specified number of decimal places, no decimal places by defualt.
  * 
  * Variables:
  * 
@@ -79,13 +63,13 @@ mods.Math.constructor = mods.Math;
  * * <mods.IModule.addActions>
  */
 mods.Math.prototype.addActions = function() {
-	this._events.registerAction("sin", this._trig, this);
-	this._events.registerAction("cos", this._trig, this);
-	this._events.registerAction("tan", this._trig, this);
-	this._events.registerAction("asin", this._untrig, this);
-	this._events.registerAction("acos", this._untrig, this);
-	this._events.registerAction("atan", this._untrig, this);
-	this._events.registerAction("round", this._round, this);
+	this._events.registerHashFunct("SIN", this._trig, this);
+	this._events.registerHashFunct("COS", this._trig, this);
+	this._events.registerHashFunct("TAN", this._trig, this);
+	this._events.registerHashFunct("ASIN", this._untrig, this);
+	this._events.registerHashFunct("ACOS", this._untrig, this);
+	this._events.registerHashFunct("ATAN", this._untrig, this);
+	this._events.registerHashFunct("ROUND", this._round, this);
 	
 	//Constants
 	this._events.setVar("math.pi", Math.PI);
@@ -96,83 +80,92 @@ mods.Math.prototype.addActions = function() {
 
 /*- Function: _trig
  * 
- * Used internally to handle the "sin", "cos" and "tan" actions.
- * 	You should use the standard ways of running actions, rather than calling this directly.
+ * [number] Used internally to handle the trig hashfunctions.
+ *	You should use the standard ways of running hashfunctions, rather than calling this directly.
  * 
  * Params:
- * 	data		- [object] A "sin", "cos" or "tan" action.
+ *	name		- [string] The string name of the hashfunct.
+ * 	args		- [Array] An array of arguments.
+ * 
+ * Returns:
+ *	The output of the hashfunct.
  */
-mods.Math.prototype._trig = function(data) {
-	if(data.to === null){duskWolf.error("No target to act to.");return;}
-	if(data.value === null){duskWolf.error("No value to act on.");return;}
-	
-	if(data.deg) data.value = (data.value/180)*Math.PI;
+mods.Math.prototype._trig = function(name, args) {
+	if(args.length < 1){duskWolf.error("No argument to trig function.");return;}
+	if(args.length >= 2 && args[1]) args[0] = (args[0]/180)*Math.PI;
 	
 	var tmp = 0;
 	
-	switch(data.a){
+	switch(name){
 		case "sin":
-			tmp = Math.sin(data.value);
+			tmp = Math.sin(args[0]);
 			break;
 		
 		case "cos":
-			tmp = Math.cos(data.value);
+			tmp = Math.cos(args[0]);
 			break;
 		
 		case "tan":
-			tmp = Math.tan(data.value);
-			if(tmp == Math.cos(Math.PI/2)) tmp = Infinity;
+			tmp = Math.tan(args[0]);
+			if(tmp == Math.tan(Math.PI/2)) tmp = Infinity;
 			break;
 	}
 	
-	this._events.setVar(data.to, Math.round(tmp*10000000000)/10000000000);
+	return Math.round(tmp*10000000000)/10000000000;
 };
 
 /*- Function: _untrig
  * 
- * Used internally to handle the "asin", "acos" and "atan" actions.
- * 	You should use the standard ways of running actions, rather than calling this directly.
+ * [number] Used internally to handle the inverse trig hashfunctions.
+ *	You should use the standard ways of running hashfunctions, rather than calling this directly.
  * 
  * Params:
- * 	data		- [object] An "asin", "acos" or "atan" action.
+ *	name		- [string] The string name of the hashfunct.
+ * 	args		- [Array] An array of arguments.
+ * 
+ * Returns:
+ *	The output of the hashfunct.
  */
-mods.Math.prototype._untrig = function(data) {
-	if(data.to === null){duskWolf.error("No target to act to.");return;}
-	if(data.value === null){duskWolf.error("No value to act on.");return;}
+mods.Math.prototype._untrig = function(name, args) {
+	if(args.length < 1){duskWolf.error("No argument to trig function.");return;}
 	
 	var tmp = 0;
 	
-	switch(data.a){
+	switch(name){
 		case "asin":
-			tmp = Math.asin(data.value);
+			tmp = Math.asin(args[0]);
 			break;
 		
 		case "acos":
-			tmp = Math.acos(data.value);
+			tmp = Math.acos(args[0]);
 			break;
 		
 		case "atan":
-			tmp = Math.atan(data.value);
+			tmp = Math.atan(args[0]);
 			break;
 	}
 	
 	tmp = Math.round(tmp*10000000000)/10000000000;
 	
-	this._events.setVar(data.to, data.deg?Math.round(tmp*(180/Math.PI)):tmp);
+	return (args.length >= 2 && args[1])?Math.round(tmp*(180/Math.PI)):tmp;
 };
 
 /*- Function: _round
  * 
- * Used internally to handle the "round" action.
- * 	You should use the standard ways of running actions, rather than calling this directly.
+ * [number] Used internally to handle the round hashfunction.
+ *	You should use the standard ways of running hashfunctions, rather than calling this directly.
  * 
  * Params:
- * 	data		- [object] A "round" action.
+ *	name		- [string] The string name of the hashfunct.
+ * 	args		- [Array] An array of arguments.
+ * 
+ * Returns:
+ *	The output of the hashfunct.
  */
-mods.Math.prototype._round = function(data) {
-	if(!data.to){duskWolf.error("No target to round to.");return;}
-	if(!data.value){duskWolf.error("No value to round.");return;}
-	if(!data.places) data.places = 1; else data.places = Math.pow(10, data.places);
+mods.Math.prototype._round = function(name, args) {
+	var places = 1;
+	if(args.length < 1){duskWolf.error("Nothing to round.");return;}
+	if(args.length >= 2 && args[1]) places = Math.pow(10, args[1]);
 	
-	this._events.setVar(data.to, Math.round(data.value*data.places)/data.places);
+	return Math.round(args[0]*places)/places;
 };

@@ -32,36 +32,36 @@
  * 	If this is false, the object will not be drawn on to the canvas.
  * 
  * > action:[...]
- * 	When the action button is pressed when this component is active, the code specified by this property is ran.
+ * 	When the action button is pressed when this component is active, the actions here is ran.
  * 
- * <p><code>&lt;flow-up&gt;(component)&lt;/flow-up&gt;</code> --
- * The component in this one's container that will be flowed into when the up button is pressed. If it is not a valid name, "blank" is flowed into.</p>
+ * > flow-up:"..."
+ *	The component in this one's container that will be flowed into when the up button is pressed. If it is not a valid component, "blank" is flowed into.
  * 
- * <p><code>&lt;flow-down&gt;(component)&lt;/flow-down&gt;</code> --
- * The component in this one's container that will be flowed into when the down button is pressed. If it is not a valid name, "blank" is flowed into.</p>
+ * > flow-up:"..."
+ *	The component in this one's container that will be flowed into when the down button is pressed. If it is not a valid component, "blank" is flowed into.
  * 
- * <p><code>&lt;flow-left&gt;(component)&lt;/flow-left&gt;</code> --
- * The component in this one's container that will be flowed into when the left button is pressed. If it is not a valid name, "blank" is flowed into.</p>
+ * > flow-up:"..."
+ *	The component in this one's container that will be flowed into when the left button is pressed. If it is not a valid component, "blank" is flowed into.
  * 
- * <p><code>&lt;flow-right&gt;(component)&lt;/flow-right&gt;</code> --
- * The component in this one's container that will be flowed into when the right button is pressed. If it is not a valid name, "blank" is flowed into.</p>
+ * > flow-up:"..."
+ *	The component in this one's container that will be flowed into when the right button is pressed. If it is not a valid component, "blank" is flowed into.
  * 
- * <p><code>&lt;enabled&gt;(component)&lt;/enabled&gt;</code> --
- * If this is "0", then the commponent can't be flowed into.</p>
+ * > enabled:true
+ *	If true, then the component can be flowed into, if not then the attempt to flow will fail.
  * 
- * <p><code>&lt;delete/&gt;</code> --
- * If this property is found, then the component will be destroyed, you should probably put it at the end of all actions or something.</p>
+ * > delete:true
+ *	If true, then the component will be erased from it's container.
  * 
- * <p><code>&lt;fade-in [speed='(speed)']&gt;(speed)&lt;/fade-in&gt;</code> --
- * The component's alpha will be set to 0, and increased by <code>speed</code> (default is 0.05) every frame. It stops events while it is doing this.</p>
+ * > fade:{("from":123,) ("speed":123,) ("end":123)}
+ *	This creates a fade effect, which will change the alpha from the "from" value to the "end" value at "speed" alpha units per second. The defaults for "from", "speed" and "end" are 0, 1 and 0.05 respectively. 
  * 
- * <p><code>&lt;fade-out [speed='(speed)']&gt;(speed)&lt;/fade-in&gt;</code> --
- * The component's alpha will be set to 1, and decreased by <code>speed</code> (default is 0.05) every frame. It stops events while it is doing this.</p>
+ * > float:{("for":123,) ("speed":123,) ("dir":"...")}
+ *	This creates a float effect. For "for" frames the component will move in direction "dir" (either "u", "d", "l" or "r" for the four main directions) "speed" pixels. The defaults for "for", "speed" and "dir" are 10, 5 and "u" respectively.
  * 
  * See:
  * * <sgui.IContainer>
  */
-	 
+
 /** Creates a new component, note that if you want to use a "blank component", you should use a <code>NullCom</code>.
  * 
  * @param _group The group this component is in.
@@ -77,8 +77,6 @@ sgui.Component = function (parent, events, componentName) {
 		
 		this.x = 0;
 		this.y = 0;
-		this.scaleX = 1;
-		this.scaleY = 1;
 		this.visible = true;
 		this.alpha = 1;
 		this._height = 0;
@@ -106,9 +104,6 @@ sgui.Component = function (parent, events, componentName) {
 		this._drawHandlers = [];
 		this._propHandlers = {};
 		this._propMasks = {};
-		
-		this._fade = 0;
-		this._fadeEnd = 0;
 
 		this._action = [];
 
@@ -128,14 +123,12 @@ sgui.Component = function (parent, events, componentName) {
 		this._floatTime = 0;
 		this._floatDir = "u";
 		
-		this._fade;
-		this._fadeTo;
+		this._fade = 0;
+		this._fadeEnd = 0;
 		
 		//Add the core properties
 		this._registerPropMask("x", "x", true);
 		this._registerPropMask("y", "y", true);
-		//this._registerPropMask("scale-x", "scaleX", true);
-		//this._registerPropMask("scale-y", "scaleY", true);
 		this._registerPropMask("width", "_width", true);
 		this._registerPropMask("height", "_height", true);
 		this._registerPropMask("alpha", "alpha", true);
@@ -432,8 +425,8 @@ sgui.Component.prototype._fadeEffect = function() {
 		this.alpha = this._fadeEnd;
 		this.bookRedraw();
 		this._fade = 0;
-		this._next();
 		this._clearFrameHandler(this._fadeEffect);
+		this._next();
 	}
 }
 
@@ -451,8 +444,8 @@ sgui.Component.prototype._floatEffect = function() {
 	this.bookRedraw();
 	
 	if(this._floatTime == 0) {
-		this._next();
 		this._clearFrameHandler(this._floatEffect);
+		this._next();
 	}
 }
 
@@ -487,7 +480,6 @@ sgui.Component.prototype.draw = function(c) {
 	
 	var state = c.save();
 	if(this.x || this.y) c.translate(~~this.x, ~~this.y);
-	if(this.scaleX || this.scaleY) c.scale(this.scaleX, this.scaleY);
 	if(this.alpha != 1) c.globalAlpha = this.alpha;
 	
 	for(var i = this._drawHandlers.length-1; i >= 0; i--){

@@ -76,7 +76,6 @@ sgui.Group.prototype._children = function(name, value) {
 			}
 		}
 	}else{
-		duskWolf.log(value);
 		if(value.name && this._getComponent(value.name.toLowerCase(), value.type)) {
 			return this._getComponent(value.name.toLowerCase()).parseProps(value, this._thread);
 		} else if(value.name) {

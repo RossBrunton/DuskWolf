@@ -13,6 +13,15 @@
  * The DuskWolf engine is created by SavageWolf (Ross Brunton) who can be contacted by email at savagewolf8@gmail.com if you so desire.
  * 
  * You could read readme.md for more information about the engine, but I doubt you'd be able to figure out that you can open it in a text editor.
+ * 
+ * My naming standard of things are as follows:
+ * 	CapitalLetters denotes a class.
+ * 
+ * 	camelCase denotes a public property of an object.
+ * 
+ * 	__doubleUnderscore__ denotes ether a global function, configuration thing or __init__ file.
+ * 
+ * 	_singleUnderscore denotes ether a private or protected function. If documentation for the property exists and is not initiated by "/*-" then it is protected.
  */
 window.DuskWolf = function() {};
 
@@ -79,38 +88,28 @@ DuskWolf.prototype.log = function(text) {
  * 3 - info
  * 4 - log
  */
-DuskWolf.prototype.logLevel = 4;
+DuskWolf.prototype.logLevel = ("__logLevel__" in window)?__logLevel__:4;
 
 /** Constant: htmlLogLevel
  * 
  * [number] This determines what output functions will be printed to the HTML element given by <logElem>, the level numbers themselves are the same as <logLevel>.
  */
-DuskWolf.prototype.htmlLogLevel = 4;
+DuskWolf.prototype.htmlLogLevel = ("__htmlLogLevel__" in window)?__htmlLogLevel__:4;
 
 /** Constant: ver
  * [string] Version of the DW engine. Does not have to be a dot seperated list of numbers or anything, any string will do.
  */
-DuskWolf.prototype.ver = "0.0.8-alpha";
+DuskWolf.prototype.ver = "0.0.9-alpha";
 
 /** Constant: verId
  * [number] Version of the DW engine, this may not be human readable, and should be used to check if a save file is older than a certain version, or something. It is assumed that later numbers are newer versions.
  */
-DuskWolf.prototype.verId = 8;
-
-/** Constant: gameName
- * [string] Name of the game. 
- */
-DuskWolf.prototype.gameName = "DuskWolf";
-
-/** Constant: author
- * [string] Name of the author who made the game. 
- */
-DuskWolf.prototype.author = "SavageWolf";
+DuskWolf.prototype.verId = 9;
 
 /** Constant: frameRate
  * [number] The frame rate, in frames per second.
  */
-DuskWolf.prototype.frameRate = 30;
+DuskWolf.prototype.frameRate = ("__frameRate__" in window)?__frameRate__:30;
 
 /** Constant: canvas
  * [string] The name of the HTML canvas object SimpleGui uses.
@@ -118,14 +117,14 @@ DuskWolf.prototype.frameRate = 30;
  * See:
  * 	<mods.SimpleGui>
  */
-DuskWolf.prototype.canvas = "canvas";
+DuskWolf.prototype.canvas = ("__canvas__" in window)?__canvas__:"canvas";
 
 /** Constant: logElem
  * [string] The name of the HTML div that this will output to based on htmlLogLevel. Leave it blank if there is none.
  */
-DuskWolf.prototype.logElem = "dwlog";
+DuskWolf.prototype.logElem = ("__logElement__" in window)?__logElement__:"dwlog";
 
 /** Constant: dev
  * [boolean] If true, then some features for developers are added, such as no caching for scripts and FPS info.
  */
-DuskWolf.prototype.dev = true;
+DuskWolf.prototype.dev = ("__development__" in window)?__development__:true;

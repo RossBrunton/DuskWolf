@@ -96,19 +96,19 @@ loadComponent("Pane");
  */
 mods.SimpleGui = function(events) {
 	mods.IModule.call(this, events);
-	
+
 	this._events.registerKeyHandler("SGuiKey", function(event) {
 		this.getActivePane().keypress(event);
 	}, this);
-	
+
 	this._events.registerFrameHandler("SGuiFrame", function(e) {
 		for(var p in this._panes){
 			this._panes[p].frame(e);
 		}
 	}, this);
-	
-	this._events.registerFrameHandler("SGuiDrawer", this.draw, this);
-	
+
+	//this._events.registerFrameHandler("SGuiDrawer", this.draw, this);
+
 	/*- Variable: _panes
 	 * [Object] All the panes.
 	 **/
@@ -121,12 +121,12 @@ mods.SimpleGui = function(events) {
 	 * [Boolean] If true then the frame handler will draw all the components again. Is set to true by <bookRedraw>.
 	 **/
 	this._redrawBooked = false;
-	
+
 	this.setActivePane("blank");
-	
+
 	this._events.setVar("sys.sg.width", $("#"+duskWolf.canvas)[0].width);
 	this._events.setVar("sys.sg.height", $("#"+duskWolf.canvas)[0].height);
-	
+
 	/*- Variable: _cacheCanvas
 	 * [HTMLCanvas] A cached canvas drawn to before the real one, to improve performance.
 	 **/
@@ -134,15 +134,15 @@ mods.SimpleGui = function(events) {
 	this._cacheCanvas.height = this._events.getVar("sys.sg.height");
 	this._cacheCanvas.width = this._events.getVar("sys.sg.width");
 	this._cacheCanvas.style.imageRendering = "-webkit-optimize-contrast";
-	
+
 	this._cacheCanvas.getContext("2d").mozImageSmoothingEnabled = false;
 	this._cacheCanvas.getContext("2d").textBaseline = "middle";
-	
+
 	//Themes
 	this._events.setVar("theme.default.box", "#eeeeee");
 	this._events.setVar("theme.default.border", "#cccccc");
 	this._events.setVar("theme.default.borderActive", "#ff5555");
-	
+
 	this._events.setVar("theme.current", "default");
 };
 mods.SimpleGui.prototype = new mods.IModule();
@@ -156,9 +156,9 @@ mods.SimpleGui.constructor = mods.SimpleGui;
  * * <mods.IModule.addActions>
  */
 mods.SimpleGui.prototype.addActions = function() {
-	this._events.registerAction("sg-path", this._doPath, this);
-	this._events.registerAction("pane", this._doComponent, this);
-	this._events.registerAction("draw", function(data){this.draw();}, this);
+	this._events.registerAction("sg-path", this._doPath, this, [["pane", true, "STR"], ["path", true, "STR"]]);
+	this._events.registerAction("pane", this._doComponent, this, [["name", true, "STR"]]);
+	this._events.registerAction("draw", function(data){this.draw();}, this, []);
 };
 
 /** Function: newPane
@@ -174,10 +174,10 @@ mods.SimpleGui.prototype.addActions = function() {
 mods.SimpleGui.prototype.newPane = function(name) {
 	//Check if it exists
 	if(this.getPane(name, true)){duskWolf.error("Pane "+name+" already exists!");return null;}
-	
+
 	//Create the pane
 	this._panes[name.toLowerCase()] = new sgui.Pane(this, this._events, name);
-	
+
 	return this._panes[name.toLowerCase()];
 };
 
@@ -215,31 +215,25 @@ mods.SimpleGui.prototype.getActivePane = function() {
 
 mods.SimpleGui.prototype.draw = function() {
 	if(!this._redrawBooked) return false;
-	
+
 	$("#"+duskWolf.canvas)[0].getContext("2d").clearRect(0, 0, this._events.getVar("sys.sg.width"), this._events.getVar("sys.sg.height"));
 	this._cacheCanvas.getContext("2d").clearRect(0, 0, this._events.getVar("sys.sg.width"), this._events.getVar("sys.sg.height"));
-	
+
 	//Draw panes
 	for(var c in this._panes){
 		this._panes[c].draw(this._cacheCanvas.getContext("2d"));
 	}
-	
+
 	$("#"+duskWolf.canvas)[0].getContext("2d").drawImage(this._cacheCanvas, 0, 0, this._events.getVar("sys.sg.width"), this._events.getVar("sys.sg.height"));
 	this._redrawBooked = false;
-	
-	this._render();
-	
-	return true;
-};
 
-mods.SimpleGui.prototype._render = function(event) {
-	$("#"+duskWolf.canvas)[0].getContext("2d").drawImage(this._cacheCanvas, 0, 0, this._events.getVar("sys.sg.width"), this._events.getVar("sys.sg.height"));
+	return true;
 };
 
 mods.SimpleGui.prototype._doPath = function(action) {
 	if(!action.path){duskWolf.error("No path given!");return;}
 	if(!action.pane){duskWolf.error("No pane given!");return;}
-	
+
 	this.path(action.pane, action.path).parseProps(action, this._events.thread);
 };
 

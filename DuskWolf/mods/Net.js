@@ -2,18 +2,18 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-/** Class: mods.Data
+/** Class: mods.Net
  * 
  * This allows you to download more JSONS, and prefetch images.
  * 
  * Inheritance:
- * 	mods.Data { <mods.IModule>
+ * 	mods.Net { <mods.IModule>
  * 
  * Provided Actions:
  * 
  * > {"a":"import", "file":"...", ("thread":"...")}
  * Downloads a JSON from a file relative to the data dir, and runs it.
- * 	The file extension ".json" is added automatically if needed.
+ * 	The file extension ".json" or ".dws" is added automatically if needed.
  * 	The actions will be ran on <Events.thread>, the current thread, if the thread property is not specified.
  * 
  * > {"a":"fetch", "file":"..."}
@@ -22,7 +22,7 @@
  * Provided HashFunctions:
  * 
  * > #FILE(location);
- * 	Downloads the file, and returns the contents. This is relative to the data dir.
+ * 	Provided the file has already been downloaded, returns it. This is relative to the data dir.
  */
 
 /** Function: mods.Data
@@ -32,11 +32,11 @@
  * Params:
  *	events	- [<Events>] The events system that this will be used for.
  */
-mods.Data = function(events) {
+mods.Net = function(events) {
 	mods.IModule.call(this, events);
 };
-mods.Data.prototype = new mods.IModule();
-mods.Data.constructor = mods.Data;
+mods.Net.prototype = new mods.IModule();
+mods.Net.constructor = mods.Data;
 
 /** Function: addActions
  * 
@@ -45,9 +45,9 @@ mods.Data.constructor = mods.Data;
  * See:
  * * <mods.IModule.addActions>
  */
-mods.Data.prototype.addActions = function() {
-	this._events.registerAction("import", this._get, this);
-	this._events.registerAction("fetch", this._get, this);
+mods.Net.prototype.addActions = function() {
+	this._events.registerAction("import", this._get, this, [["file", true, "STR"], ["thread", false, "STR"]]);
+	this._events.registerAction("fetch", this._get, this, [["file", true, "STR"]]);
 	
 	this._events.registerHashFunct("FILE", this._file, this);
 };
@@ -63,11 +63,11 @@ mods.Data.prototype.addActions = function() {
  * See:
  * * <Data>
  */
-mods.Data.prototype._get = function(action) {
+mods.Net.prototype._get = function(action) {
 	if(!action.file){duskWolf.error("No file to retreive.");return;}
 	
 	if(action.a === "import") {
-		this._events.run(data.grabJson(action.file), action.thread?action.thread:this._events.thread);
+		this._events.run(data.grabJson(action.file, true), action.thread?action.thread:this._events.thread);
 	}else{
 		data.grabImage(action.file);
 	}
@@ -85,7 +85,7 @@ mods.Data.prototype._get = function(action) {
  * Returns:
  *	The output of the hashfunct.
  */
-mods.Data.prototype._file = function(name, args) {
+mods.Net.prototype._file = function(name, args) {
 	if(!args[0]){duskWolf.error("No file to retreive.");return;}
 	
 	return data.grabFile(args[0]);

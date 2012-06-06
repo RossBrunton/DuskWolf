@@ -24,20 +24,14 @@
  * 	Prints the text to the normal log locations if <DuskWolf.logLevel> or <DuskWolf.htmlLogLevel> are greater than or equal to 2.
  * 	All it does is call <DuskWolf.warn>, and should be used in the same places.
  * 
- * > {"a":"inc", "to":"...", "value":123, ("by":123)}
- * 	Increments the value by "by", and stores the result in "to". It's just a simple "add" function.
+ * > {"a":"inc", "var":"...", ("by":123)}
+ * 	Increments the "var" value by "by", which is 1 by default.
  * 
- * > {"a":"mul", "to":"...", "value":123, ("by":123)}
- *	This multiplies "by" and "value" together, and stores the value in the var specified by "to". If no value is specified for "by", it is multiplied by 2.
+ * > {"a":"mul", "var":"...", ("by":123)}
+ *	Multiplies the "var" value by "by", and stores it back into the var, "by" is 2 if not specified. You can do division by using fractional multipliers.
  * 
- * > {"a":"div", "to":"...", "value":123, ("by":123)}
- *	This divides "value" by "by", and stores the value in the var specified by "to". If no value is specified for "by", it is divided by 2.
- * 
- * > {"a":"modulo", "to":"...", "value":123, ("by":123)}
- *	This takes the modulo "by" of "value", storing it in "to". The modulo X of N is the remainder when you divide N by X. If no "by" value is specified, 10 is assumed.
- * 
- * > {"a":"vartree", "root":"...", "data":{...}, ("inherit":"...")}
- * 	[DEPRECIATED] This used to be a way to specify objects, which has been replaced by using objects themselves.
+ * > {"a":"modulo", "var":"...", ("by":123)}
+ *	Modulos the "var" value by "by", and stores it back into the var, "by" is 10 if not specified.
  * 
  * Provided HashFunctions:
  * 
@@ -75,14 +69,13 @@ mods.Core.constructor = mods.Core;
  * * <mods.IModule.addActions>
  */
 mods.Core.prototype.addActions = function() {
-	this._events.registerAction("print", function(a) {duskWolf.info(a.text);return true;}, this);
-	this._events.registerAction("error", function(a) {duskWolf.error(a.text);return true;}, this);
-	this._events.registerAction("warn", function(a) {duskWolf.warn(a.text);return true;}, this);
-	this._events.registerAction("inc", this._increment, this);
-	this._events.registerAction("mul", this._multiply, this);
-	this._events.registerAction("div", this._divide, this);
-	this._events.registerAction("modulo", this._modulo, this);
-	this._events.registerAction("vartree", this._vartree, this);
+	this._events.registerAction("print", function(a) {duskWolf.info(a.text);return true;}, this, [["text", true, "STR"]]);
+	this._events.registerAction("error", function(a) {duskWolf.error(a.text);return true;}, this, [["text", true, "STR"]]);
+	this._events.registerAction("warn", function(a) {duskWolf.warn(a.text);return true;}, this, [["text", true, "STR"]]);
+	this._events.registerAction("inc", this._increment, this, [["var", true, "STR"], ["by", false, "NUM"]]);
+	this._events.registerAction("mul", this._multiply, this, [["var", true, "STR"], ["by", false, "NUM"]]);
+	this._events.registerAction("div", this._divide, this, [["var", true, "STR"], ["by", false, "NUM"]]);
+	this._events.registerAction("modulo", this._modulo, this, [["var", true, "STR"], ["by", false, "NUM"]]);
 	
 	this._events.registerHashFunct("/", this._div, this);
 	this._events.registerHashFunct("%", this._mod, this);
@@ -99,11 +92,10 @@ mods.Core.prototype.addActions = function() {
  *	data		- [object] A "inc" action.
  */
 mods.Core.prototype._increment = function(data) {
-	if(data.to === undefined){duskWolf.error("No target to increment to.");return;}
-	if(data.value === undefined){duskWolf.error("No value to increment.");return;}
+	if(data["var"] === undefined){duskWolf.error("No var to increment.");return;}
 	if(data.by === undefined) data.by = 1;
 	
-	this._events.setVar(data.to, Number(data.value)+Number(data.by));
+	this._events.setVar(data["var"], Number(events.getVar(data["var"]))+Number(data.by));
 };
 
 /*- Function: _multiply
@@ -115,27 +107,10 @@ mods.Core.prototype._increment = function(data) {
  *	data		- [object] A "mul" action.
  */
 mods.Core.prototype._multiply = function(data) {
-	if(data.to === undefined){duskWolf.error("No target to multiply to.");return;}
-	if(data.value === undefined){duskWolf.error("No value to multiply.");return;}
+	if(data["var"] === undefined){duskWolf.error("No var to multiply.");return;}
 	if(data.by === undefined) data.by = 2;
 	
-	this._events.setVar(data.to, Number(data.value)*Number(data.by));
-};
-
-/*- Function: _divide
- * 
- * Used internally to handle the "div" action.
- *	You should use the standard ways of running actions, rather than calling this directly.
- * 
- * Params:
- *	data		- [object] A "div" action.
- */
-mods.Core.prototype._divide = function(data) {
-	if(data.to === undefined){duskWolf.error("No target to divide to.");return;}
-	if(data.value === undefined){duskWolf.error("No value to divide.");return;}
-	if(data.by === undefined) data.by = 2;
-	
-	this._events.setVar(data.to, Number(data.value)/Number(data.by));
+	this._events.setVar(data["var"], Number(events.getVar(data["var"]))*Number(data.by));
 };
 
 /*- Function: _modulo
@@ -147,45 +122,10 @@ mods.Core.prototype._divide = function(data) {
  *	data		- [object] An "modulo" action.
  */
 mods.Core.prototype._modulo = function(data) {
-	if(data.to === undefined){duskWolf.error("No target to modulo to.");return;}
-	if(data.value === undefined){duskWolf.error("No value to modulo.");return;}
+	if(data["var"] === undefined){duskWolf.error("No var to modulo.");return;}
 	if(data.by === undefined) data.by = 10;
 	
-	this._events.setVar(data.to, Number(data.value)%Number(data.by));
-};
-
-/*- Function: _vartree
- * 
- * Used internally to handle the "vartree" action.
- *	You should use the standard ways of running actions, rather than calling this directly.
- * 
- * Params:
- *	data		- [object] A "vartree" action.
- */
-mods.Core.prototype._vartree = function(data) {
-	if(!data.data){duskWolf.error("No data to use!");return;}
-	if(!data.root){duskWolf.error("No root name!");return;}
-	
-	if(data.inherit){
-		var source = this._events.getVars(RegExp("^"+data.inherit+"-", "i"));
-		for(var i = source.length-1; i >= 0; i--) {
-			this._events.setVar(source[i][0].replace(RegExp("^"+data.inherit+"-", "i"), data.root+"-"), source[i][1]);
-		}
-	}
-	
-	var tree = data.root;
-	
-	this._processVarTree = function(d, root, first) {
-		for(var p in d){
-			if(typeof(d[p]) != "object"){
-				this._events.setVar(root+"-"+p, d[p]);
-			}else{
-				this._processVarTree(d[p], root+"-"+p);
-			}
-		}
-	}
-	
-	this._processVarTree(data.data, data.root);
+	this._events.setVar(data["var"], Number(events.getVar(data["var"]))%Number(data.by));
 };
 
 /*- Function: _sum

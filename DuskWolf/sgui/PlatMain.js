@@ -206,14 +206,14 @@ sgui.PlatMain.prototype._update = function() {
 	this.getComponent("over").setBoundsCoord(-this.x, -this.y);
 	this.getComponent("back").setBoundsCoord(-this.x, -this.y);
 	
-	this.getComponent("back").y = -this.y;
-	this.getComponent("back").x = -this.x;
+	this.getComponent("back").prop("y", -this.y);
+	this.getComponent("back").prop("x", -this.x);
 	
-	this.getComponent("over").y = -this.y;
-	this.getComponent("over").x = -this.x;
+	this.getComponent("over").prop("y", -this.y);
+	this.getComponent("over").prop("x", -this.x);
 	
-	this.getComponent("scheme").y = -this.y;
-	this.getComponent("scheme").x = -this.x;
+	this.getComponent("scheme").prop("y", -this.y);
+	this.getComponent("scheme").prop("x", -this.x);
 	
 	this.bookRedraw();
 };

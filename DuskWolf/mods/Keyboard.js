@@ -11,7 +11,7 @@
  * 
  * In JavaScript each character has a unique number, the keycode, which is used to identify them.
  * 	There is a list of vars from this module that list the keycodes for all the main keys.
- * 	For example, to check if the "a" key is pressed, you can use: {"a":"if-key", "key":"$key-a;", "then":[...]}.
+ * 	For example, to check if the "a" key is pressed, you can use: {"a":"if-key", "key":"#KEYC(a);", "then":[...]}.
  * 
  * Provided Actions:
  * 
@@ -28,6 +28,11 @@
  *  > {"a":"fire", "event":"key-event-up", "key":123, "shift":false, "ctrl":false, "alt":false}
  * This is fired when the key specified by the keycode is released after having been pressed.
  * 	The "ctrl", "alt", and "shift" properties depend on whether those keys were pressed as modifiers.
+ * 
+ * Provided HashFunctions:
+ * 
+ * > #KEYC(name);
+ *	This takes in the name of a key, and returns the keycode that represents that key. Not case sensitive.
  * 
  */
 
@@ -56,6 +61,7 @@ mods.Keyboard = function(events) {
 	 */
 	this._codes = {
 		"8":["BACKSPACE", false],
+		"9":["TAB", false],
 		"13":["ENTER", false],
 		
 		"32":[" ", true],
@@ -110,7 +116,9 @@ mods.Keyboard.constructor = mods.Keyboard;
  * * <mods.IModule.addActions>
  */
 mods.Keyboard.prototype.addActions = function() {
-	this._events.registerAction("if-key", this._ifkey, this);
+	this._events.registerAction("if-key", this._ifkey, this, [["key", true, "NUM"], ["then", false, "DWC"], ["else", false, "DWC"]]);
+	
+	this._events.registerHashFunct("KEYC", this._keyCode, this);
 };
 
 /*- Function: _handleKeypress
@@ -161,7 +169,7 @@ mods.Keyboard.prototype.isKeyPressed = function(code) {
  * 	code	- [number] A keycode to lookup.
  * 
  * Returns:
- * 	[array] Information on that key. The first argument is a string representation, the second a boolean saying if it is printable.
+ * 	[array] Information on that key. The first entry is a string representation, the second a boolean saying if it is printable.
  */
 mods.Keyboard.prototype.lookupCode = function(code) {
 	if(!(code in this._codes)) return ["UNKNOWN", false];
@@ -183,4 +191,28 @@ mods.Keyboard.prototype._ifKey = function(a) {
 	if(this.isKeyPressed(a.key)) {
 		if("then" in a) this.run(a.then, this._events.thread);
 	}else if("else" in a) this.run(what["else"], this._events.thread);
+};
+
+/*- Function: _keyCode
+ * 
+ * [string] Used internally to handle the "KEYC" hashfunction.
+ *	You should use the standard ways of running hashfunctions, rather than calling this directly.
+ * 
+ * Params:
+ * 	name		- [string] The string name of the hashfunct.
+ * 	args		- [Array] An array of arguments.
+ * 
+ * Returns:
+ *	The output of the hashfunct.
+ */
+mods.Keyboard.prototype._keyCode = function(name, args) {
+	if(!args.length){duskWolf.error("No key to check.");return;}
+	
+	for(var k in this._codes){
+		if(this._codes[k][0].toUpperCase() == args[0].toUpperCase()) {
+			return k;
+		}
+	}
+	
+	return -1;
 };

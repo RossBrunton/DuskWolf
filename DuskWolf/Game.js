@@ -77,6 +77,8 @@ Game.prototype.onRender = function() {
 			}
 		}
 	} catch(e) {duskWolf.error(e);};
+	
+	if(events.getMod("SimpleGui")) events.getMod("SimpleGui").draw();
 };
 
 /** Function: keypress

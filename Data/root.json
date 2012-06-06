@@ -1,7 +1,8 @@
 {
-	"name":"Platforming Example",
-	"version":"0.0.7",
-	"duskVer":7,
-	"files":["Examples/core"],
-	"mods":["Core", "SimpleGui", "LocalSaver", "Math", "Plat", "Keyboard", "Data"]
+	"name":"Example",
+	"author":"SavageWolf",
+	"version":"0.0.9",
+	"duskVer":9,
+	"files":["Examples/plat.json"],
+	"mods":["Core", "Keyboard", "Plat", "SimpleGui", "Net", "Math"]
 }

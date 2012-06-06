@@ -1,0 +1,53 @@
+/* This is an example of all the actions in Events and Core! */
+
+listen 'sys-event-load' {
+	print "Print statements log stuff to the console!";
+	
+	print "Functions!";
+	function fun {
+		print "Function Called!";
+	};
+	call fun;
+	
+	print "Listeners!";
+	listen feed name:lis1 food:orange {
+		print "I like oranges!";
+	};
+	listen feed name:lis2 {
+		print "I like anything!";
+	};
+	fire feed food:orange;
+	fire feed food:apple;
+	
+	print "Conditions!";
+	if (true) {
+		print "Yes!";
+	} { 
+		print "No...";
+	};
+	if (2*5=10) {
+		print "Yes!";
+	} { 
+		print "No...";
+	};
+	
+	print "Variables!";
+	var myVar "Moomooomoo!";
+	print "This is myVar: $myVar;";
+	delvar myVar;
+	
+	print "Looping!";
+	var count 0;
+	while ($count; < 5) {
+		print "Count is now $count;";
+		var count "#+($count, 1);";
+	};
+	
+	print "Threading!";
+	thread myThread {
+		print "This is myThread, message 1";
+		print "This is myThread, message 2";
+	};
+	print "This is not myThread, message 1";
+	print "This is not myThread, message 2";
+};

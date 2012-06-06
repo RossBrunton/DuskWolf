@@ -113,14 +113,14 @@ __import__("mods/__init__.js");
  * > {"a":"while", "cond":"...", "actions":[...]}
  * It keeps repeating the actions if the condition is true.
  * 
- * > {"a":"listen", "event":"...", ("name":"...",) ("prop1":"...", ("prop2":"...", ...)), "actions":[...]}
+ * > {"a":"listen", "event":"...", "actions":[...], ("name":"...",) ("prop1":"...", ("prop2":"...", ...))}
  * This creates a listener, making it listen for the event specified, which will run actions when it recieves it. See the section on listeners above.
  * The name property will not be actually used on the listener, but is used for identifying it, say, for deleting it.
  * 
  * > {"a":"fire", "event":"...", ("prop1":"...", ("prop2":"...", ...))}
  * Fires the specified event, which will trigger the listener which all the properties match, see the section above for details.
  * 
- * > {"a":"unlisten", ("event":"...",) ("name":"...",) ("prop1":"...", ("prop2":"...", ...)), "actions":[...]}
+ * > {"a":"unlisten", ("name":"...",) ("event":"...",) ("prop1":"...", ("prop2":"...", ...))}
  * Deletes the listener that would be fired if the rules for "listen" were true. Note that the event property is optional.
  * 
  * > {"a":"var", "name":"...", "value":{...}, ["inherit":"..."]}
@@ -226,6 +226,20 @@ window.Events = function(game) {
 	 */
 	this._modsInited = {};
 	
+	/*- Variable: _ops
+	 * [array] This is an array of all the operators that are supported in conditions.
+	 */
+	this._ops = ["*", "/", "+", "-", "<", ">", "<=", ">=", "=", "!=", "&&", "||"];
+	
+	/*- Variable: _opsReg
+	 * [array] This is an array of all the regular expressions that capture ops, generated here to save time.
+	 */
+	this._opsReg = [];
+	
+	for(var o = 0; o < this._ops.length; o ++){
+		this._opsReg[o] = RegExp("([^"+this._regEscape(this._ops.join(""))+"]+)\\s*("+this._regEscape(this._ops[o])+")\\s*([^"+this._regEscape(this._ops.join(""))+"]+)", "i");
+	}
+	
 	/** Variable: thread
 	 * [string] The currently running thread. Assuming you have not called <awaitNext>, you can read this to get your current thread. Setting it to anything will most likely break something.
 	 */
@@ -238,7 +252,18 @@ window.Events = function(game) {
 	this.setVar("sys.game.author", duskWolf.author);
 	this.setVar("sys.game.frameRate", duskWolf.frameRate);
 	
-	//Init modules
+	//Import and init modules
+	if("mods" in data.root) window.modsAvalable = data.root.mods;
+	
+	//Import modules
+	var ims = ["mods/IModule.js"];
+
+	for(var i = window.modsAvalable.length-1; i >= 0; i--) {
+		ims[ims.length] = "mods/"+window.modsAvalable[i]+".js";
+	}
+	
+	__import__(ims);
+	
 	for(var a = modsAvalable.length-1; a >= 0; a--){
 		var name = modsAvalable[a];
 		if(name != "IModule"){
@@ -250,19 +275,19 @@ window.Events = function(game) {
 	}
 	
 	//Register actions
-	this.registerAction("comment", function(what){}, this);
-	this.registerAction("function", this._addFunction, this);
-	this.registerAction("listen", this._addListener, this);
-	this.registerAction("if", this._iffy, this);
+	this.registerAction("comment", function(what){}, this, [["", false, "STR"]]);
+	this.registerAction("function", this._addFunction, this, [["name", true, "STR"], ["actions", true, "DWC"]]);
+	this.registerAction("listen", this._addListener, this, [["event", true, "STR"], ["actions", true, "DWC"], ["name", false, "STR"]]);
+	this.registerAction("if", this._iffy, this, [["cond", true, "STR"], ["then", false, "DWC"], ["else", false, "DWC"]]);
 	this.registerAction("ifset", this._ifset, this);
-	this.registerAction("while", this._whiley, this);
-	this.registerAction("call", this._callFunction, this);
-	this.registerAction("fire", this._fire, this);
-	this.registerAction("unlisten", this._unlisten, this);
-	this.registerAction("var", this._setVarInternal, this);
-	this.registerAction("delvar", this._delVarInternal, this);
-	this.registerAction("thread", this._threadTo, this);
-	this.registerAction("vardump", function(what){duskWolf.info(this._vars);}, this);
+	this.registerAction("while", this._whiley, this, [["cond", true, "STR"], ["actions", true, "DWC"]]);
+	this.registerAction("call", this._callFunction, this, [["name", true, "STR"], ["thread", false, "STR"]]);
+	this.registerAction("fire", this._fire, this, [["event", true, "STR"]]);
+	this.registerAction("unlisten", this._unlisten, this, [["name", false, "STR"], ["event", false, "STR"]]);
+	this.registerAction("var", this._setVarInternal, this, [["name", true, "STR"], ["value", true, "OBJ"], ["inherit", false, "STR"]]);
+	this.registerAction("delvar", this._delVarInternal, this, [["name", true, "STR"]]);
+	this.registerAction("thread", this._threadTo, this, [["name", true, "STR"], ["actions", true, "DWC"]]);
+	this.registerAction("vardump", function(what){duskWolf.info(this._vars);}, this, []);
 	
 	this.registerHashFunct("IF", this._hiffy, this);
 	this.registerHashFunct("=", this._rawCond, this);
@@ -271,9 +296,12 @@ window.Events = function(game) {
 		this._modsInited[b].addActions();
 	}
 	
-	//Load everything!
-	for(var x = data.scripts.length-1; x >= 0; x--){
-		this.run(data.scripts[x], "_init");
+	//Load all files
+	if(!("files" in data.root)) {duskWolf.error("Root json does not specify a list of files..."); return;}
+	for(var i = data.root.files.length-1; i>= 0; i--) {
+		if(data.grabJson(data.root.files[i]), true) {
+			this.run(data.grabJson(data.root.files[i], true), "_init");
+		}
 	}
 };
 
@@ -533,8 +561,10 @@ Events.prototype.hashFunction = function(name, args) {
  * 	name		- [string] The name of the action to listen for, this should be the one the action has the "a" property set to.
  * 	funct		- [function([object]){[undefined]}] The function to be called to run the action. Said action will be passed as a parameter.
  * 	scope		- [object] The scope that the function will be ran in.
+ * 	langDef		- [array] A definition of the action for DWC, see the guide somewhere.
  */
-Events.prototype.registerAction = function(name, funct, scope) {
+Events.prototype.registerAction = function(name, funct, scope, langDef) {
+	dwc.addLangDef(name, langDef);
 	this._actions[name] = [funct, scope];
 };
 
@@ -928,15 +958,13 @@ Events.prototype.parseVar = function(str, asStr) {
 Events.prototype.cond = function(cond, asStr) {
 	cond = String(cond);
 	var ex;
-	var ops = ["*", "/", "+", "-", "<", ">", "<=", ">=", "=", "!=", "&&", "||"];
 	
 	while(ex = /\((.*?)\)/.exec(cond)){
 		cond = cond.replace(ex[0], this.cond(ex[1], true));
 	}
 	
-	for(var o = 0; o < ops.length; o ++){
-		var reg = RegExp("([^"+this._regEscape(ops.join(""))+"]+)\\s*("+this._regEscape(ops[o])+")\\s*([^"+this._regEscape(ops.join(""))+"]+)", "i");
-		while(ex = reg.exec(cond)){
+	for(var o = 0; o < this._ops.length; o ++){
+		while(ex = this._opsReg[o].exec(cond)){
 			cond = cond.replace(ex[0], this._doOp(ex[1], ex[3], ex[2]));
 		}
 	}

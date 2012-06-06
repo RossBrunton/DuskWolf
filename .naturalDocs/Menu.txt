@@ -56,13 +56,13 @@ Group: Mods  {
 
    File: mods  (mods/__init__.js)
    File: Core  (no auto-title, mods/Core.js)
-   File: Data  (no auto-title, mods/Data.js)
    File: IModule  (no auto-title, mods/IModule.js)
    File: Keyboard  (no auto-title, mods/Keyboard.js)
    File: LocalSaver  (no auto-title, mods/LocalSaver.js)
    File: Math  (no auto-title, mods/Math.js)
    File: Plat  (no auto-title, mods/Plat.js)
    File: SimpleGui  (no auto-title, mods/SimpleGui.js)
+   File: mods.Net  (mods/Net.js)
    }  # Group: Mods
 
 Group: SGui  {

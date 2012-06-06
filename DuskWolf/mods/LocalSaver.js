@@ -20,11 +20,11 @@
  * Saves the named vars in the block specified by name.
  * 	The var property should be an array of strings with names of vars without the "$" things.
  * 	You can also specify a string instead of an array for vars, which will cause only that var to be saved.
- * 	If you specify RegExp, the var name(s) will be treated as regular expression(s). 
+ * 	If you specify RegExp as true, the var name(s) will be treated as regular expression(s). 
  *
  * > {"a":"local-load", "name":"..."}
  * Loads all the variables saved in the specified block.
- * 	It loads all of them, replacing any that may already be defined, there is no way to specify.
+ * 	It loads all of them, replacing any that may already be defined, there is no way to specify which ones.
  * 
  * > {"a":"local-clear", "name":"..."}
  * Erases the specified block.
@@ -51,9 +51,9 @@ mods.LocalSaver.constructor = mods.LocalSaver;
  * * <mods.IModule.addActions>
  */
 mods.LocalSaver.prototype.addActions = function() {
-	this._events.registerAction("local-save", this._save, this);
-	this._events.registerAction("local-load", this._load, this);
-	this._events.registerAction("local-clear", this._clear, this);
+	this._events.registerAction("local-save", this._save, this, [["name", true, "STR"], ["vars", true, "ARR:STR"], ["regexp", false, "BLN"]]);
+	this._events.registerAction("local-load", this._load, this, [["name", true, "STR"]]);
+	this._events.registerAction("local-clear", this._clear, this, [["name", true, "STR"]]);
 };
 
 /*- Function: _save

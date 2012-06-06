@@ -25,7 +25,8 @@
 			<div id='dwlog' style='overflow-y:auto;height:480px;'></div>
 		</td></tr></table>
 
-		<textarea style='width:100%' id='runBox'>[{"a":"print", "text":"Hello World!"}]</textarea>
-		<button style='width:100%' onclick='events.run(JSON.parse($("#runBox")[0].value), "_live")'>Run</button>
+		<textarea style='width:100%' id='runBox'>/*This is DWS*/
+print "Hello World!";</textarea>
+		<button style='width:100%' onclick='events.run(JSON.parse($("#runBox")[0].value), "_live")'>Run (JSON)</button><button style='width:100%' onclick='events.run(JSON.parse(dwc.compile($("#runBox")[0].value)), "_live")'>Run (DWS)</button>
 	</body>
 </html>

@@ -63,7 +63,7 @@ mods.Plat.constructor = mods.Plat;
  * * <mods.IModule.addActions>
  */
 mods.Plat.prototype.addActions = function() {
-	this._events.registerAction("plat-room", this._setRoom, this);
+	this._events.registerAction("plat-room", this._setRoom, this, [["room", true, "STR"], ["spawn", true, "NUM"]]);
 };
 
 /*- Function: _setRoom
@@ -72,20 +72,20 @@ mods.Plat.prototype.addActions = function() {
  * 	You should use the standard ways of running actions, rather than calling this directly.
  * 
  * Params:
- * 	data		- [object] A "plat-room" action.
+ * 	a			- [object] A "plat-room" action.
  */
-mods.Plat.prototype._setRoom = function(dat) {
-	if(!("room" in dat)){duskWolf.error("No room to load.");return;}
+mods.Plat.prototype._setRoom = function(a) {
+	if(!("room" in a)){duskWolf.error("No room to load.");return;}
 	
-	duskWolf.info("Setting room "+dat.room+".");
-	this._events.run(data.grabJson("prooms/"+dat.room.replace(/\-/g, "_")), this._events.thread);
+	duskWolf.info("Setting room "+a.room+".");
+	this._events.run(data.grabJson("prooms/"+a.room.replace(/\-/g, "_")), this._events.thread);
 	this._events.run([
 		/*{"a":"if", "cond":(dat.nofade?"0","1"), "then":[*/
 			{"a":"sg-path", "pane":"plat-main", "path":"/main", "fade":{"from":1, "to":0, "speed":-0.05}},
 		/*]},*/
-		{"a":"sg-path", "pane":"plat-main", "path":"/main", "room":dat.room, "spawn":dat.spawn},
+		{"a":"sg-path", "pane":"plat-main", "path":"/main", "room":a.room, "spawn":a.spawn},
 		/*{"a":"if", "cond":(dat.nofade?"0","1"), "then":[*/
 			{"a":"sg-path", "pane":"plat-main", "path":"/main", "fade":{"from":0, "to":1, "speed":0.05}},
 		/*]},*/
-		{"a":"fire", "event":"plat-room-load", "room":dat.room}], this._events.thread);
+		{"a":"fire", "event":"plat-room-load", "room":a.room}], this._events.thread);
 };
