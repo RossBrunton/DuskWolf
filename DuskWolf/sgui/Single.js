@@ -2,6 +2,10 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
+goog.require("dusk.sgui.IContainer");
+
+goog.provide("dusk.sgui.Single");
+
 /** A single is a container that holds a single component, hence the name.
  * 
  * <p>It is designed to generally add extra features and such to a single component.</p>
@@ -29,7 +33,7 @@ sgui.Single = function(parent, events, comName) {
 		this.newComponent("blank", "NullCom");
 			
 		//Add the groupStuff handler
-		this._registerProp("child", this._child, function(name, value){return this._component;});
+		this._registerProp("child", this._singleChild, function(name) {return this._component;});
 		this._registerDrawHandler(this._singleDraw);
 		this._registerFrameHandler(this._singleFrame);
 	}
@@ -58,19 +62,19 @@ sgui.Single.prototype.containerKeypress = function(e) {
 sgui.Single.prototype.newComponent = function(com, type) { //Component
 	//Find the type
 	if (!type){duskWolf.error("Cannot create a new component of type null!");return;}
-	loadComponent(type);
+	//loadComponent(type);
 	
 	this._component = new sgui[type](this, this._events, com.toLowerCase());
 	
 	return this._component;
 };
 
-sgui.Single.prototype._singleStuff = function(data) {
+sgui.Single.prototype._singleChild = function(name, value) {
 	//Component properties
-	if (data.child.name && this.getComponent(data.child.name.toLowerCase(), data.child.type)) {
-		this.getComponent(data.child.name.toLowerCase()).parseProps(this._events.replaceVar(data.child), this._thread);
+	if (value.name && this.getComponent(value.name.toLowerCase(), value.type)) {
+		this.getComponent(value.name.toLowerCase()).parseProps(this._events.replaceVar(value), this._thread);
 	} else {
-		duskWolf.warn(data.child.name + " has not been given a type and does not exist, ignoring.");
+		console.warn(value.name + " has not been given a type and does not exist, ignoring.");
 	}
 };
 

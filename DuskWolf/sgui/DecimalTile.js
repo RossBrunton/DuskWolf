@@ -2,6 +2,8 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
+goog.provide("dusk.sgui.DecimalTile");
+
 /** A tile is a type of image designed for using tilesets, a single image with lots of smaller ones in. Generally, it has a "viewing area" of a certian size and width, and the image behind it can be moved to show only one tile at a time.
  * 
  * <p>Uh, remember that this extends the <code>image</code> component, and uses the <code>image</code> property of that as the tileset.</p>
@@ -63,9 +65,9 @@ sgui.DecimalTile.prototype._tileDraw = function(c) {
 /** This sets the image that will be displayed.
  * @param image The name of the image, should be a constant in <code>Data</code>.
  */
-sgui.Image.prototype._setImage = function(name, value) {
-	if(!value) {duskWolf.warn(this.comName+" tried to set image to nothing."); return;}
-	this._img = data.grabImage(value);
+sgui.DecimalTile.prototype._setImage = function(name, value) {
+	if(!value) {console.warn(this.comName+" tried to set image to nothing."); return;}
+	this._img = dusk.data.grabImage(value);
 	this.bookRedraw();
 };
 

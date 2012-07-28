@@ -2,7 +2,10 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-loadComponent("IContainer");
+goog.require("dusk.sgui.Component");
+goog.require("dusk.sgui.IContainer");
+
+goog.provide("dusk.sgui.Group");
 
 sgui.Group = function(parent, events, comName) {
 	//Implements _container
@@ -55,7 +58,7 @@ sgui.Group.prototype._newComponent = function(com, type) { //Component
 	//Find the type
 	if (!type) {duskWolf.error("Cannot create a new component of type null!");return;}
 	if (!(type in sgui)) {duskWolf.error(type + " is not a valid component type.");type = "NullCom";}
-	loadComponent(type);
+	//loadComponent(type);
 	
 	this._components[com] = new sgui[type](this, this._events, com.toLowerCase());
 	this._drawOrder[this._drawOrder.length] = com;
@@ -148,7 +151,7 @@ sgui.Group.prototype.focus = function(value) { //Bool
 	if (this._components[this._focusedCom]){
 		if (this._components[this._focusedCom].locked){return false;};
 		
-		this._active?this._components[this._focusedCom].onDeactive():null;
+		if(this._active) this._components[this._focusedCom].onDeactive();
 		this._components[this._focusedCom].onLooseFocus();
 	}
 	
@@ -156,11 +159,11 @@ sgui.Group.prototype.focus = function(value) { //Bool
 	if (this._components[value.toLowerCase()]){
 		this._focusedCom = value.toLowerCase();
 		this._components[this._focusedCom].onGetFocus();
-		this._active?this._components[this._focusedCom].onActive():null;
+		if(this._active) this._components[this._focusedCom].onActive();
 		return true;
 	}
 	
-	duskWolf.warn(com+" was not found, couldn't set focus.");
+	console.warn(value+" was not found, couldn't set focus.");
 	
 	this._focusedCom = "blank";
 	return false;

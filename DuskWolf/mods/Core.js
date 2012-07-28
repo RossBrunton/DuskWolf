@@ -2,6 +2,8 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
+goog.provide("dusk.mods.core");
+
 /** Class: mods.Core
  * 
  * This provides a few actions that are not necessary for operation of the Events system, but are useful nonetheless.
@@ -51,36 +53,20 @@
 /** Function: mods.Core
  * 
  * Constructor, creates a new instance of this. Doesn't really do anything else of interest though.
- * 
- * Params:
- *	events	- [<Events>] The events system that this will be used for.
  */
-mods.Core = function(events) {
-	mods.IModule.call(this, events);
-};
-mods.Core.prototype = new mods.IModule();
-mods.Core.constructor = mods.Core;
-
-/** Function: addActions
- * 
- * Registers the actions and sets the vars this uses, see the class description for a list of avalable ones.
- * 
- * See:
- * * <mods.IModule.addActions>
- */
-mods.Core.prototype.addActions = function() {
-	this._events.registerAction("print", function(a) {duskWolf.info(a.text);return true;}, this, [["text", true, "STR"]]);
-	this._events.registerAction("error", function(a) {duskWolf.error(a.text);return true;}, this, [["text", true, "STR"]]);
-	this._events.registerAction("warn", function(a) {duskWolf.warn(a.text);return true;}, this, [["text", true, "STR"]]);
-	this._events.registerAction("inc", this._increment, this, [["var", true, "STR"], ["by", false, "NUM"]]);
-	this._events.registerAction("mul", this._multiply, this, [["var", true, "STR"], ["by", false, "NUM"]]);
-	this._events.registerAction("div", this._divide, this, [["var", true, "STR"], ["by", false, "NUM"]]);
-	this._events.registerAction("modulo", this._modulo, this, [["var", true, "STR"], ["by", false, "NUM"]]);
+dusk.mods.core.init = function() {
+	dusk.events.registerAction("print", function(a) {console.log(a.text);return true;}, this, [["text", true, "STR"]]);
+	dusk.events.registerAction("error", function(a) {console.error(a.text);return true;}, this, [["text", true, "STR"]]);
+	dusk.events.registerAction("warn", function(a) {console.warn(a.text);return true;}, this, [["text", true, "STR"]]);
+	dusk.events.registerAction("inc", this._increment, this, [["var", true, "STR"], ["by", false, "NUM"]]);
+	dusk.events.registerAction("mul", this._multiply, this, [["var", true, "STR"], ["by", false, "NUM"]]);
+	dusk.events.registerAction("div", this._divide, this, [["var", true, "STR"], ["by", false, "NUM"]]);
+	dusk.events.registerAction("modulo", this._modulo, this, [["var", true, "STR"], ["by", false, "NUM"]]);
 	
-	this._events.registerHashFunct("/", this._div, this);
-	this._events.registerHashFunct("%", this._mod, this);
-	this._events.registerHashFunct("+", this._sum, this);
-	this._events.registerHashFunct("*", this._prod, this);
+	dusk.events.registerHashFunct("/", this._div, this);
+	dusk.events.registerHashFunct("%", this._mod, this);
+	dusk.events.registerHashFunct("+", this._sum, this);
+	dusk.events.registerHashFunct("*", this._prod, this);
 };
 
 /*- Function: _increment
@@ -91,11 +77,11 @@ mods.Core.prototype.addActions = function() {
  * Params:
  *	data		- [object] A "inc" action.
  */
-mods.Core.prototype._increment = function(data) {
-	if(data["var"] === undefined){duskWolf.error("No var to increment.");return;}
+dusk.mods.core._increment = function(data) {
+	if(data["var"] === undefined){throw new dusk.errors.PropertyMissing(data.a, "var");}
 	if(data.by === undefined) data.by = 1;
 	
-	this._events.setVar(data["var"], Number(events.getVar(data["var"]))+Number(data.by));
+	dusk.events.setVar(data["var"], Number(dusk.events.getVar(data["var"]))+Number(data.by));
 };
 
 /*- Function: _multiply
@@ -106,11 +92,11 @@ mods.Core.prototype._increment = function(data) {
  * Params:
  *	data		- [object] A "mul" action.
  */
-mods.Core.prototype._multiply = function(data) {
-	if(data["var"] === undefined){duskWolf.error("No var to multiply.");return;}
+dusk.mods.core._multiply = function(data) {
+	if(data["var"] === undefined){throw new dusk.errors.PropertyMissing(data.a, "var");}
 	if(data.by === undefined) data.by = 2;
 	
-	this._events.setVar(data["var"], Number(events.getVar(data["var"]))*Number(data.by));
+	dusk.events.setVar(data["var"], Number(dusk.events.getVar(data["var"]))*Number(data.by));
 };
 
 /*- Function: _modulo
@@ -121,11 +107,11 @@ mods.Core.prototype._multiply = function(data) {
  * Params:
  *	data		- [object] An "modulo" action.
  */
-mods.Core.prototype._modulo = function(data) {
-	if(data["var"] === undefined){duskWolf.error("No var to modulo.");return;}
+dusk.mods.core._modulo = function(data) {
+	if(data["var"] === undefined){throw new dusk.errors.PropertyMissing(data.a, "var");}
 	if(data.by === undefined) data.by = 10;
 	
-	this._events.setVar(data["var"], Number(events.getVar(data["var"]))%Number(data.by));
+	dusk.events.setVar(data["var"], Number(dusk.events.getVar(data["var"]))%Number(data.by));
 };
 
 /*- Function: _sum
@@ -140,8 +126,8 @@ mods.Core.prototype._modulo = function(data) {
  * Returns:
  *	The output of the hashfunct.
  */
-mods.Core.prototype._sum = function(name, args) {
-	if(args.length < 1){duskWolf.error("Nothing to sum.");return;}
+dusk.mods.core._sum = function(name, args) {
+	if(args.length < 1){throw new dusk.errors.ArgLengthWrong(name, args.length, 1);}
 	var total = 0;
 	for(var i = args.length-1; i >= 0; i--){
 		total += Number(args[i]);
@@ -162,8 +148,8 @@ mods.Core.prototype._sum = function(name, args) {
  * Returns:
  *	The output of the hashfunct.
  */
-mods.Core.prototype._prod = function(name, args) {
-	if(args.length < 1){duskWolf.error("Nothing to product.");return;}
+dusk.mods.core._prod = function(name, args) {
+	if(args.length < 1){throw new dusk.errors.ArgLengthWrong(name, args.length, 1);}
 	var total = 1;
 	for(var i = args.length-1; i >= 0; i--){
 		total *= Number(args[i]);
@@ -184,8 +170,8 @@ mods.Core.prototype._prod = function(name, args) {
  * Returns:
  *	The output of the hashfunct.
  */
-mods.Core.prototype._div = function(name, args) {
-	if(args[0] === undefined){duskWolf.error("Nothing to divide.");return;}
+dusk.mods.core._div = function(name, args) {
+	if(args[0] === undefined){throw new dusk.errors.ArgLengthWrong(name, args.length, 1);}
 	if(args[1] === undefined) args[1] = 2;
 	
 	return Number(args[0])/Number(args[1]);
@@ -203,9 +189,11 @@ mods.Core.prototype._div = function(name, args) {
  * Returns:
  *	The output of the hashfunct.
  */
-mods.Core.prototype._mod = function(name, args) {
-	if(args[0] === undefined){duskWolf.error("Nothing to modulo.");return;}
+dusk.mods.core._mod = function(name, args) {
+	if(args[0] === undefined){throw new dusk.errors.ArgLengthWrong(name, args.length, 1);}
 	if(args[1] === undefined) args[1] = 10;
 	
 	return Number(args[0])%Number(args[1]);
 };
+
+dusk.mods.core.init();

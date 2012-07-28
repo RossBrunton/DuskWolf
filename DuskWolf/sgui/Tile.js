@@ -2,6 +2,8 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
+goog.provide("dusk.sgui.Tile");
+
 /** A tile is a type of image designed for using tilesets, a single image with lots of smaller ones in. Generally, it has a "viewing area" of a certian size and width, and the image behind it can be moved to show only one tile at a time.
  * 
  * <p>Uh, remember that this extends the <code>image</code> component, and uses the <code>image</code> property of that as the tileset.</p>
@@ -66,7 +68,7 @@ sgui.Tile.prototype._tileDraw = function(c) {
  * @param image The name of the image, should be a constant in <code>Data</code>.
  */
 sgui.Tile.prototype._setImage = function(name, value) {
-	this._img = data.grabImage(value);
+	this._img = dusk.data.grabImage(value);
 };
 
 sgui.Tile.prototype._getTile = function() {

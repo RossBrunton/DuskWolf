@@ -2,6 +2,10 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
+goog.provide("dusk.sgui.Label");
+goog.provide("dusk.sgui.Text");
+goog.provide("dusk.sgui.TextBox");
+
 /** This is just a generic piece of text. Amusing.
  */
 sgui.Label = function(parent, events, comName) {
@@ -68,7 +72,7 @@ sgui.Label.prototype._setHeight = function(name, value) {
 sgui.Label.prototype.measure = function(test) {
 	if(this._width != -1) return this._width;
 	
-	var c = $("#"+duskWolf.canvas)[0].getContext("2d");
+	var c = $("#"+dusk.canvas)[0].getContext("2d");
 	
 	var state = c.save();
 	c.font = this.prop("size")+"px "+this.prop("font");

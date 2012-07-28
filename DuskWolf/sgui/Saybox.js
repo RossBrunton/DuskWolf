@@ -2,8 +2,13 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-loadComponent("Group");
-loadComponent("VMenu");
+//Sayboxes don't work at the current moment...
+
+//No idea where this class has gone...
+//goog.require("dusk.sgui.VMenu");
+goog.require("dusk.sgui.Text");
+
+goog.provide("dusk.sgui.Saybox");
 
 /***/
 sgui.Saybox = function (parent, events, comName) {

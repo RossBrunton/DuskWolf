@@ -2,6 +2,11 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
+window.sgui = {};
+
+goog.provide("dusk.sgui.Component");
+goog.provide("dusk.sgui.NullCom");
+
 /** Class: sgui.Component
  * 
  * A component is a single "thing" that exists in the Simple Gui system. Everything in the Simple GUI system must have this (or a subclass of this) as a base class.
@@ -71,7 +76,11 @@
  */
 sgui.Component = function (parent, events, componentName) {
 	if(parent !== undefined){
+		/*- Variable: _container
+		 * [<sgui.Container>] The container that this component is inside.
+		 */
 		this._container = parent;
+		/*- The current events system. -*/
 		this._events = events;
 		this.comName = componentName;
 		
@@ -170,7 +179,7 @@ sgui.Component.prototype.frame = function(e) {
 sgui.Component.prototype._registerKeyHandler = function (key, shift, ctrl, funct, scope) {
 	for (var i = this._keyHandlers.length-1; i >= 0; i--) {
 		if(this._keyHandlers[i][0] == key && this._keyHandlers[i][1] == shift && this._keyHandlers[i][2] == ctrl){
-			duskWolf.warning(key+" on "+this.comName+" is already registered.");
+			console.warn(key+" on "+this.comName+" is already registered.");
 			return;
 		}
 	}
@@ -258,10 +267,10 @@ sgui.Component.prototype.keypress = function (e) {
 	
 	switch(e.which){
 		//Directions
-		case 37:if(this._leftAction() && this._leftFlow && this._container.flow(this._leftFlow)){return true};break;
-		case 38:if(this._upAction() && this._upFlow && this._container.flow(this._upFlow)){return true};break;
-		case 39:if(this._rightAction() && this._rightFlow && this._container.flow(this._rightFlow)){return true};break;
-		case 40:if(this._downAction() && this._downFlow && this._container.flow(this._downFlow)){return true};break;
+		case 37:if(this._leftAction(e) && this._leftFlow && this._container.flow(this._leftFlow)){return true};break;
+		case 38:if(this._upAction(e) && this._upFlow && this._container.flow(this._upFlow)){return true};break;
+		case 39:if(this._rightAction(e) && this._rightFlow && this._container.flow(this._rightFlow)){return true};break;
+		case 40:if(this._downAction(e) && this._downFlow && this._container.flow(this._downFlow)){return true};break;
 		
 		//Action key
 		case 32:
@@ -289,19 +298,19 @@ sgui.Component.prototype.keypress = function (e) {
 /** This is called when the left key is pressed.
  * @return Whether focus should flow to <code>leftFlow</code>.
  */
-sgui.Component.prototype._leftAction = function() {return true;}
+sgui.Component.prototype._leftAction = function(e) {return true;}
 /** This is called when the right key is pressed.
  * @return Whether focus should flow to <code>rightFlow</code>.
  */
-sgui.Component.prototype._rightAction = function() {return true;}
+sgui.Component.prototype._rightAction = function(e) {return true;}
 /** This is called when the up key is pressed.
  * @return Whether focus should flow to <code>upFlow</code>.
  */
-sgui.Component.prototype._upAction = function() {return true;}
+sgui.Component.prototype._upAction = function(e) {return true;}
 /** This is called when the down key is pressed.
  * @return Whether focus should flow to <code>downFlow</code>.
  */
-sgui.Component.prototype._downAction = function() {return true;}
+sgui.Component.prototype._downAction = function(e) {return true;}
 
 /** This is what actually processes all the properties, it should be given an xml as an argument, that XML should contain a list of properties.
  * @param xml The properties to process.
@@ -394,7 +403,6 @@ sgui.Component.prototype._setFade = function(name, value) {
 
 sgui.Component.prototype._setFloat = function(name, value) {
 	this._awaitNext();
-	duskWolf.log(value);
 	
 	if("for" in value) {
 		this._floatTime = value["for"];
@@ -482,7 +490,7 @@ sgui.Component.prototype.draw = function(c) {
 	if(this.x || this.y) c.translate(~~this.x, ~~this.y);
 	if(this.alpha != 1) c.globalAlpha = this.alpha;
 	
-	for(var i = this._drawHandlers.length-1; i >= 0; i--){
+	for(var i = 0; i < this._drawHandlers.length; i++){
 		this._drawHandlers[i].call(this, c);
 	}
 	
@@ -553,6 +561,10 @@ sgui.Component.prototype.toString = function() {return "[sgui "+this.className+"
 
 //-----
 
+/** Class: dusk.sgui.NullCom
+ * 
+ * This is a component that does nothing.
+ */
 sgui.NullCom = function(parent, events, comName) {
 	sgui.Component.call(this, parent, events, comName);
 	this.prop("visible", false);

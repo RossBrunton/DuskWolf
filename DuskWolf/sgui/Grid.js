@@ -2,7 +2,9 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-loadComponent("Group");
+goog.require("dusk.sgui.Group");
+
+goog.provide("dusk.sgui.Grid");
 
 /** This is a horizontal group of components.
  * 

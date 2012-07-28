@@ -1,9 +1,9 @@
 Doc/*
+closure/*
 DuskWolf.php
 *.u1conflict*
 change
 *~
-*.naturalDocs
 *.pyc
 jquery.js
-
+DuskWolf/DWCompiled.js

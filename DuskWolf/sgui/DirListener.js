@@ -2,7 +2,9 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-loadComponent("Single");
+goog.require("dusk.sgui.Single");
+
+goog.provide("dusk.sgui.DirListener");
 
 /** This is a simple single that allows you to run actions when a direction arrow is pressed.
  * 
@@ -42,7 +44,7 @@ sgui.DirListener = function(parent, events, comName) {
 sgui.DirListener.prototype = new sgui.Single();
 sgui.DirListener.constructor = sgui.DirListener;
 
-sgui.DecimalTile.prototype.className = "DirListener";
+sgui.DirListener.prototype.className = "DirListener";
 
 /** This is called when the up key is pressed, and in this object it runs some actions.
  * @return If some code was ran. If no code was ran, then control should flow out of this.

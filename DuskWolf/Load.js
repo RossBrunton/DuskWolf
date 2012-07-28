@@ -2,22 +2,22 @@
 //Licensed under the MIT license, see COPYING.txt for details
 //"use strict";
 
+goog.require("dusk");
+goog.require("dusk.game");
+
+goog.provide("dusk.load");
+
 //Two vars required
 // __duskdir__ Location of DuskWolf
 // __datadir__ Location of game data
 
-var __duskdir__ = __duskdir__?__duskdir__:"";
-var __datadir__ = __datadir__?__datadir__:"";
+var __duskdir__ = __duskdir__?__duskdir__:"DuskWolf";
+var __datadir__ = __datadir__?__datadir__:"Data";
 
 var log = true;
 var logDiv = "info";
 
 var loaded = [];
-
-function __load__() {
-	__import__("__init__.js");
-	__start__();
-}
 
 function __import__(file) {
 	if(loaded.indexOf(file) == -1) {
@@ -42,3 +42,20 @@ function __import__(file) {
 document.onkeydown = function(e) {
 	if(e.keyCode >= 37 && e.keyCode <= 40) return false;
 };
+
+
+ /** Function: __start__
+ * 
+ * This starts up the whole thing, and should be called onLoad by the HTML page, you can't expect me to do everything for you!
+ * 
+ * It adds handlers to all the events, and imports all the main classes.
+ */
+
+try {
+	window.game = dusk.game.init();
+} catch(e) {
+	duskWolf.error(e);
+}
+
+$(document).bind("keydown", function(e){try {if("game" in window) dusk.game.keypress(e);} catch(e) {console.error(e.name+", "+e.message);}});
+$(document).bind("keyup", function(e){try {if("game" in window) dusk.game.keyup(e);} catch(e) {console.error(e.name+", "+e.message);}});

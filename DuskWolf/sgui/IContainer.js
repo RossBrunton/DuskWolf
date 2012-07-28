@@ -2,7 +2,9 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-loadComponent("Component");
+goog.require("dusk.sgui.Component");
+
+goog.provide("dusk.sgui.IContainer");
 
 /** Components that implement this interface will be able to have other components inside them.
  * 
@@ -28,13 +30,13 @@ sgui.IContainer.constructor = sgui.IContainer;
  * @return Whether to stop the main function, this will generally cause all future handling of this event to stop.
  * @see Component#keypress
  */
-sgui.IContainer.prototype.containerKeypress = function(e) {duskWolf.warn("Container has not implemented \"containerKeypress\".");};
+sgui.IContainer.prototype.containerKeypress = function(e) {console.warn("Container has not implemented \"containerKeypress\".");};
 
 /** This should delete the component with the name <code>com</code>.
  * @param com The name of the component to delete.
  * @return Whether the delete was successful.
  */
-sgui.IContainer.prototype.deleteComponent = function(com) {duskWolf.warn("Container has not implemented \"deleteComponent\".");};
+sgui.IContainer.prototype.deleteComponent = function(com) {console.warn("Container has not implemented \"deleteComponent\".");};
 
 /** This should return the component with the name <code>com</code>.
  * @param com The name of the component to return.
@@ -42,12 +44,12 @@ sgui.IContainer.prototype.deleteComponent = function(com) {duskWolf.warn("Contai
  * @param type The type of component to create, if necessary.
  * @return The component.
  */
-sgui.IContainer.prototype.getComponent = function(com, create, type) {duskWolf.warn("Container has not implemented \"getComponent\".");};
+sgui.IContainer.prototype.getComponent = function(com, create, type) {console.warn("Container has not implemented \"getComponent\".");};
 
 /** This tells the container that it should try to flow to the component <code>to</code>.
  * @param to The component to flow to.
  * @return Whether the flow was sucessful.
  */
-sgui.IContainer.prototype.flow = function(to) {duskWolf.warn("Container has not implemented \"flow\".");};
+sgui.IContainer.prototype.flow = function(to) {console.warn("Container has not implemented \"flow\".");};
 
 sgui.IContainer.prototype.isAContainer = true;

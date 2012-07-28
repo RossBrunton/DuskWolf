@@ -2,6 +2,8 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
+goog.provide("dusk.sgui.TileMap");
+
 /** A tilemap is just a grid of tiles.
  * 
  * <p>However, it does have a <code>&lt;map&gt;</code> property, which allows quick creation of a map, based on a tilesheet. The content of that property is a whitespace separated list (Preferably using tabs) of coordinates relating to the position on the tilesheet.</p>
@@ -53,7 +55,8 @@ sgui.TileMap = function (parent, events, comName) {
 		
 		this._all = null;
 		this._drawn = false;
-		this._tiles = [];
+		this._tileBuffer = new ArrayBuffer(0);
+		this._tiles = new Uint8Array(this._tileBuffer);
 		
 		this._registerDrawHandler(this._tileMapDraw);
 	}
@@ -64,45 +67,45 @@ sgui.TileMap.constructor = sgui.TileMap;
 sgui.TileMap.prototype.className = "TileMap";
 
 sgui.TileMap.prototype._doMap = function(name, value) {
-	if(typeof(value) != "string" && value){
-		var map = value;
-		this._tiles = [];
-		
-		//Get stuff
-		if(!("rows" in map)) map.rows = this._theme("tm-rows", 5);
-		if(!("cols" in map)) map.cols = this._theme("tm-cols", 5);
-		
-		if("src" in map) {
-			this._img = data.grabImage(map.src);
-		}else{
-			this._img = data.grabImage(this._defImg);
-		}
-		
-		var singleW = 1<<this._tsize;
-		var singleH = 1<<this._tsize;
-		
-		if(map.rows == "-1") map.rows = Math.floor((this.prop("height")/singleH));
-		if(map.cols == "-1") map.cols = Math.floor((this.prop("width")/singleW));
-		
-		var tiles = map.map.split(/\s+/g);
-		
-		for(var i = 0; i < tiles.length; i++){
-			if(tiles[i].indexOf(",") === -1) continue;
-			this._tiles[this._tiles.length] = tiles[i].split(",");
-		}
-		
-		this.rows = map.rows;
-		this.cols = map.cols;
-		
-		this._all = document.createElement("canvas");
-		this._all.width = (this.cols<<this._tsize) + this.prop("width");
-		this._all.height = (this.rows<<this._tsize) + this.prop("height");
-		this._all.style.imageRendering = "-webkit-optimize-contrast";
-		
-		this.drawAll();
-		
-		this.setBoundsCoord(0, 0, this.prop("width"), this.prop("height"));
+	var map = value;
+	
+	//Get stuff
+	if(!("rows" in map)) map.rows = this._theme("tm-rows", 5);
+	if(!("cols" in map)) map.cols = this._theme("tm-cols", 5);
+	
+	if("src" in map) {
+		this._img = dusk.data.grabImage(map.src);
+	}else{
+		this._img = dusk.data.grabImage(this._defImg);
 	}
+	
+	var singleW = 1<<this._tsize;
+	var singleH = 1<<this._tsize;
+	
+	if(map.rows == "-1") map.rows = Math.floor((this.prop("height")/singleH));
+	if(map.cols == "-1") map.cols = Math.floor((this.prop("width")/singleW));
+	
+	this._tileBuffer = new ArrayBuffer((map.rows*map.cols)<<1);
+	this._tiles = new Uint8Array(this._tileBuffer);
+	var tiles = map.map.split(/\s+/g);
+	var pointer = 0;
+	for(var i = 0; i < tiles.length; i++){
+		if(tiles[i].indexOf(",") === -1) continue;
+		this._tiles[pointer++] = tiles[i].split(",")[0];
+		this._tiles[pointer++] = tiles[i].split(",")[1];
+	}
+	
+	this.rows = map.rows;
+	this.cols = map.cols;
+	
+	this._all = document.createElement("canvas");
+	this._all.width = (this.cols<<this._tsize) + this.prop("width");
+	this._all.height = (this.rows<<this._tsize) + this.prop("height");
+	this._all.style.imageRendering = "-webkit-optimize-contrast";
+	
+	this.drawAll();
+	
+	this.setBoundsCoord(0, 0, this.prop("width"), this.prop("height"));
 }
 
 sgui.TileMap.prototype.drawAll = function() {
@@ -111,12 +114,13 @@ sgui.TileMap.prototype.drawAll = function() {
 	if(!this._img.complete) return false;
 	
 	var i = 0;
+	this._all.getContext("2d").clearRect(0, 0, this._all.width, this._all.height);
 	for (var yi = 0; yi < this.rows; yi++) {
 		for (var xi = 0; xi < this.cols; xi++) {
-			if(this._tiles[i]) {
-				this._all.getContext("2d").drawImage(this._img, this._tiles[i][0]<<this._ssize, this._tiles[i][1]<<this._ssize, 1<<this._ssize, 1<<this._ssize, xi<<this._tsize, yi<<this._tsize, 1<<this._tsize, 1<<this._tsize);
+			if(this._tiles[i] !== undefined) {
+				this._all.getContext("2d").drawImage(this._img, this._tiles[i]<<this._ssize, this._tiles[i+1]<<this._ssize, 1<<this._ssize, 1<<this._ssize, xi<<this._tsize, yi<<this._tsize, 1<<this._tsize, 1<<this._tsize);
 			}
-			i++;
+			i+=2;
 		}
 	}
 	
@@ -141,7 +145,7 @@ sgui.TileMap.prototype.setBounds = function(l, u, r, b) {
 		this._rbound = Math.ceil(r/this._twidth);
 		this._ubound = Math.floor(u/this._theight);
 		this._bbound = Math.ceil(b/this._theight);*/
-		duskWolf.warn("Decimal tilemaps have not been fully implemented!");
+		console.warn("Decimal tilemaps have not been fully implemented!");
 	}else{
 		this._lbound = l<<this._tsize;
 		this._rbound = r<<this._tsize;
@@ -170,15 +174,28 @@ sgui.TileMap.prototype.tilePointIn = function(x, y, exactX, exactY) {
 sgui.TileMap.prototype._tileMapDraw = function(c) {
 	if(!this._img) return;
 	if(!this._drawn) this.drawAll();
-	c.drawImage(this._all, this._lbound, this._ubound, this.prop("width"), this.prop("height"), 0, 0, this.prop("width"), this.prop("height"));
+	var u = this._ubound<0?0:this._ubound;
+	var l = this._lbound<0?0:this._lbound;
+	
+	c.drawImage(this._all, l, u, this._rbound-this._lbound, this._bbound-this._ubound, l, u, this._rbound-this._lbound, this._bbound-this._ubound);
 };
 
 sgui.TileMap.prototype.getTile = function(x, y) {
-	if(this._tiles[(y*this.cols)+x]) {
-		return this._tiles[(y*this.cols)+x];
+	if(this._tiles[((y*this.cols)+x)<<1] !== undefined) {
+		return [this._tiles[((y*this.cols)+x)<<1], this._tiles[(((y*this.cols)+x)<<1)+1]];
 	}else{
-		duskWolf.warn("Tile "+x+","+y+" not found on "+this.comName+", wanting "+((y*this.cols)+x)+" when only "+this._tiles.length+" exist.");
-		return "0,0";
+		console.warn("Tile "+x+","+y+" not found on "+this.comName+", wanting "+(((y*this.cols)+x)<<1)+" and I can't find it.");
+		return [0, 0];
+	}
+};
+
+sgui.TileMap.prototype.setTile = function(x, y, tx, ty, update) {
+	if(this._tiles[((y*this.cols)+x)<<1] !== undefined) {
+		this._tiles[((y*this.cols)+x)<<1] = tx;
+		this._tiles[(((y*this.cols)+x)<<1)+1] = ty;
+		if(update) this.drawAll();
+	}else{
+		console.warn("Tile "+x+","+y+" not found on "+this.comName+", wanting to set"+(((y*this.cols)+x)<<1)+" and I can't find it.");
 	}
 };
 
@@ -191,6 +208,14 @@ sgui.TileMap.prototype.inRelativeRange = function(xcoord, ycoord) {
 	return true;
 };
 
+sgui.TileMap.prototype.tileWidth = function() {
+	return 1 << this._tsize;
+};
+
+sgui.TileMap.prototype.tileHeight = function() {
+	return 1 << this._tsize;
+};
+
 sgui.TileMap.prototype.visibleCols = function() {
 	return Math.floor(this.prop("width")/(1<<this._tsize));
 };
@@ -200,9 +225,9 @@ sgui.TileMap.prototype.visibleRows = function() {
 };
 
 sgui.TileMap.prototype.lookTile = function(x, y) {
-	for(var t in this._tiles){
-		if(this._tiles[t][0] == x && this._tiles[t][1] == y) {
-			return [t % this.cols, Math.floor(t/this.cols)];
+	for(var t = (this.rows*this.cols)<<1; t > 0; t-=2){
+		if(this._tiles[t] == x && this._tiles[t+1] == y) {
+			return [(t >> 1) % this.cols, Math.floor((t >> 1)/this.cols)];
 		}
 	}
 	

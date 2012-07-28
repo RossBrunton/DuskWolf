@@ -2,6 +2,8 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
+goog.provide("dusk.mods.math");
+
 /** Class: mods.Math
  * 
  * This provides a few useful mathematical actions and variables.
@@ -45,37 +47,21 @@
 /** Function: mods.Math
  * 
  * Constructor, creates a new instance of this. Doesn't really do anything else of interest though.
- * 
- * Params:
- *	events	- [<Events>] The events system that this will be used for.
  */
-mods.Math = function(events) {
-	mods.IModule.call(this, events);
-};
-mods.Math.prototype = new mods.IModule();
-mods.Math.constructor = mods.Math;
-
-/** Function: addActions
- * 
- * Registers the actions and sets the vars this uses, see the class description for a list of avalable ones.
- * 
- * See:
- * * <mods.IModule.addActions>
- */
-mods.Math.prototype.addActions = function() {
-	this._events.registerHashFunct("SIN", this._trig, this);
-	this._events.registerHashFunct("COS", this._trig, this);
-	this._events.registerHashFunct("TAN", this._trig, this);
-	this._events.registerHashFunct("ASIN", this._untrig, this);
-	this._events.registerHashFunct("ACOS", this._untrig, this);
-	this._events.registerHashFunct("ATAN", this._untrig, this);
-	this._events.registerHashFunct("ROUND", this._round, this);
+dusk.mods.math.init = function() {
+	dusk.events.registerHashFunct("SIN", this._trig, this);
+	dusk.events.registerHashFunct("COS", this._trig, this);
+	dusk.events.registerHashFunct("TAN", this._trig, this);
+	dusk.events.registerHashFunct("ASIN", this._untrig, this);
+	dusk.events.registerHashFunct("ACOS", this._untrig, this);
+	dusk.events.registerHashFunct("ATAN", this._untrig, this);
+	dusk.events.registerHashFunct("ROUND", this._round, this);
 	
 	//Constants
-	this._events.setVar("math.pi", Math.PI);
-	this._events.setVar("math.e", Math.E);
-	this._events.setVar("math.phi", 1.61803398874989);
-	this._events.setVar("math.infinity", Infinity);
+	dusk.events.setVar("math.pi", Math.PI);
+	dusk.events.setVar("math.e", Math.E);
+	dusk.events.setVar("math.phi", 1.61803398874989);
+	dusk.events.setVar("math.infinity", Infinity);
 };
 
 /*- Function: _trig
@@ -90,8 +76,8 @@ mods.Math.prototype.addActions = function() {
  * Returns:
  *	The output of the hashfunct.
  */
-mods.Math.prototype._trig = function(name, args) {
-	if(args.length < 1){duskWolf.error("No argument to trig function.");return;}
+dusk.mods.math._trig = function(name, args) {
+	if(args.length < 1){dusk.error("No argument to trig function.");return;}
 	if(args.length >= 2 && args[1]) args[0] = (args[0]/180)*Math.PI;
 	
 	var tmp = 0;
@@ -126,8 +112,8 @@ mods.Math.prototype._trig = function(name, args) {
  * Returns:
  *	The output of the hashfunct.
  */
-mods.Math.prototype._untrig = function(name, args) {
-	if(args.length < 1){duskWolf.error("No argument to trig function.");return;}
+dusk.mods.math._untrig = function(name, args) {
+	if(args.length < 1){dusk.error("No argument to trig function.");return;}
 	
 	var tmp = 0;
 	
@@ -162,10 +148,12 @@ mods.Math.prototype._untrig = function(name, args) {
  * Returns:
  *	The output of the hashfunct.
  */
-mods.Math.prototype._round = function(name, args) {
+dusk.mods.math._round = function(name, args) {
 	var places = 1;
-	if(args.length < 1){duskWolf.error("Nothing to round.");return;}
+	if(args.length < 1){dusk.error("Nothing to round.");return;}
 	if(args.length >= 2 && args[1]) places = Math.pow(10, args[1]);
 	
 	return Math.round(args[0]*places)/places;
 };
+
+dusk.mods.math.init();

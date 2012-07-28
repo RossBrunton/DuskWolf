@@ -2,8 +2,11 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-__import__("platAi/__init__.js");
-loadPai("Pai");
+goog.require("dusk.mods.simpleGui");
+goog.require("dusk.sgui.PlatMain");
+goog.require("dusk.sgui.CentreScroller");
+
+goog.provide("dusk.mods.plat");
 
 /** Class: mods.Plat
  * 
@@ -16,44 +19,35 @@ loadPai("Pai");
 
 /** Function: mods.Plat
  * 
- * Constructor, creates a new instance of this. Doesn't really do anything of interest though.
- * 
- * Params:
- *	events	- [<Events>] The events system that this will be used for.
+ * Constructor, creates a new instance of this. It sets up all the variables.
  */
-mods.Plat = function(events) {
-	mods.IModule.call(this, events);
-	
+dusk.mods.plat.init = function() {
 	//Vars
-	this._events.setVar("plat.seek", "hero");
-	this._events.setVar("plat.seektype", "player");
+	events.setVar("plat.seek", "hero");
+	events.setVar("plat.seektype", "player");
 	
-	this._events.setVar("plat.skill.jump", true);
-	this._events.setVar("plat.skill.dubjump", true);
+	events.setVar("plat.skill.jump", true);
+	events.setVar("plat.skill.dubjump", true);
+	events.setVar("plat.skill.infinijump", true);
 	
-	this._events.setVar("pentity.default.gravity", 1.5);
-	this._events.setVar("pentity.default.terminal", 10);
-	this._events.setVar("pentity.default.pai", "Stayer");
-	this._events.setVar("pentity.default.haccel", 4);
-	this._events.setVar("pentity.default.hspeed", 10);
-	this._events.setVar("pentity.default.jump", 17);
-	this._events.setVar("pentity.default.slowdown", 2);
-	this._events.setVar("pentity.default.img", "pimg/hero.png");
-	this._events.setVar("pentity.default.solid", true);
-	this._events.setVar("pentity.default.anchor", false);
+	events.setVar("pentity.default.gravity", 1.5);
+	events.setVar("pentity.default.terminal", 10);
+	events.setVar("pentity.default.behaviour", "Stayer");
+	events.setVar("pentity.default.haccel", 4);
+	events.setVar("pentity.default.hspeed", 10);
+	events.setVar("pentity.default.jump", 17);
+	events.setVar("pentity.default.slowdown", 2);
+	events.setVar("pentity.default.img", "pimg/hero.png");
+	events.setVar("pentity.default.solid", true);
+	events.setVar("pentity.default.anchor", false);
 	
-	this._events.setVar("plat.ssize", 4);
-	this._events.setVar("plat.tsize", 5);
+	events.setVar("plat.ssize", 4);
+	events.setVar("plat.tsize", 5);
 	
-	this._events.run([
-	{"a":"listen", "event":"sys-event-load", "actions":[
-		{"a":"pane", "name":"plat-main", "children":[
-			{"name":"main", "type":"PlatMain"}
-		]}
-	]}], "_plat");
+	dusk.events.registerStartHandler(this._onStart, this);
+	
+	events.registerAction("plat-room", this._setRoom, this, [["room", true, "STR"], ["spawn", true, "NUM"]]);
 };
-mods.Plat.prototype = new mods.IModule();
-mods.Plat.constructor = mods.Plat;
 
 /** Function: addActions
  * 
@@ -62,8 +56,13 @@ mods.Plat.constructor = mods.Plat;
  * See:
  * * <mods.IModule.addActions>
  */
-mods.Plat.prototype.addActions = function() {
-	this._events.registerAction("plat-room", this._setRoom, this, [["room", true, "STR"], ["spawn", true, "NUM"]]);
+dusk.mods.plat._onStart = function() {
+	events.run([
+	{"a":"listen", "event":"sys-event-load", "actions":[
+		{"a":"pane", "active":true, "focus":"mainContainer", "name":"plat-main", "children":[
+			{"name":"mainContainer", "focus":"main", "type":"CentreScroller", "width":dusk.events.getVar("sys.sg.width"), "height":dusk.events.getVar("sys.sg.height"), "child":{"name":"main", "type":"PlatMain"}}
+		]}
+	]}], "_plat");
 };
 
 /*- Function: _setRoom
@@ -74,18 +73,20 @@ mods.Plat.prototype.addActions = function() {
  * Params:
  * 	a			- [object] A "plat-room" action.
  */
-mods.Plat.prototype._setRoom = function(a) {
-	if(!("room" in a)){duskWolf.error("No room to load.");return;}
+dusk.mods.plat._setRoom = function(a) {
+	if(!("room" in a)){throw new dusk.errors.PropertyMissing(a.a, "room");}
 	
-	duskWolf.info("Setting room "+a.room+".");
-	this._events.run(data.grabJson("prooms/"+a.room.replace(/\-/g, "_")), this._events.thread);
-	this._events.run([
+	console.log("Setting room "+a.room+".");
+	events.run(dusk.data.grabJson("prooms/"+a.room.replace(/\-/g, "_")), dusk.events.thread);
+	events.run([
 		/*{"a":"if", "cond":(dat.nofade?"0","1"), "then":[*/
-			{"a":"sg-path", "pane":"plat-main", "path":"/main", "fade":{"from":1, "to":0, "speed":-0.05}},
+			{"a":"sg-path", "pane":"plat-main", "path":"/mainContainer/main", "fade":{"from":1, "to":0, "speed":-0.05}},
 		/*]},*/
-		{"a":"sg-path", "pane":"plat-main", "path":"/main", "room":a.room, "spawn":a.spawn},
+		{"a":"sg-path", "pane":"plat-main", "path":"/mainContainer/main", "room":a.room, "spawn":a.spawn},
 		/*{"a":"if", "cond":(dat.nofade?"0","1"), "then":[*/
-			{"a":"sg-path", "pane":"plat-main", "path":"/main", "fade":{"from":0, "to":1, "speed":0.05}},
+			{"a":"sg-path", "pane":"plat-main", "path":"/mainContainer/main", "fade":{"from":0, "to":1, "speed":0.05}},
 		/*]},*/
-		{"a":"fire", "event":"plat-room-load", "room":a.room}], this._events.thread);
+		{"a":"fire", "event":"plat-room-load", "room":a.room}], events.thread);
 };
+
+dusk.mods.plat.init();

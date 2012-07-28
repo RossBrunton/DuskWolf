@@ -2,27 +2,34 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-pai.Controlled = function(entity, events) {
-	if(parent !== undefined){
-		pai.Pai.call(this, entity, events);
+goog.require("dusk.pbehave.PBehave");
+
+goog.provide("dusk.pbehave.Controlled");
+
+window.pbehave.Controlled = function(entity, events) {
+	if(entity !== undefined){
+		window.pbehave.PBehave.call(this, entity, events);
 		
 		this._jumps = 0;
 		this._markAt = "";
 	}
 };
-pai.Controlled.prototype = new pai.Pai();
-pai.Controlled.constructor = pai.Controlled;
+window.pbehave.Controlled.prototype = new window.pbehave.PBehave();
+window.pbehave.Controlled.constructor = window.pbehave.Controlled;
 
-pai.Controlled.prototype.everyFrame = function() {
-	if(this._events.getMod("Keyboard").isKeyPressed(37) && this._entity.dx > -this._entity.eProp("hspeed")) {
+window.pbehave.Controlled.prototype.everyFrame = function() {
+	if(window.events.getVar("plat.edit")) return;
+	
+	if(dusk.mods.keyboard.isKeyPressed(37) && this._entity.dx > -this._entity.eProp("hspeed")) {
 		this._entity.dx -= this._entity.eProp("haccel");
-	}else if(this._events.getMod("Keyboard").isKeyPressed(39) && this._entity.dx < this._entity.eProp("hspeed")) {
+	}else if(dusk.mods.keyboard.isKeyPressed(39) && this._entity.dx < this._entity.eProp("hspeed")) {
 		this._entity.dx += this._entity.eProp("haccel");
 	}
 	
-	if(this._events.getMod("Keyboard").isKeyPressed(38) && this._entity.dy > -4) {
+	if(dusk.mods.keyboard.isKeyPressed(38) && this._entity.dy > -4) {
 		if((this._jumps == 0 && this._events.getVar("plat.skill.jump"))
-		|| (this._jumps == 1 && this._events.getVar("plat.skill.dubjump"))) {
+		|| (this._jumps == 1 && this._events.getVar("plat.skill.dubjump"))
+		|| this._events.getVar("plat.skill.infinijump")) {
 			this._entity.dy = -this._entity.eProp("jump");
 			this._jumps ++;
 		}
@@ -37,10 +44,10 @@ pai.Controlled.prototype.everyFrame = function() {
 	}
 };
 
-pai.Controlled.prototype.onLand = function() {
+window.pbehave.Controlled.prototype.onLand = function() {
 	this._jumps = 0;
 };
 
-pai.Controlled.prototype.onCollideTop = function() {
+window.pbehave.Controlled.prototype.onCollideTop = function() {
 	this._jumps = 0;
 };

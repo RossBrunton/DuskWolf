@@ -2,6 +2,8 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
+goog.provide("dusk.mods.localSaver");
+
 /** Class: mods.LocalSaver
  * 
  * This allows persistent data storage using HTML5's "localStorage" thing.
@@ -33,27 +35,11 @@
 /** Function: mods.LocalSaver
  * 
  * Constructor, creates a new instance of this. Doesn't really do anything else of interest though.
- * 
- * Params:
- *	events	- [<Events>] The events system that this will be used for.
  */
-mods.LocalSaver = function(events) {
-	mods.IModule.call(this, events);
-};
-mods.LocalSaver.prototype = new mods.IModule();
-mods.LocalSaver.constructor = mods.LocalSaver;
-
-/** Function: addActions
- * 
- * Registers the actions this uses, see the class description for a list of avalable ones.
- * 
- * See:
- * * <mods.IModule.addActions>
- */
-mods.LocalSaver.prototype.addActions = function() {
-	this._events.registerAction("local-save", this._save, this, [["name", true, "STR"], ["vars", true, "ARR:STR"], ["regexp", false, "BLN"]]);
-	this._events.registerAction("local-load", this._load, this, [["name", true, "STR"]]);
-	this._events.registerAction("local-clear", this._clear, this, [["name", true, "STR"]]);
+dusk.mods.localSaver.init = function() {
+	dusk.events.registerAction("local-save", this._save, this, [["name", true, "STR"], ["vars", true, "ARR:STR"], ["regexp", false, "BLN"]]);
+	dusk.events.registerAction("local-load", this._load, this, [["name", true, "STR"]]);
+	dusk.events.registerAction("local-clear", this._clear, this, [["name", true, "STR"]]);
 };
 
 /*- Function: _save
@@ -64,9 +50,9 @@ mods.LocalSaver.prototype.addActions = function() {
  * Params:
  * 	a			- [object] A "local-save" action.
  */
-mods.LocalSaver.prototype._save = function(a) {
-	if(!("name" in a)){duskWolf.error("No save data name given!");return;}
-	if(!("vars" in a)){duskWolf.error("No vars to save!");return;}
+dusk.mods.localSaver._save = function(a) {
+	if(!("name" in a)){throw new dusk.errors.PropertyMissing(a.a, "name");}
+	if(!("vars" in a)){throw new dusk.errors.PropertyMissing(a.a, "vars");}
 	
 	if("regexp" in a && a.regexp == "1") {
 		if(typeof(a.vars) == "array"){
@@ -75,9 +61,9 @@ mods.LocalSaver.prototype._save = function(a) {
 			for(var i = a.vars.length-1; i >= 0; i--) {
 				hold = hold.concat(this._events.getVars(RegExp(a.vars[i])));
 			}
-			localStorage["dw_"+a.name] = JSON.stringify(hold);
+			window.localStorage["dw_"+a.name] = JSON.stringify(hold);
 		}else{
-			localStorage["dw_"+a.name] = JSON.stringify(this._events.getVars(RegExp(a.vars)));
+			window.localStorage["dw_"+a.name] = JSON.stringify(this._events.getVars(RegExp(a.vars)));
 		}
 	}else{
 		if(typeof(a.vars) == "array"){
@@ -85,9 +71,9 @@ mods.LocalSaver.prototype._save = function(a) {
 			for(var i = a.vars.length-1; i >= 0; i--) {
 				hold = hold[hold.length] = [a.vars[i], this._events.getVar(a.vars[i])];
 			}
-			localStorage["dw_"+a.name] = JSON.stringify(hold);
+			window.localStorage["dw_"+a.name] = JSON.stringify(hold);
 		}else{
-			localStorage["dw_"+a.name] = JSON.stringify([[a.vars, this._events.getVar(a.vars)]]);
+			window.localStorage["dw_"+a.name] = JSON.stringify([[a.vars, this._events.getVar(a.vars)]]);
 		}
 	}
 };
@@ -100,10 +86,10 @@ mods.LocalSaver.prototype._save = function(a) {
  * Params:
  * 	a			- [object] A "local-load" action.
  */
-mods.LocalSaver.prototype._load = function(a) {
-	if(!("name" in a)){duskWolf.error("No save data name given!");return;}
+dusk.mods.localSaver._load = function(a) {
+	if(!("name" in a)){throw new dusk.errors.PropertyMissing(a.a, "name");}
 	
-	this._events.setVars(JSON.parse(localStorage["dw_"+a.name]));
+	dusk.events.setVars(window.JSON.parse(window.localStorage["dw_"+a.name]));
 };
 
 /*- Function: _clear
@@ -114,8 +100,10 @@ mods.LocalSaver.prototype._load = function(a) {
  * Params:
  * 	a			- [object] A "local-clear" action.
  */
-mods.LocalSaver.prototype._clear = function(data) {
-	if(!("name" in a)){duskWolf.error("No save data name given!");return;}
+dusk.mods.localSaver._clear = function(a) {
+	if(!("name" in a)){throw new dusk.errors.PropertyMissing(a.a, "name");}
 	
-	delete localStorage["dw_"+a.name];
+	delete window.localStorage["dw_"+a.name];
 };
+
+dusk.mods.localSaver.init();

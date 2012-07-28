@@ -2,9 +2,12 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-__import__("mods/__init__.js");
+goog.require("dusk.dwc");
+goog.require("dusk.errors");
 
-/** Class: Events
+goog.provide("dusk.events");
+
+/** Namespace: dusk.events
  * 
  * This is the heart of the entire system! It manages the event stack and carries out events.
  * 
@@ -166,41 +169,41 @@ __import__("mods/__init__.js");
  * * <mods.IModule>
  */
 
-/** Function: Events
+/** Function: dusk.events.init
  * 
- * Creates a new Events system thing, initiates all the defualt actions and goes through all the modules, initing them.
+ * Creates a new Events system thing, creating the vars and such.
  * 
  * Params:
  * 	game	- [<Game>] The game object this is attached to.
  */
-window.Events = function(game) {
+dusk.events.init = function() {
 	/*- Variable: _game
-	 * [<Game>] A link to the main game this is running for.
+	 * [<Game>] A link to the main game dusk.events is running for.
 	 */
-	this._game = game;
+	dusk.events._game = dusk.game;
 	
 	/*- Variable: _actions
-	 * [object] A list of every action, each action is an array in the form [function to be called, scope to call function in]. You should add actions using <addAction>, rather than adding it to this object directly.
+	 * [object] A list of every action, each action is an array in the form [function to be called, scope to call function in]. You should add actions using <addAction>, rather than adding it to dusk.events object directly.
 	 */
-	this._actions = {};
+	dusk.events._actions = {};
 	/*- Variable: _hashFuncs
-	 * [object] A list of every hashfunction, it is an array in the form [function to be called, scope to call function in]. You should add actions using <addHashFunct>, rather than adding it to this object directly.
+	 * [object] A list of every hashfunction, it is an array in the form [function to be called, scope to call function in]. You should add actions using <addHashFunct>, rather than adding it to dusk.events object directly.
 	 */
-	this._hashFuncts = {};
+	dusk.events._hashFuncts = {};
 	/*- Variable: _functions
 	 * [object] A list of all the functions assigned, in the form of an array of actions. Generally, you shouldn't need to create functions outside the JSON files, so you can't do it.
 	 */
-	this._functions = {};
+	dusk.events._functions = {};
 	/*- Variable: _listeners
-	 * [array] A list of all the listeners in use, this is an array of the action that set it, whith all it's properties.
+	 * [array] A list of all the listeners in use, dusk.events is an array of the action that set it, whith all it's properties.
 	 */
-	this._listeners = [];
+	dusk.events._listeners = [];
 	/*- Variable: _vars
-	 * [object] This is all the variables! You should set/retreive these using <getVar> and <setVar>, and the like.
+	 * [object] dusk.events is all the variables! You should set/retreive these using <getVar> and <setVar>, and the like.
 	 */
-	this._vars = {};
+	dusk.events._vars = {};
 	/*- Variable: _threads
-	 * [object] This is all the threads that have been created. Each thread is an object with a "buffer" property, a "nexts" property and an "actions" property.
+	 * [object] dusk.events is all the threads that have been created. Each thread is an object with a "buffer" property, a "nexts" property and an "actions" property.
 	 * 
 	 * Nexts is the number of times <awaitNext> has been called, and is the number of times we have to call <next> for the program to continue.
 	 * 
@@ -208,104 +211,92 @@ window.Events = function(game) {
 	 * 
 	 * The buffer is required so that the order of actions is intuitive, <run> calls that were called first should be ran first.
 	 */
-	this._threads = {};
+	dusk.events._threads = {};
 	/*- Variable: _frameHandlers
-	 * [object] This is all the frame handlers, they are arrays in the form [function, scope].
+	 * [object] dusk.events is all the frame handlers, they are arrays in the form [function, scope].
 	 */
-	this._frameHandlers = {};
+	dusk.events._frameHandlers = {};
 	/*- Variable: _keyHandlers
 	 * [object] The list of keyhandlers, they are arrays of the form [function, scope].
 	 */
-	this._keyHandlers = {};
+	dusk.events._keyHandlers = {};
 	/*- Variable: _keyUpHandlers
 	 * [object] The list of keyuphandlers, they are arrays of the form [function, scope].
 	 */
-	this._keyUpHandlers = {};
-	/*- Variable: _modsInited
-	 * [array] This is an array of all the mods that have been initiated.
+	dusk.events._keyUpHandlers = {};
+	/*- Variable: _startHandlers
+	 * [object] The list of start handlers, they are arrays of the form [function, scope].
 	 */
-	this._modsInited = {};
+	dusk.events._startHandlers = [];
+	/*- Variable: _modsInited
+	 * [array] dusk.events is an array of all the mods that have been initiated.
+	 */
+	dusk.events._modsInited = {};
 	
 	/*- Variable: _ops
-	 * [array] This is an array of all the operators that are supported in conditions.
+	 * [array] dusk.events is an array of all the operators that are supported in conditions.
 	 */
-	this._ops = ["*", "/", "+", "-", "<", ">", "<=", ">=", "=", "!=", "&&", "||"];
+	dusk.events._ops = ["*", "/", "+", "-", "<", ">", "<=", ">=", "=", "!=", "&&", "||"];
 	
 	/*- Variable: _opsReg
-	 * [array] This is an array of all the regular expressions that capture ops, generated here to save time.
+	 * [array] dusk.events is an array of all the regular expressions that capture ops, generated here to save time.
 	 */
-	this._opsReg = [];
+	dusk.events._opsReg = [];
 	
-	for(var o = 0; o < this._ops.length; o ++){
-		this._opsReg[o] = RegExp("([^"+this._regEscape(this._ops.join(""))+"]+)\\s*("+this._regEscape(this._ops[o])+")\\s*([^"+this._regEscape(this._ops.join(""))+"]+)", "i");
+	for(var o = 0; o < dusk.events._ops.length; o ++){
+		dusk.events._opsReg[o] = RegExp("([^"+dusk.events._regEscape(dusk.events._ops.join(""))+"]+)\\s*("+dusk.events._regEscape(dusk.events._ops[o])+")\\s*([^"+dusk.events._regEscape(dusk.events._ops.join(""))+"]+)", "i");
 	}
 	
-	/** Variable: thread
-	 * [string] The currently running thread. Assuming you have not called <awaitNext>, you can read this to get your current thread. Setting it to anything will most likely break something.
+	/** Variable: dusk.events.thread
+	 * [string] The currently running thread. Assuming you have not called <awaitNext>, you can read dusk.events to get your current thread. Setting it to anything will most likely break something.
 	 */
-	this.thread = "";
+	dusk.events.thread = "";
 	
 	//Set some vars
-	this.setVar("sys.game.ver", duskWolf.ver);
-	this.setVar("sys.game.verid", duskWolf.verId);
-	this.setVar("sys.game.name", duskWolf.gameName);
-	this.setVar("sys.game.author", duskWolf.author);
-	this.setVar("sys.game.frameRate", duskWolf.frameRate);
-	
-	//Import and init modules
-	if("mods" in data.root) window.modsAvalable = data.root.mods;
-	
-	//Import modules
-	var ims = ["mods/IModule.js"];
-
-	for(var i = window.modsAvalable.length-1; i >= 0; i--) {
-		ims[ims.length] = "mods/"+window.modsAvalable[i]+".js";
-	}
-	
-	__import__(ims);
-	
-	for(var a = modsAvalable.length-1; a >= 0; a--){
-		var name = modsAvalable[a];
-		if(name != "IModule"){
-			if(typeof(mods[name]) != "function") {
-				duskWolf.warn("module "+name+" failed to load.");
-			} else
-				this._modsInited[name] = new mods[name](this);
-		}
-	}
+	dusk.events.setVar("sys.game.ver", dusk.ver);
+	dusk.events.setVar("sys.game.verid", dusk.verId);
+	dusk.events.setVar("sys.game.frameRate", dusk.frameRate);
 	
 	//Register actions
-	this.registerAction("comment", function(what){}, this, [["", false, "STR"]]);
-	this.registerAction("function", this._addFunction, this, [["name", true, "STR"], ["actions", true, "DWC"]]);
-	this.registerAction("listen", this._addListener, this, [["event", true, "STR"], ["actions", true, "DWC"], ["name", false, "STR"]]);
-	this.registerAction("if", this._iffy, this, [["cond", true, "STR"], ["then", false, "DWC"], ["else", false, "DWC"]]);
-	this.registerAction("ifset", this._ifset, this);
-	this.registerAction("while", this._whiley, this, [["cond", true, "STR"], ["actions", true, "DWC"]]);
-	this.registerAction("call", this._callFunction, this, [["name", true, "STR"], ["thread", false, "STR"]]);
-	this.registerAction("fire", this._fire, this, [["event", true, "STR"]]);
-	this.registerAction("unlisten", this._unlisten, this, [["name", false, "STR"], ["event", false, "STR"]]);
-	this.registerAction("var", this._setVarInternal, this, [["name", true, "STR"], ["value", true, "OBJ"], ["inherit", false, "STR"]]);
-	this.registerAction("delvar", this._delVarInternal, this, [["name", true, "STR"]]);
-	this.registerAction("thread", this._threadTo, this, [["name", true, "STR"], ["actions", true, "DWC"]]);
-	this.registerAction("vardump", function(what){duskWolf.info(this._vars);}, this, []);
+	dusk.events.registerAction("comment", function(what){}, dusk.events, [["", false, "STR"]]);
+	dusk.events.registerAction("function", dusk.events._addFunction, dusk.events, [["name", true, "STR"], ["actions", true, "DWC"]]);
+	dusk.events.registerAction("listen", dusk.events._addListener, dusk.events, [["event", true, "STR"], ["actions", true, "DWC"], ["name", false, "STR"]]);
+	dusk.events.registerAction("if", dusk.events._iffy, dusk.events, [["cond", true, "STR"], ["then", false, "DWC"], ["else", false, "DWC"]]);
+	dusk.events.registerAction("ifset", dusk.events._ifset, dusk.events);
+	dusk.events.registerAction("while", dusk.events._whiley, dusk.events, [["cond", true, "STR"], ["actions", true, "DWC"]]);
+	dusk.events.registerAction("call", dusk.events._callFunction, dusk.events, [["name", true, "STR"], ["thread", false, "STR"]]);
+	dusk.events.registerAction("fire", dusk.events._fire, dusk.events, [["event", true, "STR"]]);
+	dusk.events.registerAction("unlisten", dusk.events._unlisten, dusk.events, [["name", false, "STR"], ["event", false, "STR"]]);
+	dusk.events.registerAction("var", dusk.events._setVarInternal, dusk.events, [["name", true, "STR"], ["value", true, "OBJ"], ["inherit", false, "STR"]]);
+	dusk.events.registerAction("delvar", dusk.events._delVarInternal, dusk.events, [["name", true, "STR"]]);
+	dusk.events.registerAction("thread", dusk.events._threadTo, dusk.events, [["name", true, "STR"], ["actions", true, "DWC"]]);
+	dusk.events.registerAction("vardump", function(what){console.log(dusk.events._vars);}, dusk.events, []);
 	
-	this.registerHashFunct("IF", this._hiffy, this);
-	this.registerHashFunct("=", this._rawCond, this);
+	dusk.events.registerHashFunct("IF", dusk.events._hiffy, dusk.events);
+	dusk.events.registerHashFunct("=", dusk.events._rawCond, dusk.events);
 	
-	for(var b in this._modsInited){
-		this._modsInited[b].addActions();
+	return dusk.events;
+};
+
+/** Function: dusk.events.startGame
+ * 
+ * This initiates the events system, importing all the modules and such.
+ */
+dusk.events.startGame = function() {
+	//Start handlers
+	for(var i = 0; i < this._startHandlers.length; i++){
+		this._startHandlers[i][0].call(this._startHandlers[i][1]);
 	}
 	
 	//Load all files
-	if(!("files" in data.root)) {duskWolf.error("Root json does not specify a list of files..."); return;}
-	for(var i = data.root.files.length-1; i>= 0; i--) {
-		if(data.grabJson(data.root.files[i]), true) {
-			this.run(data.grabJson(data.root.files[i], true), "_init");
+	for(var i = dusk.data.root.files.length-1; i>= 0; i--) {
+		if(dusk.data.grabJson(dusk.data.root.files[i]), true) {
+			this.run(dusk.data.grabJson(dusk.data.root.files[i], true), "_init");
 		}
 	}
 };
 
-/** Function: everyFrame
+/** Function: dusk.events.everyFrame
  * 
  * This function is called every frame by the game object, unless you didn't create this from a game object...
  * 
@@ -315,7 +306,7 @@ window.Events = function(game) {
  * * <DuskWolf.frameRate>
  * * <Events.registerFrameHandler>
  */
-Events.prototype.everyFrame = function() {
+dusk.events.everyFrame = function() {
 	//Fire event
 	if(this.getVar("sys.started")){
 		this.run([{"a":"fire", "event":"sys-event-frame"}], "_frame");
@@ -338,7 +329,7 @@ Events.prototype.everyFrame = function() {
 	}
 }
 
-/** Function: keypress
+/** Function: dusk.events.keypress
  * 
  * This is called by game if a key is pressed, for obvious reasons, if you don't have a game instance this won't be called.
  * 
@@ -350,7 +341,7 @@ Events.prototype.everyFrame = function() {
  * See:
  * * <Events.registerKeyHandler>
  */
-Events.prototype.keypress = function(e) {
+dusk.events.keypress = function(e) {
 	for(var h in this._keyHandlers){
 		this._keyHandlers[h][0].call(this._keyHandlers[h][1], e);
 	}
@@ -368,7 +359,7 @@ Events.prototype.keypress = function(e) {
  * See:
  * * <Events.registerKeyUpHandler>
  */
-Events.prototype.keyup = function(e) {
+dusk.events.keyup = function(e) {
 	for(var h in this._keyUpHandlers){
 		this._keyUpHandlers[h][0].call(this._keyUpHandlers[h][1], e);
 	}
@@ -385,7 +376,7 @@ Events.prototype.keyup = function(e) {
  * 	what	- [string/array] The actions to run, if it is a string, it will be put through JSON.parse first.
  * 	thread	- [string] The thread to run it on. If this is undefined, the thread "main" is assumed.
  */
-Events.prototype.run = function(what, thread) {
+dusk.events.run = function(what, thread) {
 	if(!thread) thread = "main";
 	
 	if(typeof(what) == "string") what = JSON.parse(what);
@@ -415,7 +406,7 @@ Events.prototype.run = function(what, thread) {
  * Returns:
  *	Whether any actions were ran, if this returns false you should not call it again immediatly because nothing'll happen.
  */
-Events.prototype.next = function(t, decrement) {
+dusk.events.next = function(t, decrement) {
 	if(decrement === undefined) decrement = true;
 	//Check if we are waiting for any nexts
 	
@@ -456,8 +447,8 @@ Events.prototype.next = function(t, decrement) {
 		return true;
 	}
 	
-	duskWolf.error("Unknown action \""+current.a+"\".");
-	duskWolf.error(current);
+	console.error("Unknown action \""+current.a+"\".");
+	console.log(current);
 	return true;
 }
 
@@ -473,7 +464,7 @@ Events.prototype.next = function(t, decrement) {
  * Returns:
  *	An object with the same properties of the source one.
  */
-Events.prototype._clone = function(o) {
+dusk.events._clone = function(o) {
 	if(o == null || typeof(o) != 'object') return o;
 
 	var tmp = o.constructor(); 
@@ -495,7 +486,7 @@ Events.prototype._clone = function(o) {
  * Returns:
  *	The thread that has been asked to wait. This will be equal to the t param.
  */
-Events.prototype.awaitNext = function(t, count) {
+dusk.events.awaitNext = function(t, count) {
 	if(t === undefined) t = this.thread;
 	if(count === undefined) count = 1;
 	
@@ -517,7 +508,7 @@ Events.prototype.awaitNext = function(t, count) {
  * Returns:
  *	The data with all the properties evaluated and replaced.
  */
-Events.prototype.replaceVar = function(data, children) {
+dusk.events.replaceVar = function(data, children) {
 	for(var p in data){
 		if(typeof(data[p]) == "string"){
 			data[p] = this.parseVar(data[p]);
@@ -542,7 +533,7 @@ Events.prototype.replaceVar = function(data, children) {
  * Returns:
  *	The return value of the hashfunction.
  */
-Events.prototype.hashFunction = function(name, args) {
+dusk.events.hashFunction = function(name, args) {
 	if(!this._hashFuncts[name.toLowerCase()]){
 		duskWolf.warn("No hashfunction named #"+name+".");
 		return "";
@@ -563,8 +554,8 @@ Events.prototype.hashFunction = function(name, args) {
  * 	scope		- [object] The scope that the function will be ran in.
  * 	langDef		- [array] A definition of the action for DWC, see the guide somewhere.
  */
-Events.prototype.registerAction = function(name, funct, scope, langDef) {
-	dwc.addLangDef(name, langDef);
+dusk.events.registerAction = function(name, funct, scope, langDef) {
+	dusk.dwc.addLangDef(name, langDef);
 	this._actions[name] = [funct, scope];
 };
 
@@ -579,7 +570,7 @@ Events.prototype.registerAction = function(name, funct, scope, langDef) {
  * 	funct		- [function([string], [string, string, ...]){[string]}] The function to be called to do the hashfunction, the first argument is the name, the second an array of params. This should return the value to replace with.
  * 	scope		- [object] The scope that the function will be ran in.
  */
-Events.prototype.registerHashFunct = function(name, funct, scope) {
+dusk.events.registerHashFunct = function(name, funct, scope) {
 	this._hashFuncts[name.toLowerCase()] = [funct, scope];
 };
 
@@ -592,7 +583,7 @@ Events.prototype.registerHashFunct = function(name, funct, scope) {
  * 	funct		- [function(){[undefined]}] The function to be called every frame.
  * 	scope		- [object] The scope in which to run the function, generally this object will be "this" inside the function.
  */
-Events.prototype.registerFrameHandler = function(name, funct, scope) {
+dusk.events.registerFrameHandler = function(name, funct, scope) {
 	this._frameHandlers[name] = [funct, scope];
 };
 
@@ -605,7 +596,7 @@ Events.prototype.registerFrameHandler = function(name, funct, scope) {
  * 	funct		- [function([object]){[undefined]}] The function to be called, it is called with a JQuery keypress object.
  * 	scope		- [object] The scope to run the object in.
  */
-Events.prototype.registerKeyHandler = function(name, funct, scope) {
+dusk.events.registerKeyHandler = function(name, funct, scope) {
 	this._keyHandlers[name] = [funct, scope];
 };
 
@@ -618,26 +609,21 @@ Events.prototype.registerKeyHandler = function(name, funct, scope) {
  * 	funct		- [function([object]){[undefined]}] The function to be called, it is called with a JQuery keypress object.
  * 	scope		- [object] The scope to run the object in.
  */
-Events.prototype.registerKeyUpHandler = function(name, funct, scope) {
+dusk.events.registerKeyUpHandler = function(name, funct, scope) {
 	this._keyUpHandlers[name] = [funct, scope];
 };
 
-/** Function: getMod
+/** Function: registerStartHandler
  * 
- * [<mods.IModule>] This gets a module, if it exists, returns null otherwise.
+ * This registers a function that will be called when the game starts, this allows you to use the DOM.
  * 
  * Params:
- * 	name		- [string] The name of the module to get.
- * 
- * Returns:
- *	A module with that name.
+ * 	name		- [string] The name of the handler.
+ * 	funct		- [function([object]){[undefined]}] The function to be called, it is called with a JQuery keypress object.
+ * 	scope		- [object] The scope to run the object in.
  */
-Events.prototype.getMod = function(name) {
-	if(name in this._modsInited) {
-		return this._modsInited[name];
-	}
-	
-	return null;
+dusk.events.registerStartHandler = function(funct, scope) {
+	this._startHandlers[this._startHandlers.length] = [funct, scope];
 };
 
 /*- Function: _addFunction
@@ -647,9 +633,9 @@ Events.prototype.getMod = function(name) {
  * Params:
  * 	data		- [object] The action to use, it should be a normal "function" action object.
  */
-Events.prototype._addFunction = function(data) {
-	if(!data.name) {duskWolf.error("No name for this function!");return;}
-	if(!data.actions) {duskWolf.error("Error defining "+data.name+", no actions.");return;}
+dusk.events._addFunction = function(data) {
+	if(!data.name) {throw new dusk.errors.PropertyMissing(data.a, "name");}
+	if(!data.actions) {throw new dusk.errors.PropertyMissing(data.a, "actions");}
 	
 	this._functions[data.name] = data.actions;
 };
@@ -661,8 +647,8 @@ Events.prototype._addFunction = function(data) {
  * Params:
  * 	data		- [object] The action to use, it should be a normal "call" action object.
  */
-Events.prototype._callFunction = function(a) {
-	if(!a.name) {duskWolf.error("No name for this function!");return;}
+dusk.events._callFunction = function(a) {
+	if(!a.name) {throw new dusk.errors.PropertyMissing(a.a, "name");}
 	
 	if(this._functions[a.name]){
 		this.run(this._functions[a.name], a.thread?a.thread:this.thread);
@@ -676,9 +662,9 @@ Events.prototype._callFunction = function(a) {
  * Params:
  * 	data		- [object] The action to use, it should be a normal "thread" action object.
  */
-Events.prototype._threadTo = function(data) {
-	if(!data.name) {duskWolf.error("No thread name!");return;}
-	if(!data.actions) {duskWolf.error("Threading to "+data.name+", no actions.");return;}
+dusk.events._threadTo = function(data) {
+	if(!data.name) {throw new dusk.errors.PropertyMissing(data.a, "name");}
+	if(!data.actions) {throw new dusk.errors.PropertyMissing(data.a, "actions");}
 	
 	this.run(data.actions, data.name);
 };
@@ -694,7 +680,7 @@ Events.prototype._threadTo = function(data) {
  * Returns:
  *	A "thread", see <_threads> for information on properties. If the thread doesn't exist and create is false, it returns null.
  */
-Events.prototype._getThread = function(name, create) {
+dusk.events._getThread = function(name, create) {
 	if(this._threads[name]){
 		return this._threads[name];
 	}else if(create){
@@ -716,8 +702,8 @@ Events.prototype._getThread = function(name, create) {
  * Params:
  * 	a			- [object] The action to use, it should be a normal "listen" action object.
  */
-Events.prototype._addListener = function(a) {
-	if(!a.event){duskWolf.error("This listener won't listen to anything!");return;}
+dusk.events._addListener = function(a) {
+	if(!a.event){throw new dusk.errors.PropertyMissing(a.a, "event");}
 	
 	if(a.name) {
 		for(var p in this._listeners) {
@@ -737,7 +723,7 @@ Events.prototype._addListener = function(a) {
  * Params:
  * 	data		- [object] The action to use, it should be a normal "unlisten" action object.
  */
-Events.prototype._unlisten = function(data) {
+dusk.events._unlisten = function(data) {
 	for(var l = this._listeners.length-1; l >= 0; l--){
 		if(this._listeners[l] && this._listeners[l].event == data.event){
 			var fail = false;
@@ -763,8 +749,8 @@ Events.prototype._unlisten = function(data) {
  * Params:
  * 	data		- [object] The action to use, it should be a normal "fire" action object.
  */
-Events.prototype._fire = function(data) {
-	if(!data.event){duskWolf.error("This won't fire anything!");return;}
+dusk.events._fire = function(data) {
+	if(!data.event){throw new dusk.errors.PropertyMissing(data.a, "event");}
 	
 	for(var l = this._listeners.length-1; l >= 0; l--){
 		if(this._listeners[l] && this._listeners[l].event == data.event){
@@ -791,8 +777,8 @@ Events.prototype._fire = function(data) {
  * Params:
  * 	data		- [object] The action to use, it should be a normal "if" action object.
  */
-Events.prototype._iffy = function(what) {
-	if(what.cond === undefined){duskWolf.error("No condition for if.");return;}
+dusk.events._iffy = function(what) {
+	if(what.cond === undefined){throw new dusk.errors.PropertyMissing(what.a, "cond");}
 	
 	if(this.cond(what.cond)) {
 		if(what.then !== undefined) this.run(what.then, this.thread);
@@ -811,7 +797,7 @@ Events.prototype._iffy = function(what) {
  * Returns:
  *	The output of the hashfunct.
  */
-Events.prototype._hiffy = function(name, args) {
+dusk.events._hiffy = function(name, args) {
 	if(args[0] === undefined){duskWolf.error("No condition for #IF.");return;}
 	
 	if(this.cond(args[0])) {
@@ -833,7 +819,7 @@ Events.prototype._hiffy = function(name, args) {
  * Returns:
  *	The output of the hashfunct.
  */
-Events.prototype._rawCond = function(name, args) {
+dusk.events._rawCond = function(name, args) {
 	return this.cond(args[0]);
 };
 
@@ -844,8 +830,8 @@ Events.prototype._rawCond = function(name, args) {
  * Params:
  * 	data		- [object] The action to use, it should be a normal "ifSet" action object.
  */
-Events.prototype._ifSet = function(what) {
-	if(!("value" in what)){duskWolf.error("No value for ifset.");return;}
+dusk.events._ifSet = function(what) {
+	if(!("value" in what)){throw new dusk.errors.PropertyMissing(what.a, "value");}
 	
 	if(!what.value) {
 		if("then" in what) this.run(what.then, this.thread);
@@ -861,9 +847,9 @@ Events.prototype._ifSet = function(what) {
  * Params:
  * 	data		- [object] The action to use, it should be a normal "while" action object.
  */
-Events.prototype._whiley = function(what) {
-	if(!what.cond){duskWolf.error("No condition for while.");return;}
-	if(!what.actions){duskWolf.error("Nothing for while to loop through.");return;}
+dusk.events._whiley = function(what) {
+	if(!what.cond){throw new dusk.errors.PropertyMissing(what.a, "cond");}
+	if(!what.actions){throw new dusk.errors.PropertyMissing(what.a, "actions");}
 	
 	if(this.cond(this.parseVar(what.cond))){
 		var funId = (new Date()).getTime();
@@ -882,7 +868,7 @@ Events.prototype._whiley = function(what) {
  * Returns:
  *	Whether the object can be parsed as json.
  */ 
-Events.prototype._isJson = function(str) {
+dusk.events._isJson = function(str) {
 	return /^[\],:{}\s]*$/.test(String(str).replace(/\\["\\\/bfnrtu]/g, '@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').replace(/(?:^|:|,)(?:\s*\[)+/g, ''));
 }
 
@@ -896,7 +882,7 @@ Events.prototype._isJson = function(str) {
  * Returns:
  *	The string suitable for regexp.
  */ 
-Events.prototype._regEscape = function(str) {
+dusk.events._regEscape = function(str) {
 	return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 }
 	
@@ -913,7 +899,7 @@ Events.prototype._regEscape = function(str) {
  * Returns:
  *	A fully parsed string, where all the variables are replaced. If when broken down the string can be a number, then it is returned as one.
  */ 
-Events.prototype.parseVar = function(str, asStr) {
+dusk.events.parseVar = function(str, asStr) {
 	str = String(str);
 	
 	var ex = null;
@@ -955,7 +941,7 @@ Events.prototype.parseVar = function(str, asStr) {
  * Returns:
  *	Either true or false, if the condition breaks down to "true" then true, "false" then false.
  */
-Events.prototype.cond = function(cond, asStr) {
+dusk.events.cond = function(cond, asStr) {
 	cond = String(cond);
 	var ex;
 	
@@ -976,7 +962,7 @@ Events.prototype.cond = function(cond, asStr) {
 	}
 };
 
-Events.prototype._doOp = function(lhs, rhs, op) {
+dusk.events._doOp = function(lhs, rhs, op) {
 	lhs = this.cond(lhs);
 	if(rhs) rhs = this.cond(rhs);
 	
@@ -1010,9 +996,9 @@ Events.prototype._doOp = function(lhs, rhs, op) {
  * See:
  * 	* <setVar>
  */
-Events.prototype._setVarInternal = function(a) {
-	if(a.name === undefined) {duskWolf.error("No name given for var."); return;}
-	if(a.value === undefined) {duskWolf.error("No value given for "+a.name+"."); return;}
+dusk.events._setVarInternal = function(a) {
+	if(a.name === undefined) {throw new dusk.errors.PropertyMissing(a.a, "name");}
+	if(a.value === undefined) {throw new dusk.errors.PropertyMissing(a.a, "value");}
 	
 	this.setVar(a.name, a.value, a.inherit);
 };
@@ -1033,7 +1019,7 @@ Events.prototype._setVarInternal = function(a) {
  * 	* <setVars>
  * 	* <getVar>
  */
-Events.prototype.setVar = function(name, value, inherit) {
+dusk.events.setVar = function(name, value, inherit) {
 	name = String(name);
 	if(name.indexOf(",") != -1) duskWolf.warning("setVar", "A variable name with a comma in it may cause problems.");
 	
@@ -1063,7 +1049,7 @@ Events.prototype.setVar = function(name, value, inherit) {
 
 /** Function: setVars
  * 
- * This sets multiple variables at once! Just supply it with an array of [key, value] pairs and away you go!
+ * This sets multiple variables at once! Just supply it with an array of [key, value] pbehavers and away you go!
  * 
  * Params:
  * 	list		- [array] The vars and values to set, an array of arrays in the form [name, value].
@@ -1071,7 +1057,7 @@ Events.prototype.setVar = function(name, value, inherit) {
  * See:
  * 	* <setVar>
  */
-Events.prototype.setVars = function(list) {
+dusk.events.setVars = function(list) {
 	for(var i = list.length-1; i>= 0; i--){
 		this.setVar(list[i][0], list[i][1]);
 	}
@@ -1091,7 +1077,7 @@ Events.prototype.setVars = function(list) {
  * 	* <setVar>
  * 	* <getVars>
  */
-Events.prototype.getVar = function(name) {
+dusk.events.getVar = function(name) {
 	name = name.toLowerCase();
 	
 	var fragments = name.split(".");
@@ -1120,12 +1106,12 @@ Events.prototype.getVar = function(name) {
  * 	expr		- [regexp] The regexp to check.
  * 
  * Returns:
- *	An array of [key, value] pairs. You should be able to call <setVars> on them to set the variables back.
+ *	An array of [key, value] pbehavers. You should be able to call <setVars> on them to set the variables back.
  * 
  * See:
  * 	* <getVar>
  */
-Events.prototype.getVars = function(expr) {
+dusk.events.getVars = function(expr) {
 	var ret = [];
 	for(var p in this._vars){
 		if(expr.test(p)){
@@ -1146,8 +1132,8 @@ Events.prototype.getVars = function(expr) {
  * See:
  * 	* <delVar>
  */
-Events.prototype._delVarInternal = function(a) {
-	if(!a.name) {duskWolf.error("No name given for var."); return;}
+dusk.events._delVarInternal = function(a) {
+	if(!a.name) {throw new dusk.errors.PropertyMissing(a.a, "name");}
 	
 	this.delVar(a.name);
 };
@@ -1163,7 +1149,7 @@ Events.prototype._delVarInternal = function(a) {
  * 	* <setVar>
  * 	* <getVar>
  */
-Events.prototype.delVar = function(name) {
+dusk.events.delVar = function(name) {
 	name = name.toLowerCase();
 	
 	var fragments = name.split(".");

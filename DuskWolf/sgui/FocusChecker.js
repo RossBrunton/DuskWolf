@@ -2,7 +2,9 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-loadComponent("Image");
+goog.require("dusk.sgui.Image");
+
+goog.provide("dusk.sgui.FocusChecker");
 
 /** This is a simple component that changes apperance based on whether it is active or not. By default it is red if active, blue if only focused and green otherwise.
  * 

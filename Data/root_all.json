@@ -1,10 +1,10 @@
 {
-	"name":"Example",
+	"name":"All Importer (Imports everything, to compile a full version)",
 	"author":"SavageWolf",
 	"version":"0.0.10",
 	"duskVer":10,
-	"files":["Examples/plat.json"],
+	"files":[],
 	"mods":["core", "plat", "math", "net", "keyboard", "localSaver"],
-	"coms":[],
+	"coms":["DecimalTile", "DirListener", "FocusChecker", "Grid", "Image", "Rect", "Text", "Tile"],
 	"reqs":["dusk.pbehave.Controlled", "dusk.pbehave.Fall", "dusk.pbehave.BackForth"]
 }

@@ -2,6 +2,8 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
+goog.provide("dusk.sgui.Image");
+
 /** This is a single image, the image just sits on the screen and does nothing of any relevance.
  * 
  * <p><img src='Image.png'/></p>
@@ -46,6 +48,6 @@ sgui.Image.prototype._imageDraw = function(c) {
  */
 sgui.Image.prototype._setImage = function(name, value) {
 	if(!value) {duskWolf.warn(this.comName+" tried to set image to nothing."); return;}
-	this._img = data.grabImage(value);
+	this._img = dusk.data.grabImage(value);
 	this.bookRedraw();
 };

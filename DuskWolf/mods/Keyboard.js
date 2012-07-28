@@ -2,6 +2,8 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
+goog.provide("dusk.mods.keyboard");
+
 /** Class: mods.Keyboard
  * 
  * This module is in charge of the keyboard, letting you react to keypresses.
@@ -31,23 +33,21 @@
  * 
  * Provided HashFunctions:
  * 
- * > #KEYC(name);
+ * > #KCODE(name);
  *	This takes in the name of a key, and returns the keycode that represents that key. Not case sensitive.
+ *
+ * > #CKEY(code);
+ *	This takes in a keycode, and returns the name of the key that has it.
  * 
  */
 
 /** Function: mods.Keyboard
  * 
  * Constructor, creates a new instance of this. Doesn't really do anything else of interest though.
- * 
- * Params:
- *	events	- [<Events>] The events system that this will be used for.
  */
-mods.Keyboard = function(events) {
-	mods.IModule.call(this, events);
-	
-	this._events.registerKeyHandler("KeyboardKey", this._handleKeypress, this);
-	this._events.registerKeyUpHandler("KeyboardUpKey", this._handleKeyup, this);
+dusk.mods.keyboard.init = function() {
+	dusk.events.registerKeyHandler("KeyboardKey", this._handleKeypress, this);
+	dusk.events.registerKeyUpHandler("KeyboardUpKey", this._handleKeyup, this);
 	
 	/*- Variable: _keys
 	 * [object] A list of keys that are pressed. It is an array with the indexes being the keycodes.
@@ -65,6 +65,11 @@ mods.Keyboard = function(events) {
 		"13":["ENTER", false],
 		
 		"32":[" ", true],
+		
+		"37":["LEFT", false],
+		"38":["UP", false],
+		"39":["RIGHT", false],
+		"40":["DOWN", false],
 		
 		"48":["0", true],
 		"49":["1", true],
@@ -104,9 +109,12 @@ mods.Keyboard = function(events) {
 		"89":["y", true],
 		"90":["z", true],
 	};
+	
+	dusk.events.registerAction("if-key", this._ifkey, this, [["key", true, "NUM"], ["then", false, "DWC"], ["else", false, "DWC"]]);
+	
+	dusk.events.registerHashFunct("KCODE", this._keyCode, this);
+	dusk.events.registerHashFunct("CKEY", this._codeKey, this);
 };
-mods.Keyboard.prototype = new mods.IModule();
-mods.Keyboard.constructor = mods.Keyboard;
 
 /** Function: addActions
  * 
@@ -115,10 +123,8 @@ mods.Keyboard.constructor = mods.Keyboard;
  * See:
  * * <mods.IModule.addActions>
  */
-mods.Keyboard.prototype.addActions = function() {
-	this._events.registerAction("if-key", this._ifkey, this, [["key", true, "NUM"], ["then", false, "DWC"], ["else", false, "DWC"]]);
+dusk.mods.keyboard.addActions = function() {
 	
-	this._events.registerHashFunct("KEYC", this._keyCode, this);
 };
 
 /*- Function: _handleKeypress
@@ -128,8 +134,8 @@ mods.Keyboard.prototype.addActions = function() {
  * Params:
  * 	e		- [object] A jQuery keypress event object.
  */
-mods.Keyboard.prototype._handleKeypress = function(e) {
-	this._events.run([{"a":"fire", "key":e.keyCode, "shift":e.shiftKey, "ctrl":e.ctrlKey, "alt":e.altKey, "event":"key-event-down"}], "_keyboard");
+dusk.mods.keyboard._handleKeypress = function(e) {
+	dusk.events.run([{"a":"fire", "key":e.keyCode, "shift":e.shiftKey, "ctrl":e.ctrlKey, "alt":e.altKey, "event":"key-event-down"}], "_keyboard");
 	this._keys[e.keyCode] = true;
 };
 
@@ -140,8 +146,8 @@ mods.Keyboard.prototype._handleKeypress = function(e) {
  * Params:
  * 	e		- [object] A jQuery keyup event object.
  */
-mods.Keyboard.prototype._handleKeyup = function(e) {
-	this._events.run([{"a":"fire", "key":e.keyCode, "shift":e.shiftKey, "ctrl":e.ctrlKey, "alt":e.altKey, "event":"key-event-up"}], "_keyboard");
+dusk.mods.keyboard._handleKeyup = function(e) {
+	dusk.events.run([{"a":"fire", "key":e.keyCode, "shift":e.shiftKey, "ctrl":e.ctrlKey, "alt":e.altKey, "event":"key-event-up"}], "_keyboard");
 	this._keys[e.keyCode] = false;
 };
 
@@ -155,7 +161,7 @@ mods.Keyboard.prototype._handleKeyup = function(e) {
  * Returns:
  * 	[Boolean] Whether the key is pressed.
  */
-mods.Keyboard.prototype.isKeyPressed = function(code) {
+dusk.mods.keyboard.isKeyPressed = function(code) {
 	if(!(code in this._keys)) return false;
 	
 	return this._keys[code];
@@ -171,7 +177,7 @@ mods.Keyboard.prototype.isKeyPressed = function(code) {
  * Returns:
  * 	[array] Information on that key. The first entry is a string representation, the second a boolean saying if it is printable.
  */
-mods.Keyboard.prototype.lookupCode = function(code) {
+dusk.mods.keyboard.lookupCode = function(code) {
 	if(!(code in this._codes)) return ["UNKNOWN", false];
 	
 	return this._codes[code];
@@ -185,12 +191,12 @@ mods.Keyboard.prototype.lookupCode = function(code) {
  * Params:
  *	data		- [object] A "ifKey" action.
  */
-mods.Keyboard.prototype._ifKey = function(a) {
-	if(!a.key){duskWolf.error("No key to check.");return;}
+dusk.mods.keyboard._ifKey = function(a) {
+	if(!a.key){throw new dusk.errors.PropertyMissing(a.a, "key");}
 	
 	if(this.isKeyPressed(a.key)) {
 		if("then" in a) this.run(a.then, this._events.thread);
-	}else if("else" in a) this.run(what["else"], this._events.thread);
+	}else if("else" in a) this.run(a["else"], this._events.thread);
 };
 
 /*- Function: _keyCode
@@ -205,8 +211,8 @@ mods.Keyboard.prototype._ifKey = function(a) {
  * Returns:
  *	The output of the hashfunct.
  */
-mods.Keyboard.prototype._keyCode = function(name, args) {
-	if(!args.length){duskWolf.error("No key to check.");return;}
+dusk.mods.keyboard._keyCode = function(name, args) {
+	if(!args.length){throw new dusk.errors.ArgLengthWrong(name, args.length, 1);}
 	
 	for(var k in this._codes){
 		if(this._codes[k][0].toUpperCase() == args[0].toUpperCase()) {
@@ -216,3 +222,25 @@ mods.Keyboard.prototype._keyCode = function(name, args) {
 	
 	return -1;
 };
+
+/*- Function: _codeKey
+ * 
+ * [string] Used internally to handle the "CKEY" hashfunction.
+ *	You should use the standard ways of running hashfunctions, rather than calling this directly.
+ * 
+ * Params:
+ * 	name		- [string] The string name of the hashfunct.
+ * 	args		- [Array] An array of arguments.
+ * 
+ * Returns:
+ *	The output of the hashfunct.
+ */
+dusk.mods.keyboard._codeKey = function(name, args) {
+	if(!args.length){throw new dusk.errors.ArgLengthWrong(name, args.length, 1);}
+	
+	if(this._codes[args[0]] !== undefined) return this._codes[args[0]][0];
+	
+	return "";
+};
+
+dusk.mods.keyboard.init();

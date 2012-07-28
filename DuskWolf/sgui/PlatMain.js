@@ -2,8 +2,11 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-loadComponent("Group");
-loadComponent("PlatEntity");
+goog.require("dusk.sgui.PlatEntity");
+goog.require("dusk.sgui.Group");
+goog.require("dusk.sgui.EditableTileMap");
+
+goog.provide("dusk.sgui.PlatMain");
 
 /***/
 sgui.PlatMain = function (parent, events, comName) {
@@ -35,13 +38,15 @@ sgui.PlatMain.prototype.className = "PlatMain";
 
 sgui.PlatMain.prototype._room = function(name, value) {
 	var room = this._events.getVar("proom."+value);
-	this.parseProps({"children":[
-		{"name":"scheme", "type":"TileMap", "src":"pimg/schematics.png", "visible":false, "tile-size":this._tsize, "sprite-size":this._ssize, "map":{"map":room.scheme, "rows":room.rows, "cols":room.cols, "width":this.prop("width"), "height":this.prop("height")}},
-		{"name":"back", "type":"TileMap", "src":room.backSrc, "tile-size":this._tsize, "sprite-size":this._ssize, "map":{"map":room.back, "rows":room.rows, "cols":room.cols}, "width":this.prop("width"), "height":this.prop("height")},
+	events.setVar("theme.default.etm.globalcoords", true);
+	this.parseProps({"focus":"noEdit", "children":[
+		{"name":"noEdit", "type":"NullCom"},
+		{"name":"back", "type":"EditableTileMap", "cursorColour":"#00ff00", "flow-down":"over", "flow-up":"scheme", "src":room.backSrc, "tile-size":this._tsize, "sprite-size":this._ssize, "map":{"map":room.back, "rows":room.rows, "cols":room.cols}, "width":this.prop("width"), "height":this.prop("height")},
 		{"name":"entities", "type":"Group", "children":[
 			{"name":this._events.getVar("plat.seek"), "type":"PlatEntity"},
 		]},
-		{"name":"over", "type":"TileMap", "src":room.overSrc, "tile-size":this._tsize, "sprite-size":this._ssize, "map":{"map":room.over, "rows":room.rows, "cols":room.cols}, "width":this.prop("width"), "height":this.prop("height")}
+		{"name":"over", "type":"EditableTileMap", "cursorColour":"#ff0000", "flow-down":"scheme", "flow-up":"back", "src":room.overSrc, "tile-size":this._tsize, "sprite-size":this._ssize, "map":{"map":room.over, "rows":room.rows, "cols":room.cols}, "width":this.prop("width"), "height":this.prop("height")},
+		{"name":"scheme", "type":"EditableTileMap", "cursorColour":"#0000ff", "flow-down":"back", "flow-up":"over", "src":"pimg/schematics.png", "alpha":0, "tile-size":this._tsize, "sprite-size":this._ssize, "map":{"map":room.scheme, "rows":room.rows, "cols":room.cols, "width":this.prop("width"), "height":this.prop("height")}},
 	]});
 	
 	this.path("entities/"+this._events.getVar("plat.seek")).typeChange(this._events.getVar("plat.seekType"));
@@ -59,12 +64,17 @@ sgui.PlatMain.prototype._room = function(name, value) {
 	}
 	
 	this._room = value;
-	this.autoScroll(200);
+	
+	this.autoScroll();
 };
 
 sgui.PlatMain.prototype._platMainFrame = function(e) {
 	// Center the player
-	this.autoScroll(this._scrollSpeed);
+	this.autoScroll();
+	
+	//Editing
+	if(events.getVar("plat.edit") && this.getFocus().comName == "noedit") this.focus("scheme");
+	if(!events.getVar("plat.edit") && this.getFocus().comName != "noedit") this.focus("noEdit");
 	
 	//Resolve collisions
 	for(var i = this._entities.length-1; i >= 0; i--) {
@@ -82,7 +92,7 @@ sgui.PlatMain.prototype._platMainFrame = function(e) {
 							this._entities[j].collideRight(this._entities[i]);
 							this._entities[i].collideLeft(this._entities[j]);
 						}
-						
+
 						if(this._entities[j].eProp("solid") && this._entities[i].eProp("solid")){ 
 							if(!this._entities[j].eProp("anchor") && !this._entities[i].eProp("anchor")) {
 								var delta = ((this._entities[i].prop("width") - Math.abs(this._entities[i].x - this._entities[j].x)) /2) +1;
@@ -126,7 +136,7 @@ sgui.PlatMain.prototype._platMainFrame = function(e) {
 							this._entities[j].collideBottom(this._entities[i]);
 							this._entities[i].collideTop(this._entities[j]);
 						}
-						
+
 						if(this._entities[j].eProp("solid") && this._entities[i].eProp("solid")){ 
 							if(!this._entities[j].eProp("anchor") && !this._entities[i].eProp("anchor")) {
 								var delta = ((this._entities[i].prop("height") - Math.abs(this._entities[i].y - this._entities[j].y)) /2)+1;
@@ -166,90 +176,24 @@ sgui.PlatMain.prototype._platMainFrame = function(e) {
 			}
 		}
 	}
+	
+	//Call every entities' moveAndCollide function
+	for(var i = this._entities.length-1; i >= 0; i --) this._entities[i].moveAndCollide();
+	
+	//Call every entities' startFrame function
+	for(var i = this._entities.length-1; i >= 0; i --) this._entities[i].startFrame();
 };
 
-sgui.PlatMain.prototype.autoScroll = function(by) {
-	// Center the player
-
-	if(this.getComponent("entities") && this.path("entities/"+this._events.getVar("plat.seek"))){
-		for(var i = by; i > 0; i--) {
-			var fragile = false;
-			
-			if(this.path("entities/"+this._events.getVar("plat.seek")).x < Math.floor(((-this.x)+this.prop("width")/2)+1)) {
-				if(!this.scrollRight()) break;
-			}else if(this.path("entities/"+this._events.getVar("plat.seek")).x > Math.floor(((-this.x)+this.prop("width")/2)-1)) {
-				if(!this.scrollLeft()) break;
-			}else{
-				break;
-			}
-		}
-		
-		for(var i = by; i > 0; i--) {
-			if(this.path("entities/"+this._events.getVar("plat.seek")).y < Math.floor(((-this.y)+this.prop("height")/2)+1)) {
-				if(!this.scrollDown()) break;
-			}else if(this.path("entities/"+this._events.getVar("plat.seek")).y > Math.floor(((-this.y)+this.prop("height")/2)-1)) {
-				if(!this.scrollUp()) break;
-			}else{
-				break;
-			}
-		}
-		
-		this._update();
-	}
+sgui.PlatMain.prototype.autoScroll = function() {
+	// Centre the player
+	var seekCoords = events.getVar("plat.edit")?[events.getVar("etm.x")<<(this._tsize), events.getVar("etm.y")<<(this._tsize)]:[this.path("entities/"+this._events.getVar("plat.seek")).x, this.path("entities/"+this._events.getVar("plat.seek")).y];
+	this._container.prop("seek", seekCoords);
+	
+	this.getComponent("scheme").setBoundsCoord(seekCoords[0]-(this.prop("width")>>1), seekCoords[1]-(this.prop("height")>>1), seekCoords[0]+(this.prop("width")>>1), seekCoords[1]+(this.prop("height")>>1));
+	this.getComponent("back").setBoundsCoord(seekCoords[0]-(this.prop("width")>>1), seekCoords[1]-(this.prop("height")>>1), seekCoords[0]+(this.prop("width")>>1), seekCoords[1]+(this.prop("height")>>1));
+	this.getComponent("over").setBoundsCoord(seekCoords[0]-(this.prop("width")>>1), seekCoords[1]-(this.prop("height")>>1), seekCoords[0]+(this.prop("width")>>1), seekCoords[1]+(this.prop("height")>>1));
 };
 
-sgui.PlatMain.prototype._update = function() {
-	if(this.x > 0) this.x = 0;
-	if(this.y > 0) this.y = 0;
-	
-	this.getComponent("scheme").setBoundsCoord(-this.x, -this.y);
-	this.getComponent("over").setBoundsCoord(-this.x, -this.y);
-	this.getComponent("back").setBoundsCoord(-this.x, -this.y);
-	
-	this.getComponent("back").prop("y", -this.y);
-	this.getComponent("back").prop("x", -this.x);
-	
-	this.getComponent("over").prop("y", -this.y);
-	this.getComponent("over").prop("x", -this.x);
-	
-	this.getComponent("scheme").prop("y", -this.y);
-	this.getComponent("scheme").prop("x", -this.x);
-	
-	this.bookRedraw();
-};
-
-sgui.PlatMain.prototype.scrollLeft = function() {
-	if(this.getComponent("scheme").inRelativeRange(this.getComponent("scheme").visibleCols(), 0)){
-		this.x --;
-		return true;
-	}
-	
-	return false;
-};
-
-sgui.PlatMain.prototype.scrollRight = function() {
-	if(this.getComponent("scheme").inRelativeRange(0, 0)){
-		this.x ++;
-		return true;
-	}
-	
-	return false;
-};
-
-sgui.PlatMain.prototype.scrollDown = function() {
-	if(this.getComponent("scheme").inRelativeRange(0, 0)){
-		this.y ++;
-		return true;
-	}
-	
-	return false;
-};
-
-sgui.PlatMain.prototype.scrollUp = function() {
-	if(this.getComponent("scheme").inRelativeRange(0, this.getComponent("scheme").visibleRows())){
-		this.y --;
-		return true;
-	}
-	
-	return false;
+sgui.PlatMain.prototype.allEntities = function() {
+	return this._entities;
 };

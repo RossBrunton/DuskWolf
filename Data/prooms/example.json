@@ -268,7 +268,7 @@
 		{"name":"d19", "type":"walk", "x":19, "y":5},
 		{"name":"d20", "type":"walk", "x":20, "y":5},
 		{"name":"d21", "type":"walk", "x":21, "y":5},
-		{"name":"b", "type":"block", "x":7, "y":25},
+		{"name":"b", "type":"block", "x":7, "y":25},*/
 		{"name":"fa1", "type":"fall", "x":21, "y":16},
 		{"name":"fa2", "type":"fall", "x":22, "y":16},
 		{"name":"fa3", "type":"fall", "x":23, "y":16},
@@ -276,7 +276,7 @@
 		{"name":"fa5", "type":"fall", "x":25, "y":16},
 		{"name":"fa6", "type":"fall", "x":26, "y":16},
 		{"name":"fa7", "type":"fall", "x":27, "y":16},
-		{"name":"fa8", "type":"fall", "x":28, "y":16}*/
+		{"name":"fa8", "type":"fall", "x":28, "y":16}
 	]
 }},
 

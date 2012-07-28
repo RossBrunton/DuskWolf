@@ -2,6 +2,12 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
+goog.require("dusk");
+goog.require("dusk.data");
+goog.require("dusk.events");
+
+goog.provide("dusk.game");
+
 /** Class: Game
  * 
  * This is the main game class, it doesn't do anything much besides add the events system to the window object and starts it up.
@@ -11,13 +17,20 @@
  * See:
  * 	<Events>
  */
-
+	
+/** Function: start
+ * 
+ * This starts (or restarts) the events system, it is automatically called when this is constructed.
+ * 
+ * Once the events system has been inited, the event "sys-event-load" event is fired, then "sys-event-start", both on the thread "_init".
+ * You should listen for these rather than doing actions directly at the start, this guarantees that all JSONS and modules and such have loaded correctly.
+ */
 /** Function: Game
  * 
  * This just creates a new instance of this. It will create a new <Data> object on the main window, and then call <start>.
  */
-window.Game = function() {
-	duskWolf.info(duskWolf.gameName+" ver "+duskWolf.ver+" is starting.");
+dusk.game.init = function() {
+	console.log("DuskWolf ver "+duskWolf.ver+" is starting.");
 	
 	//Timer
 	this._framesRan = 0;
@@ -33,23 +46,48 @@ window.Game = function() {
 	 **/
 	this._counter = 0;
 	
-	window.data = new Data();
-	this.start();
-};
+	window.events = dusk.events.init();
+	dusk.data.init();
 	
-/** Function: start
- * 
- * This starts (or restarts) the events system, it is automatically called when this is constructed.
- * 
- * Once the events system has been inited, the event "sys-event-load" event is fired, then "sys-event-start", both on the thread "_init".
- * You should listen for these rather than doing actions directly at the start, this guarantees that all JSONS and modules and such have loaded correctly.
- */
-Game.prototype.start = function() {
-	events = new Events(this);
-	events.run([
-	{"a":"fire", "ver":duskWolf.ver, "ver-id":duskWolf.verId, "gameName":duskWolf.NAME, "event":"sys-event-load"},
-	{"a":"fire", "ver":duskWolf.ver, "ver-id":duskWolf.verId, "gameName":duskWolf.NAME, "event":"sys-event-start"},
-	{"a":"var", "name":"sys.started", "value":true}], "_init");
+	//Import modules
+	window.mods = {};
+	
+	var required = [];
+	
+	for(var i = dusk.data.root.mods.length-1; i >= 0; i--) {
+		console.log("Loading mod "+dusk.data.root.mods[i]+"...");
+		required.push("dusk.mods."+dusk.data.root.mods[i]);
+	}
+	
+	for(var i = dusk.data.root.coms.length-1; i >= 0; i--) {
+		console.log("Loading component "+dusk.data.root.coms[i]+"...");
+		required.push("dusk.sgui."+dusk.data.root.coms[i]);
+	}
+	
+	for(var i = dusk.data.root.reqs.length-1; i >= 0; i--) {
+		console.log("Loading other file "+dusk.data.root.reqs[i]+"...");
+		required.push(dusk.data.root.reqs[i]);
+	}
+	
+	var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+	requestAnimationFrame(this.onRender);
+	setInterval(this.everyFrame, 1000/dusk.frameRate);
+	
+	//Give me a copmiler command!
+	if(dusk.dev) {
+		var hold = "java -jar $closureLocation --js `find *.js */*.js` --compilation_level SIMPLE_OPTIMIZATIONS --js_output_file DWCompiled.js --language_in ECMASCRIPT5 --manage_closure_dependencies --closure_entry_point dusk.load --closure_entry_point dusk.gameStarter";
+		
+		for(var i in required){hold += " --closure_entry_point "+required[i];}
+		console.log("----- Compiler command -----");
+		console.log(hold);
+		console.log("----- Compiler command -----");
+	}
+	
+	goog.addDependency('../../DuskWolf/StartGame.js', ['dusk.gameStarter'], required);
+	
+	if("goog" in window) goog["require"].call(this, "dusk"+"."+"gameStarter");
+	
+	return dusk.game;
 };
 
 /** Function: onRender
@@ -60,25 +98,30 @@ Game.prototype.start = function() {
  * See:
  * 	<DuskWolf.frameRate>
  */
-Game.prototype.onRender = function() {
+dusk.game.onRender = function() {
+	if(dusk.mods && dusk.mods.simpleGui) dusk.mods.simpleGui.draw();
+	
+	var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+	requestAnimationFrame(dusk.game.onRender);
+};
+
+dusk.game.everyFrame = function() {
 	//if(game._crashed) return;
 	try {
-		this._counter += duskWolf.frameRate/60;
-		while(this._counter > 1) {
-			this._counter --;
-			events.everyFrame();
-			if(duskWolf.dev) {
-				game._framesRan++;
-				if(game._framesRan == 100){
-					duskWolf.info("100 frames took "+((new Date()).getTime()-game._time)+"ms, "+(Math.round(100000000/((new Date()).getTime()-game._time))/1000)+"fps.");
-					game._time = (new Date()).getTime();
-					game._framesRan = 0;
+		dusk.game._counter += duskWolf.frameRate/60;
+		while(dusk.game._counter > 1) {
+			dusk.game._counter --;
+			dusk.events.everyFrame();
+			if(dusk.dev) {
+				dusk.game._framesRan++;
+				if(dusk.game._framesRan == 100){
+					console.log("100 frames took "+((new Date()).getTime()-dusk.game._time)+"ms, "+(Math.round(100000000/((new Date()).getTime()-dusk.game._time))/1000)+"fps.");
+					dusk.game._time = (new Date()).getTime();
+					dusk.game._framesRan = 0;
 				}
 			}
 		}
-	} catch(e) {duskWolf.error(e);};
-	
-	if(events.getMod("SimpleGui")) events.getMod("SimpleGui").draw();
+	} catch(e) {console.log("Error! "+e.name+", "+e.message);};
 };
 
 /** Function: keypress
@@ -88,8 +131,8 @@ Game.prototype.onRender = function() {
  * Params:
  * 	e		- [object] A JQuery keypress event to handle.
  */
-Game.prototype.keypress = function(e) {
-	events.keypress(e);
+dusk.game.keypress = function(e) {
+	dusk.events.keypress(e);
 };
 
 /** Function: keyup
@@ -99,6 +142,6 @@ Game.prototype.keypress = function(e) {
  * Params:
  * 	e		- [object] A JQuery keyup event to handle.
  */
-Game.prototype.keyup = function(e) {
-	events.keyup(e);
+dusk.game.keyup = function(e) {
+	dusk.events.keyup(e);
 };

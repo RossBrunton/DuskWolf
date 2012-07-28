@@ -2,6 +2,8 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
+goog.provide("dusk.sgui.Rect");
+
 /***/
 sgui.Rect = function(parent, events, comName) {
 	if(parent !== undefined){
