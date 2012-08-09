@@ -7,9 +7,9 @@ goog.require("dusk.errors");
 
 goog.provide("dusk.events");
 
-/** Namespace: dusk.events
+/** @namespace dusk.events
  * 
- * This is the heart of the entire system! It manages the event stack and carries out events.
+ * @description This is the heart of the entire system! It manages the event stack and carries out events.
  * 
  * Definitions:
  * 
@@ -169,12 +169,7 @@ goog.provide("dusk.events");
  * * <mods.IModule>
  */
 
-/** Function: dusk.events.init
- * 
- * Creates a new Events system thing, creating the vars and such.
- * 
- * Params:
- * 	game	- [<Game>] The game object this is attached to.
+/** Initiates the Events system.
  */
 dusk.events.init = function() {
 	/*- Variable: _game
@@ -535,7 +530,7 @@ dusk.events.replaceVar = function(data, children) {
  */
 dusk.events.hashFunction = function(name, args) {
 	if(!this._hashFuncts[name.toLowerCase()]){
-		duskWolf.warn("No hashfunction named #"+name+".");
+		console.warn("No hashfunction named #"+name+".");
 		return "";
 	};
 	
@@ -652,7 +647,7 @@ dusk.events._callFunction = function(a) {
 	
 	if(this._functions[a.name]){
 		this.run(this._functions[a.name], a.thread?a.thread:this.thread);
-	} else duskWolf.error("Function "+a.name+" does not exist!");
+	} else console.warn("Function "+a.name+" does not exist!");
 };
 
 /*- Function: _threadTo
@@ -691,7 +686,7 @@ dusk.events._getThread = function(name, create) {
 		return this._threads[name];
 	}
 	
-	duskWolf.error("Thread "+name+" does not exist!");
+	throw new Error("Thread "+name+" does not exist!");
 	return null;
 };
 
@@ -756,7 +751,7 @@ dusk.events._fire = function(data) {
 		if(this._listeners[l] && this._listeners[l].event == data.event){
 			var fail = false;
 			for(var p in this._listeners[l]){
-				if((["name", "actions", "event", "__proto__", "a"]).indexOf(p) == -1 && this._listeners[l][p] && ((this._listeners[l][p] != data[p] && this._listeners[l][p][0] != "!") || ("!"+this._listeners[l][p] == data[p] && this._listeners[l][p][0] == "!"))){
+				if((["name", "actions", "event", "__proto__", "a"]).indexOf(p) == -1 && this._listeners[l][p] !== null && ((this._listeners[l][p] != data[p] && this._listeners[l][p][0] != "!") || ("!"+this._listeners[l][p] == data[p] && this._listeners[l][p][0] == "!"))){
 					fail = true;
 					break;
 				}
@@ -798,7 +793,7 @@ dusk.events._iffy = function(what) {
  *	The output of the hashfunct.
  */
 dusk.events._hiffy = function(name, args) {
-	if(args[0] === undefined){duskWolf.error("No condition for #IF.");return;}
+	if(args[0] === undefined){throw new dusk.errors.ArgLengthWrong(name, args.length, 1);}
 	
 	if(this.cond(args[0])) {
 		if(args[1] !== undefined) return args[1];
@@ -1021,7 +1016,7 @@ dusk.events._setVarInternal = function(a) {
  */
 dusk.events.setVar = function(name, value, inherit) {
 	name = String(name);
-	if(name.indexOf(",") != -1) duskWolf.warning("setVar", "A variable name with a comma in it may cause problems.");
+	if(name.indexOf(",") !== -1) console.warn("A variable name with a comma in it may cause problems, tried to set "+name);
 	
 	name = name.toLowerCase();
 	var fragments = name.split(".");

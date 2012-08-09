@@ -195,8 +195,8 @@ dusk.mods.keyboard._ifKey = function(a) {
 	if(!a.key){throw new dusk.errors.PropertyMissing(a.a, "key");}
 	
 	if(this.isKeyPressed(a.key)) {
-		if("then" in a) this.run(a.then, this._events.thread);
-	}else if("else" in a) this.run(a["else"], this._events.thread);
+		if("then" in a) this.run(a.then, dusk.events.thread);
+	}else if("else" in a) this.run(a["else"], dusk.events.thread);
 };
 
 /*- Function: _keyCode

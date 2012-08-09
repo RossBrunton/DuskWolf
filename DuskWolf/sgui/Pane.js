@@ -6,19 +6,19 @@ goog.require("dusk.sgui.Group");
 
 goog.provide("dusk.sgui.Pane");
 
-sgui.Pane = function (sguiMod, events, comName) {
+dusk.sgui.Pane = function (sguiMod, comName) {
 	this._sgui = sguiMod;
-	sgui.Group.call(this, null, events, comName);
+	dusk.sgui.Group.call(this, null, comName);
 	
 	this._registerProp("active", function(name, value) {if(value) this._sgui.setActivePane(this.comName)}, function(name) {return this.active;});
 };
-sgui.Pane.prototype = new sgui.Group();
-sgui.Pane.constructor = sgui.Pane;
+dusk.sgui.Pane.prototype = new dusk.sgui.Group();
+dusk.sgui.Pane.constructor = dusk.sgui.Pane;
 
 
-sgui.Pane.prototype.className = "Pane";
+dusk.sgui.Pane.prototype.className = "Pane";
 
-sgui.Pane.prototype.bookRedraw = function() {
+dusk.sgui.Pane.prototype.bookRedraw = function() {
 	if(this._redrawBooked) return;
 	this._sgui.bookRedraw();
 	this._redrawBooked = true;

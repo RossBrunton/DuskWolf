@@ -4,9 +4,10 @@
 	{"a":"var", "name":"pentity.player", "inherit":"pentity.default", "value":{"behaviour":"Controlled"}},
 	{"a":"var", "name":"pentity.walk", "inherit":"pentity.default", "value":{"behaviour":"BackForth"}},
 	{"a":"var", "name":"pentity.block", "inherit":"pentity.default", "value":{"behaviour":"Stayer", "anchor":true, "gravity":0}},
-	{"a":"var", "name":"pentity.fall", "inherit":"pentity.default", "value":{"behaviour":"Fall", "anchor":true, "gravity":0, "img":"pimg/techFallBlock.png"}},
+	{"a":"var", "name":"pentity.fall", "inherit":"pentity.default", "value":{"behaviour":"Fall", /*"anchor":true,*/ "gravity":0, "img":"pimg/techFallBlock.png"}},
+	{"a":"var", "name":"pentity.push", "inherit":"pentity.default", "value":{"behaviour":"Push", "gravity":0, "img":"pimg/techFreeMove.png"}},
 	
 	{"a":"listen", "event":"sys-event-start", "actions":[
-		{"a":"plat-room", "room":"example"}
+		{"a":"plat-room", "room":"exhall"}
 	]}
 ]

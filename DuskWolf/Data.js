@@ -75,7 +75,7 @@ dusk.data.init = function() {
 	
 	if(!dusk.data.root) {dusk.error("Root json could not be loaded."); return;}
 	if(dusk.data.root.duskVer > dusk.verId) {dusk.error("DuskWolf version is incompatable with this program."); return;}
-	dusk.info(dusk.data.root.name+" is loading."); 
+	console.info(dusk.data.root.name+" is loading."); 
 	
 	return dusk.data;
 };

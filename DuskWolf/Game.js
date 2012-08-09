@@ -30,7 +30,7 @@ goog.provide("dusk.game");
  * This just creates a new instance of this. It will create a new <Data> object on the main window, and then call <start>.
  */
 dusk.game.init = function() {
-	console.log("DuskWolf ver "+duskWolf.ver+" is starting.");
+	console.log("DuskWolf ver "+dusk.ver+" ["+dusk.verId+"] is starting.");
 	
 	//Timer
 	this._framesRan = 0;
@@ -108,7 +108,7 @@ dusk.game.onRender = function() {
 dusk.game.everyFrame = function() {
 	//if(game._crashed) return;
 	try {
-		dusk.game._counter += duskWolf.frameRate/60;
+		dusk.game._counter += dusk.frameRate/60;
 		while(dusk.game._counter > 1) {
 			dusk.game._counter --;
 			dusk.events.everyFrame();

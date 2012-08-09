@@ -5,9 +5,9 @@
 goog.provide("dusk.sgui.Rect");
 
 /***/
-sgui.Rect = function(parent, events, comName) {
+dusk.sgui.Rect = function(parent, comName) {
 	if(parent !== undefined){
-		sgui.Component.call(this, parent, events, comName);
+		dusk.sgui.Component.call(this, parent, comName);
 	
 		/** This is the actual image. */
 		this._colour = this._theme("box");
@@ -27,13 +27,13 @@ sgui.Rect = function(parent, events, comName) {
 		this._registerDrawHandler(this._rectDraw);
 	}
 };
-sgui.Rect.prototype = new sgui.Component();
-sgui.Rect.constructor = sgui.Rect;
+dusk.sgui.Rect.prototype = new dusk.sgui.Component();
+dusk.sgui.Rect.constructor = dusk.sgui.Rect;
 
 /** @inheritDoc */
-sgui.Rect.prototype.className = "Rect";
+dusk.sgui.Rect.prototype.className = "Rect";
 
-sgui.Rect.prototype._rectDraw = function(c) {
+dusk.sgui.Rect.prototype._rectDraw = function(c) {
 	c.fillStyle = this._colour;
 	c.strokeStyle = this._bColour;
 	c.lineWidth = this._bWidth;

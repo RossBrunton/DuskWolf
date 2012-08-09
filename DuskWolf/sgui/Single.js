@@ -21,9 +21,9 @@ goog.provide("dusk.sgui.Single");
  * 
  * @see Group
  */
-sgui.Single = function(parent, events, comName) {
+dusk.sgui.Single = function(parent, comName) {
 	if (parent !== undefined){
-		sgui.Component.call(this, parent, events, comName);
+		dusk.sgui.Component.call(this, parent, comName);
 		
 		this._component = null;
 		
@@ -38,16 +38,16 @@ sgui.Single = function(parent, events, comName) {
 		this._registerFrameHandler(this._singleFrame);
 	}
 };
-sgui.Single.prototype = new sgui.IContainer();
-sgui.Single.constructor = sgui.Group;
+dusk.sgui.Single.prototype = new dusk.sgui.IContainer();
+dusk.sgui.Single.constructor = dusk.sgui.Group;
 
-sgui.Single.prototype.className = "Single";
+dusk.sgui.Single.prototype.className = "Single";
 
 /** The currently active component handles the keypress. 
  * @param e The keyboard event.
  * @return The result of the focused component's keypress.
  */
-sgui.Single.prototype.containerKeypress = function(e) {
+dusk.sgui.Single.prototype.containerKeypress = function(e) {
 	return this._component.keypress(e);
 };
 
@@ -59,26 +59,22 @@ sgui.Single.prototype.containerKeypress = function(e) {
  * @param type The type of the component, should be the name of one of the components in <code>SimpleGui.COMS</code>. If not specified a NullCom is made.
  * @return The component that was added.
  */
-sgui.Single.prototype.newComponent = function(com, type) { //Component
-	//Find the type
-	if (!type){duskWolf.error("Cannot create a new component of type null!");return;}
-	//loadComponent(type);
-	
-	this._component = new sgui[type](this, this._events, com.toLowerCase());
+dusk.sgui.Single.prototype.newComponent = function(com, type) { //Component
+	this._component = new dusk.sgui[type](this, com.toLowerCase());
 	
 	return this._component;
 };
 
-sgui.Single.prototype._singleChild = function(name, value) {
+dusk.sgui.Single.prototype._singleChild = function(name, value) {
 	//Component properties
 	if (value.name && this.getComponent(value.name.toLowerCase(), value.type)) {
-		this.getComponent(value.name.toLowerCase()).parseProps(this._events.replaceVar(value), this._thread);
+		this.getComponent(value.name.toLowerCase()).parseProps(dusk.events.replaceVar(value), this._thread);
 	} else {
 		console.warn(value.name + " has not been given a type and does not exist, ignoring.");
 	}
 };
 
-sgui.Single.prototype._singleDraw = function(c) {
+dusk.sgui.Single.prototype._singleDraw = function(c) {
 	//Draw children
 	this._component.draw(c);
 };
@@ -92,7 +88,7 @@ sgui.Single.prototype._singleDraw = function(c) {
  * @param type The type of component to create, see <code>newComponent</code> for details.
  * @return The component, or <code>null</code> if it wasn't found and you don't want to create it.
  */
-sgui.Single.prototype.getComponent = function(com, type) { //Component
+dusk.sgui.Single.prototype.getComponent = function(com, type) { //Component
 	if (this._component.comName == com.toLowerCase() || com == "*" || com === "") {
 		return this._component;
 	};
@@ -104,14 +100,14 @@ sgui.Single.prototype.getComponent = function(com, type) { //Component
  * @param com The name of the component to delete.
  * @return <code>true</code> when a component was deleted, <code>false</code> if it didn't exist.
  */
-sgui.Single.prototype.deleteComponent = function(com) { //Boolean
+dusk.sgui.Single.prototype.deleteComponent = function(com) { //Boolean
 	if (this._component.comName == com.toLowerCase() || com == "*" || !com){
 		this.newComponent("blank", "NullCom");
 		return true;
 	}
 };
 
-sgui.Single.prototype._singleFrame = function() {
+dusk.sgui.Single.prototype._singleFrame = function() {
 	this.getComponent("").frame();
 };
 
@@ -119,11 +115,11 @@ sgui.Single.prototype._singleFrame = function() {
  * @param to The component to flow to.
  * @return Whether the component could be flowed into.
  */
-sgui.Single.prototype.flow = function(to) { //Bool
+dusk.sgui.Single.prototype.flow = function(to) { //Bool
 	return this._container.flow(to);
 };
 
 /** Groups will call their currently focused components <code>onDeactive</code> function. */
-sgui.Single.prototype.onDeactive = function() {this._component.onDeactive();};
+dusk.sgui.Single.prototype.onDeactive = function() {this._component.onDeactive();};
 /** Groups will call their currently focused components <code>onActive</code> function. */
-sgui.Single.prototype.onActive = function() {this._component.onActive();};
+dusk.sgui.Single.prototype.onActive = function() {this._component.onActive();};

@@ -25,6 +25,11 @@ window.pbehave.PBehave.prototype.onCollideRight = function(collider) {};
 window.pbehave.PBehave.prototype.onCollideTop = function(collider) {};
 window.pbehave.PBehave.prototype.onCollideBottom = function(collider) {};
 
+window.pbehave.PBehave.prototype.onCollidedLeft = function(host) {};
+window.pbehave.PBehave.prototype.onCollidedRight = function(host) {};
+window.pbehave.PBehave.prototype.onCollidedTop = function(host) {};
+window.pbehave.PBehave.prototype.onCollidedBottom = function(host) {};
+
 //-----
 
 window.pbehave.Stayer = function(entity, events) {

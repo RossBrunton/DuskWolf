@@ -23,30 +23,32 @@ goog.provide("dusk.mods.plat");
  */
 dusk.mods.plat.init = function() {
 	//Vars
-	events.setVar("plat.seek", "hero");
-	events.setVar("plat.seektype", "player");
+	dusk.events.setVar("plat.seek", "hero");
+	dusk.events.setVar("plat.seektype", "player");
 	
-	events.setVar("plat.skill.jump", true);
-	events.setVar("plat.skill.dubjump", true);
-	events.setVar("plat.skill.infinijump", true);
+	dusk.events.setVar("plat.skill.jump", true);
+	dusk.events.setVar("plat.skill.dubjump", true);
+	dusk.events.setVar("plat.skill.infinijump", false);
 	
-	events.setVar("pentity.default.gravity", 1.5);
-	events.setVar("pentity.default.terminal", 10);
-	events.setVar("pentity.default.behaviour", "Stayer");
-	events.setVar("pentity.default.haccel", 4);
-	events.setVar("pentity.default.hspeed", 10);
-	events.setVar("pentity.default.jump", 17);
-	events.setVar("pentity.default.slowdown", 2);
-	events.setVar("pentity.default.img", "pimg/hero.png");
-	events.setVar("pentity.default.solid", true);
-	events.setVar("pentity.default.anchor", false);
+	dusk.events.setVar("pentity.default.gravity", 1);
+	dusk.events.setVar("pentity.default.terminal", 9);
+	dusk.events.setVar("pentity.default.behaviour", "Stayer");
+	dusk.events.setVar("pentity.default.haccel", 2);
+	dusk.events.setVar("pentity.default.hspeed", 7);
+	dusk.events.setVar("pentity.default.jump", 15);
+	dusk.events.setVar("pentity.default.slowdown", 1);
+	dusk.events.setVar("pentity.default.img", "pimg/hero.png");
+	dusk.events.setVar("pentity.default.solid", true);
+	dusk.events.setVar("pentity.default.anchor", false);
 	
-	events.setVar("plat.ssize", 4);
-	events.setVar("plat.tsize", 5);
+	dusk.events.setVar("plat.ssize", 4);
+	dusk.events.setVar("plat.tsize", 5);
 	
 	dusk.events.registerStartHandler(this._onStart, this);
 	
-	events.registerAction("plat-room", this._setRoom, this, [["room", true, "STR"], ["spawn", true, "NUM"]]);
+	dusk.events.registerAction("plat-room", this._setRoom, this, [["room", true, "STR"], ["spawn", true, "NUM"]]);
+	dusk.events.registerAction("plat-drop", this._setDrop, this, [["slot", true, "NUM"], ["type", true, "STR"]]);
+	dusk.events.registerAction("plat-edit", function(a){dusk.events.setVar("plat.edit.active", !dusk.events.getVar("plat.edit.active"));}, this, []);
 };
 
 /** Function: addActions
@@ -87,6 +89,13 @@ dusk.mods.plat._setRoom = function(a) {
 			{"a":"sg-path", "pane":"plat-main", "path":"/mainContainer/main", "fade":{"from":0, "to":1, "speed":0.05}},
 		/*]},*/
 		{"a":"fire", "event":"plat-room-load", "room":a.room}], events.thread);
+};
+
+dusk.mods.plat._setDrop = function(a) {
+	if(!("slot" in a)){throw new dusk.errors.PropertyMissing(a.a, "slot");}
+	if(!("type" in a)){throw new dusk.errors.PropertyMissing(a.a, "type");}
+	
+	dusk.events.setVar("plat.edit.droppers."+a.slot, a.type);
 };
 
 dusk.mods.plat.init();

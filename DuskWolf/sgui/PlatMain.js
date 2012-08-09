@@ -9,58 +9,63 @@ goog.require("dusk.sgui.EditableTileMap");
 goog.provide("dusk.sgui.PlatMain");
 
 /***/
-sgui.PlatMain = function (parent, events, comName) {
+dusk.sgui.PlatMain = function (parent, comName) {
 	if(parent !== undefined){
-		sgui.Group.call(this, parent, events, comName);
+		dusk.sgui.Group.call(this, parent, comName);
 		
 		this._registerFrameHandler(this._platMainFrame);
-		
-		this.prop("width", this._events.getVar("sys.sg.width"));
-		this.prop("height", this._events.getVar("sys.sg.height"));
+		this._registerKeyHandler(83, false, false, this._save, this);
 		
 		this._registerPropMask("sprite-size", "_ssize", true);
 		this._registerPropMask("tile-size", "_tsize", true);
 		this._registerPropMask("spawn", "_spawn", true);
+		this._registerPropMask("render-width", "_renderWidth", true);
+		this._registerPropMask("render-height", "_renderHeight", true);
 		this._registerProp("room", this._room, function(name){return this._room}, ["spawn"]);
+		this._registerProp("width", null, function(name){return this.path("scheme").prop("width")});
+		this._registerProp("height", null, function(name){return this.path("scheme").prop("height")});
 		
-		this._tsize = this._events.getVar("plat.tsize");
-		this._ssize = this._events.getVar("plat.ssize");
+		this._renderWidth = dusk.events.getVar("sys.sg.width");
+		this._renderHeight = dusk.events.getVar("sys.sg.height");
+		
+		this._tsize = dusk.events.getVar("plat.tsize");
+		this._ssize = dusk.events.getVar("plat.ssize");
 		this._scrollSpeed = this._theme("plat.scrollSpeed", 10);
 		this._spawn = 0;
-		this._entities = [];
 		this._room = "";
 	}
 };
-sgui.PlatMain.prototype = new sgui.Group();
-sgui.PlatMain.constructor = sgui.PlatMain;
+dusk.sgui.PlatMain.prototype = new dusk.sgui.Group();
+dusk.sgui.PlatMain.constructor = dusk.sgui.PlatMain;
 
-sgui.PlatMain.prototype.className = "PlatMain";
+dusk.sgui.PlatMain.prototype.className = "PlatMain";
 
-sgui.PlatMain.prototype._room = function(name, value) {
-	var room = this._events.getVar("proom."+value);
+dusk.sgui.PlatMain.prototype._room = function(name, value) {
+	var room = dusk.events.getVar("proom."+value);
 	events.setVar("theme.default.etm.globalcoords", true);
+	
 	this.parseProps({"focus":"noEdit", "children":[
 		{"name":"noEdit", "type":"NullCom"},
-		{"name":"back", "type":"EditableTileMap", "cursorColour":"#00ff00", "flow-down":"over", "flow-up":"scheme", "src":room.backSrc, "tile-size":this._tsize, "sprite-size":this._ssize, "map":{"map":room.back, "rows":room.rows, "cols":room.cols}, "width":this.prop("width"), "height":this.prop("height")},
-		{"name":"entities", "type":"Group", "children":[
-			{"name":this._events.getVar("plat.seek"), "type":"PlatEntity"},
-		]},
-		{"name":"over", "type":"EditableTileMap", "cursorColour":"#ff0000", "flow-down":"scheme", "flow-up":"back", "src":room.overSrc, "tile-size":this._tsize, "sprite-size":this._ssize, "map":{"map":room.over, "rows":room.rows, "cols":room.cols}, "width":this.prop("width"), "height":this.prop("height")},
-		{"name":"scheme", "type":"EditableTileMap", "cursorColour":"#0000ff", "flow-down":"back", "flow-up":"over", "src":"pimg/schematics.png", "alpha":0, "tile-size":this._tsize, "sprite-size":this._ssize, "map":{"map":room.scheme, "rows":room.rows, "cols":room.cols, "width":this.prop("width"), "height":this.prop("height")}},
+		{"name":"back", "type":"EditableTileMap", "cursorColour":"#00ff00", "flow-down":"over", "flow-up":"entities", "src":room.backSrc, "tile-size":this._tsize, "sprite-size":this._ssize, "map":{"map":room.back, "rows":room.rows, "cols":room.cols}},
+		{"name":"entities", "type":"EntityGroup", "tile-size":this._tsize, "sprite-size":this._ssize, "flow-down":"back", "flow-up":"scheme", },
+		{"name":"over", "type":"EditableTileMap", "cursorColour":"#ff0000", "flow-down":"scheme", "flow-up":"back", "src":room.overSrc, "tile-size":this._tsize, "sprite-size":this._ssize, "map":{"map":room.over, "rows":room.rows, "cols":room.cols}},
+		{"name":"scheme", "type":"EditableTileMap", "cursorColour":"#0000ff", "flow-down":"entities", "flow-up":"over", "src":"pimg/schematics.png", "alpha":0, "tile-size":this._tsize, "sprite-size":this._ssize, "map":{"map":room.scheme, "rows":room.rows, "cols":room.cols}},
 	]});
 	
-	this.path("entities/"+this._events.getVar("plat.seek")).typeChange(this._events.getVar("plat.seekType"));
-	var crd = this.getComponent("scheme").lookTile(this._spawn, 1);
-	this.path("entities/"+this._events.getVar("plat.seek")).gridGo(crd[0], crd[1]);
+	this.path("entities").clear();
 	
-	this._entities = [];
-	this._entities[0] = this.path("entities/"+this._events.getVar("plat.seek"));
+	var playerData = {};
+	playerData.name = dusk.events.getVar("plat.seek");
+	playerData.type = dusk.events.getVar("plat.seekType");
+	var crd = this.getComponent("scheme").lookTile(this._spawn, 1);
+	playerData.x = crd[0]<<this._tsize;
+	playerData.y = crd[1]<<this._tsize;
+	
+	this.path("entities").dropEntity(playerData);
 	
 	var waitingEnts = room.entities;
 	for(var i = 0; i < waitingEnts.length; i++) {
-		this._entities[this._entities.length] = this.path("entities").getComponent(waitingEnts[i].name, "PlatEntity");
-		this._entities[this._entities.length-1].typeChange(waitingEnts[i].type);
-		this._entities[this._entities.length-1].gridGo(waitingEnts[i].x, waitingEnts[i].y);
+		this.path("entities").dropEntity(waitingEnts[i]);
 	}
 	
 	this._room = value;
@@ -68,132 +73,132 @@ sgui.PlatMain.prototype._room = function(name, value) {
 	this.autoScroll();
 };
 
-sgui.PlatMain.prototype._platMainFrame = function(e) {
+dusk.sgui.PlatMain.prototype._platMainFrame = function(e) {
 	// Center the player
 	this.autoScroll();
 	
 	//Editing
-	if(events.getVar("plat.edit") && this.getFocus().comName == "noedit") this.focus("scheme");
-	if(!events.getVar("plat.edit") && this.getFocus().comName != "noedit") this.focus("noEdit");
-	
-	//Resolve collisions
-	for(var i = this._entities.length-1; i >= 0; i--) {
-		for(var j = i; j >= 0; j--) {
-			if(this._entities[i] && this._entities[j] && this._entities[i] != this._entities[j]) {
-				if(Math.abs(this._entities[i].x - this._entities[j].x) < (this._entities[i].prop("width"))
-				&& Math.abs(this._entities[i].y - this._entities[j].y) < (this._entities[i].prop("height"))){
-					//Resolve it!
-					if(Math.abs(this._entities[i].x - this._entities[j].x) > Math.abs(this._entities[i].y - this._entities[j].y)){
-						//Resolve horizontally
-						if(this._entities[i].x > this._entities[j].x) {
-							this._entities[i].collideRight(this._entities[j]);
-							this._entities[j].collideLeft(this._entities[i]);
-						}else{
-							this._entities[j].collideRight(this._entities[i]);
-							this._entities[i].collideLeft(this._entities[j]);
-						}
-
-						if(this._entities[j].eProp("solid") && this._entities[i].eProp("solid")){ 
-							if(!this._entities[j].eProp("anchor") && !this._entities[i].eProp("anchor")) {
-								var delta = ((this._entities[i].prop("width") - Math.abs(this._entities[i].x - this._entities[j].x)) /2) +1;
-								if(this._entities[i].x > this._entities[j].x) {
-									this._entities[i].x += delta;
-									if(this._entities[i].dx < 0) this._entities[i].dx = 0;
-									this._entities[j].x -= delta;
-									if(this._entities[j].dx > 0) this._entities[j].dx = 0;
-								}else{
-									this._entities[i].x -= delta;
-									if(this._entities[i].dx > 0) this._entities[i].dx = 0;
-									this._entities[j].x += delta;
-									if(this._entities[j].dx < 0) this._entities[j].dx = 0;
-								}
-							}else if(this._entities[j].eProp("anchor") && !this._entities[i].eProp("anchor")) {
-								var delta = this._entities[i].prop("width") - Math.abs(this._entities[i].x - this._entities[j].x);
-								if(this._entities[i].x > this._entities[j].x) {
-									this._entities[i].x += delta;
-									if(this._entities[i].dx < 0) this._entities[i].dx = 0;
-								}else{
-									this._entities[i].x -= delta;
-									if(this._entities[i].dx > 0) this._entities[i].dx = 0;
-								}
-							}else if(!this._entities[j].eProp("anchor") && this._entities[i].eProp("anchor")) {
-								var delta = this._entities[i].prop("width") - Math.abs(this._entities[i].x - this._entities[j].x);
-								if(this._entities[j].x > this._entities[i].x) {
-									this._entities[j].x += delta;
-									if(this._entities[j].dx < 0) this._entities[j].dx = 0;
-								}else{
-									this._entities[j].x -= delta;
-									if(this._entities[j].dx > 0) this._entities[j].dx = 0;
-								}
-							}	
-						}
-					}else{
-						//Resolve vertically
-						if(this._entities[i].y > this._entities[j].y) {
-							this._entities[i].collideBottom(this._entities[j]);
-							this._entities[j].collideTop(this._entities[i]);
-						}else{
-							this._entities[j].collideBottom(this._entities[i]);
-							this._entities[i].collideTop(this._entities[j]);
-						}
-
-						if(this._entities[j].eProp("solid") && this._entities[i].eProp("solid")){ 
-							if(!this._entities[j].eProp("anchor") && !this._entities[i].eProp("anchor")) {
-								var delta = ((this._entities[i].prop("height") - Math.abs(this._entities[i].y - this._entities[j].y)) /2)+1;
-								if(this._entities[i].y > this._entities[j].y) {
-									this._entities[i].y += delta;
-									if(this._entities[i].dy < 0) this._entities[i].dy = 0;
-									this._entities[j].y -= delta;
-									if(this._entities[j].dy > 0) this._entities[j].dy = 0;
-								}else{
-									this._entities[i].y -= delta;
-									if(this._entities[i].dy > 0) this._entities[i].dy = 0;
-									this._entities[j].y += delta;
-									if(this._entities[j].dy < 0) this._entities[j].dy = 0;
-								}
-							}else if(this._entities[j].eProp("anchor") && !this._entities[i].eProp("anchor")) {
-								var delta = this._entities[i].prop("height") - Math.abs(this._entities[i].y - this._entities[j].y);
-								if(this._entities[i].y > this._entities[j].y) {
-									this._entities[i].y += delta;
-									if(this._entities[i].dy < 0) this._entities[i].dy = 0;
-								}else{
-									this._entities[i].y -= delta;
-									if(this._entities[i].dy > 0) this._entities[i].dy = 0;
-								}
-							}else if(!this._entities[j].eProp("anchor") && this._entities[i].eProp("anchor")) {
-								var delta = this._entities[i].prop("height") - Math.abs(this._entities[i].y - this._entities[j].y);
-								if(this._entities[j].y > this._entities[i].y) {
-									this._entities[j].y += delta;
-									if(this._entities[j].dy < 0) this._entities[j].dy = 0;
-								}else{
-									this._entities[j].y -= delta;
-									if(this._entities[j].dy > 0) this._entities[j].dy = 0;
-								}
-							}	
-						}
-					}
-				}
-			}
-		}
-	}
-	
-	//Call every entities' moveAndCollide function
-	for(var i = this._entities.length-1; i >= 0; i --) this._entities[i].moveAndCollide();
-	
-	//Call every entities' startFrame function
-	for(var i = this._entities.length-1; i >= 0; i --) this._entities[i].startFrame();
+	if(events.getVar("plat.edit.active") && this.getFocus().comName == "noedit") this.focus("over");
+	if(!events.getVar("plat.edit.active") && this.getFocus().comName != "noedit") this.focus("noEdit");
 };
 
-sgui.PlatMain.prototype.autoScroll = function() {
+dusk.sgui.PlatMain.prototype.autoScroll = function() {
 	// Centre the player
-	var seekCoords = events.getVar("plat.edit")?[events.getVar("etm.x")<<(this._tsize), events.getVar("etm.y")<<(this._tsize)]:[this.path("entities/"+this._events.getVar("plat.seek")).x, this.path("entities/"+this._events.getVar("plat.seek")).y];
+	var seekCoords = events.getVar("plat.edit.active")?[(events.getVar("etm.x")+3)<<(this._tsize), (events.getVar("etm.y")+3)<<(this._tsize)]:[this.path("entities/"+dusk.events.getVar("plat.seek")).x, this.path("entities/"+dusk.events.getVar("plat.seek")).y];
 	this._container.prop("seek", seekCoords);
 	
-	this.getComponent("scheme").setBoundsCoord(seekCoords[0]-(this.prop("width")>>1), seekCoords[1]-(this.prop("height")>>1), seekCoords[0]+(this.prop("width")>>1), seekCoords[1]+(this.prop("height")>>1));
-	this.getComponent("back").setBoundsCoord(seekCoords[0]-(this.prop("width")>>1), seekCoords[1]-(this.prop("height")>>1), seekCoords[0]+(this.prop("width")>>1), seekCoords[1]+(this.prop("height")>>1));
-	this.getComponent("over").setBoundsCoord(seekCoords[0]-(this.prop("width")>>1), seekCoords[1]-(this.prop("height")>>1), seekCoords[0]+(this.prop("width")>>1), seekCoords[1]+(this.prop("height")>>1));
+	var dimen = this._container.prop("render");
+	this.getComponent("scheme").setBoundsCoord(dimen[0], dimen[1], dimen[0]+dimen[2], dimen[1]+dimen[3]);
+	this.getComponent("back").setBoundsCoord(dimen[0], dimen[1], dimen[0]+dimen[2], dimen[1]+dimen[3]);
+	this.getComponent("over").setBoundsCoord(dimen[0], dimen[1], dimen[0]+dimen[2], dimen[1]+dimen[3]);
 };
 
-sgui.PlatMain.prototype.allEntities = function() {
-	return this._entities;
+dusk.sgui.PlatMain.prototype._upAction = function(e) {
+	if(!dusk.events.getVar("plat.edit.active")) return true;
+	if(dusk.mods.keyboard.isKeyPressed(187)) {
+		//+
+		this.path("scheme").graftTop();
+		this.path("back").graftTop();
+		this.path("over").graftTop();
+		this.path("entities").adjustAll(0, 1<<this._tsize);
+		return false;
+	}
+	
+	if(dusk.mods.keyboard.isKeyPressed(189)) {
+		//-
+		this.path("scheme").carveTop();
+		this.path("back").carveTop();
+		this.path("over").carveTop();
+		this.path("entities").adjustAll(0, -(1<<this._tsize));
+		return false;
+	}
+	
+	return true;
+};
+
+dusk.sgui.PlatMain.prototype._downAction = function(e) {
+	if(!dusk.events.getVar("plat.edit.active")) return true;
+	if(dusk.mods.keyboard.isKeyPressed(187)) {
+		//+
+		this.path("scheme").graftBottom();
+		this.path("back").graftBottom();
+		this.path("over").graftBottom();
+		return false;
+	}
+	
+	if(dusk.mods.keyboard.isKeyPressed(189)) {
+		//-
+		this.path("scheme").carveBottom();
+		this.path("back").carveBottom();
+		this.path("over").carveBottom();
+		return false;
+	}
+	
+	return true;
+};
+
+dusk.sgui.PlatMain.prototype._leftAction = function(e) {
+	if(!dusk.events.getVar("plat.edit.active")) return true;
+	if(dusk.mods.keyboard.isKeyPressed(187)) {
+		//+
+		this.path("scheme").graftLeft();
+		this.path("back").graftLeft();
+		this.path("over").graftLeft();
+		this.path("entities").adjustAll(1<<this._tsize, 0);
+		return false;
+	}
+	
+	if(dusk.mods.keyboard.isKeyPressed(189)) {
+		//-
+		this.path("scheme").carveLeft();
+		this.path("back").carveLeft();
+		this.path("over").carveLeft();
+		this.path("entities").adjustAll(-(1<<this._tsize), 0);
+		return false;
+	}
+	
+	return true;
+};
+
+dusk.sgui.PlatMain.prototype._rightAction = function(e) {
+	if(!dusk.events.getVar("plat.edit.active")) return true;
+	if(dusk.mods.keyboard.isKeyPressed(187)) {
+		//+
+		this.path("scheme").graftRight();
+		this.path("back").graftRight();
+		this.path("over").graftRight();
+		return false;
+	}
+	
+	if(dusk.mods.keyboard.isKeyPressed(189)) {
+		//-
+		this.path("scheme").carveRight();
+		this.path("back").carveRight();
+		this.path("over").carveRight();
+		return false;
+	}
+	
+	return true;
+};
+
+dusk.sgui.PlatMain.prototype._save = function(e) {
+	if(!dusk.events.getVar("plat.edit.active")) return true;
+	
+	console.log("----- Saved Room Data -----");
+	var a = {};
+	a.a = "var";
+	a.name = "proom."+this._room;
+	a.value = {};
+	a.value.overSrc = this.path("over").prop("src");
+	a.value.backSrc = this.path("back").prop("src");
+	a.value.rows = this.path("scheme").prop("rows");
+	a.value.cols = this.path("scheme").prop("cols");
+	a.value.back = this.path("back").save();
+	a.value.over = this.path("over").save();
+	a.value.scheme = this.path("scheme").save();
+	a.value.entities = this.path("entities").save();
+	console.log(JSON.stringify(a));
+	console.log("----- Saved Room Data -----");
+	
+	return false;
 };

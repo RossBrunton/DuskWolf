@@ -11,9 +11,9 @@ goog.require("dusk.sgui.Text");
 goog.provide("dusk.sgui.Saybox");
 
 /***/
-sgui.Saybox = function (parent, events, comName) {
+dusk.sgui.Saybox = function (parent, comName) {
 	if(parent !== undefined){
-		sgui.Group.call(this, parent, events, comName);
+		dusk.sgui.Group.call(this, parent, comName);
 		
 		this._registerFrameHandler(this._sayBoxFrame);
 		this._registerActionHandler("SayBox", this._sayBoxAction, this);
@@ -22,7 +22,7 @@ sgui.Saybox = function (parent, events, comName) {
 		this._registerPropMask("speed", "_speed", true);
 		this._registerProp("say", this._startSay, null, ["speaker", "speed"]);
 		
-		this._width = this._events.getVar("sys.sg.width");
+		this._width = dusk.events.getVar("sys.sg.width");
 		this._height = 200;
 		
 		this._text = "";
@@ -39,17 +39,17 @@ sgui.Saybox = function (parent, events, comName) {
 		this._build();
 	}
 };
-sgui.Saybox.prototype = new sgui.Group();
-sgui.Saybox.constructor = sgui.SayBox;
+dusk.sgui.Saybox.prototype = new dusk.sgui.Group();
+dusk.sgui.Saybox.constructor = dusk.sgui.SayBox;
 
-sgui.Saybox.prototype.className = "Saybox";
+dusk.sgui.Saybox.prototype.className = "Saybox";
 
-sgui.Saybox.prototype._startSay = function(name, value) {
+dusk.sgui.Saybox.prototype._startSay = function(name, value) {
 	this._text = value;
 	this._speak();
 };
 
-sgui.Saybox.prototype._sayBoxFrame = function(e) {
+dusk.sgui.Saybox.prototype._sayBoxFrame = function(e) {
 	if(!this._speaking) return;
 	this._charCache += this._speed;
 	
@@ -71,14 +71,14 @@ sgui.Saybox.prototype._sayBoxFrame = function(e) {
 	}
 };
 
-sgui.Saybox.prototype._sayBoxAction = function(data) {
+dusk.sgui.Saybox.prototype._sayBoxAction = function(data) {
 	if(!this._waiting) return;
 	
 	this._waiting = false;
 	this._next();
 };
 
-sgui.Saybox.prototype._build = function() {
+dusk.sgui.Saybox.prototype._build = function() {
 	this.parseProps({"children":[
 		{"name":"body", "type":"Rect", "x":20, "y":30, "width":(this.prop("width")-40), "height":(this.prop("height")-50)},
 		{"name":"title", "type":"Rect", "x":30, "y":0, "width":200, "height":30},
@@ -87,11 +87,10 @@ sgui.Saybox.prototype._build = function() {
 	]});
 };
 
-sgui.Saybox.prototype._speak = function() {
+dusk.sgui.Saybox.prototype._speak = function() {
 	//Clear existing lines
 	for(var i = 7; i >= 0; i--) {
 		this._lines[i] = "";
-		duskWolf.log(this);
 		this.getComponent("bodyTexts").getComponent("0,"+i).prop("text", "");
 	}
 	
@@ -108,7 +107,7 @@ sgui.Saybox.prototype._speak = function() {
 	for(var w = 1; w < words.length; w++) {
 		if(this.getComponent("bodyTexts").getComponent("0,"+line).measure(this._lines[line]+" "+words[w]) > this.prop("width")-50) {
 			if(line == 7){
-				duskWolf.warn("Supplied text was larger than box size.");
+				console.warn("Supplied text was larger than box size.");
 				break;
 			}
 			line ++;

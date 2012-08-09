@@ -103,7 +103,7 @@ dusk.mods.simpleGui.init = function() {
 		}
 	}, this);
 
-	//this._events.registerFrameHandler("SGuiDrawer", this.draw, this);
+	//dusk.events.registerFrameHandler("SGuiDrawer", this.draw, this);
 
 	/*- Variable: _panes
 	 * [Object] All the panes.
@@ -157,8 +157,10 @@ dusk.mods.simpleGui._onStart = function() {
 	this._cacheCanvas.height = dusk.events.getVar("sys.sg.height");
 	this._cacheCanvas.width = dusk.events.getVar("sys.sg.width");
 	this._cacheCanvas.style.imageRendering = "-webkit-optimize-contrast";
-
+	
 	this._cacheCanvas.getContext("2d").mozImageSmoothingEnabled = false;
+	this._cacheCanvas.getContext("2d").webkitImageSmoothingEnabled = false;
+	this._cacheCanvas.getContext("2d").imageSmoothingEnabled = false;
 	this._cacheCanvas.getContext("2d").textBaseline = "middle";
 };
 
@@ -174,10 +176,10 @@ dusk.mods.simpleGui._onStart = function() {
  */
 dusk.mods.simpleGui.newPane = function(name) {
 	//Check if it exists
-	if(this.getPane(name, true)){duskWolf.error("Pane "+name+" already exists!");return null;}
+	if(this.getPane(name, true)){return this.getPane(name, true);}
 
 	//Create the pane
-	this._panes[name.toLowerCase()] = new sgui.Pane(this, dusk.events, name);
+	this._panes[name.toLowerCase()] = new dusk.sgui.Pane(this, name);
 
 	return this._panes[name.toLowerCase()];
 };

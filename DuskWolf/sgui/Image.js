@@ -17,9 +17,9 @@ goog.provide("dusk.sgui.Image");
  * 
  * @see Data
  */
-sgui.Image = function(parent, events, comName) {
+dusk.sgui.Image = function(parent, comName) {
 	if(parent !== undefined){
-		sgui.Component.call(this, parent, events, comName);
+		dusk.sgui.Component.call(this, parent, comName);
 	
 		/** This is the actual image. */
 		this._img = null;
@@ -31,13 +31,13 @@ sgui.Image = function(parent, events, comName) {
 		this._registerDrawHandler(this._imageDraw);
 	}
 };
-sgui.Image.prototype = new sgui.Component();
-sgui.Image.constructor = sgui.Image;
+dusk.sgui.Image.prototype = new dusk.sgui.Component();
+dusk.sgui.Image.constructor = dusk.sgui.Image;
 
 /** @inheritDoc */
-sgui.Image.prototype.className = "Image";
+dusk.sgui.Image.prototype.className = "Image";
 
-sgui.Image.prototype._imageDraw = function(c) {
+dusk.sgui.Image.prototype._imageDraw = function(c) {
 	if(this._img){
 		c.drawImage(this._img, 0, 0, this.prop("width"), this.prop("height"));
 	}
@@ -46,8 +46,8 @@ sgui.Image.prototype._imageDraw = function(c) {
 /** This sets the image that will be displayed.
  * @param image The name of the image, should be a constant in <code>Data</code>.
  */
-sgui.Image.prototype._setImage = function(name, value) {
-	if(!value) {duskWolf.warn(this.comName+" tried to set image to nothing."); return;}
+dusk.sgui.Image.prototype._setImage = function(name, value) {
+	if(!value) {console.warn(this.comName+" tried to set image to nothing."); return;}
 	this._img = dusk.data.grabImage(value);
 	this.bookRedraw();
 };

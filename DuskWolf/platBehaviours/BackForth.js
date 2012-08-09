@@ -21,7 +21,9 @@ window.pbehave.BackForth.prototype.everyFrame = function() {
 		this._entity.dx -= this._entity.eProp("haccel");
 	}else if(this._entity.dx > 0 && this._entity.dx < this._entity.eProp("hspeed")) {
 		this._entity.dx += this._entity.eProp("haccel");
-	}
+	}/*else{
+		this._entity.dx = this._entity.eProp("haccel");
+	}*/
 };
 
 window.pbehave.BackForth.prototype.onHitLeft = function() {
@@ -33,9 +35,9 @@ window.pbehave.BackForth.prototype.onHitRight = function() {
 };
 
 window.pbehave.BackForth.prototype.onCollideLeft = function(collider) {
-	this._entity.dx = -this._entity.eProp("haccel");
+	this._entity.dx = this._entity.eProp("haccel");
 };
 
 window.pbehave.BackForth.prototype.onCollideRight = function(collider) {
-	this._entity.dx = this._entity.eProp("haccel");
+	this._entity.dx = -this._entity.eProp("haccel");
 };

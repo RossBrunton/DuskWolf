@@ -74,14 +74,12 @@ goog.provide("dusk.sgui.NullCom");
  * @param _paneName The name of the pane this is tethered to.
  * @param _comName The name of this component.
  */
-sgui.Component = function (parent, events, componentName) {
+dusk.sgui.Component = function (parent, componentName) {
 	if(parent !== undefined){
 		/*- Variable: _container
 		 * [<sgui.Container>] The container that this component is inside.
 		 */
 		this._container = parent;
-		/*- The current events system. -*/
-		this._events = events;
 		this.comName = componentName;
 		
 		this.x = 0;
@@ -159,11 +157,11 @@ sgui.Component = function (parent, events, componentName) {
 };
 
 /** The name of this component.*/
-sgui.Component.prototype.className = "Component";
-sgui.Component.prototype.isAContainer = false;
+dusk.sgui.Component.prototype.className = "Component";
+dusk.sgui.Component.prototype.isAContainer = false;
 
 
-sgui.Component.prototype.frame = function(e) {
+dusk.sgui.Component.prototype.frame = function(e) {
 	for(var a = this._frameHandlers.length-1; a >= 0; a--){
 		if(this._frameHandlers[a]) this._frameHandlers[a].call(this, e);
 	}
@@ -176,7 +174,7 @@ sgui.Component.prototype.frame = function(e) {
  * @param ctrl Whether the ctrl key must be held down as well, note that Flash probably reserves some of these for itself, maybe.
  * @param funct The function to call, it is given a single param, the Keyboard event. It must also return a Boolean, if true then the keypress will not be processed by it's parent container. Return true if you have done something of interest, and do not want your parents to continue to do anything.
  */
-sgui.Component.prototype._registerKeyHandler = function (key, shift, ctrl, funct, scope) {
+dusk.sgui.Component.prototype._registerKeyHandler = function (key, shift, ctrl, funct, scope) {
 	for (var i = this._keyHandlers.length-1; i >= 0; i--) {
 		if(this._keyHandlers[i][0] == key && this._keyHandlers[i][1] == shift && this._keyHandlers[i][2] == ctrl){
 			console.warn(key+" on "+this.comName+" is already registered.");
@@ -191,11 +189,11 @@ sgui.Component.prototype._registerKeyHandler = function (key, shift, ctrl, funct
  * @param name The name of the handler, this is for identifying it.
  * @param funct The function to call, it will be passed a single parameter, the Event, and should return void.
  */
-sgui.Component.prototype._registerFrameHandler = function(funct) {
+dusk.sgui.Component.prototype._registerFrameHandler = function(funct) {
 	this._frameHandlers.push(funct);
 }
 
-sgui.Component.prototype._clearFrameHandler = function(funct) {
+dusk.sgui.Component.prototype._clearFrameHandler = function(funct) {
 	for(var i in this._frameHandlers) {
 		if(this._frameHandlers[i] == funct) delete this._frameHandlers[i]
 	}
@@ -205,29 +203,29 @@ sgui.Component.prototype._clearFrameHandler = function(funct) {
  * @param name The name of the handler, this is for identifying it.
  * @param funct The function to call, it will be passed a single parameter, the KeyboardEvent. It should return a Boolean, if true then the action will not "bubble"; the container that this component is in will not handle the event.
  */
-sgui.Component.prototype._registerActionHandler = function(name, funct, scope) {
+dusk.sgui.Component.prototype._registerActionHandler = function(name, funct, scope) {
 	this._actionHandlers[name] = funct;
 }
 
-sgui.Component.prototype._registerProp = function(name, onSet, onGet, depends) {
+dusk.sgui.Component.prototype._registerProp = function(name, onSet, onGet, depends) {
 	if(this._propMasks[name] !== undefined) {
 		delete this._propMasks[name];
 	}
 	this._propHandlers[name] = [onSet, onGet, depends];
 }
 
-sgui.Component.prototype._registerPropMask = function(name, mask, redraw) {
+dusk.sgui.Component.prototype._registerPropMask = function(name, mask, redraw) {
 	this._propMasks[name] = [mask, redraw];
 }
 
-sgui.Component.prototype._actionProp = function(e) {
+dusk.sgui.Component.prototype._actionProp = function(e) {
 	if(this._action.length){
-		this._events.run(this._action, "_"+this.comName);
+		dusk.events.run(this._action, "_"+this.comName);
 		return true;
 	}
 }
 
-sgui.Component.prototype._doAction = function(e) {
+dusk.sgui.Component.prototype._doAction = function(e) {
 	var actionRet = false;
 	for(var s in this._actionHandlers){
 		actionRet = this._actionHandlers[s].call(this, e)?true:actionRet;
@@ -244,7 +242,7 @@ sgui.Component.prototype._doAction = function(e) {
  * @param e The KeyboardEvent to parse.
  * @return Whether the parent container should ignore this key. Return true when you don't want anything else to happen.
  */
-sgui.Component.prototype.keypress = function (e) {
+dusk.sgui.Component.prototype.keypress = function (e) {
 	if(this.isAContainer && this.containerKeypress(e)){return true;}
 	
 	for(var y = this._keyHandlers.length-1; y >= 0; y--){
@@ -298,24 +296,24 @@ sgui.Component.prototype.keypress = function (e) {
 /** This is called when the left key is pressed.
  * @return Whether focus should flow to <code>leftFlow</code>.
  */
-sgui.Component.prototype._leftAction = function(e) {return true;}
+dusk.sgui.Component.prototype._leftAction = function(e) {return true;}
 /** This is called when the right key is pressed.
  * @return Whether focus should flow to <code>rightFlow</code>.
  */
-sgui.Component.prototype._rightAction = function(e) {return true;}
+dusk.sgui.Component.prototype._rightAction = function(e) {return true;}
 /** This is called when the up key is pressed.
  * @return Whether focus should flow to <code>upFlow</code>.
  */
-sgui.Component.prototype._upAction = function(e) {return true;}
+dusk.sgui.Component.prototype._upAction = function(e) {return true;}
 /** This is called when the down key is pressed.
  * @return Whether focus should flow to <code>downFlow</code>.
  */
-sgui.Component.prototype._downAction = function(e) {return true;}
+dusk.sgui.Component.prototype._downAction = function(e) {return true;}
 
 /** This is what actually processes all the properties, it should be given an xml as an argument, that XML should contain a list of properties.
  * @param xml The properties to process.
  */
-sgui.Component.prototype.parseProps = function(props, thread) {
+dusk.sgui.Component.prototype.parseProps = function(props, thread) {
 	if(thread) this._thread = thread;
 	
 	var toProcess = [];
@@ -337,7 +335,7 @@ sgui.Component.prototype.parseProps = function(props, thread) {
 			}
 			
 			if(props[toProcess[i]] && props[toProcess[i]].to !== undefined) {
-				this._events.setVar(props[toProcess[i]].to, this.prop[toProcess[i]]);
+				dusk.events.setVar(props[toProcess[i]].to, this.prop[toProcess[i]]);
 				if(props[toProcess[i]].value !== undefined) {
 					this.prop(toProcess[i], props[toProcess[i]].value);
 				}
@@ -350,7 +348,7 @@ sgui.Component.prototype.parseProps = function(props, thread) {
 	}
 }
 
-sgui.Component.prototype.prop = function(name, value) {
+dusk.sgui.Component.prototype.prop = function(name, value) {
 	if(this._propMasks[name] !== undefined) {
 		if(value === undefined) {
 			return this[this._propMasks[name][0]];
@@ -370,14 +368,14 @@ sgui.Component.prototype.prop = function(name, value) {
 	return null;
 };
 
-sgui.Component.prototype._theme = function(value, set) {
-	if(this._events.getVar("theme."+this._events.getVar("theme.current")+"."+value) === undefined && set !== undefined)
-		this._events.setVar("theme."+this._events.getVar("theme.current")+"."+value, set);
+dusk.sgui.Component.prototype._theme = function(value, set) {
+	if(dusk.events.getVar("theme."+dusk.events.getVar("theme.current")+"."+value) === undefined && set !== undefined)
+		dusk.events.setVar("theme."+dusk.events.getVar("theme.current")+"."+value, set);
 	
-	return this._events.getVar("theme."+this._events.getVar("theme.current")+"."+value);
+	return dusk.events.getVar("theme."+dusk.events.getVar("theme.current")+"."+value);
 }
 
-sgui.Component.prototype._setFade = function(name, value) {
+dusk.sgui.Component.prototype._setFade = function(name, value) {
 	this._awaitNext();
 	
 	if("from" in value) {
@@ -401,7 +399,7 @@ sgui.Component.prototype._setFade = function(name, value) {
 	this._registerFrameHandler(this._fadeEffect);
 };
 
-sgui.Component.prototype._setFloat = function(name, value) {
+dusk.sgui.Component.prototype._setFloat = function(name, value) {
 	this._awaitNext();
 	
 	if("for" in value) {
@@ -425,7 +423,7 @@ sgui.Component.prototype._setFloat = function(name, value) {
 	this._registerFrameHandler(this._floatEffect);
 }
 
-sgui.Component.prototype._fadeEffect = function() {
+dusk.sgui.Component.prototype._fadeEffect = function() {
 	if((this.alpha < this._fadeEnd && this._fade > 0) || (this.alpha > this._fadeEnd && this._fade < 0)) {
 		this.alpha += this._fade;
 		this.bookRedraw();
@@ -438,7 +436,7 @@ sgui.Component.prototype._fadeEffect = function() {
 	}
 }
 
-sgui.Component.prototype._floatEffect = function() {
+dusk.sgui.Component.prototype._floatEffect = function() {
 	this._floatTime--;
 	
 	switch(this._floatDir){
@@ -461,29 +459,29 @@ sgui.Component.prototype._floatEffect = function() {
  * @param count The number of nexts to wait for.
  * @see Events#awaitNext
  */
-sgui.Component.prototype._awaitNext = function(count) {
+dusk.sgui.Component.prototype._awaitNext = function(count) {
 	if(count === undefined) count = 1;
 	this.open += count;
-	this._events.awaitNext(this._thread, count);
+	dusk.events.awaitNext(this._thread, count);
 }
 
 /** This just calls <code>Events.next()</code>, but calling this function is required for the checking if this component is open to work. It also gets the thread right.
  * @see Events#awaitNext
  */
-sgui.Component.prototype._next = function(count) {
+dusk.sgui.Component.prototype._next = function(count) {
 	if(count === undefined) count = 1;
 	this.open -= count;
-	this._events.next(this._thread);
+	dusk.events.next(this._thread);
 }
 
 /** This adds a handler that will call the function when the component is added to the stage. Amusing.
  * @param funct The function to call, it will be passed a single parameter, the Event, and should return void.
  */
-sgui.Component.prototype._registerDrawHandler = function(funct) {
+dusk.sgui.Component.prototype._registerDrawHandler = function(funct) {
 	this._drawHandlers.push(funct);
 }
 
-sgui.Component.prototype.draw = function(c) {
+dusk.sgui.Component.prototype.draw = function(c) {
 	if(!this.visible) return;
 	
 	var state = c.save();
@@ -503,15 +501,15 @@ sgui.Component.prototype.draw = function(c) {
 	this._redrawBooked = false;
 }
 
-sgui.Component.prototype.bookRedraw = function() {
+dusk.sgui.Component.prototype.bookRedraw = function() {
 	if(this._redrawBooked || !this._container) return;
 	
 	this._redrawBooked = true;
 	this._container.bookRedraw();
 };
 
-sgui.Component.prototype.path = function(path) {
-	if(!path){duskWolf.error("path is undefined.");return null;}
+dusk.sgui.Component.prototype.path = function(path) {
+	if(!path){throw new Error("Path is undefined or empty.");return null;}
 	
 	if(path.indexOf("/") !== -1){
 		var first = path.split("/", 1)[0];
@@ -540,7 +538,7 @@ sgui.Component.prototype.path = function(path) {
 				if(!second) return this.getComponent(first);
 				else return this.getComponent(first).path(second);
 			}else{
-				duskWolf.warn(path + " from " + this.comName + " was not found.");
+				throw new Error(path + " from " + this.comName + " was not found.");
 			}
 	}
 	
@@ -548,16 +546,16 @@ sgui.Component.prototype.path = function(path) {
 };
 
 /** This should be called when the component looses focus. */
-sgui.Component.prototype.onLooseFocus = function() {this._focused = false;this.bookRedraw();}
+dusk.sgui.Component.prototype.onLooseFocus = function() {this._focused = false;this.bookRedraw();}
 /** This should be called when the component gets focus. */
-sgui.Component.prototype.onGetFocus = function() {this._focused = true;this.bookRedraw();}
+dusk.sgui.Component.prototype.onGetFocus = function() {this._focused = true;this.bookRedraw();}
 
 /** This should be called when the component is no longer the active component. */
-sgui.Component.prototype.onDeactive = function() {this._active = false;this.bookRedraw();}
+dusk.sgui.Component.prototype.onDeactive = function() {this._active = false;this.bookRedraw();}
 /** This should be called when the component becomes the active component. */
-sgui.Component.prototype.onActive = function() {this._active = true;this.bookRedraw();}
+dusk.sgui.Component.prototype.onActive = function() {this._active = true;this.bookRedraw();}
 
-sgui.Component.prototype.toString = function() {return "[sgui "+this.className+" "+this.comName+"]";};
+dusk.sgui.Component.prototype.toString = function() {return "[sgui "+this.className+" "+this.comName+"]";};
 
 //-----
 
@@ -565,11 +563,11 @@ sgui.Component.prototype.toString = function() {return "[sgui "+this.className+"
  * 
  * This is a component that does nothing.
  */
-sgui.NullCom = function(parent, events, comName) {
-	sgui.Component.call(this, parent, events, comName);
+dusk.sgui.NullCom = function(parent, comName) {
+	dusk.sgui.Component.call(this, parent, comName);
 	this.prop("visible", false);
 };
-sgui.NullCom.prototype = new sgui.Component();
-sgui.NullCom.constructor = sgui.NullCom;
+dusk.sgui.NullCom.prototype = new dusk.sgui.Component();
+dusk.sgui.NullCom.constructor = dusk.sgui.NullCom;
 
-sgui.NullCom.prototype.className = "NullCom";
+dusk.sgui.NullCom.prototype.className = "NullCom";

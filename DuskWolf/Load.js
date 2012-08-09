@@ -7,15 +7,8 @@ goog.require("dusk.game");
 
 goog.provide("dusk.load");
 
-//Two vars required
-// __duskdir__ Location of DuskWolf
-// __datadir__ Location of game data
-
 var __duskdir__ = __duskdir__?__duskdir__:"DuskWolf";
 var __datadir__ = __datadir__?__datadir__:"Data";
-
-var log = true;
-var logDiv = "info";
 
 var loaded = [];
 
@@ -50,12 +43,7 @@ document.onkeydown = function(e) {
  * 
  * It adds handlers to all the events, and imports all the main classes.
  */
-
-try {
-	window.game = dusk.game.init();
-} catch(e) {
-	duskWolf.error(e);
-}
+window.game = dusk.game.init();
 
 $(document).bind("keydown", function(e){try {if("game" in window) dusk.game.keypress(e);} catch(e) {console.error(e.name+", "+e.message);}});
 $(document).bind("keyup", function(e){try {if("game" in window) dusk.game.keyup(e);} catch(e) {console.error(e.name+", "+e.message);}});

@@ -23,9 +23,9 @@ goog.provide("dusk.sgui.DirListener");
  * Runs <code>actions</code> when the right direction is pressed. If this is empty, normal flowing occurs.</p>
  */
 
-sgui.DirListener = function(parent, events, comName) {
+dusk.sgui.DirListener = function(parent, comName) {
 	if(parent !== undefined){
-		sgui.Single.call(this, parent, events, comName);
+		dusk.sgui.Single.call(this, parent, comName);
 		/** This creates a new focus checker! See <code>Component</code> for parameter details.
 		 * @see sg.Component
 		 */
@@ -41,17 +41,17 @@ sgui.DirListener = function(parent, events, comName) {
 		this._registerPropMask("action-right", "_right", false);
 	}
 };
-sgui.DirListener.prototype = new sgui.Single();
-sgui.DirListener.constructor = sgui.DirListener;
+dusk.sgui.DirListener.prototype = new dusk.sgui.Single();
+dusk.sgui.DirListener.constructor = dusk.sgui.DirListener;
 
-sgui.DirListener.prototype.className = "DirListener";
+dusk.sgui.DirListener.prototype.className = "DirListener";
 
 /** This is called when the up key is pressed, and in this object it runs some actions.
  * @return If some code was ran. If no code was ran, then control should flow out of this.
  */
-sgui.DirListener.prototype._upAction = function() {
+dusk.sgui.DirListener.prototype._upAction = function() {
 	if(this._up){
-		this._events.run(this._up, "_"+this.comName);
+		dusk.events.run(this._up, "_"+this.comName);
 		return false;
 	}
 	
@@ -61,9 +61,9 @@ sgui.DirListener.prototype._upAction = function() {
 /** This is called when the down key is pressed, and in this object it runs some actions.
  * @return If some code was ran. If no code was ran, then control should flow out of this.
  */
-sgui.DirListener.prototype._downAction = function() {
+dusk.sgui.DirListener.prototype._downAction = function() {
 	if(this._down){
-		this._events.run(this._down, "_"+this.comName);
+		dusk.events.run(this._down, "_"+this.comName);
 		return false;
 	}
 	
@@ -73,9 +73,9 @@ sgui.DirListener.prototype._downAction = function() {
 /** This is called when the left key is pressed, and in this object it runs some actions.
  * @return If some code was ran. If no code was ran, then control should flow out of this.
  */
-sgui.DirListener.prototype._leftAction = function() {
+dusk.sgui.DirListener.prototype._leftAction = function() {
 	if(this._left){
-		this._events.run(this._left, "_"+this.comName);
+		dusk.events.run(this._left, "_"+this.comName);
 		return false;
 	}
 	
@@ -85,9 +85,9 @@ sgui.DirListener.prototype._leftAction = function() {
 /** This is called when the right key is pressed, and in this object it runs some actions.
  * @return If some code was ran. If no code was ran, then control should flow out of this.
  */
-sgui.DirListener.prototype._rightAction = function() {
+dusk.sgui.DirListener.prototype._rightAction = function() {
 	if(this._right){
-		this._events.run(this._right, "_"+this.comName);
+		dusk.events.run(this._right, "_"+this.comName);
 		return false;
 	}
 	

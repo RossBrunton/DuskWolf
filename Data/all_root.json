@@ -1,8 +1,8 @@
 {
 	"name":"All Importer (Imports everything, to compile a full version)",
 	"author":"SavageWolf",
-	"version":"0.0.10",
-	"duskVer":10,
+	"version":"0.0.11",
+	"duskVer":11,
 	"files":[],
 	"mods":["core", "plat", "math", "net", "keyboard", "localSaver"],
 	"coms":["DecimalTile", "DirListener", "FocusChecker", "Grid", "Image", "Rect", "Text", "Tile"],

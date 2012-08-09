@@ -28,9 +28,9 @@ goog.provide("dusk.sgui.DecimalTile");
  * 
  * @see Tile
  */
-sgui.DecimalTile = function(parent, events, comName) {
+dusk.sgui.DecimalTile = function(parent, comName) {
 	if(parent !== undefined){
-		sgui.Component.call(this, parent, events, comName);
+		dusk.sgui.Component.call(this, parent, comName);
 		
 		/** This is the actual image. */
 		this._img = null;
@@ -51,12 +51,12 @@ sgui.DecimalTile = function(parent, events, comName) {
 		this._registerDrawHandler(this._tileDraw);
 	}
 };
-sgui.DecimalTile.prototype = new sgui.Component();
-sgui.DecimalTile.constructor = sgui.DecimalTile;
+dusk.sgui.DecimalTile.prototype = new dusk.sgui.Component();
+dusk.sgui.DecimalTile.constructor = dusk.sgui.DecimalTile;
 
-sgui.DecimalTile.prototype.className = "DecimalTile";
+dusk.sgui.DecimalTile.prototype.className = "DecimalTile";
 
-sgui.DecimalTile.prototype._tileDraw = function(c) {
+dusk.sgui.DecimalTile.prototype._tileDraw = function(c) {
 	if(this._img){
 		c.drawImage(this._img, this._swidth*this._tx, this._sheight*this._ty, this._swidth, this._sheight, 0, 0, this.prop("width"), this.prop("height"));
 	}
@@ -65,38 +65,38 @@ sgui.DecimalTile.prototype._tileDraw = function(c) {
 /** This sets the image that will be displayed.
  * @param image The name of the image, should be a constant in <code>Data</code>.
  */
-sgui.DecimalTile.prototype._setImage = function(name, value) {
+dusk.sgui.DecimalTile.prototype._setImage = function(name, value) {
 	if(!value) {console.warn(this.comName+" tried to set image to nothing."); return;}
 	this._img = dusk.data.grabImage(value);
 	this.bookRedraw();
 };
 
-sgui.DecimalTile.prototype._getTile = function() {
+dusk.sgui.DecimalTile.prototype._getTile = function() {
 	return this._tx+","+this._ty;
 };
 
-sgui.DecimalTile.prototype._setTile = function(x, y) {
+dusk.sgui.DecimalTile.prototype._setTile = function(x, y) {
 	if(y === null) {x = x.split(",")[0]; y = x.split(",")[1];}
 	
 	this._tx = x;
 	this._ty = y;
 };
 
-sgui.DecimalTile.prototype.snapX = function(down) {
+dusk.sgui.DecimalTile.prototype.snapX = function(down) {
 	if(down)
 		this.x = Math.ceil(this.x/this.prop("width"))*this.prop("width");
 	else
 		this.x = Math.floor(this.x/this.prop("width"))*this.prop("width");
 };
 
-sgui.DecimalTile.prototype.snapY = function(right) {
+dusk.sgui.DecimalTile.prototype.snapY = function(right) {
 	if(right)
 		this.y = Math.ceil(this.y/this.prop("height"))*this.prop("height");
 	else
 		this.y = Math.floor(this.y/this.prop("height"))*this.prop("height");
 };
 
-sgui.DecimalTile.prototype.gridGo = function(x, y) {
+dusk.sgui.DecimalTile.prototype.gridGo = function(x, y) {
 	this.x = x*this.prop("width");
 	this.y = y*this.prop("height");
 };

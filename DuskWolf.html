@@ -9,11 +9,11 @@
 		</script>
 		<script src='jquery.js' type='text/javascript'></script>
 		
-		<!--<script src='closure/goog/base.js' type='text/javascript'></script>
+		<script src='closure/goog/base.js' type='text/javascript'></script>
 		<script src='DuskWolf/deps.js' type='text/javascript'></script>
-		<script type='text/javascript'>goog.require("dusk.load");</script>-->
+		<script type='text/javascript'>goog.require("dusk.load");</script>
 		<!-- Uncomment above part to use uncompiled version, bottom to use compiled version --> 
-		<script src='DuskWolfCompiled.js' type='text/javascript'></script>
+		<!--<script src='DuskWolfCompiled.js' type='text/javascript'></script>-->
 	</head>
 	
 	<body onload='dusk.startGame()'>
@@ -26,9 +26,10 @@
 		</canvas>
 		</td><td style='vertical-align:top;'>
 			<textarea style='width:100%;' rows='25' id='runBox'>/*This is DWS*/
-print "Hello World!";</textarea>
+/*print "Hello World!";*/plat-edit;</textarea>
 			<button style='width:100%' onclick='dusk.events.run(JSON.parse($("#runBox")[0].value), "_live")'>Run (JSON)</button>
-			<button style='width:100%' onclick='dusk.events.run(JSON.parse(dwc.compile($("#runBox")[0].value)), "_live")'>Run (DWS)</button>
+			<button style='width:100%' onclick='dusk.events.run(JSON.parse(dusk.dwc.compile($("#runBox")[0].value)), "_live")'>Run (DWS)</button>
+			<button style='width:100%' onclick='console.log("----- Compiled DWS -----");console.log(dusk.dwc.compile($("#runBox")[0].value));console.log("----- Compiled DWS -----");'>Compile (DWS)</button>
 		</td></tr></table>
 	</body>
 </html>

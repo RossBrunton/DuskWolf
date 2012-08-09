@@ -1,7 +1,7 @@
 /*
 	This is the config file used by JSDoc (install jsdoc-toolkit, if you need it) to generate docs for this.
 	
-	Run `jsdoc -c=jsdoc.conf.json` from the directory above "DuskWolf" to generate documentation.
+	Run `jsdoc -c jsdoc.conf.json -d Doc DuskWolf` from the directory above "DuskWolf" to generate documentation.
 */
 
 {

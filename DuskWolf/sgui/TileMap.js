@@ -18,9 +18,9 @@ goog.provide("dusk.sgui.TileMap");
  * @see Grid
  * @see Tile
  */
-sgui.TileMap = function (parent, events, comName) {
+dusk.sgui.TileMap = function (parent, comName) {
 	if(parent !== undefined){
-		sgui.Component.call(this, parent, events, comName);
+		dusk.sgui.Component.call(this, parent, comName);
 		
 		this._registerProp("map", this._doMap, null, ["src", "tile-size", "sprite-size"]);
 		this._registerPropMask("bound-l", "_lbound", true);
@@ -30,12 +30,16 @@ sgui.TileMap = function (parent, events, comName) {
 		this._registerPropMask("tile-size", "_tsize", true);
 		this._registerPropMask("sprite-size", "_ssize", true);
 		this._registerPropMask("src", "_defImg", true);
+		this._registerPropMask("rows", "rows", true);
+		this._registerPropMask("cols", "cols", true);
+		this._registerProp("width", function(name, value){return this.cols<<this._tsize}, function(name){return this.cols<<this._tsize});
+		this._registerProp("height", function(name, value){return this.rows<<this._tsize}, function(name){return this.rows<<this._tsize});
 		
 		this._hspacing = this._theme("tm.spacing.h", 0);
 		this._vspacing = this._theme("tm.spacing.v", 0);
 		
-		this.prop("width", this._events.getVar("sys.sg.width"));
-		this.prop("height", this._events.getVar("sys.sg.height"));
+		this.prop("render-width", dusk.events.getVar("sys.sg.width"));
+		this.prop("render-height", dusk.events.getVar("sys.sg.height"));
 		
 		/*this._twidth = this._theme("tm.tile.width");
 		this._theight = this._theme("tm.tile.height");*/
@@ -61,12 +65,12 @@ sgui.TileMap = function (parent, events, comName) {
 		this._registerDrawHandler(this._tileMapDraw);
 	}
 };
-sgui.TileMap.prototype = new sgui.Component();
-sgui.TileMap.constructor = sgui.TileMap;
+dusk.sgui.TileMap.prototype = new dusk.sgui.Component();
+dusk.sgui.TileMap.constructor = dusk.sgui.TileMap;
 
-sgui.TileMap.prototype.className = "TileMap";
+dusk.sgui.TileMap.prototype.className = "TileMap";
 
-sgui.TileMap.prototype._doMap = function(name, value) {
+dusk.sgui.TileMap.prototype._doMap = function(name, value) {
 	var map = value;
 	
 	//Get stuff
@@ -82,9 +86,6 @@ sgui.TileMap.prototype._doMap = function(name, value) {
 	var singleW = 1<<this._tsize;
 	var singleH = 1<<this._tsize;
 	
-	if(map.rows == "-1") map.rows = Math.floor((this.prop("height")/singleH));
-	if(map.cols == "-1") map.cols = Math.floor((this.prop("width")/singleW));
-	
 	this._tileBuffer = new ArrayBuffer((map.rows*map.cols)<<1);
 	this._tiles = new Uint8Array(this._tileBuffer);
 	var tiles = map.map.split(/\s+/g);
@@ -99,8 +100,8 @@ sgui.TileMap.prototype._doMap = function(name, value) {
 	this.cols = map.cols;
 	
 	this._all = document.createElement("canvas");
-	this._all.width = (this.cols<<this._tsize) + this.prop("width");
-	this._all.height = (this.rows<<this._tsize) + this.prop("height");
+	this._all.width = (this.cols<<this._ssize) + this.prop("width");
+	this._all.height = (this.rows<<this._ssize) + this.prop("height");
 	this._all.style.imageRendering = "-webkit-optimize-contrast";
 	
 	this.drawAll();
@@ -108,7 +109,7 @@ sgui.TileMap.prototype._doMap = function(name, value) {
 	this.setBoundsCoord(0, 0, this.prop("width"), this.prop("height"));
 }
 
-sgui.TileMap.prototype.drawAll = function() {
+dusk.sgui.TileMap.prototype.drawAll = function() {
 	this._drawn = false;
 	
 	if(!this._img.complete) return false;
@@ -118,17 +119,18 @@ sgui.TileMap.prototype.drawAll = function() {
 	for (var yi = 0; yi < this.rows; yi++) {
 		for (var xi = 0; xi < this.cols; xi++) {
 			if(this._tiles[i] !== undefined) {
-				this._all.getContext("2d").drawImage(this._img, this._tiles[i]<<this._ssize, this._tiles[i+1]<<this._ssize, 1<<this._ssize, 1<<this._ssize, xi<<this._tsize, yi<<this._tsize, 1<<this._tsize, 1<<this._tsize);
+				this._all.getContext("2d").drawImage(this._img, this._tiles[i]<<this._ssize, this._tiles[i+1]<<this._ssize, 1<<this._ssize, 1<<this._ssize, xi<<this._ssize, yi<<this._ssize, 1<<this._ssize, 1<<this._ssize);
 			}
 			i+=2;
 		}
 	}
 	
 	this._drawn = true;
+	this.bookRedraw();
 	return true;
 };
 
-sgui.TileMap.prototype.setBoundsCoord = function(l, u, r, b) {
+dusk.sgui.TileMap.prototype.setBoundsCoord = function(l, u, r, b) {
 	this._lbound = l;
 	this._rbound = r;
 	this._ubound = u;
@@ -136,7 +138,7 @@ sgui.TileMap.prototype.setBoundsCoord = function(l, u, r, b) {
 	this.bookRedraw();
 };
 
-sgui.TileMap.prototype.setBounds = function(l, u, r, b) {
+dusk.sgui.TileMap.prototype.setBounds = function(l, u, r, b) {
 	if(r === undefined) r = l+this.cols;
 	if(b === undefined) b = u+this.rows;
 	
@@ -156,7 +158,7 @@ sgui.TileMap.prototype.setBounds = function(l, u, r, b) {
 	this.bookRedraw();
 };
 
-sgui.TileMap.prototype.tilePointIn = function(x, y, exactX, exactY) {
+dusk.sgui.TileMap.prototype.tilePointIn = function(x, y, exactX, exactY) {
 	var xpt = (x/(1<<this._tsize));
 	var ypt = (y/(1<<this._tsize));
 	
@@ -171,16 +173,17 @@ sgui.TileMap.prototype.tilePointIn = function(x, y, exactX, exactY) {
 	}
 };
 
-sgui.TileMap.prototype._tileMapDraw = function(c) {
+dusk.sgui.TileMap.prototype._tileMapDraw = function(c) {
 	if(!this._img) return;
 	if(!this._drawn) this.drawAll();
 	var u = this._ubound<0?0:this._ubound;
 	var l = this._lbound<0?0:this._lbound;
+	var scale = this._tsize-this._ssize;
 	
-	c.drawImage(this._all, l, u, this._rbound-this._lbound, this._bbound-this._ubound, l, u, this._rbound-this._lbound, this._bbound-this._ubound);
+	c.drawImage(this._all, l>>scale, u>>scale, (this._rbound-this._lbound)>>scale, (this._bbound-this._ubound)>>scale, l, u, (this._rbound-this._lbound), (this._bbound-this._ubound));
 };
 
-sgui.TileMap.prototype.getTile = function(x, y) {
+dusk.sgui.TileMap.prototype.getTile = function(x, y) {
 	if(this._tiles[((y*this.cols)+x)<<1] !== undefined) {
 		return [this._tiles[((y*this.cols)+x)<<1], this._tiles[(((y*this.cols)+x)<<1)+1]];
 	}else{
@@ -189,7 +192,7 @@ sgui.TileMap.prototype.getTile = function(x, y) {
 	}
 };
 
-sgui.TileMap.prototype.setTile = function(x, y, tx, ty, update) {
+dusk.sgui.TileMap.prototype.setTile = function(x, y, tx, ty, update) {
 	if(this._tiles[((y*this.cols)+x)<<1] !== undefined) {
 		this._tiles[((y*this.cols)+x)<<1] = tx;
 		this._tiles[(((y*this.cols)+x)<<1)+1] = ty;
@@ -199,32 +202,32 @@ sgui.TileMap.prototype.setTile = function(x, y, tx, ty, update) {
 	}
 };
 
-sgui.TileMap.prototype.getRelativeTile = function(xcoord, ycoord) {
+dusk.sgui.TileMap.prototype.getRelativeTile = function(xcoord, ycoord) {
 	return this.getTile((xcoord+this._lbound >> this._tsize), (ycoord+this._ubound >> this._tsize));
 };
 
-sgui.TileMap.prototype.inRelativeRange = function(xcoord, ycoord) {
+dusk.sgui.TileMap.prototype.inRelativeRange = function(xcoord, ycoord) {
 	if(xcoord+(this._lbound>>this._tsize) < 0 || xcoord+(this._lbound>>this._tsize) >= this.cols || ycoord+(this._ubound>>this._tsize) < 0 || ycoord+(this._ubound>>this._tsize) >= this.rows) return false;
 	return true;
 };
 
-sgui.TileMap.prototype.tileWidth = function() {
+dusk.sgui.TileMap.prototype.tileWidth = function() {
 	return 1 << this._tsize;
 };
 
-sgui.TileMap.prototype.tileHeight = function() {
+dusk.sgui.TileMap.prototype.tileHeight = function() {
 	return 1 << this._tsize;
 };
 
-sgui.TileMap.prototype.visibleCols = function() {
+dusk.sgui.TileMap.prototype.visibleCols = function() {
 	return Math.floor(this.prop("width")/(1<<this._tsize));
 };
 
-sgui.TileMap.prototype.visibleRows = function() {
+dusk.sgui.TileMap.prototype.visibleRows = function() {
 	return Math.floor(this.prop("height")/(1<<this._tsize));
 };
 
-sgui.TileMap.prototype.lookTile = function(x, y) {
+dusk.sgui.TileMap.prototype.lookTile = function(x, y) {
 	for(var t = (this.rows*this.cols)<<1; t > 0; t-=2){
 		if(this._tiles[t] == x && this._tiles[t+1] == y) {
 			return [(t >> 1) % this.cols, Math.floor((t >> 1)/this.cols)];

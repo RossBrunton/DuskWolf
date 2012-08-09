@@ -24,9 +24,9 @@ goog.provide("dusk.sgui.FocusChecker");
  * @see Data
  */
 
-sgui.FocusChecker = function(parent, events, comName) {
+dusk.sgui.FocusChecker = function(parent, comName) {
 	if(parent !== undefined){
-		sgui.Image.call(this, parent, events, comName);
+		dusk.sgui.Image.call(this, parent, comName);
 		/** This creates a new focus checker! See <code>Component</code> for parameter details.
 		 * @see sg.Component
 		 */
@@ -43,17 +43,17 @@ sgui.FocusChecker = function(parent, events, comName) {
 		this.prop("src", this._inactiveImg);
 	}
 };
-sgui.FocusChecker.prototype = new sgui.Image();
-sgui.FocusChecker.constructor = sgui.FocusChecker;
+dusk.sgui.FocusChecker.prototype = new dusk.sgui.Image();
+dusk.sgui.FocusChecker.constructor = dusk.sgui.FocusChecker;
 
-sgui.FocusChecker.prototype.className = "FocusChecker";
+dusk.sgui.FocusChecker.prototype.className = "FocusChecker";
 
 /** Turns the focus checker to the image set by <code>image-inactive</code>. */
-sgui.FocusChecker.prototype.onLooseFocus = function() {if(this._inactiveImg) this.prop("src", this._inactiveImg);};
+dusk.sgui.FocusChecker.prototype.onLooseFocus = function() {if(this._inactiveImg) this.prop("src", this._inactiveImg);};
 /** Turns the focus checker to the image set by <code>image-focused</code>. */
-sgui.FocusChecker.prototype.onGetFocus = function() {if(this._focusedImg) this.prop("src", this._focusedImg);};
+dusk.sgui.FocusChecker.prototype.onGetFocus = function() {if(this._focusedImg) this.prop("src", this._focusedImg);};
 
 /** Turns the focus checker to the image set by <code>image-focused</code>. */
-sgui.FocusChecker.prototype.onDeactive = function() {if(this._focusedImg) this.prop("src", this._focusedImg);};
+dusk.sgui.FocusChecker.prototype.onDeactive = function() {if(this._focusedImg) this.prop("src", this._focusedImg);};
 /** Turns the focus checker to the image set by <code>image-active</code>. */
-sgui.FocusChecker.prototype.onActive = function() {if(this._activeImg) this.prop("src", this._activeImg);};
+dusk.sgui.FocusChecker.prototype.onActive = function() {if(this._activeImg) this.prop("src", this._activeImg);};

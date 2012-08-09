@@ -59,21 +59,21 @@ dusk.mods.localSaver._save = function(a) {
 			//An array of regex checks
 			var hold = [];
 			for(var i = a.vars.length-1; i >= 0; i--) {
-				hold = hold.concat(this._events.getVars(RegExp(a.vars[i])));
+				hold = hold.concat(dusk.events.getVars(RegExp(a.vars[i])));
 			}
 			window.localStorage["dw_"+a.name] = JSON.stringify(hold);
 		}else{
-			window.localStorage["dw_"+a.name] = JSON.stringify(this._events.getVars(RegExp(a.vars)));
+			window.localStorage["dw_"+a.name] = JSON.stringify(dusk.events.getVars(RegExp(a.vars)));
 		}
 	}else{
 		if(typeof(a.vars) == "array"){
 			var hold = [];
 			for(var i = a.vars.length-1; i >= 0; i--) {
-				hold = hold[hold.length] = [a.vars[i], this._events.getVar(a.vars[i])];
+				hold = hold[hold.length] = [a.vars[i], dusk.events.getVar(a.vars[i])];
 			}
 			window.localStorage["dw_"+a.name] = JSON.stringify(hold);
 		}else{
-			window.localStorage["dw_"+a.name] = JSON.stringify([[a.vars, this._events.getVar(a.vars)]]);
+			window.localStorage["dw_"+a.name] = JSON.stringify([[a.vars, dusk.events.getVar(a.vars)]]);
 		}
 	}
 };

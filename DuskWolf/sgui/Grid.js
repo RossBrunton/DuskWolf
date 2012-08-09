@@ -23,9 +23,9 @@ goog.provide("dusk.sgui.Grid");
  * 
  * @see VMenu
  */
-sgui.Grid = function (parent, events, comName) {
+dusk.sgui.Grid = function (parent, comName) {
 	if(parent !== undefined){
-		sgui.Group.call(this, parent, events, comName);
+		dusk.sgui.Group.call(this, parent, comName);
 
 		this._rows = this._theme("grid.rows", 5);
 		this._cols = this._theme("grid.cols", 5);
@@ -39,17 +39,17 @@ sgui.Grid = function (parent, events, comName) {
 		this._registerProp("populate", this._populate, null, ["rows", "cols"]);
 	}
 };
-sgui.Grid.prototype = new sgui.Group();
-sgui.Grid.constructor = sgui.Grid;
+dusk.sgui.Grid.prototype = new dusk.sgui.Group();
+dusk.sgui.Grid.constructor = dusk.sgui.Grid;
 
-sgui.Grid.prototype.className = "Grid";
+dusk.sgui.Grid.prototype.className = "Grid";
 
 /** This creates a new population, erasing any existing ones.
  * @param type The type of component to use, without the "sg-" at the start.
  * @param count The number of elements to create.
  * @param spacing The spacing, in pixels, between them.
  */
-sgui.Grid.prototype._populate = function(name, value) {
+dusk.sgui.Grid.prototype._populate = function(name, value) {
 	//Delete all the existing ones
 	for(var x in this._components){
 		if(x != "blank") this.deleteComponent(x);
@@ -67,7 +67,7 @@ sgui.Grid.prototype._populate = function(name, value) {
 	this.prop("focus", "0,0");
 };
 
-sgui.Grid.prototype.ajust = function() {
+dusk.sgui.Grid.prototype.ajust = function() {
 	for(var hy = 0; hy < this.rows; hy++){
 		for(var hx = 0; hx < this.cols; hx++){
 			var com = this.getComponent(hx+","+hy);
@@ -79,7 +79,7 @@ sgui.Grid.prototype.ajust = function() {
 /** Manages the flowing left of the children. 
  * @return <code>false</code> if the flow was successful, <code>true</code> if unsuccessful (Most likely we are at the left of the list, so flow out of it).
  */
-sgui.Grid.prototype._leftAction = function() {
+dusk.sgui.Grid.prototype._leftAction = function() {
 	var cx = this.prop("focus").split(",")[0];
 	var cy = this.prop("focus").split(",")[1];
 	if(this.getComponent((cx-1)+","+cy)){
@@ -93,7 +93,7 @@ sgui.Grid.prototype._leftAction = function() {
 /** Manages the flowing right of the children. 
  * @return <code>false</code> if the flow was successful, <code>true</code> if unsuccessful (Most likely we are at the right of the list, so flow out of it).
  */
-sgui.Grid.prototype._rightAction = function() {
+dusk.sgui.Grid.prototype._rightAction = function() {
 	var cx = this.prop("focus").split(",")[0];
 	var cy = this.prop("focus").split(",")[1];
 	if(this.getComponent((Number(cx)+1)+","+cy)){
@@ -107,7 +107,7 @@ sgui.Grid.prototype._rightAction = function() {
 /** Manages the flowing right of the children. 
  * @return <code>false</code> if the flow was successful, <code>true</code> if unsuccessful (Most likely we are at the right of the list, so flow out of it).
  */
-sgui.Grid.prototype._upAction = function() {
+dusk.sgui.Grid.prototype._upAction = function() {
 	var cx = this.prop("focus").split(",")[0];
 	var cy = this.prop("focus").split(",")[1];
 	if(this.getComponent(cx+","+(cy-1))){
@@ -121,7 +121,7 @@ sgui.Grid.prototype._upAction = function() {
 /** Manages the flowing right of the children. 
  * @return <code>false</code> if the flow was successful, <code>true</code> if unsuccessful (Most likely we are at the right of the list, so flow out of it).
  */
-sgui.Grid.prototype._downAction = function() {
+dusk.sgui.Grid.prototype._downAction = function() {
 	var cx = this.prop("focus").split(",")[0];
 	var cy = this.prop("focus").split(",")[1];
 	if(this.getComponent(cx+","+(Number(cy)+1))){

@@ -28,9 +28,9 @@ goog.provide("dusk.sgui.Tile");
  * 
  * @see Tile
  */
-sgui.Tile = function(parent, events, comName) {
+dusk.sgui.Tile = function(parent, comName) {
 	if(parent !== undefined){
-		sgui.Component.call(this, parent, events, comName);
+		dusk.sgui.Component.call(this, parent, comName);
 	
 		/** This is the actual image. */
 		this._img = null;
@@ -51,14 +51,14 @@ sgui.Tile = function(parent, events, comName) {
 		this._registerDrawHandler(this._tileDraw);
 	}
 };
-sgui.Tile.prototype = new sgui.Component();
-sgui.Tile.constructor = sgui.Tile;
+dusk.sgui.Tile.prototype = new dusk.sgui.Component();
+dusk.sgui.Tile.constructor = dusk.sgui.Tile;
 
 
 /** @inheritDoc */
-sgui.Tile.prototype.className = "Tile";
+dusk.sgui.Tile.prototype.className = "Tile";
 
-sgui.Tile.prototype._tileDraw = function(c) {
+dusk.sgui.Tile.prototype._tileDraw = function(c) {
 	if(this._img){
 		c.drawImage(this._img, this._tx<<this._ssize, this._ty<<this._ssize, 1<<this._ssize, 1<<this._ssize, 0, 0, this.prop("width"), this.prop("height"));
 	}
@@ -67,36 +67,36 @@ sgui.Tile.prototype._tileDraw = function(c) {
 /** This sets the image that will be displayed.
  * @param image The name of the image, should be a constant in <code>Data</code>.
  */
-sgui.Tile.prototype._setImage = function(name, value) {
+dusk.sgui.Tile.prototype._setImage = function(name, value) {
 	this._img = dusk.data.grabImage(value);
 };
 
-sgui.Tile.prototype._getTile = function() {
+dusk.sgui.Tile.prototype._getTile = function() {
 	return this._tx+","+this._ty;
 };
 
-sgui.Tile.prototype._setTile = function(x, y) {
+dusk.sgui.Tile.prototype._setTile = function(x, y) {
 	if(y === undefined) {x = x.split(",")[0]; y = x.split(",")[1];}
 	
 	this._tx = x;
 	this._ty = y;
 };
 
-sgui.Tile.prototype.snapX = function(down) {
+dusk.sgui.Tile.prototype.snapX = function(down) {
 	if(down)
 		this.x = Math.ceil(this.x/this.prop("width"))*this.prop("width");
 	else
 		this.x = Math.floor(this.x/this.prop("width"))*this.prop("width");
 };
 
-sgui.Tile.prototype.snapY = function(right) {
+dusk.sgui.Tile.prototype.snapY = function(right) {
 	if(right)
 		this.y = Math.ceil(this.y/this.prop("height"))*this.prop("height");
 	else
 		this.y = Math.floor(this.y/this.prop("height"))*this.prop("height");
 };
 
-sgui.Tile.prototype.gridGo = function(x, y) {
+dusk.sgui.Tile.prototype.gridGo = function(x, y) {
 	this.x = x*this.prop("width");
 	this.y = y*this.prop("height");
 };

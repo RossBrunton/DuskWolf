@@ -27,16 +27,18 @@ goog.addDependency("../../DuskWolf/sgui/FocusChecker.js", ["dusk.sgui.FocusCheck
 goog.addDependency("../../DuskWolf/sgui/Grid.js", ["dusk.sgui.Grid"], ["dusk.sgui.Group"]);
 goog.addDependency("../../DuskWolf/sgui/Image.js", ["dusk.sgui.Image"], []);
 goog.addDependency("../../DuskWolf/sgui/PlatEntity.js", ["dusk.sgui.PlatEntity"], ["dusk.sgui.Tile"]);
-goog.addDependency("../../DuskWolf/sgui/PlatMain.js", ["dusk.sgui.PlatMain"], ["dusk.sgui.Group", "dusk.sgui.PlatEntity", "dusk.sgui.EditableTileMap"]);
+goog.addDependency("../../DuskWolf/sgui/PlatMain.js", ["dusk.sgui.PlatMain"], ["dusk.sgui.Group", "dusk.sgui.PlatEntity", "dusk.sgui.EditableTileMap", "dusk.sgui.EntityGroup"]);
 goog.addDependency("../../DuskWolf/sgui/Rect.js", ["dusk.sgui.Rect"], []);
 goog.addDependency("../../DuskWolf/sgui/Saybox.js", ["dusk.sgui.Saybox"], ["dusk.sgui.VMenu", "dusk.sgui.Text"]);
 goog.addDependency("../../DuskWolf/sgui/Single.js", ["dusk.sgui.Single"], ["dusk.sgui.IContainer"]);
 goog.addDependency("../../DuskWolf/sgui/Text.js", ["dusk.sgui.Label", "dusk.sgui.Text", "dusk.sgui.TextBox"], []);
 goog.addDependency("../../DuskWolf/sgui/Tile.js", ["dusk.sgui.Tile"], []);
 goog.addDependency("../../DuskWolf/sgui/TileMap.js", ["dusk.sgui.TileMap"], []);
+goog.addDependency("../../DuskWolf/sgui/EntityGroup.js", ["dusk.sgui.EntityGroup"], ["dusk.sgui.Group"]);
 
 goog.addDependency("../../DuskWolf/platBehaviours/PBehave.js", ["dusk.pbehave.PBehave"], []);
 goog.addDependency("../../DuskWolf/platBehaviours/BackForth.js", ["dusk.pbehave.BackForth"], []);
 goog.addDependency("../../DuskWolf/platBehaviours/Controlled.js", ["dusk.pbehave.Controlled"], []);
 goog.addDependency("../../DuskWolf/platBehaviours/Fade.js", ["dusk.pbehave.Fade"], []);
 goog.addDependency("../../DuskWolf/platBehaviours/Fall.js", ["dusk.pbehave.Fall"], []);
+goog.addDependency("../../DuskWolf/platBehaviours/Push.js", ["dusk.pbehave.Push"], []);

@@ -14,13 +14,13 @@ goog.provide("dusk.sgui.IContainer");
  * @see Single
  * @see Component
  */
-sgui.IContainer = function(parent, events, comName) {
+dusk.sgui.IContainer = function(parent, comName) {
 	if (parent !== undefined){
-		sgui.Component.call(this, parent, events, comName);
+		dusk.sgui.Component.call(this, parent, comName);
 	}
 };
-sgui.IContainer.prototype = new sgui.Component();
-sgui.IContainer.constructor = sgui.IContainer;
+dusk.sgui.IContainer.prototype = new dusk.sgui.Component();
+dusk.sgui.IContainer.constructor = dusk.sgui.IContainer;
 
 /** Called when a key is pressed, at the start of <code>keypress</code>.
  * 
@@ -30,13 +30,13 @@ sgui.IContainer.constructor = sgui.IContainer;
  * @return Whether to stop the main function, this will generally cause all future handling of this event to stop.
  * @see Component#keypress
  */
-sgui.IContainer.prototype.containerKeypress = function(e) {console.warn("Container has not implemented \"containerKeypress\".");};
+dusk.sgui.IContainer.prototype.containerKeypress = function(e) {console.warn("Container has not implemented \"containerKeypress\".");};
 
 /** This should delete the component with the name <code>com</code>.
  * @param com The name of the component to delete.
  * @return Whether the delete was successful.
  */
-sgui.IContainer.prototype.deleteComponent = function(com) {console.warn("Container has not implemented \"deleteComponent\".");};
+dusk.sgui.IContainer.prototype.deleteComponent = function(com) {console.warn("Container has not implemented \"deleteComponent\".");};
 
 /** This should return the component with the name <code>com</code>.
  * @param com The name of the component to return.
@@ -44,12 +44,12 @@ sgui.IContainer.prototype.deleteComponent = function(com) {console.warn("Contain
  * @param type The type of component to create, if necessary.
  * @return The component.
  */
-sgui.IContainer.prototype.getComponent = function(com, create, type) {console.warn("Container has not implemented \"getComponent\".");};
+dusk.sgui.IContainer.prototype.getComponent = function(com, create, type) {console.warn("Container has not implemented \"getComponent\".");};
 
 /** This tells the container that it should try to flow to the component <code>to</code>.
  * @param to The component to flow to.
  * @return Whether the flow was sucessful.
  */
-sgui.IContainer.prototype.flow = function(to) {console.warn("Container has not implemented \"flow\".");};
+dusk.sgui.IContainer.prototype.flow = function(to) {console.warn("Container has not implemented \"flow\".");};
 
-sgui.IContainer.prototype.isAContainer = true;
+dusk.sgui.IContainer.prototype.isAContainer = true;
