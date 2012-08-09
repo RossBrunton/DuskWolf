@@ -74,6 +74,8 @@ dusk.sgui.PlatMain.prototype._room = function(name, value) {
 };
 
 dusk.sgui.PlatMain.prototype._platMainFrame = function(e) {
+	if(!this.getComponent("scheme")) return;
+	
 	// Center the player
 	this.autoScroll();
 	
@@ -84,6 +86,7 @@ dusk.sgui.PlatMain.prototype._platMainFrame = function(e) {
 
 dusk.sgui.PlatMain.prototype.autoScroll = function() {
 	// Centre the player
+	
 	var seekCoords = events.getVar("plat.edit.active")?[(events.getVar("etm.x")+3)<<(this._tsize), (events.getVar("etm.y")+3)<<(this._tsize)]:[this.path("entities/"+dusk.events.getVar("plat.seek")).x, this.path("entities/"+dusk.events.getVar("plat.seek")).y];
 	this._container.prop("seek", seekCoords);
 	
