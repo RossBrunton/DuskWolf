@@ -8,6 +8,9 @@
 	{"a":"var", "name":"pentity.push", "inherit":"pentity.default", "value":{"behaviour":"Push", "gravity":0, "img":"pimg/techFreeMove.png"}},
 	
 	{"a":"listen", "event":"sys-event-start", "actions":[
-		{"a":"plat-room", "room":"exhall"}
+		{"a":"jsprofile"},
+		{"a":"plat-room", "room":"exhall"},
+		{"a":"jsprofile-end"}
+		/*{"a":"pane", "name":"sayer", "children":[{"name":"sayer", "type":"Saybox", "say":"Hello World!", "speaker":"God"}]}*/
 	]}
 ]

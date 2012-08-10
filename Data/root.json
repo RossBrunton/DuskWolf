@@ -5,6 +5,6 @@
 	"duskVer":11,
 	"files":["Examples/plat.json"],
 	"mods":["core", "plat", "math", "net", "keyboard", "localSaver"],
-	"coms":[],
+	"coms":["Saybox"],
 	"reqs":["dusk.pbehave.Controlled", "dusk.pbehave.Fall", "dusk.pbehave.BackForth", "dusk.pbehave.Push"]
 }

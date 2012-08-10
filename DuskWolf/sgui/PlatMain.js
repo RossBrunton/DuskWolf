@@ -5,6 +5,7 @@
 goog.require("dusk.sgui.PlatEntity");
 goog.require("dusk.sgui.Group");
 goog.require("dusk.sgui.EditableTileMap");
+goog.require("dusk.sgui.EntityGroup");
 
 goog.provide("dusk.sgui.PlatMain");
 

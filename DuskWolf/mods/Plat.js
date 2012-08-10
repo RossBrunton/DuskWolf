@@ -81,12 +81,12 @@ dusk.mods.plat._setRoom = function(a) {
 	console.log("Setting room "+a.room+".");
 	events.run(dusk.data.grabJson("prooms/"+a.room.replace(/\-/g, "_")), dusk.events.thread);
 	events.run([
-		/*{"a":"if", "cond":(dat.nofade?"0","1"), "then":[*/
-			{"a":"sg-path", "pane":"plat-main", "path":"/mainContainer/main", "fade":{"from":1, "to":0, "speed":-0.05}},
+		/*{"a":"if", "cond":(a.nofade?"0":"1"), "then":[*/
+			{"a":"sg-path", "pane":"plat-main", "path":"/mainContainer", "fade":{"from":1, "end":0, "speed":-0.05}},
 		/*]},*/
 		{"a":"sg-path", "pane":"plat-main", "path":"/mainContainer/main", "room":a.room, "spawn":a.spawn},
-		/*{"a":"if", "cond":(dat.nofade?"0","1"), "then":[*/
-			{"a":"sg-path", "pane":"plat-main", "path":"/mainContainer/main", "fade":{"from":0, "to":1, "speed":0.05}},
+		/*{"a":"if", "cond":(a.nofade?"0":"1"), "then":[*/
+			{"a":"sg-path", "pane":"plat-main", "path":"/mainContainer", "fade":{"from":0, "end":1, "speed":0.05}},
 		/*]},*/
 		{"a":"fire", "event":"plat-room-load", "room":a.room}], events.thread);
 };

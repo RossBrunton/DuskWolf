@@ -62,6 +62,8 @@ dusk.mods.core.init = function() {
 	dusk.events.registerAction("mul", this._multiply, this, [["var", true, "STR"], ["by", false, "NUM"]]);
 	dusk.events.registerAction("div", this._divide, this, [["var", true, "STR"], ["by", false, "NUM"]]);
 	dusk.events.registerAction("modulo", this._modulo, this, [["var", true, "STR"], ["by", false, "NUM"]]);
+	dusk.events.registerAction("jsprofile", function(a) {if("profile" in console) console.profile(a.label?a.label:"DuskWolf Profile");}, this, [["label", true, "STR"]]);
+	dusk.events.registerAction("jsprofile-end", function(a) {if("profileEnd" in console) console.profileEnd();}, this, []);
 	
 	dusk.events.registerHashFunct("/", this._div, this);
 	dusk.events.registerHashFunct("%", this._mod, this);

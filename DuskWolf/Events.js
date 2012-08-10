@@ -687,7 +687,6 @@ dusk.events._getThread = function(name, create) {
 	}
 	
 	throw new Error("Thread "+name+" does not exist!");
-	return null;
 };
 
 /*- Function: _addListener

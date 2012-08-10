@@ -195,7 +195,7 @@ dusk.sgui.Component.prototype._registerFrameHandler = function(funct) {
 
 dusk.sgui.Component.prototype._clearFrameHandler = function(funct) {
 	for(var i in this._frameHandlers) {
-		if(this._frameHandlers[i] == funct) delete this._frameHandlers[i]
+		if(this._frameHandlers[i] == funct) delete this._frameHandlers[i];
 	}
 }
 
@@ -391,7 +391,7 @@ dusk.sgui.Component.prototype._setFade = function(name, value) {
 	}
 	
 	if("end" in value) {
-		this._fadeEnd = value.to;
+		this._fadeEnd = value.end;
 	}else{
 		this._fadeEnd = 1;
 	}
@@ -509,7 +509,7 @@ dusk.sgui.Component.prototype.bookRedraw = function() {
 };
 
 dusk.sgui.Component.prototype.path = function(path) {
-	if(!path){throw new Error("Path is undefined or empty.");return null;}
+	if(!path){throw new Error("Path is undefined or empty.");}
 	
 	if(path.indexOf("/") !== -1){
 		var first = path.split("/", 1)[0];
@@ -541,8 +541,6 @@ dusk.sgui.Component.prototype.path = function(path) {
 				throw new Error(path + " from " + this.comName + " was not found.");
 			}
 	}
-	
-	return null;
 };
 
 /** This should be called when the component looses focus. */

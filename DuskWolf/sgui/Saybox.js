@@ -2,11 +2,9 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-//Sayboxes don't work at the current moment...
-
-//No idea where this class has gone...
-//goog.require("dusk.sgui.VMenu");
+goog.require("dusk.sgui.Grid");
 goog.require("dusk.sgui.Text");
+goog.require("dusk.sgui.Rect");
 
 goog.provide("dusk.sgui.Saybox");
 
