@@ -2,9 +2,14 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-goog.provide("dusk.mods.simpleGui");
+dusk.load.provide("dusk.mods.simpleGui");
 
-goog.require("dusk.sgui.Pane");
+dusk.load.require("dusk.sgui.Pane");
+
+/** @namespace dusk.sgui
+ * 
+ * @description This is the namespace with all the Simple Gui's components in it. Hooray!
+ */
 
 /** Class: mods.SimpleGui
  * 
@@ -140,6 +145,8 @@ dusk.mods.simpleGui.init = function() {
 	dusk.events.registerAction("sg-path", this._doPath, this, [["pane", true, "STR"], ["path", true, "STR"]]);
 	dusk.events.registerAction("pane", this._doComponent, this, [["name", true, "STR"]]);
 	dusk.events.registerAction("draw", function(data){this.draw();}, this, []);
+	
+	dusk.events.registerHashFunct("SGPATH", this._sgpath, this);
 };
 
 /** Function: addActions
@@ -217,13 +224,18 @@ dusk.mods.simpleGui.getActivePane = function() {
 };
 
 dusk.mods.simpleGui.draw = function() {
-	if(!this._redrawBooked || !dusk.events.getVar("sys.sg.drawable")) return false;
+	if(/*!this._redrawBooked || */!dusk.events.getVar("sys.sg.drawable")) return false;
 
 	$("#"+dusk.canvas)[0].getContext("2d").clearRect(0, 0, dusk.events.getVar("sys.sg.width"), dusk.events.getVar("sys.sg.height"));
 	this._cacheCanvas.getContext("2d").clearRect(0, 0, dusk.events.getVar("sys.sg.width"), dusk.events.getVar("sys.sg.height"));
-
+	
 	//Draw panes
+	var input;
 	for(var c in this._panes){
+		/*input = this._panes[c].draw();
+		if(!input || !this._panes[c].width || !this._panes[c].height) continue;
+		this._cacheCanvas.getContext("2d").drawImage(input, this._panes[c].x, this._panes[c].y, this._panes[c].width, this._panes[c].height);*/
+		
 		this._panes[c].draw(this._cacheCanvas.getContext("2d"));
 	}
 
@@ -234,13 +246,20 @@ dusk.mods.simpleGui.draw = function() {
 };
 
 dusk.mods.simpleGui._doPath = function(action) {
-	if(!action.path){throw new dusk.errors.PropertyMissing(action.a, "path");}
-	if(!action.pane){throw new dusk.errors.PropertyMissing(action.a, "pane");}
+	if(action.path===undefined){throw new dusk.errors.PropertyMissing(action.a, "path");}
 
-	this.path(action.pane, action.path).parseProps(action, dusk.events.thread);
+	this.path((action.pane?action.pane+":":"")+action.path).parseProps(action, dusk.events.thread);
 };
 
-dusk.mods.simpleGui.path = function(pane, path) {
+dusk.mods.simpleGui._sgpath = function(name, args) {
+	if(args.length < 2){throw new dusk.errors.ArgLengthWrong(name, args.length, 2);}
+	
+	return dusk.mods.simpleGui.path(args[0]).prop(args[1]);
+};
+
+dusk.mods.simpleGui.path = function(path) {
+	var pane = path.split(":", 1)[0];
+	var path = path.substr(pane.length+1);
 	return this.getPane(pane).path(path);
 };
 

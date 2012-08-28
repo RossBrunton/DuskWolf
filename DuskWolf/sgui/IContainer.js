@@ -2,9 +2,9 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-goog.require("dusk.sgui.Component");
+dusk.load.require("dusk.sgui.Component");
 
-goog.provide("dusk.sgui.IContainer");
+dusk.load.provide("dusk.sgui.IContainer");
 
 /** Components that implement this interface will be able to have other components inside them.
  * 
@@ -30,7 +30,7 @@ dusk.sgui.IContainer.constructor = dusk.sgui.IContainer;
  * @return Whether to stop the main function, this will generally cause all future handling of this event to stop.
  * @see Component#keypress
  */
-dusk.sgui.IContainer.prototype.containerKeypress = function(e) {console.warn("Container has not implemented \"containerKeypress\".");};
+dusk.sgui.IContainer.prototype.containerKeypress = function(e) {console.warn("Container "+this.className+" has not implemented \"containerKeypress\".");};
 
 /** This should delete the component with the name <code>com</code>.
  * @param com The name of the component to delete.

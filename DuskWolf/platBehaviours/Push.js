@@ -2,34 +2,37 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-goog.require("dusk.pbehave.PBehave");
+dusk.load.require("dusk.pbehave.PBehave");
 
-goog.provide("dusk.pbehave.Push");
+dusk.load.provide("dusk.pbehave.Push");
 
-window.pbehave.Push = function(entity, events) {
+dusk.pbehave.Push = function(entity, events) {
 	if(entity !== undefined){
-		window.pbehave.PBehave.call(this, entity, events);
+		dusk.pbehave.PBehave.call(this, entity, events);
 		
-		if(!this._entity.eProp("speed") && this._entity.eProp("speed") !== 0) this._entity.eProp("speed", 1);
+		if(!("speed" in this._entity.behaviourData)) this._entity.behaviourData.speed = 1;
+		
+		this.listenEvent("collidedTop", this._pCollidedTop);
+		this.listenEvent("collidedBottom", this._pCollidedBottom);
+		this.listenEvent("collidedLeft", this._pCollidedLeft);
+		this.listenEvent("collidedRight", this._pCollidedRight);
 	}
 };
-window.pbehave.Push.prototype = new window.pbehave.PBehave();
-window.pbehave.Push.constructor = window.pbehave.Push;
+dusk.pbehave.Push.prototype = new dusk.pbehave.PBehave();
+dusk.pbehave.Push.constructor = dusk.pbehave.Push;
 
-window.pbehave.Push.prototype.everyFrame = function() {};
-
-window.pbehave.Push.prototype.onCollidedTop = function(collider) {
-	this._entity.performMotion(0, this._entity.eProp("speed"));
+dusk.pbehave.Push.prototype._pCollidedTop = function(name, collider) {
+	this._entity.performMotion(0, this._entity.behaviourData.speed);
 };
 
-window.pbehave.Push.prototype.onCollidedBottom = function(collider) {
-	this._entity.performMotion(0, -this._entity.eProp("speed"));
+dusk.pbehave.Push.prototype._pCollidedBottom = function(name, collider) {
+	this._entity.performMotion(0, -this._entity.behaviourData.speed);
 };
 
-window.pbehave.Push.prototype.onCollidedLeft = function(collider) {
-	this._entity.performMotion(this._entity.eProp("speed"), 0);
+dusk.pbehave.Push.prototype._pCollidedLeft = function(name, collider) {
+	this._entity.performMotion(this._entity.behaviourData.speed, 0);
 };
 
-window.pbehave.Push.prototype.onCollidedRight = function(collider) {
-	this._entity.performMotion(-this._entity.eProp("speed"), 0);
+dusk.pbehave.Push.prototype._pCollidedRight = function(name, collider) {
+	this._entity.performMotion(-this._entity.behaviourData.speed, 0);
 };

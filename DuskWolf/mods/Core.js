@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-goog.provide("dusk.mods.core");
+dusk.load.provide("dusk.mods.core");
 
 /** Class: mods.Core
  * 
@@ -83,7 +83,7 @@ dusk.mods.core._increment = function(data) {
 	if(data["var"] === undefined){throw new dusk.errors.PropertyMissing(data.a, "var");}
 	if(data.by === undefined) data.by = 1;
 	
-	dusk.events.setVar(data["var"], Number(dusk.events.getVar(data["var"]))+Number(data.by));
+	dusk.events.setVar(data["var"], +dusk.events.getVar(data["var"])+data.by);
 };
 
 /*- Function: _multiply
@@ -98,7 +98,7 @@ dusk.mods.core._multiply = function(data) {
 	if(data["var"] === undefined){throw new dusk.errors.PropertyMissing(data.a, "var");}
 	if(data.by === undefined) data.by = 2;
 	
-	dusk.events.setVar(data["var"], Number(dusk.events.getVar(data["var"]))*Number(data.by));
+	dusk.events.setVar(data["var"], +dusk.events.getVar(data["var"])*data.by);
 };
 
 /*- Function: _modulo

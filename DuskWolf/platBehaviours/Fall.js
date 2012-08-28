@@ -2,22 +2,21 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-goog.require("dusk.pbehave.PBehave");
+dusk.load.require("dusk.pbehave.PBehave");
 
-goog.provide("dusk.pbehave.Fall");
+dusk.load.provide("dusk.pbehave.Fall");
 
-window.pbehave.Fall = function(entity, events) {
+dusk.pbehave.Fall = function(entity, events) {
 	if(entity !== undefined){
-		window.pbehave.PBehave.call(this, entity, events);
+		dusk.pbehave.PBehave.call(this, entity, events);
 		
-		if(!this._entity.eProp("speed") && this._entity.eProp("speed") !== 0) this._entity.eProp("speed", 1);
+		if(!("speed" in this._entity.behaviourData)) this._entity.behaviourData.speed = 1;
+		this.listenEvent("collidedTop", this._fallFall);
 	}
 };
-window.pbehave.Fall.prototype = new window.pbehave.PBehave();
-window.pbehave.Fall.constructor = window.pbehave.Fall;
+dusk.pbehave.Fall.prototype = new dusk.pbehave.PBehave();
+dusk.pbehave.Fall.constructor = dusk.pbehave.Fall;
 
-window.pbehave.Fall.prototype.everyFrame = function() {};
-
-window.pbehave.Fall.prototype.onCollidedTop = function(collider) {
+dusk.pbehave.Fall.prototype._fallFall = function(name, collider) {
 	this._entity.performMotion(0, this._entity.eProp("speed"));
 };

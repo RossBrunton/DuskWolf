@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-goog.provide("dusk.sgui.Tile");
+dusk.load.provide("dusk.sgui.Tile");
 
 /** A tile is a type of image designed for using tilesets, a single image with lots of smaller ones in. Generally, it has a "viewing area" of a certian size and width, and the image behind it can be moved to show only one tile at a time.
  * 
@@ -35,9 +35,9 @@ dusk.sgui.Tile = function(parent, comName) {
 		/** This is the actual image. */
 		this._img = null;
 		
-		this._ssize = this._theme("tile.ssize", 4);
-		this._width = 1<<this._ssize;
-		this._height = 1<<this._ssize;
+		this.ssize = this._theme("tile.ssize", 4);
+		this.width = 1<<this._ssize;
+		this.height = 1<<this._ssize;
 		this._tx = 0;
 		this._ty = 0;
 		
@@ -45,9 +45,9 @@ dusk.sgui.Tile = function(parent, comName) {
 		 * @see sg.Component
 		 */
 		
-		this._registerProp("src", this._setImage, function(name){return this._img});
-		this._registerProp("tile", function(name, value){this._setTile(value.split(",")[0], value.split(",")[1]);}, function(name){this._getTile();});
-		this._registerPropMask("sprite-size", "_ssize", true);
+		this._registerPropMask("src", "src", true);
+		this._registerPropMask("tile", "tile", true);
+		this._registerPropMask("sprite-size", "ssize", true);
 		this._registerDrawHandler(this._tileDraw);
 	}
 };
@@ -60,43 +60,60 @@ dusk.sgui.Tile.prototype.className = "Tile";
 
 dusk.sgui.Tile.prototype._tileDraw = function(c) {
 	if(this._img){
-		c.drawImage(this._img, this._tx<<this._ssize, this._ty<<this._ssize, 1<<this._ssize, 1<<this._ssize, 0, 0, this.prop("width"), this.prop("height"));
+		c.drawImage(this._img, this._tx<<this.ssize, this._ty<<this.ssize, 1<<this.ssize, 1<<this.ssize, 0, 0, this.width, this.height);
 	}
 };
 
-/** This sets the image that will be displayed.
- * @param image The name of the image, should be a constant in <code>Data</code>.
- */
-dusk.sgui.Tile.prototype._setImage = function(name, value) {
+dusk.sgui.Tile.prototype.__defineSetter__("src", function _setSrc (value) {
+	if(!value) {console.warn(this.comName+" tried to set image to nothing."); return;}
 	this._img = dusk.data.grabImage(value);
-};
+	this.bookRedraw();
+});
 
-dusk.sgui.Tile.prototype._getTile = function() {
+dusk.sgui.Tile.prototype.__defineGetter__("src", function _getSrc () {
+	return this._img;
+});
+
+dusk.sgui.Tile.prototype.__defineGetter__("tile", function _getTile() {
 	return this._tx+","+this._ty;
-};
+});
 
-dusk.sgui.Tile.prototype._setTile = function(x, y) {
-	if(y === undefined) {x = x.split(",")[0]; y = x.split(",")[1];}
-	
-	this._tx = x;
-	this._ty = y;
-};
+dusk.sgui.Tile.prototype.__defineSetter__("tile", function _setTile(value) {
+	this._tx = value.split(",")[0];
+	this._ty = value.split(",")[1];
+});
 
 dusk.sgui.Tile.prototype.snapX = function(down) {
 	if(down)
-		this.x = Math.ceil(this.x/this.prop("width"))*this.prop("width");
+		this.x = Math.ceil(this.x/this.width)*this.width;
 	else
-		this.x = Math.floor(this.x/this.prop("width"))*this.prop("width");
+		this.x = Math.floor(this.x/this.width)*this.width;
 };
 
 dusk.sgui.Tile.prototype.snapY = function(right) {
 	if(right)
-		this.y = Math.ceil(this.y/this.prop("height"))*this.prop("height");
+		this.y = Math.ceil(this.y/this.height)*this.height;
 	else
-		this.y = Math.floor(this.y/this.prop("height"))*this.prop("height");
+		this.y = Math.floor(this.y/this.height)*this.height;
 };
 
 dusk.sgui.Tile.prototype.gridGo = function(x, y) {
-	this.x = x*this.prop("width");
-	this.y = y*this.prop("height");
+	this.x = x*this.width;
+	this.y = y*this.height;
 };
+
+dusk.sgui.Tile.prototype.__defineGetter__("width", function _getWidth() {
+	return 1<< this.ssize;
+});
+
+dusk.sgui.Tile.prototype.__defineSetter__("width", function _setWidth(value) {
+	this.ssize = Math.log(value)/Math.LN2;
+});
+
+dusk.sgui.Tile.prototype.__defineGetter__("height", function _getHeight() {
+	return 1<<this.ssize;
+});
+
+dusk.sgui.Tile.prototype.__defineSetter__("height", function _setHeight(value) {
+	this.ssize = Math.log(value)/Math.LN2;
+});

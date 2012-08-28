@@ -1,25 +1,13 @@
-/*
-	This is the config file used by JSDoc (install jsdoc-toolkit, if you need it) to generate docs for this.
-	
-	Run `jsdoc -c jsdoc.conf.json -d Doc DuskWolf` from the directory above "DuskWolf" to generate documentation.
-*/
-
 {
-	//Files to document
-	_: ['DuskWolf/'],
-	
-	//Document everything
-	a: true,
-	
-	//Even @private ones
-	p: true,
-	
-	//Recurse in subfolders
-	r: true,
-	
-	//Write to the folder "Doc"
-	d: "Doc",
-	
-	//Other stuff...
-	D: {generatedBy: "Michael Mathews", copyright: "2008"},
+    "tags": {
+        "allowUnknownTags": true
+    },
+    "source": {
+        "includePattern": ".+\\.js(doc)?$",
+        "excludePattern": "(^|\\/)_"
+    },
+    "plugins": [
+        "plugins/markdown.js"
+    ],
+    "jsVersion": 180
 }

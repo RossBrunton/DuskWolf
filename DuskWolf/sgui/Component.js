@@ -4,12 +4,12 @@
 
 window.sgui = {};
 
-goog.provide("dusk.sgui.Component");
-goog.provide("dusk.sgui.NullCom");
+dusk.load.provide("dusk.sgui.Component");
+dusk.load.provide("dusk.sgui.NullCom");
 
-/** Class: sgui.Component
+/** @class dusk.sgui.Component
  * 
- * A component is a single "thing" that exists in the Simple Gui system. Everything in the Simple GUI system must have this (or a subclass of this) as a base class.
+ * @description A component is a single "thing" that exists in the Simple Gui system. Everything in the Simple GUI system must have this (or a subclass of this) as a base class.
  * 
  * This class doesn't actually display anything itself, classes that inherit from it do.
  * 	The properties for this apply to all components.
@@ -86,14 +86,14 @@ dusk.sgui.Component = function (parent, componentName) {
 		this.y = 0;
 		this.visible = true;
 		this.alpha = 1;
-		this._height = 0;
-		this._width = 0;
-		this._mark = null;
+		this.height = 0;
+		this.width = 0;
+		this.mark = null;
 		
 		this._redrawBooked = false;
 		
 		this.cache = false;
-		this._cacheCanvas = null;
+		this._cacheCanvas = dusk.utils.createCanvas(0, 0);
 
 		/** The name of the group's component that will be focused when the left key is pressed and <code>leftDirection</code> returns true.*/
 		this.leftFlow = "";
@@ -136,20 +136,20 @@ dusk.sgui.Component = function (parent, componentName) {
 		//Add the core properties
 		this._registerPropMask("x", "x", true);
 		this._registerPropMask("y", "y", true);
-		this._registerPropMask("width", "_width", true);
-		this._registerPropMask("height", "_height", true);
+		this._registerPropMask("width", "width", true);
+		this._registerPropMask("height", "height", true);
 		this._registerPropMask("alpha", "alpha", true);
 		this._registerPropMask("visible", "visible", true);
-		this._registerPropMask("mark", "_mark", true);
-		this._registerPropMask("flow-up", "_upFlow", true);
-		this._registerPropMask("flow-down", "_downFlow", true);
-		this._registerPropMask("flow-left", "_leftFlow", true);
-		this._registerPropMask("flow-right", "_rightFlow", true);
+		this._registerPropMask("mark", "mark", true);
+		this._registerPropMask("flow-up", "upFlow", true);
+		this._registerPropMask("flow-down", "downFlow", true);
+		this._registerPropMask("flow-left", "leftFlow", true);
+		this._registerPropMask("flow-right", "rightFlow", true);
 		this._registerPropMask("enabled", "enabled", true);
-		this._registerPropMask("action", "_action", true);
-		this._registerProp("delete", function(name, value){if(value) this._container.deleteComponent(this.comName);}, null);
-		this._registerProp("float", this._setFloat, null);
-		this._registerProp("fade", this._setFade, null);
+		this._registerPropMask("action", "action", true);
+		this._registerPropMask("fade", "fade", true);
+		this._registerPropMask("float", "foat", true);
+		this._registerPropMask("delete", "delete", true);
 		
 		//Add the action property handler
 		this._registerActionHandler("actionProp", this._actionProp, this);
@@ -214,8 +214,8 @@ dusk.sgui.Component.prototype._registerProp = function(name, onSet, onGet, depen
 	this._propHandlers[name] = [onSet, onGet, depends];
 }
 
-dusk.sgui.Component.prototype._registerPropMask = function(name, mask, redraw) {
-	this._propMasks[name] = [mask, redraw];
+dusk.sgui.Component.prototype._registerPropMask = function(name, mask, redraw, depends) {
+	this._propMasks[name] = [mask, redraw, depends];
 }
 
 dusk.sgui.Component.prototype._actionProp = function(e) {
@@ -265,10 +265,10 @@ dusk.sgui.Component.prototype.keypress = function (e) {
 	
 	switch(e.which){
 		//Directions
-		case 37:if(this._leftAction(e) && this._leftFlow && this._container.flow(this._leftFlow)){return true};break;
-		case 38:if(this._upAction(e) && this._upFlow && this._container.flow(this._upFlow)){return true};break;
-		case 39:if(this._rightAction(e) && this._rightFlow && this._container.flow(this._rightFlow)){return true};break;
-		case 40:if(this._downAction(e) && this._downFlow && this._container.flow(this._downFlow)){return true};break;
+		case 37:if(this._leftAction(e) && this.leftFlow && this._container.flow(this.leftFlow)){return true};break;
+		case 38:if(this._upAction(e) && this.upFlow && this._container.flow(this.upFlow)){return true};break;
+		case 39:if(this._rightAction(e) && this.rightFlow && this._container.flow(this.rightFlow)){return true};break;
+		case 40:if(this._downAction(e) && this.downFlow && this._container.flow(this.downFlow)){return true};break;
 		
 		//Action key
 		case 32:
@@ -294,7 +294,7 @@ dusk.sgui.Component.prototype.keypress = function (e) {
 };
 
 /** This is called when the left key is pressed.
- * @return Whether focus should flow to <code>leftFlow</code>.
+ * @return {boolean} Whether focus should flow to {@link dusk.sgui.Component.leftFlow}.
  */
 dusk.sgui.Component.prototype._leftAction = function(e) {return true;}
 /** This is called when the right key is pressed.
@@ -334,8 +334,18 @@ dusk.sgui.Component.prototype.parseProps = function(props, thread) {
 				if(j < -1) continue;
 			}
 			
+			if(this._propMasks[toProcess[i]] && this._propMasks[toProcess[i]][2]) {
+				for(var j = this._propMasks[toProcess[i]][2].length-1; j >= 0; j--) {
+					if(toProcess.indexOf(this._propMasks[toProcess[i]][2][j]) !== -1) {
+						j = -2;
+					}
+				}
+				
+				if(j < -1) continue;
+			}
+			
 			if(props[toProcess[i]] && props[toProcess[i]].to !== undefined) {
-				dusk.events.setVar(props[toProcess[i]].to, this.prop[toProcess[i]]);
+				dusk.events.setVar(props[toProcess[i]].to, this.prop(toProcess[i]));
 				if(props[toProcess[i]].value !== undefined) {
 					this.prop(toProcess[i], props[toProcess[i]].value);
 				}
@@ -375,7 +385,7 @@ dusk.sgui.Component.prototype._theme = function(value, set) {
 	return dusk.events.getVar("theme."+dusk.events.getVar("theme.current")+"."+value);
 }
 
-dusk.sgui.Component.prototype._setFade = function(name, value) {
+dusk.sgui.Component.prototype.__defineSetter__("fade", function _setFade(value) {
 	this._awaitNext();
 	
 	if("from" in value) {
@@ -397,9 +407,9 @@ dusk.sgui.Component.prototype._setFade = function(name, value) {
 	}
 	
 	this._registerFrameHandler(this._fadeEffect);
-};
+});
 
-dusk.sgui.Component.prototype._setFloat = function(name, value) {
+dusk.sgui.Component.prototype.__defineSetter__("float", function _setFloat(value) {
 	this._awaitNext();
 	
 	if("for" in value) {
@@ -421,7 +431,7 @@ dusk.sgui.Component.prototype._setFloat = function(name, value) {
 	}
 	
 	this._registerFrameHandler(this._floatEffect);
-}
+});
 
 dusk.sgui.Component.prototype._fadeEffect = function() {
 	if((this.alpha < this._fadeEnd && this._fade > 0) || (this.alpha > this._fadeEnd && this._fade < 0)) {
@@ -453,7 +463,11 @@ dusk.sgui.Component.prototype._floatEffect = function() {
 		this._clearFrameHandler(this._floatEffect);
 		this._next();
 	}
-}
+};
+
+dusk.sgui.Component.prototype.__defineSetter__("delete", function _setDelete(value) {
+	if(value) this._container.deleteComponent(this.comName);
+});
 
 /** This just calls <code>Events.awaitNext()</code>, but calling this function is required for the checking if this component is open to work. 
  * @param count The number of nexts to wait for.
@@ -483,22 +497,45 @@ dusk.sgui.Component.prototype._registerDrawHandler = function(funct) {
 
 dusk.sgui.Component.prototype.draw = function(c) {
 	if(!this.visible) return;
-	
+
 	var state = c.save();
 	if(this.x || this.y) c.translate(~~this.x, ~~this.y);
 	if(this.alpha != 1) c.globalAlpha = this.alpha;
-	
+
 	for(var i = 0; i < this._drawHandlers.length; i++){
 		this._drawHandlers[i].call(this, c);
 	}
-	
-	if(this._mark !== null) {
-		c.strokeStyle = this._mark;
+
+	if(this.mark !== null) {
+		c.strokeStyle = this.mark;
 		c.strokeRect(0, 0, this.prop("width"), this.prop("height"));
 	}
-	
+
 	c.restore(state);
 	this._redrawBooked = false;
+	/*
+	if(!this.visible) return null;
+	if(!this._redrawBooked) return this._cacheCanvas;
+	
+	if(this._cacheCanvas.width != this.width) this._cacheCanvas.width = this.width;
+	if(this._cacheCanvas.height != this.height)this._cacheCanvas.height = this.height;
+	var ctx = this._cacheCanvas.getContext("2d");
+	ctx.clearRect(0, 0, this.width, this.height);
+	
+	//if(this.x || this.y) c.translate(~~this.x, ~~this.y);
+	if(this.alpha != 1) ctx.globalAlpha = this.alpha;
+	
+	for(var i = 0; i < this._drawHandlers.length; i++){
+		this._drawHandlers[i].call(this, ctx);
+	}
+	
+	if(this.mark !== null) {
+		ctx.strokeStyle = this.mark;
+		ctx.strokeRect(0, 0, this.width, this.height);
+	}
+	
+	this._redrawBooked = false;
+	return this._cacheCanvas;*/
 }
 
 dusk.sgui.Component.prototype.bookRedraw = function() {
@@ -523,6 +560,10 @@ dusk.sgui.Component.prototype.path = function(path) {
 		case "..":
 			if(second) return this._container.path(second);
 			return this._container;
+			break;
+		
+		case ".":
+			return this;
 			break;
 		
 		case "":
@@ -563,7 +604,7 @@ dusk.sgui.Component.prototype.toString = function() {return "[sgui "+this.classN
  */
 dusk.sgui.NullCom = function(parent, comName) {
 	dusk.sgui.Component.call(this, parent, comName);
-	this.prop("visible", false);
+	this.visible = false;
 };
 dusk.sgui.NullCom.prototype = new dusk.sgui.Component();
 dusk.sgui.NullCom.constructor = dusk.sgui.NullCom;

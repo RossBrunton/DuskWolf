@@ -4,38 +4,23 @@
 
 window.pbehave = {};
 
-goog.provide("dusk.pbehave.PBehave");
-goog.provide("dusk.pbehave.Stayer");
+dusk.load.provide("dusk.pbehave.PBehave");
 
-/** */
-window.pbehave.PBehave = function(entity, events) {
+/* */
+dusk.pbehave.PBehave = function(entity) {
 	this._entity = entity;
-	this._events = events;
+	
+	this._eventHandlers = {};
 };
 
-window.pbehave.PBehave.prototype.everyFrame = function() {};
+dusk.pbehave.PBehave.prototype.listenEvent = function(name, funct) {
+	if(!this._eventHandlers[name]) this._eventHandlers[name] = [];
+	this._eventHandlers[name].push(funct);
+};
 
-window.pbehave.PBehave.prototype.onLand = function() {};
-window.pbehave.PBehave.prototype.onBonk = function() {};
-window.pbehave.PBehave.prototype.onHitRight = function() {};
-window.pbehave.PBehave.prototype.onHitLeft = function() {};
-
-window.pbehave.PBehave.prototype.onCollideLeft = function(collider) {};
-window.pbehave.PBehave.prototype.onCollideRight = function(collider) {};
-window.pbehave.PBehave.prototype.onCollideTop = function(collider) {};
-window.pbehave.PBehave.prototype.onCollideBottom = function(collider) {};
-
-window.pbehave.PBehave.prototype.onCollidedLeft = function(host) {};
-window.pbehave.PBehave.prototype.onCollidedRight = function(host) {};
-window.pbehave.PBehave.prototype.onCollidedTop = function(host) {};
-window.pbehave.PBehave.prototype.onCollidedBottom = function(host) {};
-
-//-----
-
-window.pbehave.Stayer = function(entity, events) {
-	if(entity !== undefined){
-		window.pbehave.PBehave.call(this, entity, events);
+dusk.pbehave.PBehave.prototype.handleEvent = function(name, data) {
+	if(!this._eventHandlers[name]) return;
+	for(var i = this._eventHandlers[name].length-1; i>=0; i--) {
+		this._eventHandlers[name][i].call(this, name, data);
 	}
 };
-window.pbehave.Stayer.prototype = new window.pbehave.PBehave();
-window.pbehave.Stayer.constructor = window.pbehave.Stayer;

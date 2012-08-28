@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-goog.provide("dusk.mods.net");
+dusk.load.provide("dusk.mods.net");
 
 /** Class: mods.Net
  * 
@@ -72,9 +72,9 @@ dusk.mods.net._get = function(action) {
  *	The output of the hashfunct.
  */
 dusk.mods.net._file = function(name, args) {
-	if(!args[0]){dusk.error("No file to retreive.");return;}
+	if(!args[0]){throw new dusk.errors.ArgLengthWrong(name, args.length, 1);}
 	
-	return dusk.data.download(args[0], args[1]);
+	return dusk.data.download(args[0]);
 };
 
 dusk.mods.net.init();

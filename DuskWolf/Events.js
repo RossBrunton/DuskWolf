@@ -2,213 +2,73 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-goog.require("dusk.dwc");
-goog.require("dusk.errors");
+dusk.load.require("dusk.dwc");
+dusk.load.require("dusk.errors");
+dusk.load.require("dusk.utils");
 
-goog.provide("dusk.events");
+dusk.load.provide("dusk.events");
 
 /** @namespace dusk.events
  * 
  * @description This is the heart of the entire system! It manages the event stack and carries out events.
  * 
- * Definitions:
- * 
- * Action 			- A single thing to do. Each module is expected to add some. Generally the loop goes through the stack, and each "action" is evaluated and run. An action is just a simple object.
- * Function 		- A group of actions, when it is ran or "called", it runs all it's actions in order (top to bottom). They can also accept arguments.
- * Listener 		- A listener listens for something to happen. Other parts of the system will 'fire' things, such as when the system starts or something.
- * Event 			- This is what the listener listens for, it is fired (Ether by code or internally), and the listener responds to it with it's own function.
- * Var, Variable 	- A value that can be changed, see the section below for details.
- * 
- * Running Actions:
- * 
- * To actually run an action, you need to call <Events.run> with the array of actions, and the thread you want it to run in.
- * 
- * To register a new action from a module, call <Events.registerAction> from your module's <IModule.addActions> call with a function and scope.
- * If you want to wait for something to happen (as in, say you want to wait for user input, or a file to load), you should call <Events.awaitNext>, which reterns the current thread that you are waiting in.
- * When you want to start running again, call <Events.next> with the thread to continue in.
- * 
- * Listeners:
- * 
- * Listeners listen for something to happen, and then act on it when or if it does happen!
- * Listeners are defined by using {"a":"listen", "event":"...", "actions":[...], ("name":"...")}, and they can be fired by using {"a":"fire", "event":"..."}.
- * There can also be a number of values fired and listened for; if the listener object had the property "foo":"bar", then the fire action must also have "foo":"bar", or the listener would not be called.
- * You can also use "foo":"!bar" on the listener to say that if foo is bar, then the listener should NOT run.
- * There is also a name property, that lets you identify listeners uniquely. You cannot set a new listener when one already exists with the same name.
- * 
- * Conditions:
- * 
- * Some actions, like if and while, also have conditions, conditions should be a string made of one of the characters below, the condition is then broken down until it reaches true or false.
- * 
- * Note that whitespace is removed, so the condition "This String == ThisString" will be true.
- * 
- * > (n)
- * (false) and (true) will be broken down to false and true, respectivley, this allows you to "group conditions" so that they don't interfere.
- * 
- * > n = m
- * Is true if and only if n is equal to m, for example, 1 = 1 would be true, but 1 = 2 would be false.
- * 
- * > n != m
- * Is true if and only if n is not equal to m, like "=", but opposite.
- * 
- * > n < m, n > m
- * Is true if and only if n is less than m for the former, and n is greater than m for the latter, 1 < 2 becomes true, but 2 < 1 becomes false.
- * 
- * > n <= m, n >= m
- * Same as "<" and ">", but is true if they are equal as well.
- * 
- * > n && m
- * Is true if and only if both n and m are true.
- * 
- * > n || m
- * Is true if at least n or m is true.
- * 
- * > n + m, n - m, n * m, n / m, n % m
- * 	Performs the expected operations (add, subtract, multiply, divide, modulo), and becomes the result. 1 + 1 = 2 would be true, for example.
- * 
- * Variables:
- * 
- * Variables are set using the "var" action. variable names should include only case-insensitive alphanumeric characters and the chars "-_", any others may not work as intended. Note that the replacing is only done with basic strings, if you, say, put an "&" in the value of a variable it would be replaced in conditions, possibly causing trouble.
- * 
- * Variables can be referenced (in any property, any occurences of these are replaced by their equivilents below.)
- * 
- * > $name;
- * This is replaced by the variable "name". Simple, huh.
- * 
- * > $na$l;e;
- * Yes, this is possible, firstly $l; is replaced by whatever the var "l" is, and then the result is replaced. For example, if $l; was "m", then the whole thing there would be replaced by the value for "name".
- * 
- * > $-name;
- * Name, which resolve to a number, is inverted, if the var "name" was 4, for example, this would be replaced with -4.
- * 
- * Hashfunctions:
- * 
- * Hashfunctions work similar to variables, except that they call functions instead of being static values. They are provided by modules using <Events.registerHashFunc> in a similar way to actions.
- * 	The syntax for calling them is #NAME(arg1, arg2); The names are not case sensitive, and there can be any number of arguments.
- * 
- * Threads:
- * 
- * Threads (which are not done by the CPU) allow you to do multiple things at once, for example, you can animate a background while still having the player move.
- *  Basically, each thread maintains it's own list of actions it has to run, and an <Events.awaitNext> call will only cause execution on the current thread to stop.
- *  In the actions thing, you can use the "thread" action to switch threads.
- *  You can get the current thread by reading <Events.thread> of this, which will not work if you cave called <Events.awaitNext>.
- * 
- * Thread names starting with a "_" are system or internal threads, you should not use a thread name with an underscore at the start.
- * 
- * Modules:
- * 
- * Modules are classes that implement <mods.IModule> and generally let you DO something usefull, rather than simple printing of vars...
- *  Generally, a module calls <mods.IModule.addAction> with details it needs, and when that action is found when running code the function registered is called.
- * 
- * Built-in Actions:
- * 
- * > {"a":"function", "name":"...", "actions":[...]}
- * This defines the function given by name, which will run actions when called. It can be called with the call action.
- * 
- * > {"a":"call", "name":"...", ("thread":"...")}
- * Calls the function with the name given by name, once the code is finished, it resumes from the next action after this. If thread is specified, it is ran in that thread.
- * 
- * > {"a":"if", "cond":"...", ("then":[...],) ("else":[...])}
- * Evaluates the condition using the rules above, if it is true, then the "then" array is ran, else the "else" array is ran instead. Simple.
- * 
- * > {"a":"ifset", "value":"...", ("then":[...],) ("else":[...])}
- * [DEPRECIATED?] Runs the actions specified by "then" if the value string is not empty, otherwise it runs "else". This can be used to check if vars are defined, "$1;$2;" will run the "then" actions if ether one of the vars is not a blank string, and if they are both unset, then it will run the "else" actions.
- * 
- * > {"a":"while", "cond":"...", "actions":[...]}
- * It keeps repeating the actions if the condition is true.
- * 
- * > {"a":"listen", "event":"...", "actions":[...], ("name":"...",) ("prop1":"...", ("prop2":"...", ...))}
- * This creates a listener, making it listen for the event specified, which will run actions when it recieves it. See the section on listeners above.
- * The name property will not be actually used on the listener, but is used for identifying it, say, for deleting it.
- * 
- * > {"a":"fire", "event":"...", ("prop1":"...", ("prop2":"...", ...))}
- * Fires the specified event, which will trigger the listener which all the properties match, see the section above for details.
- * 
- * > {"a":"unlisten", ("name":"...",) ("event":"...",) ("prop1":"...", ("prop2":"...", ...))}
- * Deletes the listener that would be fired if the rules for "listen" were true. Note that the event property is optional.
- * 
- * > {"a":"var", "name":"...", "value":{...}, ["inherit":"..."]}
- * Sets the var specified with the value specified. If inherit is specified, then the variable, if an object, will "inherit" the properties of the specified var.
- * 
- * > {"a":"thread", "name":"...", "actions":[...]}
- * The actions specified will now run in that thread. The current thread will continue going to the next line.
- * 
- * > {"a":"delvar", "name":"..."}
- * Deletes the variable named, this will free up memory or something.
- * 
- * System Vars:
- * 
- * sys.game.ver 		- The version of the game, same as DuskWolf.ver.
- * sys.game.verid 		- The version id of the game, same as DuskWolf.verId.
- * sys.game.name 		- The name of the game, same as DuskWolf.gameName.
- * sys.game.author 		- The author of the game, same as DuskWolf.author.
- * sys.game.frameRate 	- The frame rate, in frames per second. This is usually 30. Setting this has no affect on the frame rate.
- * 
- * Built-in Events:
- * 
- * > {"a":"fire", "event":"sys-event-frame"}
- * Fired every frame, it will be fired about <DuskWolf.frameRate> times a second.
- * 	Note that on slow computers or large drawings this may be less than that.
- * 
- * > {"a":"fire", "ver":"...", "ver-id":"...", "gameName":"...", "event":"sys-event-load"}
- * Fired once, to signal that the game should start loading and processing any information it needs, like defining variables.
- * 	The properties are the same as the ones in <DuskWolf>.
- * 
- * > {"a":"fire", "ver":"...", "ver-id":"...", "gameName":"...", "event":"sys-event-start"}
- * Fired once, to signal that the game should start running, you should listen for this rather than just dumping code in the main array so that other things are loaded.
- * 	The properties are the same as the ones in <DuskWolf>.
- * 
- * Built-in HashFunctions:
- * 
- * > #IF(cond, then, else);
- * 	If the condition is true, then "then" is returned, else "else" is returned.
- * 
- * > #=(cond);
- * 	This evaluates a condition, but does not return true or false, this lets you do things like #=(1+1) to get two.
- * 
- * See:
- * * <mods.IModule>
+ * Use this namespace to add and run actions.
  */
 
-/** Initiates the Events system.
- */
+/** This initiates all the variables and adds all the defualt stuff. You must call this before using this namesspace. */
 dusk.events.init = function() {
-	/*- Variable: _game
-	 * [<Game>] A link to the main game dusk.events is running for.
-	 */
-	dusk.events._game = dusk.game;
-	
-	/*- Variable: _actions
-	 * [object] A list of every action, each action is an array in the form [function to be called, scope to call function in]. You should add actions using <addAction>, rather than adding it to dusk.events object directly.
+	/** A list of every action, each action is an array in the form <code>[function to be called, scope to call function in]</code>.
+	 * 
+	 * @type object
+	 * @private
 	 */
 	dusk.events._actions = {};
-	/*- Variable: _hashFuncs
-	 * [object] A list of every hashfunction, it is an array in the form [function to be called, scope to call function in]. You should add actions using <addHashFunct>, rather than adding it to dusk.events object directly.
+	
+	/** A list of every hashfunction, each function is an array in the form <code>[function to be called, scope to call function in]</code>.
+	 * 
+	 * @type object
+	 * @private
 	 */
 	dusk.events._hashFuncts = {};
-	/*- Variable: _functions
-	 * [object] A list of all the functions assigned, in the form of an array of actions. Generally, you shouldn't need to create functions outside the JSON files, so you can't do it.
+	
+	/** A list of every function defined by the <code>function</code> action, each one is an array of actions.
+	 * 
+	 * @type object
+	 * @private
 	 */
 	dusk.events._functions = {};
-	/*- Variable: _listeners
-	 * [array] A list of all the listeners in use, dusk.events is an array of the action that set it, whith all it's properties.
+	
+	/** A list of all the listeners set, these are the actual action objects themselves.
+	 * 
+	 * @type array.<object>
+	 * @private
 	 */
 	dusk.events._listeners = [];
-	/*- Variable: _vars
-	 * [object] dusk.events is all the variables! You should set/retreive these using <getVar> and <setVar>, and the like.
+	
+	/** This is all the variables in the engine, each variable is a property on this object.
+	 * 
+	 * @type object
+	 * @private
 	 */
 	dusk.events._vars = {};
-	/*- Variable: _threads
-	 * [object] dusk.events is all the threads that have been created. Each thread is an object with a "buffer" property, a "nexts" property and an "actions" property.
+	
+	/** This is an object containing all the threads that have been created. Each thread is an object with a <code>buffer</code> property, a <code>nexts</code> property and an <code>actions</code> property.
 	 * 
-	 * Nexts is the number of times <awaitNext> has been called, and is the number of times we have to call <next> for the program to continue.
+	 * <p><code>nexts</code> is the number of times {@link dusk.events.awaitNext} has been called for the thread, and is the number of times {@link dusk.events.next} has to be called for the program to continue.</p>
 	 * 
-	 * Actions is the current list of actions that the engine is slowly working it's way through. Buffer is a "temprary storage area" for actions that should be ran next, and is inserted into "actions" before any more actions are ran.
+	 * <p><code>actions</code> is the current list of actions that the engine is slowly working it's way through. <code>buffer is a "temprary storage area" for actions that should be ran next, and is inserted into <code>actions</code> before any more actions are ran.</p>
 	 * 
-	 * The buffer is required so that the order of actions is intuitive, <run> calls that were called first should be ran first.
+	 * <p>The buffer is required so that the order of actions is intuitive, {@link dusk.events.run} calls that were called first should be ran first.</p>
+	 * 
+	 * @type object
+	 * @private
 	 */
 	dusk.events._threads = {};
-	/*- Variable: _frameHandlers
-	 * [object] dusk.events is all the frame handlers, they are arrays in the form [function, scope].
+	
+	/** This is all the frame handlers, they are arrays in the form <code>[function, scope]</code>, the key is the name of the handler.
+	 * 
+	 * @type object
+	 * @private
 	 */
 	dusk.events._frameHandlers = {};
 	/*- Variable: _keyHandlers
@@ -227,6 +87,9 @@ dusk.events.init = function() {
 	 * [array] dusk.events is an array of all the mods that have been initiated.
 	 */
 	dusk.events._modsInited = {};
+	
+	dusk.events.waitingFor = -1;
+	dusk.events.started = false;
 	
 	/*- Variable: _ops
 	 * [array] dusk.events is an array of all the operators that are supported in conditions.
@@ -255,7 +118,7 @@ dusk.events.init = function() {
 	//Register actions
 	dusk.events.registerAction("comment", function(what){}, dusk.events, [["", false, "STR"]]);
 	dusk.events.registerAction("function", dusk.events._addFunction, dusk.events, [["name", true, "STR"], ["actions", true, "DWC"]]);
-	dusk.events.registerAction("listen", dusk.events._addListener, dusk.events, [["event", true, "STR"], ["actions", true, "DWC"], ["name", false, "STR"]]);
+	dusk.events.registerAction("listen", dusk.events._addListener, dusk.events, [["event", true, "STR"], ["name", false, "STR"], ["actions", true, "DWC"]]);
 	dusk.events.registerAction("if", dusk.events._iffy, dusk.events, [["cond", true, "STR"], ["then", false, "DWC"], ["else", false, "DWC"]]);
 	dusk.events.registerAction("ifset", dusk.events._ifset, dusk.events);
 	dusk.events.registerAction("while", dusk.events._whiley, dusk.events, [["cond", true, "STR"], ["actions", true, "DWC"]]);
@@ -269,8 +132,6 @@ dusk.events.init = function() {
 	
 	dusk.events.registerHashFunct("IF", dusk.events._hiffy, dusk.events);
 	dusk.events.registerHashFunct("=", dusk.events._rawCond, dusk.events);
-	
-	return dusk.events;
 };
 
 /** Function: dusk.events.startGame
@@ -278,16 +139,21 @@ dusk.events.init = function() {
  * This initiates the events system, importing all the modules and such.
  */
 dusk.events.startGame = function() {
+	if(dusk.events.started) return;
+	dusk.events.started = true;
+	
 	//Start handlers
 	for(var i = 0; i < this._startHandlers.length; i++){
 		this._startHandlers[i][0].call(this._startHandlers[i][1]);
 	}
 	
 	//Load all files
+	dusk.events.waitingFor = dusk.data.root.files.length;
 	for(var i = dusk.data.root.files.length-1; i>= 0; i--) {
-		if(dusk.data.grabJson(dusk.data.root.files[i]), true) {
-			this.run(dusk.data.grabJson(dusk.data.root.files[i], true), "_init");
-		}
+		dusk.data.download(dusk.data.root.files[i], "text", function(d, s) {
+			dusk.events.run(dusk.utils.jsonParse(d, true), "_init");
+			dusk.events.waitingFor --;
+		});
 	}
 };
 
@@ -374,7 +240,7 @@ dusk.events.keyup = function(e) {
 dusk.events.run = function(what, thread) {
 	if(!thread) thread = "main";
 	
-	if(typeof(what) == "string") what = JSON.parse(what);
+	if(typeof what == "string") what = JSON.parse(what);
 	
 	//Add all the commands to the buffer to be added before running any more commands
 	for(var i = 0; i < what.length; i++){
@@ -427,7 +293,7 @@ dusk.events.next = function(t, decrement) {
 	}
 	
 	//Get the last one from the stack and remove it
-	var current = this._clone(this._getThread(t).stack.pop());
+	var current = dusk.utils.clone(this._getThread(t).stack.pop());
 	
 	if(typeof(current) == "string") return true;
 	
@@ -446,27 +312,6 @@ dusk.events.next = function(t, decrement) {
 	console.log(current);
 	return true;
 }
-
-/*- Function: _clone
- * 
- * [object] This copies a simple object. This won't work on more complicated objects with prototypes and such.
- * 
- * It just loops through them and copies all the values to another object, which is returned.
- * 
- * Params:
- * 	o		- [object] The source object to copy.
- * 
- * Returns:
- *	An object with the same properties of the source one.
- */
-dusk.events._clone = function(o) {
-	if(o == null || typeof(o) != 'object') return o;
-
-	var tmp = o.constructor(); 
-	for(var p in o) tmp[p] = this._clone(o[p]);
-
-	return tmp;
-};
 
 /** Function: awaitNext
  * 
@@ -852,20 +697,6 @@ dusk.events._whiley = function(what) {
 	}
 };
 
-/*- Function: _isJson
- * 
- * [boolean] This takes a string, checks if it is a string in JSON notation.
- * 
- * Params:
- * 	str			- [string] The string to check.
- * 
- * Returns:
- *	Whether the object can be parsed as json.
- */ 
-dusk.events._isJson = function(str) {
-	return /^[\],:{}\s]*$/.test(String(str).replace(/\\["\\\/bfnrtu]/g, '@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').replace(/(?:^|:|,)(?:\s*\[)+/g, ''));
-}
-
 /*- Function: _regEscape
  * 
  * [string] This takes a string, and replaces any regexp chars that are needed. It's like \Q...\E.
@@ -913,12 +744,12 @@ dusk.events.parseVar = function(str, asStr) {
 		
 		while(ex = /#([^#\(]+)\(([^;#\$]+)\);?/gi.exec(str)){
 			done = true;
-			str = str.replace(ex[0], this.hashFunction(ex[1], ex[2].split(",")));
+			str = str.replace(ex[0], this.hashFunction(ex[1], ex[2].split(/\,\s*/)));
 		}
 	}
 	
 	//Check if it is JSON
-	if(!asStr && this._isJson(str)) {
+	if(!asStr && str && dusk.utils.isJson(str)) {
 		return JSON.parse(str);
 	} else {
 		return str;
@@ -949,7 +780,7 @@ dusk.events.cond = function(cond, asStr) {
 		}
 	}
 	
-	if(!asStr && this._isJson(cond)) {
+	if(!asStr && dusk.utils.isJson(cond)) {
 		return JSON.parse(cond);
 	} else {
 		return cond;
@@ -1027,16 +858,11 @@ dusk.events.setVar = function(name, value, inherit) {
 		}
 	}
 	
-	if(inherit !== undefined) {
-		obj[fragments[fragments.length-1]] = this._clone(this.getVar(inherit));
-		for(var p in value){
-			obj[fragments[fragments.length-1]][p] = value[p];
-		}
-		
-		return value;
-	}
-	
 	obj[fragments[fragments.length-1]] = value;
+	
+	if(inherit !== undefined) {
+		dusk.events.setVar(name, dusk.utils.merge(dusk.events.getVar(inherit), dusk.events.getVar(name)));
+	}
 	
 	return value;
 };

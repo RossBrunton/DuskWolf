@@ -2,9 +2,9 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-goog.require("dusk.sgui.Single");
+dusk.load.require("dusk.sgui.Single");
 
-goog.provide("dusk.sgui.DirListener");
+dusk.load.provide("dusk.sgui.DirListener");
 
 /** This is a simple single that allows you to run actions when a direction arrow is pressed.
  * 
@@ -30,15 +30,15 @@ dusk.sgui.DirListener = function(parent, comName) {
 		 * @see sg.Component
 		 */
 			
-		this._up = [];
-		this._down = [];
-		this._left = [];
-		this._right = [];
+		this.up = [];
+		this.down = [];
+		this.left = [];
+		this.right = [];
 		
-		this._registerPropMask("action-up", "_up", false);
-		this._registerPropMask("action-down", "_down", false);
-		this._registerPropMask("action-left", "_left", false);
-		this._registerPropMask("action-right", "_right", false);
+		this._registerPropMask("action-up", "up", false);
+		this._registerPropMask("action-down", "down", false);
+		this._registerPropMask("action-left", "left", false);
+		this._registerPropMask("action-right", "right", false);
 	}
 };
 dusk.sgui.DirListener.prototype = new dusk.sgui.Single();
@@ -51,7 +51,7 @@ dusk.sgui.DirListener.prototype.className = "DirListener";
  */
 dusk.sgui.DirListener.prototype._upAction = function() {
 	if(this._up){
-		dusk.events.run(this._up, "_"+this.comName);
+		dusk.events.run(this.up, "_"+this.comName);
 		return false;
 	}
 	
@@ -63,7 +63,7 @@ dusk.sgui.DirListener.prototype._upAction = function() {
  */
 dusk.sgui.DirListener.prototype._downAction = function() {
 	if(this._down){
-		dusk.events.run(this._down, "_"+this.comName);
+		dusk.events.run(this.down, "_"+this.comName);
 		return false;
 	}
 	
@@ -75,7 +75,7 @@ dusk.sgui.DirListener.prototype._downAction = function() {
  */
 dusk.sgui.DirListener.prototype._leftAction = function() {
 	if(this._left){
-		dusk.events.run(this._left, "_"+this.comName);
+		dusk.events.run(this.left, "_"+this.comName);
 		return false;
 	}
 	
@@ -87,7 +87,7 @@ dusk.sgui.DirListener.prototype._leftAction = function() {
  */
 dusk.sgui.DirListener.prototype._rightAction = function() {
 	if(this._right){
-		dusk.events.run(this._right, "_"+this.comName);
+		dusk.events.run(this.right, "_"+this.comName);
 		return false;
 	}
 	

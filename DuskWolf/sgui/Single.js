@@ -2,9 +2,9 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-goog.require("dusk.sgui.IContainer");
+dusk.load.require("dusk.sgui.IContainer");
 
-goog.provide("dusk.sgui.Single");
+dusk.load.provide("dusk.sgui.Single");
 
 /** A single is a container that holds a single component, hence the name.
  * 
@@ -26,6 +26,8 @@ dusk.sgui.Single = function(parent, comName) {
 		dusk.sgui.Component.call(this, parent, comName);
 		
 		this._component = null;
+		this._width = -1;
+		this._height = -1;
 		
 		/** This creates a new group and adds the "blank" component. See <code>Component</code> for parameter details.
 		 * @see Component
@@ -33,7 +35,8 @@ dusk.sgui.Single = function(parent, comName) {
 		this.newComponent("blank", "NullCom");
 			
 		//Add the groupStuff handler
-		this._registerProp("child", this._singleChild, function(name) {return this._component;});
+		this._registerPropMask("child", "child", false);
+		
 		this._registerDrawHandler(this._singleDraw);
 		this._registerFrameHandler(this._singleFrame);
 	}
@@ -42,6 +45,7 @@ dusk.sgui.Single.prototype = new dusk.sgui.IContainer();
 dusk.sgui.Single.constructor = dusk.sgui.Group;
 
 dusk.sgui.Single.prototype.className = "Single";
+dusk.sgui.Single.prototype.isAContainer = true;
 
 /** The currently active component handles the keypress. 
  * @param e The keyboard event.
@@ -61,21 +65,30 @@ dusk.sgui.Single.prototype.containerKeypress = function(e) {
  */
 dusk.sgui.Single.prototype.newComponent = function(com, type) { //Component
 	this._component = new dusk.sgui[type](this, com.toLowerCase());
+	this._component.onGetFocus();
 	
 	return this._component;
 };
 
-dusk.sgui.Single.prototype._singleChild = function(name, value) {
+dusk.sgui.Single.prototype.__defineSetter__("child", function _setChild(value) {
 	//Component properties
 	if (value.name && this.getComponent(value.name.toLowerCase(), value.type)) {
 		this.getComponent(value.name.toLowerCase()).parseProps(dusk.events.replaceVar(value), this._thread);
 	} else {
 		console.warn(value.name + " has not been given a type and does not exist, ignoring.");
 	}
-};
+});
+
+dusk.sgui.Single.prototype.__defineGetter__("child", function _getChild(value) {
+	//Component properties
+	return this._component;
+});
 
 dusk.sgui.Single.prototype._singleDraw = function(c) {
 	//Draw children
+	/*var input = this._component.draw();
+	if(!input || !this._component.width || !this._component.height) return;
+	c.drawImage(input, this._component.x, this._component.y, this._component.width, this._component.height);*/
 	this._component.draw(c);
 };
 
@@ -118,6 +131,26 @@ dusk.sgui.Single.prototype._singleFrame = function() {
 dusk.sgui.Single.prototype.flow = function(to) { //Bool
 	return this._container.flow(to);
 };
+
+dusk.sgui.Single.prototype.__defineGetter__("width", function _getWidth() {
+	if(this._width >= 0) return this._width;
+	
+	return this._component.x + this._component.width;
+});
+
+dusk.sgui.Single.prototype.__defineSetter__("width", function _setWidth(value) {
+	this._width = value;
+});
+
+dusk.sgui.Single.prototype.__defineGetter__("height", function _getHeight() {
+	if(this._height >= 0) return this._height;
+	
+	return this._component.y + this._component.height;
+});
+
+dusk.sgui.Single.prototype.__defineSetter__("height", function _setHeight(value) {
+	this._height = value;
+});
 
 /** Groups will call their currently focused components <code>onDeactive</code> function. */
 dusk.sgui.Single.prototype.onDeactive = function() {this._component.onDeactive();};

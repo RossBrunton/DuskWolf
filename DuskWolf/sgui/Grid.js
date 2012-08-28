@@ -2,9 +2,9 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-goog.require("dusk.sgui.Group");
+dusk.load.require("dusk.sgui.Group");
 
-goog.provide("dusk.sgui.Grid");
+dusk.load.provide("dusk.sgui.Grid");
 
 /** This is a horizontal group of components.
  * 
@@ -27,16 +27,16 @@ dusk.sgui.Grid = function (parent, comName) {
 	if(parent !== undefined){
 		dusk.sgui.Group.call(this, parent, comName);
 
-		this._rows = this._theme("grid.rows", 5);
-		this._cols = this._theme("grid.cols", 5);
-		this._hspacing = this._theme("grid.spacing.h", 0);
-		this._vspacing = this._theme("grid.spacing.v", 0);
+		this.rows = this._theme("grid.rows", 5);
+		this.cols = this._theme("grid.cols", 5);
+		this.hspacing = this._theme("grid.spacing.h", 0);
+		this.vspacing = this._theme("grid.spacing.v", 0);
 		
-		this._registerPropMask("spacing-v", "_vspacing", false);
-		this._registerPropMask("spacing-h", "_hspacing", false);
-		this._registerPropMask("rows", "_rows", false);
-		this._registerPropMask("cols", "_cols", false);
-		this._registerProp("populate", this._populate, null, ["rows", "cols"]);
+		this._registerPropMask("spacing-v", "vspacing", false);
+		this._registerPropMask("spacing-h", "hspacing", false);
+		this._registerPropMask("rows", "rows", false);
+		this._registerPropMask("cols", "cols", false);
+		this._registerPropMask("populate", true, ["rows", "cols"]);
 	}
 };
 dusk.sgui.Grid.prototype = new dusk.sgui.Group();
@@ -49,29 +49,30 @@ dusk.sgui.Grid.prototype.className = "Grid";
  * @param count The number of elements to create.
  * @param spacing The spacing, in pixels, between them.
  */
-dusk.sgui.Grid.prototype._populate = function(name, value) {
+dusk.sgui.Grid.prototype.__defineSetter__("populate", function setPopulate(value) {
 	//Delete all the existing ones
 	for(var x in this._components){
 		if(x != "blank") this.deleteComponent(x);
 	}
 	
 	//Add them
-	for(var hy = 0; hy < this.prop("rows"); hy++){
-		for(var hx = 0; hx < this.prop("cols"); hx++){
+	for(var hy = 0; hy < this.rows; hy++){
+		for(var hx = 0; hx < this.cols; hx++){
 			var com = this.getComponent(hx+","+hy, value.type);
+			console.log(com);
 			com.parseProps(value, this._thread);
-			com.parseProps({"y":(hy*com.prop("height")+hy*this._vspacing), "x":(hx*com.prop("width")+hx*this._vspacing)}, this._thread);
+			com.parseProps({"y":(hy*com.height+hy*this.vspacing), "x":(hx*com.width+hx*this.hspacing)}, this._thread);
 		}
 	}
 	
-	this.prop("focus", "0,0");
-};
+	this.focus = "0,0";
+});
 
 dusk.sgui.Grid.prototype.ajust = function() {
 	for(var hy = 0; hy < this.rows; hy++){
 		for(var hx = 0; hx < this.cols; hx++){
 			var com = this.getComponent(hx+","+hy);
-			com.doStuff({"y":(hy*com.prop("height")+hy*this._vspacing), "x":(hx*com.prop("width")+hx*this._hspacing)}, this._thread);
+			com.doStuff({"y":(hy*com.height+hy*this.vspacing), "x":(hx*com.width+hx*this.hspacing)}, this._thread);
 		}
 	}
 };
@@ -80,10 +81,10 @@ dusk.sgui.Grid.prototype.ajust = function() {
  * @return <code>false</code> if the flow was successful, <code>true</code> if unsuccessful (Most likely we are at the left of the list, so flow out of it).
  */
 dusk.sgui.Grid.prototype._leftAction = function() {
-	var cx = this.prop("focus").split(",")[0];
-	var cy = this.prop("focus").split(",")[1];
+	var cx = this.focus.split(",")[0];
+	var cy = this.focus.split(",")[1];
 	if(this.getComponent((cx-1)+","+cy)){
-		this.focus((cx-1)+","+cy);
+		this.focus = (cx-1)+","+cy;
 		return false;
 	}
 	
@@ -94,10 +95,10 @@ dusk.sgui.Grid.prototype._leftAction = function() {
  * @return <code>false</code> if the flow was successful, <code>true</code> if unsuccessful (Most likely we are at the right of the list, so flow out of it).
  */
 dusk.sgui.Grid.prototype._rightAction = function() {
-	var cx = this.prop("focus").split(",")[0];
-	var cy = this.prop("focus").split(",")[1];
+	var cx = this.focus.split(",")[0];
+	var cy = this.focus.split(",")[1];
 	if(this.getComponent((Number(cx)+1)+","+cy)){
-		this.focus((Number(cx)+1)+","+cy);
+		this.focus = (+cx+1)+","+cy;
 		return false;
 	}
 	
@@ -108,10 +109,10 @@ dusk.sgui.Grid.prototype._rightAction = function() {
  * @return <code>false</code> if the flow was successful, <code>true</code> if unsuccessful (Most likely we are at the right of the list, so flow out of it).
  */
 dusk.sgui.Grid.prototype._upAction = function() {
-	var cx = this.prop("focus").split(",")[0];
-	var cy = this.prop("focus").split(",")[1];
+	var cx = this.focus.split(",")[0];
+	var cy = this.focus.split(",")[1];
 	if(this.getComponent(cx+","+(cy-1))){
-		this.focus(cx+","+(cy-1));
+		this.focus = cx+","+(cy-1);
 		return false;
 	}
 	
@@ -122,10 +123,10 @@ dusk.sgui.Grid.prototype._upAction = function() {
  * @return <code>false</code> if the flow was successful, <code>true</code> if unsuccessful (Most likely we are at the right of the list, so flow out of it).
  */
 dusk.sgui.Grid.prototype._downAction = function() {
-	var cx = this.prop("focus").split(",")[0];
-	var cy = this.prop("focus").split(",")[1];
+	var cx = this.focus.split(",")[0];
+	var cy = this.focus.split(",")[1];
 	if(this.getComponent(cx+","+(Number(cy)+1))){
-		this.focus(cx+","+(Number(cy)+1));
+		this.focus = cx+","+(Number(cy)+1);
 		return false;
 	}
 	

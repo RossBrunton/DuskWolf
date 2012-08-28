@@ -2,42 +2,30 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-goog.require("dusk.pbehave.PBehave");
+dusk.load.require("dusk.pbehave.PBehave");
 
-goog.provide("dusk.pbehave.BackForth");
+dusk.load.provide("dusk.pbehave.BackForth");
 
-window.pbehave.BackForth = function(entity, events) {
+dusk.pbehave.BackForth = function(entity, events) {
 	if(entity !== undefined){
-		window.pbehave.PBehave.call(this, entity, events);
+		dusk.pbehave.PBehave.call(this, entity, events);
 		
-		this._entity.dx = this._entity.eProp("haccel");
+		this.listenEvent("collideLeft", this._bfCollideLeft);
+		this.listenEvent("collideRight", this._bfCollideRight);
 	}
 };
-window.pbehave.BackForth.prototype = new window.pbehave.PBehave();
-window.pbehave.BackForth.constructor = window.pbehave.BackForth;
+dusk.pbehave.BackForth.prototype = new dusk.pbehave.PBehave();
+dusk.pbehave.BackForth.constructor = dusk.pbehave.BackForth;
 
-window.pbehave.BackForth.prototype.everyFrame = function() {
-	if(this._entity.dx < 0 && this._entity.dx > -this._entity.eProp("hspeed")) {
-		this._entity.dx -= this._entity.eProp("haccel");
-	}else if(this._entity.dx > 0 && this._entity.dx < this._entity.eProp("hspeed")) {
-		this._entity.dx += this._entity.eProp("haccel");
-	}/*else{
-		this._entity.dx = this._entity.eProp("haccel");
-	}*/
+dusk.pbehave.BackForth.prototype._bfHitWall = function(name, side) {
+	if(side == "r") this._entity.dx = -this._entity.behaviourData.hspeed;
+	if(side == "l") this._entity.dx = this._entity.behaviourData.hspeed;
 };
 
-window.pbehave.BackForth.prototype.onHitLeft = function() {
-	this._entity.dx = this._entity.eProp("haccel");
+dusk.pbehave.BackForth.prototype._bfCollideLeft = function(name, collider) {
+	this._entity.dx = this._entity.behaviourData.hspeed;
 };
 
-window.pbehave.BackForth.prototype.onHitRight = function() {
-	this._entity.dx = -this._entity.eProp("haccel");
-};
-
-window.pbehave.BackForth.prototype.onCollideLeft = function(collider) {
-	this._entity.dx = this._entity.eProp("haccel");
-};
-
-window.pbehave.BackForth.prototype.onCollideRight = function(collider) {
-	this._entity.dx = -this._entity.eProp("haccel");
+dusk.pbehave.BackForth.prototype._bfCollideRight = function(name, collider) {
+	this._entity.dx = -this._entity.behaviourData.hspeed;
 };

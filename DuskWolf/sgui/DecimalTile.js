@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-goog.provide("dusk.sgui.DecimalTile");
+dusk.load.provide("dusk.sgui.DecimalTile");
 
 /** A tile is a type of image designed for using tilesets, a single image with lots of smaller ones in. Generally, it has a "viewing area" of a certian size and width, and the image behind it can be moved to show only one tile at a time.
  * 
@@ -35,8 +35,8 @@ dusk.sgui.DecimalTile = function(parent, comName) {
 		/** This is the actual image. */
 		this._img = null;
 		
-		this._sheight = this._theme("dtile.sheight", 24);
-		this._swidth = this._theme("dtile.swidth", 24);
+		this.sheight = this._theme("dtile.sheight", 24);
+		this.swidth = this._theme("dtile.swidth", 24);
 		this._tx = 0;
 		this._ty = 0;
 		
@@ -44,10 +44,11 @@ dusk.sgui.DecimalTile = function(parent, comName) {
 		 * @see sg.Component
 		 */
 		
-		this._registerProp("src", this._setImage, function(name, value){return this._img});
-		this._registerPropMask("sprite-height", "_swidth", true);
-		this._registerPropMask("sprite-width", "_sheight", true);
-		this._registerProp("tile", function(name, value){this._setTile(value.split(",")[0], value.split(",")[1]);}, function(name){this._getTile();});
+		this._registerPropMask("src", "src", true);
+		this._registerPropMask("sprite-height", "swidth", true);
+		this._registerPropMask("sprite-width", "sheight", true);
+		this._registerPropMask("tile", "tile", true);
+		
 		this._registerDrawHandler(this._tileDraw);
 	}
 };
@@ -65,22 +66,24 @@ dusk.sgui.DecimalTile.prototype._tileDraw = function(c) {
 /** This sets the image that will be displayed.
  * @param image The name of the image, should be a constant in <code>Data</code>.
  */
-dusk.sgui.DecimalTile.prototype._setImage = function(name, value) {
+dusk.sgui.DecimalTile.prototype.__defineSetter__("src", function _setSrc (value) {
 	if(!value) {console.warn(this.comName+" tried to set image to nothing."); return;}
 	this._img = dusk.data.grabImage(value);
 	this.bookRedraw();
-};
+});
 
-dusk.sgui.DecimalTile.prototype._getTile = function() {
+dusk.sgui.DecimalTile.prototype.__defineGetter__("src", function _getSrc () {
+	return this._img;
+});
+
+dusk.sgui.DecimalTile.prototype.__defineGetter__("tile", function _getTile() {
 	return this._tx+","+this._ty;
-};
+});
 
-dusk.sgui.DecimalTile.prototype._setTile = function(x, y) {
-	if(y === null) {x = x.split(",")[0]; y = x.split(",")[1];}
-	
-	this._tx = x;
-	this._ty = y;
-};
+dusk.sgui.DecimalTile.prototype.__defineSetter__("tile", function _setTile(value) {
+	this._tx = value.split(",")[0];
+	this._ty = value.split(",")[1];
+});
 
 dusk.sgui.DecimalTile.prototype.snapX = function(down) {
 	if(down)

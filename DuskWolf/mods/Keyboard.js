@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-goog.provide("dusk.mods.keyboard");
+dusk.load.provide("dusk.mods.keyboard");
 
 /** Class: mods.Keyboard
  * 

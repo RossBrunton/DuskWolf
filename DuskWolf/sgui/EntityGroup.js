@@ -2,9 +2,9 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-goog.require("dusk.sgui.Group");
+dusk.load.require("dusk.sgui.Group");
 
-goog.provide("dusk.sgui.EntityGroup");
+dusk.load.provide("dusk.sgui.EntityGroup");
 
 dusk.sgui.EntityGroup = function (parent, comName) {
 	if(parent !== undefined){
@@ -12,22 +12,22 @@ dusk.sgui.EntityGroup = function (parent, comName) {
 		
 		this._entities = [];
 		
-		this._registerPropMask("tile-size", "_tsize", true);
-		this._registerPropMask("sprite-size", "_ssize", true);
+		this._registerPropMask("tile-size", "tsize", true);
+		this._registerPropMask("sprite-size", "ssize", true);
 		
 		this._cx = 0;
 		this._cy = 0;
 		
-		this._tsize = 0;
-		this._ssize = 0;
+		this.tsize = 0;
+		this.ssize = 0;
 		
 		this._selectedEntity = null;
 		this._offsetX = 0;
 		this._offsetY = 0;
 		
-		this._registerFrameHandler(this._entityGroupFrame);
 		this._registerDrawHandler(this._entityGroupDraw);
 		this._registerActionHandler("EntityGroup", this._entityGroupAction, this);
+		
 		for(var i = 48; i <= 57; i++) {
 			this._registerKeyHandler(i, false, false, this._numberDrop, this);
 		}
@@ -40,8 +40,8 @@ dusk.sgui.EntityGroup.constructor = dusk.sgui.EntityGroup;
 
 dusk.sgui.EntityGroup.prototype.className = "EntityGroup";
 
-dusk.sgui.EntityGroup.prototype._entityGroupFrame = function(e) {
-	if(events.getVar("plat.edit.active")) {
+dusk.sgui.EntityGroup.prototype.doFrame = function() {
+	if(dusk.events.getVar("plat.edit.active")) {
 		//Editing
 		if(dusk.events.getVar("etm.x") === undefined) dusk.events.setVar("etm.x", 0);
 		if(dusk.events.getVar("etm.y") === undefined) dusk.events.setVar("etm.y", 0);
@@ -55,8 +55,8 @@ dusk.sgui.EntityGroup.prototype._entityGroupFrame = function(e) {
 		}
 		
 		if(this._selectedEntity){
-			this._selectedEntity.x = (this._cx<<this._tsize)+this._offsetX;
-			this._selectedEntity.y = (this._cy<<this._tsize)+this._offsetY;
+			this._selectedEntity.x = (this._cx<<this.tsize)+this._offsetX;
+			this._selectedEntity.y = (this._cy<<this.tsize)+this._offsetY;
 		}
 		this.bookRedraw();
 	}else{
@@ -73,19 +73,19 @@ dusk.sgui.EntityGroup.prototype._entityGroupDraw = function(c) {
 	
 	if(!this._selectedEntity){
 		c.strokeStyle = "#00ffff";
-		c.strokeRect(this._cx<<this._tsize, this._cy<<this._tsize, 1<<this._tsize, 1<<this._tsize);
-		c.strokeRect((this._cx<<this._tsize)+this._offsetX-1, (this._cy<<this._tsize)+this._offsetY-1, 3, 3);
+		c.strokeRect(this._cx<<this.tsize, this._cy<<this.tsize, 1<<this.tsize, 1<<this.tsize);
+		c.strokeRect((this._cx<<this.tsize)+this._offsetX-1, (this._cy<<this.tsize)+this._offsetY-1, 3, 3);
 	}else{
 		c.strokeStyle = "#ff00ff";
-		c.strokeRect((this._cx<<this._tsize)+this._offsetX-1, (this._cy<<this._tsize)+this._offsetY-1, 3, 3);
+		c.strokeRect((this._cx<<this.tsize)+this._offsetX-1, (this._cy<<this.tsize)+this._offsetY-1, 3, 3);
 	}
 };
 
 dusk.sgui.EntityGroup.prototype._entityGroupAction = function(e) {
-	if(!events.getVar("plat.edit.active")) return;
+	if(!dusk.events.getVar("plat.edit.active")) return;
 	
 	if(!this._selectedEntity){
-		var entityList = this.getEntitiesHere((this._cx<<this._tsize)+this._offsetX, (this._cy<<this._tsize)+this._offsetY, null);
+		var entityList = this.getEntitiesHere((this._cx<<this.tsize)+this._offsetX, (this._cy<<this.tsize)+this._offsetY, null);
 		if(entityList.length) this._selectedEntity = entityList[0];
 	}else{
 		this._selectedEntity = null;
@@ -98,9 +98,10 @@ dusk.sgui.EntityGroup.prototype.allEntities = function() {
 
 dusk.sgui.EntityGroup.prototype.getEntitiesHere = function(x, y, ignore) {
 	var out = [];
-	for(var c in this._components){
-		if(this._components[c] != ignore && x >= this._components[c].x && x < this._components[c].x+this._components[c].prop("width") && y >= this._components[c].y && y < this._components[c].y+this._components[c].prop("height")) {
-			out.push(this._components[c]);
+	for(var c = this._entities.length-1; c >= 0; c --){
+		var com = this._entities[c];
+		if(com != ignore && x >= com.x && x < com.x+com.width && y >= com.y && y < com.y+com.height) {
+			out.push(com);
 		}
 	}
 	
@@ -109,9 +110,9 @@ dusk.sgui.EntityGroup.prototype.getEntitiesHere = function(x, y, ignore) {
 
 dusk.sgui.EntityGroup.prototype.dropEntity = function(entity) {
 	var dropped = this.getComponent(entity.name, "PlatEntity");
-	dropped.typeChange(entity.type);
 	dropped.x = entity.x;
 	dropped.y = entity.y;
+	dropped.type = entity.type;
 	this._entities.push(dropped);
 	
 	return dropped; 
@@ -123,7 +124,7 @@ dusk.sgui.EntityGroup.prototype.save = function() {
 		if(this._entities[i].comName != dusk.events.getVar("plat.seek")){
 			list[list.length] = {};
 			list[list.length-1].name = this._entities[i].comName;
-			list[list.length-1].type = this._entities[i].eProp("type");
+			list[list.length-1].type = this._entities[i].type;
 			list[list.length-1].x = this._entities[i].x;
 			list[list.length-1].y = this._entities[i].y;
 		}
@@ -162,7 +163,7 @@ dusk.sgui.EntityGroup.prototype._upAction = function(e) {
 dusk.sgui.EntityGroup.prototype._downAction = function(e) {
 	if(e.ctrlKey) return true;
 	if(e.shiftKey) {
-		if(this._offsetY < 1<<this._tsize) this._offsetY ++;
+		if(this._offsetY < 1<<this.tsize) this._offsetY ++;
 		return false;
 	}
 	
@@ -182,7 +183,7 @@ dusk.sgui.EntityGroup.prototype._leftAction = function(e) {
 dusk.sgui.EntityGroup.prototype._rightAction = function(e) {
 	if(e.ctrlKey) return true;
 	if(e.shiftKey) {
-		if(this._offsetX < 1<<this._tsize) this._offsetX ++;
+		if(this._offsetX < 1<<this.tsize) this._offsetX ++;
 		return false;
 	}
 	
@@ -193,10 +194,11 @@ dusk.sgui.EntityGroup.prototype._numberDrop = function(e) {
 	if(!dusk.events.getVar("plat.edit.active")) return true;
 	
 	var entity = {};
-	entity.name = "#"+this._entities.length;
+	entity.name = (dusk.events.getVar("plat.edit.nextName")?dusk.events.getVar("plat.edit.nextName"):"#"+this._entities.length);
+	dusk.events.setVar("plat.edit.nextName", undefined)
 	entity.type = dusk.events.getVar("plat.edit.droppers."+(e.keyCode-48));
-	entity.x = (this._cx<<this._tsize)+this._offsetX;
-	entity.y = (this._cy<<this._tsize)+this._offsetY;
+	entity.x = (this._cx<<this.tsize)+this._offsetX;
+	entity.y = (this._cy<<this.tsize)+this._offsetY;
 	this.dropEntity(entity);
 	
 	return false;

@@ -2,11 +2,11 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-goog.require("dusk");
-goog.require("dusk.data");
-goog.require("dusk.events");
+dusk.load.require("dusk");
+dusk.load.require("dusk.data");
+dusk.load.require("dusk.events");
 
-goog.provide("dusk.game");
+dusk.load.provide("dusk.game");
 
 /** Class: Game
  * 
@@ -36,6 +36,9 @@ dusk.game.init = function() {
 	this._framesRan = 0;
 	this._time = (new Date()).getTime();
 	
+	this._rframesRan = 0;
+	this._rtime = (new Date()).getTime();
+	
 	/*- Variable: _crashed
 	 * [Boolean] If true, then an error has occured, and no more everyFrame events will be performed.
 	 **/
@@ -46,8 +49,7 @@ dusk.game.init = function() {
 	 **/
 	this._counter = 0;
 	
-	window.events = dusk.events.init();
-	dusk.data.init();
+	dusk.events.init();
 	
 	//Import modules
 	window.mods = {};
@@ -73,21 +75,9 @@ dusk.game.init = function() {
 	requestAnimationFrame(this.onRender);
 	setInterval(this.everyFrame, 1000/dusk.frameRate);
 	
-	//Give me a copmiler command!
-	if(dusk.dev) {
-		var hold = "java -jar $closureLocation --js `find *.js */*.js` --compilation_level SIMPLE_OPTIMIZATIONS --js_output_file DWCompiled.js --language_in ECMASCRIPT5 --manage_closure_dependencies --closure_entry_point dusk.load --closure_entry_point dusk.gameStarter";
-		
-		for(var i in required){hold += " --closure_entry_point "+required[i];}
-		console.log("----- Compiler command -----");
-		console.log(hold);
-		console.log("----- Compiler command -----");
-	}
+	dusk.load.addDependency(__duskdir__+"/StartGame.js", ['dusk.gameStarter'], required);
 	
-	goog.addDependency('../../DuskWolf/StartGame.js', ['dusk.gameStarter'], required);
-	
-	if("goog" in window) goog["require"].call(this, "dusk"+"."+"gameStarter");
-	
-	return dusk.game;
+	dusk.load.require("dusk.gameStarter");
 };
 
 /** Function: onRender
@@ -102,26 +92,33 @@ dusk.game.onRender = function() {
 	if(dusk.mods && dusk.mods.simpleGui) dusk.mods.simpleGui.draw();
 	
 	var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
-	requestAnimationFrame(dusk.game.onRender);
+	requestAnimationFrame(dusk.game.onRender, $("#"+dusk.canvas)[0]);
+	
+	if(dusk.dev) {
+		dusk.game._rframesRan++;
+		if(dusk.game._rframesRan == 1000){
+			console.log("1000 render frames took "+((new Date()).getTime()-dusk.game._rtime)+"ms, "+(Math.round(1000000000/((new Date()).getTime()-dusk.game._rtime))/1000)+"fps.");
+			dusk.game._rtime = (new Date()).getTime();
+			dusk.game._rframesRan = 0;
+		}
+	}
 };
 
 dusk.game.everyFrame = function() {
 	//if(game._crashed) return;
-	try {
-		dusk.game._counter += dusk.frameRate/60;
-		while(dusk.game._counter > 1) {
-			dusk.game._counter --;
-			dusk.events.everyFrame();
-			if(dusk.dev) {
-				dusk.game._framesRan++;
-				if(dusk.game._framesRan == 100){
-					console.log("100 frames took "+((new Date()).getTime()-dusk.game._time)+"ms, "+(Math.round(100000000/((new Date()).getTime()-dusk.game._time))/1000)+"fps.");
-					dusk.game._time = (new Date()).getTime();
-					dusk.game._framesRan = 0;
-				}
+	/*dusk.game._counter += dusk.frameRate/60;
+	while(dusk.game._counter > 1) {*/
+		dusk.game._counter --;
+		dusk.events.everyFrame();
+		if(dusk.dev) {
+			dusk.game._framesRan++;
+			if(dusk.game._framesRan == 1000){
+				console.log("1000 frames took "+((new Date()).getTime()-dusk.game._time)+"ms, "+(Math.round(1000000000/((new Date()).getTime()-dusk.game._time))/1000)+"fps.");
+				dusk.game._time = (new Date()).getTime();
+				dusk.game._framesRan = 0;
 			}
 		}
-	} catch(e) {console.log("Error! "+e.name+", "+e.message);};
+	//}
 };
 
 /** Function: keypress

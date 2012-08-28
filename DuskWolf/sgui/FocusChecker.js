@@ -2,9 +2,9 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-goog.require("dusk.sgui.Image");
+dusk.load.require("dusk.sgui.Image");
 
-goog.provide("dusk.sgui.FocusChecker");
+dusk.load.provide("dusk.sgui.FocusChecker");
 
 /** This is a simple component that changes apperance based on whether it is active or not. By default it is red if active, blue if only focused and green otherwise.
  * 
@@ -31,16 +31,15 @@ dusk.sgui.FocusChecker = function(parent, comName) {
 		 * @see sg.Component
 		 */
 			
-		this._inactiveImg = this._theme("fc.inactive", "Examples/inactive.png");
-		this._focusedImg = this._theme("fc.focused", "Examples/focused.png");
-		this._activeImg = this._theme("fc.active", "Examples/active.png");
+		this.inactiveImg = this._theme("fc.inactive", "sgui/inactive.png");
+		this.focusedImg = this._theme("fc.focused", "sgui/focused.png");
+		this.activeImg = this._theme("fc.active", "sgui/active.png");
 		
-		this._registerStuff(this._focusStuff);
-		this._registerPropMask("image-inactive", "_inactiveImg", true);
-		this._registerPropMask("image-focused", "_focusedImg", true);
-		this._registerPropMask("image-active", "_activeImg", true);
+		this._registerPropMask("image-inactive", "inactiveImg", true);
+		this._registerPropMask("image-focused", "focusedImg", true);
+		this._registerPropMask("image-active", "activeImg", true);
 		
-		this.prop("src", this._inactiveImg);
+		this.src = this.inactiveImg;
 	}
 };
 dusk.sgui.FocusChecker.prototype = new dusk.sgui.Image();
@@ -49,11 +48,11 @@ dusk.sgui.FocusChecker.constructor = dusk.sgui.FocusChecker;
 dusk.sgui.FocusChecker.prototype.className = "FocusChecker";
 
 /** Turns the focus checker to the image set by <code>image-inactive</code>. */
-dusk.sgui.FocusChecker.prototype.onLooseFocus = function() {if(this._inactiveImg) this.prop("src", this._inactiveImg);};
+dusk.sgui.FocusChecker.prototype.onLooseFocus = function() {if(this.inactiveImg) this.src = this.inactiveImg;};
 /** Turns the focus checker to the image set by <code>image-focused</code>. */
-dusk.sgui.FocusChecker.prototype.onGetFocus = function() {if(this._focusedImg) this.prop("src", this._focusedImg);};
+dusk.sgui.FocusChecker.prototype.onGetFocus = function() {if(this.focusedImg) this.src = this.focusedImg;};
 
 /** Turns the focus checker to the image set by <code>image-focused</code>. */
-dusk.sgui.FocusChecker.prototype.onDeactive = function() {if(this._focusedImg) this.prop("src", this._focusedImg);};
+dusk.sgui.FocusChecker.prototype.onDeactive = function() {if(this.focusedImg) this.src = this.focusedImg;};
 /** Turns the focus checker to the image set by <code>image-active</code>. */
-dusk.sgui.FocusChecker.prototype.onActive = function() {if(this._activeImg) this.prop("src", this._activeImg);};
+dusk.sgui.FocusChecker.prototype.onActive = function() {if(this.activeImg) this.src = this.activeImg;};

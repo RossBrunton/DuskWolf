@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-goog.provide("dusk.dwc");
+dusk.load.provide("dusk.dwc");
 
 dusk.dwc.bOpen = "\"'([{<";
 dusk.dwc.bClose = "\"')]}>";

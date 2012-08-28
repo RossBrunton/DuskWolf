@@ -2,10 +2,10 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-goog.require("dusk.sgui.Component");
-goog.require("dusk.sgui.IContainer");
+dusk.load.require("dusk.sgui.Component");
+dusk.load.require("dusk.sgui.IContainer");
 
-goog.provide("dusk.sgui.Group");
+dusk.load.provide("dusk.sgui.Group");
 
 dusk.sgui.Group = function(parent, comName) {
 	//Implements _container
@@ -15,6 +15,8 @@ dusk.sgui.Group = function(parent, comName) {
 		this._components = {};
 		this._drawOrder = [];
 		this._focusedCom = "";
+		this._width = -1;
+		this._height = -1;
 		
 		/** Whether this is the active component that will receive all keypresses. */
 		this._active = false;
@@ -22,28 +24,29 @@ dusk.sgui.Group = function(parent, comName) {
 		this._focused = false;
 		
 		//Add the groupStuff handler
-		this._registerProp("focus", function(name, value){if(this._focusedCom != value) return this.focus(value)}, function(name, value){return this._focusedCom;});
-		this._registerProp("children", this._children, function(name, value){return this._components;});
-		this._registerProp("allChildren", this._allChildren, function(name, value){return this._components;});
+		this._registerPropMask("focus", "focus", true);
+		this._registerPropMask("children", "children", false);
+		this._registerPropMask("allChildren", "allChildren", false);
 		
 		this._registerDrawHandler(this._groupDraw);
 		this._registerFrameHandler(this._groupFrame);
 		
 		this._newComponent("blank", "NullCom");
-		this.prop("focus", "blank");
+		this.focus = "blank";
 	}
 };
 dusk.sgui.Group.prototype = new dusk.sgui.IContainer();
 dusk.sgui.Group.constructor = dusk.sgui.Group;
 
 dusk.sgui.Group.prototype.className = "Group";
+dusk.sgui.Group.prototype.isAContainer = true;
 
 /** The currently active component handles the keypress. 
  * @param e The keyboard event.
  * @return The result of the focused component's keypress.
  */
 dusk.sgui.Group.prototype.containerKeypress = function(e) {
-	return this.getFocus().keypress(e);
+	return this.getFocused().keypress(e);
 };
 
 /** This creates a new component in this group. Interesting that, isn't it?
@@ -66,7 +69,7 @@ dusk.sgui.Group.prototype._newComponent = function(com, type) { //Component
 	return this._components[com];
 };
 
-dusk.sgui.Group.prototype._children = function(name, value) {
+dusk.sgui.Group.prototype.__defineSetter__("children", function _setChildren(value) {
 	if("length" in value) {
 		for (var i = 0; i < value.length; i++) {
 			if (value[i].name && this.getComponent(value[i].name.toLowerCase(), value[i].type)) {
@@ -86,25 +89,37 @@ dusk.sgui.Group.prototype._children = function(name, value) {
 			console.warn("A component has no name in "+this.comName+", cannot create or edit.");
 		}
 	}
-};
+});
 
-dusk.sgui.Group.prototype._allChildren = function(name, value) {
+dusk.sgui.Group.prototype.__defineGetter__("children", function _getChildren() {
+	return this._components;
+});
+
+dusk.sgui.Group.prototype.__defineSetter__("allChildren", function _setAllChildren(value) {
 	for (var c in this._components) {
 		this._components[c].parseProps(value, this._thread);
 	}
-};
+});
+
+dusk.sgui.Group.prototype.__defineGetter__("allChildren", function _getAllChildren() {
+	return this._components;
+});
 
 dusk.sgui.Group.prototype._groupDraw = function(c) {
 	//Draw children
+	var input;
 	for(var i = 0; i < this._drawOrder.length; i++) {
 		if(this._drawOrder[i] in this._components) {
+			/*var com = this._components[this._drawOrder[i]]
+			input = com.draw();
+			if(!input || !com.width || !com.height) continue;
+			c.drawImage(input, com.x, com.y, com.width, com.height);*/
 			this._components[this._drawOrder[i]].draw(c);
 		}
 	}
 };
 
 dusk.sgui.Group.prototype._groupFrame = function(e) {
-	//Draw children
 	for(var p in this._components){
 		this._components[p].frame(e);
 	}
@@ -146,7 +161,7 @@ dusk.sgui.Group.prototype.deleteComponent = function(com) { //Boolean
  * @param com The name of the component to focus.
  * @returns Whether the focus was successful or not; components can "resist" loosing focus by returning <code>false</code> in their <code>onLooseFocus</code> function.
  */
-dusk.sgui.Group.prototype.focus = function(value) { //Bool
+dusk.sgui.Group.prototype.__defineSetter__("focus", function setFocus(value) {
 	if (this._components[this._focusedCom]){
 		if (this._components[this._focusedCom].locked){return false;};
 		
@@ -165,13 +180,16 @@ dusk.sgui.Group.prototype.focus = function(value) { //Bool
 	console.warn(value+" was not found, couldn't set focus.");
 	
 	this._focusedCom = "blank";
-	return false;
-};
+});
+
+dusk.sgui.Group.prototype.__defineGetter__("focus", function _getFocus() {
+	return this._focusedCom;
+});
 
 /** Gets the currently focused component. This could be the "blank" NullCom if nothing is focused.
  * @returns The currently focused component.
  */
-dusk.sgui.Group.prototype.getFocus = function() {
+dusk.sgui.Group.prototype.getFocused = function() {
 	return this._components[this._focusedCom];
 };
 
@@ -180,10 +198,40 @@ dusk.sgui.Group.prototype.getFocus = function() {
  * @return Whether the component could be flowed into.
  */
 dusk.sgui.Group.prototype.flow = function(to) { //Bool
-	return this.getComponent(to) && this.getComponent(to).enabled && this.focus(to);
+	if(this.getComponent(to) && this.getComponent(to).enabled) this.focus = to;
 };
 
+dusk.sgui.Group.prototype.__defineGetter__("width", function _getWidth() {
+	if(this._width >= 0) return this._width;
+	
+	var max = 0;
+	for(var c in this._components) {
+		if(this._components[c].x + this._components[c].width > max) max = this._components[c].x + this._components[c].width;
+	}
+	
+	return max;
+});
+
+dusk.sgui.Group.prototype.__defineSetter__("width", function _setWidth(value) {
+	this._width = value;
+});
+
+dusk.sgui.Group.prototype.__defineGetter__("height", function _getHeight() {
+	if(this._height >= 0) return this._height;
+	
+	var max = 0;
+	for(var c in this._components) {
+		if(this._components[c].y + this._components[c].height > max) max = this._components[c].y + this._components[c].height;
+	}
+	
+	return max;
+});
+
+dusk.sgui.Group.prototype.__defineSetter__("height", function _setHeight(value) {
+	this._height = value;
+});
+
 /** Groups will call their currently focused components <code>onDeactive</code> function. */
-dusk.sgui.Group.prototype.onDeactive = function() {this._active = false;this.getFocus().onDeactive();};
+dusk.sgui.Group.prototype.onDeactive = function() {this._active = false;this.getFocused().onDeactive();};
 /** Groups will call their currently focused components <code>onActive</code> function. */
-dusk.sgui.Group.prototype.onActive = function() {this._active = true;this.getFocus().onActive();};
+dusk.sgui.Group.prototype.onActive = function() {this._active = true;this.getFocused().onActive();};

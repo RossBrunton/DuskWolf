@@ -1,0 +1,10 @@
+{
+	"name":"Sgui Demo",
+	"author":"SavageWolf",
+	"version":"0.0.12",
+	"duskVer":"0.0.12",
+	"files":["Examples/sgui.json"],
+	"mods":["simpleGui],
+	"coms":["DecimalTile", "DirListener", "FocusChecker", "Grid", "Image", "Rect", "Text", "Tile"],
+	"reqs":[]
+}

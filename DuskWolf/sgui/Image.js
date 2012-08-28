@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-goog.provide("dusk.sgui.Image");
+dusk.load.provide("dusk.sgui.Image");
 
 /** This is a single image, the image just sits on the screen and does nothing of any relevance.
  * 
@@ -27,7 +27,10 @@ dusk.sgui.Image = function(parent, comName) {
 		/** This creates a new image! See <code>Component</code> for parameter details.
 		 * @see sg.Component
 		 */
-		this._registerProp("src", this._setImage, function(name){return this._img});
+		this._registerPropMask("src", "src", true);
+		
+		this.src = this._theme("img.src", "sgui/img.png");
+		
 		this._registerDrawHandler(this._imageDraw);
 	}
 };
@@ -38,16 +41,21 @@ dusk.sgui.Image.constructor = dusk.sgui.Image;
 dusk.sgui.Image.prototype.className = "Image";
 
 dusk.sgui.Image.prototype._imageDraw = function(c) {
-	if(this._img){
-		c.drawImage(this._img, 0, 0, this.prop("width"), this.prop("height"));
+	if(this._img && this._img.complete){
+		c.drawImage(this._img, 0, 0, this.width?this.width:this._img.width, this.height?this.height:this._img.height);
+	}else if(this._img) {
+		this.bookRedraw();
 	}
 };
 
 /** This sets the image that will be displayed.
  * @param image The name of the image, should be a constant in <code>Data</code>.
  */
-dusk.sgui.Image.prototype._setImage = function(name, value) {
+dusk.sgui.Image.prototype.__defineSetter__("src", function _setSrc(value) {
 	if(!value) {console.warn(this.comName+" tried to set image to nothing."); return;}
 	this._img = dusk.data.grabImage(value);
 	this.bookRedraw();
-};
+});
+dusk.sgui.Image.prototype.__defineGetter__("src", function _getSrc(value) {
+	return this._img;
+});

@@ -2,11 +2,11 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-goog.require("dusk.sgui.Grid");
-goog.require("dusk.sgui.Text");
-goog.require("dusk.sgui.Rect");
+dusk.load.require("dusk.sgui.Grid");
+dusk.load.require("dusk.sgui.Text");
+dusk.load.require("dusk.sgui.Rect");
 
-goog.provide("dusk.sgui.Saybox");
+dusk.load.provide("dusk.sgui.Saybox");
 
 /***/
 dusk.sgui.Saybox = function (parent, comName) {
@@ -16,22 +16,22 @@ dusk.sgui.Saybox = function (parent, comName) {
 		this._registerFrameHandler(this._sayBoxFrame);
 		this._registerActionHandler("SayBox", this._sayBoxAction, this);
 		
-		this._registerPropMask("speaker", "_speaker", true);
-		this._registerPropMask("speed", "_speed", true);
-		this._registerProp("say", this._startSay, null, ["speaker", "speed"]);
+		this._registerPropMask("speaker", "speaker", true);
+		this._registerPropMask("speed", "speed", true);
+		this._registerPropMask("say", "say", true, ["speaker", "speed"]);
 		
 		this._width = dusk.events.getVar("sys.sg.width");
 		this._height = 200;
 		
 		this._text = "";
-		this._speaker = "";
+		this.speaker = "";
 		
 		this._lines = [];
 		this._currentLine = 0;
 		this._currentChar = 0;
 		this._speaking = false;
 		this._waiting = false;
-		this._speed = 1;
+		this.speed = 1;
 		this._charCache = 0;
 		
 		this._build();
@@ -42,14 +42,14 @@ dusk.sgui.Saybox.constructor = dusk.sgui.SayBox;
 
 dusk.sgui.Saybox.prototype.className = "Saybox";
 
-dusk.sgui.Saybox.prototype._startSay = function(name, value) {
+dusk.sgui.Saybox.prototype.__defineSetter__("say", function set_say(value) {
 	this._text = value;
 	this._speak();
-};
+});
 
 dusk.sgui.Saybox.prototype._sayBoxFrame = function(e) {
 	if(!this._speaking) return;
-	this._charCache += this._speed;
+	this._charCache += this.speed;
 	
 	while(this._charCache >= 1){
 		if(this._lines[this._currentLine].length == this._currentChar) {
@@ -94,7 +94,7 @@ dusk.sgui.Saybox.prototype._speak = function() {
 	
 	//Speaker
 	this.parseProps({"children":[
-		{"name":"titleText", "text":this._speaker}
+		{"name":"titleText", "text":this.speaker}
 	]});
 	
 	//Break it down into words
