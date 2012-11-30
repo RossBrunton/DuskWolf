@@ -49,19 +49,19 @@ dusk.load.provide("dusk.mods.math");
  * Constructor, creates a new instance of this. Doesn't really do anything else of interest though.
  */
 dusk.mods.math.init = function() {
-	dusk.events.registerHashFunct("SIN", this._trig, this);
-	dusk.events.registerHashFunct("COS", this._trig, this);
-	dusk.events.registerHashFunct("TAN", this._trig, this);
-	dusk.events.registerHashFunct("ASIN", this._untrig, this);
-	dusk.events.registerHashFunct("ACOS", this._untrig, this);
-	dusk.events.registerHashFunct("ATAN", this._untrig, this);
-	dusk.events.registerHashFunct("ROUND", this._round, this);
+	dusk.actions.registerHashFunct("SIN", this._trig, this);
+	dusk.actions.registerHashFunct("COS", this._trig, this);
+	dusk.actions.registerHashFunct("TAN", this._trig, this);
+	dusk.actions.registerHashFunct("ASIN", this._untrig, this);
+	dusk.actions.registerHashFunct("ACOS", this._untrig, this);
+	dusk.actions.registerHashFunct("ATAN", this._untrig, this);
+	dusk.actions.registerHashFunct("ROUND", this._round, this);
 	
 	//Constants
-	dusk.events.setVar("math.pi", Math.PI);
-	dusk.events.setVar("math.e", Math.E);
-	dusk.events.setVar("math.phi", 1.61803398874989);
-	dusk.events.setVar("math.infinity", Infinity);
+	dusk.actions.setVar("math.pi", Math.PI);
+	dusk.actions.setVar("math.e", Math.E);
+	dusk.actions.setVar("math.phi", 1.61803398874989);
+	dusk.actions.setVar("math.infinity", Infinity);
 };
 
 /*- Function: _trig

@@ -7,3 +7,5 @@ change
 *.pyc
 jquery.js
 DuskWolf/DWCompiled.js
+.settings
+.project

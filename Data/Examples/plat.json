@@ -4,14 +4,20 @@
 	{"a":"var", "name":"plat.ssize", "value":5},
 	{"a":"var", "name":"plat.tsize", "value":5},
 	
+	{"a":"var", "name":"plat.mode", "value":"BINARY"},
+	{"a":"var", "name":"plat.twidth", "value":32},
+	{"a":"var", "name":"plat.theight", "value":32},
+	{"a":"var", "name":"plat.swidth", "value":32},
+	{"a":"var", "name":"plat.sheight", "value":32},
+	
 	{"a":"var", "name":"pentity.player", "inherit":"pentity.default", "value":{
-		"behaviours":{"Controlled":true, "MarkTrigger":true, "SimpleAni":true},
-		"data":{},
+		"behaviours":{"Controlled":true, "MarkTrigger":true, "SimpleAni":true, "Killable":true},
+		"data":{"hp":5},
 		"animation":{"stationary":"0,0", "stationary-r":"0,0", "stationary-l":"0,1", "walk-r":"0,0|1,0|0,0|2,0", "walk-l":"0,1|1,1|0,1|2,1", "jump-r":"3,0", "jump-l":"3,1", "fall-r":"4,0", "fall-l":"4,1"}
 	}},
 	
 	{"a":"var", "name":"pentity.walk", "inherit":"pentity.default", "value":{
-		"behaviours":{"BackForth":true, "SimpleAni":true}, 
+		"behaviours":{"BackForth":true, "SimpleAni":true, "Persist":true/*, "HitDam":true*/}, 
 		"data":{"dx":5, "slowdown":0},
 		"animation":{"stationary":"0,0", "stationary-r":"0,0", "stationary-l":"0,1", "walk-r":"0,0|1,0|0,0|2,0", "walk-l":"0,1|1,1|0,1|2,1"}
 	}},

@@ -51,7 +51,7 @@ dusk.sgui.DirListener.prototype.className = "DirListener";
  */
 dusk.sgui.DirListener.prototype._upAction = function() {
 	if(this._up){
-		dusk.events.run(this.up, "_"+this.comName);
+		dusk.actions.run(this.up, "_"+this.comName);
 		return false;
 	}
 	
@@ -63,7 +63,7 @@ dusk.sgui.DirListener.prototype._upAction = function() {
  */
 dusk.sgui.DirListener.prototype._downAction = function() {
 	if(this._down){
-		dusk.events.run(this.down, "_"+this.comName);
+		dusk.actions.run(this.down, "_"+this.comName);
 		return false;
 	}
 	
@@ -75,7 +75,7 @@ dusk.sgui.DirListener.prototype._downAction = function() {
  */
 dusk.sgui.DirListener.prototype._leftAction = function() {
 	if(this._left){
-		dusk.events.run(this.left, "_"+this.comName);
+		dusk.actions.run(this.left, "_"+this.comName);
 		return false;
 	}
 	
@@ -87,7 +87,7 @@ dusk.sgui.DirListener.prototype._leftAction = function() {
  */
 dusk.sgui.DirListener.prototype._rightAction = function() {
 	if(this._right){
-		dusk.events.run(this.right, "_"+this.comName);
+		dusk.actions.run(this.right, "_"+this.comName);
 		return false;
 	}
 	

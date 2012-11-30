@@ -97,8 +97,8 @@ dusk.sgui.Text.constructor = dusk.sgui.Text;
 dusk.sgui.Text.prototype.className = "Text";
 
 dusk.sgui.Text.prototype._checkUpdate = function(e) {
-	if(this.watch && dusk.events.getVar(this.watch) !== undefined && dusk.events.getVar(this.watch) != this.text) {
-		this.text = dusk.events.getVar(this.watch);
+	if(this.watch && dusk.actions.getVar(this.watch) !== undefined && dusk.actions.getVar(this.watch) != this.text) {
+		this.text = dusk.actions.getVar(this.watch);
 		this.bookRedraw();
 	}
 };
@@ -134,15 +134,15 @@ dusk.sgui.TextBox.prototype._boxDraw = function(c) {
 dusk.sgui.TextBox.prototype._boxKey = function(e) {
 	var keyDat = dusk.mods.keyboard.lookupCode(e.keyCode);
 	
-	if(dusk.events.getVar(this.watch) === undefined) dusk.events.setVar(this.watch, "");
+	if(dusk.actions.getVar(this.watch) === undefined) dusk.actions.setVar(this.watch, "");
 	
 	if(keyDat[1]) {
-		dusk.events.setVar(this.watch, dusk.events.getVar(this.watch)+(e.shiftKey?keyDat[0].toUpperCase():keyDat[0]));
+		dusk.actions.setVar(this.watch, dusk.actions.getVar(this.watch)+(e.shiftKey?keyDat[0].toUpperCase():keyDat[0]));
 		return true;
 	}
 	
 	if(keyDat[0] == "BACKSPACE") {
-		dusk.events.setVar(this.watch, dusk.events.getVar(this.watch).substr(0, dusk.events.getVar(this.watch).length-1));
+		dusk.actions.setVar(this.watch, dusk.actions.getVar(this.watch).substr(0, dusk.actions.getVar(this.watch).length-1));
 		return true;
 	}
 	

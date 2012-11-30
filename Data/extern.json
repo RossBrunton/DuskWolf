@@ -1,0 +1,5 @@
+/*Example of external imports*/
+[
+	["DuskWolf/platBehaviours/PBehave.js", ["dusk.pbehave.PBehave"], ["dusk.sgui.PlatEntity"]],
+	["DuskWolf/platBehaviours/BackForth.js", ["dusk.pbehave.BackForth"], ["dusk.pbehave.PBehave"]]
+]

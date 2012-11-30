@@ -15,7 +15,7 @@ dusk.load.provide("dusk.errors");
  * 
  * @constructor
  * 
- * @classdesc Thrown if the Events system tried to run an action, but did not provide an expected property.
+ * @classdesc Thrown if the actions system tried to run an action, but that action not provide an expected property.
  */
 dusk.errors.PropertyMissing = function(action, prop) {
 	this.name = "DuskPropertyMissingError";
@@ -26,13 +26,14 @@ dusk.errors.PropertyMissing = function(action, prop) {
 dusk.errors.PropertyMissing.prototype = new Error();
 dusk.errors.PropertyMissing.prototype.constructor = dusk.errors.PropertyMissing;
 
-/** Creates a new PropertyMissingError.
- * @param {string} action The action on which the property is missing.
- * @param {string} prop The name of the property which is missing.
+/** Creates a new ArgLengthWrongError.
+ * @param {string} hash The hashfunction that threw the error.
+ * @param {number} length The number of parameters given.
+ * @param {number} expected The number of parameters expected.
  * 
  * @constructor
  * 
- * @classdesc <p>Thrown if the Events system tried to run an action, but did not provide an expected property.</p>
+ * @classdesc Thrown if the actions system tried to evaluate a hashfunction, but not enough arguments were provided.
  */
 dusk.errors.ArgLengthWrong = function(hash, length, expected) {
 	this.name = "DuskArgLengthWrongError";

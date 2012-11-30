@@ -28,9 +28,9 @@ dusk.pbehave.Controlled.prototype._controlledFrame = function(name, e) {
 	}
 	
 	if(dusk.mods.keyboard.isKeyPressed(38) && this._entity.dy > -4) {
-		if((this._jumps == 0 && dusk.events.getVar("plat.skill.jump"))
-		|| (this._jumps == 1 && dusk.events.getVar("plat.skill.dubjump"))
-		|| dusk.events.getVar("plat.skill.infinijump")) {
+		if((this._jumps == 0 && dusk.actions.getVar("plat.skill.jump"))
+		|| (this._jumps == 1 && dusk.actions.getVar("plat.skill.dubjump"))
+		|| dusk.actions.getVar("plat.skill.infinijump")) {
 			this._entity.dy = -this._entity.behaviourData.jump;
 			this._jumps ++;
 		}

@@ -18,14 +18,14 @@ dusk.load.provide("dusk");
  * 
  * - camelCase denotes a public property of an object.
  * 
- * - \_\_doubleUnderscore\_\_ denotes a configuration var.
+ * - __doubleUnderscore__ denotes a configuration var.
  * 
  * - \_singleUnderscore denotes ether a private or protected function.
  */
 
 /** Version of the DW engine. Must contain at least one number, and numbers furthest to the left indicate newer versions.
  * @type number */
-dusk.ver = "0.0.12-alpha";
+dusk.ver = "0.0.13-alpha";
 
 /** The frame rate, in frames per second. 
  * @type number */

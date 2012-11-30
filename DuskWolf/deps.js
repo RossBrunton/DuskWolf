@@ -13,8 +13,8 @@ dusk.load.provide("dusk.deps");
 
 dusk.load.addDependency(__duskdir__+"/Data.js", ["dusk.data"], ["dusk", "dusk.utils", "dusk.game"]);
 dusk.load.addDependency(__duskdir__+"/DuskWolf.js", ["dusk"], []);
-dusk.load.addDependency(__duskdir__+"/Events.js", ["dusk.events"], ["dusk.dwc", "dusk.errors", "dusk.utils"]);
-dusk.load.addDependency(__duskdir__+"/Game.js", ["dusk.game"], ["dusk", "dusk.data", "dusk.events", "dusk.utils"]);
+dusk.load.addDependency(__duskdir__+"/Actions.js", ["dusk.actions"], ["dusk.dwc", "dusk.errors", "dusk.utils"]);
+dusk.load.addDependency(__duskdir__+"/Game.js", ["dusk.game"], ["dusk", "dusk.data", "dusk.actions", "dusk.utils"]);
 dusk.load.addDependency(__duskdir__+"/Dwc.js", ["dusk.dwc"], []);
 dusk.load.addDependency(__duskdir__+"/Load.js", ["dusk.load"], ["dusk", "dusk.game"]);
 dusk.load.addDependency(__duskdir__+"/Errors.js", ["dusk.errors"], []);
@@ -56,5 +56,8 @@ dusk.load.addDependency(__duskdir__+"/platBehaviours/Fall.js", ["dusk.pbehave.Fa
 dusk.load.addDependency(__duskdir__+"/platBehaviours/Push.js", ["dusk.pbehave.Push"], ["dusk.pbehave.PBehave"]);
 dusk.load.addDependency(__duskdir__+"/platBehaviours/MarkTrigger.js", ["dusk.pbehave.MarkTrigger"], ["dusk.pbehave.PBehave"]);
 dusk.load.addDependency(__duskdir__+"/platBehaviours/SimpleAni.js", ["dusk.pbehave.SimpleAni"], ["dusk.pbehave.PBehave"]);
+dusk.load.addDependency(__duskdir__+"/platBehaviours/Persist.js", ["dusk.pbehave.Persist"], ["dusk.pbehave.PBehave"]);
+dusk.load.addDependency(__duskdir__+"/platBehaviours/HitDam.js", ["dusk.pbehave.HitDam"], ["dusk.pbehave.PBehave"]);
+dusk.load.addDependency(__duskdir__+"/platBehaviours/Killable.js", ["dusk.pbehave.Killable"], ["dusk.pbehave.PBehave"]);
 
 dusk.load.require("dusk.data");

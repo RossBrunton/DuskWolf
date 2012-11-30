@@ -46,8 +46,8 @@ dusk.load.provide("dusk.mods.keyboard");
  * Constructor, creates a new instance of this. Doesn't really do anything else of interest though.
  */
 dusk.mods.keyboard.init = function() {
-	dusk.events.registerKeyHandler("KeyboardKey", this._handleKeypress, this);
-	dusk.events.registerKeyUpHandler("KeyboardUpKey", this._handleKeyup, this);
+	dusk.actions.registerKeyHandler("KeyboardKey", this._handleKeypress, this);
+	dusk.actions.registerKeyUpHandler("KeyboardUpKey", this._handleKeyup, this);
 	
 	/*- Variable: _keys
 	 * [object] A list of keys that are pressed. It is an array with the indexes being the keycodes.
@@ -110,10 +110,10 @@ dusk.mods.keyboard.init = function() {
 		"90":["z", true],
 	};
 	
-	dusk.events.registerAction("if-key", this._ifkey, this, [["key", true, "NUM"], ["then", false, "DWC"], ["else", false, "DWC"]]);
+	dusk.actions.registerAction("if-key", this._ifkey, this, [["key", true, "NUM"], ["then", false, "DWC"], ["else", false, "DWC"]]);
 	
-	dusk.events.registerHashFunct("KCODE", this._keyCode, this);
-	dusk.events.registerHashFunct("CKEY", this._codeKey, this);
+	dusk.actions.registerHashFunct("KCODE", this._keyCode, this);
+	dusk.actions.registerHashFunct("CKEY", this._codeKey, this);
 };
 
 /** Function: addActions
@@ -135,7 +135,7 @@ dusk.mods.keyboard.addActions = function() {
  * 	e		- [object] A jQuery keypress event object.
  */
 dusk.mods.keyboard._handleKeypress = function(e) {
-	dusk.events.run([{"a":"fire", "key":e.keyCode, "shift":e.shiftKey, "ctrl":e.ctrlKey, "alt":e.altKey, "event":"key-event-down"}], "_keyboard");
+	dusk.actions.run([{"a":"fire", "key":e.keyCode, "shift":e.shiftKey, "ctrl":e.ctrlKey, "alt":e.altKey, "event":"key-event-down"}], "_keyboard");
 	this._keys[e.keyCode] = true;
 };
 
@@ -147,7 +147,7 @@ dusk.mods.keyboard._handleKeypress = function(e) {
  * 	e		- [object] A jQuery keyup event object.
  */
 dusk.mods.keyboard._handleKeyup = function(e) {
-	dusk.events.run([{"a":"fire", "key":e.keyCode, "shift":e.shiftKey, "ctrl":e.ctrlKey, "alt":e.altKey, "event":"key-event-up"}], "_keyboard");
+	dusk.actions.run([{"a":"fire", "key":e.keyCode, "shift":e.shiftKey, "ctrl":e.ctrlKey, "alt":e.altKey, "event":"key-event-up"}], "_keyboard");
 	this._keys[e.keyCode] = false;
 };
 
@@ -195,8 +195,8 @@ dusk.mods.keyboard._ifKey = function(a) {
 	if(!a.key){throw new dusk.errors.PropertyMissing(a.a, "key");}
 	
 	if(this.isKeyPressed(a.key)) {
-		if("then" in a) this.run(a.then, dusk.events.thread);
-	}else if("else" in a) this.run(a["else"], dusk.events.thread);
+		if("then" in a) this.run(a.then, dusk.actions.thread);
+	}else if("else" in a) this.run(a["else"], dusk.actions.thread);
 };
 
 /*- Function: _keyCode

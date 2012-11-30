@@ -27,6 +27,13 @@ dusk.data.init = function() {
 	 */
 	dusk.data._loaded = {};
 	
+	/** This indicates how many initial external source files have to be downloaded.
+	 * @type number
+	 * @private
+	 * @since 0.0.13-alpha
+	 */
+	 dusk.data._externLoading = 0;
+	
 	//Enable/disable cache
 	$.ajaxSetup({"cache": !dusk.dev});
 	
@@ -40,10 +47,32 @@ dusk.data.init = function() {
 		dusk.data.root = dusk.utils.jsonParse(d);
 	
 		if(!dusk.data.root) {dusk.error("Root json could not be loaded."); return;}
-		if(dusk.utils.verCompare(dusk.data.root.duskVer, dusk.ver) == 1) {dusk.error("DuskWolf version is incompatable with this program."); return;}
+		if(dusk.utils.verCompare(dusk.data.root.duskVer, dusk.ver) == 1) {dusk.error("DuskWolf version is incompatable with this program. This may explode.");}
 		console.info(dusk.data.root.name+" is loading.");
 		
-		dusk.game.init();
+		if("external" in dusk.data.root) {
+			for(var i = dusk.data.root.external.length-1; i >= 0; i--) {
+				if(typeof dusk.data.root.external[i] == "string"){
+					console.log("External import file "+dusk.data.root.external[i]+"...");
+					dusk.data._externLoading ++;
+					dusk.data.download(dusk.data.root.external[i], "text", function x_imported(data, state) {
+						data = dusk.utils.jsonParse(data);
+						for(var i = data.length-1; i >= 0; i--) {
+							console.log("External import: "+data[i][0]+"...");
+							dusk.load.addDependency(data[i][0], data[i][1], data[i][2]);
+						}
+						
+						if(--dusk.data._externLoading == 0) {
+							dusk.game.init();
+						}
+					});
+				}
+			}
+		}
+		
+		if(dusk.data._externLoading == 0) {
+			dusk.game.init();
+		}
 	});
 };
 
@@ -51,7 +80,6 @@ dusk.data.init = function() {
  * 
  * @param {string} file The file name, realtive to {@link dusk.dataDir}.
  * @param {string=""} type The file type, this may be any value for <code>"dataType"</code> that JQuery's ajax method supports.
- * @param {boolean=false} async Not yet supported.
  * @return {string|object} The contents of the file, the type depends on the value of the <code>type</code> param.
  */
 dusk.data.download = function(file, type, callback, state) {
@@ -90,7 +118,7 @@ dusk.data.grabImage = function(file) {
 	if(this._loaded[file] === undefined) {
 		console.log("Downloading image "+file+"...");
 		
-		this._loaded[file] = new Image()
+		this._loaded[file] = new Image();
 		this._loaded[file].src = dusk.dataDir+"/"+file;
 		return this._loaded[file];
 	}else{

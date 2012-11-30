@@ -4,17 +4,15 @@
 
 dusk.load.provide("dusk.mods.core");
 
-/** Class: mods.Core
+/** @namespace dusk.mods.core
+ * @name dusk.mods.core
  * 
- * This provides a few actions that are not necessary for operation of the Events system, but are useful nonetheless.
- * 	It generally contains action that do things for your convenience.
+ * @description This module contains several usefull functions, like maths and logging.
  * 
- * Inheritance:
- * 	mods.Core { <mods.IModule>
- * 
- * Provided Actions:
- * 
- * > {"a":"print", "text":"..."}
+ * This namespace has no public members.
+ */
+
+ /* > {"a":"print", "text":"..."}
  * 	Prints the text to the normal log locations if <DuskWolf.logLevel> or <DuskWolf.htmlLogLevel> are greater than or equal to 3.
  * 	All it does is call <DuskWolf.info>, and should be used in the same places.
  * 
@@ -50,83 +48,64 @@ dusk.load.provide("dusk.mods.core");
  * 	Takes "original" modulo "by", in which "by" is 10 if ommited.
  */
 
-/** Function: mods.Core
- * 
- * Constructor, creates a new instance of this. Doesn't really do anything else of interest though.
+/** This initiates the module, registering all the actions and variables. This is called automatically when the file is loaded.
+ * @private
  */
-dusk.mods.core.init = function() {
-	dusk.events.registerAction("print", function(a) {console.log(a.text);return true;}, this, [["text", true, "STR"]]);
-	dusk.events.registerAction("error", function(a) {console.error(a.text);return true;}, this, [["text", true, "STR"]]);
-	dusk.events.registerAction("warn", function(a) {console.warn(a.text);return true;}, this, [["text", true, "STR"]]);
-	dusk.events.registerAction("inc", this._increment, this, [["var", true, "STR"], ["by", false, "NUM"]]);
-	dusk.events.registerAction("mul", this._multiply, this, [["var", true, "STR"], ["by", false, "NUM"]]);
-	dusk.events.registerAction("div", this._divide, this, [["var", true, "STR"], ["by", false, "NUM"]]);
-	dusk.events.registerAction("modulo", this._modulo, this, [["var", true, "STR"], ["by", false, "NUM"]]);
-	dusk.events.registerAction("jsprofile", function(a) {if("profile" in console) console.profile(a.label?a.label:"DuskWolf Profile");}, this, [["label", true, "STR"]]);
-	dusk.events.registerAction("jsprofile-end", function(a) {if("profileEnd" in console) console.profileEnd();}, this, []);
+dusk.mods.core._init = function() {
+	dusk.actions.registerAction("print", function(a) {console.log(a.text);return true;}, this, [["text", true, "STR"]]);
+	dusk.actions.registerAction("error", function(a) {console.error(a.text);return true;}, this, [["text", true, "STR"]]);
+	dusk.actions.registerAction("warn", function(a) {console.warn(a.text);return true;}, this, [["text", true, "STR"]]);
+	dusk.actions.registerAction("inc", this._increment, this, [["var", true, "STR"], ["by", false, "NUM"]]);
+	dusk.actions.registerAction("mul", this._multiply, this, [["var", true, "STR"], ["by", false, "NUM"]]);
+	dusk.actions.registerAction("div", this._divide, this, [["var", true, "STR"], ["by", false, "NUM"]]);
+	dusk.actions.registerAction("modulo", this._modulo, this, [["var", true, "STR"], ["by", false, "NUM"]]);
+	dusk.actions.registerAction("jsprofile", function(a) {if("profile" in console) console.profile(a.label?a.label:"DuskWolf Profile");}, this, [["label", true, "STR"]]);
+	dusk.actions.registerAction("jsprofile-end", function(a) {if("profileEnd" in console) console.profileEnd();}, this, []);
 	
-	dusk.events.registerHashFunct("/", this._div, this);
-	dusk.events.registerHashFunct("%", this._mod, this);
-	dusk.events.registerHashFunct("+", this._sum, this);
-	dusk.events.registerHashFunct("*", this._prod, this);
+	dusk.actions.registerHashFunct("/", this._div, this);
+	dusk.actions.registerHashFunct("%", this._mod, this);
+	dusk.actions.registerHashFunct("+", this._sum, this);
+	dusk.actions.registerHashFunct("*", this._prod, this);
 };
 
-/*- Function: _increment
- * 
- * Used internally to handle the "inc" action.
- *	You should use the standard ways of running actions, rather than calling this directly.
- * 
- * Params:
- *	data		- [object] A "inc" action.
+/** Used internally to handle the `inc` action. This should not be called by anything else.
+ * @param {object} data An `inc` action.
+ * @private
  */
 dusk.mods.core._increment = function(data) {
 	if(data["var"] === undefined){throw new dusk.errors.PropertyMissing(data.a, "var");}
 	if(data.by === undefined) data.by = 1;
 	
-	dusk.events.setVar(data["var"], +dusk.events.getVar(data["var"])+data.by);
+	dusk.actions.setVar(data["var"], +dusk.actions.getVar(data["var"])+data.by);
 };
 
-/*- Function: _multiply
- * 
- * Used internally to handle the "mul" action.
- *	You should use the standard ways of running actions, rather than calling this directly.
- * 
- * Params:
- *	data		- [object] A "mul" action.
+/** Used internally to handle the `mul` action. This should not be called by anything else.
+ * @param {object} data A `mul` action.
+ * @private
  */
 dusk.mods.core._multiply = function(data) {
 	if(data["var"] === undefined){throw new dusk.errors.PropertyMissing(data.a, "var");}
 	if(data.by === undefined) data.by = 2;
 	
-	dusk.events.setVar(data["var"], +dusk.events.getVar(data["var"])*data.by);
+	dusk.actions.setVar(data["var"], +dusk.actions.getVar(data["var"])*data.by);
 };
 
-/*- Function: _modulo
- * 
- * Used internally to handle the "modulo" action.
- *	You should use the standard ways of running actions, rather than calling this directly.
- * 
- * Params:
- *	data		- [object] An "modulo" action.
+/** Used internally to handle the `modulo` action. This should not be called by anything else.
+ * @param {object} data A `modulo` action.
+ * @private
  */
 dusk.mods.core._modulo = function(data) {
 	if(data["var"] === undefined){throw new dusk.errors.PropertyMissing(data.a, "var");}
 	if(data.by === undefined) data.by = 10;
 	
-	dusk.events.setVar(data["var"], Number(dusk.events.getVar(data["var"]))%Number(data.by));
+	dusk.actions.setVar(data["var"], Number(dusk.actions.getVar(data["var"]))%Number(data.by));
 };
 
-/*- Function: _sum
- * 
- * [number] Used internally to handle the "+" hashfunction.
- *	You should use the standard ways of running hashfunctions, rather than calling this directly.
- * 
- * Params:
- *	name		- [string] The string name of the hashfunct.
- * 	args		- [Array] An array of arguments.
- * 
- * Returns:
- *	The output of the hashfunct.
+/** Used internally to handle the `+` hashfunction. This should not be called by anything else.
+ * @param {string} name The hashfunct name.
+ * @param {array} args The arguments of the hashfunction.
+ * @return {number} The hasfunction output.
+ * @private
  */
 dusk.mods.core._sum = function(name, args) {
 	if(args.length < 1){throw new dusk.errors.ArgLengthWrong(name, args.length, 1);}
@@ -138,17 +117,11 @@ dusk.mods.core._sum = function(name, args) {
 	return total;
 };
 
-/*- Function: _prod
- * 
- * [number] Used internally to handle the "*" hashfunction.
- *	You should use the standard ways of running hashfunctions, rather than calling this directly.
- * 
- * Params:
- *	name		- [string] The string name of the hashfunct.
- * 	args		- [Array] An array of arguments.
- * 
- * Returns:
- *	The output of the hashfunct.
+/** Used internally to handle the `*` hashfunction. This should not be called by anything else.
+ * @param {string} name The hashfunct name.
+ * @param {array} args The arguments of the hashfunction.
+ * @return {number} The hasfunction output.
+ * @private
  */
 dusk.mods.core._prod = function(name, args) {
 	if(args.length < 1){throw new dusk.errors.ArgLengthWrong(name, args.length, 1);}
@@ -160,17 +133,11 @@ dusk.mods.core._prod = function(name, args) {
 	return total;
 };
 
-/*- Function: _div
- * 
- * [number] Used internally to handle the "/" hashfunction.
- *	You should use the standard ways of running hashfunctions, rather than calling this directly.
- * 
- * Params:
- *	name		- [string] The string name of the hashfunct.
- * 	args		- [Array] An array of arguments.
- * 
- * Returns:
- *	The output of the hashfunct.
+/** Used internally to handle the `/` hashfunction. This should not be called by anything else.
+ * @param {string} name The hashfunct name.
+ * @param {array} args The arguments of the hashfunction.
+ * @return {number} The hasfunction output.
+ * @private
  */
 dusk.mods.core._div = function(name, args) {
 	if(args[0] === undefined){throw new dusk.errors.ArgLengthWrong(name, args.length, 1);}
@@ -179,17 +146,11 @@ dusk.mods.core._div = function(name, args) {
 	return Number(args[0])/Number(args[1]);
 };
 
-/*- Function: _mod
- * 
- * [number] Used internally to handle the "MOD" hashfunction.
- *	You should use the standard ways of running hashfunctions, rather than calling this directly.
- * 
- * Params:
- * 	name		- [string] The string name of the hashfunct.
- * 	args		- [Array] An array of arguments.
- * 
- * Returns:
- *	The output of the hashfunct.
+/** Used internally to handle the `MOD` hashfunction. This should not be called by anything else.
+ * @param {string} name The hashfunct name.
+ * @param {array} args The arguments of the hashfunction.
+ * @return {number} The hasfunction output.
+ * @private
  */
 dusk.mods.core._mod = function(name, args) {
 	if(args[0] === undefined){throw new dusk.errors.ArgLengthWrong(name, args.length, 1);}
@@ -198,4 +159,4 @@ dusk.mods.core._mod = function(name, args) {
 	return Number(args[0])%Number(args[1]);
 };
 
-dusk.mods.core.init();
+dusk.mods.core._init();

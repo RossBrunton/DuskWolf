@@ -59,7 +59,6 @@ dusk.sgui.Grid.prototype.__defineSetter__("populate", function setPopulate(value
 	for(var hy = 0; hy < this.rows; hy++){
 		for(var hx = 0; hx < this.cols; hx++){
 			var com = this.getComponent(hx+","+hy, value.type);
-			console.log(com);
 			com.parseProps(value, this._thread);
 			com.parseProps({"y":(hy*com.height+hy*this.vspacing), "x":(hx*com.width+hx*this.hspacing)}, this._thread);
 		}
@@ -68,7 +67,7 @@ dusk.sgui.Grid.prototype.__defineSetter__("populate", function setPopulate(value
 	this.focus = "0,0";
 });
 
-dusk.sgui.Grid.prototype.ajust = function() {
+dusk.sgui.Grid.prototype.adjust = function() {
 	for(var hy = 0; hy < this.rows; hy++){
 		for(var hx = 0; hx < this.cols; hx++){
 			var com = this.getComponent(hx+","+hy);

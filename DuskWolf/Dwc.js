@@ -12,7 +12,7 @@ dusk.dwc.lang = {
 
 dusk.dwc.addLangDef = function(name, structure) {
 	dusk.dwc.lang[name] = structure;
-}
+};
 
 dusk.dwc.compile = function(code) {
 	var output = "";
@@ -33,7 +33,7 @@ dusk.dwc.compile = function(code) {
 		output += '{"a":'+dusk.dwc.cast(action, "STR");
 		firstAct = false;
 		
-		var firstProp = true;
+		//var firstProp = true;
 		var propIndex = 0;
 		while(input[p] != ";" && input[p]) {
 			p = dusk.dwc.ignoreWhitespace(input, p);
@@ -107,7 +107,7 @@ dusk.dwc.cast = function(text, type) {
 			if(type.length < 1) {
 				throw new Error("No type for array element!");
 			}
-			var out = "["
+			var out = "[";
 			var p = 0;
 			var doneOne = false;
 			type.splice(0, 1);
@@ -131,7 +131,7 @@ dusk.dwc.ignoreWhitespace = function(text, p) {
 	var chr = "";
 	var commentMode = false;
 	while(chr = text[p]) {
-		if(chr == "/" && text[p+1] == "*") {commentMode = true};
+		if(chr == "/" && text[p+1] == "*") {commentMode = true;};
 		if(chr == "/" && text[p-1] == "*") {commentMode = false;p++;continue;};
 		if(commentMode) {p++;continue;}
 		
@@ -157,7 +157,7 @@ dusk.dwc.read = function(text, p, patt, inclPatt) {
 	
 	p ++;
 	while(chr = text[p]) {
-		if(chr == "/" && text[p+1] == "*" && opening[0] == "\0") {commentMode = true};
+		if(chr == "/" && text[p+1] == "*" && opening[0] == "\0") {commentMode = true;};
 		if(chr == "/" && text[p-1] == "*" && opening[0] == "\0") {commentMode = false;p++;continue;};
 		if(commentMode) {p++;continue;}
 		

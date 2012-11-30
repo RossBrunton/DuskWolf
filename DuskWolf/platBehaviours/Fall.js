@@ -10,7 +10,7 @@ dusk.pbehave.Fall = function(entity, events) {
 	if(entity !== undefined){
 		dusk.pbehave.PBehave.call(this, entity, events);
 		
-		if(!("speed" in this._entity.behaviourData)) this._entity.behaviourData.speed = 1;
+		this._data("speed", 1, true);
 		this.listenEvent("collidedTop", this._fallFall);
 	}
 };

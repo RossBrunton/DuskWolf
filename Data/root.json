@@ -4,7 +4,8 @@
 	"version":"0.0.11",
 	"duskVer":"0.0.11",
 	"files":["Examples/plat.json"],
+	"external":[],
 	"mods":["core", "plat", "math", "net", "keyboard", "localSaver"],
 	"coms":["Saybox"],
-	"reqs":["dusk.pbehave.Controlled", "dusk.pbehave.Fall", "dusk.pbehave.BackForth", "dusk.pbehave.MarkTrigger", "dusk.pbehave.Push", "dusk.pbehave.SimpleAni"]
+	"reqs":["dusk.pbehave.Controlled", "dusk.pbehave.Persist", "dusk.pbehave.Fall", "dusk.pbehave.BackForth", "dusk.pbehave.MarkTrigger", "dusk.pbehave.Push", "dusk.pbehave.SimpleAni", "dusk.pbehave.Killable", "dusk.pbehave.HitDam"]
 }

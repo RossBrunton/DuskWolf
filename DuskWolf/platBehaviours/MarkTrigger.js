@@ -35,9 +35,9 @@ dusk.pbehave.MarkTrigger.prototype._markTriggerFrame = function(name, e) {
 		this._markAt = this._entity.path("../../scheme").tilePointIn(this._entity.x+(this._entity.prop("width")/2), this._entity.y+(this._entity.prop("height")/2))[0];
 		
 		if(!this._coolDown) {
-			dusk.events.run([
+			dusk.actions.run([
 				{"a":"fire", "up":false, "mark":this._markAt, "activator":this._entity.comName, "room":this._entity.path("../..").prop("room"), "event":"plat-mark"}
-			], dusk.events.thread);
+			], dusk.actions.thread);
 			this._coolDown = 5;
 		}
 	}

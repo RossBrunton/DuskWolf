@@ -4,6 +4,8 @@
 
 dusk.load.provide("dusk.sgui.Tile");
 
+//NEEDS DECIMAL SUPPORT
+
 /** A tile is a type of image designed for using tilesets, a single image with lots of smaller ones in. Generally, it has a "viewing area" of a certian size and width, and the image behind it can be moved to show only one tile at a time.
  * 
  * <p>Uh, remember that this extends the <code>image</code> component, and uses the <code>image</code> property of that as the tileset.</p>
@@ -35,9 +37,11 @@ dusk.sgui.Tile = function(parent, comName) {
 		/** This is the actual image. */
 		this._img = null;
 		
+		this.mode = this._theme("tile.mode", "BINARY");
+		
 		this.ssize = this._theme("tile.ssize", 4);
-		this.width = 1<<this._ssize;
-		this.height = 1<<this._ssize;
+		this.swidth = this._theme("tile.swidth", 16);
+		this.sheight = this._theme("tile.sheight", 16);
 		this._tx = 0;
 		this._ty = 0;
 		
@@ -48,6 +52,9 @@ dusk.sgui.Tile = function(parent, comName) {
 		this._registerPropMask("src", "src", true);
 		this._registerPropMask("tile", "tile", true);
 		this._registerPropMask("sprite-size", "ssize", true);
+		this._registerPropMask("sprite-width", "swidth", true);
+		this._registerPropMask("sprite-height", "sheight", true);
+		this._registerPropMask("mode", "mode", true);
 		this._registerDrawHandler(this._tileDraw);
 	}
 };
@@ -60,30 +67,34 @@ dusk.sgui.Tile.prototype.className = "Tile";
 
 dusk.sgui.Tile.prototype._tileDraw = function(c) {
 	if(this._img){
-		c.drawImage(this._img, this._tx<<this.ssize, this._ty<<this.ssize, 1<<this.ssize, 1<<this.ssize, 0, 0, this.width, this.height);
+		if(this.mode == "BINARY") {
+			c.drawImage(this._img, this._tx << this.ssize, this._ty << this.ssize, 1 << this.ssize, 1 << this.ssize, 0, 0, this.width, this.height);
+		}else{
+			c.drawImage(this._img, this._tx * this.swidth, this._ty * this.sheight, this.swidth, this.sheight, 0, 0, this.width, this.height);
+		}
 	}
 };
 
-dusk.sgui.Tile.prototype.__defineSetter__("src", function _setSrc (value) {
+dusk.sgui.Tile.prototype.__defineSetter__("src", function s_src(value) {
 	if(!value) {console.warn(this.comName+" tried to set image to nothing."); return;}
 	this._img = dusk.data.grabImage(value);
 	this.bookRedraw();
 });
 
-dusk.sgui.Tile.prototype.__defineGetter__("src", function _getSrc () {
+dusk.sgui.Tile.prototype.__defineGetter__("src", function g_src() {
 	return this._img;
 });
 
-dusk.sgui.Tile.prototype.__defineGetter__("tile", function _getTile() {
+dusk.sgui.Tile.prototype.__defineGetter__("tile", function g_tile() {
 	return this._tx+","+this._ty;
 });
 
-dusk.sgui.Tile.prototype.__defineSetter__("tile", function _setTile(value) {
+dusk.sgui.Tile.prototype.__defineSetter__("tile", function s_tile(value) {
 	this._tx = value.split(",")[0];
 	this._ty = value.split(",")[1];
 });
 
-dusk.sgui.Tile.prototype.snapX = function(down) {
+/*dusk.sgui.Tile.prototype.snapX = function(down) {
 	if(down)
 		this.x = Math.ceil(this.x/this.width)*this.width;
 	else
@@ -100,20 +111,4 @@ dusk.sgui.Tile.prototype.snapY = function(right) {
 dusk.sgui.Tile.prototype.gridGo = function(x, y) {
 	this.x = x*this.width;
 	this.y = y*this.height;
-};
-
-dusk.sgui.Tile.prototype.__defineGetter__("width", function _getWidth() {
-	return 1<< this.ssize;
-});
-
-dusk.sgui.Tile.prototype.__defineSetter__("width", function _setWidth(value) {
-	this.ssize = Math.log(value)/Math.LN2;
-});
-
-dusk.sgui.Tile.prototype.__defineGetter__("height", function _getHeight() {
-	return 1<<this.ssize;
-});
-
-dusk.sgui.Tile.prototype.__defineSetter__("height", function _setHeight(value) {
-	this.ssize = Math.log(value)/Math.LN2;
-});
+};*/

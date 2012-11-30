@@ -23,34 +23,42 @@ dusk.load.provide("dusk.mods.plat");
  */
 dusk.mods.plat.init = function() {
 	//Vars
-	dusk.events.setVar("plat.seek", "hero");
-	dusk.events.setVar("plat.seektype", "player");
+	dusk.actions.setVar("plat.seek", "hero");
+	dusk.actions.setVar("plat.seektype", "player");
 	
-	dusk.events.setVar("plat.skill.jump", true);
-	dusk.events.setVar("plat.skill.dubjump", true);
-	dusk.events.setVar("plat.skill.infinijump", false);
+	dusk.actions.setVar("plat.skill.jump", true);
+	dusk.actions.setVar("plat.skill.dubjump", true);
+	dusk.actions.setVar("plat.skill.infinijump", false);
 	
-	dusk.events.setVar("pentity.default.data.gravity", 1);
-	dusk.events.setVar("pentity.default.data.terminal", 9);
-	dusk.events.setVar("pentity.default.behaviours", {});
-	dusk.events.setVar("pentity.default.animation", {"stationary":"0,0"});
-	dusk.events.setVar("pentity.default.data.haccel", 2);
-	dusk.events.setVar("pentity.default.data.hspeed", 7);
-	dusk.events.setVar("pentity.default.data.jump", 15);
-	dusk.events.setVar("pentity.default.data.slowdown", 1);
-	dusk.events.setVar("pentity.default.data.img", "pimg/hero.png");
-	dusk.events.setVar("pentity.default.data.solid", true);
-	dusk.events.setVar("pentity.default.data.anchor", false);
+	dusk.actions.setVar("pentity.default.data.hp", 1);
+	dusk.actions.setVar("pentity.default.data.gravity", 1);
+	dusk.actions.setVar("pentity.default.data.terminal", 9);
+	dusk.actions.setVar("pentity.default.behaviours", {});
+	dusk.actions.setVar("pentity.default.animation", {"stationary":"0,0"});
+	dusk.actions.setVar("pentity.default.data.haccel", 2);
+	dusk.actions.setVar("pentity.default.data.hspeed", 7);
+	dusk.actions.setVar("pentity.default.data.jump", 15);
+	dusk.actions.setVar("pentity.default.data.slowdown", 1);
+	dusk.actions.setVar("pentity.default.data.img", "pimg/hero.png");
+	dusk.actions.setVar("pentity.default.data.solid", true);
+	dusk.actions.setVar("pentity.default.data.anchor", false);
 	
-	dusk.events.setVar("plat.ssize", 4);
-	dusk.events.setVar("plat.tsize", 5);
+	dusk.actions.setVar("plat.ssize", 4);
+	dusk.actions.setVar("plat.swidth", 16);
+	dusk.actions.setVar("plat.sheight", 16);
 	
-	dusk.events.registerStartHandler(this._onStart, this);
+	dusk.actions.setVar("plat.tsize", 5);
+	dusk.actions.setVar("plat.twidth", 32);
+	dusk.actions.setVar("plat.theight", 32);
 	
-	dusk.events.registerAction("plat-room", this._setRoom, this, [["room", true, "STR"], ["spawn", true, "NUM"]]);
-	dusk.events.registerAction("plat-drop", this._setDrop, this, [["slot", true, "NUM"], ["type", true, "STR"]]);
-	dusk.events.registerAction("plat-name", this._nextName, this, [["name", true, "STR"]]);
-	dusk.events.registerAction("plat-edit", function(a){dusk.events.setVar("plat.edit.active", !dusk.events.getVar("plat.edit.active"));}, this, []);
+	dusk.actions.setVar("plat.mode", "BINARY");
+	
+	dusk.actions.registerStartHandler(this._onStart, this);
+	
+	dusk.actions.registerAction("plat-room", this._setRoom, this, [["room", true, "STR"], ["spawn", true, "NUM"]]);
+	dusk.actions.registerAction("plat-drop", this._setDrop, this, [["slot", true, "NUM"], ["type", true, "STR"]]);
+	dusk.actions.registerAction("plat-name", this._nextName, this, [["name", true, "STR"]]);
+	dusk.actions.registerAction("plat-edit", function(a){dusk.actions.setVar("plat.edit.active", !dusk.actions.getVar("plat.edit.active"));}, this, []);
 };
 
 /** Function: addActions
@@ -61,10 +69,10 @@ dusk.mods.plat.init = function() {
  * * <mods.IModule.addActions>
  */
 dusk.mods.plat._onStart = function() {
-	dusk.events.run([
+	dusk.actions.run([
 	{"a":"listen", "event":"sys-event-load", "actions":[
 		{"a":"pane", "active":true, "focus":"mainContainer", "name":"plat-main", "children":[
-			{"name":"mainContainer", "focus":"main", "type":"CentreScroller", "width":dusk.events.getVar("sys.sg.width"), "height":dusk.events.getVar("sys.sg.height"), "child":{"name":"main", "type":"PlatMain"}}
+			{"name":"mainContainer", "focus":"main", "type":"CentreScroller", "width":dusk.actions.getVar("sys.sg.width"), "height":dusk.actions.getVar("sys.sg.height"), "child":{"name":"main", "type":"PlatMain"}}
 		]}
 	]}], "_plat");
 };
@@ -80,18 +88,18 @@ dusk.mods.plat._onStart = function() {
 dusk.mods.plat._setRoom = function(a) {
 	if(!("room" in a)){throw new dusk.errors.PropertyMissing(a.a, "room");}
 	
-	dusk.events.run([{"a":"if", "cond":(a.nofade?"0":"1"), "then":[
+	dusk.actions.run([{"a":"if", "cond":(a.nofade?"0":"1"), "then":[
 		{"a":"sg-path", "pane":"plat-main", "path":"/mainContainer", "fade":{"from":1, "end":0, "speed":-0.05}}
-	]}], dusk.events.thread);
+	]}], dusk.actions.thread);
 	console.log("Setting room "+a.room+".");
 	dusk.data.download("prooms/"+a.room.replace(/\-/g, "_")+".json", "text", function(d, s) {
-		dusk.events.run(dusk.utils.jsonParse(d, true), dusk.events.thread);
-		dusk.events.run([
+		dusk.actions.run(dusk.utils.jsonParse(d, true), dusk.actions.thread);
+		dusk.actions.run([
 			{"a":"sg-path", "pane":"plat-main", "path":"/mainContainer/main", "room":a.room, "spawn":a.spawn},
 			{"a":"if", "cond":(a.nofade?"0":"1"), "then":[
 				{"a":"sg-path", "pane":"plat-main", "path":"/mainContainer", "fade":{"from":0, "end":1, "speed":0.05}}
 			]},
-			{"a":"fire", "event":"plat-room-load", "room":a.room}], dusk.events.thread);
+			{"a":"fire", "event":"plat-room-load", "room":a.room}], dusk.actions.thread);
 	});
 };
 
@@ -99,13 +107,13 @@ dusk.mods.plat._setDrop = function(a) {
 	if(!("slot" in a)){throw new dusk.errors.PropertyMissing(a.a, "slot");}
 	if(!("type" in a)){throw new dusk.errors.PropertyMissing(a.a, "type");}
 	
-	dusk.events.setVar("plat.edit.droppers."+a.slot, a.type);
+	dusk.actions.setVar("plat.edit.droppers."+a.slot, a.type);
 };
 
 dusk.mods.plat._nextName = function(a) {
 	if(!("name" in a)){throw new dusk.errors.PropertyMissing(a.a, "name");}
 	
-	dusk.events.setVar("plat.edit.nextName", a.name);
+	dusk.actions.setVar("plat.edit.nextName", a.name);
 };
 
 dusk.mods.plat.init();

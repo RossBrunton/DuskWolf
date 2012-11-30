@@ -97,18 +97,18 @@ dusk.load.require("dusk.sgui.Pane");
  * 
  * Constructor, creates a new instance of this, adding all the handlers and initing the theme vars.
  */
-dusk.mods.simpleGui.init = function() {
-	dusk.events.registerKeyHandler("SGuiKey", function(event) {
+dusk.mods.simpleGui._init = function() {
+	dusk.actions.registerKeyHandler("SGuiKey", function(event) {
 		this.getActivePane().keypress(event);
 	}, this);
 
-	dusk.events.registerFrameHandler("SGuiFrame", function(e) {
+	dusk.actions.registerFrameHandler("SGuiFrame", function() {
 		for(var p in this._panes){
-			this._panes[p].frame(e);
+			this._panes[p].frame();
 		}
 	}, this);
 
-	//dusk.events.registerFrameHandler("SGuiDrawer", this.draw, this);
+	//dusk.actions.registerFrameHandler("SGuiDrawer", this.draw, this);
 
 	/*- Variable: _panes
 	 * [Object] All the panes.
@@ -125,8 +125,8 @@ dusk.mods.simpleGui.init = function() {
 
 	this.setActivePane("blank");
 
-	dusk.events.setVar("sys.sg.width", 0);
-	dusk.events.setVar("sys.sg.height", 0);
+	dusk.actions.setVar("sys.sg.width", 0);
+	dusk.actions.setVar("sys.sg.height", 0);
 
 	/*- Variable: _cacheCanvas
 	 * [HTMLCanvas] A cached canvas drawn to before the real one, to improve performance.
@@ -134,19 +134,19 @@ dusk.mods.simpleGui.init = function() {
 	this._cacheCanvas = document.createElement("canvas");
 
 	//Themes
-	dusk.events.setVar("theme.default.box", "#eeeeee");
-	dusk.events.setVar("theme.default.border", "#cccccc");
-	dusk.events.setVar("theme.default.borderActive", "#ff5555");
+	dusk.actions.setVar("theme.default.box", "#eeeeee");
+	dusk.actions.setVar("theme.default.border", "#cccccc");
+	dusk.actions.setVar("theme.default.borderActive", "#ff5555");
 
-	dusk.events.setVar("theme.current", "default");
+	dusk.actions.setVar("theme.current", "default");
 	
-	dusk.events.registerStartHandler(this._onStart, this);
+	dusk.actions.registerStartHandler(this._onStart, this);
 	
-	dusk.events.registerAction("sg-path", this._doPath, this, [["pane", true, "STR"], ["path", true, "STR"]]);
-	dusk.events.registerAction("pane", this._doComponent, this, [["name", true, "STR"]]);
-	dusk.events.registerAction("draw", function(data){this.draw();}, this, []);
+	dusk.actions.registerAction("sg-path", this._doPath, this, [["pane", true, "STR"], ["path", true, "STR"]]);
+	dusk.actions.registerAction("pane", this._doComponent, this, [["name", true, "STR"]]);
+	dusk.actions.registerAction("draw", function(data){this.draw();}, this, []);
 	
-	dusk.events.registerHashFunct("SGPATH", this._sgpath, this);
+	dusk.actions.registerHashFunct("SGPATH", this._sgpath, this);
 };
 
 /** Function: addActions
@@ -157,12 +157,12 @@ dusk.mods.simpleGui.init = function() {
  * * <mods.IModule.addActions>
  */
 dusk.mods.simpleGui._onStart = function() {
-	dusk.events.setVar("sys.sg.width", $("#"+dusk.canvas)[0].width);
-	dusk.events.setVar("sys.sg.height", $("#"+dusk.canvas)[0].height);
-	dusk.events.setVar("sys.sg.drawable", true);
+	dusk.actions.setVar("sys.sg.width", $("#"+dusk.canvas)[0].width);
+	dusk.actions.setVar("sys.sg.height", $("#"+dusk.canvas)[0].height);
+	dusk.actions.setVar("sys.sg.drawable", true);
 	
-	this._cacheCanvas.height = dusk.events.getVar("sys.sg.height");
-	this._cacheCanvas.width = dusk.events.getVar("sys.sg.width");
+	this._cacheCanvas.height = dusk.actions.getVar("sys.sg.height");
+	this._cacheCanvas.width = dusk.actions.getVar("sys.sg.width");
 	this._cacheCanvas.style.imageRendering = "-webkit-optimize-contrast";
 	
 	this._cacheCanvas.getContext("2d").mozImageSmoothingEnabled = false;
@@ -209,7 +209,7 @@ dusk.mods.simpleGui.getPane = function(name, noNew) { //Returns pane
 
 dusk.mods.simpleGui._doComponent = function(data) {
 	if(data.name === undefined) {throw new dusk.errors.PropertyMissing(data.a, "vars");}
-	this.getPane(data.name).parseProps(dusk.events.replaceVar(data, true), dusk.events.thread);
+	this.getPane(data.name).parseProps(dusk.actions.replaceVar(data, true), dusk.actions.thread);
 };
 
 dusk.mods.simpleGui.setActivePane = function(to) {
@@ -224,13 +224,13 @@ dusk.mods.simpleGui.getActivePane = function() {
 };
 
 dusk.mods.simpleGui.draw = function() {
-	if(/*!this._redrawBooked || */!dusk.events.getVar("sys.sg.drawable")) return false;
+	if(/*!this._redrawBooked || */!dusk.actions.getVar("sys.sg.drawable")) return false;
 
-	$("#"+dusk.canvas)[0].getContext("2d").clearRect(0, 0, dusk.events.getVar("sys.sg.width"), dusk.events.getVar("sys.sg.height"));
-	this._cacheCanvas.getContext("2d").clearRect(0, 0, dusk.events.getVar("sys.sg.width"), dusk.events.getVar("sys.sg.height"));
+	$("#"+dusk.canvas)[0].getContext("2d").clearRect(0, 0, dusk.actions.getVar("sys.sg.width"), dusk.actions.getVar("sys.sg.height"));
+	this._cacheCanvas.getContext("2d").clearRect(0, 0, dusk.actions.getVar("sys.sg.width"), dusk.actions.getVar("sys.sg.height"));
 	
 	//Draw panes
-	var input;
+	//var input;
 	for(var c in this._panes){
 		/*input = this._panes[c].draw();
 		if(!input || !this._panes[c].width || !this._panes[c].height) continue;
@@ -239,7 +239,7 @@ dusk.mods.simpleGui.draw = function() {
 		this._panes[c].draw(this._cacheCanvas.getContext("2d"));
 	}
 
-	$("#"+dusk.canvas)[0].getContext("2d").drawImage(this._cacheCanvas, 0, 0, dusk.events.getVar("sys.sg.width"), dusk.events.getVar("sys.sg.height"));
+	$("#"+dusk.canvas)[0].getContext("2d").drawImage(this._cacheCanvas, 0, 0, dusk.actions.getVar("sys.sg.width"), dusk.actions.getVar("sys.sg.height"));
 	this._redrawBooked = false;
 
 	return true;
@@ -248,7 +248,7 @@ dusk.mods.simpleGui.draw = function() {
 dusk.mods.simpleGui._doPath = function(action) {
 	if(action.path===undefined){throw new dusk.errors.PropertyMissing(action.a, "path");}
 
-	this.path((action.pane?action.pane+":":"")+action.path).parseProps(action, dusk.events.thread);
+	this.path((action.pane?action.pane+":":"")+action.path).parseProps(action, dusk.actions.thread);
 };
 
 dusk.mods.simpleGui._sgpath = function(name, args) {
@@ -259,7 +259,7 @@ dusk.mods.simpleGui._sgpath = function(name, args) {
 
 dusk.mods.simpleGui.path = function(path) {
 	var pane = path.split(":", 1)[0];
-	var path = path.substr(pane.length+1);
+	path = path.substr(pane.length+1);
 	return this.getPane(pane).path(path);
 };
 
@@ -267,4 +267,4 @@ dusk.mods.simpleGui.bookRedraw = function() {
 	this._redrawBooked = true;
 };
 
-dusk.mods.simpleGui.init();
+dusk.mods.simpleGui._init();

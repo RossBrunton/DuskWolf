@@ -11,17 +11,12 @@ dusk.load = {};
  * It provides the functions required to import files and resolve dependancies.
  * 
  * JavaScript files imported by DuskWolf consist of adding them to the page's head tab, one after the other.
- * Before a new file is added to the head, the old one must have been finished downloading, and call `{dusk.load.provide}` with it's namespace name.
+ * Before a new file is added to the head, the old one must have been finished downloading, and call {@link dusk.load.provide} with it's namespace name.
  * 
  * This namespace will also add keyboard listeners to the page, which stop you scrolling using the arrow keys, and send any keypresses to the engine.
  * 
- * @see {@dusk.deps}
+ * @see {@link dusk.deps}
  */
-
-//Block keys from moving page
-document.onkeydown = function(e) {
-	if(e.keyCode >= 37 && e.keyCode <= 40) return false;
-};
 
 /** Containes all the dependancy information for the files.
  * 
@@ -74,7 +69,7 @@ dusk.load.provide = function(name) {
 
 /** Adds a dependency. This tells the engine the file in which the namespaces are provided, and what other files must be imported before it.
  * 
- * @param {string} file The file name which the namespaces reside. It is relative to `{@link __duskdir__}`.
+ * @param {string} file The file name which the namespaces reside. It is relative to `__duskdir__`.
  * @param {array.<string>} provided An array of namespace names which are provided by the file.
  * @param {array.<string>} required An array of namespace names that are required for this file to run. These will be downloaded before this one if any provided namespaces are requested.
  * @since 0.0.12-alpha
@@ -108,7 +103,6 @@ dusk.load.require = function(name) {
 	}
 	
 	dusk.load._files.push([false, name]);
-	
 };
 
 /** This is called every 10ms or so. It checks `{@link dusk.load._files}` to see if there are any new files that need downloading, and if so downloads them.
@@ -127,7 +121,8 @@ dusk.load._repeat = function() {
 setInterval(dusk.load._repeat, 10);
 
 /** This is the location of the DuskWolf engine's core files. Every namespace is inside this folder, or any of it's subfolders.
- * @type {string="DuskWolf"}
+ * @type {string}
+ * @default "DuskWolf"
  */
 var __duskdir__ = __duskdir__?__duskdir__:"DuskWolf";
 
@@ -138,7 +133,12 @@ dusk.load.require("dusk.deps");
 $(document).bind("keydown", function(e){try {dusk.game.keypress(e);} catch(e) {console.error(e.name+", "+e.message);}});
 $(document).bind("keyup", function(e){try {dusk.game.keyup(e);} catch(e) {console.error(e.name+", "+e.message);}});
 
+//Block keys from moving page
+document.onkeydown = function(e) {
+	if(e.keyCode >= 37 && e.keyCode <= 40) return false;
+};
+
 //Replaced in StartGame.js
 dusk.startGame = function() {
 	setTimeout(dusk.startGame, 100);
-}
+};

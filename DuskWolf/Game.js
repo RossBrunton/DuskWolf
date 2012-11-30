@@ -4,33 +4,23 @@
 
 dusk.load.require("dusk");
 dusk.load.require("dusk.data");
-dusk.load.require("dusk.events");
+dusk.load.require("dusk.actions");
 
 dusk.load.provide("dusk.game");
 
-/** Class: Game
+/** @namespace dusk.game
  * 
- * This is the main game class, it doesn't do anything much besides add the events system to the window object and starts it up.
+ * @description This is the main game class, it downloads all the files that the root.json requests in `coms`, `mods` and `req`.
  * 
- * It can restart the events system though, that's probably worth something, maybe...
- * 
- * See:
- * 	<Events>
+ * It does this by adding a dependency for all the files on the namespace `dusk.gameStarter`, which contains a redefintion of {@link dusk.startGame}, and requiring that.
  */
 	
-/** Function: start
+/** Initiates all the variables needed, downloads all the files, and starts all the timers.
  * 
- * This starts (or restarts) the events system, it is automatically called when this is constructed.
- * 
- * Once the events system has been inited, the event "sys-event-load" event is fired, then "sys-event-start", both on the thread "_init".
- * You should listen for these rather than doing actions directly at the start, this guarantees that all JSONS and modules and such have loaded correctly.
- */
-/** Function: Game
- * 
- * This just creates a new instance of this. It will create a new <Data> object on the main window, and then call <start>.
+ * It also calls {@link dusk.actions.init}
  */
 dusk.game.init = function() {
-	console.log("DuskWolf ver "+dusk.ver+" ["+dusk.verId+"] is starting.");
+	console.log("DuskWolf ver "+dusk.ver+" is starting.");
 	
 	//Timer
 	this._framesRan = 0;
@@ -39,33 +29,36 @@ dusk.game.init = function() {
 	this._rframesRan = 0;
 	this._rtime = (new Date()).getTime();
 	
-	/*- Variable: _crashed
-	 * [Boolean] If true, then an error has occured, and no more everyFrame events will be performed.
-	 **/
+	/* Game crashed? */
 	this._crashed = false;
 	
-	/*- Variable: _counter
-	 * [Number] Used to keep track of time.
-	 **/
-	this._counter = 0;
-	
-	dusk.events.init();
-	
-	//Import modules
-	window.mods = {};
+	dusk.actions.init();
 	
 	var required = [];
 	
+	//External dependencies
+	if("external" in dusk.data.root) {
+		for(var i = dusk.data.root.external.length-1; i >= 0; i--) {
+			if(typeof dusk.data.root.external[i] == "object"){
+				console.log("External import: "+dusk.data.root.external[i][0]+"...");
+				dusk.load.addDependency(dusk.data.root.external[i][0], dusk.data.root.external[i][1], dusk.data.root.external[i][2]);
+			}
+		}
+	}
+	
+	//Mods
 	for(var i = dusk.data.root.mods.length-1; i >= 0; i--) {
 		console.log("Loading mod "+dusk.data.root.mods[i]+"...");
 		required.push("dusk.mods."+dusk.data.root.mods[i]);
 	}
 	
+	//Components
 	for(var i = dusk.data.root.coms.length-1; i >= 0; i--) {
 		console.log("Loading component "+dusk.data.root.coms[i]+"...");
 		required.push("dusk.sgui."+dusk.data.root.coms[i]);
 	}
 	
+	//Other things
 	for(var i = dusk.data.root.reqs.length-1; i >= 0; i--) {
 		console.log("Loading other file "+dusk.data.root.reqs[i]+"...");
 		required.push(dusk.data.root.reqs[i]);
@@ -80,13 +73,9 @@ dusk.game.init = function() {
 	dusk.load.require("dusk.gameStarter");
 };
 
-/** Function: onRender
+/** This is called when the browser wants to render the image (using requestAnimationFrame), and it instructs the simpleGui module to draw all the components.
  * 
- * This is called 60 times a second (or less, if the computer is laggy).
- * 	It manages the frame rate, and calls <Events.everyFrame> of the events system in use every frame.
- * 
- * See:
- * 	<DuskWolf.frameRate>
+ * This is usually called 60 frames a second, but may vary depending on what the browser feels like.
  */
 dusk.game.onRender = function() {
 	if(dusk.mods && dusk.mods.simpleGui) dusk.mods.simpleGui.draw();
@@ -104,41 +93,32 @@ dusk.game.onRender = function() {
 	}
 };
 
+/** This is called `{@link dusk.frameRate}` times a second, and calls `{@link dusk.actions.everyFrame}`.
+ */
 dusk.game.everyFrame = function() {
-	//if(game._crashed) return;
-	/*dusk.game._counter += dusk.frameRate/60;
-	while(dusk.game._counter > 1) {*/
-		dusk.game._counter --;
-		dusk.events.everyFrame();
-		if(dusk.dev) {
-			dusk.game._framesRan++;
-			if(dusk.game._framesRan == 1000){
-				console.log("1000 frames took "+((new Date()).getTime()-dusk.game._time)+"ms, "+(Math.round(1000000000/((new Date()).getTime()-dusk.game._time))/1000)+"fps.");
-				dusk.game._time = (new Date()).getTime();
-				dusk.game._framesRan = 0;
-			}
+	dusk.actions.everyFrame();
+	if(dusk.dev) {
+		dusk.game._framesRan++;
+		if(dusk.game._framesRan == 1000){
+			console.log("1000 frames took "+((new Date()).getTime()-dusk.game._time)+"ms, "+(Math.round(1000000000/((new Date()).getTime()-dusk.game._time))/1000)+"fps.");
+			dusk.game._time = (new Date()).getTime();
+			dusk.game._framesRan = 0;
 		}
-	//}
+	}
 };
 
-/** Function: keypress
+/** This is called to process a keypress event. It calls `{@dusk.actions.keypress}` with it's argument.
  * 
- * This should be called (and is automatically) to process a keypress event. It just basically calls <Events.keypress> of the current Events system.
- * 
- * Params:
- * 	e		- [object] A JQuery keypress event to handle.
+ * @param {object} e A JQuery keypress event object.
  */
 dusk.game.keypress = function(e) {
-	dusk.events.keypress(e);
+	dusk.actions.keypress(e);
 };
 
-/** Function: keyup
+/** This is called to process a keyup event. It calls `{@dusk.actions.keyup}` with it's argument.
  * 
- * This should be called (and is automatically) to process a keyup event. It just basically calls <Events.keyup> of the current Events system.
- * 
- * Params:
- * 	e		- [object] A JQuery keyup event to handle.
+ * @param {object} e A JQuery keyup event object.
  */
 dusk.game.keyup = function(e) {
-	dusk.events.keyup(e);
+	dusk.actions.keyup(e);
 };

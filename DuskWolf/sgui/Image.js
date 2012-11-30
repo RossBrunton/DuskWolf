@@ -51,11 +51,12 @@ dusk.sgui.Image.prototype._imageDraw = function(c) {
 /** This sets the image that will be displayed.
  * @param image The name of the image, should be a constant in <code>Data</code>.
  */
-dusk.sgui.Image.prototype.__defineSetter__("src", function _setSrc(value) {
+dusk.sgui.Image.prototype.__defineSetter__("src", function s_src(value) {
 	if(!value) {console.warn(this.comName+" tried to set image to nothing."); return;}
 	this._img = dusk.data.grabImage(value);
 	this.bookRedraw();
 });
-dusk.sgui.Image.prototype.__defineGetter__("src", function _getSrc(value) {
+
+dusk.sgui.Image.prototype.__defineGetter__("src", function g_src(value) {
 	return this._img;
 });

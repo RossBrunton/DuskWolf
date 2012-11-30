@@ -22,8 +22,8 @@
 		</td><td style='vertical-align:top;'>
 			<textarea style='width:100%;' rows='25' id='runBox'>/*This is DWS*/
 /*print "Hello World!";*/plat-edit;</textarea>
-			<button style='width:100%' onclick='dusk.events.run(JSON.parse($("#runBox")[0].value), "_live")'>Run (JSON)</button>
-			<button style='width:100%' onclick='dusk.events.run(JSON.parse(dusk.dwc.compile($("#runBox")[0].value)), "_live")'>Run (DWS)</button>
+			<button style='width:100%' onclick='dusk.actions.run(JSON.parse($("#runBox")[0].value), "_live")'>Run (JSON)</button>
+			<button style='width:100%' onclick='dusk.actions.run(JSON.parse(dusk.dwc.compile($("#runBox")[0].value)), "_live")'>Run (DWS)</button>
 			<button style='width:100%' onclick='console.log("----- Compiled DWS -----");console.log(dusk.dwc.compile($("#runBox")[0].value));console.log("----- Compiled DWS -----");'>Compile (DWS)</button>
 		</td></tr></table>
 	</body>

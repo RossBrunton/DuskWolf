@@ -43,21 +43,21 @@ dusk.sgui.EditableTileMap.prototype._editTileMapDraw = function(c) {
 };
 
 dusk.sgui.EditableTileMap.prototype._editTileMapFrame = function(e) {
-	if(dusk.events.getVar("etm.x") === undefined) dusk.events.setVar("etm.x", 0);
-	if(dusk.events.getVar("etm.y") === undefined) dusk.events.setVar("etm.y", 0);
-	if(dusk.events.getVar("etm.frame.width") === undefined) dusk.events.setVar("etm.frame.width", 1);
-	if(dusk.events.getVar("etm.frame.height") === undefined) dusk.events.setVar("etm.frame.height", 1);
+	if(dusk.actions.getVar("etm.x") === undefined) dusk.actions.setVar("etm.x", 0);
+	if(dusk.actions.getVar("etm.y") === undefined) dusk.actions.setVar("etm.y", 0);
+	if(dusk.actions.getVar("etm.frame.width") === undefined) dusk.actions.setVar("etm.frame.width", 1);
+	if(dusk.actions.getVar("etm.frame.height") === undefined) dusk.actions.setVar("etm.frame.height", 1);
 	
 	if(this._focused) {
-		dusk.events.setVar("etm.x", this._cx);
-		dusk.events.setVar("etm.y", this._cy);
-		dusk.events.setVar("etm.frame.width", this.frameWidth);
-		dusk.events.setVar("etm.frame.height", this.frameHeight);
+		dusk.actions.setVar("etm.x", this._cx);
+		dusk.actions.setVar("etm.y", this._cy);
+		dusk.actions.setVar("etm.frame.width", this.frameWidth);
+		dusk.actions.setVar("etm.frame.height", this.frameHeight);
 	}else{
-		this._cx = dusk.events.getVar("etm.x");
-		this._cy = dusk.events.getVar("etm.y");
-		this.frameWidth = dusk.events.getVar("etm.frame.width");
-		this.frameHeight = dusk.events.getVar("etm.frame.height");
+		this._cx = dusk.actions.getVar("etm.x");
+		this._cy = dusk.actions.getVar("etm.y");
+		this.frameWidth = dusk.actions.getVar("etm.frame.width");
+		this.frameHeight = dusk.actions.getVar("etm.frame.height");
 	}
 };
 
@@ -76,7 +76,7 @@ dusk.sgui.EditableTileMap.prototype._upAction = function(e) {
 	}
 	
 	if(dusk.mods.keyboard.isKeyPressed(65)) {
-		if(this.alpha+0.1 >= 1) {this.alpha = 1} else {this.alpha += 0.1;}
+		if(this.alpha+0.1 >= 1) {this.alpha = 1;} else {this.alpha += 0.1;}
 		return false;
 	}
 	
@@ -109,7 +109,7 @@ dusk.sgui.EditableTileMap.prototype._downAction = function(e) {
 	}
 	
 	if(dusk.mods.keyboard.isKeyPressed(65)) {
-		if(this.alpha-0.1 <= 0) {this.alpha = 0} else {this.alpha -= 0.1;}
+		if(this.alpha-0.1 <= 0) {this.alpha = 0;} else {this.alpha -= 0.1;}
 		return false;
 	}
 	
@@ -142,7 +142,7 @@ dusk.sgui.EditableTileMap.prototype._rightAction = function(e) {
 	}
 	
 	if(dusk.mods.keyboard.isKeyPressed(65)) {
-		if(this.alpha+0.1 >= 1) {this.alpha = 1} else {this.alpha += 0.1;}
+		if(this.alpha+0.1 >= 1) {this.alpha = 1;} else {this.alpha += 0.1;}
 		return false;
 	}
 	
@@ -175,7 +175,7 @@ dusk.sgui.EditableTileMap.prototype._leftAction = function(e) {
 	}
 	
 	if(dusk.mods.keyboard.isKeyPressed(65)) {
-		if(this.alpha-0.1 <= 0) {this.alpha = 0} else {this.alpha -= 0.1;}
+		if(this.alpha-0.1 <= 0) {this.alpha = 0;} else {this.alpha -= 0.1;}
 		return false;
 	}
 	

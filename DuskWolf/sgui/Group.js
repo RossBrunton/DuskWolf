@@ -69,7 +69,7 @@ dusk.sgui.Group.prototype._newComponent = function(com, type) { //Component
 	return this._components[com];
 };
 
-dusk.sgui.Group.prototype.__defineSetter__("children", function _setChildren(value) {
+dusk.sgui.Group.prototype.__defineSetter__("children", function s_children(value) {
 	if("length" in value) {
 		for (var i = 0; i < value.length; i++) {
 			if (value[i].name && this.getComponent(value[i].name.toLowerCase(), value[i].type)) {
@@ -91,23 +91,23 @@ dusk.sgui.Group.prototype.__defineSetter__("children", function _setChildren(val
 	}
 });
 
-dusk.sgui.Group.prototype.__defineGetter__("children", function _getChildren() {
+dusk.sgui.Group.prototype.__defineGetter__("children", function g_children() {
 	return this._components;
 });
 
-dusk.sgui.Group.prototype.__defineSetter__("allChildren", function _setAllChildren(value) {
+dusk.sgui.Group.prototype.__defineSetter__("allChildren", function s_allChildren(value) {
 	for (var c in this._components) {
 		this._components[c].parseProps(value, this._thread);
 	}
 });
 
-dusk.sgui.Group.prototype.__defineGetter__("allChildren", function _getAllChildren() {
+dusk.sgui.Group.prototype.__defineGetter__("allChildren", function g_allChildren() {
 	return this._components;
 });
 
 dusk.sgui.Group.prototype._groupDraw = function(c) {
 	//Draw children
-	var input;
+	//var input;
 	for(var i = 0; i < this._drawOrder.length; i++) {
 		if(this._drawOrder[i] in this._components) {
 			/*var com = this._components[this._drawOrder[i]]
@@ -148,7 +148,7 @@ dusk.sgui.Group.prototype.getComponent = function(com, type) { //Component
  */
 dusk.sgui.Group.prototype.deleteComponent = function(com) { //Boolean
 	if (this._components[com.toLowerCase()]){
-		if(this._focusedCom == com.toLowerCase()) this.focus("blank");
+		if(this._focusedCom == com.toLowerCase()) this.focus = "blank";
 		delete this._components[com.toLowerCase()];
 		delete this._drawOrder[this._drawOrder.indexOf(com.toLowerCase())];
 		this.bookRedraw();
@@ -161,7 +161,7 @@ dusk.sgui.Group.prototype.deleteComponent = function(com) { //Boolean
  * @param com The name of the component to focus.
  * @returns Whether the focus was successful or not; components can "resist" loosing focus by returning <code>false</code> in their <code>onLooseFocus</code> function.
  */
-dusk.sgui.Group.prototype.__defineSetter__("focus", function setFocus(value) {
+dusk.sgui.Group.prototype.__defineSetter__("focus", function set_focus(value) {
 	if (this._components[this._focusedCom]){
 		if (this._components[this._focusedCom].locked){return false;};
 		
@@ -182,7 +182,7 @@ dusk.sgui.Group.prototype.__defineSetter__("focus", function setFocus(value) {
 	this._focusedCom = "blank";
 });
 
-dusk.sgui.Group.prototype.__defineGetter__("focus", function _getFocus() {
+dusk.sgui.Group.prototype.__defineGetter__("focus", function get_focus() {
 	return this._focusedCom;
 });
 

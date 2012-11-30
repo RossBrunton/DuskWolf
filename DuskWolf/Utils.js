@@ -6,16 +6,16 @@ dusk.load.provide("dusk.utils");
 
 /** @namespace dusk.utils
  * 
- * @description <p>This namespace contains general functions for manipulating data, nothing specific to any other namespace.</p>
+ * @description This namespace contains general functions for manipulating data, nothing specific to any other namespace.
  */
 
-/** Returns if the object can be parsed as a JSON string. If it returns true, then it can be assumed that <code>JSON.parse</code> will not throw any error when trying to parse the string.
+/** Returns if the object can be parsed as a JSON string. If it returns true, then it can be assumed that `JSON.parse` will not throw any error when trying to parse the string.
  * @param {string} str The string to test.
  * @return {boolean} Whether the string is a valid JSON string.
  */
 dusk.utils.isJson = function(str) {
 	return /^[\],:{}\s]*$/.test(String(str).replace(/\\["\\\/bfnrtu]/g, '@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').replace(/(?:^|:|,)(?:\s*\[)+/g, ''));
-}
+};
 
 /** Makes a simple copy of the parameter object, and returns it. This will only work for simple objects, and not anything with prototypes and such like.
  * @param {object} o The source object to copy.
@@ -36,7 +36,7 @@ dusk.utils.clone = function(o) {
  * @return {object} A new object, containing all the properties of the two source objects. Note that b takes priority.
  */
 dusk.utils.merge = function(a, b) {
-	var a = dusk.utils.clone(a);
+	a = dusk.utils.clone(a);
 	for(var p in b) {
 		//Property in destination object set; update its value.
 		if(b[p].constructor == Object && p in a) {
@@ -93,7 +93,7 @@ dusk.utils.jsonParse = function(json, dws) {
 
 /** Takes two version strings, and returns whether the first is higher than the second (1), they are the same (0) or the later is (-1).
  * 
- * <p>It looks for the first integer it can find in each argument, and if one is higher returns the relevent value. If both numbers are the same, then the next number is searched and checked. If all the numbers are the same, returns 0. Non-numerical characters are ignored.</p>
+ * It looks for the first integer it can find in each argument, and if one is higher returns the relevent value. If both numbers are the same, then the next number is searched and checked. If all the numbers are the same, returns 0. Non-numerical characters are ignored.
  * 
  * @param {string} a The first version string.
  * @param {string} b The second version string.

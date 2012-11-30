@@ -13,14 +13,14 @@ dusk.load.provide("dusk.gameStarter");
  * It dispatches the `sys-event-load` and `sys-event-start` events.
  */
 dusk.startGame = function() {
-	dusk.events.startGame();
+	dusk.actions.startGame();
 	
-	if(dusk.events.waitingFor != 0) {
+	if(dusk.actions.waitingFor != 0) {
 		setTimeout(dusk.startGame, 100);
 		return;
 	}
 	
-	dusk.events.run([
+	dusk.actions.run([
 	{"a":"fire", "ver":dusk.ver, "ver-id":dusk.verId, "event":"sys-event-load"},
 	{"a":"fire", "ver":dusk.ver, "ver-id":dusk.verId, "event":"sys-event-start"},
 	{"a":"var", "name":"sys.started", "value":true}], "_init");

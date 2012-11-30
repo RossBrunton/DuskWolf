@@ -20,7 +20,7 @@ dusk.sgui.Saybox = function (parent, comName) {
 		this._registerPropMask("speed", "speed", true);
 		this._registerPropMask("say", "say", true, ["speaker", "speed"]);
 		
-		this._width = dusk.events.getVar("sys.sg.width");
+		this._width = dusk.actions.getVar("sys.sg.width");
 		this._height = 200;
 		
 		this._text = "";

@@ -21,6 +21,6 @@ dusk.sgui.Pane.prototype.bookRedraw = function() {
 	if(this._redrawBooked) return;
 	this._sgui.bookRedraw();
 	this._redrawBooked = true;
-}
+};
 
 dusk.sgui.Pane.prototype.__defineSetter__("active", function _setActive(value) {if(value) this._sgui.setActivePane(this.comName);});
