@@ -30,59 +30,58 @@ dusk.sgui.PlatMain.constructor = dusk.sgui.PlatMain;
 
 dusk.sgui.PlatMain.prototype.className = "PlatMain";
 
-dusk.sgui.PlatMain.prototype.__defineSetter__("room", function s_room(value) {
-	var room = dusk.actions.getVar("proom."+value);
-	dusk.actions.setVar("theme.default.etm.globalcoords", true);
+dusk.sgui.PlatMain.prototype.createRoom = function(name, spawn) {
+	var room = dusk.mods.plat.getRoomData(name);
+	if(!room) {
+		console.error("Room "+name+" does not exist.");
+		return;
+	}
 	
-	this.parseProps({"focus":"noEdit", "children":[
-		{"name":"noEdit", "type":"NullCom"},
-		
+	this.parseProps({"focus":"entities", "children":[
 		{"name":"back", "type":"EditableTileMap", "cursorColour":"#00ff00", "flow-down":"over", "flow-up":"entities",
-		"src":room.backSrc, "tile-size":dusk.actions.getVar("plat.tsize"), "sprite-size":dusk.actions.getVar("plat.ssize"), "mode":dusk.actions.getVar("plat.mode"),
-		"tile-width":dusk.actions.getVar("plat.twidth"), "tile-height":dusk.actions.getVar("plat.theight"), "sprite-width":dusk.actions.getVar("plat.swidth"), "sprite-height":dusk.actions.getVar("plat.sheight"),
+		"src":room.backSrc, "tile-size":dusk.mods.plat.tsize, "sprite-size":dusk.mods.plat.ssize, "mode":dusk.mods.plat.mode,
+		"tile-width":dusk.mods.plat.twidth, "tile-height":dusk.mods.plat.theight, "sprite-width":dusk.mods.plat.swidth, "sprite-height":dusk.mods.plat.sheight,
 		"map":{"map":room.back, "rows":room.rows, "cols":room.cols}},
 		
-		{"name":"entities", "type":"EntityGroup", "tile-size":this.tsize, "sprite-size":this.ssize, "flow-down":"back", "flow-up":"scheme", "mode":dusk.actions.getVar("plat.mode"),
-		"tile-width":dusk.actions.getVar("plat.twidth"), "tile-height":dusk.actions.getVar("plat.theight"), "sprite-width":dusk.actions.getVar("plat.swidth"), "sprite-height":dusk.actions.getVar("plat.sheight")},
+		{"name":"entities", "type":"EntityGroup", "tile-size":dusk.mods.plat.tsize, "sprite-size":dusk.mods.plat.ssize, "flow-down":"back", "flow-up":"scheme", "mode":dusk.mods.plat.mode,
+		"tile-width":dusk.mods.plat.twidth, "tile-height":dusk.mods.plat.theight, "sprite-width":dusk.mods.plat.swidth, "sprite-height":dusk.mods.plat.sheight},
 		
 		{"name":"over", "type":"EditableTileMap", "cursorColour":"#ff0000", "flow-down":"scheme", "flow-up":"back",
-		"src":room.overSrc, "tile-size":dusk.actions.getVar("plat.tsize"), "sprite-size":dusk.actions.getVar("plat.ssize"), "mode":dusk.actions.getVar("plat.mode"),
-		"tile-width":dusk.actions.getVar("plat.twidth"), "tile-height":dusk.actions.getVar("plat.theight"), "sprite-width":dusk.actions.getVar("plat.swidth"), "sprite-height":dusk.actions.getVar("plat.sheight"),
+		"src":room.overSrc, "tile-size":dusk.mods.plat.tsize, "sprite-size":dusk.mods.plat.ssize, "mode":dusk.mods.plat.mode,
+		"tile-width":dusk.mods.plat.twidth, "tile-height":dusk.mods.plat.theight, "sprite-width":dusk.mods.plat.swidth, "sprite-height":dusk.mods.plat.sheight,
 		"map":{"map":room.over, "rows":room.rows, "cols":room.cols}},
 		
 		{"name":"scheme", "type":"EditableTileMap", "cursorColour":"#0000ff", "flow-down":"entities", "flow-up":"over",
-		"src":"pimg/schematics.png", "alpha":0, "tile-size":dusk.actions.getVar("plat.tsize"), "sprite-size":dusk.actions.getVar("plat.ssize"), "mode":dusk.actions.getVar("plat.mode"),
-		"tile-width":dusk.actions.getVar("plat.twidth"), "tile-height":dusk.actions.getVar("plat.theight"), "sprite-width":dusk.actions.getVar("plat.swidth"), "sprite-height":dusk.actions.getVar("plat.sheight"),
+		"src":"pimg/schematics.png", "alpha":0, "tile-size":dusk.mods.plat.tsize, "sprite-size":dusk.mods.plat.ssize, "mode":dusk.mods.plat.mode,
+		"tile-width":dusk.mods.plat.twidth, "tile-height":dusk.mods.plat.theight, "sprite-width":dusk.mods.plat.swidth, "sprite-height":dusk.mods.plat.sheight,
 		"map":{"map":room.scheme, "rows":room.rows, "cols":room.cols}},
 	]});
 	
 	this.path("entities").clear();
 	
 	var playerData = {};
-	playerData.name = dusk.actions.getVar("plat.seek");
-	playerData.type = dusk.actions.getVar("plat.seekType");
-	var crd = this.getComponent("scheme").lookTile(this.spawn, 1);
-	if(dusk.actions.getVar("plat.mode") == "BINARY") {
-		playerData.x = crd[0]<<dusk.actions.getVar("plat.tsize");
-		playerData.y = crd[1]<<dusk.actions.getVar("plat.tsize");
+	playerData.name = dusk.mods.plat.seek; //dusk.mods.plat.seek;
+	playerData.type = dusk.mods.plat.seekType; //dusk.actions.getVar("plat.seekType");
+	var crd = this.getComponent("scheme").lookTile(spawn, 1);
+	if(dusk.mods.plat.mode == "BINARY") {
+		playerData.x = crd[0]<<dusk.mods.plat.tsize;
+		playerData.y = crd[1]<<dusk.mods.plat.tsize;
 	}else{
-		playerData.x = crd[0]*dusk.actions.getVar("plat.twidth");
-		playerData.y = crd[1]*dusk.actions.getVar("plat.theight");
+		playerData.x = crd[0]*dusk.mods.plat.twidth;
+		playerData.y = crd[1]*dusk.mods.plat.theight;
 	}
 	
-	this.path("entities").dropEntity(playerData);
+	this.path("entities").dropEntity(playerData, true);
 	
 	var waitingEnts = room.entities;
 	for(var i = 0; i < waitingEnts.length; i++) {
 		this.path("entities").dropEntity(waitingEnts[i]);
 	}
 	
-	this.roomName = value;
+	this.roomName = name;
 	
 	this.autoScroll();
-});
-
-dusk.sgui.PlatMain.prototype.__defineGetter__("room", function g_room(){return this.roomName;});
+};
 
 dusk.sgui.PlatMain.prototype._platMainFrame = function(e) {
 	if(!this.getComponent("scheme")) return;
@@ -94,27 +93,27 @@ dusk.sgui.PlatMain.prototype._platMainFrame = function(e) {
 	if(this._focused) this.getComponent("entities").doFrame();
 	
 	//Editing
-	if(dusk.actions.getVar("plat.edit.active") && this.getFocused().comName == "noedit") this.flow("over");
-	if(!dusk.actions.getVar("plat.edit.active") && this.getFocused().comName != "noedit") this.flow("noEdit");
+	//if(dusk.mods.plat.editing && this.getFocused().comName == "entities") this.flow("over");
+	if(!dusk.mods.plat.editing && this.getFocused().comName != "entities") this.flow("entities");
 };
 
 dusk.sgui.PlatMain.prototype.autoScroll = function() {
 	// Centre the player
 	var seekCoords = [];
-	if(dusk.actions.getVar("plat.mode") == "BINARY") {
-		seekCoords = dusk.actions.getVar("plat.edit.active")?[
-			(dusk.actions.getVar("etm.x")+3)<<(dusk.actions.getVar("plat.tsize")),
-			(dusk.actions.getVar("etm.y")+3)<<(dusk.actions.getVar("plat.tsize"))]
+	if(dusk.mods.plat.mode == "BINARY") {
+		seekCoords = dusk.mods.plat.editing?[
+			(dusk.sgui.EditableTileMap.globalEditX+3)<<(dusk.mods.plat.tsize),
+			(dusk.sgui.EditableTileMap.globalEditY+3)<<(dusk.mods.plat.tsize)]
 		:
-			[this.path("entities/"+dusk.actions.getVar("plat.seek")).x,
-			this.path("entities/"+dusk.actions.getVar("plat.seek")).y];
+			[this.path("entities/"+dusk.mods.plat.seek).x,
+			this.path("entities/"+dusk.mods.plat.seek).y];
 	}else{
-		seekCoords = dusk.actions.getVar("plat.edit.active")?[
-			(dusk.actions.getVar("etm.x")+3)*(dusk.actions.getVar("plat.twidth")),
-			(dusk.actions.getVar("etm.y")+3)*(dusk.actions.getVar("plat.theight"))]
+		seekCoords = dusk.mods.plat.editing?[
+			(dusk.sgui.EditableTileMap.globalEditX+3)*(dusk.mods.plat.twidth),
+			(dusk.sgui.EditableTileMap.globalEditY+3)*(dusk.mods.plat.theight)]
 		:
-			[this.path("entities/"+dusk.actions.getVar("plat.seek")).x,
-			this.path("entities/"+dusk.actions.getVar("plat.seek")).y];
+			[this.path("entities/"+dusk.mods.plat.seek).x,
+			this.path("entities/"+dusk.mods.plat.seek).y];
 	}
 	this._container.prop("seek", seekCoords);
 	
@@ -125,7 +124,7 @@ dusk.sgui.PlatMain.prototype.autoScroll = function() {
 };
 
 dusk.sgui.PlatMain.prototype._upAction = function(e) {
-	if(!dusk.actions.getVar("plat.edit.active")) return true;
+	if(!dusk.mods.plat.editing) return true;
 	if(dusk.mods.keyboard.isKeyPressed(187)) {
 		//+
 		this.path("scheme").graftTop();
@@ -148,7 +147,7 @@ dusk.sgui.PlatMain.prototype._upAction = function(e) {
 };
 
 dusk.sgui.PlatMain.prototype._downAction = function(e) {
-	if(!dusk.actions.getVar("plat.edit.active")) return true;
+	if(!dusk.mods.plat.editing) return true;
 	if(dusk.mods.keyboard.isKeyPressed(187)) {
 		//+
 		this.path("scheme").graftBottom();
@@ -169,7 +168,7 @@ dusk.sgui.PlatMain.prototype._downAction = function(e) {
 };
 
 dusk.sgui.PlatMain.prototype._leftAction = function(e) {
-	if(!dusk.actions.getVar("plat.edit.active")) return true;
+	if(!dusk.mods.plat.editing) return true;
 	if(dusk.mods.keyboard.isKeyPressed(187)) {
 		//+
 		this.path("scheme").graftLeft();
@@ -192,7 +191,7 @@ dusk.sgui.PlatMain.prototype._leftAction = function(e) {
 };
 
 dusk.sgui.PlatMain.prototype._rightAction = function(e) {
-	if(!dusk.actions.getVar("plat.edit.active")) return true;
+	if(!dusk.mods.plat.editing) return true;
 	if(dusk.mods.keyboard.isKeyPressed(187)) {
 		//+
 		this.path("scheme").graftRight();
@@ -213,7 +212,7 @@ dusk.sgui.PlatMain.prototype._rightAction = function(e) {
 };
 
 dusk.sgui.PlatMain.prototype._save = function(e) {
-	if(!dusk.actions.getVar("plat.edit.active")) return true;
+	if(!dusk.mods.plat.editing) return true;
 	
 	console.log("----- Saved Room Data -----");
 	var a = {};

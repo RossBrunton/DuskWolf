@@ -10,17 +10,17 @@ dusk.pbehave.Persist = function(entity) {
 	if(entity !== undefined){
 		dusk.pbehave.PBehave.call(this, entity);
 		
-		this.listenEvent("typeChange", this._persistLoad);
-		this.listenEvent("frame", this._persistFrame);
+		this._listenEvent("typeChange", this._persistLoad);
+		this._listenEvent("frame", this._persistFrame);
 	}
 };
 dusk.pbehave.Persist.prototype = new dusk.pbehave.PBehave();
 dusk.pbehave.Persist.constructor = dusk.pbehave.Persist;
 
 dusk.pbehave.Persist.prototype._persistLoad = function(name, data) {
-	this._entity.behaviourData = dusk.actions.getVar("plat.entper."+this._entity.comName) || this._entity.behaviourData;
+	this._entity.behaviourData = dusk.mods.plat.getPersist(this._entity.comName) || this._entity.behaviourData;
 };
 
 dusk.pbehave.Persist.prototype._persistFrame = function(name, data) {
-	dusk.actions.setVar("plat.entper."+this._entity.comName, this._entity.behaviourData);
+	dusk.mods.plat.storePersist(this._entity.comName, this._entity.behaviourData);
 };

@@ -12,21 +12,17 @@ dusk.load.provide("dusk.deps");
  */
 
 dusk.load.addDependency(__duskdir__+"/Data.js", ["dusk.data"], ["dusk", "dusk.utils", "dusk.game"]);
-dusk.load.addDependency(__duskdir__+"/DuskWolf.js", ["dusk"], []);
-dusk.load.addDependency(__duskdir__+"/Actions.js", ["dusk.actions"], ["dusk.dwc", "dusk.errors", "dusk.utils"]);
-dusk.load.addDependency(__duskdir__+"/Game.js", ["dusk.game"], ["dusk", "dusk.data", "dusk.actions", "dusk.utils"]);
-dusk.load.addDependency(__duskdir__+"/Dwc.js", ["dusk.dwc"], []);
+dusk.load.addDependency(__duskdir__+"/DuskWolf.js", ["dusk"], ["dusk.EventDispatcher", "dusk.utils"]);
+dusk.load.addDependency(__duskdir__+"/Game.js", ["dusk.game"], ["dusk", "dusk.data", "dusk.utils"]);
 dusk.load.addDependency(__duskdir__+"/Load.js", ["dusk.load"], ["dusk", "dusk.game"]);
-dusk.load.addDependency(__duskdir__+"/Errors.js", ["dusk.errors"], []);
 dusk.load.addDependency(__duskdir__+"/Utils.js", ["dusk.utils"], []);
+dusk.load.addDependency(__duskdir__+"/EventDispatcher.js", ["dusk.EventDispatcher"], []);
 
-dusk.load.addDependency(__duskdir__+"/mods/Core.js", ["dusk.mods.core"], []);
-dusk.load.addDependency(__duskdir__+"/mods/Keyboard.js", ["dusk.mods.keyboard"], []);
-dusk.load.addDependency(__duskdir__+"/mods/LocalSaver.js", ["dusk.mods.localSaver"], []);
-dusk.load.addDependency(__duskdir__+"/mods/Math.js", ["dusk.mods.math"], []);
-dusk.load.addDependency(__duskdir__+"/mods/Net.js", ["dusk.mods.net"], []);
+dusk.load.addDependency(__duskdir__+"/mods/Keyboard.js", ["dusk.mods.keyboard"], ["dusk.EventDispatcher"]);
+dusk.load.addDependency(__duskdir__+"/mods/FrameTicker.js", ["dusk.mods.frameTicker"], ["dusk.EventDispatcher"]);
+dusk.load.addDependency(__duskdir__+"/mods/Performance.js", ["dusk.mods.performance"], ["dusk.mods.frameTicker", "dusk.mods.simpleGui"]);
 dusk.load.addDependency(__duskdir__+"/mods/Plat.js", ["dusk.mods.plat"], ["dusk.mods.simpleGui", "dusk.sgui.PlatMain", "dusk.sgui.CentreScroller", "dusk.pbehave.PBehave"]);
-dusk.load.addDependency(__duskdir__+"/mods/SimpleGui.js", ["dusk.mods.simpleGui"], ["dusk.sgui.Pane"]);
+dusk.load.addDependency(__duskdir__+"/mods/SimpleGui.js", ["dusk.mods.simpleGui"], ["dusk.mods.keyboard", "dusk.mods.frameTicker", "dusk.sgui.Pane"]);
 
 dusk.load.addDependency(__duskdir__+"/sgui/Component.js", ["dusk.sgui.Component", "dusk.sgui.NullCom"], []);
 dusk.load.addDependency(__duskdir__+"/sgui/Group.js", ["dusk.sgui.Group"], ["dusk.sgui.IContainer"]);
@@ -34,7 +30,6 @@ dusk.load.addDependency(__duskdir__+"/sgui/IContainer.js", ["dusk.sgui.IContaine
 dusk.load.addDependency(__duskdir__+"/sgui/Pane.js", ["dusk.sgui.Pane"], ["dusk.sgui.Group"]);
 dusk.load.addDependency(__duskdir__+"/sgui/CentreScroller.js", ["dusk.sgui.CentreScroller"], ["dusk.sgui.Single"]);
 dusk.load.addDependency(__duskdir__+"/sgui/DecimalTile.js", ["dusk.sgui.DecimalTile"], ["dusk.sgui.Component"]);
-dusk.load.addDependency(__duskdir__+"/sgui/DirListener.js", ["dusk.sgui.DirListener"], ["dusk.sgui.Single"]);
 dusk.load.addDependency(__duskdir__+"/sgui/EditableTileMap.js", ["dusk.sgui.EditableTileMap"], ["dusk.sgui.TileMap"]);
 dusk.load.addDependency(__duskdir__+"/sgui/FocusChecker.js", ["dusk.sgui.FocusChecker"], ["dusk.sgui.Image"]);
 dusk.load.addDependency(__duskdir__+"/sgui/Grid.js", ["dusk.sgui.Grid"], ["dusk.sgui.Group"]);

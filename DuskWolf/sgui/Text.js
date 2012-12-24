@@ -79,7 +79,7 @@ dusk.sgui.Label.prototype.measure = function(test) {
 
 // -----
 
-dusk.sgui.Text = function(parent, comName) {
+/*dusk.sgui.Text = function(parent, comName) {
 	if(parent !== undefined){
 		dusk.sgui.Label.call(this, parent, comName);
 		
@@ -101,7 +101,7 @@ dusk.sgui.Text.prototype._checkUpdate = function(e) {
 		this.text = dusk.actions.getVar(this.watch);
 		this.bookRedraw();
 	}
-};
+};*/
 
 // -----
 
@@ -120,7 +120,8 @@ dusk.sgui.TextBox = function(parent, comName) {
 	}
 };
 
-dusk.sgui.TextBox.prototype = new dusk.sgui.Text();
+//dusk.sgui.TextBox.prototype = new dusk.sgui.Text();
+dusk.sgui.TextBox.prototype = new dusk.sgui.Label();
 dusk.sgui.TextBox.constructor = dusk.sgui.TextBox;
 
 dusk.sgui.TextBox.prototype.className = "TextBox";
@@ -134,15 +135,17 @@ dusk.sgui.TextBox.prototype._boxDraw = function(c) {
 dusk.sgui.TextBox.prototype._boxKey = function(e) {
 	var keyDat = dusk.mods.keyboard.lookupCode(e.keyCode);
 	
-	if(dusk.actions.getVar(this.watch) === undefined) dusk.actions.setVar(this.watch, "");
+	//if(dusk.actions.getVar(this.watch) === undefined) dusk.actions.setVar(this.watch, "");
 	
 	if(keyDat[1]) {
-		dusk.actions.setVar(this.watch, dusk.actions.getVar(this.watch)+(e.shiftKey?keyDat[0].toUpperCase():keyDat[0]));
+		this.text += e.shiftKey?keyDat[0].toUpperCase():keyDat[0];
+		//dusk.actions.setVar(this.watch, dusk.actions.getVar(this.watch)+(e.shiftKey?keyDat[0].toUpperCase():keyDat[0]));
 		return true;
 	}
 	
 	if(keyDat[0] == "BACKSPACE") {
-		dusk.actions.setVar(this.watch, dusk.actions.getVar(this.watch).substr(0, dusk.actions.getVar(this.watch).length-1));
+		this.text = this.text.substr(0, this.text.length-1);
+		//dusk.actions.setVar(this.watch, dusk.actions.getVar(this.watch).substr(0, dusk.actions.getVar(this.watch).length-1));
 		return true;
 	}
 	

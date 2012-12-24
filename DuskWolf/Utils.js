@@ -84,11 +84,10 @@ dusk.utils.urlGet = function(name) {
  * @return {?object} a de-commented and potentially compiled object.
  * @since 0.0.12-alpha
  */
-dusk.utils.jsonParse = function(json, dws) {
+dusk.utils.jsonParse = function(json) {
 	json = json.replace(/\t/g, " ").replace(/\/\*(?:.|\n)*?\*\//g, "").replace(/\n/g, " ");
 	
 	if(dusk.utils.isJson(json)) return JSON.parse(json);
-	if(dwc) return JSON.parse(dusk.dwc.compile(json));
 };
 
 /** Takes two version strings, and returns whether the first is higher than the second (1), they are the same (0) or the later is (-1).

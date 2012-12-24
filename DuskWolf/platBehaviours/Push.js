@@ -12,10 +12,10 @@ dusk.pbehave.Push = function(entity, events) {
 		
 		if(!("speed" in this._entity.behaviourData)) this._entity.behaviourData.speed = 1;
 		
-		this.listenEvent("collidedTop", this._pCollidedTop);
-		this.listenEvent("collidedBottom", this._pCollidedBottom);
-		this.listenEvent("collidedLeft", this._pCollidedLeft);
-		this.listenEvent("collidedRight", this._pCollidedRight);
+		this._listenEvent("collidedTop", this._pCollidedTop);
+		this._listenEvent("collidedBottom", this._pCollidedBottom);
+		this._listenEvent("collidedLeft", this._pCollidedLeft);
+		this._listenEvent("collidedRight", this._pCollidedRight);
 	}
 };
 dusk.pbehave.Push.prototype = new dusk.pbehave.PBehave();

@@ -44,6 +44,19 @@ dusk.load._names = {};
  */
 dusk.load._files = [];
 
+/** An event dispatcher which is fired when a package is imported and then calls `{@link dusk.load.provide}`.
+ * 
+ * The event will be fired after the script is ran; so you can be sure that the module has been initiated.
+ * 
+ * The event object has only one property, a string with the package name in it.
+ * 
+ * This object will be `null` until `dusk.EventDispatcher` is imported; and this namespace will not make any attempt to import it.
+ * 
+ * @type null|EventDispatcher
+ * @since 0.0.14-alpha
+ */
+dusk.load.onProvide = null;
+
 /** Marks that the namespace `name` has been provided. This tells the engine to download the next file in the list, and it also creates the namespace if it doesn't already exist.
  * 
  * @param {string} name The namespace to provide.
@@ -65,6 +78,8 @@ dusk.load.provide = function(name) {
 			this._files.splice(i, 1);
 		}
 	}
+	
+	if(dusk.load.onProvide) setTimeout ("dusk.load.onProvide.fire({'package':'"+name+"'});", 1);
 };
 
 /** Adds a dependency. This tells the engine the file in which the namespaces are provided, and what other files must be imported before it.
@@ -88,7 +103,11 @@ dusk.load.addDependency = function(file, provided, required) {
  * @since 0.0.12-alpha
  */
 dusk.load.require = function(name) {
-	if(!(name in this._names)) throw Error("Could not import "+name+" as it is not recognised.");
+	if(!(name in this._names)) {
+		console.error("Could not import "+name+" as it is not recognised.");
+		return;
+	}
+	
 	if(this._names[name][1] !== 0) return;
 	
 	for(var i in this._names) {
@@ -130,15 +149,19 @@ var __duskdir__ = __duskdir__?__duskdir__:"DuskWolf";
 dusk.load.addDependency(__duskdir__+"/deps.js", ["dusk.deps"], []);
 dusk.load.require("dusk.deps");
 
-$(document).bind("keydown", function(e){try {dusk.game.keypress(e);} catch(e) {console.error(e.name+", "+e.message);}});
-$(document).bind("keyup", function(e){try {dusk.game.keyup(e);} catch(e) {console.error(e.name+", "+e.message);}});
-
-//Block keys from moving page
-document.onkeydown = function(e) {
-	if(e.keyCode >= 37 && e.keyCode <= 40) return false;
-};
-
 //Replaced in StartGame.js
 dusk.startGame = function() {
 	setTimeout(dusk.startGame, 100);
 };
+
+/** Called every 100ms to check if dusk.EventDispatcher is imported; if so, initiates `{@link dusk.load.onProvide}`.
+ * @private
+ */
+dusk.load._checkIfHandleable = function() {
+	if("EventDispatcher" in dusk) {
+		dusk.load.onProvide = new dusk.EventDispatcher();
+	}else{
+		setTimeout(dusk.load._checkIfHandleable, 100);
+	}
+};
+dusk.load._checkIfHandleable();

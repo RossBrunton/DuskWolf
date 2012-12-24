@@ -13,18 +13,24 @@
 	
 	<body onload='dusk.startGame()'>
 		<noscript>You need to enable JavaScript!</noscript>
-		<table width='100%'><tr><td style='vertical-align:top;'>
 		<canvas id='canvas' width='768'  height='480' style='image-rendering: -webkit-optimize-contrast;'>
 			Your browser doesn't support canvas. Ha-ha!<br/>
 			Uh, if you are using the Browser of the Damned (Internet Explorer), please switch to <a href='http://www.mozilla.org/en-US/firefox/new/'>Firefox</a> or <a href='http://www.google.com/chrome/'>Chrome</a>.<br/>
 			If not, just upgrade your browser!
 		</canvas>
-		</td><td style='vertical-align:top;'>
-			<textarea style='width:100%;' rows='25' id='runBox'>/*This is DWS*/
-/*print "Hello World!";*/plat-edit;</textarea>
-			<button style='width:100%' onclick='dusk.actions.run(JSON.parse($("#runBox")[0].value), "_live")'>Run (JSON)</button>
-			<button style='width:100%' onclick='dusk.actions.run(JSON.parse(dusk.dwc.compile($("#runBox")[0].value)), "_live")'>Run (DWS)</button>
-			<button style='width:100%' onclick='console.log("----- Compiled DWS -----");console.log(dusk.dwc.compile($("#runBox")[0].value));console.log("----- Compiled DWS -----");'>Compile (DWS)</button>
-		</td></tr></table>
+		
+		<div>
+			<input id="editing" type="checkbox" onchange="dusk.mods.plat.editing = this.checked;"/><label for='editing'>Edit mode active</label>
+			 | 
+			<button onclick="dusk.mods.plat.editDroppers[+prompt('Number (0-9) to set entity for.')] = prompt('Entity type to drop.');">Set dropper</button>
+			 | 
+			<button onclick="dusk.mods.plat.editNext = prompt('Enter name for next entity.');">Name next entity</button>
+			
+			<div style='color:#999999'>
+				ARROW: Move frame | CTRL+ARROW: Change layer | ++ARROW: Extend map | -+ARROW: Shrink map<br/>
+				<b>On tilemap layers</b> -=- A+ARROW: Adjust alpha | F+ARROW: Resize frame | SHIFT+ARROW: Change tile</br>
+				<b>On entity layer</b> -=- SPACE: Pick up/put down | SHIFT+ARROW: Move slightly | DEL: Delete entity | C: Clear all entities | 0-9: Drop defined entity
+			</div>
+		</div>
 	</body>
 </html>

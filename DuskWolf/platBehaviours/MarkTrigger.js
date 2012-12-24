@@ -17,7 +17,7 @@ dusk.pbehave.MarkTrigger = function(entity) {
 			this._markAt = this._entity.path("../../scheme").tilePointIn(this._entity.x+(this._entity.prop("width")/2), this._entity.y+(this._entity.prop("height")/2))[0];
 		}
 		
-		this.listenEvent("frame", this._markTriggerFrame);
+		this._listenEvent("frame", this._markTriggerFrame);
 	}
 };
 dusk.pbehave.MarkTrigger.prototype = new dusk.pbehave.PBehave();
@@ -35,9 +35,8 @@ dusk.pbehave.MarkTrigger.prototype._markTriggerFrame = function(name, e) {
 		this._markAt = this._entity.path("../../scheme").tilePointIn(this._entity.x+(this._entity.prop("width")/2), this._entity.y+(this._entity.prop("height")/2))[0];
 		
 		if(!this._coolDown) {
-			dusk.actions.run([
-				{"a":"fire", "up":false, "mark":this._markAt, "activator":this._entity.comName, "room":this._entity.path("../..").prop("room"), "event":"plat-mark"}
-			], dusk.actions.thread);
+			console.log({"up":false, "mark":this._markAt, "activator":this._entity.comName, "room":this._entity.path("../..").roomName});
+			dusk.mods.plat.markTrigger.fire({"up":false, "mark":this._markAt, "activator":this._entity.comName, "room":this._entity.path("../..").roomName});
 			this._coolDown = 5;
 		}
 	}

@@ -1,9 +1,9 @@
 # DuskWolf #
-The DuskWolf engine is basically a JSON parser; it takes a list of JSON files with special commands and runs them. What it actually does depends on what "modules" are loaded, for example there is a module for a GUI system, which registers the "actions" that it will process to create a GUI using canvas. The general idea is that everything in the game is broken down into some simple JSON instructions. Note that it used to be in Flash before, and has been ported to JavaScript.
+The DuskWolf engine is basically a game engine thing; it has modules and stuff which can help you make your games! It also has a GUI system, so that too!
 
 It is mainly designed for making games, specifically RPGs and platformers, but I suppose you could hack it to work to any other use if you wanted to...
 
-You can see an example at [http://www.savagewolf.org/games/duskWolf].
+You can see an example of it running at [http://www.savagewolf.org/games/duskWolf].
 
 See the wiki at [https://github.com/SavageWolf/DuskWolf/wiki] for details on setup and stuff.
 

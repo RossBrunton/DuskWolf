@@ -45,8 +45,8 @@ dusk.sgui.TileMap = function (parent, comName) {
 		
 		this.mode = "BINARY";
 		
-		this.prop("render-width", dusk.actions.getVar("sys.sg.width"));
-		this.prop("render-height", dusk.actions.getVar("sys.sg.height"));
+		this.prop("render-width", dusk.mods.simpleGui.width);
+		this.prop("render-height", dusk.mods.simpleGui.height);
 		
 		this.twidth = this._theme("tm.twidth", 16);
 		this.theight = this._theme("tm.theight", 16);

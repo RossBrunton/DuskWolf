@@ -81,8 +81,8 @@ dusk.sgui.Group.prototype.__defineSetter__("children", function s_children(value
 			}
 		}
 	}else{
-		if(value.name && this._getComponent(value.name.toLowerCase(), value.type)) {
-			return this._getComponent(value.name.toLowerCase()).parseProps(value, this._thread);
+		if(value.name && this.getComponent(value.name.toLowerCase(), value.type)) {
+			return this.getComponent(value.name.toLowerCase()).parseProps(value, this._thread);
 		} else if(value.name) {
 			console.warn(value.name + " has not been given a type and does not exist, ignoring.");
 		} else {

@@ -73,7 +73,7 @@ dusk.sgui.Single.prototype.newComponent = function(com, type) { //Component
 dusk.sgui.Single.prototype.__defineSetter__("child", function _setChild(value) {
 	//Component properties
 	if (value.name && this.getComponent(value.name.toLowerCase(), value.type)) {
-		this.getComponent(value.name.toLowerCase()).parseProps(dusk.actions.replaceVar(value), this._thread);
+		this.getComponent(value.name.toLowerCase()).parseProps(value);
 	} else {
 		console.warn(value.name + " has not been given a type and does not exist, ignoring.");
 	}

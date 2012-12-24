@@ -1,0 +1,3 @@
+[
+	["/Data/Example/plat.js", ["example.plat"], ["dusk.mods.plat", "dusk.pbehave.Controlled", "dusk.pbehave.Persist", "dusk.pbehave.Fall", "dusk.pbehave.BackForth", "dusk.pbehave.MarkTrigger", "dusk.pbehave.Push", "dusk.pbehave.SimpleAni", "dusk.pbehave.Killable", "dusk.pbehave.HitDam"]]
+]

@@ -12,10 +12,10 @@ dusk.pbehave.HitDam = function(entity) {
 		
 		this._data("damage", 1, true);
 		
-		this.listenEvent("collideLeft", this._hdCollide);
-		this.listenEvent("collideRight", this._hdCollide);
-		this.listenEvent("collideTop", this._hdCollide);
-		this.listenEvent("collideBottom", this._hdCollide);
+		this._listenEvent("collideLeft", this._hdCollide);
+		this._listenEvent("collideRight", this._hdCollide);
+		this._listenEvent("collideTop", this._hdCollide);
+		this._listenEvent("collideBottom", this._hdCollide);
 	}
 };
 dusk.pbehave.HitDam.prototype = new dusk.pbehave.PBehave();

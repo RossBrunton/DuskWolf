@@ -8,73 +8,66 @@ dusk.load.require("dusk.sgui.CentreScroller");
 
 dusk.load.provide("dusk.mods.plat");
 
-/** Class: mods.Plat
+/** Namespace: mods.Plat
  * 
  * This is a module that lets the user develop platformers simply using the SGui System.
- * 
- * Inheritance:
- * 	mods.Plat { <mods.IModule>
- * 
  */
 
 /** Function: mods.Plat
  * 
  * Constructor, creates a new instance of this. It sets up all the variables.
  */
-dusk.mods.plat.init = function() {
+dusk.mods.plat._init = function() {
 	//Vars
-	dusk.actions.setVar("plat.seek", "hero");
-	dusk.actions.setVar("plat.seektype", "player");
+	this._skills = [];
+	this.giveSkill("jump");
+	this.giveSkill("dubjump");
+	//this.giveSkill("infinijump");
 	
-	dusk.actions.setVar("plat.skill.jump", true);
-	dusk.actions.setVar("plat.skill.dubjump", true);
-	dusk.actions.setVar("plat.skill.infinijump", false);
+	this.ssize = 4;
+	this.swidth = 16;
+	this.sheight = 16;
 	
-	dusk.actions.setVar("pentity.default.data.hp", 1);
-	dusk.actions.setVar("pentity.default.data.gravity", 1);
-	dusk.actions.setVar("pentity.default.data.terminal", 9);
-	dusk.actions.setVar("pentity.default.behaviours", {});
-	dusk.actions.setVar("pentity.default.animation", {"stationary":"0,0"});
-	dusk.actions.setVar("pentity.default.data.haccel", 2);
-	dusk.actions.setVar("pentity.default.data.hspeed", 7);
-	dusk.actions.setVar("pentity.default.data.jump", 15);
-	dusk.actions.setVar("pentity.default.data.slowdown", 1);
-	dusk.actions.setVar("pentity.default.data.img", "pimg/hero.png");
-	dusk.actions.setVar("pentity.default.data.solid", true);
-	dusk.actions.setVar("pentity.default.data.anchor", false);
+	this.tsize = 5;
+	this.twidth = 32;
+	this.theight = 32;
 	
-	dusk.actions.setVar("plat.ssize", 4);
-	dusk.actions.setVar("plat.swidth", 16);
-	dusk.actions.setVar("plat.sheight", 16);
+	this.mode = "BINARY";
 	
-	dusk.actions.setVar("plat.tsize", 5);
-	dusk.actions.setVar("plat.twidth", 32);
-	dusk.actions.setVar("plat.theight", 32);
+	this.seek = "hero";
+	this.seekType = "player";
 	
-	dusk.actions.setVar("plat.mode", "BINARY");
+	this.editing = false;
+	this.editDroppers = [];
+	this.editNext = "";
 	
-	dusk.actions.registerStartHandler(this._onStart, this);
+	this._rooms = {};
 	
-	dusk.actions.registerAction("plat-room", this._setRoom, this, [["room", true, "STR"], ["spawn", true, "NUM"]]);
-	dusk.actions.registerAction("plat-drop", this._setDrop, this, [["slot", true, "NUM"], ["type", true, "STR"]]);
-	dusk.actions.registerAction("plat-name", this._nextName, this, [["name", true, "STR"]]);
-	dusk.actions.registerAction("plat-edit", function(a){dusk.actions.setVar("plat.edit.active", !dusk.actions.getVar("plat.edit.active"));}, this, []);
+	this.roomLoaded = new dusk.EventDispatcher("dusk.mods.plat.roomLoaded");
+	this.markTrigger = new dusk.EventDispatcher("dusk.mods.plat.markTrigger");
+	this.persistDataUpdate = new dusk.EventDispatcher("dusk.mods.plat.persistDataUpdate");
+	
+	this._persistData = {};
+	
+	this._entityData = {};
+	this._entityData["default"] = {
+		"data":{"hp":1, "gravity":1, "terminal":9, "haccel":2, "hspeed":7, "jump":15, "slowdown":1, "img":"pimg/hero.png", "solid":true, "anchor":false},
+		"animation":{"stationary":"0,0"},
+		"behaviours":{}
+	};
+	
+	var main = dusk.mods.simpleGui.getPane("plat-main");
+	main.children = {"name":"mainContainer", "focus":"main", "type":"CentreScroller", "width":dusk.mods.simpleGui.width, "height":dusk.mods.simpleGui.height, "child":{"name":"main", "type":"PlatMain"}};
+	main.active = true;
+	main.focus = "mainContainer";
 };
 
-/** Function: addActions
- * 
- * Registers the actions this uses, see the class description for a list.
- * 
- * See:
- * * <mods.IModule.addActions>
- */
-dusk.mods.plat._onStart = function() {
-	dusk.actions.run([
-	{"a":"listen", "event":"sys-event-load", "actions":[
-		{"a":"pane", "active":true, "focus":"mainContainer", "name":"plat-main", "children":[
-			{"name":"mainContainer", "focus":"main", "type":"CentreScroller", "width":dusk.actions.getVar("sys.sg.width"), "height":dusk.actions.getVar("sys.sg.height"), "child":{"name":"main", "type":"PlatMain"}}
-		]}
-	]}], "_plat");
+dusk.mods.plat.createRoom = function(name, data) {
+	this._rooms[name] = data;
+};
+
+dusk.mods.plat.getRoomData = function(name) {
+	return this._rooms[name];
 };
 
 /*- Function: _setRoom
@@ -85,10 +78,17 @@ dusk.mods.plat._onStart = function() {
  * Params:
  * 	a			- [object] A "plat-room" action.
  */
-dusk.mods.plat._setRoom = function(a) {
-	if(!("room" in a)){throw new dusk.errors.PropertyMissing(a.a, "room");}
+dusk.mods.plat.setRoom = function(room, spawn) {
+	if(!room) {
+		console.error("No room specified to set!");
+		return;
+	}
+	console.log("Setting room "+room);
 	
-	dusk.actions.run([{"a":"if", "cond":(a.nofade?"0":"1"), "then":[
+	dusk.mods.simpleGui.getPane("plat-main").path("/mainContainer/main").createRoom(room, spawn);
+	this.roomLoaded.fire({"room":room, "spawn":spawn});
+	
+	/*dusk.actions.run([{"a":"if", "cond":(a.nofade?"0":"1"), "then":[
 		{"a":"sg-path", "pane":"plat-main", "path":"/mainContainer", "fade":{"from":1, "end":0, "speed":-0.05}}
 	]}], dusk.actions.thread);
 	console.log("Setting room "+a.room+".");
@@ -100,20 +100,51 @@ dusk.mods.plat._setRoom = function(a) {
 				{"a":"sg-path", "pane":"plat-main", "path":"/mainContainer", "fade":{"from":0, "end":1, "speed":0.05}}
 			]},
 			{"a":"fire", "event":"plat-room-load", "room":a.room}], dusk.actions.thread);
-	});
+	});*/
 };
 
-dusk.mods.plat._setDrop = function(a) {
-	if(!("slot" in a)){throw new dusk.errors.PropertyMissing(a.a, "slot");}
-	if(!("type" in a)){throw new dusk.errors.PropertyMissing(a.a, "type");}
-	
-	dusk.actions.setVar("plat.edit.droppers."+a.slot, a.type);
+dusk.mods.plat.modifyEntityType = function(name, data) {
+	if(!(name in this._entityData)) {
+		this._entityData[name] = dusk.utils.merge(this._entityData["default"], data);
+	}else{
+		this._entityData[name] = dusk.utils.merge(this._entityData[name], data);
+	}
 };
 
-dusk.mods.plat._nextName = function(a) {
-	if(!("name" in a)){throw new dusk.errors.PropertyMissing(a.a, "name");}
-	
-	dusk.actions.setVar("plat.edit.nextName", a.name);
+dusk.mods.plat.getEntityType = function(name) {
+	return this._entityData[name];
 };
 
-dusk.mods.plat.init();
+dusk.mods.plat.giveSkill = function(skillName) {
+	if(this._skills.indexOf(skillName) === -1) {
+		this._skills.push(skillName);
+		return true;
+	}else{
+		return false;
+	}
+};
+
+dusk.mods.plat.hasSkill = function(skillName) {
+	return this._skills.indexOf(skillName) !== -1;
+};
+
+dusk.mods.plat.revokeSkill = function(skillName) {
+	if(this._skills.indexOf(skillName) === -1) {
+		return false;
+	}else{
+		this._skills.splice(this._skills.indexOf(skillName), 1);
+		return true;
+	}
+};
+
+dusk.mods.plat.storePersist = function(name, data) {
+	this._persistData[name] = data;
+	data.entityName = name;
+	this.persistDataUpdate.fire(data);
+};
+
+dusk.mods.plat.getPersist = function(name) {
+	return this._persistData[name];
+};
+
+dusk.mods.plat._init();

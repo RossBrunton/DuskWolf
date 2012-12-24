@@ -19,6 +19,7 @@ dusk.sgui.PlatEntity = function (parent, comName) {
 		this.animationData = {};
 		this._currentAni = [];
 		this._aniPointer = 0;
+		this._aniTerminate = false;
 		this.aniName = "";
 		this._frameDelay = 5;
 		this._frameCountdown = 0;
@@ -33,17 +34,17 @@ dusk.sgui.PlatEntity = function (parent, comName) {
 		this._registerPropMask("dx", "dx", true);
 		this._registerPropMask("dy", "dy", true);
 		
-		if(dusk.actions.getVar("plat.mode") == "BINARY") {
+		if(dusk.mods.plat.mode == "BINARY") {
 			this.mode = "BINARY";
-			this.ssize = dusk.actions.getVar("plat.ssize");
-			this.width = 1 << dusk.actions.getVar("plat.tsize");
-			this.height = 1 << dusk.actions.getVar("plat.tsize");
+			this.ssize = dusk.mods.plat.ssize;
+			this.width = 1 << dusk.mods.plat.tsize;
+			this.height = 1 << dusk.mods.plat.tsize;
 		}else{
 			this.mode = "DECIMAL";
-			this.sheight = dusk.actions.getVar("plat.sheight");
-			this.swidth = dusk.actions.getVar("plat.swidth");
-			this.width = dusk.actions.getVar("plat.twidth");
-			this.height = dusk.actions.getVar("plat.theight");
+			this.sheight = dusk.mods.plat.sheight;
+			this.swidth = dusk.mods.plat.swidth;
+			this.width = dusk.mods.plat.twidth;
+			this.height = dusk.mods.plat.theight;
 		}
 	}
 };
@@ -54,7 +55,7 @@ dusk.sgui.PlatEntity.prototype.className = "PlatEntity";
 
 dusk.sgui.PlatEntity.prototype.moveAndCollide = function() {
 	//Gravity
-	if(this.dy < this.behaviourData.terminal && /* !this.touchers("d").length &&*/ !this._teatherHost){
+	if(this.dy < this.behaviourData.terminal  /*&& !this.touchers("d").length && !this._teatherHost*/){
 		this.dy += this.behaviourData.gravity;
 	}
 	
@@ -70,7 +71,7 @@ dusk.sgui.PlatEntity.prototype.moveAndCollide = function() {
 	this.performMotion(this.dx, this.dy, true);
 	
 	//Tethering
-	for(var i = this._teatherClients.length-1; i >= 0; i--) {
+	/*for(var i = this._teatherClients.length-1; i >= 0; i--) {
 		if(this._teatherClients[i][1].indexOf("u") !== -1) {
 			this._teatherClients[i][0].y = this.y - this._teatherClients[i][0].height;
 			if(this._teatherClients[i][1].indexOf("X") !== -1 && (this._teatherClients[i][0].x + this._teatherClients[i][0].width < this.x || this._teatherClients[i][0].x > this.x + this.width)) {this.unteather(this._teatherClients[i][0]); break;}
@@ -87,7 +88,7 @@ dusk.sgui.PlatEntity.prototype.moveAndCollide = function() {
 		if(this._teatherClients[i][1].indexOf("r") !== -1) {
 			this._teatherClients[i][0].x = this.x + this.width;
 		}
-	}
+	}*/
 	this.bookRedraw();
 };
 
@@ -262,17 +263,17 @@ dusk.sgui.PlatEntity.prototype.startFrame = function() {
 	}
 };
 
-dusk.sgui.PlatEntity.prototype.__defineSetter__("type", function _setType(type) {
+dusk.sgui.PlatEntity.prototype.__defineSetter__("type", function s_type(type) {
 	this._type = type;
-	this.behaviourData = dusk.actions.getVar("pentity."+this._type+".data");
-	this.animationData = dusk.actions.getVar("pentity."+this._type+".animation");
+	this.behaviourData = dusk.mods.plat.getEntityType(type).data;//dusk.actions.getVar("pentity."+this._type+".data");
+	this.animationData = dusk.mods.plat.getEntityType(type).animation;//dusk.actions.getVar("pentity."+this._type+".animation");
 	
 	this.setAnimation("stationary");
 	this.prop("src", this.behaviourData.img);
 	if("dx" in this.behaviourData) this.dx = this.behaviourData.dx;
 	if("dy" in this.behaviourData) this.dy = this.behaviourData.dy;
 	
-	var beh = dusk.actions.getVar("pentity."+this._type+".behaviours");
+	var beh = dusk.mods.plat.getEntityType(type).behaviours;//dusk.actions.getVar("pentity."+this._type+".behaviours");
 	for(var b in beh) {
 		if(beh[b]) this.addBehaviour(b, true);
 	}
@@ -280,7 +281,7 @@ dusk.sgui.PlatEntity.prototype.__defineSetter__("type", function _setType(type) 
 	this.behaviourFire("typeChange");
 });
 
-dusk.sgui.PlatEntity.prototype.__defineGetter__("type", function _getType() {
+dusk.sgui.PlatEntity.prototype.__defineGetter__("type", function g_type() {
 	return this._type;
 });
 
@@ -297,11 +298,13 @@ dusk.sgui.PlatEntity.prototype.addBehaviour = function(name, reInit) {
 	this._behaviours[name] = new dusk.pbehave[name](this);
 };
 
-dusk.sgui.PlatEntity.prototype.setAnimation = function(name, reInit) {
+dusk.sgui.PlatEntity.prototype.setAnimation = function(name, reInit, terminates) {
+	this._aniTerminate = terminates==true;
 	if(name == this.aniName && !reInit) return;
 	if(!(name.replace("-!", "") in this.animationData)) {
 		if(name.indexOf("-l") !== -1) this.setAnimation(name.replace("-l", ""));
 		if(name.indexOf("-r") !== -1) this.setAnimation(name.replace("-r", ""));
+		if(terminates) this.behaviourFire("aniComplete", {"name":name});
 		return;
 	};
 	this._currentAni = this.animationData[name].split("|");
@@ -313,7 +316,10 @@ dusk.sgui.PlatEntity.prototype.setAnimation = function(name, reInit) {
 dusk.sgui.PlatEntity.prototype._animationTick = function() {
 	this.tile = this._currentAni[this._aniPointer];
 	this._aniPointer ++;
-	if(this._aniPointer == this._currentAni.length) this._aniPointer = 0;
+	if(this._aniPointer == this._currentAni.length) {
+		this._aniPointer = 0;
+		if(this._aniTerminate) this.behaviourFire("aniComplete", {"name":this.aniName});
+	}
 };
 
 dusk.sgui.PlatEntity.prototype.touchers = function(dir) {

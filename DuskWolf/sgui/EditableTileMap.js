@@ -36,6 +36,11 @@ dusk.sgui.EditableTileMap.constructor = dusk.sgui.EditableTileMap;
 
 dusk.sgui.EditableTileMap.prototype.className = "EditableTileMap";
 
+dusk.sgui.EditableTileMap.globalEditX = 0;
+dusk.sgui.EditableTileMap.globalEditY = 0;
+dusk.sgui.EditableTileMap.globalEditHeight = 1;
+dusk.sgui.EditableTileMap.globalEditWidth = 1;
+
 dusk.sgui.EditableTileMap.prototype._editTileMapDraw = function(c) {
 	if(!this._focused) return;
 	c.strokeStyle = this.prop("cursorColour");
@@ -43,21 +48,16 @@ dusk.sgui.EditableTileMap.prototype._editTileMapDraw = function(c) {
 };
 
 dusk.sgui.EditableTileMap.prototype._editTileMapFrame = function(e) {
-	if(dusk.actions.getVar("etm.x") === undefined) dusk.actions.setVar("etm.x", 0);
-	if(dusk.actions.getVar("etm.y") === undefined) dusk.actions.setVar("etm.y", 0);
-	if(dusk.actions.getVar("etm.frame.width") === undefined) dusk.actions.setVar("etm.frame.width", 1);
-	if(dusk.actions.getVar("etm.frame.height") === undefined) dusk.actions.setVar("etm.frame.height", 1);
-	
 	if(this._focused) {
-		dusk.actions.setVar("etm.x", this._cx);
-		dusk.actions.setVar("etm.y", this._cy);
-		dusk.actions.setVar("etm.frame.width", this.frameWidth);
-		dusk.actions.setVar("etm.frame.height", this.frameHeight);
+		dusk.sgui.EditableTileMap.globalEditX = this._cx;
+		dusk.sgui.EditableTileMap.globalEditY = this._cy;
+		dusk.sgui.EditableTileMap.globalEditWidth = this.frameWidth;
+		dusk.sgui.EditableTileMap.globalEditHeight = this.frameHeight;
 	}else{
-		this._cx = dusk.actions.getVar("etm.x");
-		this._cy = dusk.actions.getVar("etm.y");
-		this.frameWidth = dusk.actions.getVar("etm.frame.width");
-		this.frameHeight = dusk.actions.getVar("etm.frame.height");
+		this._cx = dusk.sgui.EditableTileMap.globalEditX;
+		this._cy = dusk.sgui.EditableTileMap.globalEditY;
+		this.frameWidth = dusk.sgui.EditableTileMap.globalEditWidth;
+		this.frameHeight = dusk.sgui.EditableTileMap.globalEditHeight;
 	}
 };
 

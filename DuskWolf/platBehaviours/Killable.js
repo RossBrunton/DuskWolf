@@ -12,7 +12,8 @@ dusk.pbehave.Killable = function(entity) {
 		
 		this._data("hp", 1, true);
 		
-		this.listenEvent("takeDamage", this._killableTakeDamage);
+		this._listenEvent("takeDamage", this._killableTakeDamage);
+		this._listenEvent("terminate", this._killableTerminate);
 	}
 };
 dusk.pbehave.Killable.prototype = new dusk.pbehave.PBehave();
@@ -21,5 +22,14 @@ dusk.pbehave.Killable.constructor = dusk.pbehave.Killable;
 dusk.pbehave.Killable.prototype._killableTakeDamage = function(name, e) {
 	this._data("hp", this._data("hp")-e.damage);
 	
-	if(this._data("hp") <= 0) console.log("I'm dead! :D");
+	if(this._data("hp") <= 0) {
+		console.log("I'm dead! :D");
+		if(!this.handleEvent("die")) {
+			this._entity.delete();
+		}
+	}
+};
+
+dusk.pbehave.Killable.prototype._killableTarminate = function(name, e) {
+	this._entity.delete();
 };

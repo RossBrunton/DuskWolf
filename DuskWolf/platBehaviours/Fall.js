@@ -11,7 +11,7 @@ dusk.pbehave.Fall = function(entity, events) {
 		dusk.pbehave.PBehave.call(this, entity, events);
 		
 		this._data("speed", 1, true);
-		this.listenEvent("collidedTop", this._fallFall);
+		this._listenEvent("collidedTop", this._fallFall);
 	}
 };
 dusk.pbehave.Fall.prototype = new dusk.pbehave.PBehave();

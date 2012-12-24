@@ -25,7 +25,7 @@ dusk.load.provide("dusk");
 
 /** Version of the DW engine. Must contain at least one number, and numbers furthest to the left indicate newer versions.
  * @type number */
-dusk.ver = "0.0.13-alpha";
+dusk.ver = "0.0.14-alpha";
 
 /** The frame rate, in frames per second. 
  * @type number */
@@ -48,3 +48,12 @@ dusk.canvas = ("__canvas__" in window)?__canvas__:"canvas";
 /** If true, then some features for developers are added, such as no caching for scripts and FPS info.
  * @type boolean */
 dusk.dev = ("__development__" in window)?__development__:true;
+
+/** An event dispatcher which fires when the game engine is ready to go.
+ * 
+ * The events fired have no properties.
+ * 
+ * @type dusk.EventDispatcher
+ * @since 0.0.14-alpha
+ */
+dusk.onLoad = new dusk.EventDispatcher("dusk.onLoad");

@@ -10,8 +10,8 @@ dusk.pbehave.BackForth = function(entity, events) {
 	if(entity !== undefined){
 		dusk.pbehave.PBehave.call(this, entity, events);
 		
-		this.listenEvent("collideLeft", this._bfCollideLeft);
-		this.listenEvent("collideRight", this._bfCollideRight);
+		this._listenEvent("collideLeft", this._bfCollideLeft);
+		this._listenEvent("collideRight", this._bfCollideRight);
 	}
 };
 dusk.pbehave.BackForth.prototype = new dusk.pbehave.PBehave();

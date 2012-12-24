@@ -98,17 +98,15 @@ dusk.load.require("dusk.sgui.Pane");
  * Constructor, creates a new instance of this, adding all the handlers and initing the theme vars.
  */
 dusk.mods.simpleGui._init = function() {
-	dusk.actions.registerKeyHandler("SGuiKey", function(event) {
+	dusk.mods.keyboard.keyPress.listen(function e_keypress(event) {
 		this.getActivePane().keypress(event);
 	}, this);
 
-	dusk.actions.registerFrameHandler("SGuiFrame", function() {
+	dusk.mods.frameTicker.onFrame.listen(function e_onFrame() {
 		for(var p in this._panes){
 			this._panes[p].frame();
 		}
 	}, this);
-
-	//dusk.actions.registerFrameHandler("SGuiDrawer", this.draw, this);
 
 	/*- Variable: _panes
 	 * [Object] All the panes.
@@ -124,51 +122,33 @@ dusk.mods.simpleGui._init = function() {
 	this._redrawBooked = false;
 
 	this.setActivePane("blank");
-
-	dusk.actions.setVar("sys.sg.width", 0);
-	dusk.actions.setVar("sys.sg.height", 0);
-
+	
+	this.width = $("#"+dusk.canvas)[0].width;
+	this.height = $("#"+dusk.canvas)[0].height;
+	
+	this.onRender = new dusk.EventDispatcher("onRender");
+	
 	/*- Variable: _cacheCanvas
 	 * [HTMLCanvas] A cached canvas drawn to before the real one, to improve performance.
 	 **/
 	this._cacheCanvas = document.createElement("canvas");
 
 	//Themes
-	dusk.actions.setVar("theme.default.box", "#eeeeee");
-	dusk.actions.setVar("theme.default.border", "#cccccc");
-	dusk.actions.setVar("theme.default.borderActive", "#ff5555");
-
-	dusk.actions.setVar("theme.current", "default");
+	this._themeData = {};
+	this.setThemeKey("box", "#eeeeee");
+	this.setThemeKey("border", "#cccccc");
+	this.setThemeKey("borderActive", "#ff5555");
 	
-	dusk.actions.registerStartHandler(this._onStart, this);
-	
-	dusk.actions.registerAction("sg-path", this._doPath, this, [["pane", true, "STR"], ["path", true, "STR"]]);
-	dusk.actions.registerAction("pane", this._doComponent, this, [["name", true, "STR"]]);
-	dusk.actions.registerAction("draw", function(data){this.draw();}, this, []);
-	
-	dusk.actions.registerHashFunct("SGPATH", this._sgpath, this);
-};
-
-/** Function: addActions
- * 
- * Registers the actions and sets the vars this uses, see the class description for a list of avalable ones.
- * 
- * See:
- * * <mods.IModule.addActions>
- */
-dusk.mods.simpleGui._onStart = function() {
-	dusk.actions.setVar("sys.sg.width", $("#"+dusk.canvas)[0].width);
-	dusk.actions.setVar("sys.sg.height", $("#"+dusk.canvas)[0].height);
-	dusk.actions.setVar("sys.sg.drawable", true);
-	
-	this._cacheCanvas.height = dusk.actions.getVar("sys.sg.height");
-	this._cacheCanvas.width = dusk.actions.getVar("sys.sg.width");
+	this._cacheCanvas.height = this.height;
+	this._cacheCanvas.width = this.width;
 	this._cacheCanvas.style.imageRendering = "-webkit-optimize-contrast";
 	
 	this._cacheCanvas.getContext("2d").mozImageSmoothingEnabled = false;
 	this._cacheCanvas.getContext("2d").webkitImageSmoothingEnabled = false;
 	this._cacheCanvas.getContext("2d").imageSmoothingEnabled = false;
 	this._cacheCanvas.getContext("2d").textBaseline = "middle";
+	
+	dusk.mods.simpleGui._draw();
 };
 
 /** Function: newPane
@@ -207,11 +187,6 @@ dusk.mods.simpleGui.getPane = function(name, noNew) { //Returns pane
 	return noNew?null:this.newPane(name);
 };
 
-dusk.mods.simpleGui._doComponent = function(data) {
-	if(data.name === undefined) {throw new dusk.errors.PropertyMissing(data.a, "vars");}
-	this.getPane(data.name).parseProps(dusk.actions.replaceVar(data, true), dusk.actions.thread);
-};
-
 dusk.mods.simpleGui.setActivePane = function(to) {
 	if(this.getActivePane()) this.getActivePane().onDeactive();
 	this.getPane(to);
@@ -223,41 +198,38 @@ dusk.mods.simpleGui.getActivePane = function() {
 	return this._panes[this._activePane];
 };
 
-dusk.mods.simpleGui.draw = function() {
-	if(/*!this._redrawBooked || */!dusk.actions.getVar("sys.sg.drawable")) return false;
+dusk.mods.simpleGui._draw = function() {
+	var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+	requestAnimationFrame(dusk.mods.simpleGui._draw);
+	
+	//if(/*!this._redrawBooked || */!dusk.actions.getVar("sys.sg.drawable")) return false;
 
-	$("#"+dusk.canvas)[0].getContext("2d").clearRect(0, 0, dusk.actions.getVar("sys.sg.width"), dusk.actions.getVar("sys.sg.height"));
-	this._cacheCanvas.getContext("2d").clearRect(0, 0, dusk.actions.getVar("sys.sg.width"), dusk.actions.getVar("sys.sg.height"));
+	$("#"+dusk.canvas)[0].getContext("2d").clearRect(0, 0, dusk.mods.simpleGui.width, dusk.mods.simpleGui.height);
+	dusk.mods.simpleGui._cacheCanvas.getContext("2d").clearRect(0, 0, dusk.mods.simpleGui.width, dusk.mods.simpleGui.height);
 	
 	//Draw panes
 	//var input;
-	for(var c in this._panes){
+	for(var c in dusk.mods.simpleGui._panes){
 		/*input = this._panes[c].draw();
 		if(!input || !this._panes[c].width || !this._panes[c].height) continue;
 		this._cacheCanvas.getContext("2d").drawImage(input, this._panes[c].x, this._panes[c].y, this._panes[c].width, this._panes[c].height);*/
 		
-		this._panes[c].draw(this._cacheCanvas.getContext("2d"));
+		dusk.mods.simpleGui._panes[c].draw(dusk.mods.simpleGui._cacheCanvas.getContext("2d"));
 	}
 
-	$("#"+dusk.canvas)[0].getContext("2d").drawImage(this._cacheCanvas, 0, 0, dusk.actions.getVar("sys.sg.width"), dusk.actions.getVar("sys.sg.height"));
-	this._redrawBooked = false;
+	$("#"+dusk.canvas)[0].getContext("2d").drawImage(dusk.mods.simpleGui._cacheCanvas, 0, 0, dusk.mods.simpleGui.width, dusk.mods.simpleGui.height);
+	dusk.mods.simpleGui._redrawBooked = false;
+	
+	dusk.mods.simpleGui.onRender.fire({});
 
 	return true;
 };
 
-dusk.mods.simpleGui._doPath = function(action) {
-	if(action.path===undefined){throw new dusk.errors.PropertyMissing(action.a, "path");}
-
-	this.path((action.pane?action.pane+":":"")+action.path).parseProps(action, dusk.actions.thread);
-};
-
-dusk.mods.simpleGui._sgpath = function(name, args) {
-	if(args.length < 2){throw new dusk.errors.ArgLengthWrong(name, args.length, 2);}
-	
-	return dusk.mods.simpleGui.path(args[0]).prop(args[1]);
-};
-
 dusk.mods.simpleGui.path = function(path) {
+	if(path.indexOf(":") !== -1) {
+		console.error("Tried to set an invalid path (no colon): "+path);
+		return null;
+	}
 	var pane = path.split(":", 1)[0];
 	path = path.substr(pane.length+1);
 	return this.getPane(pane).path(path);
@@ -265,6 +237,14 @@ dusk.mods.simpleGui.path = function(path) {
 
 dusk.mods.simpleGui.bookRedraw = function() {
 	this._redrawBooked = true;
+};
+
+dusk.mods.simpleGui.setThemeKey = function(name, value) {
+	this._themeData[name] = value;
+};
+
+dusk.mods.simpleGui.getThemeKey = function(name) {
+	return this._themeData[name];
 };
 
 dusk.mods.simpleGui._init();

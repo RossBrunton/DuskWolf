@@ -12,9 +12,9 @@ dusk.pbehave.Controlled = function(entity) {
 		
 		this._jumps = 0;
 		
-		this.listenEvent("frame", this._controlledFrame);
-		this.listenEvent("land", function(name, e) {this._jumps = 0;});
-		this.listenEvent("collideBottom", function(name, e) {this._jumps = 0;});
+		this._listenEvent("frame", this._controlledFrame);
+		this._listenEvent("land", function(name, e) {this._jumps = 0;});
+		this._listenEvent("collideBottom", function(name, e) {this._jumps = 0;});
 	}
 };
 dusk.pbehave.Controlled.prototype = new dusk.pbehave.PBehave();
@@ -28,9 +28,9 @@ dusk.pbehave.Controlled.prototype._controlledFrame = function(name, e) {
 	}
 	
 	if(dusk.mods.keyboard.isKeyPressed(38) && this._entity.dy > -4) {
-		if((this._jumps == 0 && dusk.actions.getVar("plat.skill.jump"))
-		|| (this._jumps == 1 && dusk.actions.getVar("plat.skill.dubjump"))
-		|| dusk.actions.getVar("plat.skill.infinijump")) {
+		if((this._jumps == 0 && dusk.mods.plat.hasSkill("jump"))
+		|| (this._jumps == 1 && dusk.mods.plat.hasSkill("dubjump"))
+		|| dusk.mods.plat.hasSkill("infinijump")) {
 			this._entity.dy = -this._entity.behaviourData.jump;
 			this._jumps ++;
 		}

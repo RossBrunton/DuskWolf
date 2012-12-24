@@ -191,12 +191,6 @@ dusk.sgui.Component = function (parent, componentName) {
 		 */
 		this._propMasks = {};
 		
-		/** The actions that will be ran if the "action key" is pressed while this is active. They must all be valid DuskWolf actions.
-		 * @type array
-		 * @private
-		 * @memberof dusk.sgui.Component
-		 */
-		this._action = [];
 
 		/** Whether the component can become focused, if false it cannot be flowed into. 
 		 * @type boolean
@@ -288,21 +282,21 @@ dusk.sgui.Component = function (parent, componentName) {
 		this._registerPropMask("fade", "fade", true);
 		this._registerPropMask("float", "foat", true);
 		this._registerPropMask("delete", "delete", true);
-		
-		//Add the action property handler
-		this._registerActionHandler("actionProp", this._actionProp, this);
 	}
 };
 
 /** The name of this component.
  * @type string
  * @static
+ * @memberof dusk.sgui.Component
+ * 
  */
 dusk.sgui.Component.prototype.className = "Component";
 /** Whether this compontent is a container. If true, then it MUST implement the interface IContainer.
  * @type boolean
  * @default false
  * @static
+ * @memberof dusk.sgui.Component
  */
 dusk.sgui.Component.prototype.isAContainer = false;
 
@@ -310,8 +304,8 @@ dusk.sgui.Component.prototype.isAContainer = false;
 /** This adds a handler that will call the function once every frame.
  * @param {function()} funct The function to call, it will be passed no parameters.
  * @protected
- * 
  * @see {@link _clearFrameHandler}
+ * @memberof dusk.sgui.Component
  */
 dusk.sgui.Component.prototype._registerFrameHandler = function(funct) {
 	this._frameHandlers.push(funct);
@@ -321,6 +315,7 @@ dusk.sgui.Component.prototype._registerFrameHandler = function(funct) {
  * @param {function()} funct The function to remove.
  * 	This must be the same function used in the call to {@link _registerFrameHandler}.
  * @protected
+ * @memberof dusk.sgui.Component
  */
 dusk.sgui.Component.prototype._clearFrameHandler = function(funct) {
 	for(var i in this._frameHandlers) {
@@ -329,6 +324,7 @@ dusk.sgui.Component.prototype._clearFrameHandler = function(funct) {
 };
 
 /** This function should be called every frame by {@link dusk.mods.simpleGui}. It calls all of this component's frame handlers once.
+ * @memberof dusk.sgui.Component
  */
 dusk.sgui.Component.prototype.frame = function() {
 	for(var a = this._frameHandlers.length-1; a >= 0; a--){
@@ -373,19 +369,6 @@ dusk.sgui.Component.prototype._registerKeyHandler = function (key, shift, ctrl, 
  */
 dusk.sgui.Component.prototype._registerActionHandler = function(name, funct, scope) {
 	this._actionHandlers[name] = funct;
-};
-
-/** This is an action handler, and it runs whatever the value is in the object's `{@link _action}` property using the actions system.
- * @param {object} e The JQuery keypress object.
- * @return {boolean} True if the action exists, false otherwise.
- * 	Hence, if there is an action defined in the JSON, this will stop the event going to it's container.
- * @private
- */
-dusk.sgui.Component.prototype._actionProp = function(e) {
-	if(this._action.length){
-		dusk.actions.run(this._action, "_"+this.comName);
-		return true;
-	}
 };
 
 /** This causes the component to handle a keypress, it should be called by ether it's parent container or SimpleGui.
@@ -459,6 +442,11 @@ dusk.sgui.Component.prototype.keypress = function (e) {
 	return false;
 };
 
+/** This is called when the "action key" is pressed.
+ * @param {object} e The JQuery keypress event.
+ * @return {boolean} Whether the event should bubble up.
+ * @protected
+ */
 dusk.sgui.Component.prototype._doAction = function(e) {
 	var actionRet = false;
 	for(var s in this._actionHandlers){
@@ -471,20 +459,27 @@ dusk.sgui.Component.prototype._doAction = function(e) {
 };
 
 /** This is called when the left key is pressed.
+ * @param {object} e The JQuery keypress event.
  * @return {boolean} Whether focus should flow to {@link dusk.sgui.Component.leftFlow}.
  * @protected
  */
 dusk.sgui.Component.prototype._leftAction = function(e) {return true;};
 /** This is called when the right key is pressed.
- * @return Whether focus should flow to <code>rightFlow</code>.
+ * @param {object} e The JQuery keypress event.
+ * @return {boolean} Whether focus should flow to {@link dusk.sgui.Component.rightFlow}.
+ * @protected
  */
 dusk.sgui.Component.prototype._rightAction = function(e) {return true;};
 /** This is called when the up key is pressed.
- * @return Whether focus should flow to <code>upFlow</code>.
+ * @param {object} e The JQuery keypress event.
+ * @return {boolean} Whether focus should flow to {@link dusk.sgui.Component.upFlow}.
+ * @protected
  */
 dusk.sgui.Component.prototype._upAction = function(e) {return true;};
 /** This is called when the down key is pressed.
- * @return Whether focus should flow to <code>downFlow</code>.
+ * @param {object} e The JQuery keypress event.
+ * @return {boolean} Whether focus should flow to {@link dusk.sgui.Component.downFlow}.
+ * @protected
  */
 dusk.sgui.Component.prototype._downAction = function(e) {return true;};
 
@@ -503,8 +498,17 @@ dusk.sgui.Component.prototype._registerPropMask = function(name, mask, redraw, d
 	this._propMasks[name] = [mask, redraw, depends];
 };
 
-/** This is what actually processes all the properties, it should be given an xml as an argument, that XML should contain a list of properties.
- * @param xml The properties to process.
+/** Given an object, this function sets the properties of this object in relation to the properties of the object.
+ * 
+ * This is how the actions system manages the SimpleGui system; by setting properties in JSON which will be interpreted.
+ * 
+ * If any property is an object which has a `to` property, then the current value of the property will be stored in the variable `to`.
+ * 	If the property also has a `value` property, then that will be set to the property.
+ * 
+ * @param {object} props The object to read the properties off.
+ * @param {?thread} thread The thread the actions system is running this on; null if no thread is using it.
+ * @see {dusk.sgui.Component._registerPropMask}
+ * @see {dusk.sgui.Component.prop}
  */
 dusk.sgui.Component.prototype.parseProps = function(props, thread) {
 	if(thread) this._thread = thread;
@@ -516,10 +520,13 @@ dusk.sgui.Component.prototype.parseProps = function(props, thread) {
 	
 	//Dependancies system
 	while(toProcess.length) {
+		//loop through all props needing to be processed
 		for(var i = toProcess.length-1; i >= 0; i--) {
 			if(this._propMasks[toProcess[i]] && this._propMasks[toProcess[i]][2]) {
+				//Loop to see if dependancies need processing
 				for(var j = this._propMasks[toProcess[i]][2].length-1; j >= 0; j--) {
 					if(toProcess.indexOf(this._propMasks[toProcess[i]][2][j]) !== -1) {
+						//If so, then skip this one
 						j = -2;
 					}
 				}
@@ -527,6 +534,7 @@ dusk.sgui.Component.prototype.parseProps = function(props, thread) {
 				if(j < -1) continue;
 			}
 			
+			//Check for "to" propety and handle it
 			if(props[toProcess[i]] && props[toProcess[i]].to !== undefined) {
 				dusk.actions.setVar(props[toProcess[i]].to, this.prop(toProcess[i]));
 				if(props[toProcess[i]].value !== undefined) {
@@ -541,6 +549,16 @@ dusk.sgui.Component.prototype.parseProps = function(props, thread) {
 	}
 };
 
+/** Returns or sets a single property of the component using the name specified by {dusk.sgui.Component._registerPropMask}.
+ * 	A full list of properties that can be set can be found on the wiki.
+ * 
+ * If value is omitted, no value will be set.
+ * 
+ * @param {string} name The property to set.
+ * @param {?object} value The new value to set for the object.
+ * @return {?object} The (new) value of the object, or null if no property by that name can be handled.
+ * @see {dusk.sgui.Component.parseProps}
+ */
 dusk.sgui.Component.prototype.prop = function(name, value) {
 	if(this._propMasks[name] !== undefined) {
 		if(value === undefined) {
@@ -555,16 +573,22 @@ dusk.sgui.Component.prototype.prop = function(name, value) {
 	return null;
 };
 
-
+/** Returns or sets a property for the theme.
+ * 	A theme is a collection of variables that serve as the "default" value for some properties of components.
+ * 
+ * @param {string} name The property to set.
+ * @param {?object} value The new value to set for the object.
+ * @return {?object} The (new) value of the object, or null if no property by that name can be handled.
+ * @see {dusk.sgui.Component.parseProps}
+ */
 dusk.sgui.Component.prototype._theme = function(value, set) {
-	if(dusk.actions.getVar("theme."+dusk.actions.getVar("theme.current")+"."+value) === undefined && set !== undefined)
-		dusk.actions.setVar("theme."+dusk.actions.getVar("theme.current")+"."+value, set);
+	if(!dusk.mods.simpleGui.getThemeKey(value)) dusk.mods.simpleGui.setThemeKey(value, set);
 	
-	return dusk.actions.getVar("theme."+dusk.actions.getVar("theme.current")+"."+value);
+	return dusk.mods.simpleGui.getThemeKey(value);
 };
 
 
-dusk.sgui.Component.prototype.__defineSetter__("fade", function _setFade(value) {
+/*dusk.sgui.Component.prototype.__defineSetter__("fade", function s_fade(value) {
 	this._awaitNext();
 	
 	if("from" in value) {
@@ -591,8 +615,8 @@ dusk.sgui.Component.prototype.__defineSetter__("fade", function _setFade(value) 
 /** @name float
  * 
  * Test!
- */
-dusk.sgui.Component.prototype.__defineSetter__("float", function _setFloat(value) {
+ * /
+dusk.sgui.Component.prototype.__defineSetter__("float", function s_float(value) {
 	this._awaitNext();
 	
 	if("for" in value) {
@@ -646,43 +670,43 @@ dusk.sgui.Component.prototype._floatEffect = function() {
 		this._clearFrameHandler(this._floatEffect);
 		this._next();
 	}
-};
+};*/
 
 
-dusk.sgui.Component.prototype.__defineSetter__("delete", function set_delete(value) {
+/** This deletes the component. It can be envoked in one of two ways:
+ * 
+ * Firstly, by assigning it any non false value, and secondly by calling it as if it were a function.
+ * 
+ * This will tell the parent component to remove the child, however it will not remove any other references to it.
+ * 
+ * @type function
+ * @name delete
+ * @memberof dusk.sgui.Component
+ */
+dusk.sgui.Component.prototype.__defineSetter__("delete", function s_delete(value) {
 	if(value) this._container.deleteComponent(this.comName);
 });
 
-dusk.sgui.Component.prototype.__defineGetter__("delete", function get_delete() {return function(){this["delete"] = true;};});
+dusk.sgui.Component.prototype.__defineGetter__("delete", function g_delete() {return function(){this["delete"] = true;};});
 
 
-/** This just calls <code>Events.awaitNext()</code>, but calling this function is required for the checking if this component is open to work. 
- * @param count The number of nexts to wait for.
- * @see Events#awaitNext
- */
-dusk.sgui.Component.prototype._awaitNext = function(count) {
-	if(count === undefined) count = 1;
-	this._open += count;
-	dusk.actions.awaitNext(this._thread, count);
-};
-
-/** This just calls <code>Events.next()</code>, but calling this function is required for the checking if this component is open to work. It also gets the thread right.
- * @see Events#awaitNext
- */
-dusk.sgui.Component.prototype._next = function(count) {
-	if(count === undefined) count = 1;
-	this._open -= count;
-	dusk.actions.next(this._thread);
-};
-
-
-/** This adds a handler that will call the function when the component is added to the stage. Amusing.
- * @param funct The function to call, it will be passed a single parameter, the Event, and should return void.
+/** This will register the function to a listener that fires when the component tries to draw stuff.
+ * 
+ * It is expected that the function registered will draw the component to the stage.
+ * 
+ * @param {function(CanvasRenderingContext2D):undefined} funct The function to call, it will be passed a single argument; the canvas to draw the component onto.
+ * @protected
  */
 dusk.sgui.Component.prototype._registerDrawHandler = function(funct) {
 	this._drawHandlers.push(funct);
 };
 
+/** Requests the component to draw itself onto the specified 2D canvas context.
+ * 
+ * The canvas' state will be restored to what it was as an argument when this function is finished, so no changes will persist out of the function.
+ * 
+ * @param {CanvasRenderingContext2D} c The canvas context to draw onto.
+ */
 dusk.sgui.Component.prototype.draw = function(c) {
 	if(!this.visible) return;
 
@@ -726,6 +750,10 @@ dusk.sgui.Component.prototype.draw = function(c) {
 	return this._cacheCanvas;*/
 };
 
+/** Called when the component's apperance has changed.
+ * 
+ * If this is not called after making any changes, then the component's apperence may not update.
+ */
 dusk.sgui.Component.prototype.bookRedraw = function() {
 	if(this._redrawBooked || !this._container) return;
 	
@@ -734,6 +762,13 @@ dusk.sgui.Component.prototype.bookRedraw = function() {
 };
 
 
+/** Resolves a path relative to the current component.
+ * 
+ * See `{@link dusk.mods.simpleGui}` for a description on how paths work.
+ * 
+ * @param {string} path The path to resolve.
+ * @return {dusk.sgui.Component} The component the path is a path to.
+ */
 dusk.sgui.Component.prototype.path = function(path) {
 	if(!path){throw new Error("Path is undefined or empty.");}
 	
@@ -770,16 +805,17 @@ dusk.sgui.Component.prototype.path = function(path) {
 	}
 };
 
-/** This should be called when the component looses focus. */
+/** This is called when the component looses focus, and may be overriden. */
 dusk.sgui.Component.prototype.onLooseFocus = function() {this._focused = false;this.bookRedraw();};
-/** This should be called when the component gets focus. */
+/** This is called when the component gains focus, and may be overriden. */
 dusk.sgui.Component.prototype.onGetFocus = function() {this._focused = true;this.bookRedraw();};
 
-/** This should be called when the component is no longer the active component. */
+/** This is called when the component is no longer active, and may be overriden. */
 dusk.sgui.Component.prototype.onDeactive = function() {this._active = false;this.bookRedraw();};
-/** This should be called when the component becomes the active component. */
+/** This is called when the component becomes longer active, and may be overriden. */
 dusk.sgui.Component.prototype.onActive = function() {this._active = true;this.bookRedraw();};
 
+/** Returns a string representation of the component. */
 dusk.sgui.Component.prototype.toString = function() {return "[sgui "+this.className+" "+this.comName+"]";};
 
 //-----
