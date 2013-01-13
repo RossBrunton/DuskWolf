@@ -2,7 +2,10 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-window.sgui = {};
+dusk.load.require("dusk.utils");
+dusk.load.require("dusk.EventDispatcher");
+dusk.load.require("dusk.keyboard");
+dusk.load.require("dusk.controls");
 
 dusk.load.provide("dusk.sgui.Component");
 dusk.load.provide("dusk.sgui.NullCom");
@@ -19,56 +22,7 @@ dusk.load.provide("dusk.sgui.NullCom");
  * This class doesn't actually display anything itself, classes that inherit from it do.
  * 	The properties for this apply to all components.
  * 
- * @see {@link dusk.mods.simpleGui}
- */
-
-/*
- * Supported Properties:
- * 
- * > x:123
- *	The x coordinate of this component, starting from the left of its container at 0.
- * 
- * > y:123
- *	The y coordinate of this component, starting from the top of its container at 0.
- * 
- * > width:123
- * 	The width of the component, in pixels.
- * 
- * > height:123
- * 	The height of the component, in pixels.
- * 
- * > alpha:123
- * 	How transparent the object is, in the range 0 (fully transparent) to 1 (opaque).
- * 
- * > visible:true
- * 	If this is false, the object will not be drawn on to the canvas.
- * 
- * > action:[...]
- * 	When the action button is pressed when this component is active, the actions here is ran.
- * 
- * > flow-up:"..."
- *	The component in this one's container that will be flowed into when the up button is pressed. If it is not a valid component, "blank" is flowed into.
- * 
- * > flow-up:"..."
- *	The component in this one's container that will be flowed into when the down button is pressed. If it is not a valid component, "blank" is flowed into.
- * 
- * > flow-up:"..."
- *	The component in this one's container that will be flowed into when the left button is pressed. If it is not a valid component, "blank" is flowed into.
- * 
- * > flow-up:"..."
- *	The component in this one's container that will be flowed into when the right button is pressed. If it is not a valid component, "blank" is flowed into.
- * 
- * > enabled:true
- *	If true, then the component can be flowed into, if not then the attempt to flow will fail.
- * 
- * > delete:true
- *	If true, then the component will be erased from it's container.
- * 
- * > fade:{("from":123,) ("speed":123,) ("end":123)}
- *	This creates a fade effect, which will change the alpha from the "from" value to the "end" value at "speed" alpha units per second. The defaults for "from", "speed" and "end" are 0, 1 and 0.05 respectively. 
- * 
- * > float:{("for":123,) ("speed":123,) ("dir":"...")}
- *	This creates a float effect. For "for" frames the component will move in direction "dir" (either "u", "d", "l" or "r" for the four main directions) "speed" pixels. The defaults for "for", "speed" and "dir" are 10, 5 and "u" respectively.
+ * @see {@link dusk.simpleGui}
  */
 dusk.sgui.Component = function (parent, componentName) {
 	if(parent !== undefined){
@@ -190,7 +144,15 @@ dusk.sgui.Component = function (parent, componentName) {
 		 * @memberof dusk.sgui.Component
 		 */
 		this._propMasks = {};
-		
+		/** An event dispatcher which fires when the element is deleted.
+		 * 
+		 * The event object has a single property named `component`, which is this.
+		 * 
+		 * @type dusk.EventDispatcher
+		 * @since 0.0.15-alpha
+		 * @memberof dusk.sgui.Component
+		 */
+		this.onDelete = new dusk.EventDispatcher("dusk.sgui.Component.onDelete");
 
 		/** Whether the component can become focused, if false it cannot be flowed into. 
 		 * @type boolean
@@ -311,9 +273,9 @@ dusk.sgui.Component.prototype._registerFrameHandler = function(funct) {
 	this._frameHandlers.push(funct);
 };
 
-/** This removes a frame handler that has been set with `{@link _registerFrameHandler}`.
+/** This removes a frame handler that has been set with `{@link dusk.sgui.Component._registerFrameHandler}`.
  * @param {function()} funct The function to remove.
- * 	This must be the same function used in the call to {@link _registerFrameHandler}.
+ * 	This must be the same function used in the call to {@link dusk.sgui.Component._registerFrameHandler}.
  * @protected
  * @memberof dusk.sgui.Component
  */
@@ -323,7 +285,7 @@ dusk.sgui.Component.prototype._clearFrameHandler = function(funct) {
 	}
 };
 
-/** This function should be called every frame by {@link dusk.mods.simpleGui}. It calls all of this component's frame handlers once.
+/** This function should be called every frame by {@link dusk.simpleGui}. It calls all of this component's frame handlers once.
  * @memberof dusk.sgui.Component
  */
 dusk.sgui.Component.prototype.frame = function() {
@@ -373,7 +335,7 @@ dusk.sgui.Component.prototype._registerActionHandler = function(name, funct, sco
 
 /** This causes the component to handle a keypress, it should be called by ether it's parent container or SimpleGui.
  * 
- * If the component running this is a container, then it's `{@link dusk.sgui.Component.containerKeypress}` function will be called.
+ * If the component running this is a container, then it's `{@link dusk.sgui.IContainer.containerKeypress}` function will be called.
  *	If that function returns true, then this shall return true without doing anything else.
  * 
  * This function will first check the key to see if it is a direction or the action key, if it is ether the action handlers or the "directionAction"s are called. Otherwise it looks for a keyhandler. If any of the action handlers or keyhandlers returns true, then this function will return true.
@@ -412,31 +374,29 @@ dusk.sgui.Component.prototype.keypress = function (e) {
 		}
 	}
 	
-	switch(e.which){
-		//Directions
-		case 37:if(this._leftAction(e) && this.leftFlow && this._container.flow(this.leftFlow)){return true;};break;
-		case 38:if(this._upAction(e) && this.upFlow && this._container.flow(this.upFlow)){return true;};break;
-		case 39:if(this._rightAction(e) && this.rightFlow && this._container.flow(this.rightFlow)){return true;};break;
-		case 40:if(this._downAction(e) && this.downFlow && this._container.flow(this.downFlow)){return true;};break;
+	//Directions
+	if(dusk.controls.checkKey("sgui_left", e.which)) {
+		if(this._leftAction(e) && this.leftFlow && this._container.flow(this.leftFlow)){return true;}
+	}else if(dusk.controls.checkKey("sgui_up", e.which)) {
+		if(this._upAction(e) && this.upFlow && this._container.flow(this.upFlow)){return true;}
+	}else if(dusk.controls.checkKey("sgui_right", e.which)) {
+		if(this._rightAction(e) && this.rightFlow && this._container.flow(this.rightFlow)){return true;}
+	}else if(dusk.controls.checkKey("sgui_down", e.which)) {
+		if(this._downAction(e) && this.downFlow && this._container.flow(this.downFlow)){return true;}
+	}else if(dusk.controls.checkKey("sgui_action", e.which)) {
+		if(this._doAction(e)){return true;}
+	}else {
+		for(var a = this._keyHandlers.length-1; a >= 0; a--){
+			if(this._keyHandlers[a][0] == e.which && this._keyHandlers[a][1] == e.shiftKey && this._keyHandlers[a][2] == e.ctrlKey){
+				return this._keyHandlers[a][3].call(this, e);
+			}
+		}
 		
-		//Action key
-		case 32:
-			if(this._doAction(e)){
-				return true;
+		for(var b = this._keyHandlers.length-1; b >= 0; b--){
+			if(this._keyHandlers[b][0] == e.which && this._keyHandlers[b][1] == false && this._keyHandlers[b][2] == e.ctrlKey){
+				return this._keyHandlers[b][3].call(this, e);
 			}
-		
-		default:
-			for(var a = this._keyHandlers.length-1; a >= 0; a--){
-				if(this._keyHandlers[a][0] == e.which && this._keyHandlers[a][1] == e.shiftKey && this._keyHandlers[a][2] == e.ctrlKey){
-					return this._keyHandlers[a][3].call(this, e);
-				}
-			}
-			
-			for(var b = this._keyHandlers.length-1; b >= 0; b--){
-				if(this._keyHandlers[b][0] == e.which && this._keyHandlers[b][1] == false && this._keyHandlers[b][2] == e.ctrlKey){
-					return this._keyHandlers[b][3].call(this, e);
-				}
-			}
+		}
 	}
 	
 	return false;
@@ -500,19 +460,16 @@ dusk.sgui.Component.prototype._registerPropMask = function(name, mask, redraw, d
 
 /** Given an object, this function sets the properties of this object in relation to the properties of the object.
  * 
- * This is how the actions system manages the SimpleGui system; by setting properties in JSON which will be interpreted.
+ * This is used to describe the component using JSON, for quicker efficiency.
  * 
- * If any property is an object which has a `to` property, then the current value of the property will be stored in the variable `to`.
- * 	If the property also has a `value` property, then that will be set to the property.
+ * The properties of the `props` object tend to match up with the names of properties of this class (any changes will be noted in the documentation).
+ * 
+ * This function will loop through all the properties is `props` and set that value to the corresponding value in this object.
  * 
  * @param {object} props The object to read the properties off.
- * @param {?thread} thread The thread the actions system is running this on; null if no thread is using it.
- * @see {dusk.sgui.Component._registerPropMask}
- * @see {dusk.sgui.Component.prop}
+ * @see {@link dusk.sgui.Component._registerPropMask}
  */
-dusk.sgui.Component.prototype.parseProps = function(props, thread) {
-	if(thread) this._thread = thread;
-	
+dusk.sgui.Component.prototype.parseProps = function(props) {
 	var toProcess = [];
 	for(var p in props) {
 		toProcess[toProcess.length] = p;
@@ -549,8 +506,8 @@ dusk.sgui.Component.prototype.parseProps = function(props, thread) {
 	}
 };
 
-/** Returns or sets a single property of the component using the name specified by {dusk.sgui.Component._registerPropMask}.
- * 	A full list of properties that can be set can be found on the wiki.
+/** Returns or sets a single property of the component.
+ *	See `{@link dusk.sgui.Component.parseProps}` for details on how properties work.
  * 
  * If value is omitted, no value will be set.
  * 
@@ -582,9 +539,9 @@ dusk.sgui.Component.prototype.prop = function(name, value) {
  * @see {dusk.sgui.Component.parseProps}
  */
 dusk.sgui.Component.prototype._theme = function(value, set) {
-	if(!dusk.mods.simpleGui.getThemeKey(value)) dusk.mods.simpleGui.setThemeKey(value, set);
+	if(!dusk.simpleGui.getThemeKey(value)) dusk.simpleGui.setThemeKey(value, set);
 	
-	return dusk.mods.simpleGui.getThemeKey(value);
+	return dusk.simpleGui.getThemeKey(value);
 };
 
 
@@ -684,7 +641,10 @@ dusk.sgui.Component.prototype._floatEffect = function() {
  * @memberof dusk.sgui.Component
  */
 dusk.sgui.Component.prototype.__defineSetter__("delete", function s_delete(value) {
-	if(value) this._container.deleteComponent(this.comName);
+	if(value) {
+		this.onDelete.fire({"component":this});
+		this._container.deleteComponent(this.comName);
+	}
 });
 
 dusk.sgui.Component.prototype.__defineGetter__("delete", function g_delete() {return function(){this["delete"] = true;};});
@@ -755,7 +715,12 @@ dusk.sgui.Component.prototype.draw = function(c) {
  * If this is not called after making any changes, then the component's apperence may not update.
  */
 dusk.sgui.Component.prototype.bookRedraw = function() {
-	if(this._redrawBooked || !this._container) return;
+	if(this._redrawBooked) return;
+	if(!this._container) {
+		//Must be a pane
+		dusk.simpleGui.bookRedraw();
+		return;
+	}
 	
 	this._redrawBooked = true;
 	this._container.bookRedraw();
@@ -764,7 +729,7 @@ dusk.sgui.Component.prototype.bookRedraw = function() {
 
 /** Resolves a path relative to the current component.
  * 
- * See `{@link dusk.mods.simpleGui}` for a description on how paths work.
+ * See `{@link dusk.simpleGui}` for a description on how paths work.
  * 
  * @param {string} path The path to resolve.
  * @return {dusk.sgui.Component} The component the path is a path to.

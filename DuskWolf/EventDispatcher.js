@@ -7,6 +7,7 @@ dusk.load.provide("dusk.EventDispatcher");
 /** Creates a new EventDispatcher.
  * 
  * @param {string} name A name for the event dispatcher; used for identifying it in debbuging.
+ * @param {?number} mode The current behaviour used for managing return values, defaults to `{@link dusk.EventDispatcher.MODE_NONE}`.
  * 
  * @class dusk.EventDispatcher
  * 
@@ -22,7 +23,7 @@ dusk.load.provide("dusk.EventDispatcher");
  * 
  * @since 0.0.14-alpha
  */
-dusk.EventDispatcher = function(name) {
+dusk.EventDispatcher = function(name, mode) {
 	/** All the listeners; each element is an array in the form [callback, propsYes, propsNo, scope].
 	 * @type array
 	 * @private
@@ -88,7 +89,10 @@ dusk.EventDispatcher.prototype.fire = function(event) {
 	}
 };
 
-/** Returns a string representation of the EventDispatcher */
+/** Returns a string representation of the EventDispatcher.
+ * 
+ * @return {string} A representation of the EventDispatcher.
+ */
 dusk.EventDispatcher.prototype.toString = function() {
 	return "[EventDispatcher "+this._name+"]";
 };

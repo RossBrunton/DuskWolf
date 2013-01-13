@@ -30,10 +30,13 @@ dusk.utils.clone = function(o) {
 	return tmp;
 };
 
-/** Merges two objects together.
+/** Merges two objects together, combining their properties.
+ * 
+ * Note that b takes priority, so if a and b both have the same property, b's will be set.
+ * 
  * @param {object} a The first object.
  * @param {object} b The second object.
- * @return {object} A new object, containing all the properties of the two source objects. Note that b takes priority.
+ * @return {object} A new object, containing all the properties of the two source objects.
  */
 dusk.utils.merge = function(a, b) {
 	a = dusk.utils.clone(a);
@@ -50,6 +53,7 @@ dusk.utils.merge = function(a, b) {
 };
 
 /** Creates a new canvas with a specified height and width.
+ * 
  * @param {number} width The width of the canvas.
  * @param {number} height The height of the canvas.
  * @return {Canvas} A canvas with those dimensions.
@@ -66,6 +70,7 @@ dusk.utils.createCanvas = function(width, height) {
 /** Retrieves a HTTP get var (the ?name=value part of the URL).
  * @param {string} name The name of the var to get.
  * @return {string} The value of the requested var.
+ * 
  * @since 0.0.12-alpha
  */
 dusk.utils.urlGet = function(name) {
@@ -78,10 +83,12 @@ dusk.utils.urlGet = function(name) {
 	return false;
 };
 
-/** Strips anything that looks like a comment from a JSON string, and also compile the file as DWS if neccissary.
- * @param {string} json The JSON or DWS string.
- * @param {boolean=false} dws Allow compiling as DWS if the string doesn't look like a JSON string.
- * @return {?object} a de-commented and potentially compiled object.
+/** Strips anything that looks like a comment from a JSON string.
+ * 
+ * If, after removing the comment, the string is valid JSON, then it will be parsed, else this will return null.
+ * 
+ * @param {string} json The JSON string.
+ * @return {?object} The JSON, or the null if it couldn't be parsed.
  * @since 0.0.12-alpha
  */
 dusk.utils.jsonParse = function(json) {
@@ -120,4 +127,17 @@ dusk.utils.verCompare = function(a, b) {
 		if(+ca < +cb) return -1;
 		if(ca === "" || cb === "") return 0;
 	}
+};
+
+/** Resolves a relative URL into an absolute one.
+ * 
+ * If the URL provided is relative, then the base URL will be prepended to it.
+ * 
+ * @param {string} url The URL to resolve.
+ * @param {string} base The base to set if the URL is relative. This must be a directory (ends with a "/").
+ * @return {string} The URL, converted to absolute if needed.
+ */
+dusk.utils.resolveRelative = function(url, base) {
+	if(url.indexOf(":") === -1 && url[0] != "/") url = base+url;
+	return url;
 };

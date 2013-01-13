@@ -6,7 +6,7 @@ dusk.load.require("dusk.sgui.Image");
 
 dusk.load.provide("dusk.sgui.FocusChecker");
 
-/** This is a simple component that changes apperance based on whether it is active or not. By default it is red if active, blue if only focused and green otherwise.
+/* This is a simple component that changes apperance based on whether it is active or not. By default it is red if active, blue if only focused and green otherwise.
  * 
  * <p><img src='FocusChecker.png'/></p>
  * 
@@ -47,12 +47,12 @@ dusk.sgui.FocusChecker.constructor = dusk.sgui.FocusChecker;
 
 dusk.sgui.FocusChecker.prototype.className = "FocusChecker";
 
-/** Turns the focus checker to the image set by <code>image-inactive</code>. */
+/* Turns the focus checker to the image set by <code>image-inactive</code>. */
 dusk.sgui.FocusChecker.prototype.onLooseFocus = function() {if(this.inactiveImg) this.src = this.inactiveImg;};
-/** Turns the focus checker to the image set by <code>image-focused</code>. */
+/* Turns the focus checker to the image set by <code>image-focused</code>. */
 dusk.sgui.FocusChecker.prototype.onGetFocus = function() {if(this.focusedImg) this.src = this.focusedImg;};
 
-/** Turns the focus checker to the image set by <code>image-focused</code>. */
+/* Turns the focus checker to the image set by <code>image-focused</code>. */
 dusk.sgui.FocusChecker.prototype.onDeactive = function() {if(this.focusedImg) this.src = this.focusedImg;};
-/** Turns the focus checker to the image set by <code>image-active</code>. */
+/* Turns the focus checker to the image set by <code>image-active</code>. */
 dusk.sgui.FocusChecker.prototype.onActive = function() {if(this.activeImg) this.src = this.activeImg;};

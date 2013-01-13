@@ -2,20 +2,14 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-var dusk = {};
-dusk.load = {};
+if(!dusk) var dusk = {};
+if(!dusk.load) dusk.load = {};
 
 /** @namespace dusk.load
- * @description This file initiates the DuskWolf engine, and when included the engine is started.
- * 
- * It provides the functions required to import files and resolve dependancies.
+ * @description This namespace provides the functions required to import files and resolve dependancies.
  * 
  * JavaScript files imported by DuskWolf consist of adding them to the page's head tab, one after the other.
- * Before a new file is added to the head, the old one must have been finished downloading, and call {@link dusk.load.provide} with it's namespace name.
- * 
- * This namespace will also add keyboard listeners to the page, which stop you scrolling using the arrow keys, and send any keypresses to the engine.
- * 
- * @see {@link dusk.deps}
+ * Before a new file is added to the head, the old one must have been finished downloading, and call `{@link dusk.load.provide}` with it's namespace name.
  */
 
 /** Containes all the dependancy information for the files.
@@ -43,6 +37,24 @@ dusk.load._names = {};
  * @since 0.0.12-alpha
  */
 dusk.load._files = [];
+
+/** The currently observed dependancies, used for creating dependancy lists.
+ * 
+ * Each key is the "true" filename, the value is an array of the form `[provided, requires]`.
+ * 
+ * @type object
+ * @private
+ * @since 0.0.15-alpha
+ */
+dusk.load._observedDeps = {};
+ 
+/** The currently imported package which is running now, or ran last.
+ * 
+ * @type string
+ * @private
+ * @since 0.0.15-alpha
+ */
+dusk.load._current = "";
 
 /** An event dispatcher which is fired when a package is imported and then calls `{@link dusk.load.provide}`.
  * 
@@ -95,14 +107,29 @@ dusk.load.addDependency = function(file, provided, required) {
 	}
 };
 
-/** Imports a namespace. The namespace must have been previously registered using {@link dusk.load.addDependency}.
+/** Marks the current file as requiring the specified namespace as a dependency, used for generating dependancy information.
+ * 
+ * @param {string} name The namespace to import.
+ * @since 0.0.15-alpha
+ */
+dusk.load.require = function(name) {
+	if(dusk.load._current) {
+		for(var p in dusk.load._observedDeps) {
+			if(dusk.load._observedDeps[p][0].indexOf(dusk.load._current) !== -1) {
+				dusk.load._observedDeps[p][1].push(name);
+			}
+		}
+	}
+};
+
+/** Imports a namespace. The namespace must have been previously registered using `{@link dusk.load.addDependency}`.
  * 
  * The namespace will NOT be immediately available after this function call unless it has already been imported (in which case the call does nothing).
  * 
  * @param {string} name The namespace to import.
- * @since 0.0.12-alpha
+ * @since 0.0.15-alpha
  */
-dusk.load.require = function(name) {
+dusk.load.import = function(name) {
 	if(!(name in this._names)) {
 		console.error("Could not import "+name+" as it is not recognised.");
 		return;
@@ -117,11 +144,77 @@ dusk.load.require = function(name) {
 	this._names[name][1] = 1;
 	for(var i = this._names[name][2].length-1; i >= 0; i --) {
 		if(this._names[this._names[name][2][i]][1] === 0) {
-			dusk.load.require(this._names[name][2][i]);
+			dusk.load.import(this._names[name][2][i]);
 		}
 	}
 	
 	dusk.load._files.push([false, name]);
+};
+
+/** Imports all packages, usefull for debugging or generating dependancy files.
+ * @since 0.0.15-alpha
+ */
+dusk.load.importAll = function() {
+	console.log("Importing everything...");
+	for(var f in dusk.load._names) {
+		console.log(f);
+		dusk.load.import(f);
+	}
+};
+
+/** Returns a JSON string containing all the dependancy information of all the elements matching the regexp specified.
+ * 
+ * This should be importable using `{@link dusk.load.import}`.
+ * 
+ * @param {regex} patt The pattern to match.
+ * @return {string} A list of dependancies.
+ * @since 0.0.15-alpha
+ */
+dusk.load.buildDeps = function(patt) {
+	var holdString = "[\n\t";
+	var first = true;
+	for(var d in dusk.load._observedDeps) {
+		for(var i = dusk.load._observedDeps[d][0].length-1; i >= 0; i --) {
+			if(patt.test(dusk.load._observedDeps[d][0][i])) {
+				if(!first) holdString += ",\n\t";
+				first = false;
+				var holdArray = [];
+				holdArray[0] = d;
+				holdArray[1] = dusk.load._observedDeps[d][0];
+				holdArray[1].sort();
+				holdArray[2] = dusk.load._observedDeps[d][1];
+				holdArray[2].sort();
+				holdString += JSON.stringify(holdArray);
+				break;
+			}
+		}
+	}
+	holdString += "\n]";
+	return holdString;
+};
+
+/** Download a JSON containing an array of dependancies. These will be looped through, and the entries will be given to `{@link dusk.load.addDependency}`.
+ * 
+ * Each entry of the array must itself be an array of the form `[file, provided, required]`.
+ * 
+ * @param {string} path The path to the JSON file.
+ * @param {function()} callback Will be called when the imports are completed.
+ * @since 0.0.15-alpha
+ */
+dusk.load.importList = function(path, callback) {
+	$.ajax({"async":true, "dataType":"JSON", "error":function(jqXHR, textStatus, errorThrown) {
+		console.error("Error getting file, "+errorThrown);
+	}, "success":[function importSuccess(data, textStatus, jqXHR){
+		var relativePath = jqXHR.responseURL.split("/");
+		relativePath.splice(-1, 1);
+		relativePath = relativePath.join("/")+"/";
+		for(var i = data.length-1; i >= 0; i--) {
+			dusk.load._observedDeps[data[i][0]] = [data[i][1], []];
+			if(data[i][0].indexOf(":") === -1 && data[i][0][0] != "/") data[i][0] = relativePath + data[i][0];
+			dusk.load.addDependency(data[i][0], data[i][1], data[i][2]);
+		}
+	}, callback], "beforeSend":function(jqXHR, settings) {jqXHR.responseURL = path},
+	"url":path});
 };
 
 /** This is called every 10ms or so. It checks `{@link dusk.load._files}` to see if there are any new files that need downloading, and if so downloads them.
@@ -130,11 +223,13 @@ dusk.load.require = function(name) {
  */
 dusk.load._repeat = function() {
 	if(dusk.load._files.length && dusk.load._files[0][0] === false) {
+		dusk.load._current = dusk.load._files[0][1];
 		var js = document.createElement("script");
 		js.src = dusk.load._names[dusk.load._files[0][1]][0];
 		document.head.appendChild(js);
 		dusk.load._names[dusk.load._files[0][1]][1] = 2;
 		dusk.load._files[0][0] = true;
+		//dusk.load._current = "";
 	}
 };
 setInterval(dusk.load._repeat, 10);
@@ -144,15 +239,6 @@ setInterval(dusk.load._repeat, 10);
  * @default "DuskWolf"
  */
 var __duskdir__ = __duskdir__?__duskdir__:"DuskWolf";
-
-
-dusk.load.addDependency(__duskdir__+"/deps.js", ["dusk.deps"], []);
-dusk.load.require("dusk.deps");
-
-//Replaced in StartGame.js
-dusk.startGame = function() {
-	setTimeout(dusk.startGame, 100);
-};
 
 /** Called every 100ms to check if dusk.EventDispatcher is imported; if so, initiates `{@link dusk.load.onProvide}`.
  * @private
@@ -165,3 +251,5 @@ dusk.load._checkIfHandleable = function() {
 	}
 };
 dusk.load._checkIfHandleable();
+
+dusk.load.provide("dusk.load");

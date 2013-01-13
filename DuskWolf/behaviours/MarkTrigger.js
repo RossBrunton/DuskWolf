@@ -2,13 +2,14 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-dusk.load.require("dusk.pbehave.PBehave");
+dusk.load.require("dusk.behave.Behave");
+dusk.load.require("dusk.plat");
 
-dusk.load.provide("dusk.pbehave.MarkTrigger");
+dusk.load.provide("dusk.behave.MarkTrigger");
 
-dusk.pbehave.MarkTrigger = function(entity) {
+dusk.behave.MarkTrigger = function(entity) {
 	if(entity !== undefined){
-		dusk.pbehave.PBehave.call(this, entity);
+		dusk.behave.Behave.call(this, entity);
 		
 		this._markAt = "";
 		this._coolDown = 5;
@@ -20,10 +21,10 @@ dusk.pbehave.MarkTrigger = function(entity) {
 		this._listenEvent("frame", this._markTriggerFrame);
 	}
 };
-dusk.pbehave.MarkTrigger.prototype = new dusk.pbehave.PBehave();
-dusk.pbehave.MarkTrigger.constructor = dusk.pbehave.MarkTrigger;
+dusk.behave.MarkTrigger.prototype = new dusk.behave.Behave();
+dusk.behave.MarkTrigger.constructor = dusk.behave.MarkTrigger;
 
-dusk.pbehave.MarkTrigger.prototype._markTriggerFrame = function(name, e) {
+dusk.behave.MarkTrigger.prototype._markTriggerFrame = function(name, e) {
 	if(this._coolDown) this._coolDown --;
 	
 	if(this._entity.path("../../scheme").tilePointIn(this._entity.x+(this._entity.prop("width")/2), this._entity.y+(this._entity.prop("height")/2))[1] != 1) {
@@ -35,8 +36,7 @@ dusk.pbehave.MarkTrigger.prototype._markTriggerFrame = function(name, e) {
 		this._markAt = this._entity.path("../../scheme").tilePointIn(this._entity.x+(this._entity.prop("width")/2), this._entity.y+(this._entity.prop("height")/2))[0];
 		
 		if(!this._coolDown) {
-			console.log({"up":false, "mark":this._markAt, "activator":this._entity.comName, "room":this._entity.path("../..").roomName});
-			dusk.mods.plat.markTrigger.fire({"up":false, "mark":this._markAt, "activator":this._entity.comName, "room":this._entity.path("../..").roomName});
+			dusk.plat.markTrigger.fire({"up":false, "mark":this._markAt, "activator":this._entity.comName, "room":this._entity.path("../..").roomName});
 			this._coolDown = 5;
 		}
 	}

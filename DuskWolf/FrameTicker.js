@@ -2,10 +2,13 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-dusk.load.provide("dusk.mods.frameTicker");
+dusk.load.require("dusk.EventDispatcher");
+dusk.load.require("dusk");
 
-/** @namespace dusk.mods.frameTicker
- * @name dusk.mods.frameTicker
+dusk.load.provide("dusk.frameTicker");
+
+/** @namespace dusk.frameTicker
+ * @name dusk.frameTicker
  * 
  * @description This module contains things that allow code to be run at a specified frame rate.
  * 
@@ -20,13 +23,13 @@ dusk.load.provide("dusk.mods.frameTicker");
  * 
  * @type dusk.EventDispatcher
  */
-dusk.mods.frameTicker.onFrame = new dusk.EventDispatcher();
+dusk.frameTicker.onFrame = new dusk.EventDispatcher();
 
-/** The function that fires `{@dusk.mods.frameTicker.onFrame}`; it is called using `setInterval`.
+/** The function that fires `{@dusk.frameTicker.onFrame}`; it is called using `setInterval`.
  * 
  * @private
  */
-dusk.mods.frameTicker._doFrame = function() {
-	dusk.mods.frameTicker.onFrame.fire({});
+dusk.frameTicker._doFrame = function() {
+	dusk.frameTicker.onFrame.fire({});
 };
-setInterval(dusk.mods.frameTicker._doFrame, 1000/dusk.frameRate);
+setInterval(dusk.frameTicker._doFrame, 1000/dusk.frameRate);

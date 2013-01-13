@@ -2,6 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
+dusk.load.require("dusk.sgui.Component");
 dusk.load.require("dusk.sgui.IContainer");
 
 dusk.load.provide("dusk.sgui.Single");

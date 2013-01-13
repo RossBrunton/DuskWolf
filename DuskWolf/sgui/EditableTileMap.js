@@ -75,18 +75,18 @@ dusk.sgui.EditableTileMap.prototype._upAction = function(e) {
 		return false;
 	}
 	
-	if(dusk.mods.keyboard.isKeyPressed(65)) {
+	if(dusk.keyboard.isKeyPressed(65)) {
 		if(this.alpha+0.1 >= 1) {this.alpha = 1;} else {this.alpha += 0.1;}
 		return false;
 	}
 	
-	if(dusk.mods.keyboard.isKeyPressed(70)) {
+	if(dusk.keyboard.isKeyPressed(70)) {
 		this.frameHeight--;
 		this.bookRedraw(); 
 		return false;
 	}
 	
-	if(dusk.mods.keyboard.isKeyPressed(187) || dusk.mods.keyboard.isKeyPressed(189)) {
+	if(dusk.keyboard.isKeyPressed(187) || dusk.keyboard.isKeyPressed(189)) {
 		return false;
 	}
 	
@@ -108,18 +108,18 @@ dusk.sgui.EditableTileMap.prototype._downAction = function(e) {
 		return false;
 	}
 	
-	if(dusk.mods.keyboard.isKeyPressed(65)) {
+	if(dusk.keyboard.isKeyPressed(65)) {
 		if(this.alpha-0.1 <= 0) {this.alpha = 0;} else {this.alpha -= 0.1;}
 		return false;
 	}
 	
-	if(dusk.mods.keyboard.isKeyPressed(70)) {
+	if(dusk.keyboard.isKeyPressed(70)) {
 		this.frameHeight ++;
 		this.bookRedraw(); 
 		return false;
 	}
 	
-	if(dusk.mods.keyboard.isKeyPressed(187) || dusk.mods.keyboard.isKeyPressed(189)) {
+	if(dusk.keyboard.isKeyPressed(187) || dusk.keyboard.isKeyPressed(189)) {
 		return false;
 	}
 	
@@ -141,18 +141,18 @@ dusk.sgui.EditableTileMap.prototype._rightAction = function(e) {
 		return false;
 	}
 	
-	if(dusk.mods.keyboard.isKeyPressed(65)) {
+	if(dusk.keyboard.isKeyPressed(65)) {
 		if(this.alpha+0.1 >= 1) {this.alpha = 1;} else {this.alpha += 0.1;}
 		return false;
 	}
 	
-	if(dusk.mods.keyboard.isKeyPressed(70)) {
+	if(dusk.keyboard.isKeyPressed(70)) {
 		this.frameWidth ++;
 		this.bookRedraw(); 
 		return false;
 	}
 	
-	if(dusk.mods.keyboard.isKeyPressed(187) || dusk.mods.keyboard.isKeyPressed(189)) {
+	if(dusk.keyboard.isKeyPressed(187) || dusk.keyboard.isKeyPressed(189)) {
 		return false;
 	}
 	
@@ -174,18 +174,18 @@ dusk.sgui.EditableTileMap.prototype._leftAction = function(e) {
 		return false;
 	}
 	
-	if(dusk.mods.keyboard.isKeyPressed(65)) {
+	if(dusk.keyboard.isKeyPressed(65)) {
 		if(this.alpha-0.1 <= 0) {this.alpha = 0;} else {this.alpha -= 0.1;}
 		return false;
 	}
 	
-	if(dusk.mods.keyboard.isKeyPressed(70)) {
+	if(dusk.keyboard.isKeyPressed(70)) {
 		this.frameWidth --;
 		this.bookRedraw(); 
 		return false;
 	}
 	
-	if(dusk.mods.keyboard.isKeyPressed(187) || dusk.mods.keyboard.isKeyPressed(189)) {
+	if(dusk.keyboard.isKeyPressed(187) || dusk.keyboard.isKeyPressed(189)) {
 		return false;
 	}
 	

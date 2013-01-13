@@ -3,8 +3,9 @@
 "use strict";
 
 dusk.load.require("dusk.sgui.Grid");
-dusk.load.require("dusk.sgui.Text");
+dusk.load.require("dusk.sgui.Label");
 dusk.load.require("dusk.sgui.Rect");
+dusk.load.require("dusk.simpleGui");
 
 dusk.load.provide("dusk.sgui.Saybox");
 
@@ -20,7 +21,7 @@ dusk.sgui.Saybox = function (parent, comName) {
 		this._registerPropMask("speed", "speed", true);
 		this._registerPropMask("say", "say", true, ["speaker", "speed"]);
 		
-		this._width = dusk.mods.simpleGui.width;
+		this._width = dusk.simpleGui.width;
 		this._height = 200;
 		
 		this._text = "";

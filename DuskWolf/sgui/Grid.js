@@ -6,7 +6,7 @@ dusk.load.require("dusk.sgui.Group");
 
 dusk.load.provide("dusk.sgui.Grid");
 
-/** This is a horizontal group of components.
+/* This is a horizontal group of components.
  * 
  * <p><img src='HMenu.png'/></p>
  * 
@@ -44,7 +44,7 @@ dusk.sgui.Grid.constructor = dusk.sgui.Grid;
 
 dusk.sgui.Grid.prototype.className = "Grid";
 
-/** This creates a new population, erasing any existing ones.
+/* This creates a new population, erasing any existing ones.
  * @param type The type of component to use, without the "sg-" at the start.
  * @param count The number of elements to create.
  * @param spacing The spacing, in pixels, between them.
@@ -76,7 +76,7 @@ dusk.sgui.Grid.prototype.adjust = function() {
 	}
 };
 
-/** Manages the flowing left of the children. 
+/* Manages the flowing left of the children. 
  * @return <code>false</code> if the flow was successful, <code>true</code> if unsuccessful (Most likely we are at the left of the list, so flow out of it).
  */
 dusk.sgui.Grid.prototype._leftAction = function() {
@@ -90,7 +90,7 @@ dusk.sgui.Grid.prototype._leftAction = function() {
 	return true;
 };
 
-/** Manages the flowing right of the children. 
+/* Manages the flowing right of the children. 
  * @return <code>false</code> if the flow was successful, <code>true</code> if unsuccessful (Most likely we are at the right of the list, so flow out of it).
  */
 dusk.sgui.Grid.prototype._rightAction = function() {
@@ -104,7 +104,7 @@ dusk.sgui.Grid.prototype._rightAction = function() {
 	return true;
 };
 
-/** Manages the flowing right of the children. 
+/* Manages the flowing right of the children. 
  * @return <code>false</code> if the flow was successful, <code>true</code> if unsuccessful (Most likely we are at the right of the list, so flow out of it).
  */
 dusk.sgui.Grid.prototype._upAction = function() {
@@ -118,7 +118,7 @@ dusk.sgui.Grid.prototype._upAction = function() {
 	return true;
 };
 
-/** Manages the flowing right of the children. 
+/* Manages the flowing right of the children. 
  * @return <code>false</code> if the flow was successful, <code>true</code> if unsuccessful (Most likely we are at the right of the list, so flow out of it).
  */
 dusk.sgui.Grid.prototype._downAction = function() {

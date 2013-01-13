@@ -2,9 +2,12 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
+dusk.load.require("dusk.sgui.Component");
+dusk.load.require("dusk.data");
+
 dusk.load.provide("dusk.sgui.TileMap");
 
-/** A tilemap is just a grid of tiles.
+/* A tilemap is just a grid of tiles.
  * 
  * <p>However, it does have a <code>&lt;map&gt;</code> property, which allows quick creation of a map, based on a tilesheet. The content of that property is a whitespace separated list (Preferably using tabs) of coordinates relating to the position on the tilesheet.</p>
  * 
@@ -45,8 +48,8 @@ dusk.sgui.TileMap = function (parent, comName) {
 		
 		this.mode = "BINARY";
 		
-		this.prop("render-width", dusk.mods.simpleGui.width);
-		this.prop("render-height", dusk.mods.simpleGui.height);
+		this.prop("render-width", dusk.simpleGui.width);
+		this.prop("render-height", dusk.simpleGui.height);
 		
 		this.twidth = this._theme("tm.twidth", 16);
 		this.theight = this._theme("tm.theight", 16);

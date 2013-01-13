@@ -2,11 +2,11 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
+dusk.load.require("dusk.sgui.Component");
+
 dusk.load.provide("dusk.sgui.Tile");
 
-//NEEDS DECIMAL SUPPORT
-
-/** A tile is a type of image designed for using tilesets, a single image with lots of smaller ones in. Generally, it has a "viewing area" of a certian size and width, and the image behind it can be moved to show only one tile at a time.
+/* A tile is a type of image designed for using tilesets, a single image with lots of smaller ones in. Generally, it has a "viewing area" of a certian size and width, and the image behind it can be moved to show only one tile at a time.
  * 
  * <p>Uh, remember that this extends the <code>image</code> component, and uses the <code>image</code> property of that as the tileset.</p>
  * 
@@ -45,7 +45,7 @@ dusk.sgui.Tile = function(parent, comName) {
 		this._tx = 0;
 		this._ty = 0;
 		
-		/** This creates a new image! See <code>Component</code> for parameter details.
+		/* This creates a new image! See <code>Component</code> for parameter details.
 		 * @see sg.Component
 		 */
 		
@@ -62,7 +62,7 @@ dusk.sgui.Tile.prototype = new dusk.sgui.Component();
 dusk.sgui.Tile.constructor = dusk.sgui.Tile;
 
 
-/** @inheritDoc */
+/* @inheritDoc */
 dusk.sgui.Tile.prototype.className = "Tile";
 
 dusk.sgui.Tile.prototype._tileDraw = function(c) {

@@ -2,6 +2,8 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
+dusk.load.require("dusk.sgui.Component");
+
 dusk.load.provide("dusk.sgui.Rect");
 
 /** Creates a new Rect.
@@ -57,7 +59,7 @@ dusk.sgui.Rect.constructor = dusk.sgui.Rect;
 dusk.sgui.Rect.prototype.className = "Rect";
 
 /** A draw handler which draws the rectangle.
- * @param {canvas} c A 2D canvas perspective to draw onto.
+ * @param {CanvasRenderingContext2D} c A 2D canvas perspective to draw onto.
  * @private
  */
 dusk.sgui.Rect.prototype._rectDraw = function(c) {

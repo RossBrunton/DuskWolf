@@ -31,7 +31,7 @@ dusk.sgui.PlatMain.constructor = dusk.sgui.PlatMain;
 dusk.sgui.PlatMain.prototype.className = "PlatMain";
 
 dusk.sgui.PlatMain.prototype.createRoom = function(name, spawn) {
-	var room = dusk.mods.plat.getRoomData(name);
+	var room = dusk.plat.getRoomData(name);
 	if(!room) {
 		console.error("Room "+name+" does not exist.");
 		return;
@@ -39,36 +39,36 @@ dusk.sgui.PlatMain.prototype.createRoom = function(name, spawn) {
 	
 	this.parseProps({"focus":"entities", "children":[
 		{"name":"back", "type":"EditableTileMap", "cursorColour":"#00ff00", "flow-down":"over", "flow-up":"entities",
-		"src":room.backSrc, "tile-size":dusk.mods.plat.tsize, "sprite-size":dusk.mods.plat.ssize, "mode":dusk.mods.plat.mode,
-		"tile-width":dusk.mods.plat.twidth, "tile-height":dusk.mods.plat.theight, "sprite-width":dusk.mods.plat.swidth, "sprite-height":dusk.mods.plat.sheight,
+		"src":room.backSrc, "tile-size":dusk.plat.tsize, "sprite-size":dusk.plat.ssize, "mode":dusk.plat.mode,
+		"tile-width":dusk.plat.twidth, "tile-height":dusk.plat.theight, "sprite-width":dusk.plat.swidth, "sprite-height":dusk.plat.sheight,
 		"map":{"map":room.back, "rows":room.rows, "cols":room.cols}},
 		
-		{"name":"entities", "type":"EntityGroup", "tile-size":dusk.mods.plat.tsize, "sprite-size":dusk.mods.plat.ssize, "flow-down":"back", "flow-up":"scheme", "mode":dusk.mods.plat.mode,
-		"tile-width":dusk.mods.plat.twidth, "tile-height":dusk.mods.plat.theight, "sprite-width":dusk.mods.plat.swidth, "sprite-height":dusk.mods.plat.sheight},
+		{"name":"entities", "type":"EntityGroup", "tile-size":dusk.plat.tsize, "sprite-size":dusk.plat.ssize, "flow-down":"back", "flow-up":"scheme", "mode":dusk.plat.mode,
+		"tile-width":dusk.plat.twidth, "tile-height":dusk.plat.theight, "sprite-width":dusk.plat.swidth, "sprite-height":dusk.plat.sheight},
 		
 		{"name":"over", "type":"EditableTileMap", "cursorColour":"#ff0000", "flow-down":"scheme", "flow-up":"back",
-		"src":room.overSrc, "tile-size":dusk.mods.plat.tsize, "sprite-size":dusk.mods.plat.ssize, "mode":dusk.mods.plat.mode,
-		"tile-width":dusk.mods.plat.twidth, "tile-height":dusk.mods.plat.theight, "sprite-width":dusk.mods.plat.swidth, "sprite-height":dusk.mods.plat.sheight,
+		"src":room.overSrc, "tile-size":dusk.plat.tsize, "sprite-size":dusk.plat.ssize, "mode":dusk.plat.mode,
+		"tile-width":dusk.plat.twidth, "tile-height":dusk.plat.theight, "sprite-width":dusk.plat.swidth, "sprite-height":dusk.plat.sheight,
 		"map":{"map":room.over, "rows":room.rows, "cols":room.cols}},
 		
 		{"name":"scheme", "type":"EditableTileMap", "cursorColour":"#0000ff", "flow-down":"entities", "flow-up":"over",
-		"src":"pimg/schematics.png", "alpha":0, "tile-size":dusk.mods.plat.tsize, "sprite-size":dusk.mods.plat.ssize, "mode":dusk.mods.plat.mode,
-		"tile-width":dusk.mods.plat.twidth, "tile-height":dusk.mods.plat.theight, "sprite-width":dusk.mods.plat.swidth, "sprite-height":dusk.mods.plat.sheight,
+		"src":"pimg/schematics.png", "alpha":0, "tile-size":dusk.plat.tsize, "sprite-size":dusk.plat.ssize, "mode":dusk.plat.mode,
+		"tile-width":dusk.plat.twidth, "tile-height":dusk.plat.theight, "sprite-width":dusk.plat.swidth, "sprite-height":dusk.plat.sheight,
 		"map":{"map":room.scheme, "rows":room.rows, "cols":room.cols}},
 	]});
 	
 	this.path("entities").clear();
 	
 	var playerData = {};
-	playerData.name = dusk.mods.plat.seek; //dusk.mods.plat.seek;
-	playerData.type = dusk.mods.plat.seekType; //dusk.actions.getVar("plat.seekType");
+	playerData.name = dusk.plat.seek;
+	playerData.type = dusk.plat.seekType;
 	var crd = this.getComponent("scheme").lookTile(spawn, 1);
-	if(dusk.mods.plat.mode == "BINARY") {
-		playerData.x = crd[0]<<dusk.mods.plat.tsize;
-		playerData.y = crd[1]<<dusk.mods.plat.tsize;
+	if(dusk.plat.mode == "BINARY") {
+		playerData.x = crd[0]<<dusk.plat.tsize;
+		playerData.y = crd[1]<<dusk.plat.tsize;
 	}else{
-		playerData.x = crd[0]*dusk.mods.plat.twidth;
-		playerData.y = crd[1]*dusk.mods.plat.theight;
+		playerData.x = crd[0]*dusk.plat.twidth;
+		playerData.y = crd[1]*dusk.plat.theight;
 	}
 	
 	this.path("entities").dropEntity(playerData, true);
@@ -93,39 +93,39 @@ dusk.sgui.PlatMain.prototype._platMainFrame = function(e) {
 	if(this._focused) this.getComponent("entities").doFrame();
 	
 	//Editing
-	//if(dusk.mods.plat.editing && this.getFocused().comName == "entities") this.flow("over");
-	if(!dusk.mods.plat.editing && this.getFocused().comName != "entities") this.flow("entities");
+	//if(dusk.plat.editing && this.getFocused().comName == "entities") this.flow("over");
+	if(!dusk.plat.editing && this.getFocused().comName != "entities") this.flow("entities");
 };
 
 dusk.sgui.PlatMain.prototype.autoScroll = function() {
 	// Centre the player
 	var seekCoords = [];
-	if(dusk.mods.plat.mode == "BINARY") {
-		seekCoords = dusk.mods.plat.editing?[
-			(dusk.sgui.EditableTileMap.globalEditX+3)<<(dusk.mods.plat.tsize),
-			(dusk.sgui.EditableTileMap.globalEditY+3)<<(dusk.mods.plat.tsize)]
+	if(dusk.plat.mode == "BINARY") {
+		seekCoords = dusk.plat.editing?[
+			(dusk.sgui.EditableTileMap.globalEditX+3)<<(dusk.plat.tsize),
+			(dusk.sgui.EditableTileMap.globalEditY+3)<<(dusk.plat.tsize)]
 		:
-			[this.path("entities/"+dusk.mods.plat.seek).x,
-			this.path("entities/"+dusk.mods.plat.seek).y];
+			[this.path("entities/"+dusk.plat.seek).x,
+			this.path("entities/"+dusk.plat.seek).y];
 	}else{
-		seekCoords = dusk.mods.plat.editing?[
-			(dusk.sgui.EditableTileMap.globalEditX+3)*(dusk.mods.plat.twidth),
-			(dusk.sgui.EditableTileMap.globalEditY+3)*(dusk.mods.plat.theight)]
+		seekCoords = dusk.plat.editing?[
+			(dusk.sgui.EditableTileMap.globalEditX+3)*(dusk.plat.twidth),
+			(dusk.sgui.EditableTileMap.globalEditY+3)*(dusk.plat.theight)]
 		:
-			[this.path("entities/"+dusk.mods.plat.seek).x,
-			this.path("entities/"+dusk.mods.plat.seek).y];
+			[this.path("entities/"+dusk.plat.seek).x,
+			this.path("entities/"+dusk.plat.seek).y];
 	}
-	this._container.prop("seek", seekCoords);
+	this._container.centre(seekCoords);
 	
-	var dimen = this._container.render;
+	var dimen = this._container.render();
 	this.getComponent("scheme").setBoundsCoord(dimen[0], dimen[1], dimen[0]+dimen[2], dimen[1]+dimen[3]);
 	this.getComponent("back").setBoundsCoord(dimen[0], dimen[1], dimen[0]+dimen[2], dimen[1]+dimen[3]);
 	this.getComponent("over").setBoundsCoord(dimen[0], dimen[1], dimen[0]+dimen[2], dimen[1]+dimen[3]);
 };
 
 dusk.sgui.PlatMain.prototype._upAction = function(e) {
-	if(!dusk.mods.plat.editing) return true;
-	if(dusk.mods.keyboard.isKeyPressed(187)) {
+	if(!dusk.plat.editing) return true;
+	if(dusk.keyboard.isKeyPressed(187)) {
 		//+
 		this.path("scheme").graftTop();
 		this.path("back").graftTop();
@@ -134,7 +134,7 @@ dusk.sgui.PlatMain.prototype._upAction = function(e) {
 		return false;
 	}
 	
-	if(dusk.mods.keyboard.isKeyPressed(189)) {
+	if(dusk.keyboard.isKeyPressed(189)) {
 		//-
 		this.path("scheme").carveTop();
 		this.path("back").carveTop();
@@ -147,8 +147,8 @@ dusk.sgui.PlatMain.prototype._upAction = function(e) {
 };
 
 dusk.sgui.PlatMain.prototype._downAction = function(e) {
-	if(!dusk.mods.plat.editing) return true;
-	if(dusk.mods.keyboard.isKeyPressed(187)) {
+	if(!dusk.plat.editing) return true;
+	if(dusk.keyboard.isKeyPressed(187)) {
 		//+
 		this.path("scheme").graftBottom();
 		this.path("back").graftBottom();
@@ -156,7 +156,7 @@ dusk.sgui.PlatMain.prototype._downAction = function(e) {
 		return false;
 	}
 	
-	if(dusk.mods.keyboard.isKeyPressed(189)) {
+	if(dusk.keyboard.isKeyPressed(189)) {
 		//-
 		this.path("scheme").carveBottom();
 		this.path("back").carveBottom();
@@ -168,8 +168,8 @@ dusk.sgui.PlatMain.prototype._downAction = function(e) {
 };
 
 dusk.sgui.PlatMain.prototype._leftAction = function(e) {
-	if(!dusk.mods.plat.editing) return true;
-	if(dusk.mods.keyboard.isKeyPressed(187)) {
+	if(!dusk.plat.editing) return true;
+	if(dusk.keyboard.isKeyPressed(187)) {
 		//+
 		this.path("scheme").graftLeft();
 		this.path("back").graftLeft();
@@ -178,7 +178,7 @@ dusk.sgui.PlatMain.prototype._leftAction = function(e) {
 		return false;
 	}
 	
-	if(dusk.mods.keyboard.isKeyPressed(189)) {
+	if(dusk.keyboard.isKeyPressed(189)) {
 		//-
 		this.path("scheme").carveLeft();
 		this.path("back").carveLeft();
@@ -191,8 +191,8 @@ dusk.sgui.PlatMain.prototype._leftAction = function(e) {
 };
 
 dusk.sgui.PlatMain.prototype._rightAction = function(e) {
-	if(!dusk.mods.plat.editing) return true;
-	if(dusk.mods.keyboard.isKeyPressed(187)) {
+	if(!dusk.plat.editing) return true;
+	if(dusk.keyboard.isKeyPressed(187)) {
 		//+
 		this.path("scheme").graftRight();
 		this.path("back").graftRight();
@@ -200,7 +200,7 @@ dusk.sgui.PlatMain.prototype._rightAction = function(e) {
 		return false;
 	}
 	
-	if(dusk.mods.keyboard.isKeyPressed(189)) {
+	if(dusk.keyboard.isKeyPressed(189)) {
 		//-
 		this.path("scheme").carveRight();
 		this.path("back").carveRight();
@@ -212,7 +212,7 @@ dusk.sgui.PlatMain.prototype._rightAction = function(e) {
 };
 
 dusk.sgui.PlatMain.prototype._save = function(e) {
-	if(!dusk.mods.plat.editing) return true;
+	if(!dusk.plat.editing) return true;
 	
 	console.log("----- Saved Room Data -----");
 	var a = {};

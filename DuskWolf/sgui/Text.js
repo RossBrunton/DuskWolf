@@ -2,6 +2,8 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
+dusk.load.require("dusk.sgui.Component");
+
 dusk.load.provide("dusk.sgui.Label");
 dusk.load.provide("dusk.sgui.Text");
 dusk.load.provide("dusk.sgui.TextBox");
@@ -133,7 +135,7 @@ dusk.sgui.TextBox.prototype._boxDraw = function(c) {
 };
 
 dusk.sgui.TextBox.prototype._boxKey = function(e) {
-	var keyDat = dusk.mods.keyboard.lookupCode(e.keyCode);
+	var keyDat = dusk.keyboard.lookupCode(e.keyCode);
 	
 	//if(dusk.actions.getVar(this.watch) === undefined) dusk.actions.setVar(this.watch, "");
 	

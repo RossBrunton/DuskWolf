@@ -2,22 +2,22 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-window.pbehave = {};
+dusk.load.require("dusk.sgui.PlatEntity");
 
-dusk.load.provide("dusk.pbehave.PBehave");
+dusk.load.provide("dusk.behave.Behave");
 
-dusk.pbehave.PBehave = function(entity) {
+dusk.behave.Behave = function(entity) {
 	this._entity = entity;
 	
 	this._eventHandlers = {};
 };
 
-dusk.pbehave.PBehave.prototype._listenEvent = function(name, funct) {
+dusk.behave.Behave.prototype._listenEvent = function(name, funct) {
 	if(!this._eventHandlers[name]) this._eventHandlers[name] = [];
 	this._eventHandlers[name].push(funct);
 };
 
-dusk.pbehave.PBehave.prototype.handleEvent = function(name, data) {
+dusk.behave.Behave.prototype.handleEvent = function(name, data) {
 	if(!this._eventHandlers[name]) return;
 	
 	var toReturn = false;
@@ -27,7 +27,7 @@ dusk.pbehave.PBehave.prototype.handleEvent = function(name, data) {
 	return toReturn;
 };
 
-dusk.pbehave.PBehave.prototype._data = function(name, value, init) {
+dusk.behave.Behave.prototype._data = function(name, value, init) {
 	if(init && value !== undefined) {
 		if(!(name in this._entity.behaviourData)) this._entity.behaviourData[name] = value;
 	}else if(value !== undefined) {

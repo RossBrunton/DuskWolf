@@ -2,10 +2,12 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-dusk.load.provide("dusk.mods.keyboard");
+dusk.load.require("dusk.EventDispatcher");
 
-/** @namespace dusk.mods.keyboard
- * @name dusk.mods.keyboard
+dusk.load.provide("dusk.keyboard");
+
+/** @namespace dusk.keyboard
+ * @name dusk.keyboard
  * 
  * @description This module contains methods for interacting with the keyboard.
  */
@@ -17,7 +19,7 @@ dusk.load.provide("dusk.mods.keyboard");
  * @type object
  * @private
  */
-dusk.mods.keyboard._keys = {};
+dusk.keyboard._keys = {};
 
 /** An event dispatcher which fires when a key is pressed.
  * 
@@ -26,7 +28,7 @@ dusk.mods.keyboard._keys = {};
  * @type dusk.EventDispatcher
  * @since 0.0.14-alpha
  */
-dusk.mods.keyboard.keyPress = new dusk.EventDispatcher("dusk.mods.keyboard.keyPress");
+dusk.keyboard.keyPress = new dusk.EventDispatcher("dusk.keyboard.keyPress");
 
 /** An event dispatcher which fires when a key is released after being pressed.
  * 
@@ -35,10 +37,10 @@ dusk.mods.keyboard.keyPress = new dusk.EventDispatcher("dusk.mods.keyboard.keyPr
  * @type dusk.EventDispatcher
  * @since 0.0.14-alpha
  */
-dusk.mods.keyboard.keyUp = new dusk.EventDispatcher("dusk.mods.keyboard.keyUp");
+dusk.keyboard.keyUp = new dusk.EventDispatcher("dusk.keyboard.keyUp");
 
-$(document).bind("keydown", function je_keydown(e){dusk.mods.keyboard.keyPress.fire(e);});
-$(document).bind("keyup", function je_keyup(e){dusk.mods.keyboard.keyUp.fire(e);});
+$(document).bind("keydown", function je_keydown(e){dusk.keyboard.keyPress.fire(e);});
+$(document).bind("keyup", function je_keyup(e){dusk.keyboard.keyUp.fire(e);});
 
 /** An object describing the properties of keys relative to their keycodes.
  * 
@@ -114,30 +116,30 @@ this._codes = {
 
 /** Handles a keypress internally. This enables the module to track whether a key is pressed or not.
  * 
- * @param {object} e An event dispatched by `{@link dusk.mods.keyboard.keyPress}`.
+ * @param {object} e An event dispatched by `{@link dusk.keyboard.keyPress}`.
  * @private
  */
-dusk.mods.keyboard._handleKeypress = function(e) {
+dusk.keyboard._handleKeypress = function(e) {
 	this._keys[e.keyCode] = true;
 };
-dusk.mods.keyboard.keyPress.listen(dusk.mods.keyboard._handleKeypress, dusk.mods.keyboard);
+dusk.keyboard.keyPress.listen(dusk.keyboard._handleKeypress, dusk.keyboard);
 
 /** Handles a key release event internally. This enables the module to track whether a key is pressed or not.
  * 
- * @param {object} e An event dispatched by `{@link dusk.mods.keyboard.keyUp}`.
+ * @param {object} e An event dispatched by `{@link dusk.keyboard.keyUp}`.
  * @private
  */
-dusk.mods.keyboard._handleKeyup = function(e) {
+dusk.keyboard._handleKeyup = function(e) {
 	this._keys[e.keyCode] = false;
 };
-dusk.mods.keyboard.keyUp.listen(dusk.mods.keyboard._handleKeyup, dusk.mods.keyboard);
+dusk.keyboard.keyUp.listen(dusk.keyboard._handleKeyup, dusk.keyboard);
 
 /** Checks if a key is currently pressed or not.
  * 
  * @param {number} code A keycode to check.
  * @return {boolean} Whether the specified key is currently pressed.
  */
-dusk.mods.keyboard.isKeyPressed = function(code) {
+dusk.keyboard.isKeyPressed = function(code) {
 	if(!(code in this._keys)) return false;
 	
 	return this._keys[code];
@@ -152,7 +154,7 @@ dusk.mods.keyboard.isKeyPressed = function(code) {
  * @param {number} code A keycode to look up.
  * @return {array} Information on that key.
  */
-dusk.mods.keyboard.lookupCode = function(code) {
+dusk.keyboard.lookupCode = function(code) {
 	if(!(code in this._codes)) return ["UNKNOWN", false];
 	
 	return this._codes[code];

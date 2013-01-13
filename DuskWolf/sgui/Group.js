@@ -7,30 +7,54 @@ dusk.load.require("dusk.sgui.IContainer");
 
 dusk.load.provide("dusk.sgui.Group");
 
+/** Creates a new group.
+ * 
+ * @param {?dusk.sgui.Component} parent The container that this component is in.
+ * @param {string} componentName The name of the component.
+ * 
+ * @class dusk.sgui.Group
+ * 
+ * @classdesc A group contains multiple components, and manages things like keyboard events and drawing.
+ * 
+ * Components have names, which are used to reference them, these names are strings and are not case sensitive.
+ * 
+ * One (and only one) component may be focused. This is the ONLY component that will recieve keypress events.
+ * 
+ * @extends dusk.sgui.IContainer
+ */
 dusk.sgui.Group = function(parent, comName) {
-	//Implements _container
 	if (parent !== undefined){
 		dusk.sgui.Component.call(this, parent, comName);
 		
+		/** All the components in this container, key names are component names.
+		 * @type object
+		 * @memberof dusk.sgui.Group
+		 * @protected
+		 */
 		this._components = {};
+		/** The current drawing order of all the components. An array of string component names, earlier entries are drawn first.
+		 * @type array
+		 * @memberof dusk.sgui.Group
+		 * @protected
+		 */
 		this._drawOrder = [];
+		/** The name of the currently focused component.
+		 * @type string
+		 * @memberof dusk.sgui.Group
+		 * @protected
+		 */
 		this._focusedCom = "";
-		this._width = -1;
-		this._height = -1;
 		
-		/** Whether this is the active component that will receive all keypresses. */
-		this._active = false;
-		/** Whether this is the focused component in its group. */
-		this._focused = false;
-		
-		//Add the groupStuff handler
+		//Add the property masks
 		this._registerPropMask("focus", "focus", true);
-		this._registerPropMask("children", "children", false);
-		this._registerPropMask("allChildren", "allChildren", false);
+		this._registerPropMask("children", "__children", false);
+		this._registerPropMask("allChildren", "__allChildren", false);
 		
+		//Add the handlers
 		this._registerDrawHandler(this._groupDraw);
 		this._registerFrameHandler(this._groupFrame);
 		
+		//And set it up
 		this._newComponent("blank", "NullCom");
 		this.focus = "blank";
 	}
@@ -41,26 +65,30 @@ dusk.sgui.Group.constructor = dusk.sgui.Group;
 dusk.sgui.Group.prototype.className = "Group";
 dusk.sgui.Group.prototype.isAContainer = true;
 
-/** The currently active component handles the keypress. 
- * @param e The keyboard event.
- * @return The result of the focused component's keypress.
+/** Container specific method of handling keypresses.
+ * 
+ * In this case, it will call `{@link dusk.sgui.Component.keypress}` of its focused component, and return that value.
+ * 
+ * @param {object} e The keypress event, must be a JQuery keypress event object.
+ * @return {boolean} The return value of the focused component's keypress.
  */
 dusk.sgui.Group.prototype.containerKeypress = function(e) {
 	return this.getFocused().keypress(e);
 };
 
-/** This creates a new component in this group. Interesting that, isn't it?
+/** Creates a new component of the specified type.
  * 
- * <p>If you need to check the names of the component you are after, <code>Component.NAME</code> will tell you. If the type you provide isn't a real component, then a <code>NullCom</code> will be used.</p>
+ * `type` is a string, and must correspond to a property of the namespace `{@link dusk.sgui}` and inherit from the class `{@link dusk.sgui.Component}`.
+ *	This will be the object which is created.
  * 
- * @param com The name of the component.
- * @param type The type of the component, should be the name of one of the components in <code>SimpleGui.COMS</code>. If not specified a NullCom is made.
+ * @param {string} com The name of the new component.
+ * @param {?string} type The type to add as described above. If not specified, `"NullCom"` is used.
  * @return The component that was added.
+ * @private
  */
-dusk.sgui.Group.prototype._newComponent = function(com, type) { //Component
-	//Find the type
+dusk.sgui.Group.prototype._newComponent = function(com, type) {
+	if(type === undefined) type = "NullCom";
 	if(!(type in dusk.sgui)){throw new Error(type + " is not a valid component type.");}
-	//loadComponent(type);
 	
 	this._components[com] = new dusk.sgui[type](this, com.toLowerCase());
 	this._drawOrder[this._drawOrder.length] = com;
@@ -69,44 +97,62 @@ dusk.sgui.Group.prototype._newComponent = function(com, type) { //Component
 	return this._components[com];
 };
 
-dusk.sgui.Group.prototype.__defineSetter__("children", function s_children(value) {
-	if("length" in value) {
-		for (var i = 0; i < value.length; i++) {
-			if (value[i].name && this.getComponent(value[i].name.toLowerCase(), value[i].type)) {
-				this.getComponent(value[i].name.toLowerCase()).parseProps(value[i], this._thread);
-			} else if(value[i].name) {
-				console.warn(value.name + " has not been given a type and does not exist, ignoring.");
+/** Modifies this component's children using JSON data.
+ *	See `{@link dusk.sgui.Component.parseProps}` for a basic description on how JSON properties work.
+ * 
+ * `data` is either a single object or an array of objects, each describing a single component.
+ * 	Each component must have a `name` property, stating the name of the component they are modifying.
+ *	It may also have a `type` property, which will be used in case the component does not exist to set its type.
+ * 	If the component does not exist and `type` is ommited, then a warning is raised, and that object is skipped.
+ * 
+ * This may be used in the JSON representation with the property `children`.
+ * 
+ * @param {object|array} data Information about components, as described above.
+ */
+dusk.sgui.Group.prototype.modifyChildren = function(data) {
+	if("length" in data) {
+		for (var i = 0; i < data.length; i++) {
+			if (data[i].name && this.getComponent(data[i].name.toLowerCase(), data[i].type)) {
+				this.getComponent(data[i].name.toLowerCase()).parseProps(data[i]);
+			} else if(data[i].name) {
+				console.warn(data.name + " has not been given a type and does not exist, ignoring.");
 			} else {
 				console.warn("A component has no name in "+this.comName+", cannot create or edit.");
 			}
 		}
 	}else{
-		if(value.name && this.getComponent(value.name.toLowerCase(), value.type)) {
-			return this.getComponent(value.name.toLowerCase()).parseProps(value, this._thread);
-		} else if(value.name) {
-			console.warn(value.name + " has not been given a type and does not exist, ignoring.");
+		if(data.name && this.getComponent(data.name.toLowerCase(), data.type)) {
+			return this.getComponent(data.name.toLowerCase()).parseProps(data, this._thread);
+		} else if(data.name) {
+			console.warn(data.name + " has not been given a type and does not exist, ignoring.");
 		} else {
 			console.warn("A component has no name in "+this.comName+", cannot create or edit.");
 		}
 	}
-});
+};
+dusk.sgui.Group.prototype.__defineSetter__("__children", function s_children(value) {this.modifyChildren(value);});
 
-dusk.sgui.Group.prototype.__defineGetter__("children", function g_children() {
-	return this._components;
-});
-
-dusk.sgui.Group.prototype.__defineSetter__("allChildren", function s_allChildren(value) {
-	for (var c in this._components) {
-		this._components[c].parseProps(value, this._thread);
+/** Similar to `{@link dusk.sgui.Group.modifyChildren}` only it modifies the properties of all the children, instead of one.
+ * 
+ * Hence, the `type` and `name` properties are not needed or required.
+ * 
+ * This may be used in the JSON representation as the property `allChildren`.
+ * 
+ * @param {object} data Data used to modify all the children in this group.
+ */
+dusk.sgui.Group.prototype.modifyAllChildren = function(data) {
+	for(var c in this._components) {
+		this._components[c].parseProps(data);
 	}
-});
+};
+dusk.sgui.Group.prototype.__defineSetter__("__allChildren", function s_allChildren(value) {this.modifyAllChildren(value);});
 
-dusk.sgui.Group.prototype.__defineGetter__("allChildren", function g_allChildren() {
-	return this._components;
-});
-
+/** Draws all of the children in the order described by `{@link dusk.sgui.Group._drawOrder}`.
+ * 
+ * @param {CanvasRenderingContext2D} The canvas context on which to draw all the components.
+ * @private
+ */
 dusk.sgui.Group.prototype._groupDraw = function(c) {
-	//Draw children
 	//var input;
 	for(var i = 0; i < this._drawOrder.length; i++) {
 		if(this._drawOrder[i] in this._components) {
@@ -119,22 +165,25 @@ dusk.sgui.Group.prototype._groupDraw = function(c) {
 	}
 };
 
-dusk.sgui.Group.prototype._groupFrame = function(e) {
+/** Calls the `{@link dusk.sgui.Component.frame}` method of all components.
+ * 
+ * @private
+ */
+dusk.sgui.Group.prototype._groupFrame = function() {
 	for(var p in this._components){
-		this._components[p].frame(e);
+		this._components[p].frame();
 	}
 };
 
-/** Gets a component in this group. It will create a new component if <code>create</code> is true.
+/** Returns a component in this group.
  * 
- * <p>The type of the component is not needed if you are 100% sure the component exists.</p>
+ * If `type` is not undefined, then the component will be created of that type if it exists.
  * 
- * @param com The name of the component to get.
- * @param create Whether to create a new component if it is not found.
- * @param type The type of component to create, see <code>newComponent</code> for details.
- * @return The component, or <code>null</code> if it wasn't found and you don't want to create it.
+ * @param {string} com The name of the component to get.
+ * @param {?string} type The type of component to create.
+ * @return {?dusk.sgui.Component} The component, or null if it doesn't exist and `type` is undefined.
  */
-dusk.sgui.Group.prototype.getComponent = function(com, type) { //Component
+dusk.sgui.Group.prototype.getComponent = function(com, type) {
 	if (this._components[com.toLowerCase()]) {
 		return this._components[com.toLowerCase()];
 	};
@@ -142,26 +191,32 @@ dusk.sgui.Group.prototype.getComponent = function(com, type) { //Component
 	return type?this._newComponent(com, type):null;
 };
 
-/** Deletes a component from this group. That's it.
- * @param com The name of the component to delete.
- * @return <code>true</code> when a component was deleted, <code>false</code> if it didn't exist.
+/** Deletes a component in this group. This will not remove any refrences to it elsewhere, but will remove it from the list of components and the draw order.
+ * 
+ * @param {string} The name of the component to delete.
+ * @return {boolean} If the delete was successfull, this will return false if the component doesn't exist.
  */
-dusk.sgui.Group.prototype.deleteComponent = function(com) { //Boolean
+dusk.sgui.Group.prototype.deleteComponent = function(com) {
 	if (this._components[com.toLowerCase()]){
 		if(this._focusedCom == com.toLowerCase()) this.focus = "blank";
 		delete this._components[com.toLowerCase()];
-		delete this._drawOrder[this._drawOrder.indexOf(com.toLowerCase())];
+		this._drawOrder.splice(this._drawOrder.indexOf(com.toLowerCase()), 1);
 		this.bookRedraw();
 		return true;
 	}
 };
 
-/** Set the current focus to <code>com</code>. If that component does not exist, then focus will be set to "blank" instead.
- * <p>This calls the component's <code>onDeactivate()</code> (if applicable) and <code>onLooseFocus()</code> in that order.</p>
- * @param com The name of the component to focus.
- * @returns Whether the focus was successful or not; components can "resist" loosing focus by returning <code>false</code> in their <code>onLooseFocus</code> function.
+/** This is the name of the currently focused component.
+ * 
+ * When set, this calls all the expected functions on `{@link dusk.sgui.Component}` as expected.
+ * 
+ * If a component returns false in `{@link dusk.sgui.Component.onLooseFocus} this will abort.
+ * 
+ * @type string
+ * @memberof dusk.sgui.Group
+ * @name focus
  */
-dusk.sgui.Group.prototype.__defineSetter__("focus", function set_focus(value) {
+dusk.sgui.Group.prototype.__defineSetter__("focus", function s_focus(value) {
 	if (this._components[this._focusedCom]){
 		if (this._components[this._focusedCom].locked){return false;};
 		
@@ -181,29 +236,34 @@ dusk.sgui.Group.prototype.__defineSetter__("focus", function set_focus(value) {
 	
 	this._focusedCom = "blank";
 });
-
-dusk.sgui.Group.prototype.__defineGetter__("focus", function get_focus() {
+dusk.sgui.Group.prototype.__defineGetter__("focus", function g_focus() {
 	return this._focusedCom;
 });
 
-/** Gets the currently focused component. This could be the "blank" NullCom if nothing is focused.
- * @returns The currently focused component.
+/** Returns the currently focused component.
+ * 
+ * @return {dusk.sgui.Component} The currently focused component.
  */
 dusk.sgui.Group.prototype.getFocused = function() {
 	return this._components[this._focusedCom];
 };
 
-/** Checks to see if it's possible to flow to the specified component, and if so, then does it.
- * @param to The component to flow to.
- * @return Whether the component could be flowed into.
+/** Sets the current focused component only if it exists and it's `{@link dusk.sgui.Component.enabled}` property is true.
+ * 
+ * @param {string} to The name of the component to flow into.
+ * @return {boolean} Whether the flow was successfull.
  */
-dusk.sgui.Group.prototype.flow = function(to) { //Bool
-	if(this.getComponent(to) && this.getComponent(to).enabled) this.focus = to;
+dusk.sgui.Group.prototype.flow = function(to) {
+	if(this.getComponent(to) && this.getComponent(to).enabled) {
+		this.focus = to;
+		return true;
+	}
+	
+	return false;
 };
 
+//Width
 dusk.sgui.Group.prototype.__defineGetter__("width", function _getWidth() {
-	if(this._width >= 0) return this._width;
-	
 	var max = 0;
 	for(var c in this._components) {
 		if(this._components[c].x + this._components[c].width > max) max = this._components[c].x + this._components[c].width;
@@ -211,14 +271,12 @@ dusk.sgui.Group.prototype.__defineGetter__("width", function _getWidth() {
 	
 	return max;
 });
-
 dusk.sgui.Group.prototype.__defineSetter__("width", function _setWidth(value) {
-	this._width = value;
+	//Do nothing
 });
 
+//Height
 dusk.sgui.Group.prototype.__defineGetter__("height", function _getHeight() {
-	if(this._height >= 0) return this._height;
-	
 	var max = 0;
 	for(var c in this._components) {
 		if(this._components[c].y + this._components[c].height > max) max = this._components[c].y + this._components[c].height;
@@ -226,12 +284,11 @@ dusk.sgui.Group.prototype.__defineGetter__("height", function _getHeight() {
 	
 	return max;
 });
-
 dusk.sgui.Group.prototype.__defineSetter__("height", function _setHeight(value) {
-	this._height = value;
+	//Do nothing
 });
 
-/** Groups will call their currently focused components <code>onDeactive</code> function. */
+/** Groups will call their currently focused component's `{@link dusk.sgui.Component.onDeactive}` function. */
 dusk.sgui.Group.prototype.onDeactive = function() {this._active = false;this.getFocused().onDeactive();};
-/** Groups will call their currently focused components <code>onActive</code> function. */
+/** Groups will call their currently focused component's `{@link dusk.sgui.Component.onActive}` function. */
 dusk.sgui.Group.prototype.onActive = function() {this._active = true;this.getFocused().onActive();};

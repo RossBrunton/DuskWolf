@@ -36,44 +36,6 @@ dusk.data.init = function() {
 	
 	//Enable/disable cache
 	$.ajaxSetup({"cache": !dusk.dev});
-	
-	/** This is the actuall root.json file, parsed as an object. If the file failed to download, this will be null.
-	 * @type object
-	 */
-	dusk.data.root = {};
-	
-	var url = dusk.overrideRoot && dusk.utils.urlGet("dw_root")?dusk.utils.urlGet("dw_root"):"root.json";
-	dusk.data.download(url, "text", function(d, s) {
-		dusk.data.root = dusk.utils.jsonParse(d);
-	
-		if(!dusk.data.root) {dusk.error("Root json could not be loaded."); return;}
-		if(dusk.utils.verCompare(dusk.data.root.duskVer, dusk.ver) == 1) {dusk.error("DuskWolf version is incompatable with this program. This may explode.");}
-		console.info(dusk.data.root.name+" is loading.");
-		
-		if("external" in dusk.data.root) {
-			for(var i = dusk.data.root.external.length-1; i >= 0; i--) {
-				if(typeof dusk.data.root.external[i] == "string"){
-					console.log("External import file "+dusk.data.root.external[i]+"...");
-					dusk.data._externLoading ++;
-					dusk.data.download(dusk.data.root.external[i], "text", function x_imported(data, state) {
-						data = dusk.utils.jsonParse(data);
-						for(var i = data.length-1; i >= 0; i--) {
-							console.log("External import: "+data[i][0]+"...");
-							dusk.load.addDependency(data[i][0], data[i][1], data[i][2]);
-						}
-						
-						if(--dusk.data._externLoading == 0) {
-							dusk.game.init();
-						}
-					});
-				}
-			}
-		}
-		
-		if(dusk.data._externLoading == 0) {
-			dusk.game.init();
-		}
-	});
 };
 
 /** Downloads a file, and returns its contents.
@@ -112,7 +74,7 @@ dusk.data.download = function(file, type, callback, state) {
  * <p>If you call this without asigning the return value to anything, the image should download in the background.</p>
  * 
  * @param {string} file The image file to set as the src value of the image.
- * @return {Image} A HTML Image tag with the src set to the path requested.
+ * @return {HTMLImageElement} A HTML Image tag with the src set to the path requested.
  */
 dusk.data.grabImage = function(file) {
 	if(this._loaded[file] === undefined) {

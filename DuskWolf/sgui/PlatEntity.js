@@ -16,15 +16,19 @@ dusk.sgui.PlatEntity = function (parent, comName) {
 		
 		this._behaviours = {};
 		this.behaviourData = {};
+		
+		this._type = "";
+		this.type = "default";
+		
+		this.aniName = "";
 		this.animationData = {};
 		this._currentAni = [];
 		this._aniPointer = 0;
 		this._aniTerminate = false;
-		this.aniName = "";
+		this._aniFlags = [];
+		this._aniPriority = 0;
 		this._frameDelay = 5;
 		this._frameCountdown = 0;
-		this._type = "";
-		this.type = "default";
 		
 		this._touchers = {"l":[], "r":[], "u":[], "d":[]};
 		
@@ -34,17 +38,17 @@ dusk.sgui.PlatEntity = function (parent, comName) {
 		this._registerPropMask("dx", "dx", true);
 		this._registerPropMask("dy", "dy", true);
 		
-		if(dusk.mods.plat.mode == "BINARY") {
+		if(dusk.plat.mode == "BINARY") {
 			this.mode = "BINARY";
-			this.ssize = dusk.mods.plat.ssize;
-			this.width = 1 << dusk.mods.plat.tsize;
-			this.height = 1 << dusk.mods.plat.tsize;
+			this.ssize = dusk.plat.ssize;
+			this.width = 1 << dusk.plat.tsize;
+			this.height = 1 << dusk.plat.tsize;
 		}else{
 			this.mode = "DECIMAL";
-			this.sheight = dusk.mods.plat.sheight;
-			this.swidth = dusk.mods.plat.swidth;
-			this.width = dusk.mods.plat.twidth;
-			this.height = dusk.mods.plat.theight;
+			this.sheight = dusk.plat.sheight;
+			this.swidth = dusk.plat.swidth;
+			this.width = dusk.plat.twidth;
+			this.height = dusk.plat.theight;
 		}
 	}
 };
@@ -94,11 +98,16 @@ dusk.sgui.PlatEntity.prototype.moveAndCollide = function() {
 
 dusk.sgui.PlatEntity.prototype.performMotion = function(cdx, cdy, main) {
 	var coll = [];
-	var collidedWith = [];
-	var dir = cdy>0?1:-1;
-	//if(!(!this._teatherHost || this._teatherHost[1].indexOf("l") !== -1 || this._teatherHost[1].indexOf("r") !== -1)) {
-		for(var i = ~~Math.abs(cdy); i > 0; i --){
-			if(dir == 1) {
+	var collidedWithY = [];
+	var collidedWithX = [];
+	var dirY = cdy>0?1:-1;
+	var dirX = cdx>0?1:-1;
+	
+	cdy = ~~Math.abs(cdy);
+	cdx = ~~Math.abs(cdx);
+	while(cdy > 0 || cdx > 0) {
+		if(cdy > 0) {
+			if(dirY == 1) {
 				//Going down
 				if(this.path("../../scheme").tilePointIn(this.x+4, this.y+this.height).toString() == [1, 0].toString()
 				|| this.path("../../scheme").tilePointIn(this.x+this.width-4, this.y+this.height).toString() == [1, 0].toString()) {
@@ -108,29 +117,23 @@ dusk.sgui.PlatEntity.prototype.performMotion = function(cdx, cdy, main) {
 					this._touchers.d.push("wall");
 					this.behaviourFire("land");
 					this.behaviourFire("collideBottom", "wall");
-					break;
 				}
 				
 				//Entities
 				coll = this.path("..").getEntitiesHere(this.x+4, this.y+this.height, this).concat(this.path("..").getEntitiesHere(this.x+this.width-4, this.y+this.height, this));
 				var repeat = false;
 				for(var c = coll.length-1; c >= 0; c --) {
-					if(collidedWith.indexOf(coll[c]) === -1) {
+					if(collidedWithY.indexOf(coll[c]) === -1) {
 						cdy = 0;
 						if(main) this.dy = 0;
 						
 						this._touchers.d.push(coll[c]);
 						this.behaviourFire("collideBottom", coll[c]);
 						coll[c].behaviourFire("collidedTop", this);
-						collidedWith.push(coll[c]);
+						collidedWithY.push(coll[c]);
 						repeat = true;
 					}
 				}
-				if(repeat) {
-					i ++;
-					continue;
-				}
-				if(coll.length) break;
 			
 			}else{
 				//Going up
@@ -142,44 +145,31 @@ dusk.sgui.PlatEntity.prototype.performMotion = function(cdx, cdy, main) {
 					this._touchers.u.push("wall");
 					this.behaviourFire("bonk");
 					this.behaviourFire("collideTop", "wall");
-					break;
 				}
 				
 				//Entities
 				coll = this.path("..").getEntitiesHere(this.x+4, this.y-1, this).concat(this.path("..").getEntitiesHere(this.x+this.width-4, this.y-1, this));
-				var repeat = false;
 				for(var c = coll.length-1; c >= 0; c --) {
-					if(collidedWith.indexOf(coll[c]) === -1) {
+					if(collidedWithY.indexOf(coll[c]) === -1) {
 						cdy = 0;
 						if(main) this.dy = 0;
 						this._touchers.u.push(coll[c]);
 						this.behaviourFire("collideTop", coll[c]);
 						coll[c].behaviourFire("collidedBottom", this);
-						collidedWith.push(coll[c]);
-						repeat = true;
+						collidedWithY.push(coll[c]);
 					}
 				}
-				if(repeat) {
-					i ++;
-					continue;
-				}
-				if(coll.length) break;
 			}
 			
-			this.y += dir;
+			if(cdy) this.y += dirY;
+			cdy --;
 		}
-	//}
-	
-	// -----
-	// Horizontal motion
-	// -----
-	
-	coll = [];
-	collidedWith = [];
-	var dir = cdx>0?1:-1;
-	//if(!(!this._teatherHost || this._teatherHost[1].indexOf("u") !== -1 || this._teatherHost[1].indexOf("d") !== -1)) {
-		for(var i = ~~Math.abs(cdx); i > 0; i --){
-			if(dir == 1) {
+		
+		// -----
+		// Horizontal motion
+		// -----
+		if(cdx > 0) {
+			if(dirX == 1) {
 				//Going right
 				if(this.path("../../scheme").tilePointIn(this.x+this.width, this.y+4).toString() == [1, 0].toString()
 				|| this.path("../../scheme").tilePointIn(this.x+this.width, this.y+this.height-4).toString() == [1,0].toString()) {
@@ -188,28 +178,20 @@ dusk.sgui.PlatEntity.prototype.performMotion = function(cdx, cdy, main) {
 					
 					this._touchers.r.push("wall");
 					this.behaviourFire("collideRight", "wall");
-					break;
 				}
 				
 				//Entities
 				coll = this.path("..").getEntitiesHere(this.x+this.width, this.y+4, this).concat(this.path("..").getEntitiesHere(this.x+this.width, this.y+this.height-4, this));
-				var repeat = false;
 				for(var c = coll.length-1; c >= 0; c --) {
-					if(collidedWith.indexOf(coll[c]) === -1) {
+					if(collidedWithX.indexOf(coll[c]) === -1) {
 						cdx = 0;
 						if(main) this.dx = 0;
 						this._touchers.r.push(coll[c]);
 						this.behaviourFire("collideRight", coll[c]);
 						coll[c].behaviourFire("collidedLeft", this);
-						collidedWith.push(coll[c]);
-						repeat = true;
+						collidedWithX.push(coll[c]);
 					}
 				}
-				if(repeat) {
-					i ++;
-					continue;
-				}
-				if(coll.length) break;
 				
 			}else{
 				//Going left
@@ -220,35 +202,27 @@ dusk.sgui.PlatEntity.prototype.performMotion = function(cdx, cdy, main) {
 					
 					this._touchers.l.push("wall");
 					this.behaviourFire("collideLeft", "wall");
-					break;
 				}
 				
 				//Entities
 				coll = this.path("..").getEntitiesHere(this.x-1, this.y+4, this).concat(this.path("..").getEntitiesHere(this.x-1, this.y+this.height-4, this));
 				var repeat = false;
 				for(var c = coll.length-1; c >= 0; c --) {
-					if(collidedWith.indexOf(coll[c]) === -1) {
+					if(collidedWithX.indexOf(coll[c]) === -1) {
 						cdx = 0;
 						if(main) this.dx = 0;
 						this._touchers.l.push(coll[c]);
 						this.behaviourFire("collideLeft", coll[c]);
 						coll[c].behaviourFire("collidedRight", this);
-						collidedWith.push(coll[c]);
-						repeat = true;
+						collidedWithX.push(coll[c]);
 					}
 				}
-				if(repeat) {
-					i ++;
-					continue;
-				}
-				if(coll.length) break;
 			}
 			
-			this.x += dir;
+			if(cdx) this.x += dirX;
+			cdx --;
 		}
-	//}
-	
-	return [cdx, cdy];
+	}
 };
 
 dusk.sgui.PlatEntity.prototype.startFrame = function() {
@@ -263,17 +237,19 @@ dusk.sgui.PlatEntity.prototype.startFrame = function() {
 	}
 };
 
+
+
 dusk.sgui.PlatEntity.prototype.__defineSetter__("type", function s_type(type) {
 	this._type = type;
-	this.behaviourData = dusk.mods.plat.getEntityType(type).data;//dusk.actions.getVar("pentity."+this._type+".data");
-	this.animationData = dusk.mods.plat.getEntityType(type).animation;//dusk.actions.getVar("pentity."+this._type+".animation");
+	this.behaviourData = dusk.utils.clone(dusk.plat.getEntityType(type).data);
+	this.animationData = dusk.utils.clone(dusk.plat.getEntityType(type).animation);
 	
 	this.setAnimation("stationary");
 	this.prop("src", this.behaviourData.img);
 	if("dx" in this.behaviourData) this.dx = this.behaviourData.dx;
 	if("dy" in this.behaviourData) this.dy = this.behaviourData.dy;
 	
-	var beh = dusk.mods.plat.getEntityType(type).behaviours;//dusk.actions.getVar("pentity."+this._type+".behaviours");
+	var beh = dusk.plat.getEntityType(type).behaviours;
 	for(var b in beh) {
 		if(beh[b]) this.addBehaviour(b, true);
 	}
@@ -295,19 +271,24 @@ dusk.sgui.PlatEntity.prototype.behaviourFire = function(event, data) {
 
 dusk.sgui.PlatEntity.prototype.addBehaviour = function(name, reInit) {
 	if(name in this._behaviours && !reInit) return null;
-	this._behaviours[name] = new dusk.pbehave[name](this);
+	this._behaviours[name] = new dusk.behave[name](this);
 };
 
-dusk.sgui.PlatEntity.prototype.setAnimation = function(name, reInit, terminates) {
+
+
+dusk.sgui.PlatEntity.prototype.setAnimation = function(name, data, reInit, terminates) {
+	if(data === undefined) data = {};
 	this._aniTerminate = terminates==true;
 	if(name == this.aniName && !reInit) return;
-	if(!(name.replace("-!", "") in this.animationData)) {
-		if(name.indexOf("-l") !== -1) this.setAnimation(name.replace("-l", ""));
-		if(name.indexOf("-r") !== -1) this.setAnimation(name.replace("-r", ""));
+	
+	this._aniFlags = data.flags?data.flags:[];
+	
+	if(!this.lookupFlaggedAni(name, this._aniFlags)) {
 		if(terminates) this.behaviourFire("aniComplete", {"name":name});
 		return;
 	};
-	this._currentAni = this.animationData[name].split("|");
+	
+	this._currentAni = this.animationData[this.lookupFlaggedAni(name, this._aniFlags)].split("|");
 	this._aniPointer = 0;
 	this.aniName = name;
 	this._animationTick();
@@ -321,6 +302,23 @@ dusk.sgui.PlatEntity.prototype._animationTick = function() {
 		if(this._aniTerminate) this.behaviourFire("aniComplete", {"name":this.aniName});
 	}
 };
+
+dusk.sgui.PlatEntity.prototype.lookupFlaggedAni = function(name, flags) {
+	for(var i = 0; i < flags.length; i ++) {
+		if(name+"-"+flags[i] in this.animationData) {
+			return name+"-"+flags[i];
+		}
+	}
+	
+	if(name in this.animationData) return name;
+	return null;
+};
+
+dusk.sgui.PlatEntity.prototype.aniFlagActive = function(flag) {
+	return this._aniFlags.indexOf(flag) !== -1;
+};
+
+
 
 dusk.sgui.PlatEntity.prototype.touchers = function(dir) {
 	if(!(dir in this._touchers)) {console.warn("Unknown dir "+dir+" for touching!"); return [];}
@@ -347,6 +345,8 @@ dusk.sgui.PlatEntity.prototype.receiveTeather = function(host, dir) {
 dusk.sgui.PlatEntity.prototype.teatherClients = function() {
 	return this._teatherClients;
 };
+
+
 
 dusk.sgui.PlatEntity.prototype.eProp = function(prop, set) {
 	if(set !== undefined) {
