@@ -28,12 +28,12 @@ dusk.load.provide("dusk");
  */
 
 /** Version of the DW engine. Must contain at least one number, and numbers furthest to the left indicate newer versions.
- * @type number
+ * @type string
  */
-dusk.ver = "0.0.15-alpha";
+dusk.ver = "0.0.16-alpha";
 
 /** The frame rate, in frames per second. 
- * @type number
+ * @type integer
  */
 dusk.frameRate = ("__frameRate__" in window)?__frameRate__:60;
 

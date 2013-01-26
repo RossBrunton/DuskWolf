@@ -83,7 +83,7 @@ dusk.sgui.TileMap.constructor = dusk.sgui.TileMap;
 
 dusk.sgui.TileMap.prototype.className = "TileMap";
 
-dusk.sgui.TileMap.prototype.__defineSetter__("map", function setMap(value) {
+dusk.sgui.TileMap.prototype.__defineSetter__("map", function s_map(value) {
 	var map = value;
 	
 	//Get stuff
@@ -227,10 +227,9 @@ dusk.sgui.TileMap.prototype._tileMapDraw = function(c) {
 dusk.sgui.TileMap.prototype.getTile = function(x, y) {
 	if(this._tiles[((y*this.cols)+x)<<1] !== undefined) {
 		return [this._tiles[((y*this.cols)+x)<<1], this._tiles[(((y*this.cols)+x)<<1)+1]];
-	}else{
-		console.warn("Tile "+x+","+y+" not found on "+this.comName+", wanting "+(((y*this.cols)+x)<<1)+" and I can't find it.");
-		return [0, 0];
 	}
+	console.warn("Tile "+x+","+y+" not found on "+this.comName+", wanting "+(((y*this.cols)+x)<<1)+" and I can't find it.");
+	return [0, 0];
 };
 
 dusk.sgui.TileMap.prototype.setTile = function(x, y, tx, ty, update) {
@@ -246,9 +245,8 @@ dusk.sgui.TileMap.prototype.setTile = function(x, y, tx, ty, update) {
 dusk.sgui.TileMap.prototype.getRelativeTile = function(xcoord, ycoord) {
 	if(this.mode == "BINARY") {
 		return this.getTile((xcoord+this.lbound >> this.tsize), (ycoord+this.ubound >> this.tsize));
-	}else{
-		return this.getTile((xcoord+this.lbound * this.twidth), (ycoord+this.ubound * this.theight));
 	}
+	return this.getTile((xcoord+this.lbound * this.twidth), (ycoord+this.ubound * this.theight));
 };
 
 dusk.sgui.TileMap.prototype.inRelativeRange = function(xcoord, ycoord) {
@@ -291,11 +289,11 @@ dusk.sgui.TileMap.prototype.__defineGetter__("width", function g_width() {
 	return this.cols*this.twidth;
 });
 
-dusk.sgui.TileMap.prototype.__defineSetter__("width", function s_width(value) {});
+dusk.sgui.TileMap.prototype.__defineSetter__("width", function s_width(value) {console.warn("TileMap setting width is not supported.");});
 
 dusk.sgui.TileMap.prototype.__defineGetter__("height", function g_height() {
 	if(this.mode == "BINARY") return this.rows<<this.tsize;
 	return this.rows*this.theight;
 });
 
-dusk.sgui.TileMap.prototype.__defineSetter__("height", function s_height(value) {});
+dusk.sgui.TileMap.prototype.__defineSetter__("height", function s_height(value) {console.warn("TileMap setting width is not supported.");});

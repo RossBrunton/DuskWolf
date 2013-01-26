@@ -36,6 +36,9 @@ dusk.sgui.CentreScroller = function (parent, comName) {
 		
 		this._registerPropMask("centre", "__centre", true);
 		this._registerPropMask("lockBounds", "lockBounds", true);
+		
+		this._width = 0;
+		this._height = 0;
 	}
 };
 dusk.sgui.CentreScroller.prototype = new dusk.sgui.Single();
@@ -73,3 +76,19 @@ dusk.sgui.CentreScroller.prototype.__defineSetter__("__centre", function s_centr
 dusk.sgui.CentreScroller.prototype.render = function() {
 	return [-this._component.x, -this._component.y, this.width, this.height];
 };
+
+dusk.sgui.CentreScroller.prototype.__defineSetter__("width", function s_width(value) {
+	this._width = value;
+});
+dusk.sgui.CentreScroller.prototype.__defineGetter__("width", function g_width() {
+	if(this._width === -1) return dusk.simpleGui.width;
+	return this._width;
+});
+
+dusk.sgui.CentreScroller.prototype.__defineSetter__("height", function s_height(value) {
+	this._height = value;
+});
+dusk.sgui.CentreScroller.prototype.__defineGetter__("height", function g_height() {
+	if(this._height === -1) return dusk.simpleGui.height;
+	return this._height;
+});

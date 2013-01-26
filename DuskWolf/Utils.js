@@ -54,9 +54,9 @@ dusk.utils.merge = function(a, b) {
 
 /** Creates a new canvas with a specified height and width.
  * 
- * @param {number} width The width of the canvas.
- * @param {number} height The height of the canvas.
- * @return {Canvas} A canvas with those dimensions.
+ * @param {integer} width The width of the canvas.
+ * @param {integer} height The height of the canvas.
+ * @return {HTMLCanvasElement} A canvas with those dimensions.
  * @since 0.0.12-alpha
  */
 dusk.utils.createCanvas = function(width, height) {
@@ -103,7 +103,7 @@ dusk.utils.jsonParse = function(json) {
  * 
  * @param {string} a The first version string.
  * @param {string} b The second version string.
- * @return {number} 1, 0 or -1 depending on how the versions compare.
+ * @return {integer} 1, 0 or -1 depending on how the versions compare.
  * @since 0.0.12-alpha
  */
 dusk.utils.verCompare = function(a, b) {

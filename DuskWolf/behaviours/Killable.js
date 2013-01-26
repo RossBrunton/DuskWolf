@@ -41,7 +41,7 @@ dusk.behave.Killable.prototype._killableTakeDamage = function(name, e) {
 };
 
 dusk.behave.Killable.prototype._killableTerminate = function(name, e) {
-	this._entity.delete();
+	this._entity.deleteThis();
 };
 
 dusk.behave.Killable.prototype._killableFrame = function(name, e) {

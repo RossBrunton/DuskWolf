@@ -3,7 +3,7 @@
 "use strict";
 
 dusk.load.require("dusk.behave.Behave");
-dusk.load.require("dusk.plat");
+dusk.load.require("dusk.entities");
 
 dusk.load.provide("dusk.behave.MarkTrigger");
 
@@ -36,7 +36,7 @@ dusk.behave.MarkTrigger.prototype._markTriggerFrame = function(name, e) {
 		this._markAt = this._entity.path("../../scheme").tilePointIn(this._entity.x+(this._entity.prop("width")/2), this._entity.y+(this._entity.prop("height")/2))[0];
 		
 		if(!this._coolDown) {
-			dusk.plat.markTrigger.fire({"up":false, "mark":this._markAt, "activator":this._entity.comName, "room":this._entity.path("../..").roomName});
+			dusk.entities.markTrigger.fire({"up":false, "mark":this._markAt, "activator":this._entity.comName, "room":this._entity.path("../..").roomName});
 			this._coolDown = 5;
 		}
 	}

@@ -17,18 +17,6 @@ dusk.behave.SimpleAni.prototype = new dusk.behave.Behave();
 dusk.behave.SimpleAni.constructor = dusk.behave.SimpleAni;
 
 dusk.behave.SimpleAni.prototype._simpleAniFrame = function(name, e) {
-	if(this._entity.dx > 0) {
-		this._entity.setAnimation("walk", {"flags":["r"]});
-	}else if(this._entity.dx < 0) {
-		this._entity.setAnimation("walk", {"flags":["l"]});
-	}else{
-		if(this._entity.aniFlagActive("l")) {
-			this._entity.setAnimation("stationary", {"flags":["l"]});
-		}else{
-			this._entity.setAnimation("stationary", {"flags":["r"]});
-		}
-	}
-	
 	if(this._entity.dy < 0) {
 		if(this._entity.dx > 0) {
 			this._entity.setAnimation("jump", {"flags":["r"]});
@@ -41,9 +29,7 @@ dusk.behave.SimpleAni.prototype._simpleAniFrame = function(name, e) {
 				this._entity.setAnimation("jump", {"flags":["r"]});
 			}
 		}
-	}
-	
-	if(this._entity.dy > 0) {
+	}else if(this._entity.dy > 0) {
 		if(this._entity.dx > 0) {
 			this._entity.setAnimation("fall", {"flags":["r"]});
 		}else if(this._entity.dx < 0) {
@@ -54,6 +40,16 @@ dusk.behave.SimpleAni.prototype._simpleAniFrame = function(name, e) {
 			}else{
 				this._entity.setAnimation("fall", {"flags":["r"]});
 			}
+		}
+	}else if(this._entity.dx > 0) {
+		this._entity.setAnimation("walk", {"flags":["r"]});
+	}else if(this._entity.dx < 0) {
+		this._entity.setAnimation("walk", {"flags":["l"]});
+	}else{
+		if(this._entity.aniFlagActive("l")) {
+			this._entity.setAnimation("stationary", {"flags":["l"]});
+		}else{
+			this._entity.setAnimation("stationary", {"flags":["r"]});
 		}
 	}
 };

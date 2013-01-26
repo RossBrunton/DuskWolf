@@ -105,7 +105,7 @@ dusk.sgui.Single.prototype._singleDraw = function(c) {
 dusk.sgui.Single.prototype.getComponent = function(com, type) { //Component
 	if (this._component.comName == com.toLowerCase() || com == "*" || com === "") {
 		return this._component;
-	};
+	}
 	
 	return type?this.newComponent(com, type):null;
 };
@@ -133,23 +133,23 @@ dusk.sgui.Single.prototype.flow = function(to) { //Bool
 	return this._container.flow(to);
 };
 
-dusk.sgui.Single.prototype.__defineGetter__("width", function _getWidth() {
+dusk.sgui.Single.prototype.__defineGetter__("width", function g_width() {
 	if(this._width >= 0) return this._width;
 	
 	return this._component.x + this._component.width;
 });
 
-dusk.sgui.Single.prototype.__defineSetter__("width", function _setWidth(value) {
+dusk.sgui.Single.prototype.__defineSetter__("width", function s_width(value) {
 	this._width = value;
 });
 
-dusk.sgui.Single.prototype.__defineGetter__("height", function _getHeight() {
+dusk.sgui.Single.prototype.__defineGetter__("height", function g_height() {
 	if(this._height >= 0) return this._height;
 	
 	return this._component.y + this._component.height;
 });
 
-dusk.sgui.Single.prototype.__defineSetter__("height", function _setHeight(value) {
+dusk.sgui.Single.prototype.__defineSetter__("height", function s_height(value) {
 	this._height = value;
 });
 

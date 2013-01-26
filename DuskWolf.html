@@ -3,7 +3,7 @@
 	<head>
 		<title>DuskWolf</title>
 		<script type='text/javascript'>
-		var __dataDir__ = "Data";
+		var __dataDir__ = "Data/";
 		var __implementation__ = "browser";
 		var __overrideRoot__ = true;
 		</script>
@@ -18,7 +18,7 @@
 		</script>
 	</head>
 	
-	<body>
+	<body style='margin:0px;padding:0px'>
 		<noscript>You need to enable JavaScript!</noscript>
 		<canvas id='canvas' width='768'  height='480' style='image-rendering: -webkit-optimize-contrast;'>
 			Your browser doesn't support canvas. Ha-ha!<br/>
@@ -27,11 +27,11 @@
 		</canvas>
 		
 		<div>
-			<input id="editing" type="checkbox" onchange="dusk.plat.editing = this.checked;"/><label for='editing'>Edit mode active</label>
+			<input id="editing" type="checkbox" onchange="dusk.editor.active = this.checked;"/><label for='editing'>Edit mode active</label>
 			 | 
-			<button onclick="dusk.plat.editDroppers[+prompt('Number (0-9) to set entity for.')] = prompt('Entity type to drop.');">Set dropper</button>
+			<button onclick="dusk.editor.editDroppers[+prompt('Number (0-9) to set entity for.')] = prompt('Entity type to drop.');">Set dropper</button>
 			 | 
-			<button onclick="dusk.plat.editNext = prompt('Enter name for next entity.');">Name next entity</button>
+			<button onclick="dusk.editor.editNext = prompt('Enter name for next entity.');">Name next entity</button>
 			
 			<div style='color:#999999'>
 				ARROW: Move frame | CTRL+ARROW: Change layer | ++ARROW: Extend map | -+ARROW: Shrink map<br/>

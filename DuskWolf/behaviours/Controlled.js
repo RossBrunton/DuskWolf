@@ -14,8 +14,7 @@ dusk.behave.Controlled = function(entity) {
 		this._jumps = 0;
 		
 		this._listenEvent("frame", this._controlledFrame);
-		this._listenEvent("land", function(name, e) {this._jumps = 0;});
-		this._listenEvent("collideBottom", function(name, e) {this._jumps = 0;});
+		this._listenEvent("collide", function e_collide(name, e) {if(e.dir = "b") this._jumps = 0;});
 		
 		dusk.controls.addControl("entity_left", 37, "0-0.5");
 		dusk.controls.addControl("entity_right", 39, "0+0.5");

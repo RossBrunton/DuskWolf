@@ -39,12 +39,12 @@ dusk.sgui.Component = function (parent, componentName) {
 		this.comName = componentName;
 		
 		/** The components x coordinate.
-		 * @type number
+		 * @type integer
 		 * @memberof dusk.sgui.Component
 		 */
 		this.x = 0;
 		/** The components y coordinate.
-		 * @type number
+		 * @type integer
 		 * @memberof dusk.sgui.Component
 		 */
 		this.y = 0;
@@ -55,18 +55,18 @@ dusk.sgui.Component = function (parent, componentName) {
 		 */
 		this.visible = true;
 		/** The component's transparency. A number between 0 and 1, where 0 is fully transparent, and 1 is fully opaque. 
-		 * @type number
+		 * @type float
 		 * @default 1
 		 * @memberof dusk.sgui.Component
 		 */
 		this.alpha = 1;
 		/** The component's height, in pixels. 
-		 * @type number
+		 * @type integer
 		 * @memberof dusk.sgui.Component
 		 */
 		this.height = 0;
 		/** The component's width, in pixels. 
-		 * @type number
+		 * @type integer
 		 * @memberof dusk.sgui.Component
 		 */
 		this.width = 0;
@@ -93,7 +93,6 @@ dusk.sgui.Component = function (parent, componentName) {
 		 */
 		this.leftFlow = "";
 		/** The name of the group's component that will be focused when the right key is pressed and `{@link dusk.sgui.Component.rightDirection}` returns true.
-		 * @type string
 		 * @type string
 		 * @memberof dusk.sgui.Component
 		 */
@@ -181,28 +180,15 @@ dusk.sgui.Component = function (parent, componentName) {
 		 * @memberof dusk.sgui.Component
 		 */
 		this._active = false;
-
-		/** The thread this component is currently running in. Note that this is not cleared if the component is not waiting. 
-		 * @type string
-		 * @memberof dusk.sgui.Component
-		 * @protected
-		 */
-		this._thread = "";
-		/** The number of times `{@link dusk.sgui.Component.awaitNext}` has been called, the number of "nexts" waited on.
-		 * @type number
-		 * @private
-		 * @memberof dusk.sgui.Component
-		 */
-		this._open = 0;
 		
 		/** The speed of the currently running float effect. The component will move this number of frames every second.
-		 * @type number
+		 * @type integer
 		 * @private
 		 * @memberof dusk.sgui.Component
 		 */
 		this._floatSpeed = 0;
 		/** The number of frames left on the component's float effect.
-		 * @type number
+		 * @type integer
 		 * @private
 		 * @memberof dusk.sgui.Component
 		 */
@@ -215,13 +201,13 @@ dusk.sgui.Component = function (parent, componentName) {
 		this._floatDir = "u";
 		
 		/** The fade effect's speed, this is added to the component's alpha every frame untill `{@link dusk.sgui.Component.fadeEnd}` is reached.
-		 * @type number
+		 * @type integer
 		 * @private
 		 * @memberof dusk.sgui.Component
 		 */
 		this._fade = 0;
 		/** The final value that the fade effect will reach.
-		 * @type number
+		 * @type integer
 		 * @private
 		 * @memberof dusk.sgui.Component
 		 */
@@ -243,7 +229,7 @@ dusk.sgui.Component = function (parent, componentName) {
 		this._registerPropMask("action", "action", true);
 		this._registerPropMask("fade", "fade", true);
 		this._registerPropMask("float", "foat", true);
-		this._registerPropMask("delete", "delete", true);
+		this._registerPropMask("deleteThis", "deleteThis", true);
 	}
 };
 
@@ -262,6 +248,41 @@ dusk.sgui.Component.prototype.className = "Component";
  */
 dusk.sgui.Component.prototype.isAContainer = false;
 
+/** The direction up, negative in the y axis.
+ * @type integer
+ * @default 0
+ * @static
+ * @constant
+ * @memberof dusk.sgui.Component
+ */
+dusk.sgui.Component.DIR_UP = 0;
+
+/** The direction down, positive in the y axis.
+ * @type integer
+ * @default 1
+ * @static
+ * @constant
+ * @memberof dusk.sgui.Component
+ */
+dusk.sgui.Component.DIR_DOWN = 1;
+
+/** The direction left, negative in the x axis.
+ * @type integer
+ * @default 2
+ * @static
+ * @constant
+ * @memberof dusk.sgui.Component
+ */
+dusk.sgui.Component.DIR_LEFT = 2;
+
+/** The direction right, negative in the x axis.
+ * @type integer
+ * @default 3
+ * @static
+ * @constant
+ * @memberof dusk.sgui.Component
+ */
+dusk.sgui.Component.DIR_RIGHT = 3;
 
 /** This adds a handler that will call the function once every frame.
  * @param {function()} funct The function to call, it will be passed no parameters.
@@ -302,7 +323,7 @@ dusk.sgui.Component.prototype.frame = function() {
  * If there is no event for a key which has shift set to true, but there is one where shift is set to false that one will be called.
  * 	You can also set the keycode to be -1, and it will handle all keys.
  * 
- * @param {number} key The keycode to respond to, it should be a JavaScript keycode.
+ * @param {integer} key The keycode to respond to, it should be a JavaScript keycode.
  * @param {boolean} shift Whether the shift key must be held down to trigger the handler.
  * @param {boolean} ctrl Whether the ctrl key must be held down as well.
  * @param {function(object):boolean} funct The function to call, it is given a single param, a JQuery keyboard event.
@@ -520,11 +541,11 @@ dusk.sgui.Component.prototype.prop = function(name, value) {
 	if(this._propMasks[name] !== undefined) {
 		if(value === undefined) {
 			return this[this._propMasks[name][0]];
-		}else{
-			this[this._propMasks[name][0]] = value;
-			if(this._propMasks[name][1]) this.bookRedraw();
-			return value;
 		}
+		
+		this[this._propMasks[name][0]] = value;
+		if(this._propMasks[name][1]) this.bookRedraw();
+		return value;
 	}
 	
 	return null;
@@ -640,14 +661,14 @@ dusk.sgui.Component.prototype._floatEffect = function() {
  * @name delete
  * @memberof dusk.sgui.Component
  */
-dusk.sgui.Component.prototype.__defineSetter__("delete", function s_delete(value) {
+dusk.sgui.Component.prototype.__defineSetter__("deleteThis", function s_delete(value) {
 	if(value) {
 		this.onDelete.fire({"component":this});
 		this._container.deleteComponent(this.comName);
 	}
 });
 
-dusk.sgui.Component.prototype.__defineGetter__("delete", function g_delete() {return function(){this["delete"] = true;};});
+dusk.sgui.Component.prototype.__defineGetter__("deleteThis", function g_delete() {return function(){this["deleteThis"] = true;};});
 
 
 /** This will register the function to a listener that fires when the component tries to draw stuff.
@@ -755,18 +776,16 @@ dusk.sgui.Component.prototype.path = function(path) {
 			return this;
 		
 		case "":
-			if(this.className == "Pane") 
-				return this.path(second);
-			else
-				return this._container.path(second);
+			if(this.className == "Pane") return this.path(second);
+			return this._container.path(second);
 		
 		default:
 			if(this.isAContainer){
 				if(!second) return this.getComponent(first);
-				else return this.getComponent(first).path(second);
-			}else{
-				throw new Error(path + " from " + this.comName + " was not found.");
+				return this.getComponent(first).path(second);
 			}
+			
+			throw new Error(path + " from " + this.comName + " was not found.");
 	}
 };
 
@@ -780,7 +799,10 @@ dusk.sgui.Component.prototype.onDeactive = function() {this._active = false;this
 /** This is called when the component becomes longer active, and may be overriden. */
 dusk.sgui.Component.prototype.onActive = function() {this._active = true;this.bookRedraw();};
 
-/** Returns a string representation of the component. */
+/** Returns a string representation of the component. 
+ * 
+ * @return {string} A string representation of this component.
+ */
 dusk.sgui.Component.prototype.toString = function() {return "[sgui "+this.className+" "+this.comName+"]";};
 
 //-----

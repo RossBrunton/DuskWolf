@@ -17,7 +17,7 @@ dusk.load.provide("dusk.frameTicker");
 
 /** An event dispatcher which fires once every frame.
  * 
- * There are `{@dusk.frameRate}` frames in a second, although it may be less due to the system's performance.
+ * There are `{@link dusk.frameRate}` frames in a second, although it may be less due to the system's performance.
  * 
  * The events fired have no properties.
  * 
@@ -25,7 +25,7 @@ dusk.load.provide("dusk.frameTicker");
  */
 dusk.frameTicker.onFrame = new dusk.EventDispatcher();
 
-/** The function that fires `{@dusk.frameTicker.onFrame}`; it is called using `setInterval`.
+/** The function that fires `{@link dusk.frameTicker.onFrame}`; it is called using `setInterval`.
  * 
  * @private
  */

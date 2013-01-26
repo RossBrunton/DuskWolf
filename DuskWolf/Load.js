@@ -19,7 +19,7 @@ if(!dusk.load) dusk.load = {};
  * 
  * Possible values for the state are either 0 (not imported), 1 (currently in the proccess of importing) or 2 (successfully imported and ran).
  * 
- * @type object.<array.<string, number, array.<string>>>
+ * @type object
  * @private
  * @since 0.0.12-alpha
  */
@@ -31,7 +31,7 @@ dusk.load._names = {};
  * 
  * Each element of the array consists of two elements; the first is a boolean indicating if the file is added to the file (but has not finished downloading) the second is the actual namespace to download.
  * 
- * @type array.<array.<boolean, string>>
+ * @type array
  * @see {@dusk.load._repeat}
  * @private
  * @since 0.0.12-alpha
@@ -97,8 +97,8 @@ dusk.load.provide = function(name) {
 /** Adds a dependency. This tells the engine the file in which the namespaces are provided, and what other files must be imported before it.
  * 
  * @param {string} file The file name which the namespaces reside. It is relative to `__duskdir__`.
- * @param {array.<string>} provided An array of namespace names which are provided by the file.
- * @param {array.<string>} required An array of namespace names that are required for this file to run. These will be downloaded before this one if any provided namespaces are requested.
+ * @param {array} provided An array of namespace names which are provided by the file.
+ * @param {array} required An array of namespace names that are required for this file to run. These will be downloaded before this one if any provided namespaces are requested.
  * @since 0.0.12-alpha
  */
 dusk.load.addDependency = function(file, provided, required) {
@@ -142,7 +142,7 @@ dusk.load.import = function(name) {
 	}
 	
 	this._names[name][1] = 1;
-	for(var i = this._names[name][2].length-1; i >= 0; i --) {
+	for(i = this._names[name][2].length-1; i >= 0; i --) {
 		if(this._names[this._names[name][2][i]][1] === 0) {
 			dusk.load.import(this._names[name][2][i]);
 		}
@@ -213,7 +213,7 @@ dusk.load.importList = function(path, callback) {
 			if(data[i][0].indexOf(":") === -1 && data[i][0][0] != "/") data[i][0] = relativePath + data[i][0];
 			dusk.load.addDependency(data[i][0], data[i][1], data[i][2]);
 		}
-	}, callback], "beforeSend":function(jqXHR, settings) {jqXHR.responseURL = path},
+	}, callback], "beforeSend":function(jqXHR, settings) {jqXHR.responseURL = path;},
 	"url":path});
 };
 

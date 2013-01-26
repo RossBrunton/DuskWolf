@@ -24,7 +24,7 @@ dusk.load.provide("dusk.EventDispatcher");
  * @since 0.0.14-alpha
  */
 dusk.EventDispatcher = function(name, mode) {
-	/** All the listeners; each element is an array in the form [callback, propsYes, propsNo, scope].
+	/** All the listeners; each element is an array in the form `[callback, propsYes, propsNo, scope]`.
 	 * @type array
 	 * @private
 	 * @memberof dusk.EventDispatcher
@@ -37,7 +37,27 @@ dusk.EventDispatcher = function(name, mode) {
 	 * @memberof dusk.EventDispatcher
 	 */
 	this._name = name;
+    
+    /** The current mode of the EventDispatcher.
+     * 
+     * This must be a number equal to one of the MODE_* constants.
+     *
+     * This will determine the return value of `{@link dusk.EventDispatcher.fire}`, and what the listeners should return.
+     * 
+     * @type integer
+     * @private
+     * @memberof dusk.EventDispatcher
+     */
+     this._mode = (mode === undefined)?dusk.EventDispatcher.MODE_NONE:mode;
 };
+
+/** The default mode, this will cause the fire method to return nothing.
+ * 
+ * @type integer
+ * @constant
+ * @value 0
+ */
+dusk.EventDispatcher.MODE_NONE = 0;
 
 /** Registers a listener for the event; this function will be called if an event is fired and the properties match up as described in the class description are correct.
  * 
@@ -94,5 +114,5 @@ dusk.EventDispatcher.prototype.fire = function(event) {
  * @return {string} A representation of the EventDispatcher.
  */
 dusk.EventDispatcher.prototype.toString = function() {
-	return "[EventDispatcher "+this._name+"]";
+	return "[eventDispatcher "+this._name+"]";
 };

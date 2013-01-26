@@ -73,6 +73,15 @@ dusk.simpleGui._init = function() {
 	
 	//Listen for frame events
 	dusk.frameTicker.onFrame.listen(function e_onFrame() {
+		if(this.displayMode == 1) {
+			this.width = $("#"+dusk.canvas).parent().width();
+			if($("#"+dusk.canvas).parent().height() > window.innerHeight) {
+				this.height = window.innerHeight;
+			}else{
+				this.height = $("#"+dusk.canvas).parent().height();
+			}
+		}
+		
 		for(var p in this._panes){
 			this._panes[p].frame();
 		}
@@ -99,16 +108,16 @@ dusk.simpleGui._init = function() {
 	 */
 	this._redrawBooked = false;
 	
-	/** The current width of the canvas.
+	/* * The current width of the canvas.
 	 * 
-	 * @type number
-	 */
+	 * @type integer
+	 * /
 	this.width = $("#"+dusk.canvas)[0].width;
 	/** The current height of the canvas.
 	 * 
-	 * @type number
-	 */
-	this.height = $("#"+dusk.canvas)[0].height;
+	 * @type integer
+	 * /
+	this.height = $("#"+dusk.canvas)[0].height;*/
 	
 	/** Fires when this renders a new frame.
 	 * 
@@ -120,7 +129,7 @@ dusk.simpleGui._init = function() {
 	
 	/** A cached canvas drawn to before the real one, to improve performance.
 	 * 
-	 * @type Canvas
+	 * @type HTMLCanvasElement
 	 * @private
 	 */
 	this._cacheCanvas = document.createElement("canvas");
@@ -154,6 +163,8 @@ dusk.simpleGui._init = function() {
 	dusk.controls.addControl("sgui_left", 37, "0+0.5");
 	dusk.controls.addControl("sgui_right", 39, "0-0.5");
 	dusk.controls.addControl("sgui_action", 65, 0);
+	
+	this.displayMode = 1;
 	
 	dusk.simpleGui._draw();
 };
@@ -232,7 +243,7 @@ dusk.simpleGui._draw = function() {
  * The path from this function must contain a colon, all text to the left of the colon will be the pane to start off with, and all text to the right will be a standard path.
  * 
  * @param {string} path The path to resolve.
- * @return {@dusk.sgui.Component} The component the path represents.
+ * @return {dusk.sgui.Component} The component the path represents.
  */
 dusk.simpleGui.path = function(path) {
 	if(path.indexOf(":") !== -1) {
@@ -267,6 +278,26 @@ dusk.simpleGui.setThemeKey = function(name, value) {
 dusk.simpleGui.getThemeKey = function(name) {
 	return this._themeData[name];
 };
+
+dusk.simpleGui.__defineSetter__("width", function s_width(value) {
+	if(value == this.width) return;
+	
+	$("#"+dusk.canvas)[0].width = value;
+	this._cacheCanvas.width = this.width;
+});
+dusk.simpleGui.__defineGetter__("width", function g_width(value) {
+	return $("#"+dusk.canvas)[0].width;
+});
+
+dusk.simpleGui.__defineSetter__("height", function s_height(value) {
+	if(value == this.height) return;
+	
+	$("#"+dusk.canvas)[0].height = value;
+	this._cacheCanvas.height = this.height;
+});
+dusk.simpleGui.__defineGetter__("height", function g_height(value) {
+	return $("#"+dusk.canvas)[0].height;
+});
 
 //Init the simpleGui
 dusk.simpleGui._init();

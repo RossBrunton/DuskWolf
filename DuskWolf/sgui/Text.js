@@ -50,19 +50,19 @@ dusk.sgui.Label.prototype._labelDraw = function(c) {
 	}
 };
 
-dusk.sgui.Label.prototype.__defineGetter__("width", function _getWidth() {
+dusk.sgui.Label.prototype.__defineGetter__("width", function g_width() {
 	return this.measure(this.text)+(this._padding<<1);
 });
 
-dusk.sgui.Label.prototype.__defineSetter__("width", function _setWidth(value) {
+dusk.sgui.Label.prototype.__defineSetter__("width", function s_width(value) {
 	this._width = value-(this._padding<<1);
 });
 
-dusk.sgui.Label.prototype.__defineGetter__("height", function _getHeight() {
+dusk.sgui.Label.prototype.__defineGetter__("height", function g_height() {
 	return this.size+(this._padding<<1);
 });
 
-dusk.sgui.Label.prototype.__defineSetter__("height", function _setHeight(value) {
+dusk.sgui.Label.prototype.__defineSetter__("height", function s_height(value) {
 	this.size = value-(this._padding<<1);
 });
 

@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-dusk.load.require("dusk.sgui.PlatEntity");
+dusk.load.require("dusk.sgui.Entity");
 
 dusk.load.provide("dusk.behave.Behave");
 

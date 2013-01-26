@@ -3,9 +3,10 @@
 "use strict";
 
 dusk.load.require("dusk.simpleGui");
-dusk.load.require("dusk.sgui.PlatMain");
+dusk.load.require("dusk.sgui.BasicMain");
 dusk.load.require("dusk.sgui.CentreScroller");
 dusk.load.require("dusk.EventDispatcher");
+dusk.load.require("dusk.entities");
 
 dusk.load.provide("dusk.plat");
 
@@ -30,7 +31,7 @@ dusk.load.provide("dusk.plat");
  * 
  * The background and foreground layer (named `back` and `over`) are normal, visible tilemaps.
  * 
- * Entities exist on the entity layer (`{@link dusk.sgui.EntityGroup}`), and are objects of type `{@link dusk.sgui.PlatEntity}`.
+ * Entities exist on the entity layer (`{@link dusk.sgui.EntityGroup}`), and are objects of type `{@link dusk.sgui.Entity}`.
  * 	Entities are described using types, each entity has only one type, which describes how they act, their data and animations.
  * 	Entity types are simple objects with three properties, `data`, `animation` and `behaviours`.
  * 
@@ -79,84 +80,18 @@ dusk.plat._init = function() {
 	this._skills = [];
 	this.giveSkill("jump");
 	this.giveSkill("dubjump");
-	//this.giveSkill("infinijump");
+	this.giveSkill("infinijump");
 	
-	/** Sprite size of binary entities and tilemap tiles.
-	 * 
-	 * If the mode is binary, then this is considered to be the width and height of the tiles when reading them from the image.
-	 * 
-	 * This should be `n` such that the width and height of the sprite is `2^n`. If this is 4, then the sprites will be 16x16, for example.
-	 * 
-	 * @type number
-	 * @default 4
-	 */
-	this.ssize = 4;
-	/** Sprite width of decimal entities and tilemap tiles.
-	 * 
-	 * If the mode is decimal, then this is the width of tiles when reading them from the image.
-	 * 
-	 * @type number
-	 * @default 16
-	 */
-	this.swidth = 16;
-	/** Sprite height of decimal entities and tilemap tiles.
-	 * 
-	 * If the mode is decimal, then this is the height of tiles when reading them from the image.
-	 * 
-	 * @type number
-	 * @default 16
-	 */
-	this.sheight = 16;
+	var main = dusk.simpleGui.getPane("plat-main");
+	main.modifyChildren({"name":"mainContainer", "focus":"main", "type":"CentreScroller", "width":-1, "height":-1, "child":{"name":"main", "type":"BasicMain"}});
+	main.becomeActive();
+	main.focus = "mainContainer";
 	
-	/** Tile size of binary entities and tilemap tiles.
-	 * 
-	 * If the mode is binary, then this is considered to be the width and height of the tiles when drawing them to the canvas.
-	 * 
-	 * This should be `n` such that the width and height of the tile to draw is `2^n`. If this is 4, then the sprites will be 16x16, for example.
-	 * 
-	 * @type number
-	 * @default 5
-	 */
-	this.tsize = 5;
-	this.twidth = 32;
-	this.theight = 32;
-	
-	this.mode = "BINARY";
-	
-	this.seek = "hero";
-	this.seekType = "player";
-	
-	this.editing = false;
-	this.editDroppers = [];
-	this.editNext = "";
-	
-	this._rooms = {};
-	
-	this.roomLoaded = new dusk.EventDispatcher("dusk.plat.roomLoaded");
-	this.markTrigger = new dusk.EventDispatcher("dusk.plat.markTrigger");
-	this.persistDataUpdate = new dusk.EventDispatcher("dusk.plat.persistDataUpdate");
-	
-	this._persistData = {};
-	
-	this._entityData = {};
-	this._entityData["default"] = {
+	dusk.entities.modifyEntityType("default", {
 		"data":{"hp":1, "gravity":1, "terminal":9, "haccel":2, "hspeed":7, "jump":15, "slowdown":1, "img":"pimg/hero.png", "solid":true, "anchor":false},
 		"animation":{"stationary":"0,0"},
 		"behaviours":{}
-	};
-	
-	var main = dusk.simpleGui.getPane("plat-main");
-	main.modifyChildren({"name":"mainContainer", "focus":"main", "type":"CentreScroller", "width":dusk.simpleGui.width, "height":dusk.simpleGui.height, "child":{"name":"main", "type":"PlatMain"}});
-	main.active = true;
-	main.focus = "mainContainer";
-};
-
-dusk.plat.createRoom = function(name, data) {
-	this._rooms[name] = data;
-};
-
-dusk.plat.getRoomData = function(name) {
-	return this._rooms[name];
+	});
 };
 
 /*- Function: _setRoom
@@ -175,7 +110,7 @@ dusk.plat.setRoom = function(room, spawn) {
 	console.log("Setting room "+room);
 	
 	dusk.simpleGui.getPane("plat-main").path("/mainContainer/main").createRoom(room, spawn);
-	this.roomLoaded.fire({"room":room, "spawn":spawn});
+	dusk.rooms.roomLoaded.fire({"room":room, "spawn":spawn});
 	
 	/*dusk.actions.run([{"a":"if", "cond":(a.nofade?"0":"1"), "then":[
 		{"a":"sg-path", "pane":"plat-main", "path":"/mainContainer", "fade":{"from":1, "end":0, "speed":-0.05}}
@@ -192,27 +127,12 @@ dusk.plat.setRoom = function(room, spawn) {
 	});*/
 };
 
-dusk.plat.modifyEntityType = function(name, data, inherit) {
-	if(inherit !== undefined) {
-		this._entityData[name] = dusk.utils.merge(this._entityData[inherit], data);
-	}else if(!(name in this._entityData)) {
-		this._entityData[name] = dusk.utils.merge(this._entityData["default"], data);
-	}else{
-		this._entityData[name] = dusk.utils.merge(this._entityData[name], data);
-	}
-};
-
-dusk.plat.getEntityType = function(name) {
-	return this._entityData[name];
-};
-
 dusk.plat.giveSkill = function(skillName) {
 	if(this._skills.indexOf(skillName) === -1) {
 		this._skills.push(skillName);
 		return true;
-	}else{
-		return false;
 	}
+	return false;
 };
 
 dusk.plat.hasSkill = function(skillName) {
@@ -222,20 +142,9 @@ dusk.plat.hasSkill = function(skillName) {
 dusk.plat.revokeSkill = function(skillName) {
 	if(this._skills.indexOf(skillName) === -1) {
 		return false;
-	}else{
-		this._skills.splice(this._skills.indexOf(skillName), 1);
-		return true;
 	}
-};
-
-dusk.plat.storePersist = function(name, data) {
-	this._persistData[name] = data;
-	data.entityName = name;
-	this.persistDataUpdate.fire(data);
-};
-
-dusk.plat.getPersist = function(name) {
-	return this._persistData[name];
+	this._skills.splice(this._skills.indexOf(skillName), 1);
+	return true;
 };
 
 dusk.plat._init();

@@ -3,7 +3,7 @@
 "use strict";
 
 dusk.load.require("dusk.behave.Behave");
-dusk.load.require("dusk.plat");
+dusk.load.require("dusk.entities");
 
 dusk.load.provide("dusk.behave.Persist");
 
@@ -19,9 +19,9 @@ dusk.behave.Persist.prototype = new dusk.behave.Behave();
 dusk.behave.Persist.constructor = dusk.behave.Persist;
 
 dusk.behave.Persist.prototype._persistLoad = function(name, data) {
-	this._entity.behaviourData = dusk.plat.getPersist(this._entity.comName) || this._entity.behaviourData;
+	this._entity.behaviourData = dusk.entities.getPersist(this._entity.comName) || this._entity.behaviourData;
 };
 
 dusk.behave.Persist.prototype._persistFrame = function(name, data) {
-	dusk.plat.storePersist(this._entity.comName, this._entity.behaviourData);
+	dusk.entities.storePersist(this._entity.comName, this._entity.behaviourData);
 };

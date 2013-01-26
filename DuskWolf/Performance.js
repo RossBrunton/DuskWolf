@@ -19,22 +19,22 @@ dusk.load.provide("dusk.performance");
  */
  
 /** The number of frames ran before the frame rate is checked.
- * @type number
+ * @type integer
  * @private
  */
 dusk.performance._framesRan = 0;
 /** The time since the last frame was checked.
- * @type number
+ * @type integer
  * @private
  */
 dusk.performance._time = (new Date()).getTime();
 /** The number of render frames ran before the frame rate is checked.
- * @type number
+ * @type integer
  * @private
  */
 dusk.performance._rframesRan = 0;
 /** The time since the last render frame was checked.
- * @type number
+ * @type integer
  * @private
  */
 dusk.performance._rtime = (new Date()).getTime();
@@ -43,7 +43,7 @@ dusk.performance._rtime = (new Date()).getTime();
  * 
  * This will be 0 until the frame rate is checked for the first time, otherwise it will be the result of the last check.
  * 
- * @type number
+ * @type integer
  */
 dusk.performance.frameRate = 0;
 
@@ -51,7 +51,7 @@ dusk.performance.frameRate = 0;
  * 
  * This will be 0 until the frame rate is checked for the first time, otherwise it will be the result of the last check.
  * 
- * @type number
+ * @type integer
  */
 dusk.performance.renderFrameRate = 0;
 

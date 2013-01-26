@@ -28,7 +28,7 @@ dusk.data.init = function() {
 	dusk.data._loaded = {};
 	
 	/** This indicates how many initial external source files have to be downloaded.
-	 * @type number
+	 * @type integer
 	 * @private
 	 * @since 0.0.13-alpha
 	 */
@@ -45,7 +45,7 @@ dusk.data.init = function() {
  * @return {string|object} The contents of the file, the type depends on the value of the <code>type</code> param.
  */
 dusk.data.download = function(file, type, callback, state) {
-	var url = dusk.dataDir+"/"+file;
+	var url = dusk.util.resolveRelative(file, dusk.dataDir);
 	
 	if(this._loaded[url] === undefined) {
 		console.log("Downloading file "+url+"...");
@@ -81,11 +81,10 @@ dusk.data.grabImage = function(file) {
 		console.log("Downloading image "+file+"...");
 		
 		this._loaded[file] = new Image();
-		this._loaded[file].src = dusk.dataDir+"/"+file;
-		return this._loaded[file];
-	}else{
+        this._loaded[file].src = dusk.utils.resolveRelative(file, dusk.dataDir);
 		return this._loaded[file];
 	}
+	return this._loaded[file];
 };
 
 dusk.data.init();

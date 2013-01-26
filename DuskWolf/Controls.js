@@ -55,6 +55,10 @@ dusk.controls.mapButton = function(name, button) {
 	dusk.controls._mappings[name][1] = button;
 };
 
+dusk.controls.check = function(name, key, button) {
+	return dusk.controls.checkKey(key) || dusk.controls.checkButton(button);
+};
+
 dusk.controls.checkKey = function(name, key) {
 	return dusk.controls._mappings[name][0] == key;
 };
@@ -108,7 +112,7 @@ dusk.controls._buttonPressed = function(e) {
 dusk.controls.buttonPress.listen(dusk.controls._buttonPressed, null);
 
 dusk.controls._frame = function(e) {
-	var navigatorGetGamepads = navigator.getGamepads || navigator.webkitGetGamepads;
+	var navigatorGetGamepads = navigator.getGamepads || navigator.webkitGetGamepads || function(){return [null];};
 	var gamepad = navigatorGetGamepads.call(navigator)[0];
 	if(gamepad) {
 		for(var i = 0; i < gamepad.buttons.length-1; i ++) {

@@ -11,7 +11,7 @@ dusk.load.provide("dusk.keyboard");
  * 
  * @description This module contains methods for interacting with the keyboard.
  */
-	
+
 /** An object describing which keys are currently pressed.
  * 
  * The keys of the object, are the keycodes of each key that has been pressed, with a true or false value.
@@ -44,74 +44,121 @@ $(document).bind("keyup", function je_keyup(e){dusk.keyboard.keyUp.fire(e);});
 
 /** An object describing the properties of keys relative to their keycodes.
  * 
- * Each property in this object is a two element array, the first being the "name" of the key, the second being a boolean indecating whether it is printable or not.
+ * Each property in this object is a three element array, the first being the "name" of the key, the second being a boolean indicating whether it is printable or not, and the third being a smaller (upto 3 chars) name of the key.
  * 
  * Property names of this object are the same as the keycodes they describe.
  * 
  * @type object
  * @private
  */
-this._codes = {
-	"8":["BACKSPACE", false],
-	"9":["TAB", false],
-	"13":["ENTER", false],
-	"16":["SHIFT", false],
-	"17":["CTRL", false],
-	"18":["ALT", false],
-	"27":["ESCAPE", false],
-	"33":["PAGEUP", false],
-	"34":["PAGEDOWN", false],
-	"35":["END", false],
-	"36":["HOME", false],
-	"45":["INSERT", false],
-	"46":["DELETE", false],
-	"91":["SUPER", false],
-	"92":["SUPER", false],
+dusk.keyboard._codes = {
+	"8":["BACKSPACE", false, "BS"],
+	"9":["TAB", false, "TAB"],
+	"13":["ENTER", false, "ENT"],
+	"16":["SHIFT", false, "SFT"],
+	"17":["CTRL", false, "CTL"],
+	"18":["ALT", false, "ALT"],
+	"19":["PAUSE", false, "PAU"],
+	"20":["CAPS_LOCK", false, "CAP"],
+	"27":["ESCAPE", false, "ESC"],
+	"33":["PAGEUP", false, "PGU"],
+	"34":["PAGEDOWN", false, "PGD"],
+	"35":["END", false, "END"],
+	"36":["HOME", false, "HME"],
+	"45":["INSERT", false, "INS"],
+	"46":["DELETE", false, "DEL"],
+	"91":["SUPER", false, "SPR"],
+	"92":["SUPER", false, "SPR"],
 	
-	"32":[" ", true],
+	"32":[" ", true, "SPC"],
 	
-	"37":["LEFT", false],
-	"38":["UP", false],
-	"39":["RIGHT", false],
-	"40":["DOWN", false],
+	"37":["LEFT", false, "LFT"],
+	"38":["UP", false, "UP"],
+	"39":["RIGHT", false, "RGT"],
+	"40":["DOWN", false, "DWN"],
 	
-	"48":["0", true],
-	"49":["1", true],
-	"50":["2", true],
-	"51":["3", true],
-	"52":["4", true],
-	"53":["5", true],
-	"54":["6", true],
-	"55":["7", true],
-	"56":["8", true],
-	"57":["9", true],
+	"48":["0", true, "0"],
+	"49":["1", true, "1"],
+	"50":["2", true, "2"],
+	"51":["3", true, "3"],
+	"52":["4", true, "4"],
+	"53":["5", true, "5"],
+	"54":["6", true, "6"],
+	"55":["7", true, "7"],
+	"56":["8", true, "8"],
+	"57":["9", true, "9"],
 	
-	"65":["a", true],
-	"66":["b", true],
-	"67":["c", true],
-	"68":["d", true],
-	"69":["e", true],
-	"70":["f", true],
-	"71":["g", true],
-	"72":["h", true],
-	"73":["i", true],
-	"74":["j", true],
-	"75":["k", true],
-	"76":["l", true],
-	"77":["m", true],
-	"78":["n", true],
-	"79":["o", true],
-	"80":["p", true],
-	"81":["q", true],
-	"82":["r", true],
-	"83":["s", true],
-	"84":["t", true],
-	"85":["u", true],
-	"86":["v", true],
-	"87":["w", true],
-	"88":["x", true],
-	"89":["y", true],
-	"90":["z", true],
+	"65":["a", true, "A"],
+	"66":["b", true, "B"],
+	"67":["c", true, "C"],
+	"68":["d", true, "D"],
+	"69":["e", true, "E"],
+	"70":["f", true, "F"],
+	"71":["g", true, "G"],
+	"72":["h", true, "H"],
+	"73":["i", true, "I"],
+	"74":["j", true, "J"],
+	"75":["k", true, "K"],
+	"76":["l", true, "L"],
+	"77":["m", true, "M"],
+	"78":["n", true, "N"],
+	"79":["o", true, "O"],
+	"80":["p", true, "P"],
+	"81":["q", true, "Q"],
+	"82":["r", true, "R"],
+	"83":["s", true, "S"],
+	"84":["t", true, "T"],
+	"85":["u", true, "U"],
+	"86":["v", true, "V"],
+	"87":["w", true, "W"],
+	"88":["x", true, "X"],
+	"89":["y", true, "Y"],
+	"90":["z", true, "Z"],
+	
+	"96":["0", true, "N0"],
+	"97":["1", true, "N1"],
+	"98":["2", true, "N2"],
+	"99":["3", true, "N3"],
+	"100":["4", true, "N4"],
+	"101":["5", true, "N5"],
+	"102":["6", true, "N6"],
+	"103":["7", true, "N7"],
+	"104":["8", true, "N8"],
+	"105":["9", true, "N9"],
+	
+	"106":["MULTIPLY", false, "MUL"],
+	"107":["ADD", false, "ADD"],
+	"109":["SUBTRACT", false, "SUB"],
+	"110":["DECIMAL_POINT", false, "DPT"],
+	"111":["DIVIDE", false, "DIV"],
+	
+	"112":["F1", false, "F1"],
+	"113":["F2", false, "F2"],
+	"114":["F3", false, "F3"],
+	"115":["F4", false, "F4"],
+	"116":["F5", false, "F5"],
+	"117":["F6", false, "F6"],
+	"118":["F7", false, "F7"],
+	"119":["F8", false, "F8"],
+	"120":["F9", false, "F9"],
+	"121":["F10", false, "F10"],
+	"122":["F11", false, "F11"],
+	"123":["F12", false, "F12"],
+	
+	"144":["NUM_LOCK", false, "NUM"],
+	"145":["SCROLL_LOCK", false, "SCR"],
+	
+	"186":[";", true, ";"],
+	"187":["=", true, "="],
+	"188":[",", true, ","],
+	"189":["-", true, "-"],
+	"190":[".", true, "."],
+	"191":["/", true, "/"],
+	"192":["`", true, "`"],
+	"219":["[", true, "["],
+	"220":["\\", true, "\\"],
+	"221":["]", true, "]"],
+	"222":["'", true, "'"],
 };
 
 /** Handles a keypress internally. This enables the module to track whether a key is pressed or not.
@@ -136,7 +183,7 @@ dusk.keyboard.keyUp.listen(dusk.keyboard._handleKeyup, dusk.keyboard);
 
 /** Checks if a key is currently pressed or not.
  * 
- * @param {number} code A keycode to check.
+ * @param {integer} code A keycode to check.
  * @return {boolean} Whether the specified key is currently pressed.
  */
 dusk.keyboard.isKeyPressed = function(code) {
@@ -151,16 +198,17 @@ dusk.keyboard.isKeyPressed = function(code) {
  * 
  * For all "printable" keys, the "name" is what the user would expect to type when pressing that key.
  * 
- * @param {number} code A keycode to look up.
+ * @param {integer} code A keycode to look up.
  * @return {array} Information on that key.
  */
 dusk.keyboard.lookupCode = function(code) {
-	if(!(code in this._codes)) return ["UNKNOWN", false];
+	if(!(code in this._codes)) return ["UNKNOWN", false, "???"];
 	
 	return this._codes[code];
 };
 
 //Block keys from moving page
 document.onkeydown = function(e) {
-	if(e.keyCode >= 37 && e.keyCode <= 40) return false;
+	if(e.keyCode in [37, 38, 39, 40, 9, 13, 32]) return false;
+	//if(document.activeElement.id == dusk.canvas) return false;
 };

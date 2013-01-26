@@ -44,9 +44,16 @@ dusk.sgui.Group = function(parent, comName) {
 		 * @protected
 		 */
 		this._focusedCom = "";
+		/** The current behaviour used to share focus.
+		 * @type integer
+		 * @memberof dusk.sgui.Group
+		 * @default FOCUS_ONE
+		 */
+		this.focusBehaviour = dusk.sgui.Group.FOCUS_ONE;
 		
 		//Add the property masks
 		this._registerPropMask("focus", "focus", true);
+		this._registerPropMask("focus-behaviour", "focusBehaviour", true);
 		this._registerPropMask("children", "__children", false);
 		this._registerPropMask("allChildren", "__allChildren", false);
 		
@@ -64,6 +71,28 @@ dusk.sgui.Group.constructor = dusk.sgui.Group;
 
 dusk.sgui.Group.prototype.className = "Group";
 dusk.sgui.Group.prototype.isAContainer = true;
+
+/** A mode that indicates that only one component can be active.
+ * 
+ * This means that only the currently focused component will get the keypresses and such.
+ * 
+ * @type integer
+ * @constant
+ * @static
+ * @value 0
+ */
+dusk.sgui.Group.FOCUS_ONE = 0;
+
+/** A mode that indicates that all the components are active.
+ * 
+ * This means that all the components will recieve keypress events and stuff.
+ * 
+ * @type integer
+ * @constant
+ * @static
+ * @value 0
+ */
+dusk.sgui.Group.FOCUS_ALL = 1;
 
 /** Container specific method of handling keypresses.
  * 
@@ -186,7 +215,7 @@ dusk.sgui.Group.prototype._groupFrame = function() {
 dusk.sgui.Group.prototype.getComponent = function(com, type) {
 	if (this._components[com.toLowerCase()]) {
 		return this._components[com.toLowerCase()];
-	};
+	}
 	
 	return type?this._newComponent(com, type):null;
 };
@@ -218,7 +247,7 @@ dusk.sgui.Group.prototype.deleteComponent = function(com) {
  */
 dusk.sgui.Group.prototype.__defineSetter__("focus", function s_focus(value) {
 	if (this._components[this._focusedCom]){
-		if (this._components[this._focusedCom].locked){return false;};
+		if (this._components[this._focusedCom].locked){return false;}
 		
 		if(this._active) this._components[this._focusedCom].onDeactive();
 		this._components[this._focusedCom].onLooseFocus();
