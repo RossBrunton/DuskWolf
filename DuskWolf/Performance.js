@@ -3,7 +3,7 @@
 "use strict";
 
 dusk.load.require("dusk.frameTicker");
-dusk.load.require("dusk.simpleGui");
+dusk.load.require("dusk.sgui");
 dusk.load.require("dusk");
 
 dusk.load.provide("dusk.performance");
@@ -13,7 +13,7 @@ dusk.load.provide("dusk.performance");
  * 
  * @description This contains functions that allow monitoring of frame rate.
  * 
- * When imported, it attaches listeners to the `{@link dusk.frameTicker.onFrame}` and `{@link dusk.simpleGui.onRender}` events, and monitors to check that they are running fast enough.
+ * When imported, it attaches listeners to the `{@link dusk.frameTicker.onFrame}` and `{@link dusk.sgui.onRender}` events, and monitors to check that they are running fast enough.
  * 
  * @since 0.0.14-alpha
  */
@@ -67,7 +67,7 @@ dusk.frameTicker.onFrame.listen(function e_frame(e) {
 }, dusk.performance);
 
 //Render
-dusk.simpleGui.onRender.listen(function e_onRender(e) {
+dusk.sgui.onRender.listen(function e_onRender(e) {
 	dusk.performance._rframesRan++;
 	if(dusk.performance._rframesRan == 1000){
 		this.renderFrameRate = Math.round(1000000000/((new Date()).getTime()-this._rtime))/1000;
@@ -76,3 +76,5 @@ dusk.simpleGui.onRender.listen(function e_onRender(e) {
 		if(this.renderFrameRate < 40) console.warn("Render frame rate is below 40Hz: "+this.renderFrameRate+"fps.");
 	}
 }, dusk.performance);
+
+Object.seal(dusk.performance);

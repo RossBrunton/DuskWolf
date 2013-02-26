@@ -11,21 +11,26 @@ dusk.load.require("dusk.rooms");
 
 dusk.load.provide("dusk.sgui.BasicMain");
 
-/***/
 dusk.sgui.BasicMain = function(parent, comName) {
-	if(parent !== undefined){
-		dusk.sgui.Group.call(this, parent, comName);
-		
-		this._registerFrameHandler(this._platMainFrame);
-		this._registerKeyHandler(83, false, false, this._save, this);
-		
-		this._registerPropMask("spawn", "spawn", true);
-		this._registerPropMask("room", "room", true, ["spawn"]);
-		
-		this._scrollSpeed = this._theme("plat.scrollSpeed", 10);
-		this.spawn = 0;
-		this.roomName = "";
-	}
+	dusk.sgui.Group.call(this, parent, comName);
+	
+	this._scrollSpeed = this._theme("plat.scrollSpeed", 10);
+	this.spawn = 0;
+	this.roomName = "";
+	
+	//Prop masks
+	this._registerPropMask("spawn", "spawn", true);
+	this._registerPropMask("room", "room", true, ["spawn"]);
+	
+	//Listeners
+	this.frame.listen(this._platMainFrame, this);
+	this.keyPress.listen(this.save, this, {"key":83});
+	
+	//Directions
+	this.dirPress.listen(this._bmRightAction, this, {"dir":dusk.sgui.Component.DIR_RIGHT});
+	this.dirPress.listen(this._bmLeftAction, this, {"dir":dusk.sgui.Component.DIR_LEFT});
+	this.dirPress.listen(this._bmUpAction, this, {"dir":dusk.sgui.Component.DIR_UP});
+	this.dirPress.listen(this._bmDownAction, this, {"dir":dusk.sgui.Component.DIR_DOWN});
 };
 dusk.sgui.BasicMain.prototype = new dusk.sgui.Group();
 dusk.sgui.BasicMain.constructor = dusk.sgui.BasicMain;
@@ -59,6 +64,7 @@ dusk.sgui.BasicMain.prototype.createRoom = function(name, spawn) {
 		"map":{"map":room.scheme, "rows":room.rows, "cols":room.cols}},
 	]});
 	
+	this.path("entities").scheme = this.path("scheme");
 	this.path("entities").clear();
 	
 	var playerData = {};
@@ -92,11 +98,11 @@ dusk.sgui.BasicMain.prototype._platMainFrame = function(e) {
 	this.autoScroll();
 	
 	//Ask scheme to do something
-	if(this._focused) this.getComponent("entities").doFrame();
+	if(this._active) this.getComponent("entities").doFrame();
 	
 	//Editing
 	//if(dusk.editor.active && this.getFocused().comName == "entities") this.flow("over");
-	if(!dusk.editor.active && this.getFocused().comName != "entities") this.flow("entities");
+	if(!dusk.editor.active && (this.getFocused() && this.getFocused().comName != "entities")) this.flow("entities");
 };
 
 dusk.sgui.BasicMain.prototype.autoScroll = function() {
@@ -125,7 +131,7 @@ dusk.sgui.BasicMain.prototype.autoScroll = function() {
 	this.getComponent("over").setBoundsCoord(dimen[0], dimen[1], dimen[0]+dimen[2], dimen[1]+dimen[3]);
 };
 
-dusk.sgui.BasicMain.prototype._upAction = function(e) {
+dusk.sgui.BasicMain.prototype._bmUpAction = function(e) {
 	if(!dusk.editor.active) return true;
 	if(dusk.keyboard.isKeyPressed(187)) {
 		//+
@@ -148,7 +154,7 @@ dusk.sgui.BasicMain.prototype._upAction = function(e) {
 	return true;
 };
 
-dusk.sgui.BasicMain.prototype._downAction = function(e) {
+dusk.sgui.BasicMain.prototype._bmDownAction = function(e) {
 	if(!dusk.editor.active) return true;
 	if(dusk.keyboard.isKeyPressed(187)) {
 		//+
@@ -169,7 +175,7 @@ dusk.sgui.BasicMain.prototype._downAction = function(e) {
 	return true;
 };
 
-dusk.sgui.BasicMain.prototype._leftAction = function(e) {
+dusk.sgui.BasicMain.prototype._bmLeftAction = function(e) {
 	if(!dusk.editor.active) return true;
 	if(dusk.keyboard.isKeyPressed(187)) {
 		//+
@@ -192,7 +198,7 @@ dusk.sgui.BasicMain.prototype._leftAction = function(e) {
 	return true;
 };
 
-dusk.sgui.BasicMain.prototype._rightAction = function(e) {
+dusk.sgui.BasicMain.prototype._bmRightAction = function(e) {
 	if(!dusk.editor.active) return true;
 	if(dusk.keyboard.isKeyPressed(187)) {
 		//+
@@ -213,7 +219,7 @@ dusk.sgui.BasicMain.prototype._rightAction = function(e) {
 	return true;
 };
 
-dusk.sgui.BasicMain.prototype._save = function(e) {
+dusk.sgui.BasicMain.prototype.save = function(e) {
 	if(!dusk.editor.active) return true;
 	
 	console.log("----- Saved Room Data -----");
@@ -231,3 +237,6 @@ dusk.sgui.BasicMain.prototype._save = function(e) {
 	
 	return false;
 };
+
+Object.seal(dusk.sgui.BasicMain);
+Object.seal(dusk.sgui.BasicMain.prototype);

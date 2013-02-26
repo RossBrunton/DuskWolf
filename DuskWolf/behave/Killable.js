@@ -14,9 +14,9 @@ dusk.behave.Killable = function(entity) {
 		this._data("mercyTime", 10, true);
 		this._data("currentMercy", 0, true);
 		
-		this._listenEvent("takeDamage", this._killableTakeDamage);
-		this._listenEvent("terminate", this._killableTerminate);
-		this._listenEvent("frame", this._killableFrame);
+		this.entityEvent.listen(this._killableTakeDamage, this, {"name":"takeDamage"});
+		this.entityEvent.listen(this._killableTerminate, this, {"name":"terminate"});
+		this.entityEvent.listen(this._killableFrame, this, {"name":"frame"});
 	}
 };
 dusk.behave.Killable.prototype = new dusk.behave.Behave();
@@ -41,7 +41,7 @@ dusk.behave.Killable.prototype._killableTakeDamage = function(name, e) {
 };
 
 dusk.behave.Killable.prototype._killableTerminate = function(name, e) {
-	this._entity.deleteThis();
+	this._entity.deleted = true;
 };
 
 dusk.behave.Killable.prototype._killableFrame = function(name, e) {

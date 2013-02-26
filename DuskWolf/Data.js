@@ -16,34 +16,26 @@ dusk.load.provide("dusk.data");
  * All relative URLs are resolved relative to `{@link dusk.dataDir}`.
  */
 
-/** This initiates all the variables in this namespace, and must be called before using it.
- * 
- * It also downloads the `root.json` file, checks the version of it, then prints a "Game is loading" message.
+/** This initiates all the variables in this namespace, and is automatically called.
+ * @private
  */
-dusk.data.init = function() {
+dusk.data._init = function() {
 	/** This is an object, containing all the files that have been downloaded. The key is the filename, and the value is ether a string, or a HTML Image tag, depending on filetype.
 	 * @type object
 	 * @private
 	 */
 	dusk.data._loaded = {};
 	
-	/** This indicates how many initial external source files have to be downloaded.
-	 * @type integer
-	 * @private
-	 * @since 0.0.13-alpha
-	 */
-	 dusk.data._externLoading = 0;
-	
 	//Enable/disable cache
 	$.ajaxSetup({"cache": !dusk.dev});
 };
 
-/** Downloads a file, and returns its contents.
+/* * Downloads a file, and returns its contents.
  * 
  * @param {string} file The file name, realtive to {@link dusk.dataDir}.
  * @param {string=""} type The file type, this may be any value for <code>"dataType"</code> that JQuery's ajax method supports.
- * @return {string|object} The contents of the file, the type depends on the value of the <code>type</code> param.
- */
+ * @param {function(object, *):undefined} 
+ * /
 dusk.data.download = function(file, type, callback, state) {
 	var url = dusk.util.resolveRelative(file, dusk.dataDir);
 	
@@ -65,13 +57,15 @@ dusk.data.download = function(file, type, callback, state) {
 	}else{
 		callback(this._loaded[url], state);
 	}
-};
+};*/
 
 /** Returns a HTML image object with the specified path.
  * 
- * <p>If there is an image that has already been created with this path, then it is returned, so a new one is not created every time.</p>
+ * If there is an image that has already been created with this path, then it is returned, so a new one is not created every time.
  * 
- * <p>If you call this without asigning the return value to anything, the image should download in the background.</p>
+ * If you call this without asigning the return value to anything, the image should download in the background.
+ * 
+ * The path may be relative to `{@link dusk.dataDir}`.
  * 
  * @param {string} file The image file to set as the src value of the image.
  * @return {HTMLImageElement} A HTML Image tag with the src set to the path requested.
@@ -81,10 +75,12 @@ dusk.data.grabImage = function(file) {
 		console.log("Downloading image "+file+"...");
 		
 		this._loaded[file] = new Image();
-        this._loaded[file].src = dusk.utils.resolveRelative(file, dusk.dataDir);
+        this._loaded[file].src = dusk.utils.resolveRelative(file, dusk.dataDir) + (dusk.dev?"?_="+(new Date()).getTime():"");
 		return this._loaded[file];
 	}
 	return this._loaded[file];
 };
 
-dusk.data.init();
+dusk.data._init();
+
+Object.seal(dusk.data);

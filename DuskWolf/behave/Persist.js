@@ -11,17 +11,17 @@ dusk.behave.Persist = function(entity) {
 	if(entity !== undefined){
 		dusk.behave.Behave.call(this, entity);
 		
-		this._listenEvent("typeChange", this._persistLoad);
-		this._listenEvent("frame", this._persistFrame);
+		this.entityEvent.listen(this._persistFrame, this, {"name":"frame"});
+		this.entityEvent.listen(this._persistLoad, this, {"name":"typeChange"});
 	}
 };
 dusk.behave.Persist.prototype = new dusk.behave.Behave();
 dusk.behave.Persist.constructor = dusk.behave.Persist;
 
-dusk.behave.Persist.prototype._persistLoad = function(name, data) {
+dusk.behave.Persist.prototype._persistLoad = function(data) {
 	this._entity.behaviourData = dusk.entities.getPersist(this._entity.comName) || this._entity.behaviourData;
 };
 
-dusk.behave.Persist.prototype._persistFrame = function(name, data) {
+dusk.behave.Persist.prototype._persistFrame = function(data) {
 	dusk.entities.storePersist(this._entity.comName, this._entity.behaviourData);
 };

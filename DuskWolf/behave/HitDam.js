@@ -12,14 +12,14 @@ dusk.behave.HitDam = function(entity) {
 		
 		this._data("damage", 1, true);
 		
-		this._listenEvent("collidedInto", this._hdCollide);
-		this._listenEvent("collide", this._hdCollide);
+		this.entityEvent.listen(this._hdCollide, this, {"name":"collide"});
+		this.entityEvent.listen(this._hdCollide, this, {"name":"collidedInto"});
 	}
 };
 dusk.behave.HitDam.prototype = new dusk.behave.Behave();
 dusk.behave.HitDam.constructor = dusk.behave.HitDam;
 
-dusk.behave.HitDam.prototype._hdCollide = function(event, e) {
+dusk.behave.HitDam.prototype._hdCollide = function(e) {
 	if(e.target === "wall") return;
 	e.target.behaviourFire("takeDamage", {"damage":this._data("damage"), "source":this._entity});
 };

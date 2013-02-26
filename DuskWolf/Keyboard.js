@@ -194,7 +194,7 @@ dusk.keyboard.isKeyPressed = function(code) {
 
 /** Given a keycode, this returns information about that key.
  * 
- * It returns an array; the first element is the name of the key, the second is a boolean indicating whether it is printable.
+ * It returns an array; the first element is the name of the key, the second is a boolean indicating whether it is printable, and the third is a shorthand representation of the key.
  * 
  * For all "printable" keys, the "name" is what the user would expect to type when pressing that key.
  * 
@@ -209,6 +209,7 @@ dusk.keyboard.lookupCode = function(code) {
 
 //Block keys from moving page
 document.onkeydown = function(e) {
-	if(e.keyCode in [37, 38, 39, 40, 9, 13, 32]) return false;
-	//if(document.activeElement.id == dusk.canvas) return false;
+	if([37, 38, 39, 40, 9, 13, 32].indexOf(e.keyCode) !== -1) return false;
 };
+
+Object.seal(dusk.keyboard);

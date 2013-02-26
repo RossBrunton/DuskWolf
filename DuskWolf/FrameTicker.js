@@ -33,3 +33,5 @@ dusk.frameTicker._doFrame = function() {
 	dusk.frameTicker.onFrame.fire({});
 };
 setInterval(dusk.frameTicker._doFrame, 1000/dusk.frameRate);
+
+Object.seal(dusk.frameTicker);

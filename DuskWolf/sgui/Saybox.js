@@ -5,23 +5,23 @@
 dusk.load.require("dusk.sgui.Grid");
 dusk.load.require("dusk.sgui.Label");
 dusk.load.require("dusk.sgui.Rect");
-dusk.load.require("dusk.simpleGui");
+dusk.load.require("dusk.sgui");
 
 dusk.load.provide("dusk.sgui.Saybox");
 
-/***/
+
 dusk.sgui.Saybox = function (parent, comName) {
 	if(parent !== undefined){
 		dusk.sgui.Group.call(this, parent, comName);
 		
-		this._registerFrameHandler(this._sayBoxFrame);
-		this._registerActionHandler("SayBox", this._sayBoxAction, this);
+		this.frame.listen(this._sayBoxFrame, this);
+		this.action.listen(this._sayBoxAction, this);
 		
 		this._registerPropMask("speaker", "speaker", true);
 		this._registerPropMask("speed", "speed", true);
 		this._registerPropMask("say", "say", true, ["speaker", "speed"]);
 		
-		this._width = dusk.simpleGui.width;
+		this._width = dusk.sgui.width;
 		this._height = 200;
 		
 		this._text = "";

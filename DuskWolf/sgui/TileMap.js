@@ -7,30 +7,108 @@ dusk.load.require("dusk.data");
 
 dusk.load.provide("dusk.sgui.TileMap");
 
-/* A tilemap is just a grid of tiles.
+/** @class dusk.sgui.TileMap
  * 
- * <p>However, it does have a <code>&lt;map&gt;</code> property, which allows quick creation of a map, based on a tilesheet. The content of that property is a whitespace separated list (Preferably using tabs) of coordinates relating to the position on the tilesheet.</p>
+ * @classdesc This is a lot of tiles arranged in a grid.
  * 
- * <p>These coordinates are assigned tiles in order, the first coordinate is set to the tile at 0,0, the second one is set to the tile 0,1 and so on. It wraps to the next line once the current one is full.</p>
+ * This can be thought of as a lot of `{@link dusk.sgui.Tile}` instances arranged in a grid, but for practical reasons, this is not how it is implemented.
  * 
- * <p><b>This component has the following properties:</b></p>
+ * Each tile on the grid has a coordinate, where the tile at the upper left is at (0, 0), and the next one to the right is (1, 0) and so on.
  * 
- * <p><code>&lt;map [spacing-y='(yspacing)'] [spacing-x='(xspacing)'] [rows='(rows)'] [cols='(cols)'] [image='(image)']&gt;(map)&lt;/map&gt;</code> --
- * Creates a new grid of tiles, erasing any already there. The <code>xspacing</code> and <code>yspacing</code> are space between the tiles, both default to 0. <code>rows</code> and <code>cols</code>, the rows and columns, default to <code>$sys-env-height;/$sg-tile-defHeight</code> and <code>$sys-env-width;/$sg-tile-defWidth</code>, these give the total number of tiles that the stage can support. <code>image</code> is the tilesheet to use, a string for a constant in <code>Data</code>, defaults to <code>IMG_EXAMPLE_TILE</code>. <code>map</code> is the whitespace seperated list of coordinates described above.</p>
+ * The tilemap must be drawn completley before it can be used, hence changing any tile and especially changing the dimensions of the tilemap is a really expensive operation.
+ *
+ * Only part of the tilemap is visible, as described by the `*bound` properties, and this will be the only area drawn.
  * 
- * @see Grid
- * @see Tile
+ * @extends dusk.sgui.Component
+ * @param {?dusk.sgui.Component} parent The container that this component is in.
+ * @param {string} componentName The name of the component.
+ * @constructor
  */
 dusk.sgui.TileMap = function (parent, comName) {
 	if(parent !== undefined){
 		dusk.sgui.Component.call(this, parent, comName);
 		
+		/** The current mode of tiles in the tilemap. Must be either `"BINARY"` or `"DECIMAL"`.
+		 * 
+		 * This takes the value of the theme key `tm.mode`, which by default is `"BINARY"`.
+		 * @type string
+		 */
+		this.mode = this._theme("tm.mode", "BINARY");
+		
+		
+		/** The width (for displaying) of a single tile if this tilemap is in `"DECIMAL"` mode.
+		 * 
+		 * This takes the value of the theme key `tm.twidth`, which by default is `32`.
+		 * @type integer
+		 */
+		this.twidth = this._theme("tm.twidth", 32);
+		/** The height (for displaying) of a single tile if this tilemap is in `"DECIMAL"` mode.
+		 * 
+		 * This takes the value of the theme key `tm.theight`, which by default is `32`.
+		 * @type integer
+		 */
+		this.theight = this._theme("tm.theight", 32);
+		/** The size (for displaying) of a single tile if this tilemap is in `"BINARY"` mode.
+		 * 
+		 * This should be `n` such that the width and height of the sprite is `2^n`. If this is 4, then the sprites will be 16x16, for example.
+		 * 
+		 * This takes the value of the theme key `tm.tsize`, which by default is `5`.
+		 * @type integer
+		 */
+		this.tsize = this._theme("tm.tsize", 5);
+		
+		/** The width (for reading from the image) of a single tile if this tilemap is in `"DECIMAL"` mode.
+		 * 
+		 * This takes the value of the theme key `tm.swidth`, which by default is `16`.
+		 * @type integer
+		 */
+		this.swidth = this._theme("tm.swidth", 16);
+		/** The height (for reading from the image) of a single tile if this tilemap is in `"DECIMAL"` mode.
+		 * 
+		 * This takes the value of the theme key `tm.theight`, which by default is `16`.
+		 * @type integer
+		 */
+		this.sheight = this._theme("tm.sheight", 16);
+		/** The size (for reading from the image) of a single tile if this tilemap is in `"BINARY"` mode.
+		 * 
+		 * This should be `n` such that the width and height of the sprite is `2^n`. If this is 4, then the sprites will be 16x16, for example.
+		 * 
+		 * This takes the value of the theme key `tm.tsize`, which by default is `4`.
+		 * @type integer
+		 */
+		this.ssize = this._theme("tm.ssize", 4);
+		
+		/** The left boundry. This is the x coordinate to start drawing from. Any tiles after this value will not be drawn.
+		 * @type integer
+		 */
+		this.lbound = 0;
+		/** The upper boundry. This is the y coordinate to start drawing from. Any tiles located above this value not be drawn.
+		 * @type integer
+		 */
+		this.ubound = 0;
+		this.rbound = 0;
+		this.bbound = 0;
+		
+		this.rows = this._theme("tm.rows", 50);
+		this.cols = this._theme("tm.cols", 50);
+		
+		this.map = null;
+		
+		this.src = "";
+		this._img = null;
+		
+		this._all = null;
+		this._drawn = false;
+		this._tileBuffer = new ArrayBuffer(0);
+		this._tiles = new Uint8Array(this._tileBuffer);
+		
+		//Prop masks
 		this._registerPropMask("map", "map", true, ["src", "mode", "sprite-size", "sprite-width", "sprite-height", "tile-size", "tile-height", "tile-width", "tile-size"]);
 		this._registerPropMask("bound-l", "lbound", true);
 		this._registerPropMask("bound-r", "rbound", true);
 		this._registerPropMask("bound-u", "ubound", true);
 		this._registerPropMask("bound-b", "bbound", true);
-		this._registerPropMask("src", "defImg", true);
+		this._registerPropMask("src", "src", true);
 		this._registerPropMask("rows", "rows", true);
 		this._registerPropMask("cols", "cols", true);
 		this._registerPropMask("mode", "mode", true);
@@ -43,39 +121,8 @@ dusk.sgui.TileMap = function (parent, comName) {
 		this._registerPropMask("tile-height", "theight", true);
 		this._registerPropMask("tile-width", "twidth", true);
 		
-		this._hspacing = this._theme("tm.spacing.h", 0);
-		this._vspacing = this._theme("tm.spacing.v", 0);
-		
-		this.mode = "BINARY";
-		
-		this.prop("render-width", dusk.simpleGui.width);
-		this.prop("render-height", dusk.simpleGui.height);
-		
-		this.twidth = this._theme("tm.twidth", 16);
-		this.theight = this._theme("tm.theight", 16);
-		this.tsize = this._theme("tm.tsize", 4)?this._theme("tm.tsize", 4):-1;
-		
-		this.swidth = this._theme("tm.swidth", 32);
-		this.sheight = this._theme("tm.sheight", 32);
-		this.ssize = this._theme("tm.ssize", 4)?this._theme("tm.tsize", 5):-1;
-		
-		this.lbound = 0;
-		this.ubound = 0;
-		this.rbound = 0;
-		this.bbound = 0;
-		
-		this.rows = -1;
-		this.cols = -1;
-		
-		this.defImg = "";
-		this._img = null;
-		
-		this._all = null;
-		this._drawn = false;
-		this._tileBuffer = new ArrayBuffer(0);
-		this._tiles = new Uint8Array(this._tileBuffer);
-		
-		this._registerDrawHandler(this._tileMapDraw);
+		//Listeners
+		this.prepareDraw.listen(this._tileMapDraw, this);
 	}
 };
 dusk.sgui.TileMap.prototype = new dusk.sgui.Component();
@@ -83,47 +130,73 @@ dusk.sgui.TileMap.constructor = dusk.sgui.TileMap;
 
 dusk.sgui.TileMap.prototype.className = "TileMap";
 
-dusk.sgui.TileMap.prototype.__defineSetter__("map", function s_map(value) {
-	var map = value;
+Object.defineProperty(dusk.sgui.TileMap.prototype, "map", {
+	set: function(value) {
+		if(!value) return;
+		var map = value;
+		
+		//Get stuff
+		if(!("rows" in map)) map.rows = this.rows;
+		if(!("cols" in map)) map.cols = this.cols;
+		
+		if("src" in map) {
+			this._img = dusk.data.grabImage(map.src);
+			this.src = map.src;
+		}else{
+			this._img = dusk.data.grabImage(this.src);
+		}
+		
+		var singleW = 0;
+		var singleH = 0;
+		if(this.mode == "BINARY"){
+			singleW = 1<<this.tsize;
+			singleH = 1<<this.tsize;
+		}else{
+			singleW = this.twidth;
+			singleH = this.theight;
+		}
+		
+		if(map.map.indexOf(":") === -1) {
+			//Old style
+			this._tileBuffer = new ArrayBuffer((map.rows*map.cols)<<1);
+			this._tiles = new Uint8Array(this._tileBuffer);
+			var tiles = map.map.split(/\s+/g);
+			var pointer = 0;
+			for(var i = 0; i < tiles.length; i++){
+				if(tiles[i].indexOf(",") === -1) continue;
+				this._tiles[pointer++] = tiles[i].split(",")[0];
+				this._tiles[pointer++] = tiles[i].split(",")[1];
+			}
+		}else{
+			this._tileBuffer = dusk.utils.stringToData(map.map);
+			this._tiles = new Uint8Array(this._tileBuffer);
+		}
+		
+		this.rows = map.rows;
+		this.cols = map.cols;
+		
+		this._all = dusk.utils.createCanvas((this.cols*singleW) + this.width, (this.rows*singleH) + this.height);
+		
+		this.drawAll();
+		
+		this.setBoundsCoord(0, 0, this.width, this.height);
+	},
 	
-	//Get stuff
-	if(!("rows" in map)) map.rows = this._theme("tm-rows", 5);
-	if(!("cols" in map)) map.cols = this._theme("tm-cols", 5);
-	
-	if("src" in map) {
-		this._img = dusk.data.grabImage(map.src);
-	}else{
-		this._img = dusk.data.grabImage(this.defImg);
+	get: function(){
+		var hold = {};
+		hold.rows = this.rows;
+		hold.cols = this.cols;
+		hold.src = this.src;
+		
+		//Use new style
+		//hold.map = "";
+		//for(var i = 0; i < this._tiles.length; i ++){
+		//	hold.map += this._tiles[i]+(i+1< this._tiles.length?(i%2?" ":","):"");
+		//}
+		hold.map = dusk.utils.dataToString(this._tileBuffer, dusk.utils.SD_BC16);
+		
+		return hold;
 	}
-	
-	var singleW = 0;
-	var singleH = 0;
-	if(this.mode == "BINARY"){
-		singleW = 1<<this.tsize;
-		singleH = 1<<this.tsize;
-	}else{
-		singleW = this.twidth;
-		singleH = this.theight;
-	}
-	
-	this._tileBuffer = new ArrayBuffer((map.rows*map.cols)<<1);
-	this._tiles = new Uint8Array(this._tileBuffer);
-	var tiles = map.map.split(/\s+/g);
-	var pointer = 0;
-	for(var i = 0; i < tiles.length; i++){
-		if(tiles[i].indexOf(",") === -1) continue;
-		this._tiles[pointer++] = tiles[i].split(",")[0];
-		this._tiles[pointer++] = tiles[i].split(",")[1];
-	}
-	
-	this.rows = map.rows;
-	this.cols = map.cols;
-	
-	this._all = dusk.utils.createCanvas((this.cols*singleW) + this.width, (this.rows*singleH) + this.height);
-	
-	this.drawAll();
-	
-	this.setBoundsCoord(0, 0, this.width, this.height);
 });
 
 dusk.sgui.TileMap.prototype.drawAll = function() {
@@ -156,7 +229,6 @@ dusk.sgui.TileMap.prototype.drawAll = function() {
 	}
 	
 	this._drawn = true;
-	this.bookRedraw();
 	return true;
 };
 
@@ -165,7 +237,6 @@ dusk.sgui.TileMap.prototype.setBoundsCoord = function(l, u, r, b) {
 	this.rbound = r;
 	this.ubound = u;
 	this.bbound = b;
-	this.bookRedraw();
 };
 
 dusk.sgui.TileMap.prototype.setBounds = function(l, u, r, b) {
@@ -183,8 +254,6 @@ dusk.sgui.TileMap.prototype.setBounds = function(l, u, r, b) {
 		this.ubound = u<<this.tsize;
 		this.bbound = b<<this.tsize;
 	}
-	
-	this.bookRedraw();
 };
 
 dusk.sgui.TileMap.prototype.tilePointIn = function(x, y, exactX, exactY) {
@@ -284,16 +353,25 @@ dusk.sgui.TileMap.prototype.lookTile = function(x, y) {
 	return [0, 0];
 };
 
-dusk.sgui.TileMap.prototype.__defineGetter__("width", function g_width() {
-	if(this.mode == "BINARY") return this.cols<<this.tsize;
-	return this.cols*this.twidth;
+//Width
+Object.defineProperty(dusk.sgui.TileMap.prototype, "width", {
+	get: function() {
+		if(this.mode == "BINARY") return this.cols<<this.tsize;
+		return this.cols*this.twidth;
+	},
+
+	set: function(value) {if(value > 0) console.warn("TileMap setting width is not supported.");}
 });
 
-dusk.sgui.TileMap.prototype.__defineSetter__("width", function s_width(value) {console.warn("TileMap setting width is not supported.");});
+//Height
+Object.defineProperty(dusk.sgui.TileMap.prototype, "height", {
+	get: function() {
+		if(this.mode == "BINARY") return this.rows<<this.tsize;
+		return this.rows*this.theight;
+	},
 
-dusk.sgui.TileMap.prototype.__defineGetter__("height", function g_height() {
-	if(this.mode == "BINARY") return this.rows<<this.tsize;
-	return this.rows*this.theight;
+	set: function(value) {if(value > 0) console.warn("TileMap setting height is not supported.");}
 });
 
-dusk.sgui.TileMap.prototype.__defineSetter__("height", function s_height(value) {console.warn("TileMap setting width is not supported.");});
+Object.seal(dusk.sgui.TileMap);
+Object.seal(dusk.sgui.TileMap.prototype);

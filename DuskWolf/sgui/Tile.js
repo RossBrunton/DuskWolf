@@ -6,65 +6,122 @@ dusk.load.require("dusk.sgui.Component");
 
 dusk.load.provide("dusk.sgui.Tile");
 
-/* A tile is a type of image designed for using tilesets, a single image with lots of smaller ones in. Generally, it has a "viewing area" of a certian size and width, and the image behind it can be moved to show only one tile at a time.
+/** @class dusk.sgui.Tile
  * 
- * <p>Uh, remember that this extends the <code>image</code> component, and uses the <code>image</code> property of that as the tileset.</p>
+ * @classdesc A tile.
+ *
+ * This is a smaller image selected from a larger image.
+ *	Essentially, the source image has a lot of possible different images that this component can display.
+ *	This component will take the location of the image from the source (in traditional x,y form), and display only that image.
+ *	It is given the dimensions of each "tile" on the source image, and expects the source image to be a grid of images of those sizes.
  * 
- * <p>The tileset is assumed to be a grid where every tile is the same size, this will fail if you make all the tiles different sizes. The default is 32x32 pixels for a single tile.</p>
+ * The mode is either `"BINARY"` or `"DECIMAL"`, and this determines how dimensions are interpreted.
+ *	If the mode is `"BINARY"` the origin sprites are square, with each side being `2^this.ssize`.
+ * 	While, if the mode is the slower `"DECIMAL"` mode, then the origin sprites have their width and height described using `this.swidth` and `this.sheight`.
+ * 	This only determines the size of the sprites on the source image, the tile can be resized as normal using the `height` and `width` properties.
  * 
- * <p><b>This component has the following properties:</b></p>
- * 
- * <p><code>&lt;tile&gt;(x),(y)&lt;/tile&gt;</code> --
- * The x and y of the tile that will be displayed. Note that this is NOT the coordinates, it's the tile, the second tile to the left will be <code>1,0</code></p>
- * 
- * <p><code>&lt;tile-h&gt;(height)&lt;/tile-h&gt;</code> --
- * The height of a single tile in pixels, the default is 32.</p>
- * 
- * <p><code>&lt;tile-w&gt;(width)&lt;/tile-w&gt;</code> --
- * The width of a single tile in pixels, the default is 32.</p>
- * 
- * <p><b>Vars provided are as follows:</b></p>
- * 
- * <p><code>sg-tile-defHeight</code>: The defualt height of every tile, in pixels. Defualt is 32.</p>
- * <p><code>sg-tile-defWidth</code>: The defualt width of every tile, in pixels. Defualt is 32.</p>
- * 
- * @see Tile
+ * @param {dusk.sgui.IContainer} parent The container that this component is in.
+ * @param {string} comName The name of the component.
+ * @extends dusk.sgui.Component
+ * @see {@link dusk.sgui.Image}
+ * @constructor
  */
 dusk.sgui.Tile = function(parent, comName) {
-	if(parent !== undefined){
-		dusk.sgui.Component.call(this, parent, comName);
+	dusk.sgui.Component.call(this, parent, comName);
+
+	/** The current source image, as a HTML img object.
+	 * @type HTMLImageElement
+	 * @private
+	 */
+	this._img = null;
 	
-		/** This is the actual image. */
-		this._img = null;
-		
-		this.mode = this._theme("tile.mode", "BINARY");
-		
-		this.ssize = this._theme("tile.ssize", 4);
-		this.swidth = this._theme("tile.swidth", 16);
-		this.sheight = this._theme("tile.sheight", 16);
-		this._tx = 0;
-		this._ty = 0;
-		
-		/* This creates a new image! See <code>Component</code> for parameter details.
-		 * @see sg.Component
-		 */
-		
-		this._registerPropMask("src", "src", true);
-		this._registerPropMask("tile", "tile", true);
-		this._registerPropMask("sprite-size", "ssize", true);
-		this._registerPropMask("sprite-width", "swidth", true);
-		this._registerPropMask("sprite-height", "sheight", true);
-		this._registerPropMask("mode", "mode", true);
-		this._registerDrawHandler(this._tileDraw);
-	}
+	/** The current mode. Must be either `"BINARY"` or `"DECIMAL"`.
+	 * 
+	 * This takes the value of the theme key `tile.mode`, which by default is `"BINARY"`.
+	 * @type string
+	 */
+	this.mode = this._theme("tile.mode", "BINARY");
+	
+	/** Origin sprite size if this is running in `"BINARY"` mode.
+	 * 
+	 * This is considered to be the width and height of the sprites when reading them from the image.
+	 * 
+	 * This should be `n` such that the width and height of the sprite is `2^n`. If this is 4, then the sprites will be 16x16, for example.
+	 * 
+	 * This takes the value of the theme key `tile.ssize`, which by default is `4`.
+	 * @type integer
+	 */
+	this.ssize = this._theme("tile.ssize", 4);
+	/** Origin sprite width if this is running in `"DECIMAL"` mode.
+	 * 
+	 * This is considered to be the width of the sprites when reading them from the image.
+	 * 
+	 * This takes the value of the theme key `tile.swidth`, which by default is `16`.
+	 * @type integer
+	 */
+	this.swidth = this._theme("tile.swidth", 16);
+	/** Origin sprite height if this is running in `"DECIMAL"` mode.
+	 * 
+	 * This is considered to be the height of the sprites when reading them from the image.
+	 * 
+	 * This takes the value of the theme key `tile.sheight`, which by default is `16`.
+	 * @type integer
+	 */
+	this.sheight = this._theme("tile.sheight", 16);
+	
+	/** X coordinate of the current sprite.
+	 * @type integer
+	 * @private
+	 */
+	this._tx = 0;
+	/** Y coordinate of the current sprite.
+	 * @type integer
+	 * @private
+	 */
+	this._ty = 0;
+	
+	/** The path to the origin image.
+	 * 
+	 * This is relative to `{@link dusk.dataDir}` if needed.
+	 * @type string
+	 */
+	this.src = "";
+	
+	/** The current tile, represented as a string.
+	 * 
+	 * This must be a string in the form `"x,y"` representing the sprite on the source image.
+	 * @type string
+	 */
+	this.tileStr = "0,0";
+	
+	/** The current tile, represented as an array.
+	 * 
+	 * This must be an array in the form `[x,y]` representing the sprite on the source image.
+	 * @type string
+	 */
+	this.tile = [0,0];
+	
+	//Prop masks
+	this._registerPropMask("src", "src", true);
+	this._registerPropMask("tile", "tileStr", true);
+	this._registerPropMask("ssize", "ssize", true);
+	this._registerPropMask("swidth", "swidth", true);
+	this._registerPropMask("sheight", "sheight", true);
+	this._registerPropMask("mode", "mode", true);
+	
+	//Listeners
+	this.prepareDraw.listen(this._tileDraw, this);
 };
 dusk.sgui.Tile.prototype = new dusk.sgui.Component();
 dusk.sgui.Tile.constructor = dusk.sgui.Tile;
 
-
-/* @inheritDoc */
 dusk.sgui.Tile.prototype.className = "Tile";
 
+/** Used to draw the tile.
+ * 
+ * @param {CanvasRenderingContext2D} c The canvas on which to draw.
+ * @private
+ */
 dusk.sgui.Tile.prototype._tileDraw = function(c) {
 	if(this._img){
 		if(this.mode == "BINARY") {
@@ -75,23 +132,42 @@ dusk.sgui.Tile.prototype._tileDraw = function(c) {
 	}
 };
 
-dusk.sgui.Tile.prototype.__defineSetter__("src", function s_src(value) {
-	if(!value) {console.warn(this.comName+" tried to set image to nothing."); return;}
-	this._img = dusk.data.grabImage(value);
-	this.bookRedraw();
+//src
+Object.defineProperty(dusk.sgui.Tile.prototype, "src", {
+	set: function(value) {
+		if(!value) {return;}
+		this._img = dusk.data.grabImage(value);
+	},
+
+	get: function() {
+		if(!this._img) return "";
+		return this._img.src;
+	}
 });
 
-dusk.sgui.Tile.prototype.__defineGetter__("src", function g_src() {
-	return this._img;
+//tileStr
+Object.defineProperty(dusk.sgui.Tile.prototype, "tileStr", {
+	set: function(value) {
+		if(!value) {return;}
+		this._tx = value.split(",")[0];
+		this._ty = value.split(",")[1];
+	},
+
+	get: function() {
+		return this._tx+","+this._ty;
+	}
 });
 
-dusk.sgui.Tile.prototype.__defineGetter__("tile", function g_tile() {
-	return this._tx+","+this._ty;
-});
+//tile
+Object.defineProperty(dusk.sgui.Tile.prototype, "tile", {
+	set: function(value) {
+		this._tx = value[0];
+		this._ty = value[1];
+	},
 
-dusk.sgui.Tile.prototype.__defineSetter__("tile", function s_tile(value) {
-	this._tx = value.split(",")[0];
-	this._ty = value.split(",")[1];
+	get: function() {
+		return [this._tx, this._ty];
+	}
 });
 
 /*dusk.sgui.Tile.prototype.snapX = function(down) {
@@ -112,3 +188,6 @@ dusk.sgui.Tile.prototype.gridGo = function(x, y) {
 	this.x = x*this.width;
 	this.y = y*this.height;
 };*/
+
+Object.seal(dusk.sgui.Tile);
+Object.seal(dusk.sgui.Tile.prototype);

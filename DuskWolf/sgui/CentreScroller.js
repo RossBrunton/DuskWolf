@@ -17,7 +17,7 @@ dusk.load.provide("dusk.sgui.CentreScroller");
  * 
  * Essentially, this allows you to have a single, large component, and have a paticular point (the player, for example) so that it is always visible.
  * 
- * This uses the theme key `cs.lockBounds` (default true) as the default value of `{@dusk.sgui.CentreScroller.lockBounds}`.
+ * This component may have a `width` or `height` of `-1`, this means that that it will use the values `{@link dusk.sgui.width}` and `{@link dusk.sgui.height}`.
  * 
  * @extends dusk.sgui.Single
  */
@@ -27,18 +27,26 @@ dusk.sgui.CentreScroller = function (parent, comName) {
 		
 		/** If true, then this will always display as much of the component as it can, and will not try to center the coordinates if it would result in any side of the component becoming in the range.
 		 * 
-		 * This is set the theme value of `cs.lockBounds`.
+		 * This is set the theme value of `cs.lockBounds`, which is true by default.
 		 * 
-		 * @type number
-		 * @memberof dusk.sgui.CentreScroller
+		 * @type boolean
 		 */
 		this.lockBounds = this._theme("cs.lockBounds", true);
 		
+		/** Internal storage of this component's width.
+		 * @type integer
+		 * @private
+		 */
+		this._width = 0;
+		/** Internal storage of this component's height.
+		 * @type integer
+		 * @private
+		 */
+		this._height = 0;
+		
+		//Prop masks
 		this._registerPropMask("centre", "__centre", true);
 		this._registerPropMask("lockBounds", "lockBounds", true);
-		
-		this._width = 0;
-		this._height = 0;
 	}
 };
 dusk.sgui.CentreScroller.prototype = new dusk.sgui.Single();
@@ -53,6 +61,7 @@ dusk.sgui.CentreScroller.prototype.className = "CentreScroller";
  * @param {array} value The coordinates to set, this should be an array like [x, y].
  */
 dusk.sgui.CentreScroller.prototype.centre = function(value) {
+	if(!value) return;
 	this._component.x = -(value[0])+(this.width>>1);
 	this._component.y = -(value[1])+(this.height>>1);
 	
@@ -63,9 +72,9 @@ dusk.sgui.CentreScroller.prototype.centre = function(value) {
 		if(this._component.y > 0) this._component.y = 0;
 	}
 };
-
-dusk.sgui.CentreScroller.prototype.__defineSetter__("__centre", function s_centre(value) {
-	this.centre(value);
+Object.defineProperty(dusk.sgui.CentreScroller.prototype, "__centre", {
+	set: function(value) {this.centre(value);},
+	get: function() {return undefined;}
 });
 
 /** Returns a four element array in the form `[x, y, width, height]` indicating what is currently visible.
@@ -77,18 +86,17 @@ dusk.sgui.CentreScroller.prototype.render = function() {
 	return [-this._component.x, -this._component.y, this.width, this.height];
 };
 
-dusk.sgui.CentreScroller.prototype.__defineSetter__("width", function s_width(value) {
-	this._width = value;
-});
-dusk.sgui.CentreScroller.prototype.__defineGetter__("width", function g_width() {
-	if(this._width === -1) return dusk.simpleGui.width;
-	return this._width;
+//Width
+Object.defineProperty(dusk.sgui.CentreScroller.prototype, "width", {
+	set: function(value) {this._width = value;},
+	get: function() {if(this._width === -1) return dusk.sgui.width;return this._width;}
 });
 
-dusk.sgui.CentreScroller.prototype.__defineSetter__("height", function s_height(value) {
-	this._height = value;
+//Height
+Object.defineProperty(dusk.sgui.CentreScroller.prototype, "height", {
+	set: function(value) {this._height = value;},
+	get: function() {if(this._height === -1) return dusk.sgui.height;return this._height;}
 });
-dusk.sgui.CentreScroller.prototype.__defineGetter__("height", function g_height() {
-	if(this._height === -1) return dusk.simpleGui.height;
-	return this._height;
-});
+
+Object.seal(dusk.sgui.CentreScroller);
+Object.seal(dusk.sgui.CentreScroller.prototype);

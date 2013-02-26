@@ -4,6 +4,7 @@
 
 dusk.load.require("dusk.behave.Behave");
 dusk.load.require("dusk.controls");
+dusk.load.require("dusk.skills");
 
 dusk.load.provide("dusk.behave.Controlled");
 
@@ -13,8 +14,8 @@ dusk.behave.Controlled = function(entity) {
 		
 		this._jumps = 0;
 		
-		this._listenEvent("frame", this._controlledFrame);
-		this._listenEvent("collide", function e_collide(name, e) {if(e.dir = "b") this._jumps = 0;});
+		this.entityEvent.listen(this._controlledFrame, this, {"name":"frame"});
+		this.entityEvent.listen(function(e) {this._jumps = 0;}, this, {"name":"collide", "dir":"b"});
 		
 		dusk.controls.addControl("entity_left", 37, "0-0.5");
 		dusk.controls.addControl("entity_right", 39, "0+0.5");
@@ -24,7 +25,7 @@ dusk.behave.Controlled = function(entity) {
 dusk.behave.Controlled.prototype = new dusk.behave.Behave();
 dusk.behave.Controlled.constructor = dusk.behave.Controlled;
 
-dusk.behave.Controlled.prototype._controlledFrame = function(name, e) {
+dusk.behave.Controlled.prototype._controlledFrame = function(e) {
 	if(this._isControlActive("entity_left") && this._entity.dx > -this._entity.eProp("hspeed")) {
 		this._entity.dx -= this._entity.eProp("haccel");
 	}else if(this._isControlActive("entity_right") && this._entity.dx < this._entity.eProp("hspeed")) {
@@ -32,9 +33,9 @@ dusk.behave.Controlled.prototype._controlledFrame = function(name, e) {
 	}
 	
 	if(this._isControlActive("entity_jump") && this._entity.dy > -4) {
-		if((this._jumps == 0 && dusk.plat.hasSkill("jump"))
-		|| (this._jumps == 1 && dusk.plat.hasSkill("dubjump"))
-		|| dusk.plat.hasSkill("infinijump")) {
+		if((this._jumps == 0 && dusk.skills.hasSkill("jump"))
+		|| (this._jumps == 1 && dusk.skills.hasSkill("dubjump"))
+		|| dusk.skills.hasSkill("infinijump")) {
 			this._entity.dy = -this._entity.behaviourData.jump;
 			this._jumps ++;
 		}

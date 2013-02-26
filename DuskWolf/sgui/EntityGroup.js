@@ -9,47 +9,54 @@ dusk.load.require("dusk.editor");
 dusk.load.provide("dusk.sgui.EntityGroup");
 
 dusk.sgui.EntityGroup = function (parent, comName) {
-	if(parent !== undefined){
-		dusk.sgui.Group.call(this, parent, comName);
-		
-		this._entities = [];
-		
-		this._cx = 0;
-		this._cy = 0;
-		
-		this.tsize = 0;
-		this.twidth = 0;
-		this.theight = 0;
-		
-		this.ssize = 0;
-		this.sheight = 0;
-		this.swidth = 0;
-		
-		this.mode = "";
-		
-		this._selectedEntity = null;
-		this._offsetX = 0;
-		this._offsetY = 0;
-		
-		this._registerPropMask("mode", "mode", "BINARY");
-		
-		this._registerPropMask("sprite-size", "ssize", true);
-		this._registerPropMask("sprite-height", "sheight", true);
-		this._registerPropMask("sprite-width", "swidth", true);
-		
-		this._registerPropMask("tile-size", "tsize", true);
-		this._registerPropMask("tile-height", "theight", true);
-		this._registerPropMask("tile-width", "twidth", true);
-		
-		this._registerDrawHandler(this._entityGroupDraw);
-		this._registerActionHandler("EntityGroup", this._entityGroupAction, this);
-		
-		for(var i = 48; i <= 57; i++) {
-			this._registerKeyHandler(i, false, false, this._numberDrop, this);
-		}
-		this._registerKeyHandler(46, false, false, this._keyDel, this);
-		this._registerKeyHandler(67, false, false, function(e) {if(dusk.editor.active && confirm("Delete all entities?")) this.clear();}, this);
+	dusk.sgui.Group.call(this, parent, comName);
+	
+	this._entities = [];
+	
+	this._cx = 0;
+	this._cy = 0;
+	
+	this.tsize = 0;
+	this.twidth = 0;
+	this.theight = 0;
+	
+	this.ssize = 0;
+	this.sheight = 0;
+	this.swidth = 0;
+	
+	this.mode = "";
+	
+	this.scheme = null;
+	
+	this._selectedEntity = null;
+	this._offsetX = 0;
+	this._offsetY = 0;
+	
+	//Prop masks
+	this._registerPropMask("mode", "mode", "BINARY");
+	
+	this._registerPropMask("sprite-size", "ssize", true);
+	this._registerPropMask("sprite-height", "sheight", true);
+	this._registerPropMask("sprite-width", "swidth", true);
+	
+	this._registerPropMask("tile-size", "tsize", true);
+	this._registerPropMask("tile-height", "theight", true);
+	this._registerPropMask("tile-width", "twidth", true);
+	
+	//Listeners
+	for(var i = 48; i <= 57; i++) {
+		this.keyPress.listen(this._numberDrop, this, {"key":i});
 	}
+	this.keyPress.listen(this._keyDel, this, {"key":46});
+	this.keyPress.listen(function(e) {if(dusk.editor.active && confirm("Delete all entities?")) this.clear();}, this, {"key":46});
+	this.prepareDraw.listen(this._entityGroupDraw, this);
+	this.action.listen(this._entityGroupAction, this);
+	
+	//Directions
+	this.dirPress.listen(this._egRightAction, this, {"dir":dusk.sgui.Component.DIR_RIGHT});
+	this.dirPress.listen(this._egLeftAction, this, {"dir":dusk.sgui.Component.DIR_LEFT});
+	this.dirPress.listen(this._egUpAction, this, {"dir":dusk.sgui.Component.DIR_UP});
+	this.dirPress.listen(this._egDownAction, this, {"dir":dusk.sgui.Component.DIR_DOWN});
 };
 dusk.sgui.EntityGroup.prototype = new dusk.sgui.Group();
 dusk.sgui.EntityGroup.constructor = dusk.sgui.EntityGroup;
@@ -76,7 +83,6 @@ dusk.sgui.EntityGroup.prototype.doFrame = function() {
 				this._selectedEntity.y = (this._cy*this.theight)+this._offsetY;
 			}
 		}
-		this.bookRedraw();
 	}else{
 		//Call every entities' moveAndCollide function
 		for(var i = this._entities.length-1; i >= 0; i --) this._entities[i].moveAndCollide();
@@ -138,6 +144,29 @@ dusk.sgui.EntityGroup.prototype.getEntitiesHere = function(x, y, ignore, onlyOne
 			if(onlyOne) return out;
 		}
 	}
+
+	return out; 
+};
+
+dusk.sgui.EntityGroup.prototype.getCollisions = function(x1, y1, x2, y2, ignore, onlyOne) {
+	var out = [];
+	for(var c = this._entities.length-1; c >= 0; c --){
+		var com = this._entities[c];
+		if(com != ignore && x1 >= com.x+com.collisionOffsetX && x1 < com.x+com.collisionWidth && y1 >= com.y+com.collisionOffsetY && y1 < com.y+com.collisionHeight) {
+			out.push(com);
+			if(onlyOne) return out;
+			continue;
+		}
+		if(com != ignore && x2 >= com.x+com.collisionOffsetX && x2 < com.x+com.collisionWidth && y2 >= com.y+com.collisionOffsetY && y2 < com.y+com.collisionHeight) {
+			out.push(com);
+			if(onlyOne) return out;
+		}
+		
+		/*if(com != ignore && !(com.x+com.collisionOffsetX < x || com.x+com.collisionWidth > endX || com.y+com.collisionOffsetY < y || com.y+com.collisionHeight > endY)) {
+			out.push(com);
+			if(onlyOne) return out;
+		}*/
+	}
 	
 	return out; 
 };
@@ -146,7 +175,8 @@ dusk.sgui.EntityGroup.prototype.dropEntity = function(entity, takeFocus) {
 	var dropped = this.getComponent(entity.name, "Entity");
 	dropped.x = entity.x;
 	dropped.y = entity.y;
-	dropped.type = entity.type;
+	dropped.entType = entity.type;
+	if(this.scheme) dropped.scheme = this.scheme;
 	this._entities.push(dropped);
 	dropped.onDelete.listen(dusk.sgui.EntityGroup.prototype._entityDeleted, this);
 	if(takeFocus) this.flow(entity.name);
@@ -160,7 +190,7 @@ dusk.sgui.EntityGroup.prototype.save = function() {
 		if(this._entities[i].comName != dusk.entities.seek){
 			list[list.length] = {};
 			list[list.length-1].name = this._entities[i].comName;
-			list[list.length-1].type = this._entities[i].type;
+			list[list.length-1].type = this._entities[i].entType;
 			list[list.length-1].x = this._entities[i].x;
 			list[list.length-1].y = this._entities[i].y;
 		}
@@ -188,17 +218,17 @@ dusk.sgui.EntityGroup.prototype.clear = function() {
 
 dusk.sgui.EntityGroup.prototype._entityDeleted = function(e) {
 	for(var i = this._entities.length-1; i >= 0; i --) {
-		if(this._entities[i].comName == e.component.comName) {
+		if(this._entities[i].comName == e.com.comName) {
 			this._entities.splice(i, 1);
 			return;
 		}
 	}
 };
 
-dusk.sgui.EntityGroup.prototype._upAction = function(e) {
+dusk.sgui.EntityGroup.prototype._egUpAction = function(e) {
 	if(!dusk.editor.active) return true;
-	if(e.ctrlKey) return true;
-	if(e.shiftKey) {
+	if(e.e.ctrlKey) return true;
+	if(e.e.shiftKey) {
 		if(this._offsetY) this._offsetY --;
 		return false;
 	}
@@ -206,10 +236,10 @@ dusk.sgui.EntityGroup.prototype._upAction = function(e) {
 	this._cy --;
 };
 
-dusk.sgui.EntityGroup.prototype._downAction = function(e) {
+dusk.sgui.EntityGroup.prototype._egDownAction = function(e) {
 	if(!dusk.editor.active) return true;
-	if(e.ctrlKey) return true;
-	if(e.shiftKey) {
+	if(e.e.ctrlKey) return true;
+	if(e.e.shiftKey) {
 		if((this._offsetY < 1<<this.tsize && this.mode == "BINARY") || (this._offsetY < this.theight && this.mode == "DECIMAL")) this._offsetY ++;
 		return false;
 	}
@@ -217,10 +247,10 @@ dusk.sgui.EntityGroup.prototype._downAction = function(e) {
 	this._cy ++;
 };
 
-dusk.sgui.EntityGroup.prototype._leftAction = function(e) {
+dusk.sgui.EntityGroup.prototype._egLeftAction = function(e) {
 	if(!dusk.editor.active) return true;
-	if(e.ctrlKey) return true;
-	if(e.shiftKey) {
+	if(e.e.ctrlKey) return true;
+	if(e.e.shiftKey) {
 		if(this._offsetX) this._offsetX --;
 		return false;
 	}
@@ -228,10 +258,10 @@ dusk.sgui.EntityGroup.prototype._leftAction = function(e) {
 	this._cx --;
 };
 
-dusk.sgui.EntityGroup.prototype._rightAction = function(e) {
+dusk.sgui.EntityGroup.prototype._egRightAction = function(e) {
 	if(!dusk.editor.active) return true;
-	if(e.ctrlKey) return true;
-	if(e.shiftKey) {
+	if(e.e.ctrlKey) return true;
+	if(e.e.shiftKey) {
 		if((this._offsetX < 1<<this.tsize && this.mode == "BINARY") || (this._offsetX < this.twidth && this.mode == "DECIMAL")) this._offsetX ++;
 		return false;
 	}
@@ -276,3 +306,6 @@ dusk.sgui.EntityGroup.prototype._keyDel = function(e) {
 	
 	return false;
 };
+
+Object.seal(dusk.sgui.EntityGroup);
+Object.seal(dusk.sgui.EntityGroup.prototype);

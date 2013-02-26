@@ -7,153 +7,193 @@ dusk.load.require("dusk.sgui.IContainer");
 
 dusk.load.provide("dusk.sgui.Single");
 
-/** A single is a container that holds a single component, hence the name.
+/** @class dusk.sgui.Single
  * 
- * <p>It is designed to generally add extra features and such to a single component.</p>
+ * @classdesc A single contains only one component, and typically adds some functionallity to it.
  * 
- * <p>By defualt, and if another is deleted, it contains a NullCom.</p>
+ * The component must have a name, and the name must be correct when you are referring to it, however, you may use `"*"` in any case where a name is required to specify the component.
  * 
- * <p>It is also somewhat "transparent", any attempt for the component inside to flow out will be passed to this single's container.</p>
+ * When this class is created, it will have, as its child, a `{@link dusk.sgui.NullCom}` named `"blank"`.
  * 
- * <p><b>This component has the following properties:</b></p>
- * 
- * <p><code>&lt;(type) name='(name)'&gt;(properties)&lt;/(type)&gt;</code> --
- * Sets the properties of the component if it is named <code>name</code>, creating one if it doesn't exist. The type of the component, <code>type</code>, should be in <code>cfg/components.as</code>. Generally, most of them are, and the ones that aren't you can't add to containers.</p>
- * 
- * @see Group
+ * @extends dusk.sgui.IContainer
+ * @param {?dusk.sgui.Component} parent The container that this component is in.
+ * @param {string} componentName The name of the component.
+ * @constructor
  */
 dusk.sgui.Single = function(parent, comName) {
 	if (parent !== undefined){
 		dusk.sgui.Component.call(this, parent, comName);
 		
-		this._component = null;
-		this._width = -1;
-		this._height = -1;
-		
-		/** This creates a new group and adds the "blank" component. See <code>Component</code> for parameter details.
-		 * @see Component
+		/** The actuall component this Single has.
+		 * @type dusk.sgui.Component
+		 * @private
 		 */
-		this.newComponent("blank", "NullCom");
-			
-		//Add the groupStuff handler
-		this._registerPropMask("child", "child", false);
+		this._component = null;
 		
-		this._registerDrawHandler(this._singleDraw);
-		this._registerFrameHandler(this._singleFrame);
+		this.newComponent("blank", "NullCom");
+		
+		//Prop masks
+		this._registerPropMask("child", "__child", false);
+		
+		//Listeners
+		this.prepareDraw.listen(this._singleDraw, this);
+		this.frame.listen(this._singleFrame, this);
+		this.onActiveChange.listen(function(e){this._component.onActiveChange.fire(e);}, this);
 	}
 };
 dusk.sgui.Single.prototype = new dusk.sgui.IContainer();
 dusk.sgui.Single.constructor = dusk.sgui.Group;
 
 dusk.sgui.Single.prototype.className = "Single";
-dusk.sgui.Single.prototype.isAContainer = true;
 
-/** The currently active component handles the keypress. 
- * @param e The keyboard event.
- * @return The result of the focused component's keypress.
+/** Container specific method of handling keypresses.
+ * 
+ * In this case, it will call `{@link dusk.sgui.Component.keypress}` of its component.
+ * 
+ * @param {object} e The keypress event, must be a JQuery keypress event object.
+ * @return {boolean} The return value of the component's keypress.
  */
 dusk.sgui.Single.prototype.containerKeypress = function(e) {
-	return this._component.keypress(e);
+	return this._component.doKeyPress(e);
 };
 
-/** This creates a new component in this group. Interesting that, isn't it?
+/** Creates a new component of the specified type, replacing the existing component.
  * 
- * <p>If you need to check the names of the component you are after, <code>Component.NAME</code> will tell you. If the type you provide isn't a real component, then a <code>NullCom</code> will be used.</p>
+ * `type` is a string, and must correspond to a property of the namespace `{@link dusk.sgui}` and inherit from the class `{@link dusk.sgui.Component}`.
+ *	This will be the object which is created.
  * 
- * @param com The name of the component.
- * @param type The type of the component, should be the name of one of the components in <code>SimpleGui.COMS</code>. If not specified a NullCom is made.
+ * @param {string} com The name of the new component.
+ * @param {?string} type The type to add as described above. If not specified, `"NullCom"` is used.
  * @return The component that was added.
  */
-dusk.sgui.Single.prototype.newComponent = function(com, type) { //Component
+dusk.sgui.Single.prototype.newComponent = function(com, type) {
+	if(type === undefined) type = "NullCom";
+	if(!(type in dusk.sgui)){console.warn(type + " is not a valid component type."); type = "NullCom";}
+	
 	this._component = new dusk.sgui[type](this, com.toLowerCase());
-	this._component.onGetFocus();
+	this._component.onFocusChange.fire({"focus":true});
+	dusk.sgui.applyStyles(this._component);
 	
 	return this._component;
 };
 
-dusk.sgui.Single.prototype.__defineSetter__("child", function _setChild(value) {
-	//Component properties
-	if (value.name && this.getComponent(value.name.toLowerCase(), value.type)) {
-		this.getComponent(value.name.toLowerCase()).parseProps(value);
-	} else {
-		console.warn(value.name + " has not been given a type and does not exist, ignoring.");
+/** Modifies this component's child using JSON data.
+ *	See `{@link dusk.sgui.Component.parseProps}` for a basic description on how JSON properties work.
+ * 
+ * `data` is either a single object or an array of objects, each describing a component.
+ * 	Objects whose `"name"` property isn't `"*"` or this container's child's name and that have no `"type"` property will be ignored.
+ * 	If the data has a `"type"` property and the name is different, then a new component of the specified name and type is created.
+ * 
+ * This may be used in the JSON representation with the property `child`.
+ * 
+ * @param {object|array} data Information about the component, as described above.
+ */
+dusk.sgui.Single.prototype.modifyComponent = function(data) {
+	if("length" in data) {
+		for (var i = 0; i < data.length; i++) {
+			this.modifyComponent(data[i]);
+		}
+	}else{
+		if(data.name && this.getComponent(data.name.toLowerCase(), data.type)) {
+			this._component.parseProps(data);
+		} else {
+			console.warn(data.name + " has not been given a type and does not exist, ignoring.");
+		}
+	}
+};
+Object.defineProperty(dusk.sgui.Single.prototype, "__child", {
+	set: function(value) {this.modifyComponent(value);},
+	
+	get: function() {
+		var hold = this._component.bundle();
+		hold.type = this._component.className;
+		return hold;
 	}
 });
 
-dusk.sgui.Single.prototype.__defineGetter__("child", function _getChild(value) {
-	//Component properties
-	return this._component;
-});
-
+/** Draws the child onto the canvas.
+ * 
+ * @param {CanvasRenderingContext2D} The canvas context on which to draw.
+ * @private
+ */
 dusk.sgui.Single.prototype._singleDraw = function(c) {
-	//Draw children
-	/*var input = this._component.draw();
-	if(!input || !this._component.width || !this._component.height) return;
-	c.drawImage(input, this._component.x, this._component.y, this._component.width, this._component.height);*/
 	this._component.draw(c);
 };
 
-/** Gets a component in this group. It will create a new component if <code>create</code> is true.
+/** Returns the component in the group, or creates a new one.
  * 
- * <p>The type of the component is not needed if you are 100% sure the component exists.</p>
+ * If `type` is not undefined, and the name is incorrect, then a new component with the name and type specified will be created.
  * 
- * @param com The name of the component to get.
- * @param create Whether to create a new component if it is not found.
- * @param type The type of component to create, see <code>newComponent</code> for details.
- * @return The component, or <code>null</code> if it wasn't found and you don't want to create it.
+ * @param {string} com The name of the component to get.
+ * @param {?string} type The type of component to create if needed.
+ * @return {?dusk.sgui.Component} The component, or null if the name is wrong and `type` is undefined.
  */
 dusk.sgui.Single.prototype.getComponent = function(com, type) { //Component
-	if (this._component.comName == com.toLowerCase() || com == "*" || com === "") {
+	if (this._component.comName == com.toLowerCase() || com == "*" || !com) {
 		return this._component;
 	}
 	
 	return type?this.newComponent(com, type):null;
 };
 
-/** Deletes a component from this group. That's it.
- * @param com The name of the component to delete.
- * @return <code>true</code> when a component was deleted, <code>false</code> if it didn't exist.
+/** Deletes the component, replacing it with a `{@link dusk.sgui.NullCom}` named `"blank"`; which is the default component.
+ * 
+ * @param {string} com The name of the component to delete.
+ * @return {boolean} If the delete was successfull, this will return false if the name was invalid.
  */
-dusk.sgui.Single.prototype.deleteComponent = function(com) { //Boolean
+dusk.sgui.Single.prototype.deleteComponent = function(com) {
 	if (this._component.comName == com.toLowerCase() || com == "*" || !com){
+		this._component.onDelete.fire({"com":this._component});
 		this.newComponent("blank", "NullCom");
 		return true;
 	}
+	
+	return false;
 };
 
-dusk.sgui.Single.prototype._singleFrame = function() {
-	this.getComponent("").frame();
-};
-
-/** Checks to see if it's possible to flow to the specified component, and if so, then does it.
- * @param to The component to flow to.
- * @return Whether the component could be flowed into.
+/** Calls the `{@link dusk.sgui.Component.frame}` method of its component.
+ * @private
  */
-dusk.sgui.Single.prototype.flow = function(to) { //Bool
+dusk.sgui.Single.prototype._singleFrame = function() {
+	this.getComponent("*").frame.fire();
+};
+
+/** Calls the `{@link dusk.sgui.IContainer.flow}` method of its parent container.
+ * 
+ * @param {string} to The name of the parent's component to flow into.
+ * @return {boolean} Whether the flow was successfull.
+ */
+dusk.sgui.Single.prototype.flow = function(to) {
 	return this._container.flow(to);
 };
 
-dusk.sgui.Single.prototype.__defineGetter__("width", function g_width() {
-	if(this._width >= 0) return this._width;
+/** As there is only one component in this container, this does nothing.
+ * 
+ * @param {string} com The name of the component to alter the layer of, will be ignored.
+ * @param {string} alter The alteration to make, will be ignored.
+ * @since 0.0.17-alpha
+ */
+dusk.sgui.IContainer.prototype.alterChildLayer = function(com, alter) {
+	//Does nothing
+};
+
+//Width
+Object.defineProperty(dusk.sgui.Single.prototype, "width", {
+	get: function() {
+		return this._component.x + this._component.width;
+	},
 	
-	return this._component.x + this._component.width;
+	set: function(value) {if(value > 0) console.warn("Cannot set width of a single.");}
 });
 
-dusk.sgui.Single.prototype.__defineSetter__("width", function s_width(value) {
-	this._width = value;
-});
-
-dusk.sgui.Single.prototype.__defineGetter__("height", function g_height() {
-	if(this._height >= 0) return this._height;
+//Height
+Object.defineProperty(dusk.sgui.Single.prototype, "height", {
+	get: function() {
+		return this._component.y + this._component.height;
+	},
 	
-	return this._component.y + this._component.height;
+	set: function(value) {if(value > 0) console.warn("Cannot set height of a single.");}
 });
 
-dusk.sgui.Single.prototype.__defineSetter__("height", function s_height(value) {
-	this._height = value;
-});
-
-/** Groups will call their currently focused components <code>onDeactive</code> function. */
-dusk.sgui.Single.prototype.onDeactive = function() {this._component.onDeactive();};
-/** Groups will call their currently focused components <code>onActive</code> function. */
-dusk.sgui.Single.prototype.onActive = function() {this._component.onActive();};
+Object.seal(dusk.sgui.Single);
+Object.seal(dusk.sgui.Single.prototype);

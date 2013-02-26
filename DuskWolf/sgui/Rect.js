@@ -24,33 +24,30 @@ dusk.sgui.Rect = function(parent, comName) {
 	
 		/** The colour of the rectangle.
 		 * The default value depends on the theme value "box".
-		 * 
 		 * @type string
-		 * @memberof dusk.sgui.Rect
 		 */
 		this.colour = this._theme("box");
 		/** The colour of the border.
 		 * The default value depends on the theme value "border".
-		 * 
 		 * @type string
-		 * @memberof dusk.sgui.Rect
 		 */
 		this.bColour = this._theme("border");
 		/** The thinkness of the rectangle border.
 		 * 	If 0, there will be no border.
 		 * @default 1
-		 * @type number
-		 * @memberof dusk.sgui.Rect
+		 * @type float
 		 */
 		this.bWidth = 1;
 		
+		//Prop masks
 		this._registerPropMask("colour", "colour", true);
 		this._registerPropMask("color", "colour", true);
-		this._registerPropMask("border-colour", "bColour", true);
-		this._registerPropMask("border-color", "bColour", true);
-		this._registerPropMask("border-width", "bWidth", true);
+		this._registerPropMask("bColour", "bColour", true);
+		this._registerPropMask("bColor", "bColour", true);
+		this._registerPropMask("bWidth", "bWidth", true);
 		
-		this._registerDrawHandler(this._rectDraw);
+		//Listeners
+		this.prepareDraw.listen(this._rectDraw, this);
 	}
 };
 dusk.sgui.Rect.prototype = new dusk.sgui.Component();
@@ -70,3 +67,6 @@ dusk.sgui.Rect.prototype._rectDraw = function(c) {
 	c.fillRect (0, 0, this.width, this.height);
 	if(this.bWidth) c.strokeRect (0, 0, this.width, this.height);
 };
+
+Object.seal(dusk.sgui.Rect);
+Object.seal(dusk.sgui.Rect.prototype);

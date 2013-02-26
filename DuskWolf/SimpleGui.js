@@ -9,15 +9,10 @@ dusk.load.require("dusk.EventDispatcher");
 dusk.load.require("dusk.controls");
 dusk.load.require("dusk");
 
-dusk.load.provide("dusk.simpleGui");
+dusk.load.provide("dusk.sgui");
 
 /** @namespace dusk.sgui
- * 
- * @description This is the namespace with all the Simple Gui's components in it.
- */
-
-/** @namespace dusk.simpleGui
- * @name dusk.simpleGui
+ * @name dusk.sgui
  * 
  * @description This module contains a SimpleGui system, allowing for canvas UIs.
  * 
@@ -42,7 +37,7 @@ dusk.load.provide("dusk.simpleGui");
  * 	If a direction key is pressed, a function like `{@link sgui.Component.upAction}` returns true, and a variable like `{@link upFlow}` is not empty, focus changes to the named element in this one's container.
  *	The arrow keys can be overriden by using the controls "sgui_up", "sgui_down", "sgui_left" and "sgui_right".
  * 
- * Theme keys (set by `{@link dusk.simpleGui.setThemeKey}` and `{@link dusk.simpleGui.getThemeKey}` set the default value of properties of a component.
+ * Theme keys (set by `{@link dusk.sgui.setThemeKey}` and `{@link dusk.sgui.getThemeKey}` set the default value of properties of a component.
  *	When an object that requires a theme key is first inited, then it will set those keys (if they do not exist) to a default value.
  * 	Any new object created will take the values from the theme.
  * 	The theme keys each component uses should be documented in the component's documentation.
@@ -65,77 +60,64 @@ dusk.load.provide("dusk.simpleGui");
  * 
  * @private
  */
-dusk.simpleGui._init = function() {
+dusk.sgui._init = function() {
 	//Listen for keypresses
-	dusk.keyboard.keyPress.listen(function e_keypress(event) {
-		this.getActivePane().keypress(event);
+	dusk.keyboard.keyPress.listen(function(event) {
+		this.getActivePane().doKeyPress(event);
 	}, this);
 	
 	//Listen for frame events
-	dusk.frameTicker.onFrame.listen(function e_onFrame() {
-		if(this.displayMode == 1) {
-			this.width = $("#"+dusk.canvas).parent().width();
+	dusk.frameTicker.onFrame.listen(function() {
+		if(dusk.sgui.displayMode == dusk.sgui.MODE_FULL) {
+			dusk.sgui.width = $("#"+dusk.canvas).parent().width();
 			if($("#"+dusk.canvas).parent().height() > window.innerHeight) {
-				this.height = window.innerHeight;
+				dusk.sgui.height = window.innerHeight;
 			}else{
-				this.height = $("#"+dusk.canvas).parent().height();
+				dusk.sgui.height = $("#"+dusk.canvas).parent().height();
 			}
 		}
 		
-		for(var p in this._panes){
-			this._panes[p].frame();
+		for(var p in dusk.sgui._panes){
+			dusk.sgui._panes[p].frame.fire();
 		}
 	}, this);
 
 	/** All the planes.
 	 * 
-	 * Property names are the names of panes.
-	 * 
+	 * Property names are the names of panes, and the values are the actual panes.
 	 * @type array
 	 * @private
 	 */
 	this._panes = {};
 	/** The name of the currently active pane.
-	 * 
 	 * @type string
 	 * @private
 	 */
 	this._activePane = "";
-	/** If true then the frame handler will draw all the components again. Is set to true by `{@link dusk.simpleGui.bookRedraw}`.
-	 * 
-	 * @type boolean
-	 * @private
-	 */
-	this._redrawBooked = false;
 	
-	/* * The current width of the canvas.
-	 * 
+	/** The current width of the canvas.
 	 * @type integer
-	 * /
+	 */
 	this.width = $("#"+dusk.canvas)[0].width;
 	/** The current height of the canvas.
-	 * 
 	 * @type integer
-	 * /
-	this.height = $("#"+dusk.canvas)[0].height;*/
+	 */
+	this.height = $("#"+dusk.canvas)[0].height;
 	
-	/** Fires when this renders a new frame.
+	/** Fires when the simpleGui system is about to draw a new frame.
 	 * 
 	 * The event object is empty.
-	 * 
 	 * @type dusk.EventDispatcher
 	 */
 	this.onRender = new dusk.EventDispatcher("onRender");
 	
 	/** A cached canvas drawn to before the real one, to improve performance.
-	 * 
 	 * @type HTMLCanvasElement
 	 * @private
 	 */
 	this._cacheCanvas = document.createElement("canvas");
 
 	/** The theme data, in expected name:value form.
-	 * 
 	 * @type object
 	 * @private
 	 */
@@ -143,6 +125,21 @@ dusk.simpleGui._init = function() {
 	this.setThemeKey("box", "#eeeeee");
 	this.setThemeKey("border", "#cccccc");
 	this.setThemeKey("borderActive", "#ff5555");
+	this.setThemeKey("borderLocked", "#ffff55");
+	
+	/** An object containing all the styles, the key is the selector, and the value is the props.
+	 * @type object
+	 * @private
+	 * @since 0.0.17-alpha
+	 */
+	this._styleData = {};
+	
+	/** The display mode of the canvas; this determines how the canvas will resize.
+	 *	Must be one of the `dusk.sgui.MODE_*` constants.
+	 * @type integer
+	 * @default `{@link dusk.sgui.MODE_FIXED}`
+	 */
+	this.displayMode = dusk.sgui.MODE_FIXED;
 	
 	//Set up the cached canvas
 	this._cacheCanvas.height = this.height;
@@ -154,9 +151,6 @@ dusk.simpleGui._init = function() {
 	this._cacheCanvas.getContext("2d").imageSmoothingEnabled = false;
 	this._cacheCanvas.getContext("2d").textBaseline = "middle";
 	
-	//Set and create the currently active plane.
-	this.setActivePane("blank");
-	
 	//Controls
 	dusk.controls.addControl("sgui_up", 38, "1-0.5");
 	dusk.controls.addControl("sgui_down", 40, "1+0.5");
@@ -164,18 +158,29 @@ dusk.simpleGui._init = function() {
 	dusk.controls.addControl("sgui_right", 39, "0-0.5");
 	dusk.controls.addControl("sgui_action", 65, 0);
 	
-	this.displayMode = 1;
-	
-	dusk.simpleGui._draw();
+	dusk.sgui._draw();
 };
 
+/** A display mode that represents that the canvas will not change it's size at all.
+ * @type integer
+ * @constant
+ * @value 0
+ */
+dusk.sgui.MODE_FIXED = 0;
+/** A display mode that represents that the canvas will change it's size in order to fill up the whole screen, if possible.
+ * @type integer
+ * @constant
+ * @value 1
+ */
+dusk.sgui.MODE_FULL = 1;
+
+
 /** Returns or creates a pane.
- * 
  * @param {string} name The name of the pane to get or create.
  * @param {?boolean} noNew If this is `true`, then a new pane will not be created, otherwise a new pane will be created if it does not exist.
  * @return {?dusk.sgui.Pane} The pane, or `null` if it doesn't exist and `noNew` is `true`.
  */
-dusk.simpleGui.getPane = function(name, noNew) {
+dusk.sgui.getPane = function(name, noNew) {
 	if(this._panes[name.toLowerCase()]) return this._panes[name.toLowerCase()];
 	
 	if(!noNew) {
@@ -187,66 +192,60 @@ dusk.simpleGui.getPane = function(name, noNew) {
 };
 
 /** Sets the currently active pane. This is the only one that will recieve keypresses.
- * 
  * @param {string} to The name of the pane to set to the active one.
  */
-dusk.simpleGui.setActivePane = function(to) {
-	if(this.getActivePane()) this.getActivePane().onDeactive();
+dusk.sgui.setActivePane = function(to) {
+	if(this.getActivePane()) {
+		this.getActivePane().onActiveChange.fire({"active":false});
+		this.getActivePane().onFocusChange.fire({"focus":true});
+	}
 	this.getPane(to);
 	this._activePane = to.toLowerCase();
-	this.getActivePane().onActive();
+	this.getActivePane().onActiveChange.fire({"active":true});
+	this.getActivePane().onFocusChange.fire({"focus":true});
 };
 
 /** Returns the currently active pane.
- * 
  * @return {dusk.sgui.Pane} The currently active pane.
  */
-dusk.simpleGui.getActivePane = function() {
+dusk.sgui.getActivePane = function() {
+	if(this._activePane === "") return null;
 	return this._panes[this._activePane];
 };
 
 /** Draws all the panes onto the main canvas specified, and fires the onRender event.
  * 
  * This will be called whenever `requestAnimationFrame` tells it to, which should be 60 frames a second.
- * 
  * @return {boolean} Whether any changes were made.
+ * @private
  */
-dusk.simpleGui._draw = function() {
+dusk.sgui._draw = function() {
 	var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
-	requestAnimationFrame(dusk.simpleGui._draw);
-	
-	//if(/*!this._redrawBooked || */!dusk.actions.getVar("sys.sg.drawable")) return false;
+	requestAnimationFrame(dusk.sgui._draw);
+	if(!dusk.started) return;
 
-	$("#"+dusk.canvas)[0].getContext("2d").clearRect(0, 0, dusk.simpleGui.width, dusk.simpleGui.height);
-	dusk.simpleGui._cacheCanvas.getContext("2d").clearRect(0, 0, dusk.simpleGui.width, dusk.simpleGui.height);
+	$("#"+dusk.canvas)[0].getContext("2d").clearRect(0, 0, dusk.sgui.width, dusk.sgui.height);
+	dusk.sgui._cacheCanvas.getContext("2d").clearRect(0, 0, dusk.sgui.width, dusk.sgui.height);
 	
 	//Draw panes
-	//var input;
-	for(var c in dusk.simpleGui._panes){
-		/*input = this._panes[c].draw();
-		if(!input || !this._panes[c].width || !this._panes[c].height) continue;
-		this._cacheCanvas.getContext("2d").drawImage(input, this._panes[c].x, this._panes[c].y, this._panes[c].width, this._panes[c].height);*/
-		
-		dusk.simpleGui._panes[c].draw(dusk.simpleGui._cacheCanvas.getContext("2d"));
+	for(var c in dusk.sgui._panes){
+		dusk.sgui._panes[c].draw(dusk.sgui._cacheCanvas.getContext("2d"));
 	}
 
-	$("#"+dusk.canvas)[0].getContext("2d").drawImage(dusk.simpleGui._cacheCanvas, 0, 0, dusk.simpleGui.width, dusk.simpleGui.height);
-	dusk.simpleGui._redrawBooked = false;
-	
-	dusk.simpleGui.onRender.fire({});
+	$("#"+dusk.canvas)[0].getContext("2d").drawImage(dusk.sgui._cacheCanvas, 0, 0, dusk.sgui.width, dusk.sgui.height);	
+	dusk.sgui.onRender.fire({});
 
 	return true;
 };
 
 /** Resolves a path.
  * 
- * The path from this function must contain a colon, all text to the left of the colon will be the pane to start off with, and all text to the right will be a standard path.
- * 
+ * The path from this function must contain a colon, all text to the left of the colon will be the pane to path from, and all text to the right will be a standard path.
  * @param {string} path The path to resolve.
  * @return {dusk.sgui.Component} The component the path represents.
  */
-dusk.simpleGui.path = function(path) {
-	if(path.indexOf(":") !== -1) {
+dusk.sgui.path = function(path) {
+	if(path.indexOf(":") === -1) {
 		console.error("Tried to set an invalid path (no colon): "+path);
 		return null;
 	}
@@ -255,49 +254,137 @@ dusk.simpleGui.path = function(path) {
 	return this.getPane(pane).path(path);
 };
 
-/** Requests that the display be updated; this will cause simpleGui to redraw the screen.
- */
-dusk.simpleGui.bookRedraw = function() {
-	this._redrawBooked = true;
-};
-
 /** Sets a theme key with the specified value.
- * 
  * @param {string} name The name of the key to set.
  * @param {object} value The value to set this key.
  */
-dusk.simpleGui.setThemeKey = function(name, value) {
+dusk.sgui.setThemeKey = function(name, value) {
 	this._themeData[name] = value;
 };
 
 /** Returns the value of a theme key.
- * 
  * @param {string} name The name of the key to look up.
  * @return {object} The value of that key.
  */
-dusk.simpleGui.getThemeKey = function(name) {
+dusk.sgui.getThemeKey = function(name) {
 	return this._themeData[name];
 };
 
-dusk.simpleGui.__defineSetter__("width", function s_width(value) {
-	if(value == this.width) return;
+/** A pattern used to select styles.
+ * @type RegExp
+ * @private
+ * @since 0.0.17-alpha
+ */
+dusk.sgui._stylePattern = /(?:([^\.#\[]+))?(?:\.([^#\.\[]+))?(?:#([^\.\#\[]+))?(?:\[([^\=\~\|\^\*\$]+)([\~\|\^\*\$])?=([^\]]+)\])?/gi;
+
+/** Adds a new style.
+ * 
+ * The properties will be the ones assigned, and is an object.
+ * @param {string} selector The selector to style.
+ * @param {object} props The props to set.
+ * @since 0.0.17-alpha
+ */
+dusk.sgui.addStyle = function(selector, props) {
+	dusk.sgui._styleData[selector] = [[], props];
+	var fragments = selector.split(/>/gi);
+	for(var i = 0; i < fragments.length; i ++) {
+		dusk.sgui._stylePattern.lastIndex = 0;
+		dusk.sgui._styleData[selector][0].push(dusk.sgui._stylePattern.exec(fragments[i]));
+	}
+};
+
+/** Get all style rules that match a specified component.
+ * 
+ * Each is in the form `[selector, props]`, where props is an object.
+ * @param {dusk.sgui.Component} com The component to get the styles for.
+ * @return {array} An array of style objects that should be applied to the component.
+ * @since 0.0.17-alpha
+ */
+dusk.sgui.getStyles = function(com) {
+	var matchedStyles = [];
 	
-	$("#"+dusk.canvas)[0].width = value;
-	this._cacheCanvas.width = this.width;
-});
-dusk.simpleGui.__defineGetter__("width", function g_width(value) {
-	return $("#"+dusk.canvas)[0].width;
+	for(var s in dusk.sgui._styleData) {
+		var hold = com;
+		var current = null;
+		var valid = true;
+		var p = dusk.sgui._styleData[s][0].length;
+		while(current = dusk.sgui._styleData[s][0][--p]) {
+			if((current[1] && !(hold instanceof dusk.sgui[current[1]]))
+			|| (current[2] && !Array.isArray(hold.style) && hold.style != current[2])
+			|| (current[2] && Array.isArray(hold.style) && current[2] in hold.style)
+			|| (current[3] && hold.comName != current[3])) {
+				valid = false;
+				break;
+			}
+			
+			hold = hold.getContainer();
+		}
+		
+		if(valid) matchedStyles.push(dusk.sgui._styleData[s][1])
+	}
+	
+	return matchedStyles;
+};
+
+/** Apply all styles to the specified component that match it.
+ * @param {dusk.sgui.Component} com The component to apply styles to.
+ * @since 0.0.17-alpha
+ */
+dusk.sgui.applyStyles = function(com) {
+	var styles = dusk.sgui.getStyles(com);
+	
+	for(var i = 0; i < styles.length; i ++) {
+		com.parseProps(styles[i]);
+	}
+};
+
+/** Adds a new type that can be added by specifying it's type. The component must be registered before use. Not yet implemented.
+ * @param {string} name The name of the added type.
+ * @param {class(dusk.sgui.Component, string) extends dusk.sgui.Component} type The type to add.
+ * @since 0.0.17-alpha
+ */
+dusk.sgui.registerType = function(name, type) {
+	
+};
+
+/** Returns a constructor for the specified component, provided it has been registered beforehand with {@link dusk.sgui.registerType}.
+ * 
+ * If there is no component type with the specified name, {@link dusk.sgui.NullCom} is returned. Not yet implemented.
+ * @param {string} name The name of the type to look up.
+ * @return {class(dusk.sgui.Component, string) extends dusk.sgui.Component} A constructor for the specified type.
+ * @since 0.0.17-alpha
+ */
+dusk.sgui.getType = function(name) {
+	return dusk.sgui.NullCom;
+};
+
+//width
+Object.defineProperty(dusk.sgui, "width", {
+    set:function(value) {
+    	if(value == this.width) return;
+    	
+    	$("#"+dusk.canvas)[0].width = value;
+    	this._cacheCanvas.width = this.width;
+    },
+    
+    get: function() {
+	    return $("#"+dusk.canvas)[0].width;
+    }
 });
 
-dusk.simpleGui.__defineSetter__("height", function s_height(value) {
-	if(value == this.height) return;
+//height
+Object.defineProperty(dusk.sgui, "height", {
+	set:function(value) {
+		if(value == this.height) return;
+		
+		$("#"+dusk.canvas)[0].height = value;
+		this._cacheCanvas.height = this.height;
+	},
 	
-	$("#"+dusk.canvas)[0].height = value;
-	this._cacheCanvas.height = this.height;
-});
-dusk.simpleGui.__defineGetter__("height", function g_height(value) {
-	return $("#"+dusk.canvas)[0].height;
+	get:function() {
+		return $("#"+dusk.canvas)[0].height;
+	}
 });
 
 //Init the simpleGui
-dusk.simpleGui._init();
+dusk.sgui._init();

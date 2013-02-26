@@ -41,7 +41,6 @@ dusk.utils.clone = function(o) {
 dusk.utils.merge = function(a, b) {
 	a = dusk.utils.clone(a);
 	for(var p in b) {
-		//Property in destination object set; update its value.
 		if(b[p].constructor == Object && p in a) {
 			a[p] = dusk.utils.merge(a[p], b[p]);
 		}else{
@@ -88,13 +87,14 @@ dusk.utils.urlGet = function(name) {
  * If, after removing the comment, the string is valid JSON, then it will be parsed, else this will return null.
  * 
  * @param {string} json The JSON string.
- * @return {?object} The JSON, or the null if it couldn't be parsed.
+ * @return {?object} The JSON, or `null` if it couldn't be parsed.
  * @since 0.0.12-alpha
  */
 dusk.utils.jsonParse = function(json) {
 	json = json.replace(/\t/g, " ").replace(/\/\*(?:.|\n)*?\*\//g, "").replace(/\n/g, " ");
 	
 	if(dusk.utils.isJson(json)) return JSON.parse(json);
+	return null;
 };
 
 /** Takes two version strings, and returns whether the first is higher than the second (1), they are the same (0) or the later is (-1).
@@ -141,3 +141,190 @@ dusk.utils.resolveRelative = function(url, base) {
 	if(url.indexOf(":") === -1 && url[0] != "/") url = base+url;
 	return url;
 };
+
+/** Returns whether two arrays are equal (have the same elements at the same indexes).
+ * 
+ * @param {array} a The first array.
+ * @param {array} b The second array.
+ * @return {boolean} Whether both arrays are equal.
+ */
+dusk.utils.arrayEqual = function(a, b) {
+	if(a.length !== b.length) return false;
+	
+	for(var i = a.length-1; i >= 0; i --) {
+		if(a[i] !== b[i]) return false;
+	}
+	
+	return true;
+};
+
+/** A conversion type that converts the data to and from a hexadecimal string.
+ * @type string
+ * @constant
+ * @value "0x"
+ */
+dusk.utils.SD_HEX = "0x";
+
+/** A conversion type that does simple compression that is optimised if the array buffer has sequential repeating elements in it.
+ * 
+ * It optomises based on patterns; if it sees the same sequence of two bytes (16 bits), then it will compress them down.
+ * @type string
+ * @constant
+ * @value "BC16"
+ */
+dusk.utils.SD_BC16 = "BC16";
+
+/** Converts a byte buffer to a string.
+ * 
+ * What this string looks like depends on the co
+ * @param {ArrayBuffer} arr The array buffer to stringify.
+ * @param {string=dusk.utils.COM_HEX} type The method to stringify.
+ * @return {string} A string representing the data.
+ */
+dusk.utils.dataToString = function(arr, type) {
+	if(type === undefined) type = dusk.utils.SD_HEX;
+	
+	var out = type+":";
+	
+	if(type === dusk.utils.SD_HEX) {
+		var buff = new Uint8Array(arr);
+		for(var i = 0; i < buff.length; i ++) {
+			var chr = buff[i].toString(16);
+			if(chr.length == 1) chr = "0"+chr;
+			out += chr;
+		}
+	}else if(type === dusk.utils.SD_BC16) {
+		// 1 100000 00000000 Marked, patternId, count
+		// First two bytes are the size of the uncompressed data. Then the next bite is the pattern count
+		var hold = new ArrayBuffer(arr.byteLength*2);
+		var patterns = [];
+		var currentlyFeeding = -1;
+		var counted = 0;
+		var point = 0;
+		
+		var holdv = new Uint16Array(hold);
+		var buff = new Uint16Array(arr);
+		for(var i = 0; i < buff.length; i ++) {
+			if(currentlyFeeding !== -1 && buff[i] === patterns[currentlyFeeding]) {
+				//Still found it
+				counted ++;
+				if(counted === 0x00ff) {
+					console.log("A lot of them were found; starting again.");
+					holdv[point++] = 0x8000 | (currentlyFeeding << 8) | counted;
+					count = 0;
+				}
+				continue;
+			}else if(currentlyFeeding !== -1 && buff[i] !== patterns[currentlyFeeding]) {
+				console.log("Found a total of "+counted+" of pattern "+currentlyFeeding+" which is "+patterns[currentlyFeeding]);
+				holdv[point++] = 0x8000 | (currentlyFeeding << 8) | counted;
+				currentlyFeeding = -1;
+				i --;
+				continue;
+			}else if(buff[i+1] !== undefined && buff[i+2] !== undefined && buff[i] === buff[i+1] && buff[i+1] === buff[i+2]) {
+				console.log("Found pattern "+buff[i]);
+				for(var j = 0; j < 0x007f; j ++) {
+					if(patterns[j] === undefined || patterns[j] === buff[i]) {
+						console.log("Storing it as "+j);
+						currentlyFeeding = j;
+						patterns[j] = buff[i];
+						break;
+					}
+				}
+				counted = 1;
+				
+				if(currentlyFeeding === -1) { 
+					console.log("Unfortunatley, out of slots... Whoops!");
+				}else{
+					continue;
+				}
+			}
+			
+			if(buff[i] & 0x8000) {
+				console.log("Large value found: "+buff[i]);
+				holdv[point++] = 0xffff;
+				holdv[point++] = buff[i];
+			}else{
+				holdv[point++] = buff[i];
+			}
+		}
+		
+		if(currentlyFeeding !== -1) {
+			console.log("Finished, and found a total of "+counted+" of pattern "+currentlyFeeding+" which is "+patterns[currentlyFeeding]);
+			holdv[point++] = 0x8000 | (currentlyFeeding << 8) | counted;
+		}
+		
+		
+		//Good, now let's build the final data
+		var outB = new ArrayBuffer(((point+patterns.length)*2)+4);
+		var view = new Uint16Array(outB);
+		var p = 0;
+		view[p++] = arr.byteLength;
+		view[p++] = patterns.length;
+		for(var i = 0; i < patterns.length; i ++) {
+			view[p++] = patterns[i];
+		}
+		for(var i = 0; i <= point; i ++) {
+			view[p++] = holdv[i];
+		}
+		
+		return out+dusk.utils.dataToString(outB, dusk.utils.SD_HEX);
+	}
+	
+	return out;
+};
+
+/** Converts a string to an arraybuffer, provided the string was converted using `{@link dusk.utils.dataToString}`.
+ *  The method is autodetected.
+ * 
+ * @param {string} str The string to recover.
+ * @return {ArrayBuffer} The data the string represents.
+ */
+dusk.utils.stringToData = function(str) {
+	var type = str.split(":")[0];
+	var data = str.substr(type.length+1);
+	
+	if(type === dusk.utils.SD_HEX) {
+		var ab = new ArrayBuffer(data.length/2);
+		var v = new Uint8Array(ab);
+		for(var p = 0; p < data.length; p += 2) {
+			v[p/2] = parseInt(data[p] + data[p+1], 16);
+		}
+		
+		return ab;
+	}else if(type === dusk.utils.SD_BC16) {
+		var input = dusk.utils.stringToData(data);
+		var view = new Uint16Array(input);
+		var p = 0;
+		
+		var output = new ArrayBuffer(view[p++]);
+		var ov = new Uint16Array(output);
+		
+		//Patterns
+		var patterns = [];
+		var numPatt = view[p++];
+		for(var i = 0; i < numPatt; i ++) {
+			patterns[i] = view[p++];
+		}
+		
+		//Data
+		for(var i = 0; i <= ov.length; i ++) {
+			var current = view[p++];
+			
+			if(!(current & 0x8000)) {
+				ov[i] = current;
+			}else if(current === 0xffff) {
+				ov[i] = view[p++];
+			}else{
+				var pid = (current & 0x7f00) >> 8;
+				for(var j = current & 0x00ff; j > 0; j --) {
+					ov[i++] = patterns[pid];
+				}
+				i --;
+			}
+		}
+		
+		return output;
+	}
+};
+
+Object.seal(dusk.utils);

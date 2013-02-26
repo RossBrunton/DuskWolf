@@ -5,32 +5,39 @@
 dusk.load.require("dusk.sgui.Component");
 
 dusk.load.provide("dusk.sgui.Label");
-dusk.load.provide("dusk.sgui.Text");
 dusk.load.provide("dusk.sgui.TextBox");
 
-/** This is just a generic piece of text. Amusing.
+/* This is just a generic piece of text. Amusing.
  */
 dusk.sgui.Label = function(parent, comName) {
 	if(parent !== undefined){
 		dusk.sgui.Component.call(this, parent, comName);
 		
+		this.text = "";
+		this._width = -1;
+		
+		this.size = this._theme("label.size", 14);
+		this.font = this._theme("label.font", "sans");
+		this.colour = this._theme("label.colour", "#000000");
+		this.borderColour = this._theme("label.borderColour", "#000000");
+		this.borderSize = this._theme("label.borderSize", 0);
+		this.padding = this._theme("label.padding", 5);
+		
+		//Prop masks
 		this._registerPropMask("text", "text", true);
 		this._registerPropMask("font", "font", true);
 		this._registerPropMask("colour", "colour", true);
 		this._registerPropMask("color", "colour", true);
+		this._registerPropMask("borderColour", "borderColour", true);
+		this._registerPropMask("borderColor", "borderColour", true);
+		this._registerPropMask("borderSize", "borderSize", true);
 		this._registerPropMask("padding", "padding", true);
 		this._registerPropMask("size", "size", true);
 		this._registerPropMask("width", "width", true, ["font", "text"]);
 		this._registerPropMask("height", "height", true, ["font", "text"]);
 		
-		this.text = "";
-		
-		this.size = this._theme("label.size", 14);
-		this.font = this._theme("label.font", "sans");
-		this.colour = this._theme("label.colour", "#000000");
-		this.padding = this._theme("label.padding", 5);
-		
-		this._registerDrawHandler(this._labelDraw);
+		//Listeners
+		this.prepareDraw.listen(this._labelDraw, this);
 	}
 };
 dusk.sgui.Label.prototype = new dusk.sgui.Component();
@@ -39,31 +46,35 @@ dusk.sgui.Label.constructor = dusk.sgui.Label;
 dusk.sgui.Label.prototype.className = "Label";
 
 dusk.sgui.Label.prototype._labelDraw = function(c) {
-	if(this._text){
-		c.fillStyle = this.prop("colour");
-		c.font = this.prop("size")+"px "+this.prop("font");
-		if(this.prop("width")>0) {
-			c.fillText(this._text, this.prop("padding"), (this.prop("height")>>1)+(this.prop("padding")>>1), ~~this.prop("width")-(this._padding<<1));
+	if(this.text){
+		c.fillStyle = this.colour;
+		c.font = this.size+"px "+this.font;
+		if(this._width > -1) {
+			c.fillText(this.text, this.padding, (this.height>>1)+(this.padding>>1), ~~this._width-(this.padding<<1));
+			if(this.borderSize > 0) {
+				c.strokeStyle = this.borderColour;
+				c.strokeText(this.text, this.padding, (this.height>>1)+(this.padding>>1), ~~this._width-(this.padding<<1));
+			}
 		}else{
-			c.fillText(this._text, this.prop("padding"), (this.prop("height")>>1)+(this.prop("padding")>>1));
+			c.fillText(this.text, this.padding, (this.height>>1)+(this.padding>>1));
+			if(this.borderSize > 0) {
+				c.strokeStyle = this.borderColour;
+				c.strokeText(this.text, this.padding, (this.height>>1)+(this.padding>>1));
+			}
 		}
 	}
 };
 
-dusk.sgui.Label.prototype.__defineGetter__("width", function g_width() {
-	return this.measure(this.text)+(this._padding<<1);
+//Width
+Object.defineProperty(dusk.sgui.Label.prototype, "width", {
+	get: function() {return this.measure(this.text)+(this._padding<<1);},
+	set: function(value) {this._width = value-(this._padding<<1);}
 });
 
-dusk.sgui.Label.prototype.__defineSetter__("width", function s_width(value) {
-	this._width = value-(this._padding<<1);
-});
-
-dusk.sgui.Label.prototype.__defineGetter__("height", function g_height() {
-	return this.size+(this._padding<<1);
-});
-
-dusk.sgui.Label.prototype.__defineSetter__("height", function s_height(value) {
-	this.size = value-(this._padding<<1);
+//Height
+Object.defineProperty(dusk.sgui.Label.prototype, "height", {
+	get: function() {return this.size+(this._padding<<1);},
+	set: function(value) {this.size = value-(this._padding<<1);}
 });
 
 dusk.sgui.Label.prototype.measure = function(test) {
@@ -79,50 +90,27 @@ dusk.sgui.Label.prototype.measure = function(test) {
 	return hold;
 };
 
-// -----
-
-/*dusk.sgui.Text = function(parent, comName) {
-	if(parent !== undefined){
-		dusk.sgui.Label.call(this, parent, comName);
-		
-		this.watch = "";
-		
-		this._registerPropMask("watch", "watch", true);
-		
-		this._registerFrameHandler(this._checkUpdate);
-	}
-};
-
-dusk.sgui.Text.prototype = new dusk.sgui.Label();
-dusk.sgui.Text.constructor = dusk.sgui.Text;
-
-dusk.sgui.Text.prototype.className = "Text";
-
-dusk.sgui.Text.prototype._checkUpdate = function(e) {
-	if(this.watch && dusk.actions.getVar(this.watch) !== undefined && dusk.actions.getVar(this.watch) != this.text) {
-		this.text = dusk.actions.getVar(this.watch);
-		this.bookRedraw();
-	}
-};*/
+Object.seal(dusk.sgui.Label);
+Object.seal(dusk.sgui.Label.prototype);
 
 // -----
 
 dusk.sgui.TextBox = function(parent, comName) {
 	if(parent !== undefined){
-		dusk.sgui.Text.call(this, parent, comName);
-		
-		this._registerPropMask("border", "border", true);
-		this._registerPropMask("border-active", "borderActive", true);
+		dusk.sgui.Label.call(this, parent, comName);
 		
 		this.border = this._theme("border");
 		this.borderActive = this._theme("borderActive");
 		
-		this._registerDrawHandler(this._boxDraw);
-		this._registerKeyHandler(-1, false, false, this._boxKey, this);
+		//Prop masks
+		this._registerPropMask("border", "border", true);
+		this._registerPropMask("border-active", "borderActive", true);
+		
+		//Listeners
+		this.prepareDraw.listen(this._boxDraw, this);
+		this.keyPress.listen(this._boxKey, this, {"ctrl":false});
 	}
 };
-
-//dusk.sgui.TextBox.prototype = new dusk.sgui.Text();
 dusk.sgui.TextBox.prototype = new dusk.sgui.Label();
 dusk.sgui.TextBox.constructor = dusk.sgui.TextBox;
 
@@ -131,30 +119,35 @@ dusk.sgui.TextBox.prototype.className = "TextBox";
 dusk.sgui.TextBox.prototype._boxDraw = function(c) {
 	c.strokeStyle = this._active?this.borderActive:this.border;
 	
-	c.strokeRect (0, 0, this.width, this.height);
+	c.strokeRect(0, 0, this.width, this.height);
 };
 
 dusk.sgui.TextBox.prototype._boxKey = function(e) {
-	var keyDat = dusk.keyboard.lookupCode(e.keyCode);
+	var keyDat = dusk.keyboard.lookupCode(e.key);
 	
-	//if(dusk.actions.getVar(this.watch) === undefined) dusk.actions.setVar(this.watch, "");
+	//Check if the user has mapped any inputs to the key...
+	if(dusk.controls.checkKey("sgui_up", e.key)) return true;
+	if(dusk.controls.checkKey("sgui_down", e.key)) return true;
+	if(dusk.controls.checkKey("sgui_left", e.key)) return true;
+	if(dusk.controls.checkKey("sgui_right", e.key)) return true;
 	
 	if(keyDat[1]) {
 		this.text += e.shiftKey?keyDat[0].toUpperCase():keyDat[0];
-		//dusk.actions.setVar(this.watch, dusk.actions.getVar(this.watch)+(e.shiftKey?keyDat[0].toUpperCase():keyDat[0]));
-		return true;
+		return false;
 	}
 	
 	if(keyDat[0] == "BACKSPACE") {
 		this.text = this.text.substr(0, this.text.length-1);
-		//dusk.actions.setVar(this.watch, dusk.actions.getVar(this.watch).substr(0, dusk.actions.getVar(this.watch).length-1));
-		return true;
+		return false;
 	}
 	
 	if(keyDat[0] == "ENTER") {
 		this._doAction(e);
-		return true;
+		return false;
 	}
 	
-	return false;
+	return true;
 };
+
+Object.seal(dusk.sgui.TextBox);
+Object.seal(dusk.sgui.TextBox.prototype);

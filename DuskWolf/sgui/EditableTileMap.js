@@ -6,30 +6,36 @@ dusk.load.require("dusk.sgui.TileMap");
 
 dusk.load.provide("dusk.sgui.EditableTileMap");
 
-/**
+/*
  */
 dusk.sgui.EditableTileMap = function (parent, comName) {
-	if(parent !== undefined){
-		dusk.sgui.TileMap.call(this, parent, comName);
-		
-		this._registerPropMask("cursorColour", "cursorColour", true);
-		this._registerPropMask("cursorColor", "cursorColour", true);
-		this._registerPropMask("globalCoords", "globalCoords", true);
-		this._registerPropMask("frame-width", "frameWidth", true);
-		this._registerPropMask("frame-height", "frameHeight", true);
-		
-		this._globalCoords = this._theme("etm.globalCoords", false);
-		this.cursorColour = this._theme("etm.cursorColour", "#000000");
-		
-		this._cx = 0;
-		this._cy = 0;
-		
-		this.frameHeight = 1;
-		this.frameWidth = 1;
-		
-		this._registerDrawHandler(this._editTileMapDraw);
-		this._registerFrameHandler(this._editTileMapFrame);
-	}
+	dusk.sgui.TileMap.call(this, parent, comName);
+	
+	this._globalCoords = this._theme("etm.globalCoords", false);
+	this.cursorColour = this._theme("etm.cursorColour", "#000000");
+	
+	this._cx = 0;
+	this._cy = 0;
+	
+	this.frameHeight = 1;
+	this.frameWidth = 1;
+	
+	//Prop masks
+	this._registerPropMask("cursorColour", "cursorColour", true);
+	this._registerPropMask("cursorColor", "cursorColour", true);
+	this._registerPropMask("globalCoords", "globalCoords", true);
+	this._registerPropMask("frame-width", "frameWidth", true);
+	this._registerPropMask("frame-height", "frameHeight", true);
+	
+	//Listeners
+	this.prepareDraw.listen(this._editTileMapDraw, this);
+	this.frame.listen(this._editTileMapFrame, this);
+	
+	//Directions
+	this.dirPress.listen(this._etmRightAction, this, {"dir":dusk.sgui.Component.DIR_RIGHT});
+	this.dirPress.listen(this._etmLeftAction, this, {"dir":dusk.sgui.Component.DIR_LEFT});
+	this.dirPress.listen(this._etmUpAction, this, {"dir":dusk.sgui.Component.DIR_UP});
+	this.dirPress.listen(this._etmDownAction, this, {"dir":dusk.sgui.Component.DIR_DOWN});
 };
 dusk.sgui.EditableTileMap.prototype = new dusk.sgui.TileMap();
 dusk.sgui.EditableTileMap.constructor = dusk.sgui.EditableTileMap;
@@ -61,9 +67,9 @@ dusk.sgui.EditableTileMap.prototype._editTileMapFrame = function(e) {
 	}
 };
 
-dusk.sgui.EditableTileMap.prototype._upAction = function(e) {
-	if(e.ctrlKey) return true;
-	if(e.shiftKey) {
+dusk.sgui.EditableTileMap.prototype._etmUpAction = function(e) {
+	if(e.e.ctrlKey) return true;
+	if(e.e.shiftKey) {
 		var current = this.getTile(this._cx, this._cy);
 		current[1] --;
 		for(var x = this.frameWidth-1; x >= 0; x --) {
@@ -82,7 +88,6 @@ dusk.sgui.EditableTileMap.prototype._upAction = function(e) {
 	
 	if(dusk.keyboard.isKeyPressed(70)) {
 		this.frameHeight--;
-		this.bookRedraw(); 
 		return false;
 	}
 	
@@ -91,12 +96,11 @@ dusk.sgui.EditableTileMap.prototype._upAction = function(e) {
 	}
 	
 	this._cy --;
-	this.bookRedraw();
 };
 
-dusk.sgui.EditableTileMap.prototype._downAction = function(e) {
-	if(e.ctrlKey) return true;
-	if(e.shiftKey) {
+dusk.sgui.EditableTileMap.prototype._etmDownAction = function(e) {
+	if(e.e.ctrlKey) return true;
+	if(e.e.shiftKey) {
 		var current = this.getTile(this._cx, this._cy);
 		current[1] ++;
 		for(var x = this.frameWidth-1; x >= 0; x --) {
@@ -115,7 +119,6 @@ dusk.sgui.EditableTileMap.prototype._downAction = function(e) {
 	
 	if(dusk.keyboard.isKeyPressed(70)) {
 		this.frameHeight ++;
-		this.bookRedraw(); 
 		return false;
 	}
 	
@@ -124,12 +127,11 @@ dusk.sgui.EditableTileMap.prototype._downAction = function(e) {
 	}
 	
 	this._cy ++;
-	this.bookRedraw();
 };
 
-dusk.sgui.EditableTileMap.prototype._rightAction = function(e) {
-	if(e.ctrlKey) return true;
-	if(e.shiftKey) {
+dusk.sgui.EditableTileMap.prototype._etmRightAction = function(e) {
+	if(e.e.ctrlKey) return true;
+	if(e.e.shiftKey) {
 		var current = this.getTile(this._cx, this._cy);
 		current[0] ++;
 		for(var x = this.frameWidth-1; x >= 0; x --) {
@@ -148,7 +150,6 @@ dusk.sgui.EditableTileMap.prototype._rightAction = function(e) {
 	
 	if(dusk.keyboard.isKeyPressed(70)) {
 		this.frameWidth ++;
-		this.bookRedraw(); 
 		return false;
 	}
 	
@@ -157,12 +158,11 @@ dusk.sgui.EditableTileMap.prototype._rightAction = function(e) {
 	}
 	
 	this._cx ++;
-	this.bookRedraw();
 };
 
-dusk.sgui.EditableTileMap.prototype._leftAction = function(e) {
-	if(e.ctrlKey) return true;
-	if(e.shiftKey) {
+dusk.sgui.EditableTileMap.prototype._etmLeftAction = function(e) {
+	if(e.e.ctrlKey) return true;
+	if(e.e.shiftKey) {
 		var current = this.getTile(this._cx, this._cy);
 		current[0] --;
 		for(var x = this.frameWidth-1; x >= 0; x --) {
@@ -181,7 +181,6 @@ dusk.sgui.EditableTileMap.prototype._leftAction = function(e) {
 	
 	if(dusk.keyboard.isKeyPressed(70)) {
 		this.frameWidth --;
-		this.bookRedraw(); 
 		return false;
 	}
 	
@@ -190,7 +189,6 @@ dusk.sgui.EditableTileMap.prototype._leftAction = function(e) {
 	}
 	
 	this._cx --;
-	this.bookRedraw();
 };
 
 dusk.sgui.EditableTileMap.prototype.carveTop = function() {
@@ -344,9 +342,8 @@ dusk.sgui.EditableTileMap.prototype.carveRight = function() {
 };
 
 dusk.sgui.EditableTileMap.prototype.save = function() {
-	var hold = "";
-	for(var i = 0; i < this._tiles.length; i ++){
-		hold += this._tiles[i]+(i+1< this._tiles.length?(i%2?" ":","):"");
-	}
-	return hold;
+	return this.map.map;
 };
+
+Object.seal(dusk.sgui.EditableTileMap);
+Object.seal(dusk.sgui.EditableTileMap.prototype);

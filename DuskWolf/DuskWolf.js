@@ -22,7 +22,7 @@ dusk.load.provide("dusk");
  * 
  * - YELLING for constants.
  * 
- * - __doubleUnderscore__ denotes a configuration var.
+ * - \_\_doubleUnderscore\_\_ denotes a configuration var, these are all global.
  * 
  * - _singleUnderscore denotes ether a private or protected function.
  */
@@ -30,33 +30,45 @@ dusk.load.provide("dusk");
 /** Version of the DW engine. Must contain at least one number, and numbers furthest to the left indicate newer versions.
  * @type string
  */
-dusk.ver = "0.0.16-alpha";
+dusk.ver = "0.0.17-alpha";
 
-/** The frame rate, in frames per second. 
+/** The frame rate, in frames per second.
+ * 
+ * If it exists, this is set the value of `window.__frameRate__`.
  * @type integer
+ * @default 60
  */
 dusk.frameRate = ("__frameRate__" in window)?__frameRate__:60;
 
-/** The path to the data directory, this is where the game will look for all it's assets if given a relative URL. 
+/** The path to the data directory, this is where the game will look for all it's data (like images) if given a relative URL.
+ * 
+ *  If it exists, this is set the value of `window.__dataDir__`.
  * @type string
+ * @defualt "Data/"
  */
-dusk.dataDir = ("__dataDir__" in window)?__dataDir__:"Data";
-
-/** If true, then instead of the file root.json being used as the root.json file, the HTTP get var `dw_root` in the page URL is used, if it exists.
- * @type boolean 
- * @since 0.0.12-alpha */
-dusk.overrideRoot = ("__overrideRoot__" in window)?__overrideRoot__:false;
+dusk.dataDir = ("__dataDir__" in window)?__dataDir__:"Data/";
 
 /** The name of the HTML canvas object SimpleGui uses.
+ * 
+ * If it exists, this is set the value of `window.__canvas__`.
  * @type string
- * @see dusk.simpleGui
+ * @see dusk.sgui
+ * @default "canvas"
  */
 dusk.canvas = ("__canvas__" in window)?__canvas__:"canvas";
 
 /** If true, then some features for developers are added, such as no caching for scripts and FPS info.
+ * 
+ * If it exists, this is set the value of `window.__development__`.
  * @type boolean
+ * @default true
  */
 dusk.dev = ("__development__" in window)?__development__:true;
+
+/** If true, then the game has been started (`{@link dusk.startGame}` has been called).
+ * @type boolean
+ */
+dusk.started = false;
 
 /** An event dispatcher which fires when the game engine is ready to go.
  * 
@@ -67,7 +79,8 @@ dusk.dev = ("__development__" in window)?__development__:true;
  */
 dusk.onLoad = new dusk.EventDispatcher("dusk.onLoad");
 
-/** Call this to start the game, and fire the dusk.onLoad event. */
+/** Call this to start the game, and fire the dusk.onLoad EventDispatcher. */
 dusk.startGame = function() {
+	dusk.started = true;
 	dusk.onLoad.fire();
 };

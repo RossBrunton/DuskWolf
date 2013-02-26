@@ -3,11 +3,16 @@
         "allowUnknownTags": true
     },
     "source": {
+		"include":"DuskWolf",
         "includePattern": ".+\\.js(doc)?$",
         "excludePattern": "(^|\\/)_"
     },
     "plugins": [
         "plugins/markdown.js"
     ],
-    "jsVersion": 180
+    "markdown": {
+		"parser": "gfm"
+	},
+    "jsVersion": 180,
+    "lenient":true
 }

@@ -10,13 +10,13 @@ dusk.behave.SimpleAni = function(entity) {
 	if(entity !== undefined){
 		dusk.behave.Behave.call(this, entity);
 		
-		this._listenEvent("frame", this._simpleAniFrame);
+		this.entityEvent.listen(this._simpleAniFrame, this, {"name":"frame"});
 	}
 };
 dusk.behave.SimpleAni.prototype = new dusk.behave.Behave();
 dusk.behave.SimpleAni.constructor = dusk.behave.SimpleAni;
 
-dusk.behave.SimpleAni.prototype._simpleAniFrame = function(name, e) {
+dusk.behave.SimpleAni.prototype._simpleAniFrame = function(e) {
 	if(this._entity.dy < 0) {
 		if(this._entity.dx > 0) {
 			this._entity.setAnimation("jump", {"flags":["r"]});
