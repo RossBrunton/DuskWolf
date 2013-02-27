@@ -71,7 +71,7 @@ dusk.data.download = function(file, type, callback, state) {
  * @return {HTMLImageElement} A HTML Image tag with the src set to the path requested.
  */
 dusk.data.grabImage = function(file) {
-	if(this._loaded[file] === undefined) {
+	if(!(file in this._loaded)) {
 		console.log("Downloading image "+file+"...");
 		
 		this._loaded[file] = new Image();

@@ -21,6 +21,7 @@ dusk.sgui.ItemSlot = function (parent, comName) {
 	this._itemChild = this.getComponent("item", "Tile");
 	this._handItemChild = this.getComponent("handitem", "Tile");
 	this._textChild = this.getComponent("count", "Label");
+	this._handTextChild = this.getComponent("handcount", "Label");
 	this._selectChild = this.getComponent("select", "Image");
 	this.alterChildLayer("count", "+");
 	
@@ -75,7 +76,7 @@ dusk.sgui.ItemSlot.prototype._itemSlotFrame = function() {
 		this._itemChild.tileStr = this._invent.getItemFromSlot(this.slot).get("tile");
 		this._textChild.text = this._invent.countSlot(this.slot)>1?this._invent.countSlot(this.slot):"";
 	}else{
-		this._itemChild.src = undefined;
+		this._itemChild.src = "";
 		this._itemChild.tileStr = "0,0";
 		this._textChild.text = "";
 	}
@@ -87,10 +88,17 @@ dusk.sgui.ItemSlot.prototype._itemSlotFrame = function() {
 			this._handItemChild.visible = true;
 			this._handItemChild.src = h.getHand().getItemFromSlot(0).get("src");
 			this._handItemChild.tileStr = h.getHand().getItemFromSlot(0).get("tile");
+			
+			this._handTextChild.visible = true;
+			this._handTextChild.text = h.getHand().countSlot(0)>1?h.getHand().countSlot(0):"";
+		}else{
+			this._handItemChild.visible = false;
+			this._handTextChild.visible = false;
 		}
 	}else{
 		this._selectChild.visible = false;
 		this._handItemChild.visible = false;
+		this._handTextChild.visible = false;
 	}
 };
 
@@ -100,12 +108,20 @@ dusk.sgui.ItemSlot.prototype._itemSlotAction = function(e) {
 		if(h.getHand().countSlot(0) > 0) {
 			//Holding something
 			if(this._invent.isValidAddition(h.getHand().getItemFromSlot(0)) && this._invent.isValidAdditionToSlot(h.getHand().getItemFromSlot(0), this.slot)) {
-				h.getHand().sendToInventSlot(this._invent, this.slot, e.keyPress.shiftKey?1:Infinity);
+				//Can add the item
+				h.getHand().sendToInventSlot(this._invent, this.slot, e.keyPress.shiftKey?1:0xffffffff);
+			}else if(this._invent.isValidAddition(h.getHand().getItemFromSlot(0))) {
+				//Swap them round
+				var temp = new dusk.items.Invent(1, []);
+				this._invent.sendSlotToInvent(temp, this.slot, 0xffffffff);
+				h.getHand().sendToInventSlot(this._invent, this.slot, 0xffffffff);
+				temp.sendToInventSlot(h.getHand(), 0, 0xffffffff);
 			}
+				
 		}else{
 			//Not holding anything
 			if(h.getHand().isValidAddition(this._invent.getItemFromSlot(this.slot))) {
-				this._invent.sendSlotToInvent(h.getHand(), this.slot, e.keyPress.shiftKey?1:Infinity);
+				this._invent.sendSlotToInvent(h.getHand(), this.slot, e.keyPress.shiftKey?(this._invent.countSlot(this.slot)>>1):0xffffffff);
 			}else{
 				//..?
 			}
@@ -162,6 +178,16 @@ dusk.sgui.addStyle("ItemSlot", {
 			"borderColour":"#cccccc",
 			"borderSize":0.5,
 			"y":18,
+			"x":1,
+			"padding":0
+		},
+		{
+			"name":"handCount",
+			"size":13,
+			"colour":"#ffffff",
+			"borderColour":"#cccccc",
+			"borderSize":0.5,
+			"y":1,
 			"x":1,
 			"padding":0
 		},

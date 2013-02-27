@@ -133,7 +133,7 @@ dusk.sgui.Tile.prototype._tileDraw = function(c) {
 //src
 Object.defineProperty(dusk.sgui.Tile.prototype, "src", {
 	set: function(value) {
-		if(!value) {return;}
+		if(value === undefined) {return;}
 		this._img = dusk.data.grabImage(value);
 	},
 
@@ -146,7 +146,7 @@ Object.defineProperty(dusk.sgui.Tile.prototype, "src", {
 //tileStr
 Object.defineProperty(dusk.sgui.Tile.prototype, "tileStr", {
 	set: function(value) {
-		if(!value) {return;}
+		if(value === undefined) {return;}
 		this._tx = value.split(",")[0];
 		this._ty = value.split(",")[1];
 	},

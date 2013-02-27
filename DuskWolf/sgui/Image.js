@@ -67,7 +67,7 @@ Object.defineProperty(dusk.sgui.Image.prototype, "src", {
 	},
 	
 	set: function(value) {
-		if(!value) {return;}
+		if(value === undefined) {return;}
 		this._img = dusk.data.grabImage(value);
 	}
 });

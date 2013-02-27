@@ -181,7 +181,15 @@ dusk.sgui.getPane("itemsTest").parseProps({
 						{
 							"type":"ItemSlot"
 						}
-					]
+					],
+					"x":32,
+					"leftFlow":"extraSlot"
+				},
+				
+				{
+					"name":"extraSlot",
+					"type":"ItemSlot",
+					"rightFlow":"itemGrid"
 				}
 			]
 		}
@@ -196,10 +204,3 @@ dusk.sgui.path("itemsTest:/itemhand/itemGrid/4,3").getInventory().putItemIntoSlo
 dusk.sgui.path("itemsTest:/itemhand/itemGrid/3,3").putItem("blood");
 
 dusk.startGame();
-
-dusk.sgui.addStyle("Component", {"x":20});
-dusk.sgui.addStyle("Component.red", {"border":"#ff0000"});
-dusk.sgui.addStyle("Component.red#input", {"border":"#ff6600"});
-dusk.sgui.addStyle("Component.red#input[x=20]", {"border":"#ff6699"});
-
-dusk.sgui.addStyle("ItemSlot>Rect", {"colour":"#990000"});

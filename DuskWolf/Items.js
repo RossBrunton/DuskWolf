@@ -101,7 +101,7 @@ dusk.items.REST_ISNIN = 3;
  * 
  * @param {integer} capacity The number of inventory slots this inventory should have.
  * @param {array} restrictions An array of restrictions on this inventory, each element should be an array as described above.
- * @param {?integer} maxStack The maximum number of items that can be stored in one single slot. Defaults to Infinity if not specified.
+ * @param {integer=0xffffffff} maxStack The maximum number of items that can be stored in one single slot.
  * @since 0.0.17-alpha
  * @constructor
  */
@@ -128,7 +128,7 @@ dusk.items.Invent = function(capacity, restrictions, maxStack) {
 	 * No item stack will have larger than this number of elements.
 	 * @type integer
 	 */
-	this.maxStack = maxStack>=0?maxStack:Infinity;
+	this.maxStack = maxStack>=0?maxStack:0xffffffff;
 };
 
 /** Checks if the specified item can be added into the inventory.
