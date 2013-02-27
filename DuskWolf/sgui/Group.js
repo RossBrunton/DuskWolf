@@ -13,7 +13,7 @@ dusk.load.provide("dusk.sgui.Group");
  * 
  * Components have names, which are used to reference them, these names are strings and are not case sensitive.
  * 
- * One (or none) component may be focused. This is the ONLY component that will receive keypress events.
+ * One (or none) component may be focused. Focused components are the ONLY components that will receive keypress events.
  * 
  * @extends dusk.sgui.IContainer
  * @param {?dusk.sgui.Component} parent The container that this component is in.
@@ -38,7 +38,7 @@ dusk.sgui.Group = function(parent, comName) {
 	 * @protected
 	 */
 	this._focusedCom = "";
-	/** The current behaviour used to share focus.
+	/** The current behaviour used to say how focus works. Changing this will not affect any currently existing components.
 	 * @type integer
 	 * @default FOCUS_ONE
 	 */
@@ -56,14 +56,22 @@ dusk.sgui.Group = function(parent, comName) {
 	//Prop masks
 	this._registerPropMask("focus", "focus", true, ["children"]);
 	this._registerPropMask("focusBehaviour", "focusBehaviour");
-	this._registerPropMask("children", "__children");
-	this._registerPropMask("allChildren", "__allChildren");
+	this._registerPropMask("children", "__children", undefined, ["focusBehaviour"]);
+	this._registerPropMask("allChildren", "__allChildren", undefined, ["focusBehaviour"]);
 	
 	//Listeners
 	this.prepareDraw.listen(this._groupDraw, this);
 	this.frame.listen(this._groupFrame, this);
 	
-	this.onActiveChange.listen(function(e){this.getFocused() && this.getFocused().onActiveChange.fire(e);}, this);
+	this.onActiveChange.listen(function(e){
+		if(this.focusBehaviour == dusk.sgui.Group.FOCUS_ALL) {
+			for(var c in this._components) {
+				this._components[c].onActiveChange.fire(e);
+			}
+		}else if(this.getFocused()) {
+			this.getFocused().onActiveChange.fire(e);
+		}
+	}, this);
 };
 dusk.sgui.Group.prototype = new dusk.sgui.IContainer();
 dusk.sgui.Group.constructor = dusk.sgui.Group;
@@ -73,7 +81,6 @@ dusk.sgui.Group.prototype.className = "Group";
 /** A mode that indicates that only one component can be active.
  * 
  * This means that only the currently focused component will get the keypresses and such.
- * 
  * @type integer
  * @constant
  * @static
@@ -84,6 +91,7 @@ dusk.sgui.Group.FOCUS_ONE = 0;
 /** A mode that indicates that all the components are active.
  * 
  * This means that all the components will recieve keypress events and stuff.
+ *	A component is still technically "focused", but all components will act as if they are.
  * 
  * @type integer
  * @constant
@@ -100,6 +108,13 @@ dusk.sgui.Group.FOCUS_ALL = 1;
  * @return {boolean} The return value of the focused component's keypress.
  */
 dusk.sgui.Group.prototype.containerKeypress = function(e) {
+	if(this.focusBehaviour == dusk.sgui.Group.FOCUS_ALL) {
+		var toReturn = true;
+		for(var c in this._components) {
+			toReturn = this._components[c].doKeyPress(e) && toReturn;
+		}
+		return toReturn;
+	}
 	if(this.getFocused()) return this.getFocused().doKeyPress(e);
 	return true;
 };
@@ -124,6 +139,7 @@ dusk.sgui.Group.prototype._newComponent = function(com, type) {
 	this._components[com] = new (dusk.sgui.getType(type))(this, com.toLowerCase());
 	this._drawOrder[this._drawOrder.length] = com;
 	dusk.sgui.applyStyles(this._components[com]);
+	if(this.focusBehaviour == dusk.sgui.Group.FOCUS_ALL) this._components[com].onFocusChange.fire({"focus":true});
 	
 	return this._components[com];
 };
@@ -272,14 +288,14 @@ dusk.sgui.Group.prototype.flow = function(to) {
 	if(this._focusedCom !== "" && this._components[this._focusedCom]){
 		if(this._components[this._focusedCom].locked){return false;}
 		
-		if(this._active) this._components[this._focusedCom].onActiveChange.fire({"active":false});
-		this._components[this._focusedCom].onFocusChange.fire({"focus":false});
+		if(this.focusBehaviour != dusk.sgui.Group.FOCUS_ALL && this._active) this._components[this._focusedCom].onActiveChange.fire({"active":false});
+		if(this.focusBehaviour != dusk.sgui.Group.FOCUS_ALL) this._components[this._focusedCom].onFocusChange.fire({"focus":false});
 	}
 	
 	if(this._components[to.toLowerCase()]){
 		this._focusedCom = to.toLowerCase();
-		this._components[this._focusedCom].onFocusChange.fire({"focus":true});
-		if(this._active) this._components[this._focusedCom].onActiveChange.fire({"active":true});
+		if(this.focusBehaviour != dusk.sgui.Group.FOCUS_ALL) this._components[this._focusedCom].onFocusChange.fire({"focus":true});
+		if(this.focusBehaviour != dusk.sgui.Group.FOCUS_ALL && this._active) this._components[this._focusedCom].onActiveChange.fire({"active":true});
 		return true;
 	}
 	

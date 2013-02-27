@@ -33,19 +33,9 @@ dusk.load.provide("dusk.sgui");
  * 	For a component to be active, all it's parent groups must be too.
  * 
  * Components can also be "focused", focused components will be made active when the container it is in becomes active.
- * 	Focus is generally changed by the arrow keys (only active components can handle key events, remember), though this can be remapped using the controls.
+ * 	Focus is generally changed by the arrow keys (only active components can handle key events, remember), though this can be remapped using `{@link dusk.controls}`.
  * 	If a direction key is pressed, a function like `{@link sgui.Component.upAction}` returns true, and a variable like `{@link upFlow}` is not empty, focus changes to the named element in this one's container.
  *	The arrow keys can be overriden by using the controls "sgui_up", "sgui_down", "sgui_left" and "sgui_right".
- * 
- * Theme keys (set by `{@link dusk.sgui.setThemeKey}` and `{@link dusk.sgui.getThemeKey}` set the default value of properties of a component.
- *	When an object that requires a theme key is first inited, then it will set those keys (if they do not exist) to a default value.
- * 	Any new object created will take the values from the theme.
- * 	The theme keys each component uses should be documented in the component's documentation.
- * 
- * There are several "standard" theme keys:
- * - border - The colour of a border round some components.
- * - borderActive - The colour of an active border for some components.
- * - box - The colour of a background box for anything that needs a background.
  * 
  * Component paths also exist, these paths are similar to file names and allow you to specify one component relative to another.
  * 	From an example container "X" in another container "Y", which itself is in a pane "Z", and with children "a", "b" and "c", with "c" having children "c1" and "c2" the following paths are as described:
@@ -54,6 +44,11 @@ dusk.load.provide("dusk.sgui");
  * - c/c1 - Access the child "c1" of the container "c", which is in "X".
  * - ../ - Access this parent, "Y".
  * - /Y - Access the child "Y" in the pane "Z".
+ * 
+ * This namespace registeres the following controls for `{@link dusk.controls}`:
+ * 
+ * `dusk_up`, `dusk_down`, `dusk_left` and `dusk_right` are the controls used to change the active component, these are the arrow keys or first stick by default.
+ * `dusk_action` is used to trigger the "action" event on a component, this is by default the `a` key, or button 0.
  */
 
 /** Initiates the simpleGui system.

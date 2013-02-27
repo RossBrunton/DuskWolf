@@ -143,6 +143,7 @@ dusk.sgui.Grid.prototype.adjust = function() {
  * @protected
  */
 dusk.sgui.Grid.prototype._gridDirAction = function(e) {
+	if(this.focusBehaviour == dusk.sgui.Group.FOCUS_ALL) return true;
 	if(this.componentRelative(this.focus, e.dir)){
 		this.flow(this.componentRelative(this.focus, e.dir).comName);
 		return false;

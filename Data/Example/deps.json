@@ -1,3 +1,4 @@
 [
-	["plat.js",["example.plat"],["dusk","dusk.sgui.Rect","dusk.behave.BackForth","dusk.behave.Controlled","dusk.behave.Fall","dusk.behave.HitDam","dusk.behave.Killable","dusk.behave.MarkTrigger","dusk.behave.Persist","dusk.behave.Push","dusk.behave.SimpleAni","dusk.entities","dusk.plat","dusk.rooms","dusk.sgui.ControlConfig","dusk.sgui.FocusChecker","dusk.sgui.Grid","dusk.sgui.ItemGrid","dusk.sgui.ItemHand","dusk.sgui.ItemSlot"]]
+	["items.js",["example.items"],["dusk","dusk.sgui.ControlConfig","dusk.sgui.FocusChecker","dusk.sgui.Grid","dusk.sgui.ItemGrid","dusk.sgui.ItemHand","dusk.sgui.ItemSlot","dusk.sgui.Rect"]],
+	["plat.js",["example.plat"],["dusk","dusk.behave.BackForth","dusk.behave.Controlled","dusk.behave.Fall","dusk.behave.HitDam","dusk.behave.Killable","dusk.behave.MarkTrigger","dusk.behave.Persist","dusk.behave.Push","dusk.behave.SimpleAni","dusk.entities","dusk.plat","dusk.rooms"]]
 ]
