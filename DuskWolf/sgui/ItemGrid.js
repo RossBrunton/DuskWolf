@@ -65,3 +65,5 @@ dusk.sgui.ItemGrid.prototype._igCreate = function(e) {
 
 Object.seal(dusk.sgui.ItemGrid);
 Object.seal(dusk.sgui.ItemGrid.prototype);
+
+dusk.sgui.registerType("ItemGrid", dusk.sgui.ItemGrid);

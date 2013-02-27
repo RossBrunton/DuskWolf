@@ -24,7 +24,7 @@ dusk.sgui.EntityGroup = function (parent, comName) {
 	this.sheight = 0;
 	this.swidth = 0;
 	
-	this.mode = "";
+	this.mode = "BINARY";
 	
 	this.scheme = null;
 	
@@ -33,15 +33,15 @@ dusk.sgui.EntityGroup = function (parent, comName) {
 	this._offsetY = 0;
 	
 	//Prop masks
-	this._registerPropMask("mode", "mode", "BINARY");
+	this._registerPropMask("mode", "mode");
 	
-	this._registerPropMask("sprite-size", "ssize", true);
-	this._registerPropMask("sprite-height", "sheight", true);
-	this._registerPropMask("sprite-width", "swidth", true);
+	this._registerPropMask("sprite-size", "ssize");
+	this._registerPropMask("sprite-height", "sheight");
+	this._registerPropMask("sprite-width", "swidth");
 	
-	this._registerPropMask("tile-size", "tsize", true);
-	this._registerPropMask("tile-height", "theight", true);
-	this._registerPropMask("tile-width", "twidth", true);
+	this._registerPropMask("tile-size", "tsize");
+	this._registerPropMask("tile-height", "theight");
+	this._registerPropMask("tile-width", "twidth");
 	
 	//Listeners
 	for(var i = 48; i <= 57; i++) {
@@ -309,3 +309,5 @@ dusk.sgui.EntityGroup.prototype._keyDel = function(e) {
 
 Object.seal(dusk.sgui.EntityGroup);
 Object.seal(dusk.sgui.EntityGroup.prototype);
+
+dusk.sgui.registerType("EntityGroup", dusk.sgui.EntityGroup);

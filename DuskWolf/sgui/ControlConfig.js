@@ -19,21 +19,12 @@ dusk.sgui.ControlConfig = function (parent, comName) {
 	this._keyChild = this.getComponent("key", "Label");
 	this._buttonChild = this.getComponent("button", "Tile");
 	
-	this._keyChild.height = 16;
-	this._keyChild.width = 40;
-	
-	this._buttonChild.src = "sgui/buttons.png";
-	this._buttonChild.x = 40;
-	this._buttonChild.ssize = 4;
-	this._buttonChild.width = 16;
-	this._buttonChild.height = 16;
-	
-	this.border = this._theme("border");
-	this.borderActive = this._theme("borderActive");
+	this.border = "#cccccc";
+	this.borderActive = "#ff5555";
 	
 	//Prop masks
-	this._registerPropMask("border", "border", true);
-	this._registerPropMask("border-active", "borderActive", true);
+	this._registerPropMask("border", "border");
+	this._registerPropMask("borderActive", "borderActive");
 	this._registerPropMask("control", "control");
 	
 	//Listeners
@@ -102,3 +93,16 @@ dusk.sgui.ControlConfig.prototype._ccKey = function(e) {
 
 Object.seal(dusk.sgui.ControlConfig);
 Object.seal(dusk.sgui.ControlConfig.prototype);
+
+dusk.sgui.registerType("ControlConfig", dusk.sgui.ControlConfig);
+dusk.sgui.addStyle("ControlConfig>Label#key", {
+	"height":16,
+	"width":40
+});
+dusk.sgui.addStyle("ControlConfig>Tile#button", {
+	"src":"sgui/buttons.png",
+	"x":40,
+	"ssize":4,
+	"width":16,
+	"height":16
+});

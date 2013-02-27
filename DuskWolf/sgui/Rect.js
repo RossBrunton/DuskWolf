@@ -23,15 +23,15 @@ dusk.sgui.Rect = function(parent, comName) {
 		dusk.sgui.Component.call(this, parent, comName);
 	
 		/** The colour of the rectangle.
-		 * The default value depends on the theme value "box".
 		 * @type string
+		 * @default "#eeeeee"
 		 */
-		this.colour = this._theme("box");
+		this.colour = "#eeeeee";
 		/** The colour of the border.
-		 * The default value depends on the theme value "border".
 		 * @type string
+		 * @default "#cccccc"
 		 */
-		this.bColour = this._theme("border");
+		this.bColour = "#cccccc";
 		/** The thinkness of the rectangle border.
 		 * 	If 0, there will be no border.
 		 * @default 1
@@ -70,3 +70,5 @@ dusk.sgui.Rect.prototype._rectDraw = function(c) {
 
 Object.seal(dusk.sgui.Rect);
 Object.seal(dusk.sgui.Rect.prototype);
+
+dusk.sgui.registerType("Rect", dusk.sgui.Rect);

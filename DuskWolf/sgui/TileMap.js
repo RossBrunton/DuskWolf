@@ -29,54 +29,47 @@ dusk.sgui.TileMap = function (parent, comName) {
 		dusk.sgui.Component.call(this, parent, comName);
 		
 		/** The current mode of tiles in the tilemap. Must be either `"BINARY"` or `"DECIMAL"`.
-		 * 
-		 * This takes the value of the theme key `tm.mode`, which by default is `"BINARY"`.
 		 * @type string
+		 * @default "BINARY"
 		 */
-		this.mode = this._theme("tm.mode", "BINARY");
+		this.mode = "BINARY";
 		
 		
 		/** The width (for displaying) of a single tile if this tilemap is in `"DECIMAL"` mode.
-		 * 
-		 * This takes the value of the theme key `tm.twidth`, which by default is `32`.
 		 * @type integer
+		 * @default 32
 		 */
-		this.twidth = this._theme("tm.twidth", 32);
+		this.twidth = 32;
 		/** The height (for displaying) of a single tile if this tilemap is in `"DECIMAL"` mode.
-		 * 
-		 * This takes the value of the theme key `tm.theight`, which by default is `32`.
 		 * @type integer
+		 * @default 32
 		 */
-		this.theight = this._theme("tm.theight", 32);
+		this.theight = 32;
 		/** The size (for displaying) of a single tile if this tilemap is in `"BINARY"` mode.
 		 * 
 		 * This should be `n` such that the width and height of the sprite is `2^n`. If this is 4, then the sprites will be 16x16, for example.
-		 * 
-		 * This takes the value of the theme key `tm.tsize`, which by default is `5`.
 		 * @type integer
+		 * @default 5
 		 */
-		this.tsize = this._theme("tm.tsize", 5);
+		this.tsize = 5;
 		
 		/** The width (for reading from the image) of a single tile if this tilemap is in `"DECIMAL"` mode.
-		 * 
-		 * This takes the value of the theme key `tm.swidth`, which by default is `16`.
 		 * @type integer
+		 * @default 16
 		 */
-		this.swidth = this._theme("tm.swidth", 16);
+		this.swidth = 16;
 		/** The height (for reading from the image) of a single tile if this tilemap is in `"DECIMAL"` mode.
-		 * 
-		 * This takes the value of the theme key `tm.theight`, which by default is `16`.
 		 * @type integer
+		 * @default 16
 		 */
-		this.sheight = this._theme("tm.sheight", 16);
+		this.sheight = 16;
 		/** The size (for reading from the image) of a single tile if this tilemap is in `"BINARY"` mode.
 		 * 
 		 * This should be `n` such that the width and height of the sprite is `2^n`. If this is 4, then the sprites will be 16x16, for example.
-		 * 
-		 * This takes the value of the theme key `tm.tsize`, which by default is `4`.
 		 * @type integer
+		 * @default 4
 		 */
-		this.ssize = this._theme("tm.ssize", 4);
+		this.ssize = 4;
 		
 		/** The left boundry. This is the x coordinate to start drawing from. Any tiles after this value will not be drawn.
 		 * @type integer
@@ -89,8 +82,8 @@ dusk.sgui.TileMap = function (parent, comName) {
 		this.rbound = 0;
 		this.bbound = 0;
 		
-		this.rows = this._theme("tm.rows", 50);
-		this.cols = this._theme("tm.cols", 50);
+		this.rows = 50;
+		this.cols = 50;
 		
 		this.map = null;
 		
@@ -104,22 +97,22 @@ dusk.sgui.TileMap = function (parent, comName) {
 		
 		//Prop masks
 		this._registerPropMask("map", "map", true, ["src", "mode", "sprite-size", "sprite-width", "sprite-height", "tile-size", "tile-height", "tile-width", "tile-size"]);
-		this._registerPropMask("bound-l", "lbound", true);
-		this._registerPropMask("bound-r", "rbound", true);
-		this._registerPropMask("bound-u", "ubound", true);
-		this._registerPropMask("bound-b", "bbound", true);
-		this._registerPropMask("src", "src", true);
-		this._registerPropMask("rows", "rows", true);
-		this._registerPropMask("cols", "cols", true);
-		this._registerPropMask("mode", "mode", true);
+		this._registerPropMask("lbound", "lbound");
+		this._registerPropMask("rbound", "rbound");
+		this._registerPropMask("ubound", "ubound");
+		this._registerPropMask("bbound", "bbound");
+		this._registerPropMask("src", "src");
+		this._registerPropMask("rows", "rows");
+		this._registerPropMask("cols", "cols");
+		this._registerPropMask("mode", "mode");
 		
-		this._registerPropMask("sprite-size", "ssize", true);
-		this._registerPropMask("sprite-height", "sheight", true);
-		this._registerPropMask("sprite-width", "swidth", true);
+		this._registerPropMask("ssize", "ssize");
+		this._registerPropMask("sheight", "sheight");
+		this._registerPropMask("swidth", "swidth");
 		
-		this._registerPropMask("tile-size", "tsize", true);
-		this._registerPropMask("tile-height", "theight", true);
-		this._registerPropMask("tile-width", "twidth", true);
+		this._registerPropMask("tsize", "tsize");
+		this._registerPropMask("theight", "theight");
+		this._registerPropMask("twidth", "twidth");
 		
 		//Listeners
 		this.prepareDraw.listen(this._tileMapDraw, this);
@@ -375,3 +368,5 @@ Object.defineProperty(dusk.sgui.TileMap.prototype, "height", {
 
 Object.seal(dusk.sgui.TileMap);
 Object.seal(dusk.sgui.TileMap.prototype);
+
+dusk.sgui.registerType("TileMap", dusk.sgui.TileMap);

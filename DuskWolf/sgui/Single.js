@@ -68,9 +68,9 @@ dusk.sgui.Single.prototype.containerKeypress = function(e) {
  */
 dusk.sgui.Single.prototype.newComponent = function(com, type) {
 	if(type === undefined) type = "NullCom";
-	if(!(type in dusk.sgui)){console.warn(type + " is not a valid component type."); type = "NullCom";}
+	if(!dusk.sgui.getType(type)){console.warn(type + " is not a valid component type."); type = "NullCom";}
 	
-	this._component = new dusk.sgui[type](this, com.toLowerCase());
+	this._component = new (dusk.sgui.getType(type))(this, com.toLowerCase());
 	this._component.onFocusChange.fire({"focus":true});
 	dusk.sgui.applyStyles(this._component);
 	

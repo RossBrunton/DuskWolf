@@ -22,30 +22,27 @@ dusk.sgui.FocusChecker = function(parent, comName) {
 	dusk.sgui.Image.call(this, parent, comName);
 	
 	/** The path to the image to be displayed when the component is not focused or active.
-	 * 
-	 * This takes the value of the theme key `fc.inactive`, which by default is `"sgui/inactive.png"`.
 	 * @type string
+	 * @default "sgui/inactive.png"
 	 */
-	this.inactiveImg = this._theme("fc.inactive", "sgui/inactive.png");
+	this.inactiveImg = "sgui/inactive.png";
 	/** The path to the image to be displayed when the component is focused, but not active.
-	 * 
-	 * This takes the value of the theme key `fc.focused`, which by default is `"sgui/focused.png"`.
 	 * @type string
+	 * @default "sgui/focused.png"
 	 */
-	this.focusedImg = this._theme("fc.focused", "sgui/focused.png");
+	this.focusedImg = "sgui/focused.png";
 	/** The path to the image to be displayed when the component is active.
-	 * 
-	 * This takes the value of the theme key `fc.focused`, which by default is `"sgui/active.png"`.
 	 * @type string
+	 * @default "sgui/active.png"
 	 */
-	this.activeImg = this._theme("fc.active", "sgui/active.png");
+	this.activeImg = "sgui/active.png";
 	
 	this.src = this.inactiveImg;
 	
 	//Prop masks
-	this._registerPropMask("image-inactive", "inactiveImg", true);
-	this._registerPropMask("image-focused", "focusedImg", true);
-	this._registerPropMask("image-active", "activeImg", true);
+	this._registerPropMask("inactiveImg", "inactiveImg");
+	this._registerPropMask("focusedImg", "focusedImg");
+	this._registerPropMask("activeImg", "activeImg");
 	
 	//Listeners
 	this.onFocusChange.listen(function(e) {if(this.focusedImg) this.src = this.focusedImg;}, this, {"focus":true});
@@ -61,3 +58,5 @@ dusk.sgui.FocusChecker.prototype.className = "FocusChecker";
 
 Object.seal(dusk.sgui.FocusChecker);
 Object.seal(dusk.sgui.FocusChecker.prototype);
+
+dusk.sgui.registerType("FocusChecker", dusk.sgui.FocusChecker);

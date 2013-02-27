@@ -26,29 +26,27 @@ dusk.sgui.Grid = function (parent, comName) {
 	dusk.sgui.Group.call(this, parent, comName);
 	
 	/** The number of rows that are to be created when the grid is populated.
-	 * 
-	 * This takes the value of the theme key `grid.rows`, which by default is `5`.
 	 * @type integer
+	 * @default 5
 	 */
-	this.rows = this._theme("grid.rows", 5);
+	this.rows = 5;
 	/** The number of columns that are to be created when the grid is populated.
-	 * 
-	 * This takes the value of the theme key `grid.cols`, which by default is `5`.
 	 * @type integer
+	 * @default 5
 	 */
-	this.cols = this._theme("grid.cols", 5);
+	this.cols = 5;
 	/** The space, in pixels, between each grid component horizontally.
-	 * 
-	 * This takes the value of the theme key `grid.hspacing`, which by default is `0`.
 	 * @type integer
+	 * @default 0
 	 */
-	this.hspacing = this._theme("grid.hspacing", 0);
+	this.hspacing = 0;
 	/** The space, in pixels, between each grid component vertically.
 	 * 
 	 * This takes the value of the theme key `grid.vspacing`, which by default is `0`.
 	 * @type integer
+	 * @default 0
 	 */
-	this.vspacing = this._theme("grid.vspacing", 0);
+	this.vspacing = 0;
 	
 	/** This event handler is fired during three stages of the population proccess; when it starts, when a component is created, and when it finishes.
 	 * 
@@ -66,10 +64,10 @@ dusk.sgui.Grid = function (parent, comName) {
 	this._populationEvent = new dusk.EventDispatcher("dusk.sgui.Grid._populationEvent", dusk.EventDispatcher.MODE_PASS);
 	
 	//Prop masks
-	this._registerPropMask("vspacing", "vspacing", false);
-	this._registerPropMask("hspacing", "hspacing", false);
-	this._registerPropMask("rows", "rows", false);
-	this._registerPropMask("cols", "cols", false);
+	this._registerPropMask("vspacing", "vspacing");
+	this._registerPropMask("hspacing", "hspacing");
+	this._registerPropMask("rows", "rows");
+	this._registerPropMask("cols", "cols");
 	this._registerPropMask("populate", "__populate", undefined, ["rows", "cols", "hspacing", "vspacing"]);
 	
 	//Listeners
@@ -184,3 +182,5 @@ dusk.sgui.Grid.prototype.componentRelative = function(name, dir) {
 
 Object.seal(dusk.sgui.Grid);
 Object.seal(dusk.sgui.Grid.prototype);
+
+dusk.sgui.registerType("Grid", dusk.sgui.Grid);

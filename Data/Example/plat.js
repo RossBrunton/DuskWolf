@@ -121,54 +121,6 @@ dusk.plat.becomeRoomManager();
 
 dusk.onLoad.listen(function (e){dusk.rooms.setRoom("exhall", 0);}, this);
 
-//Styles
-dusk.sgui.addStyle("ItemSlot", {
-	"width":32,
-	"height":32,
-	"children":[
-		{
-			"name":"back",
-			"type":"Rect",
-			"layer":"-",
-			"colour":"#990000",
-			"bColour":"#770000",
-			"width":32,
-			"height":32
-		},
-		{
-			"name":"item",
-			"mode":"BINARY",
-			"ssize":5,
-			"width":32,
-			"height":32
-		},
-		{
-			"name":"handItem",
-			"mode":"BINARY",
-			"ssize":5,
-			"width":32,
-			"height":32,
-			"alpha":0.75
-		},
-		{
-			"name":"count",
-			"size":13,
-			"colour":"#ffffff",
-			"borderColour":"#cccccc",
-			"borderSize":0.5,
-			"y":18,
-			"x":1,
-			"padding":0
-		},
-		{
-			"name":"select",
-			"width":32,
-			"height":32,
-			"src":"sgui/selector.png"
-		}
-	]
-});
-
 //Items test
 dusk.sgui.getPane("itemsTest").parseProps({
 	"active":true,
@@ -180,16 +132,16 @@ dusk.sgui.getPane("itemsTest").parseProps({
 			"width":120,
 			"height":30,
 			"y":200,
-			"flow-up":"itemHand",
-			"flow-down":"cc"
+			"upFlow":"itemHand",
+			"downFlow":"cc"
 		},
 		
 		{
 			"name":"cc",
 			"type":"ControlConfig",
 			"y":250,
-			"flow-up":"input",
-			"flow-down":"cc2",
+			"upFlow":"input",
+			"downFlow":"cc2",
 			"control":"sgui_up"
 		},
 		
@@ -197,7 +149,7 @@ dusk.sgui.getPane("itemsTest").parseProps({
 			"name":"cc2",
 			"type":"ControlConfig",
 			"y":270,
-			"flow-up":"cc",
+			"upFlow":"cc",
 			"control":"sgui_action"
 		},
 		
@@ -207,7 +159,7 @@ dusk.sgui.getPane("itemsTest").parseProps({
 			"x":200,
 			"rows":10,
 			"cols":10,
-			"flow-left":"itemHand",
+			"leftFlow":"itemHand",
 			"populate":{
 				"type":"FocusChecker",
 				"width":16,
@@ -219,8 +171,8 @@ dusk.sgui.getPane("itemsTest").parseProps({
 			"name":"itemHand",
 			"type":"ItemHand",
 			"focus":"itemGrid",
-			"flow-right":"fc",
-			"flow-down":"input",
+			"rightFlow":"fc",
+			"downFlow":"input",
 			"children":[
 				{
 					"name":"itemGrid",

@@ -39,35 +39,33 @@ dusk.sgui.Tile = function(parent, comName) {
 	 * 
 	 * This takes the value of the theme key `tile.mode`, which by default is `"BINARY"`.
 	 * @type string
+	 * @default "BINARY"
 	 */
-	this.mode = this._theme("tile.mode", "BINARY");
+	this.mode = "BINARY";
 	
 	/** Origin sprite size if this is running in `"BINARY"` mode.
 	 * 
 	 * This is considered to be the width and height of the sprites when reading them from the image.
 	 * 
 	 * This should be `n` such that the width and height of the sprite is `2^n`. If this is 4, then the sprites will be 16x16, for example.
-	 * 
-	 * This takes the value of the theme key `tile.ssize`, which by default is `4`.
 	 * @type integer
+	 * @default 4
 	 */
-	this.ssize = this._theme("tile.ssize", 4);
+	this.ssize = 4;
 	/** Origin sprite width if this is running in `"DECIMAL"` mode.
 	 * 
 	 * This is considered to be the width of the sprites when reading them from the image.
-	 * 
-	 * This takes the value of the theme key `tile.swidth`, which by default is `16`.
 	 * @type integer
+	 * @default 16
 	 */
-	this.swidth = this._theme("tile.swidth", 16);
+	this.swidth = 16;
 	/** Origin sprite height if this is running in `"DECIMAL"` mode.
 	 * 
 	 * This is considered to be the height of the sprites when reading them from the image.
-	 * 
-	 * This takes the value of the theme key `tile.sheight`, which by default is `16`.
 	 * @type integer
+	 * @default 16
 	 */
-	this.sheight = this._theme("tile.sheight", 16);
+	this.sheight = 16;
 	
 	/** X coordinate of the current sprite.
 	 * @type integer
@@ -191,3 +189,5 @@ dusk.sgui.Tile.prototype.gridGo = function(x, y) {
 
 Object.seal(dusk.sgui.Tile);
 Object.seal(dusk.sgui.Tile.prototype);
+
+dusk.sgui.registerType("Tile", dusk.sgui.Tile);

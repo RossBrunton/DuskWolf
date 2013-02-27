@@ -11,8 +11,8 @@ dusk.load.provide("dusk.sgui.EditableTileMap");
 dusk.sgui.EditableTileMap = function (parent, comName) {
 	dusk.sgui.TileMap.call(this, parent, comName);
 	
-	this._globalCoords = this._theme("etm.globalCoords", false);
-	this.cursorColour = this._theme("etm.cursorColour", "#000000");
+	this._globalCoords = false;
+	this.cursorColour = "#000000";
 	
 	this._cx = 0;
 	this._cy = 0;
@@ -21,11 +21,11 @@ dusk.sgui.EditableTileMap = function (parent, comName) {
 	this.frameWidth = 1;
 	
 	//Prop masks
-	this._registerPropMask("cursorColour", "cursorColour", true);
-	this._registerPropMask("cursorColor", "cursorColour", true);
-	this._registerPropMask("globalCoords", "globalCoords", true);
-	this._registerPropMask("frame-width", "frameWidth", true);
-	this._registerPropMask("frame-height", "frameHeight", true);
+	this._registerPropMask("cursorColour", "cursorColour");
+	this._registerPropMask("cursorColor", "cursorColour");
+	this._registerPropMask("globalCoords", "globalCoords");
+	this._registerPropMask("frameWidth", "frameWidth");
+	this._registerPropMask("frameHeight", "frameHeight");
 	
 	//Listeners
 	this.prepareDraw.listen(this._editTileMapDraw, this);
@@ -347,3 +347,5 @@ dusk.sgui.EditableTileMap.prototype.save = function() {
 
 Object.seal(dusk.sgui.EditableTileMap);
 Object.seal(dusk.sgui.EditableTileMap.prototype);
+
+dusk.sgui.registerType("EditableTileMap", dusk.sgui.EditableTileMap);

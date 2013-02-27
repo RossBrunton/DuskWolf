@@ -126,3 +126,50 @@ dusk.sgui.ItemSlot.prototype._getHand = function() {
 
 Object.seal(dusk.sgui.ItemSlot);
 Object.seal(dusk.sgui.ItemSlot.prototype);
+
+dusk.sgui.registerType("ItemSlot", dusk.sgui.ItemSlot);
+
+dusk.sgui.addStyle("ItemSlot", {
+	"width":32,
+	"height":32,
+	"children":[
+		{
+			"name":"back",
+			"type":"Rect",
+			"layer":"-",
+			"width":32,
+			"height":32
+		},
+		{
+			"name":"item",
+			"mode":"BINARY",
+			"ssize":5,
+			"width":32,
+			"height":32
+		},
+		{
+			"name":"handItem",
+			"mode":"BINARY",
+			"ssize":5,
+			"width":32,
+			"height":32,
+			"alpha":0.75
+		},
+		{
+			"name":"count",
+			"size":13,
+			"colour":"#ffffff",
+			"borderColour":"#cccccc",
+			"borderSize":0.5,
+			"y":18,
+			"x":1,
+			"padding":0
+		},
+		{
+			"name":"select",
+			"width":32,
+			"height":32,
+			"src":"sgui/selector.png"
+		}
+	]
+});

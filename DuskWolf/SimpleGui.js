@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-dusk.load.require("dusk.sgui.Pane");
+dusk.load.require(">dusk.sgui.Pane");
 dusk.load.require("dusk.keyboard");
 dusk.load.require("dusk.frameTicker");
 dusk.load.require("dusk.EventDispatcher");
@@ -116,16 +116,6 @@ dusk.sgui._init = function() {
 	 * @private
 	 */
 	this._cacheCanvas = document.createElement("canvas");
-
-	/** The theme data, in expected name:value form.
-	 * @type object
-	 * @private
-	 */
-	this._themeData = {};
-	this.setThemeKey("box", "#eeeeee");
-	this.setThemeKey("border", "#cccccc");
-	this.setThemeKey("borderActive", "#ff5555");
-	this.setThemeKey("borderLocked", "#ffff55");
 	
 	/** An object containing all the styles, the key is the selector, and the value is the props.
 	 * @type object
@@ -133,6 +123,13 @@ dusk.sgui._init = function() {
 	 * @since 0.0.17-alpha
 	 */
 	this._styleData = {};
+	
+	/** An object containing all the component types that can be used. The key is the name of the component, while the value is the constructor.
+	 * @type object
+	 * @private
+	 * @since 0.0.18-alpha
+	 */
+	this._types = {};
 	
 	/** The display mode of the canvas; this determines how the canvas will resize.
 	 *	Must be one of the `dusk.sgui.MODE_*` constants.
@@ -254,22 +251,6 @@ dusk.sgui.path = function(path) {
 	return this.getPane(pane).path(path);
 };
 
-/** Sets a theme key with the specified value.
- * @param {string} name The name of the key to set.
- * @param {object} value The value to set this key.
- */
-dusk.sgui.setThemeKey = function(name, value) {
-	this._themeData[name] = value;
-};
-
-/** Returns the value of a theme key.
- * @param {string} name The name of the key to look up.
- * @return {object} The value of that key.
- */
-dusk.sgui.getThemeKey = function(name) {
-	return this._themeData[name];
-};
-
 /** A pattern used to select styles.
  * @type RegExp
  * @private
@@ -309,7 +290,7 @@ dusk.sgui.getStyles = function(com) {
 		var valid = true;
 		var p = dusk.sgui._styleData[s][0].length;
 		while(current = dusk.sgui._styleData[s][0][--p]) {
-			if((current[1] && !(hold instanceof dusk.sgui[current[1]]))
+			if((current[1] && current[1] in dusk.sgui && !(hold instanceof dusk.sgui[current[1]]))
 			|| (current[2] && !Array.isArray(hold.style) && hold.style != current[2])
 			|| (current[2] && Array.isArray(hold.style) && current[2] in hold.style)
 			|| (current[3] && hold.comName != current[3])) {
@@ -338,24 +319,23 @@ dusk.sgui.applyStyles = function(com) {
 	}
 };
 
-/** Adds a new type that can be added by specifying it's type. The component must be registered before use. Not yet implemented.
+/** Adds a new type that can be added by specifying it's type. The component must be registered before use.
  * @param {string} name The name of the added type.
  * @param {class(dusk.sgui.Component, string) extends dusk.sgui.Component} type The type to add.
  * @since 0.0.17-alpha
  */
 dusk.sgui.registerType = function(name, type) {
-	
+	this._types[name] = type;
 };
 
 /** Returns a constructor for the specified component, provided it has been registered beforehand with {@link dusk.sgui.registerType}.
- * 
- * If there is no component type with the specified name, {@link dusk.sgui.NullCom} is returned. Not yet implemented.
  * @param {string} name The name of the type to look up.
- * @return {class(dusk.sgui.Component, string) extends dusk.sgui.Component} A constructor for the specified type.
+ * @return {?class(dusk.sgui.Component, string) extends dusk.sgui.Component} A constructor for the specified type, or null if it doesn't exist.
  * @since 0.0.17-alpha
  */
 dusk.sgui.getType = function(name) {
-	return dusk.sgui.NullCom;
+	if(!(name in this._types)) return null;
+	return this._types[name];
 };
 
 //width

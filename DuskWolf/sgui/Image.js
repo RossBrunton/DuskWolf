@@ -27,23 +27,20 @@ dusk.load.provide("dusk.sgui.Image");
 dusk.sgui.Image = function(parent, comName) {
 	dusk.sgui.Component.call(this, parent, comName);
 
-	/** The current image, as a HTML img object.
-	 * 
+	/** The current image, as a HTML img element object.
 	 * @type HTMLImageElement
 	 * @protected
 	 */
 	this._img = null;
 	
 	/** Sets the image to draw, this should be a URL, potentially relative to `{@link dusk.dataDir}`.
-	 * 
-	 * Setting this property will cause the image to be updated at the current time.
-	 * 
 	 * @type string
+	 * @default "sgui/img.png"
 	 */
-	this.src = this._theme("img.src", "sgui/img.png");
+	this.src = "sgui/img.png";
 	
 	//Prop masks
-	this._registerPropMask("src", "src", true);
+	this._registerPropMask("src", "src");
 	
 	//Listeners
 	this.prepareDraw.listen(this._imageDraw, this);
@@ -77,3 +74,5 @@ Object.defineProperty(dusk.sgui.Image.prototype, "src", {
 
 Object.seal(dusk.sgui.Image);
 Object.seal(dusk.sgui.Image.prototype);
+
+dusk.sgui.registerType("Image", dusk.sgui.Image);

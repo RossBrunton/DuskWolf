@@ -16,12 +16,12 @@ dusk.sgui.Label = function(parent, comName) {
 		this.text = "";
 		this._width = -1;
 		
-		this.size = this._theme("label.size", 14);
-		this.font = this._theme("label.font", "sans");
-		this.colour = this._theme("label.colour", "#000000");
-		this.borderColour = this._theme("label.borderColour", "#000000");
-		this.borderSize = this._theme("label.borderSize", 0);
-		this.padding = this._theme("label.padding", 5);
+		this.size = 14;
+		this.font = "sans";
+		this.colour = "#000000";
+		this.borderColour = "#000000";
+		this.borderSize = 0;
+		this.padding = 5;
 		
 		//Prop masks
 		this._registerPropMask("text", "text", true);
@@ -93,18 +93,20 @@ dusk.sgui.Label.prototype.measure = function(test) {
 Object.seal(dusk.sgui.Label);
 Object.seal(dusk.sgui.Label.prototype);
 
+dusk.sgui.registerType("Label", dusk.sgui.Label);
+
 // -----
 
 dusk.sgui.TextBox = function(parent, comName) {
 	if(parent !== undefined){
 		dusk.sgui.Label.call(this, parent, comName);
 		
-		this.border = this._theme("border");
-		this.borderActive = this._theme("borderActive");
+		this.border = "#cccccc";
+		this.borderActive = "#ff5555";
 		
 		//Prop masks
 		this._registerPropMask("border", "border", true);
-		this._registerPropMask("border-active", "borderActive", true);
+		this._registerPropMask("borderActive", "borderActive", true);
 		
 		//Listeners
 		this.prepareDraw.listen(this._boxDraw, this);
@@ -151,3 +153,5 @@ dusk.sgui.TextBox.prototype._boxKey = function(e) {
 
 Object.seal(dusk.sgui.TextBox);
 Object.seal(dusk.sgui.TextBox.prototype);
+
+dusk.sgui.registerType("TextBox", dusk.sgui.TextBox);

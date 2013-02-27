@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-dusk.load.require("dusk.sgui.Component");
+dusk.load.require(">dusk.sgui.Component");
 dusk.load.require("dusk.sgui.IContainer");
 
 dusk.load.provide("dusk.sgui.Group");
@@ -55,9 +55,9 @@ dusk.sgui.Group = function(parent, comName) {
 	
 	//Prop masks
 	this._registerPropMask("focus", "focus", true, ["children"]);
-	this._registerPropMask("focus-behaviour", "focusBehaviour", true);
-	this._registerPropMask("children", "__children", false);
-	this._registerPropMask("allChildren", "__allChildren", false);
+	this._registerPropMask("focusBehaviour", "focusBehaviour");
+	this._registerPropMask("children", "__children");
+	this._registerPropMask("allChildren", "__allChildren");
 	
 	//Listeners
 	this.prepareDraw.listen(this._groupDraw, this);
@@ -116,12 +116,12 @@ dusk.sgui.Group.prototype.containerKeypress = function(e) {
  */
 dusk.sgui.Group.prototype._newComponent = function(com, type) {
 	if(type === undefined) type = "NullCom";
-	if(!(type in dusk.sgui)){
+	if(!dusk.sgui.getType(type)){
 		console.warn(type + " is not a valid component type.");
 		type = "NullCom";
 	}
 	
-	this._components[com] = new dusk.sgui[type](this, com.toLowerCase());
+	this._components[com] = new (dusk.sgui.getType(type))(this, com.toLowerCase());
 	this._drawOrder[this._drawOrder.length] = com;
 	dusk.sgui.applyStyles(this._components[com]);
 	
@@ -366,3 +366,5 @@ Object.defineProperty(dusk.sgui.Group.prototype, "height", {
 
 Object.seal(dusk.sgui.Group);
 Object.seal(dusk.sgui.Group.prototype);
+
+dusk.sgui.registerType("Group", dusk.sgui.Group);

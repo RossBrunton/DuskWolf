@@ -46,3 +46,5 @@ Object.defineProperty(dusk.sgui.Pane.prototype, "__active", {
 
 Object.seal(dusk.sgui.Pane);
 Object.seal(dusk.sgui.Pane.prototype);
+
+dusk.sgui.registerType("Pane", dusk.sgui.Pane);

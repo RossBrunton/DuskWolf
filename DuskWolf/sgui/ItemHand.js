@@ -60,3 +60,5 @@ Object.defineProperty(dusk.sgui.ItemHand.prototype, "locked", {
 
 Object.seal(dusk.sgui.ItemHand);
 Object.seal(dusk.sgui.ItemHand.prototype);
+
+dusk.sgui.registerType("ItemHand", dusk.sgui.ItemHand);

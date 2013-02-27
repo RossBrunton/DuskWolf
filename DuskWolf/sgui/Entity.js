@@ -60,10 +60,10 @@ dusk.sgui.Entity = function (parent, comName) {
 	}
 	
 	//Prop masks
-	this._registerPropMask("dx", "dx", true);
-	this._registerPropMask("dy", "dy", true);
-	this._registerPropMask("scheme", "schemePath", true);
-	this._registerPropMask("entType", "entType", true);
+	this._registerPropMask("dx", "dx");
+	this._registerPropMask("dy", "dy");
+	this._registerPropMask("scheme", "schemePath");
+	this._registerPropMask("entType", "entType");
 	
 	//Listeners
 	if(this.collisionMark) this.prepareDraw.listen(this._collisionDraw, this);
@@ -372,3 +372,5 @@ dusk.sgui.Entity.prototype._collisionDraw = function(c) {
 
 Object.seal(dusk.sgui.Entity);
 Object.seal(dusk.sgui.Entity.prototype);
+
+dusk.sgui.registerType("Entity", dusk.sgui.Entity);

@@ -14,12 +14,12 @@ dusk.load.provide("dusk.sgui.BasicMain");
 dusk.sgui.BasicMain = function(parent, comName) {
 	dusk.sgui.Group.call(this, parent, comName);
 	
-	this._scrollSpeed = this._theme("plat.scrollSpeed", 10);
+	this._scrollSpeed = 0;
 	this.spawn = 0;
 	this.roomName = "";
 	
 	//Prop masks
-	this._registerPropMask("spawn", "spawn", true);
+	this._registerPropMask("spawn", "spawn");
 	this._registerPropMask("room", "room", true, ["spawn"]);
 	
 	//Listeners
@@ -45,22 +45,22 @@ dusk.sgui.BasicMain.prototype.createRoom = function(name, spawn) {
 	}
 	
 	this.parseProps({"focus":"entities", "children":[
-		{"name":"back", "type":"EditableTileMap", "cursorColour":"#00ff00", "flow-down":"over", "flow-up":"entities",
-		"src":room.backSrc, "tile-size":dusk.entities.tsize, "sprite-size":dusk.entities.ssize, "mode":dusk.entities.mode,
-		"tile-width":dusk.entities.twidth, "tile-height":dusk.entities.theight, "sprite-width":dusk.entities.swidth, "sprite-height":dusk.entities.sheight,
+		{"name":"back", "type":"EditableTileMap", "cursorColour":"#00ff00", "downFlow":"over", "upFlow":"entities",
+		"src":room.backSrc, "tsize":dusk.entities.tsize, "ssize":dusk.entities.ssize, "mode":dusk.entities.mode,
+		"twidth":dusk.entities.twidth, "theight":dusk.entities.theight, "swidth":dusk.entities.swidth, "sheight":dusk.entities.sheight,
 		"map":{"map":room.back, "rows":room.rows, "cols":room.cols}},
 		
-		{"name":"entities", "type":"EntityGroup", "tile-size":dusk.entities.tsize, "sprite-size":dusk.entities.ssize, "flow-down":"back", "flow-up":"scheme", "mode":dusk.entities.mode,
-		"tile-width":dusk.entities.twidth, "tile-height":dusk.entities.theight, "sprite-width":dusk.entities.swidth, "sprite-height":dusk.entities.sheight},
+		{"name":"entities", "type":"EntityGroup", "tsize":dusk.entities.tsize, "ssize":dusk.entities.ssize, "downFlow":"back", "upFlow":"scheme", "mode":dusk.entities.mode,
+		"twidth":dusk.entities.twidth, "theight":dusk.entities.theight, "swidth":dusk.entities.swidth, "sheight":dusk.entities.sheight},
 		
-		{"name":"over", "type":"EditableTileMap", "cursorColour":"#ff0000", "flow-down":"scheme", "flow-up":"back",
-		"src":room.overSrc, "tile-size":dusk.entities.tsize, "sprite-size":dusk.entities.ssize, "mode":dusk.entities.mode,
-		"tile-width":dusk.entities.twidth, "tile-height":dusk.entities.theight, "sprite-width":dusk.entities.swidth, "sprite-height":dusk.entities.sheight,
+		{"name":"over", "type":"EditableTileMap", "cursorColour":"#ff0000", "downFlow":"scheme", "upFlow":"back",
+		"src":room.overSrc, "tsize":dusk.entities.tsize, "ssize":dusk.entities.ssize, "mode":dusk.entities.mode,
+		"twidth":dusk.entities.twidth, "theight":dusk.entities.theight, "swidth":dusk.entities.swidth, "sheight":dusk.entities.sheight,
 		"map":{"map":room.over, "rows":room.rows, "cols":room.cols}},
 		
-		{"name":"scheme", "type":"EditableTileMap", "cursorColour":"#0000ff", "flow-down":"entities", "flow-up":"over",
-		"src":"pimg/schematics.png", "alpha":0, "tile-size":dusk.entities.tsize, "sprite-size":dusk.entities.ssize, "mode":dusk.entities.mode,
-		"tile-width":dusk.entities.twidth, "tile-height":dusk.entities.theight, "sprite-width":dusk.entities.swidth, "sprite-height":dusk.entities.sheight,
+		{"name":"scheme", "type":"EditableTileMap", "cursorColour":"#0000ff", "downFlow":"entities", "upFlow":"over",
+		"src":"pimg/schematics.png", "alpha":0, "tsize":dusk.entities.tsize, "ssize":dusk.entities.ssize, "mode":dusk.entities.mode,
+		"twidth":dusk.entities.twidth, "theight":dusk.entities.theight, "swidth":dusk.entities.swidth, "sheight":dusk.entities.sheight,
 		"map":{"map":room.scheme, "rows":room.rows, "cols":room.cols}},
 	]});
 	
@@ -240,3 +240,5 @@ dusk.sgui.BasicMain.prototype.save = function(e) {
 
 Object.seal(dusk.sgui.BasicMain);
 Object.seal(dusk.sgui.BasicMain.prototype);
+
+dusk.sgui.registerType("BasicMain", dusk.sgui.BasicMain);

@@ -47,7 +47,7 @@ dusk.load._init = function() {
 	 */
 	dusk.load._current = "";
 	
-	/** The "major file" that is currently importing. This is always the name of the package which `{@dusk.load.import}` was called for, or an empty string.
+	/** An array of all the files and their dependancies that are waiting to be imported.
 	 * @type array
 	 * @private
 	 * @since 0.0.17-alpha
@@ -180,7 +180,11 @@ dusk.load.require = function(name) {
  * @since 0.0.15-alpha
  */
 dusk.load.import = function(name) {
+	if(this._currentlyImporting.indexOf(name) !== -1) return;
 	this._currentlyImporting.push(name);
+	for(var i = this._names[name][2].length-1; i >= 0; i --) {
+		dusk.load.import(this._names[name][2][i].replace(">", ""));
+	}
 };
 
 /** Imports all packages, usefull for debugging or generating dependancy files.
@@ -247,48 +251,47 @@ dusk.load.importList = function(path, callback) {
 	"url":path});
 };
 
-/** Used internally to import a package and it's dependancies.
- *	This will be called recursivley to handle dependancies.
+/** Used internally to import a package, will fail if dependancies are not met.
  * @param {string} name The name of the package to attempt to import.
- * @param {array} history Previous calls leave the name of the package in here, this prevents an infinite loop, as it will not attempt to import a package that has already been tried.
+ * @param {boolean} ignoreDefer In the case where no packages can be imported at the moment, this parameter can be set to true so that dependancies starting with ">" are ignored.
  * @return {boolean} True if the package and all of it's dependancies are imported.
  * @private
  * @since 0.0.17-alpha
  */
-dusk.load._tryToImport = function(name, history) {
-	if(history.indexOf(name) !== -1) return true;
-	history.push(name);
-	
-	if(dusk.load._names[name][1] == 1) return false;
-	
+dusk.load._tryToImport = function(name, ignoreDefer) {
+	if(dusk.load._names[name][1] != 0) return false;
 	for(var i = dusk.load._names[name][2].length-1; i >= 0; i --) {
-		if(dusk.load._names[name][2][i].charAt(0) !== ">" && !dusk.load._tryToImport(dusk.load._names[name][2][i], history)) return false;
+		if(!(dusk.load._names[name][2][i].charAt(0) === ">" && ignoreDefer)
+		&& dusk.load._names[dusk.load._names[name][2][i].replace(">", "")][1] < 2) return false;
 	}
 	
-	if(dusk.load._names[name][1] != 2) {
-		dusk.load._current = name;
-		var js = document.createElement("script");
-		js.src = dusk.load._names[name][0];// + ((!("dev" in dusk) || dusk.dev)?"?_="+(new Date()).getTime():"");
-		document.head.appendChild(js);
-		dusk.load._names[name][1] = 1;
-		return false;
-	}
-	
-	for(var i = dusk.load._names[name][2].length-1; i >= 0; i --) {
-		if(dusk.load._names[name][2][i].charAt(0) === ">" && !dusk.load._tryToImport(dusk.load._names[name][2][i].substr(1), history)) return false;
-	}
-	
+	console.log("Now importing: "+name);
+	dusk.load._current = name;
+	var js = document.createElement("script");
+	js.src = dusk.load._names[name][0];// + ((!("dev" in dusk) || dusk.dev)?"?_="+(new Date()).getTime():"");
+	document.head.appendChild(js);
+	dusk.load._names[name][1] = 1;
 	return true;
 };
 
-/** This is called every 100ms or so. It checks `{@link dusk.load._files}` to see if there are any new files that need downloading, and if so downloads them.
+/** This is called every 100ms or so. It checks if any packages are being imported, and attempts to import them.
  * @private
  * @since 0.0.12-alpha
  */
 dusk.load._repeat = function() {
 	if(dusk.load._currentlyImporting.length) {
-		if(dusk.load._tryToImport(dusk.load._currentlyImporting[dusk.load._currentlyImporting.length-1], [])) {
-			dusk.load._currentlyImporting.pop();
+		for(var i = dusk.load._currentlyImporting.length-1; i >= 0; i --) {
+			if(dusk.load._tryToImport(dusk.load._currentlyImporting[i])) {
+				dusk.load._currentlyImporting.splice(i, 1);
+				return;
+			}
+		}
+		
+		for(var i = dusk.load._currentlyImporting.length-1; i >= 0; i --) {
+			if(dusk.load._tryToImport(dusk.load._currentlyImporting[i], true)) {
+				dusk.load._currentlyImporting.splice(i, 1);
+				return;
+			}
 		}
 	}
 };

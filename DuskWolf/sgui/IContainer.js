@@ -27,6 +27,8 @@ dusk.load.provide("dusk.sgui.IContainer");
  * - {@link dusk.sgui.IContainer.getComponent}
  * - {@link dusk.sgui.IContainer.alterChildLayer}
  * 
+ * This class cannot be used on its own as a component.
+ * 
  * @param {dusk.sgui.IContainer} parent The container that this component is in.
  * @param {string} comName The name of the component.
  * @extends dusk.sgui.Component

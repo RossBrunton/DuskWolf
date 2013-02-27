@@ -27,11 +27,10 @@ dusk.sgui.CentreScroller = function (parent, comName) {
 		
 		/** If true, then this will always display as much of the component as it can, and will not try to center the coordinates if it would result in any side of the component becoming in the range.
 		 * 
-		 * This is set the theme value of `cs.lockBounds`, which is true by default.
-		 * 
 		 * @type boolean
+		 * @default true
 		 */
-		this.lockBounds = this._theme("cs.lockBounds", true);
+		this.lockBounds = true;
 		
 		/** Internal storage of this component's width.
 		 * @type integer
@@ -45,8 +44,8 @@ dusk.sgui.CentreScroller = function (parent, comName) {
 		this._height = 0;
 		
 		//Prop masks
-		this._registerPropMask("centre", "__centre", true);
-		this._registerPropMask("lockBounds", "lockBounds", true);
+		this._registerPropMask("centre", "__centre");
+		this._registerPropMask("lockBounds", "lockBounds");
 	}
 };
 dusk.sgui.CentreScroller.prototype = new dusk.sgui.Single();
@@ -100,3 +99,5 @@ Object.defineProperty(dusk.sgui.CentreScroller.prototype, "height", {
 
 Object.seal(dusk.sgui.CentreScroller);
 Object.seal(dusk.sgui.CentreScroller.prototype);
+
+dusk.sgui.registerType("CentreScroller", dusk.sgui.CentreScroller);

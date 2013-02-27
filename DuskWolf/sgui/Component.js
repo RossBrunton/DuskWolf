@@ -6,7 +6,7 @@ dusk.load.require(">dusk.utils");
 dusk.load.require("dusk.EventDispatcher");
 dusk.load.require(">dusk.keyboard");
 dusk.load.require(">dusk.controls");
-dusk.load.require(">dusk.sgui");
+dusk.load.require("dusk.sgui");
 
 dusk.load.provide("dusk.sgui.Component");
 dusk.load.provide("dusk.sgui.NullCom");
@@ -201,22 +201,22 @@ dusk.sgui.Component = function (parent, componentName) {
 	this._deleted = false;
 	
 	//Prop masks
-	this._registerPropMask("x", "x", true);
-	this._registerPropMask("y", "y", true);
-	this._registerPropMask("width", "width", true);
-	this._registerPropMask("height", "height", true);
-	this._registerPropMask("alpha", "alpha", true);
-	this._registerPropMask("visible", "visible", true);
-	this._registerPropMask("mark", "mark", true);
-	this._registerPropMask("flow-up", "upFlow", true);
-	this._registerPropMask("flow-down", "downFlow", true);
-	this._registerPropMask("flow-left", "leftFlow", true);
-	this._registerPropMask("flow-right", "rightFlow", true);
-	this._registerPropMask("enabled", "enabled", true);
-	this._registerPropMask("deleted", "deleted", true);
-	this._registerPropMask("name", "comName", true);
-	this._registerPropMask("style", "style", true);
-	this._registerPropMask("layer", "__layer", true);
+	this._registerPropMask("x", "x");
+	this._registerPropMask("y", "y");
+	this._registerPropMask("width", "width");
+	this._registerPropMask("height", "height");
+	this._registerPropMask("alpha", "alpha");
+	this._registerPropMask("visible", "visible");
+	this._registerPropMask("mark", "mark");
+	this._registerPropMask("upFlow", "upFlow");
+	this._registerPropMask("downFlow", "downFlow");
+	this._registerPropMask("leftFlow", "leftFlow");
+	this._registerPropMask("rightFlow", "rightFlow");
+	this._registerPropMask("enabled", "enabled");
+	this._registerPropMask("deleted", "deleted");
+	this._registerPropMask("name", "comName");
+	this._registerPropMask("style", "style");
+	this._registerPropMask("layer", "__layer");
 };
 
 /** The name of this component's class.
@@ -409,20 +409,6 @@ dusk.sgui.Component.prototype.bundle = function() {
 
 
 
-/** Returns or sets a theme property.
- * 	A theme is a collection of variables that serve as the "default" value for some properties of components.
- * 
- * @param {string} name The theme key to set or get.
- * @param {?object} set If the theme value is not set yet, it will be set to this value.
- * @return {?object} The (new) value of the theme key.
- * @protected
- */
-dusk.sgui.Component.prototype._theme = function(value, set) {
-	if(!dusk.sgui.getThemeKey(value)) dusk.sgui.setThemeKey(value, set);
-	
-	return dusk.sgui.getThemeKey(value);
-};
-
 //deleted
 Object.defineProperty(dusk.sgui.Component.prototype, "deleted", {
 	set: function (value) {
@@ -583,3 +569,5 @@ dusk.sgui.NullCom.prototype.className = "NullCom";
 
 Object.seal(dusk.sgui.NullCom);
 Object.seal(dusk.sgui.NullCom.prototype);
+
+dusk.sgui.registerType("NullCom", dusk.sgui.NullCom);
