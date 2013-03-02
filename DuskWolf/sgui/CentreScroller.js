@@ -20,6 +20,7 @@ dusk.load.provide("dusk.sgui.CentreScroller");
  * This component may have a `width` or `height` of `-1`, this means that that it will use the values `{@link dusk.sgui.width}` and `{@link dusk.sgui.height}`.
  * 
  * @extends dusk.sgui.Single
+ * @constructor
  */
 dusk.sgui.CentreScroller = function (parent, comName) {
 	if(parent !== undefined) {

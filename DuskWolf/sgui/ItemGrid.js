@@ -11,7 +11,7 @@ dusk.load.provide("dusk.sgui.ItemGrid");
 dusk.sgui.ItemGrid = function (parent, comName) {
 	dusk.sgui.Grid.call(this, parent, comName);
 	
-	this.maxStack = Infinity;
+	this.maxStack = 0xffffffff;
 	this._invent = new dusk.items.Invent(this.rows*this.cols, [], this.maxStack);
 	
 	this._counter = 0;

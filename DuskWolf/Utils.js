@@ -167,7 +167,7 @@ dusk.utils.SD_HEX = "0x";
 
 /** A conversion type that does simple compression that is optimised if the array buffer has sequential repeating elements in it.
  * 
- * It optomises based on patterns; if it sees the same sequence of two bytes (16 bits), then it will compress them down.
+ * It optimises based on patterns; if it sees the same sequence of two bytes (16 bits), then it will compress them down.
  * @type string
  * @constant
  * @value "BC16"

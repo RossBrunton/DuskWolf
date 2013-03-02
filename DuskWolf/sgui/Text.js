@@ -134,7 +134,7 @@ dusk.sgui.TextBox.prototype._boxKey = function(e) {
 	if(dusk.controls.checkKey("sgui_right", e.key)) return true;
 	
 	if(keyDat[1]) {
-		this.text += e.shiftKey?keyDat[0].toUpperCase():keyDat[0];
+		this.text += e.shift?keyDat[0].toUpperCase():keyDat[0];
 		return false;
 	}
 	
@@ -144,7 +144,7 @@ dusk.sgui.TextBox.prototype._boxKey = function(e) {
 	}
 	
 	if(keyDat[0] == "ENTER") {
-		this._doAction(e);
+		this.action.fire(e);
 		return false;
 	}
 	

@@ -14,8 +14,8 @@ dusk.load.provide("dusk.sgui.ItemSlot");
 dusk.sgui.ItemSlot = function (parent, comName) {
 	dusk.sgui.Group.call(this, parent, comName);
 	
-	this._invent = new dusk.items.Invent(1, [], Infinity);
-	this.maxStack = Infinity;
+	this._invent = new dusk.items.Invent(1, [], 0xffffffff);
+	this.maxStack = 0xffffffff;
 	this.slot = 0;
 	
 	this._itemChild = this.getComponent("item", "Tile");

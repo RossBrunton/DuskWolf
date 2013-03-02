@@ -374,7 +374,7 @@ dusk.items.Invent.prototype.sendSlotToInvent = function(dest, slot, howMany) {
 dusk.items.Invent.prototype.sendAllToInvent = function(dest) {
 	for(var i = 0; i < this._items.length; i ++) {
 		if(this._items[i] !== null) {
-			this.sendToInvent(dest, this._items[i][0].type, Infinity);
+			this.sendToInvent(dest, this._items[i][0].type, 0xffffffff);
 		}
 	}
 };

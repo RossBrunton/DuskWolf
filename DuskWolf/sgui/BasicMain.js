@@ -50,7 +50,7 @@ dusk.sgui.BasicMain.prototype.createRoom = function(name, spawn) {
 		"twidth":dusk.entities.twidth, "theight":dusk.entities.theight, "swidth":dusk.entities.swidth, "sheight":dusk.entities.sheight,
 		"map":{"map":room.back, "rows":room.rows, "cols":room.cols}},
 		
-		{"name":"entities", "type":"EntityGroup", "tsize":dusk.entities.tsize, "ssize":dusk.entities.ssize, "downFlow":"back", "upFlow":"scheme", "mode":dusk.entities.mode,
+		{"name":"entities", "type":"EntityGroup", "tsize":dusk.entities.tsize, "ssize":dusk.entities.ssize, "downFlow":"back", "upFlow":"scheme",
 		"twidth":dusk.entities.twidth, "theight":dusk.entities.theight, "swidth":dusk.entities.swidth, "sheight":dusk.entities.sheight},
 		
 		{"name":"over", "type":"EditableTileMap", "cursorColour":"#ff0000", "downFlow":"scheme", "upFlow":"back",
@@ -107,6 +107,8 @@ dusk.sgui.BasicMain.prototype._platMainFrame = function(e) {
 
 dusk.sgui.BasicMain.prototype.autoScroll = function() {
 	// Centre the player
+	if(!this.path("entities/"+dusk.entities.seek)) return;
+	
 	var seekCoords = [];
 	if(dusk.entities.mode == "BINARY") {
 		seekCoords = dusk.editor.active?[

@@ -17,38 +17,37 @@ dusk.load.provide("dusk.sgui.Rect");
  * 	It sets all the area specified by it's `height` and `width`, and colours it in a single colour with an optional border.
  * 
  * @extends dusk.sgui.Component
+ * @constructor
  */
-dusk.sgui.Rect = function(parent, comName) {
-	if(parent !== undefined){
-		dusk.sgui.Component.call(this, parent, comName);
+dusk.sgui.Rect = function (parent, comName) {
+	dusk.sgui.Component.call(this, parent, comName);
+
+	/** The colour of the rectangle.
+	 * @type string
+	 * @default "#eeeeee"
+	 */
+	this.colour = "#eeeeee";
+	/** The colour of the border.
+	 * @type string
+	 * @default "#cccccc"
+	 */
+	this.bColour = "#cccccc";
+	/** The thinkness of the rectangle border.
+	 * 	If 0, there will be no border.
+	 * @type float
+	 * @default 1
+	 */
+	this.bWidth = 1;
 	
-		/** The colour of the rectangle.
-		 * @type string
-		 * @default "#eeeeee"
-		 */
-		this.colour = "#eeeeee";
-		/** The colour of the border.
-		 * @type string
-		 * @default "#cccccc"
-		 */
-		this.bColour = "#cccccc";
-		/** The thinkness of the rectangle border.
-		 * 	If 0, there will be no border.
-		 * @default 1
-		 * @type float
-		 */
-		this.bWidth = 1;
-		
-		//Prop masks
-		this._registerPropMask("colour", "colour", true);
-		this._registerPropMask("color", "colour", true);
-		this._registerPropMask("bColour", "bColour", true);
-		this._registerPropMask("bColor", "bColour", true);
-		this._registerPropMask("bWidth", "bWidth", true);
-		
-		//Listeners
-		this.prepareDraw.listen(this._rectDraw, this);
-	}
+	//Prop masks
+	this._registerPropMask("colour", "colour", true);
+	this._registerPropMask("color", "colour", true);
+	this._registerPropMask("bColour", "bColour", true);
+	this._registerPropMask("bColor", "bColour", true);
+	this._registerPropMask("bWidth", "bWidth", true);
+	
+	//Listeners
+	this.prepareDraw.listen(this._rectDraw, this);
 };
 dusk.sgui.Rect.prototype = new dusk.sgui.Component();
 dusk.sgui.Rect.constructor = dusk.sgui.Rect;

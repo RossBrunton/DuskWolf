@@ -35,13 +35,13 @@ dusk.sgui.EntityGroup = function (parent, comName) {
 	//Prop masks
 	this._registerPropMask("mode", "mode");
 	
-	this._registerPropMask("sprite-size", "ssize");
-	this._registerPropMask("sprite-height", "sheight");
-	this._registerPropMask("sprite-width", "swidth");
+	this._registerPropMask("ssize", "ssize");
+	this._registerPropMask("sheight", "sheight");
+	this._registerPropMask("swidth", "swidth");
 	
-	this._registerPropMask("tile-size", "tsize");
-	this._registerPropMask("tile-height", "theight");
-	this._registerPropMask("tile-width", "twidth");
+	this._registerPropMask("tsize", "tsize");
+	this._registerPropMask("theight", "theight");
+	this._registerPropMask("twidth", "twidth");
 	
 	//Listeners
 	for(var i = 48; i <= 57; i++) {

@@ -18,7 +18,7 @@ dusk.load.provide("dusk.sgui.NullCom");
  * This class doesn't actually display anything itself, classes that inherit from it do.
  * 	The properties for this apply to all components.
  * 
- * @param {?dusk.sgui.Component} parent The container that this component is in.
+ * @param {?dusk.sgui.IContainer} parent The container that this component is in.
  * @param {string} componentName The name of the component.
  * @see {@link dusk.sgui}
  * @constructor
@@ -113,7 +113,7 @@ dusk.sgui.Component = function (parent, componentName) {
 	/** An event dispatcher that is fired when the action control `"sgui_action"` is pressed.
 	 * 	By default, this is the "space" key, and should be the key that would press a button, or so.
 	 * 
-	 * This is in OR mode, so that any function registered to this that returns `true` will stop the event bubbling to the container component.
+	 * This is in AND mode, so that any function registered to this that returns `false` will stop the event bubbling to the container component.
 	 * @type dusk.EventDispatcher
 	 * @since 0.0.17-alpha
 	 */
