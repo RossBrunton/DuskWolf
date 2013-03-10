@@ -39,3 +39,8 @@ dusk.behave.BackForth.prototype._bfCollide = function(e) {
 		this._entity.dx = -this._entity.behaviourData.hspeed;
 	}
 };
+
+Object.seal(dusk.behave.BackForth);
+Object.seal(dusk.behave.BackForth.prototype);
+
+dusk.entities.registerBehaviour("BackForth", dusk.behave.BackForth);

@@ -177,3 +177,6 @@ dusk.Mapper.prototype.massGet = function() {
 dusk.Mapper.prototype.toString = function() {
 	return "[Mapper for "+this._target.toString()+"]";
 };
+
+Object.seal(dusk.Mapper);
+Object.seal(dusk.Mapper.prototype);

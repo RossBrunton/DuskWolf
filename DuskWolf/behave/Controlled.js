@@ -45,3 +45,8 @@ dusk.behave.Controlled.prototype._controlledFrame = function(e) {
 dusk.behave.Controlled.prototype._isControlActive = function(name) {
 	return dusk.controls.controlActive(name);
 };
+
+Object.seal(dusk.behave.Controlled);
+Object.seal(dusk.behave.Controlled.prototype);
+
+dusk.entities.registerBehaviour("Controlled", dusk.behave.Controlled);

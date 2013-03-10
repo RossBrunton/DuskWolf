@@ -25,3 +25,8 @@ dusk.behave.Persist.prototype._persistLoad = function(data) {
 dusk.behave.Persist.prototype._persistFrame = function(data) {
 	dusk.entities.storePersist(this._entity.comName, this._entity.behaviourData);
 };
+
+Object.seal(dusk.behave.Persist);
+Object.seal(dusk.behave.Persist.prototype);
+
+dusk.entities.registerBehaviour("Persist", dusk.behave.Persist);

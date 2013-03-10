@@ -49,3 +49,8 @@ dusk.behave.Killable.prototype._killableFrame = function(name, e) {
 		this._data("currentMercy", this._data("currentMercy")-1);
 	}
 };
+
+Object.seal(dusk.behave.Killable);
+Object.seal(dusk.behave.Killable.prototype);
+
+dusk.entities.registerBehaviour("Killable", dusk.behave.Killable);

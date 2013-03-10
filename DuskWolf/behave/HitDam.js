@@ -23,3 +23,8 @@ dusk.behave.HitDam.prototype._hdCollide = function(e) {
 	if(e.target === "wall") return;
 	e.target.behaviourFire("takeDamage", {"damage":this._data("damage"), "source":this._entity});
 };
+
+Object.seal(dusk.behave.HitDam);
+Object.seal(dusk.behave.HitDam.prototype);
+
+dusk.entities.registerBehaviour("HitDam", dusk.behave.HitDam);

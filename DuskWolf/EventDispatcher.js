@@ -10,7 +10,7 @@ dusk.load.provide("dusk.EventDispatcher");
  * 
  * Code registeres a "listen" function in the dispatcher that is called when the event is fired.
  * 
- * More finley tuned event handling is also available, in the form of "propsYes" and "propsNo".
+ * More finely tuned event handling is also available, in the form of "propsYes" and "propsNo".
  * 
  * If the listener has a `propsYes` object registered, then the listener will ONLY be called if ALL the properties of propsYes have counterparts that are equal in the event object.
  * 
@@ -190,3 +190,4 @@ dusk.EventDispatcher.prototype.toString = function() {
 };
 
 Object.seal(dusk.EventDispatcher);
+Object.seal(dusk.EventDispatcher.prototype);

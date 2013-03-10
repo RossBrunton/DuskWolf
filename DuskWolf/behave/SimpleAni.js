@@ -53,3 +53,8 @@ dusk.behave.SimpleAni.prototype._simpleAniFrame = function(e) {
 		}
 	}
 };
+
+Object.seal(dusk.behave.SimpleAni);
+Object.seal(dusk.behave.SimpleAni.prototype);
+
+dusk.entities.registerBehaviour("SimpleAni", dusk.behave.SimpleAni);

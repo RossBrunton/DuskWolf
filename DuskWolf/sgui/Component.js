@@ -128,14 +128,10 @@ dusk.sgui.Component = function (parent, componentName) {
 	 * @since 0.0.17-alpha
 	 */
 	this.prepareDraw = new dusk.EventDispatcher("dusk.sgui.Component.prepareDraw");
-	/** A mapping of action object properties to real one. The key name is the action property name, and is an array in the form `[mask, redraw, depends]`.
-	 * 
-	 * `mask` is the actual property name that will be set/read, `redraw` is a boolean indecating that setting the variable books a redraw, and `depends` is an array of all the properties in the object that must be ran before this.
-	 * @type object
-	 * @private
+	/** A mapper used to map JSON properties to the properties on this object.
+	 * @type dusk.Mapper
+	 * @protected
 	 */
-	this._propMasks = {};
-	
 	this._props = new dusk.Mapper(this);
 	/** An event dispatcher which fires when the element is deleted.
 	 * 

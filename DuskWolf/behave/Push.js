@@ -41,3 +41,8 @@ dusk.behave.Push.prototype._pCollided = function(e) {
 		case "l": this._entity.performMotion(-this._entity.behaviourData.speed, 0); break;
 	}
 };
+
+Object.seal(dusk.behave.Push);
+Object.seal(dusk.behave.Push.prototype);
+
+dusk.entities.registerBehaviour("Push", dusk.behave.Push);

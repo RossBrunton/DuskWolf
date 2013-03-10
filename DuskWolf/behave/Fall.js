@@ -35,3 +35,8 @@ dusk.behave.Fall.constructor = dusk.behave.Fall;
 dusk.behave.Fall.prototype._fallFall = function(name, e) {
 	this._entity.performMotion(0, this._entity.eProp("fallSpeed"));
 };
+
+Object.seal(dusk.behave.Fall);
+Object.seal(dusk.behave.Fall.prototype);
+
+dusk.entities.registerBehaviour("Fall", dusk.behave.Fall);

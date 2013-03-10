@@ -43,3 +43,8 @@ dusk.behave.MarkTrigger.prototype._markTriggerFrame = function(name, e) {
 		}
 	}
 };
+
+Object.seal(dusk.behave.MarkTrigger);
+Object.seal(dusk.behave.MarkTrigger.prototype);
+
+dusk.entities.registerBehaviour("MarkTrigger", dusk.behave.MarkTrigger);

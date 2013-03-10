@@ -63,3 +63,6 @@ dusk.behave.Behave.prototype._data = function(name, value, init) {
 	
 	return this._entity.behaviourData[name];
 };
+
+Object.seal(dusk.behave.Behave);
+Object.seal(dusk.behave.Behave.prototype);

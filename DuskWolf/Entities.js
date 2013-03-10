@@ -148,6 +148,13 @@ dusk.entities._init = function() {
 		"animation":{"stationary":"0,0"},
 		"behaviours":{}
 	});
+	
+	/** An object that contains all the behaviours that can be applied to entities.
+	 * @type object
+	 * @private
+	 * @since 0.0.18-alpha
+	 */
+	this._behaviours = {};
 };
 
 /** Stores entity data for a persistant entity.
@@ -170,6 +177,25 @@ dusk.entities.storePersist = function(name, data) {
  */
 dusk.entities.getPersist = function(name) {
 	return this._persistData[name];
+};
+
+/** Adds a new behaviour that can be added to entities. This must be called before the behaviour can be used.
+ * @param {string} name The name of the added behaviour.
+ * @param {class(dusk.sgui.Entity) extends dusk.behave.Behave} behaviour The behaviour to register.
+ * @since 0.0.18-alpha
+ */
+dusk.entities.registerBehaviour = function(name, behaviour) {
+	this._behaviours[name] = behaviour;
+};
+
+/** Returns a constructor for the specified behaviour, provided it has been registered beforehand with {@link dusk.entities.registerBehaviour}.
+ * @param {string} name The name of the behaviour to look up.
+ * @return {?class(dusk.sgui.Entity) extends dusk.behave.Behave} A constructor for the specified type, or null if it doesn't exist.
+ * @since 0.0.18-alpha
+ */
+dusk.entities.getBehaviour = function(name) {
+	if(!(name in this._behaviours)) return null;
+	return this._behaviours[name];
 };
 
 dusk.entities._init();

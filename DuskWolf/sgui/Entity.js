@@ -275,7 +275,7 @@ dusk.sgui.Entity.prototype.behaviourFire = function(event, data) {
 
 dusk.sgui.Entity.prototype.addBehaviour = function(name, reInit) {
 	if(name in this._behaviours && !reInit) return null;
-	this._behaviours[name] = new dusk.behave[name](this);
+	this._behaviours[name] = new (dusk.entities.getBehaviour(name))(this);
 };
 
 
