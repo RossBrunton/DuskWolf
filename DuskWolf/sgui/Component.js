@@ -7,6 +7,7 @@ dusk.load.require("dusk.EventDispatcher");
 dusk.load.require(">dusk.keyboard");
 dusk.load.require(">dusk.controls");
 dusk.load.require("dusk.sgui");
+dusk.load.require("dusk.Mapper");
 
 dusk.load.provide("dusk.sgui.Component");
 dusk.load.provide("dusk.sgui.NullCom");
@@ -52,11 +53,13 @@ dusk.sgui.Component = function (parent, componentName) {
 	 * @default 1
 	 */
 	this.alpha = 1;
-	/** The component's height, in pixels. 
+	/** The component's height, in pixels.
+	 * Some components do not support setting their dimensions, in which case you cannot set this to anything other than 0.
 	 * @type integer
 	 */
 	this.height = 0;
 	/** The component's width, in pixels. 
+	 * Some components do not support setting their dimensions, in which case you cannot set this to anything other than 0.
 	 * @type integer
 	 */
 	this.width = 0;
@@ -132,6 +135,8 @@ dusk.sgui.Component = function (parent, componentName) {
 	 * @private
 	 */
 	this._propMasks = {};
+	
+	this._props = new dusk.Mapper(this);
 	/** An event dispatcher which fires when the element is deleted.
 	 * 
 	 * The event object has a single property named `component`, which is this.
@@ -312,7 +317,7 @@ dusk.sgui.Component.prototype.doKeyPress = function (e) {
  * @protected
  */
 dusk.sgui.Component.prototype._registerPropMask = function(name, mask, redraw, depends) {
-	this._propMasks[name] = [mask, null, depends];
+	this._props.map(name, mask, dusk.Mapper.TYPE_ANY, depends);
 };
 
 /** Adds new dependancies to an existing property mask.
@@ -323,10 +328,7 @@ dusk.sgui.Component.prototype._registerPropMask = function(name, mask, redraw, d
  * @since 0.0.17-alpha
  */
 dusk.sgui.Component.prototype._addNewPropDepends = function(name, depends) {
-	if(name in this._propMasks) {
-		if(typeof depends == "string") depends = [depends];
-		this._propMasks[name][2] = this._propMasks[name][2].concat(depends);
-	}
+	this._props.addDepends(name, depends);
 };
 
 /** Given an object, this function sets the properties of this object in relation to the properties of the object.
@@ -341,32 +343,7 @@ dusk.sgui.Component.prototype._addNewPropDepends = function(name, depends) {
  * @see {@link dusk.sgui.Component#_registerPropMask}
  */
 dusk.sgui.Component.prototype.parseProps = function(props) {
-	var toProcess = [];
-	for(var p in props) {
-		toProcess[toProcess.length] = p;
-	}
-	
-	//Dependancies system
-	while(toProcess.length) {
-		//loop through all props needing to be processed
-		for(var i = toProcess.length-1; i >= 0; i--) {
-			if(this._propMasks[toProcess[i]] && this._propMasks[toProcess[i]][2]) {
-				//Loop to see if dependancies need processing
-				for(var j = this._propMasks[toProcess[i]][2].length-1; j >= 0; j--) {
-					if(toProcess.indexOf(this._propMasks[toProcess[i]][2][j]) !== -1) {
-						//If so, then skip this one
-						j = -2;
-					}
-				}
-				
-				if(j < -1) continue;
-			}
-			
-			this.prop(toProcess[i], props[toProcess[i]]);
-			
-			toProcess.splice(i, 1);
-		}
-	}
+	this._props.massSet(props);
 };
 
 /** Returns or sets a single property of the component.
@@ -380,16 +357,9 @@ dusk.sgui.Component.prototype.parseProps = function(props) {
  * @see {dusk.sgui.Component#parseProps}
  */
 dusk.sgui.Component.prototype.prop = function(name, value) {
-	if(this._propMasks[name] !== undefined) {
-		if(value === undefined) {
-			return this[this._propMasks[name][0]];
-		}
-		
-		this[this._propMasks[name][0]] = value;
-		return value;
-	}
+	if(value === undefined) return this._props.get(name);
 	
-	return null;
+	return this._props.set(name, value);
 };
 
 /** "Bundles up" the component into a simple object.
@@ -400,11 +370,7 @@ dusk.sgui.Component.prototype.prop = function(name, value) {
  * @since 0.0.17-alpha
  */
 dusk.sgui.Component.prototype.bundle = function() {
-	var hold = {};
-	for(var p in this._propMasks) {
-		hold[p] = this[this._propMasks[p][0]];
-	}
-	return hold;
+	return this._props.massGet();
 };
 
 

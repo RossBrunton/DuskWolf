@@ -10,6 +10,20 @@ dusk.load.require("dusk.keyboard");
 
 dusk.load.provide("dusk.sgui.ControlConfig");
 
+/** Creates a new ControlConfig component.
+ * 
+ * @param {dusk.sgui.Component} parent The container that this component is in.
+ * @param {string} comName The name of the component.
+ * 
+ * @class dusk.sgui.ControlConfig
+ * 
+ * @classdesc A control config allows the user to configure a control (as used by `{@link dusk.controls}`).
+ * 
+ * 
+ * 
+ * @extends dusk.sgui.Group
+ * @constructor
+ */
 dusk.sgui.ControlConfig = function (parent, comName) {
 	dusk.sgui.Group.call(this, parent, comName);
 	

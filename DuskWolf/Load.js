@@ -181,6 +181,10 @@ dusk.load.require = function(name) {
  */
 dusk.load.import = function(name) {
 	if(this._currentlyImporting.indexOf(name) !== -1) return;
+	if(!(name in this._names)) {
+		console.error("Package "+name+" not found; could not be imported.");
+		return;
+	}
 	this._currentlyImporting.push(name);
 	for(var i = this._names[name][2].length-1; i >= 0; i --) {
 		dusk.load.import(this._names[name][2][i].replace(">", ""));
