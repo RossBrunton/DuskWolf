@@ -3,6 +3,7 @@
 "use strict";
 
 dusk.load.require("dusk.sgui.Component");
+dusk.load.require("dusk.utils");
 
 dusk.load.provide("dusk.sgui.IContainer");
 
@@ -29,20 +30,11 @@ dusk.load.provide("dusk.sgui.IContainer");
  * 
  * This class cannot be used on its own as a component.
  * 
- * @param {dusk.sgui.IContainer} parent The container that this component is in.
- * @param {string} comName The name of the component.
- * @extends dusk.sgui.Component
  * @see {@link dusk.sgui.Group}
  * @see {@link dusk.sgui.Single}
  * @constructor
  */
-dusk.sgui.IContainer = function(parent, comName) {
-	dusk.sgui.Component.call(this, parent, comName);
-};
-dusk.sgui.IContainer.prototype = new dusk.sgui.Component();
-dusk.sgui.IContainer.constructor = dusk.sgui.IContainer;
-
-dusk.sgui.IContainer.prototype.className = "IContainer";
+dusk.sgui.IContainer = function() {};
 
 /** Container specific method of handling keypresses.
  * 
@@ -54,10 +46,7 @@ dusk.sgui.IContainer.prototype.className = "IContainer";
  * @param {object} e The keypress event, must be a JQuery keypress event object.
  * @return {boolean} The return value of the focused component's keypress.
  */
-dusk.sgui.IContainer.prototype.containerKeypress = function(e) {
-	console.warn("Container "+this.className+" has not implemented \"containerKeypress\".");
-	return false;
-};
+dusk.sgui.IContainer.containerKeypress = function(e) {};
 
 /** Deletes a component from this container if possible.
  * 	It is not expected that this method remove all refrences outside itself, but it must fire the component's `{@link dusk.sgui.Component.onDelete}` event dispatcher.
@@ -65,9 +54,7 @@ dusk.sgui.IContainer.prototype.containerKeypress = function(e) {
  * @param {string} com The name of the component to delete.
  * @return {boolean} If the delete was successfull, this will return false if the component doesn't exist.
  */
-dusk.sgui.IContainer.prototype.deleteComponent = function(com) {
-	console.warn("Container "+this.className+" has not implemented \"deleteComponent\".");
-};
+dusk.sgui.IContainer.deleteComponent = function(com) {};
 
 /** Return the component with that name in this container, and potentially create it.
  * 
@@ -77,10 +64,7 @@ dusk.sgui.IContainer.prototype.deleteComponent = function(com) {
  * @param {?string} type The type of component to create if possible.
  * @return {?dusk.sgui.Component} The component, or null if it doesn't exist and wasn't created.
  */
-dusk.sgui.IContainer.prototype.getComponent = function(com, type) {
-	console.warn("Container "+this.className+" has not implemented \"getComponent\".");
-	return null;
-};
+dusk.sgui.IContainer.getComponent = function(com, type) {};
 
 /** Modifies a component in this container using JSON data.
  *	
@@ -89,9 +73,7 @@ dusk.sgui.IContainer.prototype.getComponent = function(com, type) {
  * An array may also be specified, in which case it should behave as if multiple called had been made; one for each element.
  * @param {object|array} data Information about components, as described above.
  */
-dusk.sgui.IContainer.prototype.modifyComponent = function(data) {
-	console.warn("Container "+this.className+" has not implemented \"modifyComponent\".");
-};
+dusk.sgui.IContainer.modifyComponent = function(data) {};
 
 /** If it makes sense, this should change focus to the specified component under the following conditions:
  * 
@@ -104,10 +86,7 @@ dusk.sgui.IContainer.prototype.modifyComponent = function(data) {
  * @param {string} to The name of the component to flow into.
  * @return {boolean} Whether the flow was successfull.
  */
-dusk.sgui.IContainer.prototype.flow = function(to) {
-	console.warn("Container "+this.className+" has not implemented \"flow\".");
-	return false;
-};
+dusk.sgui.IContainer.flow = function(to) {};
 
 /** Alters the layer that the specified component is on.
  * 
@@ -126,9 +105,6 @@ dusk.sgui.IContainer.prototype.flow = function(to) {
  * @param {string} alter The alteration to make to the component's layer, as described above.
  * @since 0.0.17-alpha
  */
-dusk.sgui.IContainer.prototype.alterChildLayer = function(com, alter) {
-	console.warn("Container "+this.className+" has not implemented \"alterChildLayer\".");
-};
+dusk.sgui.IContainer.alterChildLayer = function(com, alter) {};
 
 Object.seal(dusk.sgui.IContainer);
-Object.seal(dusk.sgui.IContainer.prototype);

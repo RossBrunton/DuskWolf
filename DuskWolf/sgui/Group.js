@@ -16,12 +16,13 @@ dusk.load.provide("dusk.sgui.Group");
  * One (or none) component may be focused. Focused components are the ONLY components that will receive keypress events.
  * 
  * @extends dusk.sgui.IContainer
+ * @extends dusk.sgui.Component
  * @param {?dusk.sgui.Component} parent The container that this component is in.
  * @param {string} componentName The name of the component.
  * @constructor
  */
 dusk.sgui.Group = function(parent, comName) {
-	dusk.sgui.IContainer.call(this, parent, comName);
+	dusk.sgui.Component.call(this, parent, comName);
 	
 	/** All the components in this container, key names are component names.
 	 * @type object
@@ -72,8 +73,11 @@ dusk.sgui.Group = function(parent, comName) {
 			this.getFocused().onActiveChange.fire(e);
 		}
 	}, this);
+	
+	//Check interfaces
+	if(!dusk.utils.doesImplement(this, dusk.sgui.IContainer)) console.warn(this.toString()+" does not implement dusk.sgui.IContainer!");
 };
-dusk.sgui.Group.prototype = new dusk.sgui.IContainer();
+dusk.sgui.Group.prototype = new dusk.sgui.Component();
 dusk.sgui.Group.constructor = dusk.sgui.Group;
 
 dusk.sgui.Group.prototype.className = "Group";

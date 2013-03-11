@@ -322,7 +322,7 @@ dusk.load._displayLoad = function() {
 		$("#"+dusk.canvas)[0].getContext("2d").clearRect(0, 0, $("#"+dusk.canvas)[0].width, $("#"+dusk.canvas)[0].height);
 		var textY = 0;
 		
-		//$("#"+dusk.canvas)[0].getContext("2d").fillText("Hold on! Loading "+dusk.load._files.length+" files!", 5, textY+=15);
+		$("#"+dusk.canvas)[0].getContext("2d").fillText("Hold on! Loading "+dusk.load._currentlyImporting.length+" files!", 5, textY+=15);
 		$("#"+dusk.canvas)[0].getContext("2d").fillText("Now loading "+dusk.load._current+"!", 5, textY+=15);
 		if("onLine" in navigator && !navigator.onLine) {
 			$("#"+dusk.canvas)[0].getContext("2d").fillText("You have no internet connection; good luck with that.", 5, textY+=15);

@@ -465,7 +465,7 @@ dusk.sgui.Component.prototype.path = function(path) {
 			return this._container.path(path);
 		
 		default:
-			if(this instanceof dusk.sgui.IContainer){
+			if(dusk.utils.doesImplement(this, dusk.sgui.IContainer)){
 				if(!path.length) return this.getComponent(p);
 				return this.getComponent(p).path(path);
 			}
@@ -484,7 +484,7 @@ dusk.sgui.Component.prototype.path = function(path) {
 dusk.sgui.Component.prototype.fullPath = function() {
 	if(this instanceof dusk.sgui.Pane) return this.comName+":/";
 	
-	if(this instanceof dusk.sgui.IContainer) return this._container.fullPath() + this.comName+"/";
+	if(dusk.utils.doesImplement(this, dusk.sgui.IContainer)) return this._container.fullPath() + this.comName+"/";
 	
 	return this._container.fullPath() + this.comName;
 };

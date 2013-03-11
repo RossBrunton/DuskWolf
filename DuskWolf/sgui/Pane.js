@@ -29,7 +29,7 @@ dusk.sgui.Pane = function (parent, comName) {
 dusk.sgui.Pane.prototype = new dusk.sgui.Group();
 dusk.sgui.Pane.constructor = dusk.sgui.Pane;
 
-dusk.sgui.IContainer.prototype.className = "Pane";
+dusk.sgui.Pane.prototype.className = "Pane";
 
 /** Causes the pane to become the active pane.
  * 

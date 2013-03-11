@@ -16,32 +16,34 @@ dusk.load.provide("dusk.sgui.Single");
  * When this class is created, it will have, as its child, a `{@link dusk.sgui.NullCom}` named `"blank"`.
  * 
  * @extends dusk.sgui.IContainer
+ * @extends dusk.sgui.Component
  * @param {?dusk.sgui.Component} parent The container that this component is in.
  * @param {string} componentName The name of the component.
  * @constructor
  */
 dusk.sgui.Single = function(parent, comName) {
-	if (parent !== undefined){
-		dusk.sgui.Component.call(this, parent, comName);
+	dusk.sgui.Component.call(this, parent, comName);
+	
+	/** The actuall component this Single has.
+	 * @type dusk.sgui.Component
+	 * @private
+	 */
+	this._component = null;
+	
+	this.newComponent("blank", "NullCom");
+	
+	//Prop masks
+	this._registerPropMask("child", "__child", false);
+	
+	//Listeners
+	this.prepareDraw.listen(this._singleDraw, this);
+	this.frame.listen(this._singleFrame, this);
+	this.onActiveChange.listen(function(e){this._component.onActiveChange.fire(e);}, this);
 		
-		/** The actuall component this Single has.
-		 * @type dusk.sgui.Component
-		 * @private
-		 */
-		this._component = null;
-		
-		this.newComponent("blank", "NullCom");
-		
-		//Prop masks
-		this._registerPropMask("child", "__child", false);
-		
-		//Listeners
-		this.prepareDraw.listen(this._singleDraw, this);
-		this.frame.listen(this._singleFrame, this);
-		this.onActiveChange.listen(function(e){this._component.onActiveChange.fire(e);}, this);
-	}
+	//Check interfaces
+	if(!dusk.utils.doesImplement(this, dusk.sgui.IContainer)) console.warn(this.toString()+" does not implement dusk.sgui.IContainer!");
 };
-dusk.sgui.Single.prototype = new dusk.sgui.IContainer();
+dusk.sgui.Single.prototype = new dusk.sgui.Component();
 dusk.sgui.Single.constructor = dusk.sgui.Group;
 
 dusk.sgui.Single.prototype.className = "Single";
@@ -173,7 +175,7 @@ dusk.sgui.Single.prototype.flow = function(to) {
  * @param {string} alter The alteration to make, will be ignored.
  * @since 0.0.17-alpha
  */
-dusk.sgui.IContainer.prototype.alterChildLayer = function(com, alter) {
+dusk.sgui.Single.prototype.alterChildLayer = function(com, alter) {
 	//Does nothing
 };
 

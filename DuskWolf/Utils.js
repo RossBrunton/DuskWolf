@@ -9,14 +9,6 @@ dusk.load.provide("dusk.utils");
  * @description This namespace contains general functions for manipulating data, nothing specific to any other namespace.
  */
 
-/** Returns if the object can be parsed as a JSON string. If it returns true, then it can be assumed that `JSON.parse` will not throw any error when trying to parse the string.
- * @param {string} str The string to test.
- * @return {boolean} Whether the string is a valid JSON string.
- */
-dusk.utils.isJson = function(str) {
-	return /^[\],:{}\s]*$/.test(String(str).replace(/\\["\\\/bfnrtu]/g, '@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').replace(/(?:^|:|,)(?:\s*\[)+/g, ''));
-};
-
 /** Makes a simple copy of the parameter object, and returns it. This will only work for simple objects, and not anything with prototypes and such like.
  * @param {object} o The source object to copy.
  * @return {object} A copy of the source object.
@@ -51,6 +43,26 @@ dusk.utils.merge = function(a, b) {
 	return a;
 };
 
+/** Returns whether an object implements a specified interface.
+ * 
+ * The interface is an object where the enumerable property names (with any value equivalent to true) represent functions.
+ *  The object wishing to implement this interface must have all the specified property names be functions.
+ * 
+ * @param {object} obj The object you wish to check.
+ * @param {object} inter The interface that you want to check the object by.
+ * @return {boolean} Whether the object implements the interface or not.
+ * @since 0.0.18-alpha
+ */
+dusk.utils.doesImplement = function(obj, inter) {
+	for(var p in inter) {
+		if(!(p in obj) || typeof obj[p] != "function") {
+			return false;
+		}
+	}
+	
+	return true;
+};
+
 /** Creates a new canvas with a specified height and width.
  * 
  * @param {integer} width The width of the canvas.
@@ -80,6 +92,14 @@ dusk.utils.urlGet = function(name) {
 	}
 	
 	return false;
+};
+
+/** Returns if the object can be parsed as a JSON string. If it returns true, then it can be assumed that `JSON.parse` will not throw any error when trying to parse the string.
+ * @param {string} str The string to test.
+ * @return {boolean} Whether the string is a valid JSON string.
+ */
+dusk.utils.isJson = function(str) {
+	return /^[\],:{}\s]*$/.test(String(str).replace(/\\["\\\/bfnrtu]/g, '@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').replace(/(?:^|:|,)(?:\s*\[)+/g, ''));
 };
 
 /** Strips anything that looks like a comment from a JSON string.
