@@ -4,6 +4,7 @@
 
 dusk.load.require(">dusk.sgui.Entity");
 dusk.load.require(">dusk.EventDispatcher");
+dusk.load.require("dusk.entities");
 
 dusk.load.provide("dusk.behave.Behave");
 

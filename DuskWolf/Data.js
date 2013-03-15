@@ -80,7 +80,7 @@ dusk.data.grabImage = function(file) {
 		console.log("Downloading image "+file+"...");
 		
 		this._loaded[file] = new Image();
-        this._loaded[file].src = dusk.utils.resolveRelative(file, dusk.dataDir) + (dusk.dev?"?_="+(new Date()).getTime():"");
+        this._loaded[file].src = dusk.utils.resolveRelative(file, dusk.dataDir) /*+ (dusk.dev?"?_="+(new Date()).getTime():"")*/;
 		return this._loaded[file];
 	}
 	return this._loaded[file];
