@@ -21,7 +21,7 @@ dusk.behave.HitDam.constructor = dusk.behave.HitDam;
 
 dusk.behave.HitDam.prototype._hdCollide = function(e) {
 	if(e.target === "wall") return;
-	e.target.behaviourFire("takeDamage", {"damage":this._data("damage"), "source":this._entity});
+	e.target.behaviourFire("takeDamage", {"damage":this._data("damage"), "source":this._entity, "types":this._data("types")});
 };
 
 Object.seal(dusk.behave.HitDam);

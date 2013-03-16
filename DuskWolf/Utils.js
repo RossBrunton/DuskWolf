@@ -229,22 +229,22 @@ dusk.utils.dataToString = function(arr, type) {
 				//Still found it
 				counted ++;
 				if(counted === 0x00ff) {
-					console.log("A lot of them were found; starting again.");
+					//console.log("A lot of them were found; starting again.");
 					holdv[point++] = 0x8000 | (currentlyFeeding << 8) | counted;
 					count = 0;
 				}
 				continue;
 			}else if(currentlyFeeding !== -1 && buff[i] !== patterns[currentlyFeeding]) {
-				console.log("Found a total of "+counted+" of pattern "+currentlyFeeding+" which is "+patterns[currentlyFeeding]);
+				//console.log("Found a total of "+counted+" of pattern "+currentlyFeeding+" which is "+patterns[currentlyFeeding]);
 				holdv[point++] = 0x8000 | (currentlyFeeding << 8) | counted;
 				currentlyFeeding = -1;
 				i --;
 				continue;
 			}else if(buff[i+1] !== undefined && buff[i+2] !== undefined && buff[i] === buff[i+1] && buff[i+1] === buff[i+2]) {
-				console.log("Found pattern "+buff[i]);
+				//console.log("Found pattern "+buff[i]);
 				for(var j = 0; j < 0x007f; j ++) {
 					if(patterns[j] === undefined || patterns[j] === buff[i]) {
-						console.log("Storing it as "+j);
+						//console.log("Storing it as "+j);
 						currentlyFeeding = j;
 						patterns[j] = buff[i];
 						break;
@@ -253,14 +253,14 @@ dusk.utils.dataToString = function(arr, type) {
 				counted = 1;
 				
 				if(currentlyFeeding === -1) { 
-					console.log("Unfortunatley, out of slots... Whoops!");
+					//console.log("Unfortunatley, out of slots... Whoops!");
 				}else{
 					continue;
 				}
 			}
 			
 			if(buff[i] & 0x8000) {
-				console.log("Large value found: "+buff[i]);
+				//console.log("Large value found: "+buff[i]);
 				holdv[point++] = 0xffff;
 				holdv[point++] = buff[i];
 			}else{
@@ -269,7 +269,7 @@ dusk.utils.dataToString = function(arr, type) {
 		}
 		
 		if(currentlyFeeding !== -1) {
-			console.log("Finished, and found a total of "+counted+" of pattern "+currentlyFeeding+" which is "+patterns[currentlyFeeding]);
+			//console.log("Finished, and found a total of "+counted+" of pattern "+currentlyFeeding+" which is "+patterns[currentlyFeeding]);
 			holdv[point++] = 0x8000 | (currentlyFeeding << 8) | counted;
 		}
 		

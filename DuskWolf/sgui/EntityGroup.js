@@ -285,7 +285,7 @@ dusk.sgui.EntityGroup.prototype._numberDrop = function(e) {
 	}
 	
 	dusk.editor.editNext = "";
-	entity.type = dusk.editor.editDroppers[e.keyCode-48];
+	entity.type = dusk.editor.editDroppers[e.key-48];
 	entity.x = (this._cx<<this.tsize)+this._offsetX;
 	entity.y = (this._cy<<this.tsize)+this._offsetY;
 	this.dropEntity(entity, false);

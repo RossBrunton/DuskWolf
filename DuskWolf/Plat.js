@@ -31,7 +31,7 @@ dusk.plat._init = function() {
 	//dusk.skills.giveSkill("infinijump");
 	
 	var main = dusk.sgui.getPane("plat-main");
-	main.modifyComponent({"name":"mainContainer", "focus":"main", "type":"CentreScroller", "width":-1, "height":-1, "child":{"name":"main", "type":"BasicMain"}});
+	main.modifyComponent([{"name":"mainContainer", "focus":"main", "type":"CentreScroller", "width":-1, "height":-1, "child":{"name":"main", "type":"BasicMain"}}]);
 	main.becomeActive();
 	main.flow("mainContainer");
 	

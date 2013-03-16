@@ -58,7 +58,7 @@ dusk.load.provide("dusk.sgui");
 dusk.sgui._init = function() {
 	//Listen for keypresses
 	dusk.keyboard.keyPress.listen(function(event) {
-		this.getActivePane().doKeyPress(event);
+		if(this.getActivePane()) this.getActivePane().doKeyPress(event);
 	}, this);
 	
 	//Listen for frame events

@@ -22,7 +22,7 @@ dusk.behave.Killable = function(entity) {
 dusk.behave.Killable.prototype = new dusk.behave.Behave();
 dusk.behave.Killable.constructor = dusk.behave.Killable;
 
-dusk.behave.Killable.prototype._killableTakeDamage = function(name, e) {
+dusk.behave.Killable.prototype._killableTakeDamage = function(e) {
 	if(isNaN(e.damage)) {
 		console.warn("Tried to damage entity with NaN damage "+e.damage+".");
 		return;

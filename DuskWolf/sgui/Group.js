@@ -151,8 +151,8 @@ dusk.sgui.Group.prototype._newComponent = function(com, type) {
 /** Modifies this component's children using JSON data.
  *	See `{@link dusk.sgui.Component.parseProps}` for a basic description on how JSON properties work.
  * 
- * `data` is either a single object or an array of objects, each describing a single component.
- * 	Each component must have a `name` property, stating the name of the component they are modifying.
+ * `data` is either a single component description, an array of component description or an object with the keys being component names, and the value being their data.
+ * 	Each component must have a `name` property, stating the name of the component they are modifying. This is the key when describing multiple components using an object.
  *	It may also have a `type` property, which will be used in case the component does not exist to set its type.
  * 	If the component does not exist and `type` is omitted, then a warning is raised, and that object is skipped.
  * 
@@ -161,17 +161,31 @@ dusk.sgui.Group.prototype._newComponent = function(com, type) {
  * @param {object|array} data Information about components, as described above.
  */
 dusk.sgui.Group.prototype.modifyComponent = function(data) {
-	if("length" in data) {
+	if(Array.isArray(data)) {
 		for (var i = 0; i < data.length; i++) {
-			this.modifyComponent(data[i]);
+			if(("name" in data[i]) && this.getComponent(data[i].name.toLowerCase(), data[i].type)) {
+				this.getComponent(data[i].name.toLowerCase()).parseProps(data[i]);
+			} else if(data[i].name) {
+				console.warn(data[i].name + " has not been given a type and does not exist, ignoring.");
+			} else {
+				console.warn("A component has no name in "+this.comName+", cannot create or edit.");
+			}
 		}
 	}else{
-		if(data.name && this.getComponent(data.name.toLowerCase(), data.type)) {
-			return this.getComponent(data.name.toLowerCase()).parseProps(data, this._thread);
-		} else if(data.name) {
-			console.warn(data.name + " has not been given a type and does not exist, ignoring.");
-		} else {
-			console.warn("A component has no name in "+this.comName+", cannot create or edit.");
+		if("name" in data && typeof data.name == "string") {
+			if(this.getComponent(data.name.toLowerCase(), data.type)) {
+				return this.getComponent(data.name.toLowerCase()).parseProps(data);
+			}else{
+				console.warn(data.name + " has not been given a type and does not exist, ignoring.");
+			}
+		}else{
+			for(var p in data) {
+				if(this.getComponent(p.toLowerCase(), data[p].type)) {
+					this.getComponent(p.toLowerCase()).parseProps(data[p]);
+				}else{
+					console.warn(p + " has not been given a type and does not exist, ignoring.");
+				}
+			}
 		}
 	}
 };

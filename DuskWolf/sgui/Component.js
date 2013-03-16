@@ -278,7 +278,7 @@ dusk.sgui.Component.DIR_RIGHT = 3;
  * @return {boolean} Whether the parent container should run it's own actions.
  */
 dusk.sgui.Component.prototype.doKeyPress = function (e) {
-	if(this instanceof dusk.sgui.IContainer && !this.containerKeypress(e)){return false;}
+	if(dusk.utils.doesImplement(this, dusk.sgui.IContainer) && !this.containerKeypress(e)){return false;}
 	
 	var eventObject = {"key":e.keyCode, "shift":e.shiftKey, "ctrl":e.ctrlKey, "meta":e.metaKey, "jquery":e};
 	
@@ -376,7 +376,6 @@ Object.defineProperty(dusk.sgui.Component.prototype, "deleted", {
 	set: function (value) {
 		if(value && !this._deleted) {
 			this._deleted = true;
-			this.onDelete.fire({"component":this});
 			this._container.deleteComponent(this.comName);
 		}
 	},
