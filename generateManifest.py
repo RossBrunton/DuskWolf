@@ -27,4 +27,5 @@ for i in xrange(1, len(sys.argv) - 1, 2):
 	os.chdir(sys.argv[i+1])
 	for root, dirs, files in os.walk("."):
 		for f in files:
-			print sys.argv[i]+posixpath.join(root, f)[2:]
+			if f[-1] != "~":
+				print sys.argv[i]+posixpath.join(root, f)[2:]

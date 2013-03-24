@@ -35,6 +35,13 @@ dusk.plat._init = function() {
 	main.becomeActive();
 	main.flow("mainContainer");
 	
+	main.getComponent("mainContainer").getComponent("main").layers = [
+		{"name":"back", "type":dusk.sgui.BasicMain.LAYER_TILEMAP},
+		{"name":"scheme", "type":dusk.sgui.BasicMain.LAYER_SCHEME},
+		{"name":"entities", "type":dusk.sgui.BasicMain.LAYER_ENTITIES, "primary":true},
+		{"name":"over", "type":dusk.sgui.BasicMain.LAYER_TILEMAP}
+	];
+	
 	dusk.entities.types.createNewType("plat", {
 		"data":{"hp":1, "gravity":1, "terminal":9, "haccel":2, "hspeed":7, "jump":15, "slowdown":1, "img":"pimg/hero.png", "solid":true, "anchor":false},
 		"animation":{"stationary":"0,0"},

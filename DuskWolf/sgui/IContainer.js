@@ -24,6 +24,7 @@ dusk.load.provide("dusk.sgui.IContainer");
  * 
  * - {@link dusk.sgui.IContainer.containerKeypress}
  * - {@link dusk.sgui.IContainer.deleteComponent}
+ * - {@link dusk.sgui.IContainer.deleteAllComponents}
  * - {@link dusk.sgui.IContainer.flow}
  * - {@link dusk.sgui.IContainer.getComponent}
  * - {@link dusk.sgui.IContainer.alterChildLayer}
@@ -55,6 +56,12 @@ dusk.sgui.IContainer.containerKeypress = function(e) {};
  * @return {boolean} If the delete was successfull, this will return false if the component doesn't exist.
  */
 dusk.sgui.IContainer.deleteComponent = function(com) {};
+
+/** Deletes all the components from this container under the same critera as `{@link dusk.sgui.IContainer#deleteComponent}`.
+ * 
+ * @since 0.0.18-alpha
+ */
+dusk.sgui.IContainer.deleteAllComponents = function() {};
 
 /** Return the component with that name in this container, and potentially create it.
  * 

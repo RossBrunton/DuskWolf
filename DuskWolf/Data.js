@@ -71,7 +71,7 @@ dusk.data.download = function(file, type, callback, state) {
  * @return {HTMLImageElement} A HTML Image tag with the src set to the path requested.
  */
 dusk.data.grabImage = function(file) {
-	if(file === "") {
+	if(!file) {
 		//Blank image
 		return new Image();
 	}

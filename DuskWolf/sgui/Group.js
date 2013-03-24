@@ -39,6 +39,13 @@ dusk.sgui.Group = function(parent, comName) {
 	 * @protected
 	 */
 	this._focusedCom = "";
+	/** Used internally to store the current focus behaviour.
+	 * @type integer
+	 * @default FOCUS_ONE
+	 * @private
+	 * @since 0.0.18-alpha
+	 */
+	this._focusBehaviour = dusk.sgui.Group.FOCUS_ONE;
 	/** The current behaviour used to say how focus works. Changing this will not affect any currently existing components.
 	 * @type integer
 	 * @default FOCUS_ONE
@@ -280,6 +287,17 @@ dusk.sgui.Group.prototype.deleteComponent = function(com) {
 	}
 };
 
+/** Deletes all the components in this group.
+ * 
+ * @see dusk.sgui.Group#deleteComponent
+ * @since 0.0.18-alpha
+ */
+dusk.sgui.Group.prototype.deleteAllComponents = function(com) {
+	for(var p in this._components) {
+		this.deleteComponent(p);
+	}
+};
+
 //focus
 dusk.sgui.Group.prototype.__defineSetter__("focus", function s_focus(value) {
 	if(value) this.flow(value);
@@ -321,6 +339,38 @@ dusk.sgui.Group.prototype.flow = function(to) {
 	
 	this._focusedCom = "";
 };
+
+//focusBehaviour
+Object.defineProperty(dusk.sgui.Group.prototype, "focusBehaviour", {
+	set: function(value) {
+		if(this._focusBehaviour == value) return;
+		this._focusBehaviour = value;
+		
+		switch(this._focusBehaviour) {
+			case dusk.sgui.Group.FOCUS_ONE:
+				for(var c in this._components) {
+					if(this._focusedCom != c) {
+						if(this._active) this._components[c].onActiveChange.fire({"active":false});
+						this._components[c].onFocusChange.fire({"focus":false});
+					}
+				}
+				break;
+				
+			case dusk.sgui.Group.FOCUS_ALL:
+				for(var c in this._components) {
+					if(this._focusedCom != c) {
+						if(this._active) this._components[c].onActiveChange.fire({"active":true});
+						this._components[c].onFocusChange.fire({"focus":true});
+					}
+				}
+				break;
+		}
+	},
+	
+	get: function() {
+		return this._focusBehaviour
+	}
+});
 
 /** Alters the layer components are on; higher layers are drawn later, appearing on top of others.
  * 

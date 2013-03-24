@@ -140,7 +140,7 @@ dusk.sgui.Single.prototype.getComponent = function(com, type) { //Component
 
 /** Deletes the component, replacing it with a `{@link dusk.sgui.NullCom}` named `"blank"`; which is the default component.
  * 
- * @param {string} com The name of the component to delete.
+ * @param {string} com Must be any false value, "*" or the name of the component.
  * @return {boolean} If the delete was successfull, this will return false if the name was invalid.
  */
 dusk.sgui.Single.prototype.deleteComponent = function(com) {
@@ -151,6 +151,14 @@ dusk.sgui.Single.prototype.deleteComponent = function(com) {
 	}
 	
 	return false;
+};
+
+/** Deletes the component, replacing it with a `{@link dusk.sgui.NullCom}` named `"blank"`; which is the default component.
+ * @since 0.0.18-alpha
+ */
+dusk.sgui.Single.prototype.deleteAllComponents = function(com) {
+	this._component.onDelete.fire({"com":this._component});
+	this.newComponent("blank", "NullCom");
 };
 
 /** Calls the `{@link dusk.sgui.Component.frame}` method of its component.

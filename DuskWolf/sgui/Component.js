@@ -88,6 +88,12 @@ dusk.sgui.Component = function (parent, componentName) {
 	 * @type string
 	 */
 	this.downFlow = "";
+	/** This should be set to true only in a dirPress listener. If true, then there will be no attempt at flowing out of the component.
+	 * @type boolean
+	 * @protected
+	 * @since 0.0.18-alpha
+	 */
+	this._noFlow = false;
 	
 	/** Fired when a key is pressed.
 	 * 
@@ -282,17 +288,19 @@ dusk.sgui.Component.prototype.doKeyPress = function (e) {
 	
 	var eventObject = {"key":e.keyCode, "shift":e.shiftKey, "ctrl":e.ctrlKey, "meta":e.metaKey, "jquery":e};
 	
+	this._noFlow = false;
+	
 	var dirReturn = true;
 	if(this.keyPress.fire(eventObject)) {
 		//Directions
 		if(dusk.controls.checkKey("sgui_left", e.which)) {
-			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.Component.DIR_LEFT, "e":e})) && this.leftFlow && this._container.flow(this.leftFlow)){return false;}
+			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.Component.DIR_LEFT, "e":e})) && !this._noFlow && this.leftFlow && this._container.flow(this.leftFlow)){return false;}
 		}else if(dusk.controls.checkKey("sgui_up", e.which)) {
-			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.Component.DIR_UP, "e":e})) && this.upFlow && this._container.flow(this.upFlow)){return false;}
+			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.Component.DIR_UP, "e":e})) && !this._noFlow && this.upFlow && this._container.flow(this.upFlow)){return false;}
 		}else if(dusk.controls.checkKey("sgui_right", e.which)) {
-			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.Component.DIR_RIGHT, "e":e})) && this.rightFlow && this._container.flow(this.rightFlow)){return false;}
+			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.Component.DIR_RIGHT, "e":e})) && !this._noFlow && this.rightFlow && this._container.flow(this.rightFlow)){return false;}
 		}else if(dusk.controls.checkKey("sgui_down", e.which)) {
-			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.Component.DIR_DOWN, "e":e})) && this.downFlow && this._container.flow(this.downFlow)){return false;}
+			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.Component.DIR_DOWN, "e":e})) && !this._noFlow && this.downFlow && this._container.flow(this.downFlow)){return false;}
 		}else if(dusk.controls.checkKey("sgui_action", e.which)) {
 			return this.action.fire({"keyPress":e});
 		}

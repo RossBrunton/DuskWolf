@@ -258,7 +258,10 @@ dusk.sgui.TileMap.prototype.drawAll = function() {
 		for (var yi = 0; yi < this.rows; yi++) {
 			for (var xi = 0; xi < this.cols; xi++) {
 				if(this._tiles[i] !== undefined) {
-					this._all.getContext("2d").drawImage(this._img, this._tiles[i]<<this.ssize, this._tiles[i+1]<<this.ssize, 1<<this.ssize, 1<<this.ssize, xi<<this.ssize, yi<<this.ssize, 1<<this.ssize, 1<<this.ssize);
+					this._all.getContext("2d").drawImage(this._img,
+						this._tiles[i]<<this.ssize, this._tiles[i+1]<<this.ssize, 1<<this.ssize, 1<<this.ssize,
+						xi<<this.ssize, yi<<this.ssize, 1<<this.ssize, 1<<this.ssize
+					);
 				}
 				i+=2;
 			}
@@ -269,7 +272,10 @@ dusk.sgui.TileMap.prototype.drawAll = function() {
 		for (var yi = 0; yi < this.rows; yi++) {
 			for (var xi = 0; xi < this.cols; xi++) {
 				if(this._tiles[i] !== undefined) {
-					this._all.getContext("2d").drawImage(this._img, this._tiles[i]*this.swidth, this._tiles[i+1]*this.sheight, this.swidth, this.sheight, xi*this.swidth, yi*this.sheight, this.swidth, this.sheight);
+					this._all.getContext("2d").drawImage(this._img, 
+						this._tiles[i]*this.swidth, this._tiles[i+1]*this.sheight, this.swidth, this.sheight, 
+						xi*this.swidth, yi*this.sheight, this.swidth, this.sheight
+					);
 				}
 				i+=2;
 			}
@@ -358,11 +364,15 @@ dusk.sgui.TileMap.prototype._tileMapDraw = function(c) {
 	var l = this.lbound<0?0:this.lbound;
 	if(this.mode == "BINARY") {
 		var scale = this.tsize-this.ssize;
-		c.drawImage(this._all, l>>scale, u>>scale, (this.rbound-this.lbound)>>scale, (this.bbound-this.ubound)>>scale, l, u, (this.rbound-this.lbound), (this.bbound-this.ubound));
+		c.drawImage(this._all, l>>scale, u>>scale, (this.rbound-this.lbound)>>scale, (this.bbound-this.ubound)>>scale,
+			l, u, (this.rbound-this.lbound), (this.bbound-this.ubound)
+		);
 	}else{
 		var hscale = this.swidth/this.twidth;
 		var vscale = this.sheight/this.theight;
-		c.drawImage(this._all, l*hscale, u*vscale, (this.rbound-this.lbound)*hscale, (this.bbound-this.ubound)*vscale, l, u, (this.rbound-this.lbound), (this.bbound-this.ubound));
+		c.drawImage(this._all, l*hscale, u*vscale, (this.rbound-this.lbound)*hscale, (this.bbound-this.ubound)*vscale, 
+			l, u, (this.rbound-this.lbound), (this.bbound-this.ubound)
+		);
 	}
 };
 

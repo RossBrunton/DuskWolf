@@ -10,6 +10,7 @@ dusk.behave.HitDam = function(entity) {
 	if(entity !== undefined){
 		dusk.behave.Behave.call(this, entity);
 		
+		this._data("types", [], true);
 		this._data("damage", 1, true);
 		
 		this.entityEvent.listen(this._hdCollide, this, {"name":"collide"});

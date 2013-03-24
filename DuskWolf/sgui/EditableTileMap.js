@@ -104,7 +104,7 @@ dusk.sgui.EditableTileMap.globalEditWidth = 1;
  * @private
  */
 dusk.sgui.EditableTileMap.prototype._editTileMapDraw = function(c) {
-	if(!this._focused) return;
+	if(!this._focused || !dusk.editor.active) return;
 	c.strokeStyle = this.prop("cursorColour");
 	c.strokeRect(this._cx*this.tileWidth(), this._cy*this.tileHeight(), this.tileWidth()*this.frameWidth, this.tileHeight()*this.frameHeight);
 };
@@ -115,7 +115,7 @@ dusk.sgui.EditableTileMap.prototype._editTileMapDraw = function(c) {
  */
 dusk.sgui.EditableTileMap.prototype._editTileMapFrame = function(e) {
 	if(this.globalCoords) {
-		if(this._focused) {
+		if(this._focused && dusk.editor.active) {
 			dusk.sgui.EditableTileMap.globalEditX = this._cx;
 			dusk.sgui.EditableTileMap.globalEditY = this._cy;
 			dusk.sgui.EditableTileMap.globalEditWidth = this.frameWidth;
@@ -135,7 +135,7 @@ dusk.sgui.EditableTileMap.prototype._editTileMapFrame = function(e) {
  * @private
  */
 dusk.sgui.EditableTileMap.prototype._etmUpAction = function(e) {
-	if(e.e.ctrlKey) return true;
+	if(e.e.ctrlKey || !dusk.editor.active) return true;
 	if(e.e.shiftKey) {
 		var current = this.getTile(this._cx, this._cy);
 		current[1] --;
@@ -159,7 +159,8 @@ dusk.sgui.EditableTileMap.prototype._etmUpAction = function(e) {
 	}
 	
 	if(dusk.keyboard.isKeyPressed(187) || dusk.keyboard.isKeyPressed(189)) {
-		return false;
+		this._noFlow = true;
+		return true;
 	}
 	
 	if(this._cy) this._cy --;
@@ -171,7 +172,7 @@ dusk.sgui.EditableTileMap.prototype._etmUpAction = function(e) {
  * @private
  */
 dusk.sgui.EditableTileMap.prototype._etmDownAction = function(e) {
-	if(e.e.ctrlKey) return true;
+	if(e.e.ctrlKey || !dusk.editor.active) return true;
 	if(e.e.shiftKey) {
 		var current = this.getTile(this._cx, this._cy);
 		current[1] ++;
@@ -195,7 +196,8 @@ dusk.sgui.EditableTileMap.prototype._etmDownAction = function(e) {
 	}
 	
 	if(dusk.keyboard.isKeyPressed(187) || dusk.keyboard.isKeyPressed(189)) {
-		return false;
+		this._noFlow = true;
+		return true;
 	}
 	
 	this._cy ++;
@@ -207,7 +209,7 @@ dusk.sgui.EditableTileMap.prototype._etmDownAction = function(e) {
  * @private
  */
 dusk.sgui.EditableTileMap.prototype._etmRightAction = function(e) {
-	if(e.e.ctrlKey) return true;
+	if(e.e.ctrlKey || !dusk.editor.active) return true;
 	if(e.e.shiftKey) {
 		var current = this.getTile(this._cx, this._cy);
 		current[0] ++;
@@ -231,7 +233,8 @@ dusk.sgui.EditableTileMap.prototype._etmRightAction = function(e) {
 	}
 	
 	if(dusk.keyboard.isKeyPressed(187) || dusk.keyboard.isKeyPressed(189)) {
-		return false;
+		this._noFlow = true;
+		return true;
 	}
 	
 	this._cx ++;
@@ -243,7 +246,7 @@ dusk.sgui.EditableTileMap.prototype._etmRightAction = function(e) {
  * @private
  */
 dusk.sgui.EditableTileMap.prototype._etmLeftAction = function(e) {
-	if(e.e.ctrlKey) return true;
+	if(e.e.ctrlKey || !dusk.editor.active) return true;
 	if(e.e.shiftKey) {
 		var current = this.getTile(this._cx, this._cy);
 		current[0] --;
@@ -267,7 +270,8 @@ dusk.sgui.EditableTileMap.prototype._etmLeftAction = function(e) {
 	}
 	
 	if(dusk.keyboard.isKeyPressed(187) || dusk.keyboard.isKeyPressed(189)) {
-		return false;
+		this._noFlow = true;
+		return true;
 	}
 	
 	if(this._cx) this._cx --;
@@ -438,6 +442,24 @@ dusk.sgui.EditableTileMap.prototype.carveRight = function() {
  */
 dusk.sgui.EditableTileMap.prototype.save = function() {
 	return this.map.map;
+};
+
+/** Returns the map for `{@link dusk.sgui.BasicMain}` to save it.
+ * 
+ * @return {object} The current map.
+ * @since 0.0.18-alpha
+ */
+dusk.sgui.EditableTileMap.prototype.saveBM = function() {
+	return this.map;
+};
+
+/** Loads a map from an object. This is used by `{@link dusk.sgui.BasicMain}`.
+ * 
+ * @param {object} map The map to load, will be assigned to `{@link dusk.sgui.EditableTileMap#map}`.
+ * @since 0.0.18-alpha
+ */
+dusk.sgui.EditableTileMap.prototype.loadBM = function(map) {
+	this.map = map;
 };
 
 Object.seal(dusk.sgui.EditableTileMap);

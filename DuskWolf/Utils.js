@@ -231,7 +231,7 @@ dusk.utils.dataToString = function(arr, type) {
 				if(counted === 0x00ff) {
 					//console.log("A lot of them were found; starting again.");
 					holdv[point++] = 0x8000 | (currentlyFeeding << 8) | counted;
-					count = 0;
+					counted = 0;
 				}
 				continue;
 			}else if(currentlyFeeding !== -1 && buff[i] !== patterns[currentlyFeeding]) {

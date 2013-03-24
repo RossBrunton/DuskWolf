@@ -26,6 +26,7 @@ dusk.sgui.EntityGroup = function (parent, comName) {
 	
 	this.mode = "BINARY";
 	
+	this._scheme = null;
 	this.scheme = null;
 	
 	this._selectedEntity = null;
@@ -88,7 +89,7 @@ dusk.sgui.EntityGroup.prototype.doFrame = function() {
 		for(var i = this._entities.length-1; i >= 0; i --) this._entities[i].moveAndCollide();
 		
 		//Call every entities' startFrame function
-		for(var i = this._entities.length-1; i >= 0; i --) this._entities[i].startFrame();
+		for(var i = this._entities.length-1; i >= 0; i --) if(i < this._entities.length) this._entities[i].startFrame();
 	}
 };
 
@@ -184,7 +185,7 @@ dusk.sgui.EntityGroup.prototype.dropEntity = function(entity, takeFocus) {
 	return dropped; 
 };
 
-dusk.sgui.EntityGroup.prototype.save = function() {
+dusk.sgui.EntityGroup.prototype.saveBM = function() {
 	var list = [];
 	for(var i = this._entities.length-1; i >= 0; i --){
 		if(this._entities[i].comName != dusk.entities.seek){
@@ -198,6 +199,26 @@ dusk.sgui.EntityGroup.prototype.save = function() {
 	
 	return list;
 };
+
+dusk.sgui.EntityGroup.prototype.loadBM = function(ents) {
+	this.clear();
+	for(var i = ents.length-1; i >= 0; i --){
+		this.dropEntity(ents[i]);
+	}
+};
+
+Object.defineProperty(dusk.sgui.EntityGroup.prototype, "scheme", {
+	get: function() {
+		return this._scheme;
+	},
+	
+	set: function(val) {
+		this._scheme = val;
+		for(var i = this._entities.length-1; i >= 0; i --){
+			this._entities[i].scheme = val;
+		}
+	}
+});
 
 dusk.sgui.EntityGroup.prototype.adjustAll = function(dx, dy) {
 	for(var i = this._entities.length-1; i >= 0; i --){
