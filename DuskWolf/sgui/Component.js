@@ -400,22 +400,32 @@ Object.defineProperty(dusk.sgui.Component.prototype, "deleted", {
  * The canvas' state will be restored to what it was as an argument when this function is finished, so no changes to the state will persist out of the function.
  * 
  * @param {CanvasRenderingContext2D} c The canvas context to draw onto.
+ * @param {integer=0} xOffset The x offset, this is subtracted from the component's x value.
+ * @param {integer=0} yOffset The x offset, this is subtracted from the component's x value.
  */
-dusk.sgui.Component.prototype.draw = function(c) {
+dusk.sgui.Component.prototype.draw = function(c, xOffset, yOffset) {
 	if(!this.visible) return;
+	if(xOffset === undefined) xOffset = 0;
+	if(yOffset === undefined) yOffset = 0;
 
-	var state = c.save();
-	if(this.x || this.y) c.translate(~~this.x, ~~this.y);
-	if(this.alpha != 1) c.globalAlpha = this.alpha;
+	//var state = c.save();
+	//if(this.x - xOffset || this.y - yOffset) c.translate(~~(this.x - xOffset), ~~(this.y - yOffset));
+	
+	var oldAlpha = -1;
+	if(this.alpha != c.globalAlpha) {
+		oldAlpha = c.globalAlpha;
+		c.globalAlpha = this.alpha;
+	}
 	
 	this.prepareDraw.fire(c);
 
 	if(this.mark !== null) {
 		c.strokeStyle = this.mark;
-		c.strokeRect(0, 0, this.prop("width"), this.prop("height"));
+		c.strokeRect(this.x, this.y, this.width, this.height);
 	}
 
-	c.restore(state);
+	//c.restore(state);
+	if(oldAlpha >= 0) c.globalAlpha = oldAlpha
 };
 
 /** Alters the layer this is on.

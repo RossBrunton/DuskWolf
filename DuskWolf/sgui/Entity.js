@@ -367,7 +367,7 @@ dusk.sgui.Entity.prototype.eProp = function(prop, set) {
 
 dusk.sgui.Entity.prototype._collisionDraw = function(c) {
 	c.strokeStyle = this.collisionMark;
-	c.strokeRect(this.collisionOffsetX, this.collisionOffsetY, -this.collisionOffsetX+this.collisionWidth, -this.collisionOffsetY+this.collisionHeight);
+	c.strokeRect(this.x + this.collisionOffsetX, this.y + this.collisionOffsetY, -this.collisionOffsetX+this.collisionWidth, -this.collisionOffsetY+this.collisionHeight);
 };
 
 Object.seal(dusk.sgui.Entity);

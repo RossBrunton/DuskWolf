@@ -86,7 +86,7 @@ dusk.sgui.ControlConfig.prototype._ccFrame = function(e) {
 dusk.sgui.ControlConfig.prototype._ccDraw = function(c) {
 	c.strokeStyle = this._active?this.borderActive:this.border;
 	
-	c.strokeRect(0, 0, this.width, this.height);
+	c.strokeRect(this.x, this.y, this.width, this.height);
 };
 
 dusk.sgui.ControlConfig.prototype._ccKey = function(e) {

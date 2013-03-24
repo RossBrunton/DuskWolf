@@ -142,6 +142,8 @@ dusk.sgui.TileMap = function (parent, comName) {
 		 */
 		this._tiles = new Uint8Array(this._tileBuffer);
 		
+		this._mark = "#0000ff";
+		
 		//Prop masks
 		this._registerPropMask("map", "map", true, ["src", "mode", "ssize", "swidth", "sheight", "tsize", "theight", "twidth", "tsize"]);
 		this._registerPropMask("lbound", "lbound");
@@ -360,18 +362,22 @@ dusk.sgui.TileMap.prototype.tilePointIn = function(x, y, exactX, exactY) {
 dusk.sgui.TileMap.prototype._tileMapDraw = function(c) {
 	if(!this._img) return;
 	if(!this._drawn) this.drawAll();
-	var u = this.ubound<0?0:this.ubound;
-	var l = this.lbound<0?0:this.lbound;
+	var u = this.ubound < 0 ? 0 : this.ubound;
+	var l = this.lbound < 0 ? 0 : this.lbound;
 	if(this.mode == "BINARY") {
 		var scale = this.tsize-this.ssize;
+		//c.drawImage(this._all, l>>scale, u>>scale, (this.rbound-this.lbound)>>scale, (this.bbound-this.ubound)>>scale,
+		//	this.x/2/* + l*/, this.y/2 /* + u*/, (this.rbound-this.lbound), (this.bbound-this.ubound)
+		//);
+		
 		c.drawImage(this._all, l>>scale, u>>scale, (this.rbound-this.lbound)>>scale, (this.bbound-this.ubound)>>scale,
-			l, u, (this.rbound-this.lbound), (this.bbound-this.ubound)
+			this.x + l, this.y + u, (this.rbound-this.lbound), (this.bbound-this.ubound)
 		);
 	}else{
 		var hscale = this.swidth/this.twidth;
 		var vscale = this.sheight/this.theight;
 		c.drawImage(this._all, l*hscale, u*vscale, (this.rbound-this.lbound)*hscale, (this.bbound-this.ubound)*vscale, 
-			l, u, (this.rbound-this.lbound), (this.bbound-this.ubound)
+			this.x + l, this.y + u, (this.rbound-this.lbound), (this.bbound-this.ubound)
 		);
 	}
 };

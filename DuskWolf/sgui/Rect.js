@@ -64,7 +64,7 @@ dusk.sgui.Rect.prototype._rectDraw = function(c) {
 	c.lineWidth = this.bWidth;
 	
 	c.fillRect (0, 0, this.width, this.height);
-	if(this.bWidth) c.strokeRect (0, 0, this.width, this.height);
+	if(this.bWidth) c.strokeRect (this.x, this.y, this.width, this.height);
 };
 
 Object.seal(dusk.sgui.Rect);

@@ -53,6 +53,8 @@ dusk.sgui.getPane("itemsTest").parseProps({
 			"cols":10,
 			"focusBehaviour":dusk.sgui.Group.FOCUS_ALL,
 			"leftFlow":"itemHand",
+			"xOffset":10,
+			"yOffset":10,
 			"populate":{
 				"type":"FocusChecker",
 				"width":16,

@@ -61,9 +61,42 @@ dusk.sgui.Group = function(parent, comName) {
 	 */
 	this.focus = "";
 	
+	/** Used internally to store width.
+	 * @type integer
+	 * @private
+	 * @since 0.0.18-alpha
+	 */
+	this._width = -1;
+	/** Used internally to store height.
+	 * @type integer
+	 * @private
+	 * @since 0.0.18-alpha
+	 */
+	this._height = -1;
+	/** Used to cache drawn stuff.
+	 * @type HTMLCanvasElement
+	 * @private
+	 * @since 0.0.18-alpha
+	 */
+	this._cache = null;
+	/** The x offset. All the contents of this container will be moved to the left this many, and any pixels that have an x less than 0 are not drawn.
+	 * @type integer
+	 * @since 0.0.18-alpha
+	 */
+	this.xOffset = 0;
+	/** The y offset. All the contents of this container will be moved upwards this many, and any pixels that have an y less than 0 are not drawn.
+	 * @type integer
+	 * @since 0.0.18-alpha
+	 */
+	this.yOffset = 0;
+	
+	this.mark = "#ff0000";
+	
 	//Prop masks
 	this._registerPropMask("focus", "focus", true, ["children"]);
 	this._registerPropMask("focusBehaviour", "focusBehaviour");
+	this._registerPropMask("xOffset", "xOffset");
+	this._registerPropMask("yOffset", "yOffset");
 	this._registerPropMask("children", "__children", undefined, ["focusBehaviour"]);
 	this._registerPropMask("allChildren", "__allChildren", undefined, ["focusBehaviour"]);
 	
@@ -234,15 +267,41 @@ Object.defineProperty(dusk.sgui.Group.prototype, "__allChildren", {
  * @private
  */
 dusk.sgui.Group.prototype._groupDraw = function(c) {
-	//var input;
+	var usingCache = false;
+	if(this._width > -1 || this._height > -1) {
+		this._cache.getContext("2d").clearRect(0, 0, this.width, this.height);
+		usingCache = true;
+	}else if(this.xOffset || this.yOffset) {
+		if(!this._cache) this._cache = dusk.utils.createCanvas(this.width, this.height);
+		this._cache.width = this.width;
+		this._cache.height = this.height;
+		usingCache = true;
+	}
+	
+	if(!usingCache) c.save();
+	if(!usingCache && (this.x - this.xOffset || this.y - this.yOffset)) c.translate(~~(this.x - this.xOffset), ~~(this.y - this.yOffset));
+	if(usingCache) {
+		this._cache.width = this.width + this.xOffset;
+		this._cache.height = this.height + this.yOffset;
+		var ctx = this._cache.getContext("2d");
+		ctx.save();
+		ctx.translate(-(~~this.xOffset), -(~~this.yOffset));
+	}
+	
 	for(var i = 0; i < this._drawOrder.length; i++) {
 		if(this._drawOrder[i] in this._components) {
-			/*var com = this._components[this._drawOrder[i]]
-			input = com.draw();
-			if(!input || !com.width || !com.height) continue;
-			c.drawImage(input, com.x, com.y, com.width, com.height);*/
-			this._components[this._drawOrder[i]].draw(c);
+			this._components[this._drawOrder[i]].draw(usingCache?ctx:c);
 		}
+	}
+	
+	if(usingCache) {
+		c.drawImage(this._cache, 0, 0, this._cache.width, this._cache.height, this.x, this.y, this._cache.width, this._cache.height);
+	}
+	
+	if(!usingCache) {
+		c.restore();
+	}else{
+		ctx.restore();
 	}
 };
 
@@ -423,29 +482,55 @@ dusk.sgui.Group.prototype.alterChildLayer = function(com, alter) {
 //Width
 Object.defineProperty(dusk.sgui.Group.prototype, "width", {
 	get: function() {
-		var max = 0;
-		for(var c in this._components) {
-			if(this._components[c].x + this._components[c].width > max) max = this._components[c].x + this._components[c].width;
+		if(this._width <= -1) {
+			var max = 0;
+			for(var c in this._components) {
+				if(this._components[c].x + this._components[c].width > max) max = this._components[c].x + this._components[c].width;
+			}
+			
+			return max - this.xOffset;
+		}else{
+			return this._width;
 		}
-		
-		return max;
 	},
 	
-	set: function(value) {if(value > 0) console.warn("Cannot set width of a group.");}
+	set: function(value) {
+		if(value <= -1) {
+			this._width = -1;
+		}else{
+			this._width = value;
+			if(!this._cache) this._cache = dusk.utils.createCanvas(this.width, this.height);
+			this._cache.width = this._width;
+			this._cache.height = this.height;
+		}
+	}
 });
 
 //Height
 Object.defineProperty(dusk.sgui.Group.prototype, "height", {
 	get: function() {
-		var max = 0;
-		for(var c in this._components) {
-			if(this._components[c].y + this._components[c].height > max) max = this._components[c].y + this._components[c].height;
-		}
+		if(this._height <= -1) {
+			var max = 0;
+			for(var c in this._components) {
+				if(this._components[c].y + this._components[c].height > max) max = this._components[c].y + this._components[c].height;
+			}
 		
-		return max;
+			return max - this.yOffset;
+		}else{
+			return this._height;
+		}
 	},
 	
-	set: function(value) {if(value > 0) console.warn("Cannot set height of a group.");}
+	set: function(value) {
+		if(value <= -1) {
+			this._height = -1;
+		}else{
+			this._height = value;
+			if(!this._cache) this._cache = dusk.utils.createCanvas(this.width, this.height);
+			this._cache.height = this._height;
+			this._cache.width = this.width;
+		}
+	}
 });
 
 Object.seal(dusk.sgui.Group);

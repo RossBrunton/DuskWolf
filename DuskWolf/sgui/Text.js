@@ -48,18 +48,19 @@ dusk.sgui.Label.prototype.className = "Label";
 dusk.sgui.Label.prototype._labelDraw = function(c) {
 	if(this.text){
 		c.fillStyle = this.colour;
-		c.font = this.size+"px "+this.font;
+		c.font = this.size + "px "+this.font;
+		if(c.textBaseline != "middle") c.textBaseline = "middle";
 		if(this._width > -1) {
-			c.fillText(this.text, this.padding, (this.height>>1)+(this.padding>>1), ~~this._width-(this.padding<<1));
+			c.fillText(this.text, this.x + this.padding, this.y + (this.height>>1) + (this.padding>>1), ~~this._width-(this.padding<<1));
 			if(this.borderSize > 0) {
 				c.strokeStyle = this.borderColour;
-				c.strokeText(this.text, this.padding, (this.height>>1)+(this.padding>>1), ~~this._width-(this.padding<<1));
+				c.strokeText(this.text, this.x + this.padding, this.y + (this.height>>1) + (this.padding>>1), ~~this._width-(this.padding<<1));
 			}
 		}else{
-			c.fillText(this.text, this.padding, (this.height>>1)+(this.padding>>1));
+			c.fillText(this.text, this.x + this.padding, this.y + (this.height>>1) + (this.padding>>1));
 			if(this.borderSize > 0) {
 				c.strokeStyle = this.borderColour;
-				c.strokeText(this.text, this.padding, (this.height>>1)+(this.padding>>1));
+				c.strokeText(this.text, this.x + this.padding, this.y + (this.height>>1) + (this.padding>>1));
 			}
 		}
 	}
@@ -73,8 +74,8 @@ Object.defineProperty(dusk.sgui.Label.prototype, "width", {
 
 //Height
 Object.defineProperty(dusk.sgui.Label.prototype, "height", {
-	get: function() {return this.size+(this._padding<<1);},
-	set: function(value) {this.size = value-(this._padding<<1);}
+	get: function() {return this.size + (this._padding<<1);},
+	set: function(value) {this.size = value - (this._padding<<1);}
 });
 
 dusk.sgui.Label.prototype.measure = function(test) {
@@ -82,10 +83,10 @@ dusk.sgui.Label.prototype.measure = function(test) {
 	
 	var c = $("#"+dusk.canvas)[0].getContext("2d");
 	
-	var state = c.save();
+	c.save();
 	c.font = this.size+"px "+this.font;
 	var hold = c.measureText(test).width;
-	c.restore(state);
+	c.restore();
 	
 	return hold;
 };
@@ -121,7 +122,7 @@ dusk.sgui.TextBox.prototype.className = "TextBox";
 dusk.sgui.TextBox.prototype._boxDraw = function(c) {
 	c.strokeStyle = this._active?this.borderActive:this.border;
 	
-	c.strokeRect(0, 0, this.width, this.height);
+	c.strokeRect(this.x, this.y, this.width, this.height);
 };
 
 dusk.sgui.TextBox.prototype._boxKey = function(e) {

@@ -62,14 +62,14 @@ dusk.sgui.CentreScroller.prototype.className = "CentreScroller";
  */
 dusk.sgui.CentreScroller.prototype.centre = function(value) {
 	if(!value) return;
-	this._component.x = -(value[0])+(this.width>>1);
-	this._component.y = -(value[1])+(this.height>>1);
+	//this._component.x = -(value[0])+(this.width>>1);
+	//this._component.y = -(value[1])+(this.height>>1);
 	
 	if(this.lockBounds){
-		if(this._component.x < -(this.getComponent("*").width)+this.width) this._component.x = -(this.getComponent("*").width)+this.width;
-		if(this._component.y < -(this.getComponent("*").height)+this.height) this._component.y = -(this.getComponent("*").height)+this.height;
-		if(this._component.x > 0) this._component.x = 0;
-		if(this._component.y > 0) this._component.y = 0;
+		//if(this._component.x < -(this.getComponent("*").width)+this.width) this._component.x = -(this.getComponent("*").width)+this.width;
+		//if(this._component.y < -(this.getComponent("*").height)+this.height) this._component.y = -(this.getComponent("*").height)+this.height;
+		//if(this._component.x > 0) this._component.x = 0;
+		//if(this._component.y > 0) this._component.y = 0;
 	}
 };
 Object.defineProperty(dusk.sgui.CentreScroller.prototype, "__centre", {

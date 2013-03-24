@@ -99,6 +99,8 @@ dusk.sgui.Tile = function(parent, comName) {
 	 */
 	this.tile = [0,0];
 	
+	//this.mark = "#00ff00";
+	
 	//Prop masks
 	this._registerPropMask("src", "src", true);
 	this._registerPropMask("tile", "tileStr", true);
@@ -123,9 +125,9 @@ dusk.sgui.Tile.prototype.className = "Tile";
 dusk.sgui.Tile.prototype._tileDraw = function(c) {
 	if(this._img){
 		if(this.mode == "BINARY") {
-			c.drawImage(this._img, this._tx << this.ssize, this._ty << this.ssize, 1 << this.ssize, 1 << this.ssize, 0, 0, this.width, this.height);
+			c.drawImage(this._img, this._tx << this.ssize, this._ty << this.ssize, 1 << this.ssize, 1 << this.ssize, this.x, this.y, this.width, this.height);
 		}else{
-			c.drawImage(this._img, this._tx * this.swidth, this._ty * this.sheight, this.swidth, this.sheight, 0, 0, this.width, this.height);
+			c.drawImage(this._img, this._tx * this.swidth, this._ty * this.sheight, this.swidth, this.sheight, this.x, this.y, this.width, this.height);
 		}
 	}
 };

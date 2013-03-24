@@ -56,7 +56,7 @@ dusk.sgui.Image.prototype.className = "Image";
  */
 dusk.sgui.Image.prototype._imageDraw = function(c) {
 	if(this._img && this._img.complete && this._img.width && this._img.height){
-		c.drawImage(this._img, 0, 0, this.width?this.width:this._img.width, this.height?this.height:this._img.height);
+		c.drawImage(this._img, this.x, this.y, this.width?this.width:this._img.width, this.height?this.height:this._img.height);
 	}
 };
 

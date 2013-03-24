@@ -75,6 +75,7 @@ dusk.utils.createCanvas = function(width, height) {
 	hold.width = width;
 	hold.height = height;
 	hold.style.imageRendering = "-webkit-optimize-contrast";
+	hold.getContext("2d").textBaseline = "middle";
 	return hold;
 };
 

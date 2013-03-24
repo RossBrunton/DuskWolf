@@ -30,6 +30,25 @@ dusk.sgui.Single = function(parent, comName) {
 	 */
 	this._component = null;
 	
+	/** Used internally to store width.
+	 * @type integer
+	 * @private
+	 * @since 0.0.18-alpha
+	 */
+	this._width = -1;
+	/** Used internally to store height.
+	 * @type integer
+	 * @private
+	 * @since 0.0.18-alpha
+	 */
+	this._height = -1;
+	/** Used to cache drawn stuff.
+	 * @type HTMLCanvasElement
+	 * @private
+	 * @since 0.0.18-alpha
+	 */
+	this._cache = null;
+	
 	this.newComponent("blank", "NullCom");
 	
 	//Prop masks
@@ -119,6 +138,23 @@ Object.defineProperty(dusk.sgui.Single.prototype, "__child", {
  * @private
  */
 dusk.sgui.Single.prototype._singleDraw = function(c) {
+	var usingCache = false;
+	if(this._width > -1 || this._height > -1) {
+		this._cache.getContext("2d").clearRect(0, 0, this.width, this.height);
+		usingCache = true;
+	}
+	
+	var state = c.save();
+	if(this.x - this.xOffset || this.y - this.yOffset) c.translate(~~(this.x - this.xOffset), ~~(this.y - this.yOffset));
+	
+	this._component.draw(usingCache?this._cache.getContext("2d"):c);
+	
+	c.restore(state);
+	
+	if(usingCache) {
+		c.drawImage(this._cache, this.x, this.y, this.width, this.height);
+	}
+	
 	this._component.draw(c);
 };
 
@@ -190,20 +226,48 @@ dusk.sgui.Single.prototype.alterChildLayer = function(com, alter) {
 //Width
 Object.defineProperty(dusk.sgui.Single.prototype, "width", {
 	get: function() {
-		return this._component.x + this._component.width;
+		if(this._width <= -1) {
+			return this._component.x + this._component.width;
+		}else{
+			return this._width;
+		}
 	},
 	
-	set: function(value) {if(value > 0) console.warn("Cannot set width of a single.");}
+	set: function(value) {
+		if(value <= -1) {
+			this._width = -1;
+		}else{
+			this._width = value;
+			if(!this._cache) this._cache = dusk.utils.createCanvas(this.width, this.height);
+			this._cache.width = this._width;
+			this._cache.height = this.height;
+		}
+	}
 });
 
 //Height
 Object.defineProperty(dusk.sgui.Single.prototype, "height", {
 	get: function() {
-		return this._component.y + this._component.height;
+		if(this._height <= -1) {
+			return this._component.y + this._component.height;
+		}else{
+			return this._height;
+		}
 	},
 	
-	set: function(value) {if(value > 0) console.warn("Cannot set height of a single.");}
+	set: function(value) {
+		if(value <= -1) {
+			this._height = -1;
+		}else{
+			this._height = value;
+			if(!this._cache) this._cache = dusk.utils.createCanvas(this.width, this.height);
+			this._cache.height = this._height;
+			this._cache.width = this.width;
+		}
+	}
 });
 
 Object.seal(dusk.sgui.Single);
 Object.seal(dusk.sgui.Single.prototype);
+
+dusk.sgui.registerType("Single", dusk.sgui.Single);

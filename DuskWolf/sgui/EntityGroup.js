@@ -13,6 +13,14 @@ dusk.sgui.EntityGroup = function (parent, comName) {
 	
 	this._entities = [];
 	
+	//this.width = 400;
+	//this.height = 400;
+	//this.yOffset = 200;
+	//this.xOffset = 200;
+	//this.x = 200;
+	//this.y = 200;
+	//this.mark = "#ff0000";
+	
 	this._cx = 0;
 	this._cy = 0;
 	

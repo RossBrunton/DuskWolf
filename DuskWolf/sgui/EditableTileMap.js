@@ -106,7 +106,7 @@ dusk.sgui.EditableTileMap.globalEditWidth = 1;
 dusk.sgui.EditableTileMap.prototype._editTileMapDraw = function(c) {
 	if(!this._focused || !dusk.editor.active) return;
 	c.strokeStyle = this.prop("cursorColour");
-	c.strokeRect(this._cx*this.tileWidth(), this._cy*this.tileHeight(), this.tileWidth()*this.frameWidth, this.tileHeight()*this.frameHeight);
+	c.strokeRect(this.x + this._cx*this.tileWidth(), this.y + this._cy*this.tileHeight(), this.tileWidth()*this.frameWidth, this.tileHeight()*this.frameHeight);
 };
 
 /** Called every frame, it updates the global editor coordinates if appropriate.

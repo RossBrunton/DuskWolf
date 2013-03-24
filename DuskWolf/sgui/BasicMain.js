@@ -212,12 +212,18 @@ dusk.sgui.BasicMain.prototype.autoScroll = function() {
 	}else{
 		seekCoords = [0, 0];
 	}
-	this._container.centre(seekCoords);
+	//this._container.centre(seekCoords);
 	
-	var dimen = this._container.render();
+	//var dimen = this._container.render();
+	
+	this.xOffset = seekCoords[0] - (this.width >> 1);
+	this.yOffset = seekCoords[1] - (this.height >> 1);
+	//this.x = seekCoords[0];
+	//this.y = seekCoords[1];
+	
 	for(var i = 0; i < this._layers.length; i ++) {
 		if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap) {
-			this.getComponent(this._layers[i].name).setBoundsCoord(dimen[0], dimen[1], dimen[0]+dimen[2], dimen[1]+dimen[3]);
+			this.getComponent(this._layers[i].name).setBoundsCoord(this.xOffset, this.yOffset, this.xOffset + this.width, this.yOffset + this.height);
 		}
 	}
 };
