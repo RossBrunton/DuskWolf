@@ -165,6 +165,9 @@ dusk.sgui.TileMap = function (parent, comName) {
 		
 		//Listeners
 		this.prepareDraw.listen(this._tileMapDraw, this);
+	
+		//Render support
+		this.renderSupport |= dusk.sgui.Component.REND_OFFSET | dusk.sgui.Component.REND_SLICE;
 	}
 };
 dusk.sgui.TileMap.prototype = new dusk.sgui.Component();
@@ -359,25 +362,21 @@ dusk.sgui.TileMap.prototype.tilePointIn = function(x, y, exactX, exactY) {
  * @param {CanvasRenderingContext2D} c The canvas on which to draw.
  * @private
  */
-dusk.sgui.TileMap.prototype._tileMapDraw = function(c) {
+dusk.sgui.TileMap.prototype._tileMapDraw = function(e) {
 	if(!this._img) return;
 	if(!this._drawn) this.drawAll();
 	var u = this.ubound < 0 ? 0 : this.ubound;
 	var l = this.lbound < 0 ? 0 : this.lbound;
 	if(this.mode == "BINARY") {
 		var scale = this.tsize-this.ssize;
-		//c.drawImage(this._all, l>>scale, u>>scale, (this.rbound-this.lbound)>>scale, (this.bbound-this.ubound)>>scale,
-		//	this.x/2/* + l*/, this.y/2 /* + u*/, (this.rbound-this.lbound), (this.bbound-this.ubound)
-		//);
-		
-		c.drawImage(this._all, l>>scale, u>>scale, (this.rbound-this.lbound)>>scale, (this.bbound-this.ubound)>>scale,
-			this.x + l, this.y + u, (this.rbound-this.lbound), (this.bbound-this.ubound)
+		e.c.drawImage(this._all, e.d.sourceX>>scale, e.d.sourceY>>scale, e.d.width>>scale, e.d.height>>scale,
+			e.d.destX, e.d.destY, e.d.width, e.d.height
 		);
 	}else{
 		var hscale = this.swidth/this.twidth;
 		var vscale = this.sheight/this.theight;
-		c.drawImage(this._all, l*hscale, u*vscale, (this.rbound-this.lbound)*hscale, (this.bbound-this.ubound)*vscale, 
-			this.x + l, this.y + u, (this.rbound-this.lbound), (this.bbound-this.ubound)
+		e.c.drawImage(this._all, e.d.sourceX*hscale, e.d.sourceY*vscale, e.d.width*hscale, e.d.height*vscale, 
+			e.d.destX, e.d.destY, e.d.width, e.d.height
 		);
 	}
 };

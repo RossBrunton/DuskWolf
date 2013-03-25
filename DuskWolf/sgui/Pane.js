@@ -25,6 +25,9 @@ dusk.sgui.Pane = function (parent, comName) {
 	
 	//Prop masks
 	this._registerPropMask("active", "__active", true);
+	
+	this.height = -2;
+	this.width = -2;
 };
 dusk.sgui.Pane.prototype = new dusk.sgui.Group();
 dusk.sgui.Pane.constructor = dusk.sgui.Pane;

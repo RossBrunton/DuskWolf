@@ -45,22 +45,22 @@ dusk.sgui.Label.constructor = dusk.sgui.Label;
 
 dusk.sgui.Label.prototype.className = "Label";
 
-dusk.sgui.Label.prototype._labelDraw = function(c) {
+dusk.sgui.Label.prototype._labelDraw = function(e) {
 	if(this.text){
-		c.fillStyle = this.colour;
-		c.font = this.size + "px "+this.font;
-		if(c.textBaseline != "middle") c.textBaseline = "middle";
+		e.c.fillStyle = this.colour;
+		e.c.font = this.size + "px "+this.font;
+		if(e.c.textBaseline != "middle") e.c.textBaseline = "middle";
 		if(this._width > -1) {
-			c.fillText(this.text, this.x + this.padding, this.y + (this.height>>1) + (this.padding>>1), ~~this._width-(this.padding<<1));
+			e.c.fillText(this.text, e.d.destX + this.padding, e.d.destY + (this.height>>1) + (this.padding>>1), ~~this._width-(this.padding<<1));
 			if(this.borderSize > 0) {
-				c.strokeStyle = this.borderColour;
-				c.strokeText(this.text, this.x + this.padding, this.y + (this.height>>1) + (this.padding>>1), ~~this._width-(this.padding<<1));
+				e.c.strokeStyle = this.borderColour;
+				e.c.strokeText(this.text, e.d.destX + this.padding, e.d.destY + (this.height>>1) + (this.padding>>1), ~~this._width-(this.padding<<1));
 			}
 		}else{
-			c.fillText(this.text, this.x + this.padding, this.y + (this.height>>1) + (this.padding>>1));
+			e.c.fillText(this.text, e.d.destX + this.padding, e.d.destY + (this.height>>1) + (this.padding>>1));
 			if(this.borderSize > 0) {
-				c.strokeStyle = this.borderColour;
-				c.strokeText(this.text, this.x + this.padding, this.y + (this.height>>1) + (this.padding>>1));
+				e.c.strokeStyle = this.borderColour;
+				e.c.strokeText(this.text, e.d.destX + this.padding, e.d.destY + (this.height>>1) + (this.padding>>1));
 			}
 		}
 	}
@@ -119,10 +119,10 @@ dusk.sgui.TextBox.constructor = dusk.sgui.TextBox;
 
 dusk.sgui.TextBox.prototype.className = "TextBox";
 
-dusk.sgui.TextBox.prototype._boxDraw = function(c) {
-	c.strokeStyle = this._active?this.borderActive:this.border;
+dusk.sgui.TextBox.prototype._boxDraw = function(e) {
+	e.c.strokeStyle = this._active?this.borderActive:this.border;
 	
-	c.strokeRect(this.x, this.y, this.width, this.height);
+	e.c.strokeRect(e.d.destX, e.d.destY, e.d.width, e.d.height);
 };
 
 dusk.sgui.TextBox.prototype._boxKey = function(e) {

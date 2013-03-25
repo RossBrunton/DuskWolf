@@ -103,10 +103,21 @@ dusk.sgui.EditableTileMap.globalEditWidth = 1;
  * @param {CanvasRenderingContext2D} c The canvas on which to draw.
  * @private
  */
-dusk.sgui.EditableTileMap.prototype._editTileMapDraw = function(c) {
+dusk.sgui.EditableTileMap.prototype._editTileMapDraw = function(e) {
 	if(!this._focused || !dusk.editor.active) return;
-	c.strokeStyle = this.prop("cursorColour");
-	c.strokeRect(this.x + this._cx*this.tileWidth(), this.y + this._cy*this.tileHeight(), this.tileWidth()*this.frameWidth, this.tileHeight()*this.frameHeight);
+	
+	if(-e.d.sourceX + (this._cx*this.tileWidth()) > e.d.width) return;
+	if(-e.d.sourceY + (this._cy*this.tileHeight()) > e.d.height) return;
+	
+	var width = this.tileWidth()*this.frameWidth;
+	var height = this.tileWidth()*this.frameHeight;
+	if(-e.d.sourceX + (this._cx*this.tileWidth()) + width > e.d.width) width = (e.d.width) - (-e.d.sourceX + (this._cx*this.tileWidth()));
+	if(-e.d.sourceY + (this._cy*this.tileHeight()) + height > e.d.height) height = (e.d.height) - (-e.d.sourceY + (this._cy*this.tileHeight()));
+	
+	e.c.strokeStyle = this.cursorColour;
+	e.c.strokeRect(e.d.destX - e.d.sourceX + (this._cx*this.tileWidth()),
+		e.d.destX - e.d.sourceY + (this._cy*this.tileHeight()), width, height
+	);
 };
 
 /** Called every frame, it updates the global editor coordinates if appropriate.

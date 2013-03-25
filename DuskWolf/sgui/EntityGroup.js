@@ -12,15 +12,6 @@ dusk.sgui.EntityGroup = function (parent, comName) {
 	dusk.sgui.Group.call(this, parent, comName);
 	
 	this._entities = [];
-	
-	//this.width = 400;
-	//this.height = 400;
-	//this.yOffset = 200;
-	//this.xOffset = 200;
-	//this.x = 200;
-	//this.y = 200;
-	//this.mark = "#ff0000";
-	
 	this._cx = 0;
 	this._cy = 0;
 	
@@ -101,27 +92,34 @@ dusk.sgui.EntityGroup.prototype.doFrame = function() {
 	}
 };
 
-dusk.sgui.EntityGroup.prototype._entityGroupDraw = function(c) {
+dusk.sgui.EntityGroup.prototype._entityGroupDraw = function(e) {
 	if(!dusk.editor.active) return;
 	if(!this._focused) return;
 	
+	var width = this.mode=="BINARY"?1<<this.tsize:this.twidth;
+	var height = this.mode=="BINARY"?1<<this.tsize:this.theight;
+	
+	var xAt = this.mode=="BINARY"?this._cx<<this.tsize:this._cx*this.twidth;
+	var yAt = this.mode=="BINARY"?this._cy<<this.tsize:this._cy*this.theight;
+	
+	if(-e.d.sourceX + xAt > e.d.width) return;
+	if(-e.d.sourceY + yAt > e.d.height) return;
+	
+	if(-e.d.sourceX + xAt + width > e.d.width) width = e.d.width - (-e.d.sourceX + xAt);
+	if(-e.d.sourceY + yAt + height > e.d.height) height = e.d.height - (-e.d.sourceY + yAt);
+	
 	if(!this._selectedEntity){
-		c.strokeStyle = "#00ffff";
-		if(this.mode == "BINARY") {
-			c.strokeRect(this._cx<<this.tsize, this._cy<<this.tsize, 1<<this.tsize, 1<<this.tsize);
-			c.strokeRect((this._cx<<this.tsize)+this._offsetX-1, (this._cy<<this.tsize)+this._offsetY-1, 3, 3);
-		}else{
-			c.strokeRect(this._cx*this.twidth, this._cy*this.theight, this.twidth, this.theight);
-			c.strokeRect((this._cx*this.twidth)+this._offsetX-1, (this._cy*this.theight)+this._offsetY-1, 3, 3);
-		}
+		e.c.strokeStyle = "#00ffff";
 	}else{
-		c.strokeStyle = "#ff00ff";
-		if(this.mode == "BINARY") {
-			c.strokeRect((this._cx<<this.tsize)+this._offsetX-1, (this._cy<<this.tsize)+this._offsetY-1, 3, 3);
-		}else{
-			c.strokeRect((this._cx*this.twidth)+this._offsetX-1, (this._cy*this.theight)+this._offsetY-1, 3, 3);
-		}
+		e.c.strokeStyle = "#ff00ff";
 	}
+	
+	e.c.strokeRect(e.d.destX - e.d.sourceX + xAt,
+		e.d.destY - e.d.sourceY + yAt, width, height
+	);
+	e.c.strokeRect(e.d.destX - e.d.sourceX + xAt + this._offsetX - 1,
+		e.d.destY - e.d.sourceY + yAt + this._offsetY - 1, 3, 3
+	);
 };
 
 dusk.sgui.EntityGroup.prototype._entityGroupAction = function(e) {

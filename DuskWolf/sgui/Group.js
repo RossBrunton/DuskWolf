@@ -90,8 +90,6 @@ dusk.sgui.Group = function(parent, comName) {
 	 */
 	this.yOffset = 0;
 	
-	this.mark = "#ff0000";
-	
 	//Prop masks
 	this._registerPropMask("focus", "focus", true, ["children"]);
 	this._registerPropMask("focusBehaviour", "focusBehaviour");
@@ -113,6 +111,9 @@ dusk.sgui.Group = function(parent, comName) {
 			this.getFocused().onActiveChange.fire(e);
 		}
 	}, this);
+	
+	//Render support
+	this.renderSupport |= dusk.sgui.Component.REND_OFFSET | dusk.sgui.Component.REND_SLICE;
 	
 	//Check interfaces
 	if(!dusk.utils.doesImplement(this, dusk.sgui.IContainer)) console.warn(this.toString()+" does not implement dusk.sgui.IContainer!");
@@ -263,46 +264,96 @@ Object.defineProperty(dusk.sgui.Group.prototype, "__allChildren", {
 
 /** Draws all of the children in the order described by `{@link dusk.sgui.Group._drawOrder}`.
  * 
- * @param {CanvasRenderingContext2D} The canvas context on which to draw all the components.
+ * @param {object} e An event from `{@link dusk.sgui.Component#_prepareDraw}`
  * @private
  */
-dusk.sgui.Group.prototype._groupDraw = function(c) {
-	var usingCache = false;
-	if(this._width > -1 || this._height > -1) {
-		this._cache.getContext("2d").clearRect(0, 0, this.width, this.height);
-		usingCache = true;
-	}else if(this.xOffset || this.yOffset) {
-		if(!this._cache) this._cache = dusk.utils.createCanvas(this.width, this.height);
-		this._cache.width = this.width;
-		this._cache.height = this.height;
-		usingCache = true;
+dusk.sgui.Group.prototype._groupDraw = function(e) {
+	//Check support of children
+	var support = this._getLeastRenderSupport();
+	var cacheNeeded = false;
+	
+	if(!(support & dusk.sgui.Component.REND_LOCATION)) {
+		console.error("All components must support origin location.");
+		return;
 	}
 	
-	if(!usingCache) c.save();
-	if(!usingCache && (this.x - this.xOffset || this.y - this.yOffset)) c.translate(~~(this.x - this.xOffset), ~~(this.y - this.yOffset));
-	if(usingCache) {
-		this._cache.width = this.width + this.xOffset;
-		this._cache.height = this.height + this.yOffset;
-		var ctx = this._cache.getContext("2d");
-		ctx.save();
-		ctx.translate(-(~~this.xOffset), -(~~this.yOffset));
+	if(!(support & dusk.sgui.Component.REND_OFFSET) && (this.xOffset || this.yOffset)) {
+		cacheNeeded = true;
 	}
 	
-	for(var i = 0; i < this._drawOrder.length; i++) {
-		if(this._drawOrder[i] in this._components) {
-			this._components[this._drawOrder[i]].draw(usingCache?ctx:c);
+	if(!(support & dusk.sgui.Component.REND_SLICE) && (this.width >= 0 || this.height >= 0)) {
+		cacheNeeded = true;
+	}
+	
+	if(!cacheNeeded) {
+		for(var i = 0; i < this._drawOrder.length; i++) {
+			if(this._drawOrder[i] in this._components) {
+				var com = this._components[this._drawOrder[i]];
+				var data = {};
+				data.sourceX = (-this.xOffset + com.x - e.d.sourceX)<0 ? -(-this.xOffset + com.x - e.d.sourceX) : 0;
+				data.sourceY = (-this.yOffset + com.y - e.d.sourceY)<0 ? -(-this.yOffset + com.y - e.d.sourceY) : 0;
+				data.destX = (com.x - this.xOffset - e.d.sourceX)<0 ? e.d.destX : (com.x - this.xOffset - e.d.sourceX) + e.d.destX;
+				data.destY = (com.y - this.yOffset - e.d.sourceY)<0 ? e.d.destY : (com.y - this.yOffset - e.d.sourceY) + e.d.destY;
+				data.width = com.width - data.sourceX;
+				data.height = com.height - data.sourceY;
+				
+				if(data.destX >= e.d.width + e.d.destX) continue;
+				if(data.destY >= e.d.height + e.d.destY) continue;
+				
+				if(data.width <= 0 || data.height <= 0) continue;
+				
+				if(data.width + data.destX > e.d.width + e.d.destX) data.width = (e.d.destX + e.d.width) - data.destX;
+				if(data.height + data.destY > e.d.height + e.d.destY) data.height = (e.d.destY + e.d.height) - data.destY;
+				
+				com.draw(data, e.c);
+			}
 		}
-	}
-	
-	if(usingCache) {
-		c.drawImage(this._cache, 0, 0, this._cache.width, this._cache.height, this.x, this.y, this._cache.width, this._cache.height);
-	}
-	
-	if(!usingCache) {
-		c.restore();
 	}else{
-		ctx.restore();
+		if(this._cache == null) {
+			this._cache = dusk.utils.createCanvas(e.d.width + this.xOffset, e.d.height + this.yOffset);
+		}else{
+			this._cache.width = e.d.width + this.xOffset;
+			this._cache.height = e.d.height + this.yOffset;
+		}
+		
+		for(var i = 0; i < this._drawOrder.length; i++) {
+			if(this._drawOrder[i] in this._components) {
+				var com = this._components[this._drawOrder[i]];
+				var data = {};
+				data.sourceX = 0;
+				data.sourceY = 0;
+				data.destX = com.x;
+				data.destY = com.y;
+				data.width = com.width;
+				data.height = com.height;
+				
+				if(data.destX >= e.d.width + e.d.destX) continue;
+				if(data.destY >= e.d.height + e.d.destY) continue;
+				
+				if(data.width <= 0 || data.height <= 0) continue;
+				
+				com.draw(data, this._cache.getContext("2d"));
+			}
+		}
+		
+		e.c.drawImage(this._cache, this.xOffset + e.d.sourceX, this.yOffset + e.d.sourceY, e.d.width, e.d.height,
+			e.d.destX, e.d.destY, e.d.width, e.d.height
+		);
 	}
+};
+
+/** Looks through all components in this group and returns the bare minimum support needed to draw all of them.
+ * 
+ * @returns {integer} A bitflag containing all of the render support things supported.
+ * @private
+ * @since 0.0.18-alpha
+ */
+dusk.sgui.Group.prototype._getLeastRenderSupport = function() {
+	var hold = 0xffff;
+	for(var p in this._components){
+		hold &= this._components[p].renderSupport;
+	}
+	return hold;
 };
 
 /** Calls the `{@link dusk.sgui.Component.frame}` method of all components.
@@ -479,10 +530,17 @@ dusk.sgui.Group.prototype.alterChildLayer = function(com, alter) {
 	}
 };
 
+//Please note that to set the width to -2, all the parent's must have either an explicit width, or a width of -2 otherwise Chrome will explode.
 //Width
 Object.defineProperty(dusk.sgui.Group.prototype, "width", {
 	get: function() {
-		if(this._width <= -1) {
+		if(this._width == -2) {
+			if(this._container !== null) {
+				return this._container.width;
+			}else{
+				return dusk.sgui.width;
+			}
+		}else if(this._width == -1) {
 			var max = 0;
 			for(var c in this._components) {
 				if(this._components[c].x + this._components[c].width > max) max = this._components[c].x + this._components[c].width;
@@ -495,21 +553,20 @@ Object.defineProperty(dusk.sgui.Group.prototype, "width", {
 	},
 	
 	set: function(value) {
-		if(value <= -1) {
-			this._width = -1;
-		}else{
-			this._width = value;
-			if(!this._cache) this._cache = dusk.utils.createCanvas(this.width, this.height);
-			this._cache.width = this._width;
-			this._cache.height = this.height;
-		}
+		this._width = value;
 	}
 });
 
 //Height
 Object.defineProperty(dusk.sgui.Group.prototype, "height", {
 	get: function() {
-		if(this._height <= -1) {
+		if(this._height == -2) {
+			if(this._container !== null) {
+				return this._container.height;
+			}else{
+				return dusk.sgui.height;
+			}
+		}else if(this._height == -1) {
 			var max = 0;
 			for(var c in this._components) {
 				if(this._components[c].y + this._components[c].height > max) max = this._components[c].y + this._components[c].height;
@@ -522,16 +579,41 @@ Object.defineProperty(dusk.sgui.Group.prototype, "height", {
 	},
 	
 	set: function(value) {
-		if(value <= -1) {
-			this._height = -1;
-		}else{
-			this._height = value;
-			if(!this._cache) this._cache = dusk.utils.createCanvas(this.width, this.height);
-			this._cache.height = this._height;
-			this._cache.width = this.width;
-		}
+		this._height = value;
 	}
 });
+
+/** Returns the smallest width which has all the components fully drawn inside.
+ * 
+ * @param {boolean} includeOffset If true, then the offset is taken into account, and removed from the figure.
+ * @return {integer} The smallest possible width where all the components are fully inside.
+ * @protected
+ * @since 0.0.18-alpha
+ */
+dusk.sgui.Group.prototype._getTrueWidth = function(includeOffset) {
+	var max = 0;
+	for(var c in this._components) {
+		if(this._components[c].x + this._components[c].width > max) max = this._components[c].x + this._components[c].width;
+	}
+	
+	return max - (includeOffset?this.xOffset:0);
+};
+
+/** Returns the smallest height which has all the components fully drawn inside.
+ * 
+ * @param {boolean} includeOffset If true, then the offset is taken into account, and removed from the figure.
+ * @return {integer} The smallest possible height where all the components are fully inside.
+ * @protected
+ * @since 0.0.18-alpha
+ */
+dusk.sgui.Group.prototype._getTrueHeight = function(includeOffset) {
+	var max = 0;
+	for(var c in this._components) {
+		if(this._components[c].y + this._components[c].height > max) max = this._components[c].y + this._components[c].height;
+	}
+	
+	return max - (includeOffset?this.yOffset:0);
+};
 
 Object.seal(dusk.sgui.Group);
 Object.seal(dusk.sgui.Group.prototype);

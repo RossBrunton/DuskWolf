@@ -111,6 +111,9 @@ dusk.sgui.Tile = function(parent, comName) {
 	
 	//Listeners
 	this.prepareDraw.listen(this._tileDraw, this);
+	
+	//Render support
+	this.renderSupport |= dusk.sgui.Component.REND_OFFSET | dusk.sgui.Component.REND_SLICE;
 };
 dusk.sgui.Tile.prototype = new dusk.sgui.Component();
 dusk.sgui.Tile.constructor = dusk.sgui.Tile;
@@ -122,12 +125,19 @@ dusk.sgui.Tile.prototype.className = "Tile";
  * @param {CanvasRenderingContext2D} c The canvas on which to draw.
  * @private
  */
-dusk.sgui.Tile.prototype._tileDraw = function(c) {
+dusk.sgui.Tile.prototype._tileDraw = function(e) {
 	if(this._img){
 		if(this.mode == "BINARY") {
-			c.drawImage(this._img, this._tx << this.ssize, this._ty << this.ssize, 1 << this.ssize, 1 << this.ssize, this.x, this.y, this.width, this.height);
+			var scale = this.width/(1<<this.ssize);
+			e.c.drawImage(this._img, (this._tx << this.ssize) + (e.d.sourceX*scale), (this._ty << this.ssize) + (e.d.sourceY*scale),
+				e.d.width*scale, e.d.height*scale, e.d.destX, e.d.destY, e.d.width, e.d.height
+			);
 		}else{
-			c.drawImage(this._img, this._tx * this.swidth, this._ty * this.sheight, this.swidth, this.sheight, this.x, this.y, this.width, this.height);
+			var hscale = this.swidth/this.width;
+			var vscale = this.sheight/this.height;
+			e.c.drawImage(this._img, this._tx * this.swidth + e.d.sourceX * hscale, this._ty * this.sheight + e.d.sourceY * vscale,
+				e.d.width*hscale, e.d.height*vscale, e.d.destX, e.d.destY, e.d.width, e.d.height
+			);
 		}
 	}
 };

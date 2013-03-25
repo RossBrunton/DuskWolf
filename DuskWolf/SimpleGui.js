@@ -221,7 +221,14 @@ dusk.sgui._draw = function() {
 	
 	//Draw panes
 	for(var c in dusk.sgui._panes){
-		dusk.sgui._panes[c].draw(dusk.sgui._cacheCanvas.getContext("2d"));
+		var data = {};
+		data.sourceX = 0;
+		data.sourceY = 0;
+		data.destX = dusk.sgui._panes[c].x;
+		data.destY = dusk.sgui._panes[c].y;
+		data.width = dusk.sgui._panes[c].width;
+		data.height = dusk.sgui._panes[c].height;
+		dusk.sgui._panes[c].draw(data, dusk.sgui._cacheCanvas.getContext("2d"));
 	}
 
 	$("#"+dusk.canvas)[0].getContext("2d").drawImage(dusk.sgui._cacheCanvas, 0, 0, dusk.sgui.width, dusk.sgui.height);	

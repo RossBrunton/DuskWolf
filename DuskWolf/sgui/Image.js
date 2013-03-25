@@ -44,6 +44,9 @@ dusk.sgui.Image = function(parent, comName) {
 	
 	//Listeners
 	this.prepareDraw.listen(this._imageDraw, this);
+	
+	//Render support
+	this.renderSupport |= dusk.sgui.Component.REND_OFFSET | dusk.sgui.Component.REND_SLICE;
 };
 dusk.sgui.Image.prototype = new dusk.sgui.Component();
 dusk.sgui.Image.constructor = dusk.sgui.Image;
@@ -54,9 +57,13 @@ dusk.sgui.Image.prototype.className = "Image";
  * @param {CanvasRenderingContext2D} c The canvas on which to draw.
  * @private
  */
-dusk.sgui.Image.prototype._imageDraw = function(c) {
+dusk.sgui.Image.prototype._imageDraw = function(e) {
 	if(this._img && this._img.complete && this._img.width && this._img.height){
-		c.drawImage(this._img, this.x, this.y, this.width?this.width:this._img.width, this.height?this.height:this._img.height);
+		var ratioX = (this._img.width / this.width);
+		var ratioY = (this._img.height / this.height);
+		e.c.drawImage(this._img, e.d.sourceX * ratioX, e.d.sourceY * ratioY, e.d.width * ratioX, e.d.height * ratioY,
+			e.d.destX, e.d.destY, e.d.width, e.d.height
+		);
 	}
 };
 

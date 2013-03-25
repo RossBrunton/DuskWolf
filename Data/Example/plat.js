@@ -26,6 +26,11 @@ dusk.load.provide("example.plat");
 
 dusk.entities.tsize = 5;
 dusk.entities.ssize = 5;
+dusk.entities.twidth = 32;
+dusk.entities.theight = 32;
+dusk.entities.swidth = 32;
+dusk.entities.sheight = 32;
+dusk.entities.mode = "BINARY";
 
 //Define entities
 dusk.entities.types.createNewType("walk", {

@@ -83,10 +83,10 @@ dusk.sgui.ControlConfig.prototype._ccFrame = function(e) {
 	}
 };
 
-dusk.sgui.ControlConfig.prototype._ccDraw = function(c) {
-	c.strokeStyle = this._active?this.borderActive:this.border;
+dusk.sgui.ControlConfig.prototype._ccDraw = function(e) {
+	e.c.strokeStyle = this._active?this.borderActive:this.border;
 	
-	c.strokeRect(this.x, this.y, this.width, this.height);
+	e.c.strokeRect(e.d.destX, e.d.destY, e.d.width, e.d.height);
 };
 
 dusk.sgui.ControlConfig.prototype._ccKey = function(e) {

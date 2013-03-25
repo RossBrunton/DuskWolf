@@ -4,7 +4,6 @@
 
 dusk.load.require("dusk.sgui");
 dusk.load.require("dusk.sgui.BasicMain");
-dusk.load.require("dusk.sgui.CentreScroller");
 dusk.load.require("dusk.EventDispatcher");
 dusk.load.require("dusk.entities");
 dusk.load.require("dusk.rooms");
@@ -30,12 +29,12 @@ dusk.plat._init = function() {
 	dusk.skills.giveSkill("dubjump");
 	//dusk.skills.giveSkill("infinijump");
 	
-	var main = dusk.sgui.getPane("plat-main");
-	main.modifyComponent([{"name":"mainContainer", "focus":"main", "type":"Single", "width":-1, "height":-1, "child":{"name":"main", "type":"BasicMain", "x":50, "y":50, "width":768-100, "height":480-100}}]);
+	var main = dusk.sgui.getPane("plat");
+	main.modifyComponent([{"name":"main", "type":"BasicMain", "width":-2, "height":-2}]);
 	main.becomeActive();
-	main.flow("mainContainer");
+	main.flow("main");
 	
-	main.getComponent("mainContainer").getComponent("main").layers = [
+	main.getComponent("main").layers = [
 		{"name":"back", "type":dusk.sgui.BasicMain.LAYER_TILEMAP},
 		{"name":"scheme", "type":dusk.sgui.BasicMain.LAYER_SCHEME},
 		{"name":"entities", "type":dusk.sgui.BasicMain.LAYER_ENTITIES, "primary":true},
@@ -52,7 +51,7 @@ dusk.plat._init = function() {
 /** Requests that the `{@link dusk.sgui.BasicMain}` used by the plat system be the main room manager used to load rooms.
  */
 dusk.plat.becomeRoomManager = function() {
-	dusk.rooms.roomManager = dusk.sgui.path("plat-main:/mainContainer/main");
+	dusk.rooms.roomManager = dusk.sgui.path("plat:/main");
 };
 
 dusk.plat._init();

@@ -43,9 +43,9 @@ dusk.sgui.BasicMain.constructor = dusk.sgui.BasicMain;
 
 dusk.sgui.BasicMain.prototype.className = "BasicMain";
 
-dusk.sgui.BasicMain.LAYER_TILEMAP = 0;
-dusk.sgui.BasicMain.LAYER_SCHEME = 1;
-dusk.sgui.BasicMain.LAYER_ENTITIES = 2;
+dusk.sgui.BasicMain.LAYER_TILEMAP = 0x01;
+dusk.sgui.BasicMain.LAYER_SCHEME = 0x02;
+dusk.sgui.BasicMain.LAYER_ENTITIES = 0x04;
 
 dusk.sgui.BasicMain._LAYER_COLOURS = ["#ff0000", "#00ff00", "#ffff00", "#0000ff"];
 
@@ -66,9 +66,9 @@ dusk.sgui.BasicMain.prototype.createRoom = function(name, spawn) {
 	var entLayers = this.getAllLayersOfType(dusk.sgui.BasicMain.LAYER_ENTITIES);
 	for(var i = entLayers.length-1; i >= 0; i --) {
 		entLayers[i].scheme = this.getFirstLayerOfType(dusk.sgui.BasicMain.LAYER_SCHEME);
+		entLayers[i].width = this.getFirstLayerOfType(dusk.sgui.BasicMain.LAYER_SCHEME | dusk.sgui.BasicMain.LAYER_TILEMAP).width;
+		entLayers[i].height = this.getFirstLayerOfType(dusk.sgui.BasicMain.LAYER_SCHEME | dusk.sgui.BasicMain.LAYER_TILEMAP).height;
 	}
-	
-	//this.path("entities").clear();
 	
 	var playerData = {};
 	playerData.name = dusk.entities.seek;
@@ -149,7 +149,7 @@ Object.defineProperty(dusk.sgui.BasicMain.prototype, "layers", {
 
 dusk.sgui.BasicMain.prototype.getFirstLayerOfType = function(type) {
 	for(var i = 0; i < this._layers.length; i ++) {
-		if(this._layers[i].type === type) return this.getComponent(this._layers[i].name);
+		if((this._layers[i].type & type) > 0) return this.getComponent(this._layers[i].name);
 	}
 	
 	return null;
@@ -158,7 +158,7 @@ dusk.sgui.BasicMain.prototype.getFirstLayerOfType = function(type) {
 dusk.sgui.BasicMain.prototype.getAllLayersOfType = function(type) {
 	var out = []
 	for(var i = 0; i < this._layers.length; i ++) {
-		if(this._layers[i].type === type) out.push(this.getComponent(this._layers[i].name));
+		if((this._layers[i].type & type) > 0) out.push(this.getComponent(this._layers[i].name));
 	}
 	
 	return out;
@@ -212,20 +212,15 @@ dusk.sgui.BasicMain.prototype.autoScroll = function() {
 	}else{
 		seekCoords = [0, 0];
 	}
-	//this._container.centre(seekCoords);
-	
-	//var dimen = this._container.render();
 	
 	this.xOffset = seekCoords[0] - (this.width >> 1);
 	this.yOffset = seekCoords[1] - (this.height >> 1);
-	//this.x = seekCoords[0];
-	//this.y = seekCoords[1];
 	
-	for(var i = 0; i < this._layers.length; i ++) {
-		if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap) {
-			this.getComponent(this._layers[i].name).setBoundsCoord(this.xOffset, this.yOffset, this.xOffset + this.width, this.yOffset + this.height);
-		}
-	}
+	if(this.xOffset > this._getTrueWidth(false) - this.width) this.xOffset = this._getTrueWidth(false) - this.width;
+	if(this.yOffset > this._getTrueHeight(false) - this.height) this.yOffset = this._getTrueHeight(false) - this.height;
+	
+	if(this.xOffset < 0) this.xOffset = 0;
+	if(this.yOffset < 0) this.yOffset = 0;
 };
 
 dusk.sgui.BasicMain.prototype._bmUpAction = function(e) {

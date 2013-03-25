@@ -48,6 +48,9 @@ dusk.sgui.Rect = function (parent, comName) {
 	
 	//Listeners
 	this.prepareDraw.listen(this._rectDraw, this);
+	
+	//Render support
+	this.renderSupport = dusk.sgui.Component.REND_LOCATION | dusk.sgui.Component.REND_OFFSET | dusk.sgui.Component.REND_SLICE;
 };
 dusk.sgui.Rect.prototype = new dusk.sgui.Component();
 dusk.sgui.Rect.constructor = dusk.sgui.Rect;
@@ -58,13 +61,13 @@ dusk.sgui.Rect.prototype.className = "Rect";
  * @param {CanvasRenderingContext2D} c A 2D canvas perspective to draw onto.
  * @private
  */
-dusk.sgui.Rect.prototype._rectDraw = function(c) {
-	c.fillStyle = this.colour;
-	c.strokeStyle = this.bColour;
-	c.lineWidth = this.bWidth;
+dusk.sgui.Rect.prototype._rectDraw = function(e) {
+	e.c.fillStyle = this.colour;
+	e.c.strokeStyle = this.bColour;
+	e.c.lineWidth = this.bWidth;
 	
-	c.fillRect (0, 0, this.width, this.height);
-	if(this.bWidth) c.strokeRect (this.x, this.y, this.width, this.height);
+	e.c.fillRect(e.d.destX, e.d.destY, e.d.width, e.d.height);
+	if(this.bWidth) e.c.strokeRect(e.d.destX, e.d.destY, e.d.width, e.d.height);
 };
 
 Object.seal(dusk.sgui.Rect);

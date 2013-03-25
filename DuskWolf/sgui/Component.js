@@ -68,9 +68,6 @@ dusk.sgui.Component = function (parent, componentName) {
 	 * @default null
 	 */
 	this.mark = null;
-	
-	//this.cache = false;
-	//this._cacheCanvas = dusk.utils.createCanvas(0, 0);
 
 	/** The name of the group's component that will be focused when the left key is pressed and `{@link dusk.sgui.Component.leftDirection}` returns true.
 	 * @type string
@@ -134,6 +131,16 @@ dusk.sgui.Component = function (parent, componentName) {
 	 * @since 0.0.17-alpha
 	 */
 	this.prepareDraw = new dusk.EventDispatcher("dusk.sgui.Component.prepareDraw");
+	
+	/** The supported ways in which this component can render itself.
+	 * 
+	 * This is a bitmask using the `REND_*` constants.
+	 * @type integer
+	 * @default dusk.sgui.Component.REND_LOCATION
+	 * @since 0.0.18-alpha
+	 */
+	this.renderSupport = dusk.sgui.Component.REND_LOCATION;
+	
 	/** A mapper used to map JSON properties to the properties on this object.
 	 * @type dusk.Mapper
 	 * @protected
@@ -237,7 +244,6 @@ dusk.sgui.Component.prototype.className = "Component";
 /** The direction up, negative in the y axis.
  * @type integer
  * @value 0
- * @static
  * @constant
  * @memberof dusk.sgui.Component
  */
@@ -246,7 +252,6 @@ dusk.sgui.Component.DIR_UP = 0;
 /** The direction down, positive in the y axis.
  * @type integer
  * @value 1
- * @static
  * @constant
  * @memberof dusk.sgui.Component
  */
@@ -264,11 +269,43 @@ dusk.sgui.Component.DIR_LEFT = 2;
 /** The direction right, negative in the x axis.
  * @type integer
  * @value 3
- * @static
  * @constant
  * @memberof dusk.sgui.Component
  */
 dusk.sgui.Component.DIR_RIGHT = 3;
+
+/** Components which support this (and all must do so) must support being drawn at arbitary locations.
+ * 
+ * They should use the `destX` and `destY` properties of the rendering data as the x and y coordinates to draw on.
+ * @type integer
+ * @value 0x01
+ * @constant
+ * @memberof dusk.sgui.Component
+ * @since 0.0.18-alpha
+ */
+dusk.sgui.Component.REND_LOCATION = 0x01;
+
+/** Components which support this must support their image being rendered starting from an arbitary point.
+ * 
+ * They should use the `sourceX` and `sourceY` properties of the rendering data as the x and y coordinates of the source image.
+ * @type integer
+ * @value 0x02
+ * @constant
+ * @memberof dusk.sgui.Component
+ * @since 0.0.18-alpha
+ */
+dusk.sgui.Component.REND_OFFSET = 0x02;
+
+/** Components which support this must support their image being rendered with an arbitary width and height.
+ * 
+ * They should use the `width` and `height` properties of the rendering data (which may be different from the component's width and hight) as the width and height to draw of the image.
+ * @type integer
+ * @value 0x04
+ * @constant
+ * @memberof dusk.sgui.Component
+ * @since 0.0.18-alpha
+ */
+dusk.sgui.Component.REND_SLICE = 0x04;
 
 /** This causes the component to handle a keypress, it should be called by ether it's parent container or SimpleGui.
  * 
@@ -397,19 +434,13 @@ Object.defineProperty(dusk.sgui.Component.prototype, "deleted", {
 
 /** Requests the component to draw itself onto the specified 2D canvas context.
  * 
- * The canvas' state will be restored to what it was as an argument when this function is finished, so no changes to the state will persist out of the function.
+ * You should use `{@link dusk.sgui.Component#_prepareDraw}` instead of overriding this.
  * 
+ * @param {object} d An object describing where and how the conponent is to draw itself.
  * @param {CanvasRenderingContext2D} c The canvas context to draw onto.
- * @param {integer=0} xOffset The x offset, this is subtracted from the component's x value.
- * @param {integer=0} yOffset The x offset, this is subtracted from the component's x value.
  */
-dusk.sgui.Component.prototype.draw = function(c, xOffset, yOffset) {
-	if(!this.visible) return;
-	if(xOffset === undefined) xOffset = 0;
-	if(yOffset === undefined) yOffset = 0;
-
-	//var state = c.save();
-	//if(this.x - xOffset || this.y - yOffset) c.translate(~~(this.x - xOffset), ~~(this.y - yOffset));
+dusk.sgui.Component.prototype.draw = function(d, c) {
+	if(!this.visible || this.alpha <= 0) return;
 	
 	var oldAlpha = -1;
 	if(this.alpha != c.globalAlpha) {
@@ -417,14 +448,13 @@ dusk.sgui.Component.prototype.draw = function(c, xOffset, yOffset) {
 		c.globalAlpha = this.alpha;
 	}
 	
-	this.prepareDraw.fire(c);
+	this.prepareDraw.fire({"d":d, "c":c});
 
 	if(this.mark !== null) {
 		c.strokeStyle = this.mark;
-		c.strokeRect(this.x, this.y, this.width, this.height);
+		c.strokeRect(d.destX, d.destY, d.width, d.height);
 	}
-
-	//c.restore(state);
+	
 	if(oldAlpha >= 0) c.globalAlpha = oldAlpha
 };
 

@@ -49,6 +49,17 @@ dusk.sgui.Single = function(parent, comName) {
 	 */
 	this._cache = null;
 	
+	/** The x offset. The child will be moved to the left this many, and any pixels that have an x less than 0 are not drawn.
+	 * @type integer
+	 * @since 0.0.18-alpha
+	 */
+	this.xOffset = 0;
+	/** The y offset. The child will be moved upwards this many, and any pixels that have an y less than 0 are not drawn.
+	 * @type integer
+	 * @since 0.0.18-alpha
+	 */
+	this.yOffset = 0;
+	
 	this.newComponent("blank", "NullCom");
 	
 	//Prop masks
@@ -61,6 +72,9 @@ dusk.sgui.Single = function(parent, comName) {
 		
 	//Check interfaces
 	if(!dusk.utils.doesImplement(this, dusk.sgui.IContainer)) console.warn(this.toString()+" does not implement dusk.sgui.IContainer!");
+	
+	//Render support
+	this.renderSupport |= dusk.sgui.Component.REND_OFFSET | dusk.sgui.Component.REND_SLICE;
 };
 dusk.sgui.Single.prototype = new dusk.sgui.Component();
 dusk.sgui.Single.constructor = dusk.sgui.Group;
@@ -137,25 +151,70 @@ Object.defineProperty(dusk.sgui.Single.prototype, "__child", {
  * @param {CanvasRenderingContext2D} The canvas context on which to draw.
  * @private
  */
-dusk.sgui.Single.prototype._singleDraw = function(c) {
-	var usingCache = false;
-	if(this._width > -1 || this._height > -1) {
-		this._cache.getContext("2d").clearRect(0, 0, this.width, this.height);
-		usingCache = true;
+dusk.sgui.Single.prototype._singleDraw = function(e) {
+	var support = this._component.renderSupport;
+	var cacheNeeded = false;
+	
+	if(!(support & dusk.sgui.Component.REND_LOCATION)) {
+		console.error("All components must support origin location.");
+		return e;
 	}
 	
-	var state = c.save();
-	if(this.x - this.xOffset || this.y - this.yOffset) c.translate(~~(this.x - this.xOffset), ~~(this.y - this.yOffset));
-	
-	this._component.draw(usingCache?this._cache.getContext("2d"):c);
-	
-	c.restore(state);
-	
-	if(usingCache) {
-		c.drawImage(this._cache, this.x, this.y, this.width, this.height);
+	if(!(support & dusk.sgui.Component.REND_OFFSET) && (this.xOffset || this.yOffset)) {
+		cacheNeeded = true;
 	}
 	
-	this._component.draw(c);
+	if(!(support & dusk.sgui.Component.REND_SLICE) && (this.width >= 0 || this.height >= 0)) {
+		cacheNeeded = true;
+	}
+	
+	if(!cacheNeeded) {
+		var com = this._component;
+		var data = {};
+		data.sourceX = (-this.xOffset + com.x - e.d.sourceX)<0 ? -(-this.xOffset + com.x - e.d.sourceX) : 0;
+		data.sourceY = (-this.yOffset + com.y - e.d.sourceY)<0 ? -(-this.yOffset + com.y - e.d.sourceY) : 0;
+		data.destX = (com.x - this.xOffset - e.d.sourceX)<0 ? e.d.destX : (com.x - this.xOffset - e.d.sourceX) + e.d.destX;
+		data.destY = (com.y - this.yOffset - e.d.sourceY)<0 ? e.d.destY : (com.y - this.yOffset - e.d.sourceY) + e.d.destY;
+		data.width = com.width - data.sourceX;
+		data.height = com.height - data.sourceY;
+		
+		if(data.destX >= e.d.width + e.d.destX) return;
+		if(data.destY >= e.d.height + e.d.destY) return;
+		
+		if(data.width <= 0 || data.height <= 0) return;
+		
+		if(data.width + data.destX > e.d.width + e.d.destX) data.width = (e.d.destX + e.d.width) - data.destX;
+		if(data.height + data.destY > e.d.height + e.d.destY) data.height = (e.d.destY + e.d.height) - data.destY;
+		
+		com.draw(data, e.c);
+	}else{
+		if(this._cache == null) {
+			this._cache = dusk.utils.createCanvas(e.d.width + this.xOffset, e.d.height + this.yOffset);
+		}else{
+			this._cache.width = e.d.width + this.xOffset;
+			this._cache.height = e.d.height + this.yOffset;
+		}
+		
+		var com = this._component;
+		var data = {};
+		data.sourceX = 0;
+		data.sourceY = 0;
+		data.destX = com.x;
+		data.destY = com.y;
+		data.width = com.width;
+		data.height = com.height;
+		
+		if(data.destX >= e.d.width + e.d.destX) return;
+		if(data.destY >= e.d.height + e.d.destY) return;
+		
+		if(data.width <= 0 || data.height <= 0) return;
+		
+		com.draw(data, this._cache.getContext("2d"));
+		
+		e.c.drawImage(this._cache, this.xOffset + e.d.sourceX, this.yOffset + e.d.sourceY, e.d.width, e.d.height,
+			e.d.destX, e.d.destY, e.d.width, e.d.height
+		);
+	}
 };
 
 /** Returns the component in the group, or creates a new one.
@@ -226,44 +285,34 @@ dusk.sgui.Single.prototype.alterChildLayer = function(com, alter) {
 //Width
 Object.defineProperty(dusk.sgui.Single.prototype, "width", {
 	get: function() {
-		if(this._width <= -1) {
-			return this._component.x + this._component.width;
+		if(this._width == -2) {
+			return this._container.width;
+		}else if(this._width == -1) {
+			return this._component.x + this._component.width - this.xOffset;
 		}else{
 			return this._width;
 		}
 	},
 	
 	set: function(value) {
-		if(value <= -1) {
-			this._width = -1;
-		}else{
-			this._width = value;
-			if(!this._cache) this._cache = dusk.utils.createCanvas(this.width, this.height);
-			this._cache.width = this._width;
-			this._cache.height = this.height;
-		}
+		this._width = value;
 	}
 });
 
 //Height
 Object.defineProperty(dusk.sgui.Single.prototype, "height", {
 	get: function() {
-		if(this._height <= -1) {
-			return this._component.y + this._component.height;
+		if(this._height == -2) {
+			return this._container.height;
+		}else if(this._height == -1) {
+			return this._component.y + this._component.height - this.yOffset;
 		}else{
 			return this._height;
 		}
 	},
 	
 	set: function(value) {
-		if(value <= -1) {
-			this._height = -1;
-		}else{
-			this._height = value;
-			if(!this._cache) this._cache = dusk.utils.createCanvas(this.width, this.height);
-			this._cache.height = this._height;
-			this._cache.width = this.width;
-		}
+		this._height = value;
 	}
 });
 
