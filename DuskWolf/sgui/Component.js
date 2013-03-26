@@ -39,10 +39,26 @@ dusk.sgui.Component = function (parent, componentName) {
 	 * @type integer
 	 */
 	this.x = 0;
+	/** The origin point for the x coordinate, this describes where the x coordinate "begins".
+	 * 
+	 * Must be one of the `ORIGIN_*` constants.
+	 * @type integer
+	 * @default dusk.sgui.Component#ORIGIN_MIN
+	 * @since 0.0.18-alpha
+	 */
+	this.xOrigin = dusk.sgui.Component.ORIGIN_MIN;
 	/** The components y coordinate.
 	 * @type integer
 	 */
 	this.y = 0;
+	/** The origin point for the y coordinate, this describes where the y coordinate "begins".
+	 * 
+	 * Must be one of the `ORIGIN_*` constants.
+	 * @type integer
+	 * @default dusk.sgui.Component#ORIGIN_MIN
+	 * @since 0.0.18-alpha
+	 */
+	this.xOrigin = dusk.sgui.Component.ORIGIN_MIN;
 	/** Whether the component will draw. If false, the component will not render.
 	 * @type boolean
 	 * @default true
@@ -216,7 +232,9 @@ dusk.sgui.Component = function (parent, componentName) {
 	
 	//Prop masks
 	this._registerPropMask("x", "x");
+	this._registerPropMask("xOrigin", "xOrigin");
 	this._registerPropMask("y", "y");
+	this._registerPropMask("yOrigin", "yOrigin");
 	this._registerPropMask("width", "width");
 	this._registerPropMask("height", "height");
 	this._registerPropMask("alpha", "alpha");
@@ -306,6 +324,34 @@ dusk.sgui.Component.REND_OFFSET = 0x02;
  * @since 0.0.18-alpha
  */
 dusk.sgui.Component.REND_SLICE = 0x04;
+
+
+/** The origin point of the component will be either the top or the left of its container.
+ * @type integer
+ * @value 0
+ * @constant
+ * @memberof dusk.sgui.Component
+ * @since 0.0.18-alpha
+ */
+dusk.sgui.Component.ORIGIN_MIN = 0;
+
+/** The origin point of the component will be either the bottom or right of its container.
+ * @type integer
+ * @value 1
+ * @constant
+ * @memberof dusk.sgui.Component
+ * @since 0.0.18-alpha
+ */
+dusk.sgui.Component.ORIGIN_MAX = 1;
+
+/** The origin point of the component will be the centre of its container.
+ * @type integer
+ * @value 2
+ * @constant
+ * @memberof dusk.sgui.Component
+ * @since 0.0.18-alpha
+ */
+dusk.sgui.Component.ORIGIN_MIDDLE = 2;
 
 /** This causes the component to handle a keypress, it should be called by ether it's parent container or SimpleGui.
  * 

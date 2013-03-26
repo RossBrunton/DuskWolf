@@ -13,6 +13,8 @@ dusk.sgui.Label = function(parent, comName) {
 	if(parent !== undefined){
 		dusk.sgui.Component.call(this, parent, comName);
 		
+		this._cachedWidth = 0;
+		this._text = "";
 		this.text = "";
 		this._width = -1;
 		
@@ -68,14 +70,23 @@ dusk.sgui.Label.prototype._labelDraw = function(e) {
 
 //Width
 Object.defineProperty(dusk.sgui.Label.prototype, "width", {
-	get: function() {return this.measure(this.text)+(this._padding<<1);},
-	set: function(value) {this._width = value-(this._padding<<1);}
+	get: function() {return this._width>=0?this._width+(this._padding<<1):this._cachedWidth;},
+	set: function(value) {this._width = value-(this.padding<<1);}
 });
 
 //Height
 Object.defineProperty(dusk.sgui.Label.prototype, "height", {
-	get: function() {return this.size + (this._padding<<1);},
-	set: function(value) {this.size = value - (this._padding<<1);}
+	get: function() {return this.size + (this.padding<<1);},
+	set: function(value) {this.size = value - (this.padding<<1);}
+});
+
+//Text
+Object.defineProperty(dusk.sgui.Label.prototype, "text", {
+	get: function() {return this._text;},
+	set: function(value) {
+		this._text = value;
+		this._cachedWidth = this.measure(this._text)+(this.padding<<1);
+	}
 });
 
 dusk.sgui.Label.prototype.measure = function(test) {

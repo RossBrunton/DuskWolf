@@ -47,6 +47,11 @@ dusk.sgui.Grid = function (parent, comName) {
 	 * @default 0
 	 */
 	this.vspacing = 0;
+	/** Global properties. These will be set to all children during population.
+	 * @type object
+	 * @since 0.0.18-alpha
+	 */
+	this.globals = null;
 	
 	/** This event handler is fired during three stages of the population proccess; when it starts, when a component is created, and when it finishes.
 	 * 
@@ -68,7 +73,8 @@ dusk.sgui.Grid = function (parent, comName) {
 	this._registerPropMask("hspacing", "hspacing");
 	this._registerPropMask("rows", "rows");
 	this._registerPropMask("cols", "cols");
-	this._registerPropMask("populate", "__populate", undefined, ["rows", "cols", "hspacing", "vspacing"]);
+	this._registerPropMask("globals", "globals");
+	this._registerPropMask("populate", "__populate", undefined, ["rows", "cols", "hspacing", "vspacing", "globals"]);
 	
 	//Listeners
 	this.dirPress.listen(this._gridDirAction, this);
@@ -86,6 +92,8 @@ dusk.sgui.Grid.prototype.className = "Grid";
  * 
  * This may take an array as it's argument, in which case it will alternate between the components as it places them.
  * 
+ * With this array, if one of the elements has the property "grid_forGlobal" which is true, then it's properties will apply to all grid entries.
+ * 
  * This may be used in the JSON representation with the property `populate`.
  * 
  * @param {object|array} child A description of the object or objects to set.
@@ -93,6 +101,7 @@ dusk.sgui.Grid.prototype.className = "Grid";
 dusk.sgui.Grid.prototype.populate = function(child) {
 	if(child === undefined) return;
 	if(!Array.isArray(child)) child = [child];
+	
 	//Delete all the existing ones
 	for(var x in this._components){
 		this.deleteComponent(x);
@@ -100,17 +109,28 @@ dusk.sgui.Grid.prototype.populate = function(child) {
 	
 	//Add them
 	child = this._populationEvent.fire({"action":"before", "child":child}).child;
-	var p = 0;
+	var p = -1;
 	var xpoint = 0;
 	var ypoint = 0;
 	var ypointMax = 0;
 	for(var hy = 0; hy < this.rows; hy++){
 		for(var hx = 0; hx < this.cols; hx++){
 			p = (p + 1) % child.length;
-			var com = this.getComponent(hx + "," + hy, child[p].type);
-			com = this._populationEvent.fire({"action":"create", "current":child[p], "child":child, "component":com}).component;
+			
+			var com = null;
+			if(!("type" in child[p]) && this.globals !== null && "type" in this.globals) {
+				com = this.getComponent(hx + "," + hy, this.globals.type);
+			}else if("type" in child[p]) {
+				com = this.getComponent(hx + "," + hy, child[p].type);
+			}else{
+				console.warn("Grid tried to populate element with no type.");
+			}
+			
+			com = this._populationEvent.fire({"action":"create", "current":child[p], "child":child, "component":com, "globals":this.globals}).component;
+			if(this.globals !== null) com.parseProps(dusk.utils.clone(this.globals));
 			com.parseProps(dusk.utils.clone(child[p]));
 			com.parseProps({"y":ypoint, "x":xpoint});
+			
 			xpoint += com.width+this.hspacing;
 			if(com.height + this.vspacing > ypointMax) ypointMax = com.height + this.vspacing;
 		}
@@ -118,9 +138,10 @@ dusk.sgui.Grid.prototype.populate = function(child) {
 		ypoint += ypointMax;
 		xpoint = 0;
 	}
-	this._populationEvent.fire({"action":"complete", "child":child});
 	
 	this.flow("0,0");
+	
+	this._populationEvent.fire({"action":"complete", "child":child});
 };
 Object.defineProperty(dusk.sgui.Grid.prototype, "__populate", {
 	set: function(value) {this.populate(value);},

@@ -171,10 +171,15 @@ dusk.sgui.Single.prototype._singleDraw = function(e) {
 	if(!cacheNeeded) {
 		var com = this._component;
 		var data = {};
-		data.sourceX = (-this.xOffset + com.x - e.d.sourceX)<0 ? -(-this.xOffset + com.x - e.d.sourceX) : 0;
-		data.sourceY = (-this.yOffset + com.y - e.d.sourceY)<0 ? -(-this.yOffset + com.y - e.d.sourceY) : 0;
-		data.destX = (com.x - this.xOffset - e.d.sourceX)<0 ? e.d.destX : (com.x - this.xOffset - e.d.sourceX) + e.d.destX;
-		data.destY = (com.y - this.yOffset - e.d.sourceY)<0 ? e.d.destY : (com.y - this.yOffset - e.d.sourceY) + e.d.destY;
+		var destXAdder = com.xOrigin == dusk.sgui.Component.ORIGIN_MAX?this.width - com.width:0;
+		var destYAdder = com.yOrigin == dusk.sgui.Component.ORIGIN_MAX?this.height - com.height:0;
+		destXAdder = com.xOrigin == dusk.sgui.Component.ORIGIN_MIDDLE?(this.width - com.width)<<1:destXAdder;
+		destXAdder = com.yOrigin == dusk.sgui.Component.ORIGIN_MIDDLE?(this.height - com.height)<<1:destYAdder;
+		
+		data.sourceX = (-this.xOffset + com.x + destXAdder - e.d.sourceX)<0 ? -(-this.xOffset + com.x + destXAdder - e.d.sourceX) : 0;
+		data.sourceY = (-this.yOffset + com.y + destYAdder - e.d.sourceY)<0 ? -(-this.yOffset + com.y + destYAdder - e.d.sourceY) : 0;
+		data.destX = (com.x + destXAdder - this.xOffset - e.d.sourceX)<0 ? e.d.destX : (com.x + destXAdder - this.xOffset - e.d.sourceX) + e.d.destX;
+		data.destY = (com.y + destYAdder - this.yOffset - e.d.sourceY)<0 ? e.d.destY : (com.y + destYAdder - this.yOffset - e.d.sourceY) + e.d.destY;
 		data.width = com.width - data.sourceX;
 		data.height = com.height - data.sourceY;
 		
@@ -197,15 +202,20 @@ dusk.sgui.Single.prototype._singleDraw = function(e) {
 		
 		var com = this._component;
 		var data = {};
+		var destXAdder = com.xOrigin == dusk.sgui.Component.ORIGIN_MAX?this.width - com.width:0;
+		var destYAdder = com.yOrigin == dusk.sgui.Component.ORIGIN_MAX?this.height - com.height:0;
+		destXAdder = com.xOrigin == dusk.sgui.Component.ORIGIN_MIDDLE?(this.width - com.width)<<1:destXAdder;
+		destXAdder = com.yOrigin == dusk.sgui.Component.ORIGIN_MIDDLE?(this.height - com.height)<<1:destYAdder;
+		
 		data.sourceX = 0;
 		data.sourceY = 0;
-		data.destX = com.x;
-		data.destY = com.y;
+		data.destX = com.x + destXAdder;
+		data.destY = com.y + destYAdder;
 		data.width = com.width;
 		data.height = com.height;
 		
-		if(data.destX >= e.d.width + e.d.destX) return;
-		if(data.destY >= e.d.height + e.d.destY) return;
+		//if(data.destX >= e.d.width + e.d.destX) return;
+		//if(data.destY >= e.d.height + e.d.destY) return;
 		
 		if(data.width <= 0 || data.height <= 0) return;
 		

@@ -28,7 +28,7 @@ dusk.sgui.ItemGrid = function (parent, comName) {
 dusk.sgui.ItemGrid.prototype = new dusk.sgui.Grid();
 dusk.sgui.ItemGrid.constructor = dusk.sgui.ItemGrid;
 
-dusk.sgui.ItemGrid.prototype.className = "ClassName";
+dusk.sgui.ItemGrid.prototype.className = "ItemGrid";
 
 dusk.sgui.ItemGrid.prototype.setInventory = function(invent) {
 	if(!(invent instanceof dusk.items.Invent)) {

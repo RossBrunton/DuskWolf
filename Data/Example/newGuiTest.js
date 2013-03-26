@@ -5,11 +5,13 @@
 dusk.load.require("dusk.sgui.Pane");
 dusk.load.require("dusk.sgui.Rect");
 dusk.load.require("dusk.sgui.Label");
+dusk.load.require("dusk.sgui.Grid");
+dusk.load.require("dusk.sgui.Selection");
 dusk.load.require("dusk");
 
 dusk.load.provide("example.newGui");
 
-//Items test
+//Basic offsets and such
 dusk.sgui.getPane("newGui").parseProps({
 	"active":true,
 	"xOffset":50,
@@ -72,6 +74,46 @@ dusk.sgui.getPane("newGui").parseProps({
 					"colour":"#ffff00"
 				}
 			}
+		}
+	}
+});
+
+//Grids
+dusk.sgui.getPane("grid").parseProps({
+	"active":true,
+	"focus":"grd",
+	"children":{
+		"grd":{
+			"type":"Selection",
+			"xOrigin":dusk.sgui.Component.ORIGIN_MAX,
+			"yOrigin":dusk.sgui.Component.ORIGIN_MAX,
+			"x":-5,
+			"y":-50,
+			"options":10,
+			"globals":{"type":"Label", "height":20, "padding":5, "colour":"#0000ff"},
+			"populate":[
+				{"text":"1"}, {"text":"2"}, {"text":"3"}, {"text":"4"}, {"text":"5"}
+			]
+		}/*,
+		"test":{
+			"type":"Label",
+			"xOrigin":dusk.sgui.Component.ORIGIN_MAX,
+			"x":-20,
+			"text":"Test Text",
+		}*/,
+		"r":{
+			"type":"Rect",
+			"width":50,
+			"height":50,
+			"xOrigin":dusk.sgui.Component.ORIGIN_MIDDLE,
+			"yOrigin":dusk.sgui.Component.ORIGIN_MIDDLE
+		},
+		"c":{
+			"type":"Rect",
+			"width":3,
+			"height":3,
+			"x":dusk.sgui.width/2 - 1,
+			"y":dusk.sgui.height/2 - 1
 		}
 	}
 });
