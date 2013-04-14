@@ -8,17 +8,29 @@ dusk.load.provide("dusk.sgui.extras.Radiobox");
 
 /** @class dusk.sgui.extras.Radiobox
  * 
- * @classdesc 
+ * @classdesc This extra can be attached to a group and makes any checkboxes inside function like radiobuttons.
+ * 
+ * This means that, for all the checkboxes in the group, only one or zero may be selected,
+ *  attempting to select more than one will uncheck the other checkbox.
  * 
  * @param {dusk.sgui.Component} owner The component this extra is "attached to".
  * @param {string} name This extra's name.
  * @extends dusk.sgui.extras.Extra
+ * @see {@link dusk.sgui.Checkbox}
  * @constructor
  */
 dusk.sgui.extras.Radiobox = function(owner, name) {
 	dusk.sgui.extras.Extra.call(this, owner, name);
 	
+	/** Internal property for the currently selected checkbox.
+	 * @type {dusk.sgui.Checkbox}
+	 * @private
+	 */
 	this._selected = null;
+	/** The path to the currently selected checkbox.
+	 *   You may assign this an object of type `{@link dusk.sgui.Checkbox}` and the path will be automatically detected.
+	 * @type {string}
+	 */
 	this.selected = null;
 	
 	//Prop masks
@@ -27,6 +39,9 @@ dusk.sgui.extras.Radiobox = function(owner, name) {
 dusk.sgui.extras.Radiobox.prototype = new dusk.sgui.extras.Extra();
 dusk.sgui.extras.Radiobox.constructor = dusk.sgui.extras.Radiobox;
 
+/** Returns the currently selected checkbox, or null if none are selected.
+ * @return {?dusk.sgui.Checkbox} The current selection.
+ */
 dusk.sgui.extras.Radiobox.prototype.getSelectedCheckbox = function() {
 	return this._selected;
 };

@@ -12,12 +12,14 @@ dusk.load.provide("dusk.EventDispatcher");
  * 
  * More finely tuned event handling is also available, in the form of "propsYes" and "propsNo".
  * 
- * If the listener has a `propsYes` object registered, then the listener will ONLY be called if ALL the properties of propsYes have counterparts that are equal in the event object.
+ * If the listener has a `propsYes` object registered
+ *  then the listener will ONLY be called if ALL the properties of `propsYes` have counterparts
+ *  that are equal in the event object.
  * 
  * Similarly, `propsNo` will only fire if the properties specified are NOT equal to the event properties.
  * 
  * @param {string} name A name for the event dispatcher; used for identifying it in debbuging.
- * @param {?integer} mode The current behaviour used for managing return values, defaults to `{@link dusk.EventDispatcher.MODE_NONE}`.
+ * @param {integer=dusk.EventDispatcher.MODE_NONE} mode The current behaviour used for managing return values.
  * @since 0.0.14-alpha
  * @constructor
  */
@@ -69,7 +71,8 @@ dusk.EventDispatcher.MODE_AND = 1;
  */
 dusk.EventDispatcher.MODE_OR = 2;
 
-/** The "pass" mode, this will take the event object returned by a listener, and then give it to the next one, and finaly return.
+/** The "pass" mode, this will take the event object returned by a listener
+ *   and then pass it to the next one and so on then finaly return that value.
  * 
  * @type integer
  * @constant
@@ -85,12 +88,17 @@ dusk.EventDispatcher.MODE_PASS = 3;
  */
 dusk.EventDispatcher.MODE_LAST = 4;
 
-/** Registers a listener for the event; this function will be called if an event is fired and the properties match up as described in the class description are correct.
+/** Registers a listener for the event;
+ *   this function will be called if an event is fired
+ *   and the properties match up as described in the class description are correct.
  * 
- * @param {function(object):*} callback The function that will be called when an event is fired. It will be given a single argument; the event object.
+ * @param {function(object):*} callback The function that will be called when an event is fired.
+ *  It will be given a single argument; the event object.
  * @param {object} scope The scope to run the callback in. This will be the value of `this` in the callback function.
- * @param {?object} propsYes The listener will only fire if every property of this object is equal to the same named property in the event object.
- * @param {?object} propsNo The listener will only fire if every property of this object is not equal to the same named property in the event object.
+ * @param {?object} propsYes The listener will only fire if every property of this object
+ *  is equal to the same named property in the event object.
+ * @param {?object} propsNo The listener will only fire if every property of this object
+ *  is not equal to the same named property in the event object.
  */
 dusk.EventDispatcher.prototype.listen = function(callback, scope, propsYes, propsNo) {
 	if(!callback) {

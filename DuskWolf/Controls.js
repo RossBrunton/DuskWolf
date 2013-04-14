@@ -13,24 +13,30 @@ dusk.load.provide("dusk.controls");
  * 
  * @description Provides a simple way to describe changeable control schemes and implement game controllers.
  * 
- * How control mapping works is that code registers the name of a "control", and a default key/button, and then either gets an event when the control is pressed, or checks button/key presses against it.
+ * How control mapping works is that code registers the name of a "control", and a default key/button,
+ *  and then either gets an event when the control is pressed, or checks button/key presses against it.
  *	This allows the input mapped to a control to change.
  * 
  * This module supports gamepads, which are automatically detected and set up.
  *	Gamepads consist of buttons, and axes.
- *	Buttons are essentially numbered from 0 to however many buttons there are on the controller, and this is the number used to describe them on controls.
+ *	Buttons are essentially numbered from 0 to however many buttons there are on the controller,
+ *   and this is the number used to describe them on controls.
  *
  * Axes, however, are more complicated.
- *	Like buttons, axes are numbered, however they also have an intensity from `0.0` to `1.0`, and so they are represented using strings like `"0+0.5` or `"2-0.2"` wherever a button is expected.
- *	The first example means that for the control to be active, stick 0 must be halfway or more to it's maximum positive (right or down) value.
- * 	The second example means that for the control to be active, stick 2 must be 20% or more to it's maximum negative (up or left) value.
+ *	Like buttons, axes are numbered, however they also have an intensity from `0.0` to `1.0`,
+ *   and so they are represented using strings like `"0+0.5` or `"2-0.2"` wherever a button is expected.
+ *	The first example means that for the control to be active,
+ *   stick 0 must be halfway or more to it's maximum positive (right or down) value.
+ * 	The second example means that for the control to be active,
+ *   stick 2 must be 20% or more to it's maximum negative (up or left) value.
  * 
  * @since 0.0.15-alpha
  */
 
 /** The mappings of controls to their respective key or button.
  * 
- * The key of this object is the name of the control, and the value is a two element array. The first element is the keycode of the key, and the second a button representation.
+ * The key of this object is the name of the control, and the value is a two element array.
+ *  The first element is the keycode of the key, and the second a button representation.
  * @type object
  * @private
  */
@@ -57,7 +63,8 @@ dusk.controls._axes = [];
  * @value 0
  */
 dusk.controls.TYPE_KEY = 0;
-/** A constant used when firing the `{@link dusk.controls.controlPressed}` event, indicating that a controller button was pressed.
+/** A constant used when firing the `{@link dusk.controls.controlPressed}` event,
+ *   indicating that a controller button was pressed.
  * @type integer
  * @constant
  * @value 1
@@ -72,8 +79,11 @@ dusk.controls.TYPE_AXIS = 2;
 
 /** Fired when a key or button control has been activated, axes are not supported.
  * 
- * The event object contains three properties. `type`; one of the `TYPE_*` constants indicating what was pressed; `control`, a string with the name of the control.
- * 	The third property is either `buttonEvent` or `keyEvent` depending on what was pressed. This is either a keyPress or buttonPress event.
+ * The event object contains three properties.
+ *  `type`; one of the `TYPE_*` constants indicating what was pressed;
+ *  `control`, a string with the name of the control.
+ * 	The third property is either `buttonEvent` or `keyEvent` depending on what was pressed.
+ *   This is either a keyPress or buttonPress event.
  * @type dusk.EventDispatcher
  */
 dusk.controls.controlPressed = new dusk.EventDispatcher("dusk.controls.controlPressed");
@@ -98,11 +108,15 @@ dusk.controls.buttonUp = new dusk.EventDispatcher("dusk.controls.buttonUp");
  * If the control is already registered, this does nothing.
  * @param {string} name The name of the controll to add.
  * @param {integer} defaultKey The default key to fire this control on, as a keycode.
- * @param {integer|string} defaultButton The default button to fire this control on, either a button ID, or a axis description.
+ * @param {integer|string} defaultButton The default button to fire this control on,
+ *  either a button ID, or a axis description.
  */
 dusk.controls.addControl = function(name, defaultKey, defaultButton) {
 	if(name in dusk.controls._mappings) return;
-	dusk.controls._mappings[name] = [defaultKey===undefined?null:defaultKey, defaultButton===undefined?null:defaultButton];
+	dusk.controls._mappings[name] = [
+		defaultKey===undefined?null:defaultKey,
+		defaultButton===undefined?null:defaultButton
+	];
 };
 
 /** Returns the buttons control mappings assigned to that control.
@@ -125,7 +139,8 @@ dusk.controls.mapKey = function(name, key) {
 	dusk.controls._mappings[name][0] = key;
 };
 
-/** Registers a button or axis to a control; when that button is pressed, or the axis is greater than the threshold, the control will fire.
+/** Registers a button or axis to a control; 
+ *   when that button is pressed, or the axis is greater than the threshold, the control will fire.
  * @param {string} name The name of the control to add the button/axis to.
  * @param {integer|string} button The button ID, or the axis description to register to the control.
  */
@@ -180,7 +195,8 @@ dusk.controls.checkButton = function(name, button) {
  * @return {boolean} Whether the control is active.
  */
 dusk.controls.controlActive = function(name) {
-	return dusk.keyboard.isKeyPressed(dusk.controls._mappings[name][0]) || dusk.controls.isButtonPressed(dusk.controls._mappings[name][1]);
+	return dusk.keyboard.isKeyPressed(dusk.controls._mappings[name][0])
+	|| dusk.controls.isButtonPressed(dusk.controls._mappings[name][1]);
 };
 
 /** Checks if a button is pressed, or an axis is tilted.
@@ -240,7 +256,8 @@ dusk.controls._buttonPressed = function(e) {
 dusk.controls.buttonPress.listen(dusk.controls._buttonPressed, null);
 
 /** Registered on `{@link dusk.frameTicker.onFrame}`.
- * 	This checks to see if gamepad buttons or pressed, or if axises are tilted, and fires the relative events, and updates the relative variables.
+ * 	This checks to see if gamepad buttons or pressed, or if axises are tilted,
+ *   and fires the relative events, and updates the relative variables.
  * @param {object} e The event object.
  * @private
  */

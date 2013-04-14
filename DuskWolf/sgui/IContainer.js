@@ -42,7 +42,8 @@ dusk.sgui.IContainer = function() {};
  * This is different from the normal keypress handler, in that it is ran before the listener is fired.
  * 	If it returns true, then proccessing the keypress stops, hence the event doesn't "bubble".
  * 
- * It is expected that a Container use this method to call one or more of it's children, and if any of those return values are true, then this must return true.
+ * It is expected that a Container use this method to call one or more of it's children
+ *  and if any of those return values are true, then this must return true.
  * 
  * @param {object} e The keypress event, must be a JQuery keypress event object.
  * @return {boolean} The return value of the focused component's keypress.
@@ -50,14 +51,16 @@ dusk.sgui.IContainer = function() {};
 dusk.sgui.IContainer.containerKeypress = function(e) {};
 
 /** Deletes a component from this container if possible.
- * 	It is not expected that this method remove all refrences outside itself, but it must fire the component's `{@link dusk.sgui.Component.onDelete}` event dispatcher.
+ * 	It is not expected that this method remove all refrences outside itself
+ *   but it must fire the component's `{@link dusk.sgui.Component.onDelete}` event dispatcher.
  * 
  * @param {string} com The name of the component to delete.
  * @return {boolean} If the delete was successfull, this will return false if the component doesn't exist.
  */
 dusk.sgui.IContainer.deleteComponent = function(com) {};
 
-/** Deletes all the components from this container under the same critera as `{@link dusk.sgui.IContainer#deleteComponent}`.
+/** Deletes all the components from this container
+ *   under the same critera as `{@link dusk.sgui.IContainer#deleteComponent}`.
  * 
  * @since 0.0.18-alpha
  */
@@ -65,7 +68,8 @@ dusk.sgui.IContainer.deleteAllComponents = function() {};
 
 /** Return the component with that name in this container, and potentially create it.
  * 
- * If `type` is defined, then it is suggested that if the component doesn't exist, then it should be created as the specified type.
+ * If `type` is defined, then it is suggested that if the component doesn't exist,
+ *  then it should be created as the specified type.
  * 
  * @param {string} com The name of the component to get.
  * @param {?string} type The type of component to create if possible.
@@ -75,9 +79,11 @@ dusk.sgui.IContainer.getComponent = function(com, type) {};
 
 /** Modifies a component in this container using JSON data.
  *	
- * A component is expected to check what component to send the data to (Possibly using the `name` property), and call `{@link dusk.sgui.Component.parseProps}` on the data.
+ * A container is expected to check what component to send the data to (Possibly using the `name` property)
+ *  and call `{@link dusk.sgui.Component.parseProps}` on the data.
  * 
- * An array may also be specified, in which case it should behave as if multiple called had been made; one for each element.
+ * An array may also be specified,
+ * 	in which case it should behave as if multiple called had been made; one for each element.
  * @param {object|array} data Information about components, as described above.
  */
 dusk.sgui.IContainer.modifyComponent = function(data) {};
@@ -88,7 +94,8 @@ dusk.sgui.IContainer.modifyComponent = function(data) {};
  * - The current component's `{@link dusk.sgui.Component.lock}` value is false.
  * - The target component's `{@link dusk.sgui.Component.enabled}` value is true.
  * 
- * It must also fire `{@link dusk.sgui.Component.onFocusChange}` and `{@link dusk.sgui.Component.onActiveChange}` as appropriate.
+ * It must also fire `{@link dusk.sgui.Component.onFocusChange}`
+ *  and `{@link dusk.sgui.Component.onActiveChange}` as appropriate.
  * 
  * @param {string} to The name of the component to flow into.
  * @return {boolean} Whether the flow was successfull.

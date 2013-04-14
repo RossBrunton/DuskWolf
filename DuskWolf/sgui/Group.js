@@ -30,7 +30,8 @@ dusk.sgui.Group = function(parent, comName) {
 	 * @protected
 	 */
 	this._components = {};
-	/** The current drawing order of all the components. An array of string component names, earlier entries are drawn first.
+	/** The current drawing order of all the components.
+	 *   An array of string component names, earlier entries are drawn first.
 	 * @type array
 	 * @protected
 	 */
@@ -47,7 +48,9 @@ dusk.sgui.Group = function(parent, comName) {
 	 * @since 0.0.18-alpha
 	 */
 	this._focusBehaviour = dusk.sgui.Group.FOCUS_ONE;
-	/** The current behaviour used to say how focus works. Changing this will not affect any currently existing components.
+	/** The current behaviour used to say how focus works.
+	 *  
+	 * Changing this will affect any currently existing components.
 	 * @type integer
 	 * @default FOCUS_ONE
 	 */
@@ -80,12 +83,14 @@ dusk.sgui.Group = function(parent, comName) {
 	 * @since 0.0.18-alpha
 	 */
 	this._cache = null;
-	/** The x offset. All the contents of this container will be moved to the left this many, and any pixels that have an x less than 0 are not drawn.
+	/** The x offset. All the contents of this container will be moved to the left this many
+	 *   and any pixels that have an x less than 0 are not drawn.
 	 * @type integer
 	 * @since 0.0.18-alpha
 	 */
 	this.xOffset = 0;
-	/** The y offset. All the contents of this container will be moved upwards this many, and any pixels that have an y less than 0 are not drawn.
+	/** The y offset. All the contents of this container will be moved upwards this many
+	 *   and any pixels that have an y less than 0 are not drawn.
 	 * @type integer
 	 * @since 0.0.18-alpha
 	 */
@@ -117,7 +122,9 @@ dusk.sgui.Group = function(parent, comName) {
 	this.renderSupport |= dusk.sgui.Component.REND_OFFSET | dusk.sgui.Component.REND_SLICE;
 	
 	//Check interfaces
-	if(!dusk.utils.doesImplement(this, dusk.sgui.IContainer)) console.warn(this.toString()+" does not implement dusk.sgui.IContainer!");
+	if(!dusk.utils.doesImplement(this, dusk.sgui.IContainer)) {
+		console.warn(this.toString()+" does not implement dusk.sgui.IContainer!");
+	}
 };
 dusk.sgui.Group.prototype = new dusk.sgui.Component();
 dusk.sgui.Group.constructor = dusk.sgui.Group;
@@ -167,7 +174,7 @@ dusk.sgui.Group.prototype.containerKeypress = function(e) {
 
 /** Creates a new component of the specified type.
  * 
- * `type` is a string, and must correspond to a property of the namespace `{@link dusk.sgui}` and inherit from the class `{@link dusk.sgui.Component}`.
+ * `type` is a string, and must have been previously registered with `{@link dusk.sgui.registerType}`.
  *	This will be the object which is created.
  * 
  * @param {string} com The name of the new component.
@@ -193,8 +200,10 @@ dusk.sgui.Group.prototype._newComponent = function(com, type) {
 /** Modifies this component's children using JSON data.
  *	See `{@link dusk.sgui.Component.parseProps}` for a basic description on how JSON properties work.
  * 
- * `data` is either a single component description, an array of component description or an object with the keys being component names, and the value being their data.
- * 	Each component must have a `name` property, stating the name of the component they are modifying. This is the key when describing multiple components using an object.
+ * `data` is either a single component description, an array of component description or an object
+ *   with the keys being component names, and the value being their data.
+ * 	Each component must have a `name` property, stating the name of the component they are modifying.
+ *   This is the key when describing multiple components using an object.
  *	It may also have a `type` property, which will be used in case the component does not exist to set its type.
  * 	If the component does not exist and `type` is omitted, then a warning is raised, and that object is skipped.
  * 
@@ -244,7 +253,8 @@ Object.defineProperty(dusk.sgui.Group.prototype, "__children", {
 	}
 });
 
-/** Similar to `{@link dusk.sgui.Group.modifyChildren}` only it modifies the properties of all the children, instead of one.
+/** Similar to `{@link dusk.sgui.Group.modifyChildren}`
+ *   only it modifies the properties of all the children instead of one.
  * 
  * Hence, the `type` and `name` properties are not needed or required.
  * 
@@ -296,11 +306,15 @@ dusk.sgui.Group.prototype._groupDraw = function(e) {
 				destXAdder = com.xOrigin == dusk.sgui.Component.ORIGIN_MIDDLE?(this.width - com.width)>>1:destXAdder;
 				destYAdder = com.yOrigin == dusk.sgui.Component.ORIGIN_MIDDLE?(this.height - com.height)>>1:destYAdder;
 				
-				data.sourceX = (-this.xOffset + com.x + destXAdder - e.d.sourceX)<0 ? -(-this.xOffset + com.x + destXAdder - e.d.sourceX) : 0;
-				data.sourceY = (-this.yOffset + com.y + destYAdder - e.d.sourceY)<0 ? -(-this.yOffset + com.y + destYAdder - e.d.sourceY) : 0;
+				data.sourceX = (-this.xOffset + com.x + destXAdder - e.d.sourceX)<0
+				 ? -(-this.xOffset + com.x + destXAdder - e.d.sourceX) : 0;
+				data.sourceY = (-this.yOffset + com.y + destYAdder - e.d.sourceY)<0
+				 ? -(-this.yOffset + com.y + destYAdder - e.d.sourceY) : 0;
 				
-				data.destX = (com.x - this.xOffset - e.d.sourceX + destXAdder)<0 ? e.d.destX : com.x - this.xOffset - e.d.sourceX + e.d.destX + destXAdder;
-				data.destY = (com.y - this.yOffset - e.d.sourceY + destYAdder)<0 ? e.d.destY : com.y - this.yOffset - e.d.sourceY + e.d.destY + destYAdder;
+				data.destX = (com.x - this.xOffset - e.d.sourceX + destXAdder)<0
+				 ? e.d.destX : com.x - this.xOffset - e.d.sourceX + e.d.destX + destXAdder;
+				data.destY = (com.y - this.yOffset - e.d.sourceY + destYAdder)<0
+				 ? e.d.destY : com.y - this.yOffset - e.d.sourceY + e.d.destY + destYAdder;
 				
 				data.width = com.width - data.sourceX;
 				data.height = com.height - data.sourceY;
@@ -310,8 +324,10 @@ dusk.sgui.Group.prototype._groupDraw = function(e) {
 				
 				if(data.width <= 0 || data.height <= 0) continue;
 				
-				if(data.width + data.destX > e.d.width + e.d.destX) data.width = (e.d.destX + e.d.width) - data.destX;
-				if(data.height + data.destY > e.d.height + e.d.destY) data.height = (e.d.destY + e.d.height) - data.destY;
+				if(data.width + data.destX > e.d.width + e.d.destX) 
+					data.width = (e.d.destX + e.d.width) - data.destX;
+				if(data.height + data.destY > e.d.height + e.d.destY) 
+					data.height = (e.d.destY + e.d.height) - data.destY;
 				
 				com.draw(data, e.c);
 			}
@@ -395,7 +411,10 @@ dusk.sgui.Group.prototype.getComponent = function(com, type) {
 	return type?this._newComponent(com, type):null;
 };
 
-/** Deletes a component in this group. This will not remove any references to it elsewhere, but will remove it from the list of components and the draw order.
+/** Deletes a component in this group.
+ * 
+ * This will not remove any references to it elsewhere
+ *  but will remove it from the list of components and the draw order.
  * 
  * @param {string} com The name of the component to delete.
  * @return {boolean} If the delete was successful, this will return false if the component doesn't exist.
@@ -438,7 +457,9 @@ dusk.sgui.Group.prototype.getFocused = function() {
 	return this._components[this._focusedCom];
 };
 
-/** Sets the current focused component only if it exists, the current component's `{@link dusk.sgui.Component.locked}` property is false, and the new component's `{@link dusk.sgui.Component.enabled}` property is true.
+/** Sets the current focused component only if it exists,
+ *   the current focus's `{@link dusk.sgui.Component.locked}` property is false
+ *   and the new component's `{@link dusk.sgui.Component.enabled}` property is true.
  * 
  * @param {string} to The name of the component to flow into.
  * @return {boolean} Whether the flow was successfull.
@@ -447,14 +468,18 @@ dusk.sgui.Group.prototype.flow = function(to) {
 	if(this._focusedCom !== "" && this._components[this._focusedCom]){
 		if(this._components[this._focusedCom].locked){return false;}
 		
-		if(this.focusBehaviour != dusk.sgui.Group.FOCUS_ALL && this._active) this._components[this._focusedCom].onActiveChange.fire({"active":false});
-		if(this.focusBehaviour != dusk.sgui.Group.FOCUS_ALL) this._components[this._focusedCom].onFocusChange.fire({"focus":false});
+		if(this.focusBehaviour != dusk.sgui.Group.FOCUS_ALL && this._active)
+			this._components[this._focusedCom].onActiveChange.fire({"active":false});
+		if(this.focusBehaviour != dusk.sgui.Group.FOCUS_ALL)
+			this._components[this._focusedCom].onFocusChange.fire({"focus":false});
 	}
 	
 	if(this._components[to.toLowerCase()]){
 		this._focusedCom = to.toLowerCase();
-		if(this.focusBehaviour != dusk.sgui.Group.FOCUS_ALL) this._components[this._focusedCom].onFocusChange.fire({"focus":true});
-		if(this.focusBehaviour != dusk.sgui.Group.FOCUS_ALL && this._active) this._components[this._focusedCom].onActiveChange.fire({"active":true});
+		if(this.focusBehaviour != dusk.sgui.Group.FOCUS_ALL)
+			this._components[this._focusedCom].onFocusChange.fire({"focus":true});
+		if(this.focusBehaviour != dusk.sgui.Group.FOCUS_ALL && this._active)
+			this._components[this._focusedCom].onActiveChange.fire({"active":true});
 		return true;
 	}
 	
@@ -543,7 +568,8 @@ dusk.sgui.Group.prototype.alterChildLayer = function(com, alter) {
 	}
 };
 
-//Please note that to set the width to -2, all the parent's must have either an explicit width, or a width of -2 otherwise Chrome will explode.
+//Please note that to set the width to -2, all the parent's must have either an explicit width, or a width of -2
+// otherwise Chrome will explode.
 //Width
 Object.defineProperty(dusk.sgui.Group.prototype, "width", {
 	get: function() {
@@ -556,7 +582,8 @@ Object.defineProperty(dusk.sgui.Group.prototype, "width", {
 		}else if(this._width == -1) {
 			var max = 0;
 			for(var c in this._components) {
-				if(this._components[c].x + this._components[c].width > max) max = this._components[c].x + this._components[c].width;
+				if(this._components[c].x + this._components[c].width > max)
+					max = this._components[c].x + this._components[c].width;
 			}
 			
 			return max - this.xOffset;
@@ -582,7 +609,8 @@ Object.defineProperty(dusk.sgui.Group.prototype, "height", {
 		}else if(this._height == -1) {
 			var max = 0;
 			for(var c in this._components) {
-				if(this._components[c].y + this._components[c].height > max) max = this._components[c].y + this._components[c].height;
+				if(this._components[c].y + this._components[c].height > max)
+					max = this._components[c].y + this._components[c].height;
 			}
 		
 			return max - this.yOffset;
@@ -606,7 +634,8 @@ Object.defineProperty(dusk.sgui.Group.prototype, "height", {
 dusk.sgui.Group.prototype._getTrueWidth = function(includeOffset) {
 	var max = 0;
 	for(var c in this._components) {
-		if(this._components[c].x + this._components[c].width > max) max = this._components[c].x + this._components[c].width;
+		if(this._components[c].x + this._components[c].width > max)
+			max = this._components[c].x + this._components[c].width;
 	}
 	
 	return max - (includeOffset?this.xOffset:0);
@@ -622,7 +651,8 @@ dusk.sgui.Group.prototype._getTrueWidth = function(includeOffset) {
 dusk.sgui.Group.prototype._getTrueHeight = function(includeOffset) {
 	var max = 0;
 	for(var c in this._components) {
-		if(this._components[c].y + this._components[c].height > max) max = this._components[c].y + this._components[c].height;
+		if(this._components[c].y + this._components[c].height > max)
+			max = this._components[c].y + this._components[c].height;
 	}
 	
 	return max - (includeOffset?this.yOffset:0);

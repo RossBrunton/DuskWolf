@@ -14,10 +14,13 @@ dusk.load.provide("dusk.Inheritable");
  * @classdesc Inheritable objects are essentially objects which inherit properties from other objects.
  *	Think OOP style-inheritance mixed with objects.
  * 
- * Every "type" is "linked" to another object, if a property is not found on an object, the object it is linked to ("inherited from") is checked for that property.
+ * Every "type" is "linked" to another object, if a property is not found on an object
+ *  then the object it is linked to ("inherited from") is checked for that property.
  * 
- * This class can either create regular JavaScript objects that have all the properties that the specified type had when it was created.
- * 	It can also can create instances of `{@link dusk.Inheritable}`, which update automatically, however are not normal JavaScript objects.
+ * This class can create regular JavaScript objects that have all the properties
+ *   that the specified type had when it was created.
+ * 	It can also can create instances of `{@link dusk.Inheritable}` which update automatically,
+ *   however are not normal JavaScript objects.
  * 
  * The base type, that all inheritables are linked to, is named `"root"`, and can be modified as any other type.
  * @param {string} name A name for the container; used for identifying it in debbuging.
@@ -150,7 +153,8 @@ Object.seal(dusk.InheritableContainer.prototype);
  * 
  * @class dusk.Inheritable
  * 
- * @classdesc Inheritables are created by instances of `{@link dusk.InheritableContainer}` and generally serve to provide dynamic access to a type.
+ * @classdesc Inheritables are created by instances of `{@link dusk.InheritableContainer}`
+ *  and generally serve to provide dynamic access to a type.
  * 
  * They also contain their own, personal, data which is not linked to the type data in the container.
  * 
@@ -223,7 +227,9 @@ dusk.Inheritable.prototype.toString = function() {return "[Inheritable "+this.ty
  * 
  * @return {dusk.Inheritable} A copy of this inheritable.
  */
-dusk.Inheritable.prototype.copy = function() {return new dusk.Inheritable(this.type, this.container, dusk.utils.clone(this._extraData));};
+dusk.Inheritable.prototype.copy = function() {
+	return new dusk.Inheritable(this.type, this.container, dusk.utils.clone(this._extraData));
+};
 
 Object.seal(dusk.Inheritable);
 Object.seal(dusk.Inheritable.prototype);

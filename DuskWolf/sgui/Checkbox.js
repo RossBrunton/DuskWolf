@@ -15,9 +15,19 @@ dusk.load.provide("dusk.sgui.Checkbox");
  * 
  * @class dusk.sgui.Checkbox
  * 
- * @classdesc
+ * @classdesc A checkbox has two states, on or off. This is represented by the property "checked" and it's apperance.
  * 
+ * A checkbox inherits from `{@link dusk.sgui.Tile}`, where each tile indicates a different state of the checkbox:
+ * - `0,0`: Not active, not checked.
+ * - `1,0`: Not active, checked.
+ * - `2,0`: Active, not checked.
+ * - `3,0`: Active, checked.
  * 
+ * In addition, a checkbox that is inside a group which has `{@link dusk.sgui.extras.Radiobox}` as an extra
+ *  will function like a radio button as described in that class. This also means it has a different apperence.
+ *  Instead of using the 0th row (where y = 0) it will use the first row (where y = 1).
+ * 
+ * By default, a checkbox has a src of `"sgui/check.png"`, a width and height of 16, and a sprite size of 4.
  * 
  * @extends dusk.sgui.Tile
  * @constructor
@@ -25,8 +35,19 @@ dusk.load.provide("dusk.sgui.Checkbox");
 dusk.sgui.Checkbox = function (parent, comName) {
 	dusk.sgui.Tile.call(this, parent, comName);
 	
+	/** Used internally to store if this is checked.
+	 * @type boolean
+	 * @private
+	 */
 	this._checked = false;
+	/** The current state of the checkbox, either checked or unchecked.
+	 * @type boolean
+	 */
 	this.checked = false;
+	/** The radiobox this is using, or null.
+	 * @type {dusk.sgui.extras.Radiobox}
+	 * @protected
+	 */
 	this._radiobox = null;
 	
 	//Defaults
@@ -63,8 +84,10 @@ Object.defineProperty(dusk.sgui.Checkbox.prototype, "checked", {
 			this.tile = [0 + (this._active?2:0), this._radiobox?1:0];
 		}
 		
-		if(this._radiobox && this._checked) this._radiobox.selected = this;
-		if(this._radiobox && !this._checked && this._radiobox.getSelectedCheckbox() == this) this._radiobox.selected = null;
+		if(this._radiobox && this._checked)
+			this._radiobox.selected = this;
+		if(this._radiobox && !this._checked && this._radiobox.getSelectedCheckbox() == this)
+			this._radiobox.selected = null;
 	},
 	
 	get: function() {

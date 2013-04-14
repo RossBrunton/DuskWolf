@@ -20,7 +20,8 @@ dusk.load.provide("dusk.data");
  * @private
  */
 dusk.data._init = function() {
-	/** This is an object, containing all the files that have been downloaded. The key is the filename, and the value is ether a string, or a HTML Image tag, depending on filetype.
+	/** This is an object, containing all the files that have been downloaded.
+	 *   The key is the filename, and the value is ether a string, or a HTML Image tag, depending on filetype.
 	 * @type object
 	 * @private
 	 */
@@ -61,7 +62,8 @@ dusk.data.download = function(file, type, callback, state) {
 
 /** Returns a HTML image object with the specified path.
  * 
- * If there is an image that has already been created with this path, then it is returned, so a new one is not created every time.
+ * If there is an image that has already been created with this path then it is returned
+ *  so a new one is not created every time.
  * 
  * If you call this without asigning the return value to anything, the image should download in the background.
  * 
