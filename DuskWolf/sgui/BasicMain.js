@@ -66,8 +66,10 @@ dusk.sgui.BasicMain.prototype.createRoom = function(name, spawn) {
 	var entLayers = this.getAllLayersOfType(dusk.sgui.BasicMain.LAYER_ENTITIES);
 	for(var i = entLayers.length-1; i >= 0; i --) {
 		entLayers[i].scheme = this.getFirstLayerOfType(dusk.sgui.BasicMain.LAYER_SCHEME);
-		entLayers[i].width = this.getFirstLayerOfType(dusk.sgui.BasicMain.LAYER_SCHEME | dusk.sgui.BasicMain.LAYER_TILEMAP).width;
-		entLayers[i].height = this.getFirstLayerOfType(dusk.sgui.BasicMain.LAYER_SCHEME | dusk.sgui.BasicMain.LAYER_TILEMAP).height;
+		entLayers[i].width = 
+		 this.getFirstLayerOfType(dusk.sgui.BasicMain.LAYER_SCHEME | dusk.sgui.BasicMain.LAYER_TILEMAP).width;
+		entLayers[i].height = 
+		 this.getFirstLayerOfType(dusk.sgui.BasicMain.LAYER_SCHEME | dusk.sgui.BasicMain.LAYER_TILEMAP).height;
 	}
 	
 	var playerData = {};
@@ -180,7 +182,8 @@ dusk.sgui.BasicMain.prototype._platMainFrame = function(e) {
 	//Ask all entities to do something
 	if(this._active) {
 		for(var i = 0; i < this._layers.length; i ++) {
-			if(this._layers[i].type == dusk.sgui.BasicMain.LAYER_ENTITIES) this.getComponent(this._layers[i].name).doFrame();
+			if(this._layers[i].type == dusk.sgui.BasicMain.LAYER_ENTITIES) 
+				this.getComponent(this._layers[i].name).doFrame();
 		}
 	}
 	

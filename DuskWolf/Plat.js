@@ -42,7 +42,10 @@ dusk.plat._init = function() {
 	];
 	
 	dusk.entities.types.createNewType("plat", {
-		"data":{"hp":1, "gravity":1, "terminal":9, "haccel":2, "hspeed":7, "jump":15, "slowdown":1, "img":"pimg/hero.png", "solid":true, "anchor":false},
+		"data":{
+			"hp":1, "gravity":1, "terminal":9, "haccel":2, "hspeed":7, "jump":15, "slowdown":1,
+			"img":"pimg/hero.png", "solid":true, "anchor":false
+		},
 		"animation":{"stationary":"0,0"},
 		"behaviours":{}
 	});

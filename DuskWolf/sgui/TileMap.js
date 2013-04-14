@@ -11,11 +11,14 @@ dusk.load.provide("dusk.sgui.TileMap");
  * 
  * @classdesc This is a lot of tiles arranged in a grid.
  * 
- * This can be thought of as a lot of `{@link dusk.sgui.Tile}` instances arranged in a grid, but for practical reasons, this is not how it is implemented.
+ * This can be thought of as a lot of `{@link dusk.sgui.Tile}` instances arranged in a grid,
+ *  but for practical reasons this is not how it is implemented.
  * 
- * Each tile on the grid has a coordinate, where the tile at the upper left is at (0, 0), and the next one to the right is (1, 0) and so on.
+ * Each tile on the grid has a coordinate, where the tile at the upper left is at (0, 0),
+ *  and the next one to the right is (1, 0) and so on.
  * 
- * The tilemap must be drawn completley before it can be used, hence changing any tile and especially changing the dimensions of the tilemap is a really expensive operation.
+ * The tilemap must be drawn completley before it can be used, hence changing any tile
+ *  and especially changing the dimensions of the tilemap is a really expensive operation.
  *
  * Only part of the tilemap is visible, as described by the `*bound` properties, and this will be the only area drawn.
  * 
@@ -47,7 +50,8 @@ dusk.sgui.TileMap = function (parent, comName) {
 		this.theight = 32;
 		/** The size (for displaying) of a single tile if this tilemap is in `"BINARY"` mode.
 		 * 
-		 * This should be `n` such that the width and height of the sprite is `2^n`. If this is 4, then the sprites will be 16x16, for example.
+		 * This should be `n` such that the width and height of the sprite is `2^n`.
+		 *  If this is 4, then the sprites will be 16x16, for example.
 		 * @type integer
 		 * @default 5
 		 */
@@ -65,28 +69,12 @@ dusk.sgui.TileMap = function (parent, comName) {
 		this.sheight = 16;
 		/** The size (for reading from the image) of a single tile if this tilemap is in `"BINARY"` mode.
 		 * 
-		 * This should be `n` such that the width and height of the sprite is `2^n`. If this is 4, then the sprites will be 16x16, for example.
+		 * This should be `n` such that the width and height of the sprite is `2^n`.
+		 *  If this is 4, then the sprites will be 16x16, for example.
 		 * @type integer
 		 * @default 4
 		 */
 		this.ssize = 4;
-		
-		/** The left boundry. This is the x coordinate to start drawing from. Any tiles before this value will not be drawn.
-		 * @type integer
-		 */
-		this.lbound = 0;
-		/** The upper boundry. This is the y coordinate to start drawing from. Any tiles located above this value not be drawn.
-		 * @type integer
-		 */
-		this.ubound = 0;
-		/** The right boundry. This is the x coordinate to stop drawing at. Any tiles located after this value will not be drawn.
-		 * @type integer
-		 */
-		this.rbound = 0;
-		/** The bottom boundry. This is the y coordinate to stop drawing at. Any tiles located below this value will not be drawn.
-		 * @type integer
-		 */
-		this.bbound = 0;
 		
 		/** The number of rows in this TileMap.
 		 * @type integer
@@ -101,9 +89,13 @@ dusk.sgui.TileMap = function (parent, comName) {
 		
 		/** The actual map to draw. Setting this will cause the map to update.
 		 * 
-		 * This can be set in two ways. Both ways require a string that describes the TileMap, this can be outputted from `{@link dusk.sgui.EditableTilemap#save}`, or as a whitespace seperated list of all the tile coordinates in order.
+		 * This can be set in two ways. Both ways require a string that describes the TileMap,
+		 *  this can be outputted from `{@link dusk.sgui.EditableTilemap#save}`,
+		 *  or as a whitespace seperated list of all the tile coordinates in order.
 		 * 
-		 * This can either be an object with optional properties `rows` and `cols` describing the dimensions, and a required property `map` being the string. Or the string itself can be set directly.
+		 * This can either be an object with optional properties `rows` and `cols` describing the dimensions,
+		 *  and a required property `map` being the string. Or the string itself can be set directly.
+		 * 
 		 * @type object|string
 		 */
 		this.map = null;
@@ -118,7 +110,8 @@ dusk.sgui.TileMap = function (parent, comName) {
 		 */
 		this._img = null;
 		
-		/** A canvas that has the full drawn tilemap on it. This will be copied onto the real canvas when it's time to draw it.
+		/** A canvas that has the full drawn tilemap on it.
+		 *  This will be copied onto the real canvas when it's time to draw it.
 		 * @type HTMLCanvasElement
 		 * @private
 		 */
@@ -134,9 +127,11 @@ dusk.sgui.TileMap = function (parent, comName) {
 		 * @protected
 		 */
 		this._tileBuffer = new ArrayBuffer(0);
-		/** All the tiles that the tilemap contains, in order of where they appear on the screen (left to right, then up to down).
+		/** All the tiles that the tilemap contains,
+		 *  in order of where they appear on the screen (left to right, then up to down).
 		 * 
-		 * Each coordinate has two bytes (hence to entries in this array), `x` then `y`, and refers to the location on the origin image for the tile.
+		 * Each coordinate has two bytes (hence to entries in this array), `x` then `y`,
+		 *  and refers to the location on the origin image for the tile.
 		 * @type Uint8Array
 		 * @protected
 		 */
@@ -145,11 +140,9 @@ dusk.sgui.TileMap = function (parent, comName) {
 		this._mark = "#0000ff";
 		
 		//Prop masks
-		this._registerPropMask("map", "map", true, ["src", "mode", "ssize", "swidth", "sheight", "tsize", "theight", "twidth", "tsize"]);
-		this._registerPropMask("lbound", "lbound");
-		this._registerPropMask("rbound", "rbound");
-		this._registerPropMask("ubound", "ubound");
-		this._registerPropMask("bbound", "bbound");
+		this._registerPropMask("map", "map", true, 
+			["src", "mode", "ssize", "swidth", "sheight", "tsize", "theight", "twidth", "tsize"]
+		);
 		this._registerPropMask("src", "src");
 		this._registerPropMask("rows", "rows");
 		this._registerPropMask("cols", "cols");
@@ -291,49 +284,14 @@ dusk.sgui.TileMap.prototype.drawAll = function() {
 	return true;
 };
 
-/** Sets the draw boundries as coordinates. This is equivilant to setting the `*bound` properties to the specified parameters.
- * @param {integer} l The left boundry.
- * @param {integer} u The upper boundry.
- * @param {integer} r The right boundry.
- * @param {integer} b The bottom boundry.
- */
-dusk.sgui.TileMap.prototype.setBoundsCoord = function(l, u, r, b) {
-	this.lbound = l;
-	this.rbound = r;
-	this.ubound = u;
-	this.bbound = b;
-};
-
-/** Sets the draw boundries as tiles, this will set the boundries to the x or y coordinates that the specified tile starts at.
- * 
- * For example, in a tilemap with `32` by `32` tiles, an l value of `2` would set the left boundry to `64`.
- * @param {integer} l The left boundry.
- * @param {integer} u The upper boundry.
- * @param {integer} r The right boundry.
- * @param {integer} b The bottom boundry.
- */
-dusk.sgui.TileMap.prototype.setBounds = function(l, u, r, b) {
-	if(r === undefined) r = l+this.cols;
-	if(b === undefined) b = u+this.rows;
-	
-	if(this.mode != "BINARY"){
-		this.lbound = l*this.twidth;
-		this.rbound = r*this.twidth;
-		this.ubound = u*this.theight;
-		this.bbound = b*this.theight;
-	}else{
-		this.lbound = l<<this.tsize;
-		this.rbound = r<<this.tsize;
-		this.ubound = u<<this.tsize;
-		this.bbound = b<<this.tsize;
-	}
-};
-
-/** Returns the location of the source tile on the origin image (as in, the one that was drawn to here) that the specified coordinate is in.
+/** Returns the location of the source tile on the origin image
+ *  (as in, the one that was drawn to here) that the specified coordinate is in.
  * @param {integer} x The x coordinate to look in.
  * @param {integer} y The y coordinate to look in.
- * @param {boolean=false} exactX If true, then the specified x coordinate must exactly match the x coordinate of a tile on this map.
- * @param {boolean=false} exactY If true, then the specified y coordinate must exactly match the y coordinate of a tile on this map.
+ * @param {boolean=false} exactX If true
+ *  then the specified x coordinate must exactly match the x coordinate of a tile on this map.
+ * @param {boolean=false} exactY If true
+ *  then the specified y coordinate must exactly match the y coordinate of a tile on this map.
  * @return {?array} An `[x,y]` array specifying the tile that is here, or `null`, if there is no tile here.
  */
 dusk.sgui.TileMap.prototype.tilePointIn = function(x, y, exactX, exactY) {
@@ -390,7 +348,8 @@ dusk.sgui.TileMap.prototype.getTile = function(x, y) {
 	if(this._tiles[((y*this.cols)+x)<<1] !== undefined) {
 		return [this._tiles[((y*this.cols)+x)<<1], this._tiles[(((y*this.cols)+x)<<1)+1]];
 	}
-	console.warn("Tile "+x+","+y+" not found on "+this.comName+", wanting "+(((y*this.cols)+x)<<1)+" and I can't find it.");
+	
+	console.warn("Tile "+x+","+y+" not found on "+this.comName+".");
 	return [0, 0];
 };
 
@@ -399,7 +358,9 @@ dusk.sgui.TileMap.prototype.getTile = function(x, y) {
  * @param {integer} y The y coordinate of the tile to change.
  * @param {integer} tx The x coordinate to change the tile to.
  * @param {integer} ty The y coordinate to change the tile to.
- * @param {boolean} update If true, then the map will be redrawn and updated when the new tile is set (an expensive operation). If this is not true, then the changes won't take effect until the map is redrawn.
+ * @param {boolean} update If true,
+ *  then the map will be redrawn and updated when the new tile is set (an expensive operation).
+ *  If this is not true, then the changes won't take effect until the map is redrawn.
  */
 dusk.sgui.TileMap.prototype.setTile = function(x, y, tx, ty, update) {
 	if(this._tiles[((y*this.cols)+x)<<1] !== undefined) {
@@ -407,7 +368,7 @@ dusk.sgui.TileMap.prototype.setTile = function(x, y, tx, ty, update) {
 		this._tiles[(((y*this.cols)+x)<<1)+1] = ty;
 		if(update) this.drawAll();
 	}else{
-		console.warn("Tile "+x+","+y+" not found on "+this.comName+", wanting to set"+(((y*this.cols)+x)<<1)+" and I can't find it.");
+		console.warn("Tile "+x+","+y+" not found on "+this.comName+".");
 	}
 };
 
@@ -421,9 +382,11 @@ dusk.sgui.TileMap.prototype.getRelativeTile = function(xcoord, ycoord) {
 
 dusk.sgui.TileMap.prototype.inRelativeRange = function(xcoord, ycoord) {
 	if(this.mode == "BINARY") {
-		if(xcoord+(this.lbound>>this.tsize) < 0 || xcoord+(this.lbound>>this.tsize) >= this.cols || ycoord+(this.ubound>>this.tsize) < 0 || ycoord+(this.ubound>>this.tsize) >= this.rows) return false;
+		if(xcoord+(this.lbound>>this.tsize) < 0 || xcoord+(this.lbound>>this.tsize) >= this.cols
+		|| ycoord+(this.ubound>>this.tsize) < 0 || ycoord+(this.ubound>>this.tsize) >= this.rows) return false;
 	}else{
-		if(xcoord+(this.lbound*this.twidth) < 0 || xcoord+(this.lbound*this.twidth) >= this.cols || ycoord+(this.ubound*this.theight) < 0 || ycoord+(this.ubound*this.theight) >= this.rows) return false;
+		if(xcoord+(this.lbound*this.twidth) < 0 || xcoord+(this.lbound*this.twidth) >= this.cols
+		|| ycoord+(this.ubound*this.theight) < 0 || ycoord+(this.ubound*this.theight) >= this.rows) return false;
 	}
 	return true;
 };*/
@@ -459,7 +422,8 @@ dusk.sgui.TileMap.prototype.visibleRows = function() {
 /** Looks for a specified tile (from the origin image), and then returns the coordinates of where it is on this tilemap.
  * @param {integer} x The x of the tile origin we are looking for.
  * @param {integer} y The y of the tile origin we are looking for.
- * @return {?array} The location of a tile that contains the specified image, in `[x,y]` format, or null if none were found.
+ * @return {?array} The location of a tile that contains the specified image,
+ *  in `[x,y]` format, or null if none were found.
  */
 dusk.sgui.TileMap.prototype.lookTile = function(x, y) {
 	for(var t = (this.rows*this.cols)<<1; t > 0; t-=2){

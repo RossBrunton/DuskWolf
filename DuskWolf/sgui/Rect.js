@@ -14,7 +14,8 @@ dusk.load.provide("dusk.sgui.Rect");
  * @class dusk.sgui.Rect
  * 
  * @classdesc A simple rectangle.
- * 	It sets all the area specified by it's `height` and `width`, and colours it in a single colour with an optional border.
+ * 	It sets all the area specified by it's `height` and `width`,
+ *  and colours it in a single colour with an optional border.
  * 
  * @extends dusk.sgui.Component
  * @constructor
@@ -50,7 +51,8 @@ dusk.sgui.Rect = function (parent, comName) {
 	this.prepareDraw.listen(this._rectDraw, this);
 	
 	//Render support
-	this.renderSupport = dusk.sgui.Component.REND_LOCATION | dusk.sgui.Component.REND_OFFSET | dusk.sgui.Component.REND_SLICE;
+	this.renderSupport =
+	 dusk.sgui.Component.REND_LOCATION | dusk.sgui.Component.REND_OFFSET | dusk.sgui.Component.REND_SLICE;
 };
 dusk.sgui.Rect.prototype = new dusk.sgui.Component();
 dusk.sgui.Rect.constructor = dusk.sgui.Rect;

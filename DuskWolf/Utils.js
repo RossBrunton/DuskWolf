@@ -6,10 +6,12 @@ dusk.load.provide("dusk.utils");
 
 /** @namespace dusk.utils
  * 
- * @description This namespace contains general functions for manipulating data, nothing specific to any other namespace.
+ * @description This namespace contains general functions
+ *  for manipulating data, nothing specific to any other namespace.
  */
 
-/** Makes a simple copy of the parameter object, and returns it. This will only work for simple objects, and not anything with prototypes and such like.
+/** Makes a simple copy of the parameter object, and returns it.
+ *   This will only work for simple objects, and not anything with prototypes and such like.
  * @param {object} o The source object to copy.
  * @return {object} A copy of the source object.
  */
@@ -45,8 +47,10 @@ dusk.utils.merge = function(a, b) {
 
 /** Returns whether an object implements a specified interface.
  * 
- * The interface is an object where the enumerable property names (with any value equivalent to true) represent functions.
- *  The object wishing to implement this interface must have all the specified property names be functions.
+ * The interface is an object where the enumerable property names 
+ *  with any value equivalent to true represent functions.
+ * 
+ * The object wishing to implement this interface must have all the specified property names be functions.
  * 
  * @param {object} obj The object you wish to check.
  * @param {object} inter The interface that you want to check the object by.
@@ -95,12 +99,18 @@ dusk.utils.urlGet = function(name) {
 	return false;
 };
 
-/** Returns if the object can be parsed as a JSON string. If it returns true, then it can be assumed that `JSON.parse` will not throw any error when trying to parse the string.
+/** Returns if the object can be parsed as a JSON string.
+ *   If it returns true, then it can be assumed that `JSON.parse` will not throw any error
+ *   when trying to parse the string.
  * @param {string} str The string to test.
  * @return {boolean} Whether the string is a valid JSON string.
  */
 dusk.utils.isJson = function(str) {
-	return /^[\],:{}\s]*$/.test(String(str).replace(/\\["\\\/bfnrtu]/g, '@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').replace(/(?:^|:|,)(?:\s*\[)+/g, ''));
+	return /^[\],:{}\s]*$/.test(String(str)
+		.replace(/\\["\\\/bfnrtu]/g, '@')
+		.replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']')
+		.replace(/(?:^|:|,)(?:\s*\[)+/g, '')
+	);
 };
 
 /** Strips anything that looks like a comment from a JSON string.
@@ -118,9 +128,12 @@ dusk.utils.jsonParse = function(json) {
 	return null;
 };
 
-/** Takes two version strings, and returns whether the first is higher than the second (1), they are the same (0) or the later is (-1).
+/** Takes two version strings, and returns whether the first is higher than the second (1),
+ *  they are the same (0) or the later is (-1).
  * 
- * It looks for the first integer it can find in each argument, and if one is higher returns the relevent value. If both numbers are the same, then the next number is searched and checked. If all the numbers are the same, returns 0. Non-numerical characters are ignored.
+ * It looks for the first integer it can find in each argument, and if one is higher returns the relevent value.
+ *  If both numbers are the same, then the next number is searched and checked.
+ *  If all the numbers are the same, returns 0. Non-numerical characters are ignored.
  * 
  * @param {string} a The first version string.
  * @param {string} b The second version string.
@@ -186,7 +199,8 @@ dusk.utils.arrayEqual = function(a, b) {
  */
 dusk.utils.SD_HEX = "0x";
 
-/** A conversion type that does simple compression that is optimised if the array buffer has sequential repeating elements in it.
+/** A conversion type that does simple compression that is optimised if 
+ *   the array buffer has sequential repeating elements in it.
  * 
  * It optimises based on patterns; if it sees the same sequence of two bytes (16 bits), then it will compress them down.
  * @type string
@@ -236,12 +250,14 @@ dusk.utils.dataToString = function(arr, type) {
 				}
 				continue;
 			}else if(currentlyFeeding !== -1 && buff[i] !== patterns[currentlyFeeding]) {
-				//console.log("Found a total of "+counted+" of pattern "+currentlyFeeding+" which is "+patterns[currentlyFeeding]);
+				//console.log("Found a total of "+counted+" of pattern "+currentlyFeeding+
+				//" which is "+patterns[currentlyFeeding]);
 				holdv[point++] = 0x8000 | (currentlyFeeding << 8) | counted;
 				currentlyFeeding = -1;
 				i --;
 				continue;
-			}else if(buff[i+1] !== undefined && buff[i+2] !== undefined && buff[i] === buff[i+1] && buff[i+1] === buff[i+2]) {
+			}else if(buff[i+1] !== undefined && buff[i+2] !== undefined
+			&& buff[i] === buff[i+1] && buff[i+1] === buff[i+2]) {
 				//console.log("Found pattern "+buff[i]);
 				for(var j = 0; j < 0x007f; j ++) {
 					if(patterns[j] === undefined || patterns[j] === buff[i]) {
@@ -270,7 +286,8 @@ dusk.utils.dataToString = function(arr, type) {
 		}
 		
 		if(currentlyFeeding !== -1) {
-			//console.log("Finished, and found a total of "+counted+" of pattern "+currentlyFeeding+" which is "+patterns[currentlyFeeding]);
+			//console.log("Finished, and found a total of "+counted+" of pattern "+
+			//currentlyFeeding+" which is "+patterns[currentlyFeeding]);
 			holdv[point++] = 0x8000 | (currentlyFeeding << 8) | counted;
 		}
 		

@@ -11,10 +11,13 @@ dusk.load.provide("dusk.sgui.Grid");
  * 
  * @classdesc A grid is a group of similar components arranged in a grid.
  * 
- * A population is created using the `{@link dusk.sgui.Grid.populate}` method with an object representation containing a type name.
- *  This will then create numerous copies of that component, in a grid of dimensions `{@link dusk.sgui.Grid.rows}` by `{@link dusk.sgui.Grid.cols}` with the same data.
+ * A population is created using the `{@link dusk.sgui.Grid.populate}` method
+ *   with an object representation containing a type name.
+ *  This will then create numerous copies of that component,
+ *   in a grid of dimensions `{@link dusk.sgui.Grid.rows}` by `{@link dusk.sgui.Grid.cols}` with the same data.
  * 
- * Components are named in the form `"x,y"`, where x and y are the coordinates of the component; the second one to the right of the first row will be `"1,0"` for example.
+ * Components are named in the form `"x,y"`, where x and y are the coordinates of the component;
+ *  the second one to the right of the first row will be `"1,0"` for example.
  *  This class will, provided the event bubbles from it's children, manage focus changing between elements.
  * 
  * @extends dusk.sgui.Group
@@ -53,7 +56,8 @@ dusk.sgui.Grid = function (parent, comName) {
 	 */
 	this.globals = null;
 	
-	/** This event handler is fired during three stages of the population proccess; when it starts, when a component is created, and when it finishes.
+	/** This event handler is fired during three stages of the population proccess; when it starts,
+	 *  when a component is created, and when it finishes.
 	 * 
 	 * The event object has up to three properties:
 	 * - `child` The child object data, this may be changed.
@@ -86,13 +90,12 @@ dusk.sgui.Grid.prototype.className = "Grid";
 
 /** Creates a new population of the specified component.
  * 
- * This will erase all components in this group, and create new ones of the type `value.type`, and then call `{@link dusk.sgui.Component.parseProps}` with a copy of `value`.
+ * This will erase all components in this group, and create new ones of the type `value.type`,
+ *  and then call `{@link dusk.sgui.Component.parseProps}` with a copy of `value`.
  * 
  * The x and y coordinates will be set automatically.
  * 
  * This may take an array as it's argument, in which case it will alternate between the components as it places them.
- * 
- * With this array, if one of the elements has the property "grid_forGlobal" which is true, then it's properties will apply to all grid entries.
  * 
  * This may be used in the JSON representation with the property `populate`.
  * 
@@ -126,7 +129,9 @@ dusk.sgui.Grid.prototype.populate = function(child) {
 				console.warn("Grid tried to populate element with no type.");
 			}
 			
-			com = this._populationEvent.fire({"action":"create", "current":child[p], "child":child, "component":com, "globals":this.globals}).component;
+			com = this._populationEvent.fire({"action":"create", "current":child[p], "child":child, "component":com,
+				"globals":this.globals
+			}).component;
 			if(this.globals !== null) com.parseProps(dusk.utils.clone(this.globals));
 			com.parseProps(dusk.utils.clone(child[p]));
 			com.parseProps({"y":ypoint, "x":xpoint});
@@ -148,7 +153,8 @@ Object.defineProperty(dusk.sgui.Grid.prototype, "__populate", {
 	get: function() {return undefined;}
 });
 
-/** Updates the location of all the components, arranging them back into a grid if, for example, they have been moved or the spacing between them has changed.
+/** Updates the location of all the components, arranging them back into a grid if, for example,
+ *  they have been moved or the spacing between them has changed.
  */
 dusk.sgui.Grid.prototype.adjust = function() {
 	for(var hy = 0; hy < this.rows; hy++){

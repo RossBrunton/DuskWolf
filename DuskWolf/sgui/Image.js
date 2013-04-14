@@ -15,7 +15,7 @@ dusk.load.provide("dusk.sgui.Image");
  * 
  * Any valid image type supported by 2D canvas context works.
  * 
- * This component's width and height properties are currently not implemented, and it will not book a redraw when the image loads.
+ * A width and height must be specified, otherwise the image will not draw.
  * 
  * This uses the theme key `img.src` (default "sgui/img.png") as the default image.
  * 

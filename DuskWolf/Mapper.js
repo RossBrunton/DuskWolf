@@ -8,9 +8,11 @@ dusk.load.provide("dusk.Mapper");
  * 
  * @class dusk.Mapper
  * 
- * @classdesc Mappers are essentially objects that can be attached to another object, and allow that object to be controlled using JSON and basic objects.
+ * @classdesc Mappers are essentially objects that can be attached to another object,
+ *  and allow that object to be controlled using JSON and basic objects.
  * 
- * To use this, the object that is being mapped must "register" mappings using `{@link dusk.mapper#map}`, this links a key for the JSON representation to a key for the "real" representation.
+ * To use this, the object that is being mapped must "register" mappings using `{@link dusk.mapper#map}`,
+ *  this links a key for the JSON representation to a key for the "real" representation.
  * 
  * @param {*} target The object this mapper is mapping.
  * @constructor

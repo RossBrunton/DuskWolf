@@ -13,13 +13,16 @@ dusk.load.provide("dusk.sgui.Tile");
  *
  * This is a smaller image selected from a larger image.
  *	Essentially, the source image has a lot of possible different images that this component can display.
- *	This component will take the location of the image from the source (in traditional x,y form), and display only that image.
- *	It is given the dimensions of each "tile" on the source image, and expects the source image to be a grid of images of those sizes.
+ *	This component will take the location of the image from the source, in x,y form, and display only that image.
+ *	It is given the dimensions of each "tile" on the source image,
+ *   and expects the source image to be a grid of images of those sizes.
  * 
  * The mode is either `"BINARY"` or `"DECIMAL"`, and this determines how dimensions are interpreted.
  *	If the mode is `"BINARY"` the origin sprites are square, with each side being `2^this.ssize`.
- * 	While, if the mode is the slower `"DECIMAL"` mode, then the origin sprites have their width and height described using `this.swidth` and `this.sheight`.
- * 	This only determines the size of the sprites on the source image, the tile can be resized as normal using the `height` and `width` properties.
+ * 	While, if the mode is the slower `"DECIMAL"` mode,
+ *   then the origin sprites have their width and height described using `this.swidth` and `this.sheight`.
+ * 	This only determines the size of the sprites on the source image,
+ *   the tile can be resized as normal using the `height` and `width` properties.
  * 
  * @param {dusk.sgui.IContainer} parent The container that this component is in.
  * @param {string} comName The name of the component.
@@ -48,7 +51,8 @@ dusk.sgui.Tile = function(parent, comName) {
 	 * 
 	 * This is considered to be the width and height of the sprites when reading them from the image.
 	 * 
-	 * This should be `n` such that the width and height of the sprite is `2^n`. If this is 4, then the sprites will be 16x16, for example.
+	 * This should be `n` such that the width and height of the sprite is `2^n`.
+	 *  If this is 4, then the sprites will be 16x16, for example.
 	 * @type integer
 	 * @default 4
 	 */
@@ -100,8 +104,6 @@ dusk.sgui.Tile = function(parent, comName) {
 	 */
 	this.tile = [0,0];
 	
-	//this.mark = "#00ff00";
-	
 	//Prop masks
 	this._registerPropMask("src", "src", true);
 	this._registerPropMask("tile", "tileStr", true);
@@ -130,14 +132,16 @@ dusk.sgui.Tile.prototype._tileDraw = function(e) {
 	if(this._img){
 		if(this.mode == "BINARY") {
 			var scale = this.width/(1<<this.ssize);
-			e.c.drawImage(this._img, (this._tx << this.ssize) + (e.d.sourceX*scale), (this._ty << this.ssize) + (e.d.sourceY*scale),
-				e.d.width*scale, e.d.height*scale, e.d.destX, e.d.destY, e.d.width, e.d.height
+			e.c.drawImage(this._img, (this._tx << this.ssize) + (e.d.sourceX*scale), 
+				(this._ty << this.ssize) + (e.d.sourceY*scale), e.d.width*scale, e.d.height*scale,
+				e.d.destX, e.d.destY, e.d.width, e.d.height
 			);
 		}else{
 			var hscale = this.swidth/this.width;
 			var vscale = this.sheight/this.height;
-			e.c.drawImage(this._img, this._tx * this.swidth + e.d.sourceX * hscale, this._ty * this.sheight + e.d.sourceY * vscale,
-				e.d.width*hscale, e.d.height*vscale, e.d.destX, e.d.destY, e.d.width, e.d.height
+			e.c.drawImage(this._img, this._tx * this.swidth + e.d.sourceX * hscale,
+				this._ty * this.sheight + e.d.sourceY * vscale, e.d.width*hscale, e.d.height*vscale,
+				e.d.destX, e.d.destY, e.d.width, e.d.height
 			);
 		}
 	}

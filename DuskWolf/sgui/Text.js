@@ -53,10 +53,14 @@ dusk.sgui.Label.prototype._labelDraw = function(e) {
 		e.c.font = this.size + "px "+this.font;
 		if(e.c.textBaseline != "middle") e.c.textBaseline = "middle";
 		if(this._width > -1) {
-			e.c.fillText(this.text, e.d.destX + this.padding, e.d.destY + (this.height>>1) + (this.padding>>1), ~~this._width-(this.padding<<1));
+			e.c.fillText(this.text, e.d.destX + this.padding, e.d.destY + (this.height>>1) + (this.padding>>1),
+				~~this._width-(this.padding<<1)
+			);
 			if(this.borderSize > 0) {
 				e.c.strokeStyle = this.borderColour;
-				e.c.strokeText(this.text, e.d.destX + this.padding, e.d.destY + (this.height>>1) + (this.padding>>1), ~~this._width-(this.padding<<1));
+				e.c.strokeText(this.text, e.d.destX + this.padding, e.d.destY + (this.height>>1) + (this.padding>>1),
+					~~this._width-(this.padding<<1)
+				);
 			}
 		}else{
 			e.c.fillText(this.text, e.d.destX + this.padding, e.d.destY + (this.height>>1) + (this.padding>>1));

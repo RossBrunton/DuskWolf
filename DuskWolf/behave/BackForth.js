@@ -9,7 +9,8 @@ dusk.load.provide("dusk.behave.BackForth");
 /** @class dusk.behave.BackForth
  * @memberof dusk.behave
  * 
- * @classdesc An entity with this behaviour will move in one direction until it collides with something, and then head the other direction.
+ * @classdesc An entity with this behaviour will move in one direction
+ *  until it collides with something, and then head the other direction.
  * 
  * The speed it travels at is defined by the behaviour data value `"hspeed"`. Which is `1` by default.
  * 

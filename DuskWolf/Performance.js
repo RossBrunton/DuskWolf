@@ -13,7 +13,8 @@ dusk.load.provide("dusk.performance");
  * 
  * @description This contains functions that allow monitoring of frame rate.
  * 
- * When imported, it attaches listeners to the `{@link dusk.frameTicker.onFrame}` and `{@link dusk.sgui.onRender}` events, and monitors to check that they are running fast enough.
+ * When imported, it attaches listeners to the `{@link dusk.frameTicker.onFrame}`
+ *  and `{@link dusk.sgui.onRender}` events, and monitors to check that they are running fast enough.
  * 
  * @since 0.0.14-alpha
  */

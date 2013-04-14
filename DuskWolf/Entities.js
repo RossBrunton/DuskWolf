@@ -15,11 +15,13 @@ dusk.load.provide("dusk.entities");
  * Entities are essentially "things that doo stuff" in games, they are the player, enemies, pickups.
  * 	In general, if it is animated, it's an entity.
  * 
- * Entities are described using types, each entity has only one type, which describes how they act, their data and animations.
+ * Entities are described using types;
+ *  each entity has only one type which describes how they act, their data and animations.
  * 	Entity types are simple objects with three properties, `data`, `animation` and `behaviours`.
  * 
  * 
- * Entity types are set using `{@link dusk.entities.modifyEntityType}`, which allows you to specify an entity to inherit from.
+ * Entity types are set using `{@link dusk.entities.modifyEntityType}` 
+ *  which allows you to specify an entity to inherit from.
  * 	This means you can make an entity type that shares the same properties of another type easily.
  * 
  * The `data` property describes data used by the entity by its behaviours to do something.
@@ -27,8 +29,11 @@ dusk.load.provide("dusk.entities");
  * 	This is a standard object.
  * 
  * The `animation` property describes animation.
- * 	It is an object, the key names are animation names with optional flags (in the form `"name-flag"`), and the values are data that is used by the animation system, in frames seperated by "|".
- * 	Flags are specified when setting the animation as an array of strings, if the animation name and any flag (ones at the start of the array have priority) matches a key, then that animation will run.
+ * 	It is an object, the key names are animation names with optional flags (in the form `"name-flag"`)
+ *   and the values are data that is used by the animation system, in frames seperated by "|".
+ * 	Flags are specified when setting the animation as an array of strings, 
+ *   if the animation name and any flag (ones at the start of the array have priority) matches a key
+ *   then that animation will run.
  * 	Flags are optional, in that if no flags match, but the name (with no flags) does, then that animation will run.
  * 
  * @since 0.0.17-alpha
@@ -43,9 +48,10 @@ dusk.load.provide("dusk.entities");
 dusk.entities._init = function() {
 	/** Sprite size of binary entities and tilemap tiles.
 	 * 
-	 * If the mode is binary, then this is considered to be the width and height of the tiles when reading them from the image.
+	 * If the mode is binary this is considered to be the width and height of the tiles when reading them from the image.
 	 * 
-	 * This should be `n` such that the width and height of the sprite is `2^n`. If this is 4, then the sprites will be 16x16, for example.
+	 * This should be `n` such that the width and height of the sprite is `2^n`.
+	 *  If this is 4, then the sprites will be 16x16, for example.
 	 * @type integer
 	 * @default 4
 	 */
@@ -67,9 +73,10 @@ dusk.entities._init = function() {
 	
 	/** Tile size of binary entities and tilemap tiles.
 	 * 
-	 * If the mode is binary, then this is considered to be the width and height of the tiles when drawing them to the canvas.
+	 * If the mode is binary, this is considered to be the width and height of the tiles when drawing them to the canvas.
 	 * 
-	 * This should be `n` such that the width and height of the tile to draw is `2^n`. If this is 4, then the sprites will be 16x16, for example.
+	 * This should be `n` such that the width and height of the tile to draw is `2^n`.
+	 * 	If this is 4, then the sprites will be 16x16, for example.
 	 * @type integer
 	 * @default 5
 	 */
@@ -100,7 +107,8 @@ dusk.entities._init = function() {
 	
 	/** The name of the "seek" entity.
 	 * 
-	 * `{@link dusk.sgui.BasicMain}` adds an entity with this name (and the type `{@link dusk.entities.seekType}`) as the "player".
+	 * `{@link dusk.sgui.BasicMain}` adds an entity
+	 *  with this name and the type `{@link dusk.entities.seekType}` as the "player".
 	 * 
 	 * In effect, this is the name of the player entity that moves between rooms, and the camera follows.
 	 * @type string
@@ -109,7 +117,8 @@ dusk.entities._init = function() {
 	this.seek = "hero";
 	/** The type of the "seek" entity.
 	 * 
-	 * `{@link dusk.sgui.BasicMain}` adds an entity with this type (and the name `{@link dusk.entities.seek}`) as the "player".
+	 * `{@link dusk.sgui.BasicMain}` adds an entity
+	 *  with this type and the name `{@link dusk.entities.seek}` as the "player".
 	 * 
 	 * In effect, this is the name of the player entity that moves between rooms, and the camera follows.
 	 * @type string
@@ -188,9 +197,11 @@ dusk.entities.registerBehaviour = function(name, behaviour) {
 	this._behaviours[name] = behaviour;
 };
 
-/** Returns a constructor for the specified behaviour, provided it has been registered beforehand with {@link dusk.entities.registerBehaviour}.
+/** Returns a constructor for the specified behaviour, 
+ *  provided it has been registered beforehand with {@link dusk.entities.registerBehaviour}.
  * @param {string} name The name of the behaviour to look up.
- * @return {?class(dusk.sgui.Entity) extends dusk.behave.Behave} A constructor for the specified type, or null if it doesn't exist.
+ * @return {?class(dusk.sgui.Entity) extends dusk.behave.Behave} A constructor for the specified type, 
+ *  or null if it doesn't exist.
  * @since 0.0.18-alpha
  */
 dusk.entities.getBehaviour = function(name) {

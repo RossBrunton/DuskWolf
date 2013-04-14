@@ -107,7 +107,8 @@ dusk.sgui.ItemSlot.prototype._itemSlotAction = function(e) {
 	if(h) {
 		if(h.getHand().countSlot(0) > 0) {
 			//Holding something
-			if(this._invent.isValidAddition(h.getHand().getItemFromSlot(0)) && this._invent.isValidAdditionToSlot(h.getHand().getItemFromSlot(0), this.slot)) {
+			if(this._invent.isValidAddition(h.getHand().getItemFromSlot(0))
+			&& this._invent.isValidAdditionToSlot(h.getHand().getItemFromSlot(0), this.slot)) {
 				//Can add the item
 				h.getHand().sendToInventSlot(this._invent, this.slot, e.keyPress.shiftKey?1:0xffffffff);
 			}else if(this._invent.isValidAddition(h.getHand().getItemFromSlot(0))) {
@@ -121,7 +122,9 @@ dusk.sgui.ItemSlot.prototype._itemSlotAction = function(e) {
 		}else{
 			//Not holding anything
 			if(h.getHand().isValidAddition(this._invent.getItemFromSlot(this.slot))) {
-				this._invent.sendSlotToInvent(h.getHand(), this.slot, e.keyPress.shiftKey?(this._invent.countSlot(this.slot)>>1):0xffffffff);
+				this._invent.sendSlotToInvent(h.getHand(), this.slot,
+					e.keyPress.shiftKey?(this._invent.countSlot(this.slot)>>1):0xffffffff
+				);
 			}else{
 				//..?
 			}

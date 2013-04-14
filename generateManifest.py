@@ -4,7 +4,8 @@
 
 # > generateManifest.py base path [[base2 path2] ...]
 # Base is a string refering to the path on the server, while path is the path of the files to list.
-# This creates a list of all the files in the paths (recursivley), and adds them to the list as if they were in the base folder.
+# This creates a list of all the files in the paths (recursivley),
+#  and adds them to the list as if they were in the base folder.
 
 import sys
 import os

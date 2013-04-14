@@ -10,9 +10,11 @@ dusk.load.provide("dusk");
  * 
  * @description This is the "root" object for DuskWolf, and provides a few functions and configuration thingies.
  * 
- * The DuskWolf engine is created by SavageWolf (Ross Brunton) who can be contacted by email at savagewolf8@gmail.com if you so desire.
+ * The DuskWolf engine is created by SavageWolf (Ross Brunton)
+ *  who can be contacted by email at savagewolf8@gmail.com if you so desire.
  * 
- * You could read readme.md for more information about the engine, but I doubt you'd be able to figure out that you can open it in a text editor.
+ * You could read readme.md for more information about the engine,
+ *  but I doubt you'd be able to figure out that you can open it in a text editor.
  * 
  * My naming standard of things are as follows:
  * 
@@ -27,7 +29,8 @@ dusk.load.provide("dusk");
  * - _singleUnderscore denotes ether a private or protected function.
  */
 
-/** Version of the DW engine. Must contain at least one number, and numbers furthest to the left indicate newer versions.
+/** Version of the DW engine.
+ *  Must contain at least one number, and numbers furthest to the left indicate newer versions.
  * @type string
  */
 dusk.ver = "0.0.18-alpha";
@@ -40,7 +43,8 @@ dusk.ver = "0.0.18-alpha";
  */
 dusk.frameRate = ("__frameRate__" in window)?__frameRate__:60;
 
-/** The path to the data directory, this is where the game will look for all it's data (like images) if given a relative URL.
+/** The path to the data directory,
+ *   this is where the game will look for all it's data (like images) if given a relative URL.
  * 
  *  If it exists, this is set the value of `window.__dataDir__`.
  * @type string

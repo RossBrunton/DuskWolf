@@ -9,7 +9,8 @@ dusk.load.provide("dusk.behave.Push");
 /** @class dusk.behave.Push
  * @memberof dusk.behave
  * 
- * @classdesc An entity with this behaviour will, when hit from any direction, will move in that direction a number of pixels specified with the `speed` property.
+ * @classdesc An entity with this behaviour will, when hit from any direction, 
+ *  will move in that direction a number of pixels specified with the `speed` property.
  * 
  * This can be used to make pushable blocks.
  * 

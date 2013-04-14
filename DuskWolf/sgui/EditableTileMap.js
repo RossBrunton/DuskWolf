@@ -15,7 +15,8 @@ dusk.load.provide("dusk.sgui.EditableTileMap");
  * 
  * @classdesc Extends the regular tilemap to add the ability to edit them.
  * 
- * When this has focus, keyboard combinations will be recognised and can change things, and a "frame" or "cursor" will appear, allowing you to select and change tiles.
+ * When this has focus, keyboard combinations will be recognised and can change things,
+ *  and a "frame" or "cursor" will appear, allowing you to select and change tiles.
  * 
  * @extends dusk.sgui.TileMap
  * @constructor
@@ -23,7 +24,8 @@ dusk.load.provide("dusk.sgui.EditableTileMap");
 dusk.sgui.EditableTileMap = function (parent, comName) {
 	dusk.sgui.TileMap.call(this, parent, comName);
 	
-	/** If true, then this will use "global coordinates", meaning that the location of the frame will be the same over all EditableTileMaps with this set to true.
+	/** If true, then this will use "global coordinates", meaning that the location of the frame will be the same
+	 *  over all EditableTileMaps with this set to true.
 	 * @type boolean
 	 * @default false
 	 */
@@ -34,23 +36,31 @@ dusk.sgui.EditableTileMap = function (parent, comName) {
 	 */
 	this.cursorColour = "#000000";
 	
-	/** The current x of the tile the cursor is at. This is not the x coordinate at which it is drawn, but the actual tile coordinate.
+	/** The current x of the tile the cursor is at.
+	 * 
+	 * This is not the x coordinate at which it is drawn, but the actual tile coordinate.
 	 * @type integer
 	 * @protected
 	 */
 	this._cx = 0;
-	/** The current y of the tile the cursor is at. This is not the y coordinate at which it is drawn, but the actual tile coordinate.
+	/** The current y of the tile the cursor is at.
+	 * 
+	 * This is not the y coordinate at which it is drawn, but the actual tile coordinate.
 	 * @type integer
 	 * @protected
 	 */
 	this._cy = 0;
 	
-	/** The height of the frame, in tiles. Whenever a change is made, all the tiles in the frame will be set the same value.
+	/** The height of the frame, in tiles.
+	 * 
+	 * Whenever a change is made, all the tiles in the frame will be set the same value.
 	 * @type integer
 	 * @default 1
 	 */
 	this.frameHeight = 1;
-	/** The width of the frame, in tiles. Whenever a change is made, all the tiles in the frame will be set the same value.
+	/** The width of the frame, in tiles.
+	 * 
+	 * Whenever a change is made, all the tiles in the frame will be set the same value.
 	 * @type integer
 	 * @default 1
 	 */
@@ -111,8 +121,10 @@ dusk.sgui.EditableTileMap.prototype._editTileMapDraw = function(e) {
 	
 	var width = this.tileWidth()*this.frameWidth;
 	var height = this.tileWidth()*this.frameHeight;
-	if(-e.d.sourceX + (this._cx*this.tileWidth()) + width > e.d.width) width = (e.d.width) - (-e.d.sourceX + (this._cx*this.tileWidth()));
-	if(-e.d.sourceY + (this._cy*this.tileHeight()) + height > e.d.height) height = (e.d.height) - (-e.d.sourceY + (this._cy*this.tileHeight()));
+	if(-e.d.sourceX + (this._cx*this.tileWidth()) + width > e.d.width)
+		width = (e.d.width) - (-e.d.sourceX + (this._cx*this.tileWidth()));
+	if(-e.d.sourceY + (this._cy*this.tileHeight()) + height > e.d.height)
+		height = (e.d.height) - (-e.d.sourceY + (this._cy*this.tileHeight()));
 	
 	e.c.strokeStyle = this.cursorColour;
 	e.c.strokeRect(e.d.destX - e.d.sourceX + (this._cx*this.tileWidth()),

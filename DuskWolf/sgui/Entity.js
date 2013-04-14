@@ -94,7 +94,12 @@ dusk.sgui.Entity.prototype.moveAndCollide = function() {
 	/*for(var i = this._teatherClients.length-1; i >= 0; i--) {
 		if(this._teatherClients[i][1].indexOf("u") !== -1) {
 			this._teatherClients[i][0].y = this.y - this._teatherClients[i][0].height;
-			if(this._teatherClients[i][1].indexOf("X") !== -1 && (this._teatherClients[i][0].x + this._teatherClients[i][0].width < this.x || this._teatherClients[i][0].x > this.x + this.width)) {this.unteather(this._teatherClients[i][0]); break;}
+			if(this._teatherClients[i][1].indexOf("X") !== -1
+			&& (this._teatherClients[i][0].x + this._teatherClients[i][0].width < this.x
+			|| this._teatherClients[i][0].x > this.x + this.width)) {
+				this.unteather(this._teatherClients[i][0]);
+				break;
+			}
 		}
 		
 		if(this._teatherClients[i][1].indexOf("d") !== -1) {
@@ -169,10 +174,14 @@ dusk.sgui.Entity.prototype.performMotion = function(cdx, cdy, main) {
 		if(cdy > 0) {
 			if(dirY == 1) {
 				//Going down
-				doCollision.call(this, this.x+this.collisionOffsetX, this.y+this.collisionHeight, this.x+this.collisionWidth-1, this.y+this.collisionHeight, "d", false);
+				doCollision.call(this, this.x+this.collisionOffsetX, this.y+this.collisionHeight,
+					this.x+this.collisionWidth-1, this.y+this.collisionHeight, "d", false
+				);
 			}else{
 				//Going up
-				doCollision.call(this, this.x+this.collisionOffsetX, this.y+this.collisionOffsetY-1, this.x+this.collisionWidth-1, this.y+this.collisionOffsetY-1, "u", false);
+				doCollision.call(this, this.x+this.collisionOffsetX, this.y+this.collisionOffsetY-1,
+					this.x+this.collisionWidth-1, this.y+this.collisionOffsetY-1, "u", false
+				);
 			}
 			
 			if(cdy) this.y += dirY;
@@ -182,10 +191,14 @@ dusk.sgui.Entity.prototype.performMotion = function(cdx, cdy, main) {
 		if(cdx > 0) {
 			if(dirX == 1) {
 				//Going right
-				doCollision.call(this, this.x+this.collisionWidth, this.y+this.collisionOffsetY, this.x+this.collisionWidth, this.y+this.collisionHeight-1, "r", true);
+				doCollision.call(this, this.x+this.collisionWidth, this.y+this.collisionOffsetY,
+					this.x+this.collisionWidth, this.y+this.collisionHeight-1, "r", true
+				);
 			}else{
 				//Going left
-				doCollision.call(this, this.x+this.collisionOffsetX-1, this.y+this.collisionOffsetY, this.x+this.collisionOffsetX-1, this.y+this.collisionHeight-1, "l", true);
+				doCollision.call(this, this.x+this.collisionOffsetX-1, this.y+this.collisionOffsetY,
+					this.x+this.collisionOffsetX-1, this.y+this.collisionHeight-1, "l", true
+				);
 			}
 			
 			if(cdx) this.x += dirX;
@@ -367,7 +380,9 @@ dusk.sgui.Entity.prototype.eProp = function(prop, set) {
 
 dusk.sgui.Entity.prototype._collisionDraw = function(c) {
 	c.strokeStyle = this.collisionMark;
-	c.strokeRect(this.x + this.collisionOffsetX, this.y + this.collisionOffsetY, -this.collisionOffsetX+this.collisionWidth, -this.collisionOffsetY+this.collisionHeight);
+	c.strokeRect(this.x + this.collisionOffsetX, this.y + this.collisionOffsetY,
+		-this.collisionOffsetX+this.collisionWidth, -this.collisionOffsetY+this.collisionHeight
+	);
 };
 
 Object.seal(dusk.sgui.Entity);

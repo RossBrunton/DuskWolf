@@ -4,7 +4,8 @@
 
 # > generateDeps.py [path] [indent]
 # Path is the path to (recursivley) generate dependancies for, defaults to the current directory
-# Indent is the amount to indent (an integer) for pretty printing, if not specified then the file will be compressed as much as possible
+# Indent is the amount to indent (an integer) for pretty printing,
+#  if not specified then the file will be compressed as much as possible
 
 import sys
 import os

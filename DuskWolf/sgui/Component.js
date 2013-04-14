@@ -14,7 +14,8 @@ dusk.load.provide("dusk.sgui.NullCom");
 
 /** @class dusk.sgui.Component
  * 
- * @classdesc A component is a single "thing" that exists in the SimpleGui system. Everything in the Simple GUI system must have this (or a subclass of this) as a base class.
+ * @classdesc A component is a single "thing" that exists in the SimpleGui system.
+ *  Everything in the Simple GUI system must have this (or a subclass of this) as a base class.
  * 
  * This class doesn't actually display anything itself, classes that inherit from it do.
  * 	The properties for this apply to all components.
@@ -70,38 +71,46 @@ dusk.sgui.Component = function (parent, componentName) {
 	 */
 	this.alpha = 1;
 	/** The component's height, in pixels.
-	 * Some components do not support setting their dimensions, in which case you cannot set this to anything other than 0.
+	 * Some components do not support setting their dimensions,
+	 * 	in which case you cannot set this to anything other than 0.
 	 * @type integer
 	 */
 	this.height = 0;
 	/** The component's width, in pixels. 
-	 * Some components do not support setting their dimensions, in which case you cannot set this to anything other than 0.
+	 * Some components do not support setting their dimensions,
+	 * 	in which case you cannot set this to anything other than 0.
 	 * @type integer
 	 */
 	this.width = 0;
-	/** If set to a string representing a colour ("#ff0000" or "red", for example) will draw a border of that colour around the component. This can be used to check if width and height are set properly.
+	/** If set to a string representing a colour ("#ff0000" or "red", for example) this will draw a border
+	 *  of that colour around the component. This can be used to check if width and height are set properly.
 	 * @type string
 	 * @default null
 	 */
 	this.mark = null;
 
-	/** The name of the group's component that will be focused when the left key is pressed and `{@link dusk.sgui.Component.leftDirection}` returns true.
+	/** The name of the group's component that will be focused when the left key is pressed
+	 *  and `{@link dusk.sgui.Component.leftDirection}` returns true.
 	 * @type string
 	 */
 	this.leftFlow = "";
-	/** The name of the group's component that will be focused when the right key is pressed and `{@link dusk.sgui.Component.rightDirection}` returns true.
+	/** The name of the group's component that will be focused when the right key is pressed
+	 *  and `{@link dusk.sgui.Component.rightDirection}` returns true.
 	 * @type string
 	 */
 	this.rightFlow = "";
-	/** The name of the group's component that will be focused when the up key is pressed and `{@link dusk.sgui.Component.upDirection}` returns true.
+	/** The name of the group's component that will be focused when the up key is pressed
+	 *  and `{@link dusk.sgui.Component.upDirection}` returns true.
 	 * @type string
 	 */
 	this.upFlow = "";
-	/** The name of the group's component that will be focused when the down key is pressed and `{@link dusk.sgui.Component.downDirection}` returns true.
+	/** The name of the group's component that will be focused when the down key is pressed
+	 *  and `{@link dusk.sgui.Component.downDirection}` returns true.
 	 * @type string
 	 */
 	this.downFlow = "";
-	/** This should be set to true only in a dirPress listener. If true, then there will be no attempt at flowing out of the component.
+	/** This should be set to true only in a dirPress listener.
+	 *  If true, then there will be no attempt at flowing out of the component.
 	 * @type boolean
 	 * @protected
 	 * @since 0.0.18-alpha
@@ -110,14 +119,16 @@ dusk.sgui.Component = function (parent, componentName) {
 	
 	/** Fired when a key is pressed.
 	 * 
-	 * The event object has five properties; `key`, the keycode of the key pressed; `ctrl`, `shift` and `meta` are modifier keys; and `jquery`, the original JQuery event.
+	 * The event object has five properties; `key`, the keycode of the key pressed; 
+	 *  `ctrl`, `shift` and `meta` are modifier keys; and `jquery`, the original JQuery event.
 	 * @type dusk.EventDispatcher
 	 * @since 0.0.17-alpha
 	 */
 	this.keyPress = new dusk.EventDispatcher("dusk.sgui.Component.keyPress", dusk.EventDispatcher.MODE_AND);
 	/** Fired when a directional key (up, down, left, right) is pressed.
 	 * 
-	 * The event object has two properties, `dir`, one of the constants `DIR_*` indicating a direction, and `e` the actual keypress event.
+	 * The event object has two properties, `dir`, one of the constants `DIR_*` indicating a direction, 
+	 *  and `e` the actual keypress event.
 	 * 
 	 * For the component to flow to the relevent flow location, all listeners registered must return true.
 	 * @type dusk.EventDispatcher
@@ -135,7 +146,8 @@ dusk.sgui.Component = function (parent, componentName) {
 	/** An event dispatcher that is fired when the action control `"sgui_action"` is pressed.
 	 * 	By default, this is the "space" key, and should be the key that would press a button, or so.
 	 * 
-	 * This is in AND mode, so that any function registered to this that returns `false` will stop the event bubbling to the container component.
+	 * This is in AND mode, so that any function registered to this that returns `false`
+	 *  will stop the event bubbling to the container component.
 	 * @type dusk.EventDispatcher
 	 * @since 0.0.17-alpha
 	 */
@@ -313,7 +325,8 @@ dusk.sgui.Component.REND_LOCATION = 0x01;
 
 /** Components which support this must support their image being rendered starting from an arbitary point.
  * 
- * They should use the `sourceX` and `sourceY` properties of the rendering data as the x and y coordinates of the source image.
+ * They should use the `sourceX` and `sourceY` properties of the rendering data 
+ *  as the x and y coordinates of the source image.
  * @type integer
  * @value 0x02
  * @constant
@@ -324,7 +337,8 @@ dusk.sgui.Component.REND_OFFSET = 0x02;
 
 /** Components which support this must support their image being rendered with an arbitary width and height.
  * 
- * They should use the `width` and `height` properties of the rendering data (which may be different from the component's width and hight) as the width and height to draw of the image.
+ * They should use the `width` and `height` properties of the rendering data 
+ *  (which may be different from the component's width and hight) as the width and height to draw of the image.
  * @type integer
  * @value 0x04
  * @constant
@@ -363,13 +377,18 @@ dusk.sgui.Component.ORIGIN_MIDDLE = 2;
 
 /** This causes the component to handle a keypress, it should be called by ether it's parent container or SimpleGui.
  * 
- * If the component running this is a container, then it's `{@link dusk.sgui.IContainer#containerKeypress}` function will be called.
+ * If the component running this is a container 
+ *  then it's `{@link dusk.sgui.IContainer#containerKeypress}` function will be called.
  *	If that function returns true, then this shall return true without doing anything else.
  * 
- * This function will first check the key to see if it is a direction or the action key, if it is ether the action handlers or the "directionAction"s are called. Otherwise it looks for a keyhandler. If all of the action handlers or keyhandlers returns true, then this function will return true.
+ * This function will first check the key to see if it is a direction or the action key,
+ *  if it is ether the action handlers or the "directionAction"s are called. 
+ *  Otherwise it looks for a keyhandler.
+ *  If all of the action handlers or keyhandlers returns true, then this function will return true.
  *
- * This function returns true if either at least one keyHandler (including action and direction) returns true, or the control flows into another component.
- *	If this returns false, then the event must not be ran by it's container.
+ * This function returns true if either at least one keyHandler (including action and direction) returns true, 
+ *  or the control flows into another component.
+ *	If this returns false, then the event must not be ran by its container.
  * 
  * @param {object} e The JQuery keypress object that should be ran.
  * @return {boolean} Whether the parent container should run it's own actions.
@@ -385,13 +404,17 @@ dusk.sgui.Component.prototype.doKeyPress = function (e) {
 	if(this.keyPress.fire(eventObject)) {
 		//Directions
 		if(dusk.controls.checkKey("sgui_left", e.which)) {
-			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.Component.DIR_LEFT, "e":e})) && !this._noFlow && this.leftFlow && this._container.flow(this.leftFlow)){return false;}
+			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.Component.DIR_LEFT, "e":e})) && !this._noFlow
+			&& this.leftFlow && this._container.flow(this.leftFlow)) return false;
 		}else if(dusk.controls.checkKey("sgui_up", e.which)) {
-			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.Component.DIR_UP, "e":e})) && !this._noFlow && this.upFlow && this._container.flow(this.upFlow)){return false;}
+			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.Component.DIR_UP, "e":e})) && !this._noFlow
+			&& this.upFlow && this._container.flow(this.upFlow)) return false;
 		}else if(dusk.controls.checkKey("sgui_right", e.which)) {
-			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.Component.DIR_RIGHT, "e":e})) && !this._noFlow && this.rightFlow && this._container.flow(this.rightFlow)){return false;}
+			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.Component.DIR_RIGHT, "e":e})) && !this._noFlow
+			&& this.rightFlow && this._container.flow(this.rightFlow)) return false;
 		}else if(dusk.controls.checkKey("sgui_down", e.which)) {
-			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.Component.DIR_DOWN, "e":e})) && !this._noFlow && this.downFlow && this._container.flow(this.downFlow)){return false;}
+			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.Component.DIR_DOWN, "e":e})) && !this._noFlow
+			&& this.downFlow && this._container.flow(this.downFlow)) return false;
 		}else if(dusk.controls.checkKey("sgui_action", e.which)) {
 			return this.action.fire({"keyPress":e});
 		}
@@ -401,7 +424,8 @@ dusk.sgui.Component.prototype.doKeyPress = function (e) {
 };
 
 
-/** This maps a property from the JSON representation of the object (One from {@link #parseProps}) to the JavaScript representation of the object.
+/** This maps a property from the JSON representation of the object (One from {@link #parseProps})
+ *  to the JavaScript representation of the object.
  * 	If the property `name` exists in the JSON properties, then `mask` will be assigned it's value.
  * 
  * @param {string} name The name in the JSON representation.
@@ -430,9 +454,11 @@ dusk.sgui.Component.prototype._addNewPropDepends = function(name, depends) {
  * 
  * This is used to describe the component using JSON, for quicker efficiency.
  * 
- * The properties of the `props` object tend to match up with the names of properties of this class (any changes will be noted in the documentation).
+ * The properties of the `props` object tend to match up with the names of public properties of the class
+ *  (any changes will be noted in the documentation).
  * 
- * This function will loop through all the properties is `props` and set that value to the corresponding value in this object.
+ * This function will loop through all the properties is `props`
+ *  and set that value to the corresponding value in this object.
  * 
  * @param {object} props The object to read the properties off.
  * @see {@link dusk.sgui.Component#_registerPropMask}
@@ -618,7 +644,8 @@ dusk.sgui.Component.prototype.removeExtra = function(name) {
 };
 
 /** Modifies an extra, if it exists.
- * 	If it does not exist, it will be attempted to be created with the type specified by the "type" property, or it will fail.
+ * 	If it does not exist, it will be attempted to be created with the type specified by the "type" property
+ *  or it will fail and do nothing with a warning.
  * @param {string} name The name of the extra to modify.
  * @param {object} data The data to use to modify.
  * @since 0.0.18-alpha

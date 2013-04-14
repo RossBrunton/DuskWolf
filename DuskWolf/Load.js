@@ -9,9 +9,12 @@ if(!dusk.load) dusk.load = {};
  * @description This namespace provides the functions required to import files and resolve dependancies.
  * 
  * JavaScript files imported by DuskWolf consist of adding them to the page's head tab, one after the other.
- * Before a new file is added to the head, the old one must have been finished downloading, and call `{@link dusk.load.provide}` with it's namespace name.
+ * Before a new file is added to the head, the old one must have been finished downloading,
+ *  and call `{@link dusk.load.provide}` with it's namespace name.
  * 
- * A package name may contain as the first character a ">". This indicates that it should be downloaded AFTER the current package. This should be used to fix circular dependancies by marking the one that should be ran first with this.
+ * A package name may contain as the first character a ">".
+ *  This indicates that it should be downloaded AFTER the current package.
+ *  This should be used to fix circular dependancies by marking the one that should be ran first with this.
  */
 
 /** Inits the `dusk.load` namespace.
@@ -22,9 +25,12 @@ dusk.load._init = function() {
 	/** Containes all the dependancy information for the files.
 	 * 
 	 * Each key is an import name, and the value is an array.
-	 * The first element is the filename that provides the file, the second is a state value, as shown below, and the third is an array of all the dependancies of the namespace.
+	 *  The first element is the filename that provides the file, 
+	 *  the second is a state value, as shown below, 
+	 *  and the third is an array of all the dependancies of the namespace.
 	 * 
-	 * Possible values for the state are either 0 (not imported), 1 (currently in the proccess of importing) or 2 (successfully imported and ran).
+	 * Possible values for the state are either 0 (not imported), 
+	 *  1 (currently in the proccess of importing) or 2 (successfully imported and ran).
 	 * @type object
 	 * @private
 	 * @since 0.0.12-alpha
@@ -60,7 +66,8 @@ dusk.load._init = function() {
 	 * 
 	 * The event object has only one property, a string with the package name in it.
 	 * 
-	 * This object will be `null` until `{@link dusk.EventDispatcher}` is imported; and this namespace will not make any attempt to import it.
+	 * This object will be `null` until `{@link dusk.EventDispatcher}` is imported; 
+	 *  and this namespace will not make any attempt to import it.
 	 * @type null|EventDispatcher
 	 * @since 0.0.14-alpha
 	 */
@@ -81,7 +88,8 @@ dusk.load._init = function() {
 
 /** Checks capability of the user agent.
  * 
- * If there is any issue, then this returns a string description of the problem. It will only return one problem; the first one found.
+ * If there is any issue, then this returns a string description of the problem.
+ *  It will only return one problem; the first one found.
  * 	DuskWolf will ignore any problems, "just in case".
  * 
  * @return {string} A problem description, or an empty string.
@@ -92,7 +100,11 @@ dusk.load._capability = function() {
 	if(!("$" in window)) return "JQuery not included!";
 	if(!("getContext" in document.createElement("canvas"))) return "Canvas not supported!";
 	
-	if(!(window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || null))
+	if(!(window.requestAnimationFrame
+	|| window.mozRequestAnimationFrame
+	|| window.webkitRequestAnimationFrame
+	|| window.msRequestAnimationFrame
+	|| null))
 		return "requestAnimationFrame not supported!";
 	
 	if(!("defineProperty" in Object)) {
@@ -119,7 +131,9 @@ dusk.load._capability = function() {
 	return "";
 };
 
-/** Marks that the namespace `name` has been provided. This tells the engine to download the next file in the list, and it also creates the namespace object if it doesn't already exist.
+/** Marks that the namespace `name` has been provided.
+ *   This tells the engine to download the next file in the list,
+ *   and it also creates the namespace object if it doesn't already exist.
  * @param {string} name The namespace to provide.
  * @since 0.0.12-alpha
  */
@@ -146,10 +160,15 @@ dusk.load.provide = function(name) {
 	}
 };
 
-/** Adds a dependency. This tells the engine the file in which the namespaces are provided, and what other files must be imported before it.
+/** Adds a dependency.
+ * 
+ *  This tells the engine the file in which the namespaces are provided,
+ *  and what other files must be imported before it.
+ * 
  * @param {string} file The file name which the namespaces reside. It is relative to `__duskdir__`.
  * @param {array} provided An array of namespace names which are provided by the file.
- * @param {array} required An array of namespace names that are required for this file to run. These will be downloaded before this one if any provided namespaces are requested.
+ * @param {array} required An array of namespace names that are required for this file to run.
+ *  These will be downloaded before this one if any provided namespaces are requested.
  * @since 0.0.12-alpha
  */
 dusk.load.addDependency = function(file, provided, required) {
@@ -158,7 +177,8 @@ dusk.load.addDependency = function(file, provided, required) {
 	}
 };
 
-/** Marks the current file as requiring the specified namespace as a dependency, used for generating dependancy information.
+/** Marks the current file as requiring the specified namespace as a dependency, 
+ *  used for generating dependancy information.
  * 
  * @param {string} name The namespace to add as a dependency.
  * @since 0.0.15-alpha
@@ -173,9 +193,13 @@ dusk.load.require = function(name) {
 	}
 };
 
-/** Imports a package. The package must have been previously registered using `{@link dusk.load.addDependency}` or `{@link dusk.load.importList}`.
+/** Imports a package.
  * 
- * The namespace will NOT be immediately available after this function call unless it has already been imported (in which case the call does nothing).
+ * The package must have been previously registered
+ *  using `{@link dusk.load.addDependency}` or `{@link dusk.load.importList}`.
+ * 
+ * The namespace will NOT be immediately available after this function call
+ *  unless it has already been imported (in which case the call does nothing).
  * @param {string} name The package to import, as a string name.
  * @since 0.0.15-alpha
  */
@@ -232,7 +256,8 @@ dusk.load.buildDeps = function(patt) {
 	return holdString;
 };
 
-/** Download a JSON containing an array of dependancies. These will be looped through, and the entries will be given to `{@link dusk.load.addDependency}`.
+/** Download a JSON containing an array of dependancies. These will be looped through,
+ *  and the entries will be given to `{@link dusk.load.addDependency}`.
  * 
  * Each entry of the array must itself be an array of the form `[file, provided, required]`.
  * @param {string} path The path to the JSON file.
@@ -257,7 +282,8 @@ dusk.load.importList = function(path, callback) {
 
 /** Used internally to import a package, will fail if dependancies are not met.
  * @param {string} name The name of the package to attempt to import.
- * @param {boolean} ignoreDefer In the case where no packages can be imported at the moment, this parameter can be set to true so that dependancies starting with ">" are ignored.
+ * @param {boolean} ignoreDefer In the case where no packages can be imported at the moment,
+ *  this parameter can be set to true so that dependancies starting with ">" are ignored.
  * @return {boolean} True if the package and all of it's dependancies are imported.
  * @private
  * @since 0.0.17-alpha
@@ -319,13 +345,20 @@ dusk.load._checkIfHandleable();
  */
 dusk.load._displayLoad = function() {
 	if(!dusk.started && dusk.canvas) {
-		$("#"+dusk.canvas)[0].getContext("2d").clearRect(0, 0, $("#"+dusk.canvas)[0].width, $("#"+dusk.canvas)[0].height);
+		$("#"+dusk.canvas)[0].getContext("2d").clearRect(0, 0, 
+			$("#"+dusk.canvas)[0].width, $("#"+dusk.canvas)[0].height
+		);
 		var textY = 0;
 		
-		$("#"+dusk.canvas)[0].getContext("2d").fillText("Hold on! Loading "+dusk.load._currentlyImporting.length+" files!", 5, textY+=15);
+		$("#"+dusk.canvas)[0].getContext("2d").fillText(
+			"Hold on! Loading "+dusk.load._currentlyImporting.length+" files!", 5, textY+=15
+		);
 		$("#"+dusk.canvas)[0].getContext("2d").fillText("Now loading "+dusk.load._current+"!", 5, textY+=15);
+		
 		if("onLine" in navigator && !navigator.onLine) {
-			$("#"+dusk.canvas)[0].getContext("2d").fillText("You have no internet connection; good luck with that.", 5, textY+=15);
+			$("#"+dusk.canvas)[0].getContext("2d").fillText(
+				"You have no internet connection; good luck with that.", 5, textY+=15
+			);
 		}
 		if(dusk.load.capabilityIssue) {
 			$("#"+dusk.canvas)[0].getContext("2d").fillText(dusk.load.capabilityIssue, 5, textY+=15);
@@ -333,11 +366,14 @@ dusk.load._displayLoad = function() {
 	}
 	
 	if(!dusk.started) {
-		var raf = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+		var raf = window.requestAnimationFrame
+		|| window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame
+		|| window.msRequestAnimationFrame;
 		raf(dusk.load._displayLoad);
 	}
 };
-window.raf = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+window.raf = window.requestAnimationFrame || window.mozRequestAnimationFrame
+|| window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 raf(dusk.load._displayLoad);
 delete window.raf;
 

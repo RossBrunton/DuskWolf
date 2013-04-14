@@ -14,14 +14,18 @@ dusk.load.provide("dusk.items.Invent");
  * 
  * @description Contains methods of managing items.
  * 
- * Items are essentially just instances of `{@link dusk.Inheritable}`, which are spawened from `{@link dusk.items.items}`.
+ * Items are essentially just instances of `{@link dusk.Inheritable}`, which are from `{@link dusk.items.items}`.
  * 	These objects describe the items, and what they do.
  * 
- * Extra data is specific to one individial item, and not to it's type. This contains things such as how many usages it has left, if it is cursed or not, that kind of thing.
+ * Extra data is specific to one individial item, and not to it's type.
+ *  This contains things such as how many usages it has left, if it is cursed or not, that kind of thing.
  * 
- * Items are stored in instances of `{@link dusk.items.Invent}`, where they can be added or removed. This is used so that items can be transferred from one place to another easily, but the item will remain in it's old place if it cannot be sent to the other item.
+ * Items are stored in instances of `{@link dusk.items.Invent}`, where they can be added or removed.
+ *  This is used so that items can be transferred from one place to another easily,
+ *  but the item will remain in it's old place if it cannot be sent to the other item.
  * 
- * The item Inheritable has a property called `"makStack"` which is the maximum number of the items that can be placed in an inventory, by default this is 0.
+ * The item Inheritable has a property called `"makStack"` which is the maximum number of the items
+ *  that can be placed in an inventory, by default this is 0.
  * 
  * @since 0.0.17-alpha
  */
@@ -87,20 +91,27 @@ dusk.items.REST_ISNIN = 3;
  * 
  * It is recommended that this be used whenever multiple items need to be stored, rather than in an array or the like.
  * 
- * An inventory carries restrictions on what items can be stored in it, this is done by specifying restrictions; if an item does not match the restrictions, then it will not be added.
+ * An inventory carries restrictions on what items can be stored in it, this is done by specifying restrictions;
+ *  if an item does not match the restrictions, then it will not be added.
  *	Rules are arrays in the form `[prop, REST_*, value]` where:
  * 
  * - `prop` is a string with the name of a property on the item to look up.
- * - `REST_*` is a constant on `dusk.items` starting with `REST_`. This specifies what the rule is (is it equal to? Greater than? One of multiple options?)
- * - `value` is the value that will be checked, if the property specified correctly matches this, as described by the rule, then the item is allowed in.
+ * - `REST_*` is a constant on `dusk.items` starting with `REST_`.
+ *  This specifies what the rule is (is it equal to? Greater than? One of multiple options?)
+ * - `value` is the value that will be checked, if the property specified correctly matches this, 
+ *  as described by the rule, then the item is allowed in.
  * 
- * For example, the restriction `["type", dusk.items.REST_ISEQ, "Potion"]` will only allow items whose `"type"` property is equal to `"Potion"`.
+ * For example, the restriction `["type", dusk.items.REST_ISEQ, "Potion"]` 
+ *  will only allow items whose `"type"` property is equal to `"Potion"`.
  * 
- * Items are arranged in "slots", and are not sorted automatically. The number of slots the inventory has is defined when it is created, and each slot can contain one type of item.
- *	Multiple items of the same type can be stored in the same slot, up to the item's `"maxStack"` value, or the Invent's `"maxStack"` value, whichever is lower.
+ * Items are arranged in "slots", and are not sorted automatically.
+ *  The number of slots the inventory has is defined when it is created, and each slot can contain one type of item.
+ *	Multiple items of the same type can be stored in the same slot, up to the item's `"maxStack"` value,
+ *   or the Invent's `"maxStack"` value, whichever is lower.
  * 
  * @param {integer} capacity The number of inventory slots this inventory should have.
- * @param {array} restrictions An array of restrictions on this inventory, each element should be an array as described above.
+ * @param {array} restrictions An array of restrictions on this inventory, 
+ *  each element should be an array as described above.
  * @param {integer=0xffffffff} maxStack The maximum number of items that can be stored in one single slot.
  * @since 0.0.17-alpha
  * @constructor
@@ -116,7 +127,10 @@ dusk.items.Invent = function(capacity, restrictions, maxStack) {
 	 * @private
 	 */
 	this._restrictions = restrictions;
-	/** An array of items. Each element of this array will itself be either an array of `{@link dusk.Inheritable}` items, or null if the stack is empty.
+	/** An array of items.
+	 *  Each element of this array will itself be either an array of `{@link dusk.Inheritable}` items, 
+	 *  or null if the stack is empty.
+	 * 
 	 * Each element of this array is an "inventory slot".
 	 * @type array
 	 * @private
@@ -140,11 +154,15 @@ dusk.items.Invent.prototype.isValidAddition = function(item) {
 	
 	for(var i = this._restrictions.length-1; i >= 0; i --) {
 		switch(this._restrictions[i][1]) {
-			case dusk.items.REST_ISEQ:if(item.get(this._restrictions[i][0]) != this._restrictions[i][2]) return false;break;
-			case dusk.items.REST_ISNEQ:if(item.get(this._restrictions[i][0]) == this._restrictions[i][2]) return false;break;
+			case dusk.items.REST_ISEQ:
+				if(item.get(this._restrictions[i][0]) != this._restrictions[i][2]) return false;break;
+			case dusk.items.REST_ISNEQ:
+				if(item.get(this._restrictions[i][0]) == this._restrictions[i][2]) return false;break;
 			
-			case dusk.items.REST_ISIN:if(item.get(this._restrictions[i][0]) in this._restrictions[i][2]) return false;break;
-			case dusk.items.REST_ISNIN:if(!(item.get(this._restrictions[i][0]) in this._restrictions[i][2])) return false;break;
+			case dusk.items.REST_ISIN:
+				if(item.get(this._restrictions[i][0]) in this._restrictions[i][2]) return false;break;
+			case dusk.items.REST_ISNIN:
+				if(!(item.get(this._restrictions[i][0]) in this._restrictions[i][2])) return false;break;
 			
 			default:
 				console.warn(this.toString()+" has invalid restrictions.");
@@ -154,8 +172,11 @@ dusk.items.Invent.prototype.isValidAddition = function(item) {
 	return true;
 };
 
-/** Checks if the specified item item slot. This does not do anything that `{@link dusk.items.Invent#isValidAddition}` does, and should not be used to replace it.
- * @param {string|dusk.Inheritable} item An item type that should be checked, either an item from `{@link dusk.items.items}` or a string type name.
+/** Checks if the specified item can be addet to an item slot.
+ *   This does not do anything that `{@link dusk.items.Invent#isValidAddition}` does,
+ *   and should not be used to replace it.
+ * @param {string|dusk.Inheritable} item An item type that should be checked,
+ *  either an item from `{@link dusk.items.items}` or a string type name.
  * @param {integer} slot The slot to check.
  * @return {boolean} Whether it can be added or not.
  */
@@ -165,7 +186,8 @@ dusk.items.Invent.prototype.isValidAdditionToSlot = function(item, slot) {
 	
 	if(typeof item == "string") {
 		if(this._items[slot] && this._items[slot][0].type === item
-		&& this._items[slot].length < this.maxStack && this._items[slot].length < dusk.items.items.get(item, "maxStack")) {
+		&& this._items[slot].length < this.maxStack
+		&& this._items[slot].length < dusk.items.items.get(item, "maxStack")) {
 			return true;
 		}
 	}else{
@@ -179,7 +201,8 @@ dusk.items.Invent.prototype.isValidAdditionToSlot = function(item, slot) {
 };
 
 /** Attempts to add multiple copies of the specified item, if possible.
- * @param {string|dusk.Inheritable} item An item from `{@link dusk.items.items}`, or a string type name, that should be added.
+ * @param {string|dusk.Inheritable} item An item from `{@link dusk.items.items}`,
+ *  or a string type name, that should be added.
  * @param {integer=1} amount The number of items that should be added, defaults to `1` if not specified.
  * @return {integer} The number of items that are left after all possible items were added.
  */
@@ -221,7 +244,8 @@ dusk.items.Invent.prototype.removeItem = function(type, amount) {
 
 /** Returns an item of the specified type, if it exists in the inventory. The item will remain in the inventory.
  * @param {string} type The type of item to look up.
- * @return {?dusk.Inheritable} An item from `{@link dusk.items.items}` that was previously added of the specified type, or null if it doesn't exist.
+ * @return {?dusk.Inheritable} An item from `{@link dusk.items.items}` that was previously added of the specified type, 
+ *  or null if it doesn't exist.
  */
 dusk.items.Invent.prototype.getAnItem = function(type) {
 	for(var i = 0; i < this._items.length; i ++) {
@@ -234,7 +258,8 @@ dusk.items.Invent.prototype.getAnItem = function(type) {
 };
 
 /** Returns any item if it exists in the inventory. The item will remain in the inventory.
- * @return {?dusk.Inheritable} An item from `{@link dusk.items.items}` that was previously added, or null if the inventory is empty.
+ * @return {?dusk.Inheritable} An item from `{@link dusk.items.items}` that was previously added,
+ *  or null if the inventory is empty.
  */
 dusk.items.Invent.prototype.getAnyItem = function() {
 	for(var i = 0; i < this._items.length; i ++) {
@@ -248,7 +273,8 @@ dusk.items.Invent.prototype.getAnyItem = function() {
 
 /** Removes and returns an item of the specified type. The item will no longer remain in the inventory.
  * @param {string} type The type of item to take.
- * @return {?dusk.Inheritable} An item from `{@link dusk.items.items}` that was previously added and has just been removed of the specified type, or null if it doesn't exist.
+ * @return {?dusk.Inheritable} An item from `{@link dusk.items.items}` that was previously added
+ *  and has just been removed of the specified type, or null if it doesn't exist.
  */
 dusk.items.Invent.prototype.takeAnItem = function(type) {
 	for(var i = 0; i < this._items.length; i ++) {
@@ -334,7 +360,8 @@ dusk.items.Invent.prototype.sendToInventSlot = function(dest, slot, howMany) {
 	}
 	
 	for(var i = howMany; i > 0; i --) {
-		if(this.countItemsOfType(type) > 0 && dest.isValidAddition(this.getAnItem(type)) && dest.isValidAdditionToSlot(this.getAnItem(type), slot)) {
+		if(this.countItemsOfType(type) > 0 && dest.isValidAddition(this.getAnItem(type)) 
+		&& dest.isValidAdditionToSlot(this.getAnItem(type), slot)) {
 			dest.putItemIntoSlot(this.takeAnItem(type), slot);
 		}else{
 			return i;
@@ -381,7 +408,8 @@ dusk.items.Invent.prototype.sendAllToInvent = function(dest) {
 
 /** Returns an item that is in the specified slot.
  * @param {integer} slot The slot to check for the item.
- * @return {?dusk.Inheritable} An item from `{@link dusk.items.items}` that is in this slot, or null if it doesn't exist.
+ * @return {?dusk.Inheritable} An item from `{@link dusk.items.items}` that is in this slot, 
+ *  or null if it doesn't exist.
  */
 dusk.items.Invent.prototype.getItemFromSlot = function(slot) {
 	if(!this._items[slot]) return null;
@@ -390,7 +418,8 @@ dusk.items.Invent.prototype.getItemFromSlot = function(slot) {
 
 /** Returns and removes an item that is in the specified slot.
  * @param {integer} slot The slot to remove the item from.
- * @return {?dusk.Inheritable} An item from `{@link dusk.items.items}` that is in this slot, or null if it doesn't exist.
+ * @return {?dusk.Inheritable} An item from `{@link dusk.items.items}` that is in this slot,
+ *  or null if it doesn't exist.
  */
 dusk.items.Invent.prototype.takeItemFromSlot = function(slot) {
 	if(!this._items[slot]) return null;

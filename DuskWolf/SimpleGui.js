@@ -17,10 +17,13 @@ dusk.load.provide("dusk.sgui");
  * @description This module contains a SimpleGui system, allowing for canvas UIs.
  * 
  * Generally, everything in the Simple GUI system is a subclass of `{@link sgui.Component}.
- * 	All components are in a parent component that implements `{@link sgui.IContainer}`, until you get to the top, which are containers of type `{@link sgui.Pane}`.
- * 	Components are things that are displayed, such as images or text, each has a draw function that lets them draw directly to a canvas, rotated and offseted already for them.
+ * 	All components are in a parent component that implements `{@link sgui.IContainer}`,
+ *   until you get to the top, which are containers of type `{@link sgui.Pane}`.
+ * 	Components are things that are displayed, such as images or text,
+ *   each has a draw function that lets them draw directly to a canvas, rotated and offseted already for them.
  * 
- * Containers allow you to define their contents as JSON objects (but only for simple properties), or you can simply use refrences to the objects themselves.
+ * Containers allow you to define their contents as JSON objects (but only for simple properties),
+ *   or you can simply use refrences to the objects themselves.
  * 	If you use JSON, the property names of the JSON keys generally match up to the property names of the components.
  * 	You cannot call functions using JSON, only modify the properties at the current time.
  * 
@@ -28,17 +31,23 @@ dusk.load.provide("dusk.sgui");
  * 	This is the name and type of the object, surprisingly.
  * 	`type` must be a valid type (extends `{@link dusk.sgui.Component}` and be in the namespace `{@link dusk.sgui}`.
  * 
- * Components can be "active", a component which is active will receive keyboard events, and should act like the user is paying attention to it.
- * 	When a component becomes active, it's `{@link sgui.Component.onActive} method is called, when it looses it, {@link sgui.Component.onDeactive} is called.
+ * Components can be "active", a component which is active will receive keyboard events,
+ *   and should act like the user is paying attention to it.
+ * 	When a component becomes active, it's `{@link sgui.Component.onActive} method is called,
+ *   when it looses it, {@link sgui.Component.onDeactive} is called.
  * 	For a component to be active, all it's parent groups must be too.
  * 
  * Components can also be "focused", focused components will be made active when the container it is in becomes active.
- * 	Focus is generally changed by the arrow keys (only active components can handle key events, remember), though this can be remapped using `{@link dusk.controls}`.
- * 	If a direction key is pressed, a function like `{@link sgui.Component.upAction}` returns true, and a variable like `{@link upFlow}` is not empty, focus changes to the named element in this one's container.
+ * 	Focus is generally changed by the arrow keys (only active components can handle key events, remember),
+ *   though this can be remapped using `{@link dusk.controls}`.
+ * 	If a direction key is pressed, a function like `{@link sgui.Component.upAction}` returns true,
+ *   and a variable like `{@link upFlow}` is not empty, focus changes to the named element in this one's container.
  *	The arrow keys can be overriden by using the controls "sgui_up", "sgui_down", "sgui_left" and "sgui_right".
  * 
- * Component paths also exist, these paths are similar to file names and allow you to specify one component relative to another.
- * 	From an example container "X" in another container "Y", which itself is in a pane "Z", and with children "a", "b" and "c", with "c" having children "c1" and "c2" the following paths are as described:
+ * Component paths also exist, these paths are similar to file names
+ *   and allow you to specify one component relative to another.
+ * 	From an example container "X" in another container "Y", which itself is in a pane "Z",
+ *   and with children "a", "b" and "c", with "c" having children "c1" and "c2" the following paths are as described:
  * 
  * - a - Access the child "a".
  * - c/c1 - Access the child "c1" of the container "c", which is in "X".
@@ -47,7 +56,8 @@ dusk.load.provide("dusk.sgui");
  * 
  * This namespace registeres the following controls for `{@link dusk.controls}`:
  * 
- * `dusk_up`, `dusk_down`, `dusk_left` and `dusk_right` are the controls used to change the active component, these are the arrow keys or first stick by default.
+ * `dusk_up`, `dusk_down`, `dusk_left` and `dusk_right` are the controls used to change the active component,
+ *   these are the arrow keys or first stick by default.
  * `dusk_action` is used to trigger the "action" event on a component, this is by default the `a` key, or button 0.
  */
 
@@ -119,14 +129,16 @@ dusk.sgui._init = function() {
 	 */
 	this._styleData = {};
 	
-	/** An object containing all the component types that can be used. The key is the name of the component, while the value is the constructor.
+	/** An object containing all the component types that can be used.
+	 *  The key is the name of the component, while the value is the constructor.
 	 * @type object
 	 * @private
 	 * @since 0.0.18-alpha
 	 */
 	this._types = {};
 	
-	/** An object containing all the extras that can be used. The key is the extra name, while the value is the constructor.
+	/** An object containing all the extras that can be used.
+	 *  The key is the extra name, while the value is the constructor.
 	 * @type object
 	 * @private
 	 * @since 0.0.18-alpha
@@ -166,7 +178,8 @@ dusk.sgui._init = function() {
  * @value 0
  */
 dusk.sgui.MODE_FIXED = 0;
-/** A display mode that represents that the canvas will change it's size in order to fill up the whole screen, if possible.
+/** A display mode that represents that the canvas will change it's size
+ *  in order to fill up the whole screen, if possible.
  * @type integer
  * @constant
  * @value 1
@@ -176,7 +189,8 @@ dusk.sgui.MODE_FULL = 1;
 
 /** Returns or creates a pane.
  * @param {string} name The name of the pane to get or create.
- * @param {?boolean} noNew If this is `true`, then a new pane will not be created, otherwise a new pane will be created if it does not exist.
+ * @param {?boolean} noNew If this is `true`, then a new pane will not be created,
+ *  otherwise a new pane will be created if it does not exist.
  * @return {?dusk.sgui.Pane} The pane, or `null` if it doesn't exist and `noNew` is `true`.
  */
 dusk.sgui.getPane = function(name, noNew) {
@@ -219,7 +233,8 @@ dusk.sgui.getActivePane = function() {
  * @private
  */
 dusk.sgui._draw = function() {
-	var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+	var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame 
+	|| window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 	requestAnimationFrame(dusk.sgui._draw);
 	if(!dusk.started) return;
 
@@ -246,7 +261,8 @@ dusk.sgui._draw = function() {
 
 /** Resolves a path.
  * 
- * The path from this function must contain a colon, all text to the left of the colon will be the pane to path from, and all text to the right will be a standard path.
+ * The path from this function must contain a colon, all text to the left of the colon will be the pane to path from
+ *  and all text to the right will be a standard path.
  * @param {string} path The path to resolve.
  * @return {dusk.sgui.Component} The component the path represents.
  */
@@ -265,7 +281,8 @@ dusk.sgui.path = function(path) {
  * @private
  * @since 0.0.17-alpha
  */
-dusk.sgui._stylePattern = /(?:([^\.#\[]+))?(?:\.([^#\.\[]+))?(?:#([^\.\#\[]+))?(?:\[([^\=\~\|\^\*\$]+)([\~\|\^\*\$])?=([^\]]+)\])?/gi;
+dusk.sgui._stylePattern =
+ /(?:([^\.#\[]+))?(?:\.([^#\.\[]+))?(?:#([^\.\#\[]+))?(?:\[([^\=\~\|\^\*\$]+)([\~\|\^\*\$])?=([^\]]+)\])?/gi;
 
 /** Adds a new style.
  * 
@@ -337,9 +354,11 @@ dusk.sgui.registerType = function(name, type) {
 	this._types[name] = type;
 };
 
-/** Returns a constructor for the specified component, provided it has been registered beforehand with {@link dusk.sgui.registerType}.
+/** Returns a constructor for the specified component, 
+ *  provided it has been registered beforehand with {@link dusk.sgui.registerType}.
  * @param {string} name The name of the type to look up.
- * @return {?class(dusk.sgui.Component, string) extends dusk.sgui.Component} A constructor for the specified type, or null if it doesn't exist.
+ * @return {?class(dusk.sgui.Component, string) extends dusk.sgui.Component} A constructor for the specified type,
+ *  or null if it doesn't exist.
  * @since 0.0.17-alpha
  */
 dusk.sgui.getType = function(name) {
@@ -357,9 +376,11 @@ dusk.sgui.registerExtra = function(name, extra) {
 	this._extras[name] = extra;
 };
 
-/** Returns a constructor for the specified extra, provided it has been registered beforehand with `{@link dusk.sgui.registerExtra}`.
+/** Returns a constructor for the specified extra,
+ *  provided it has been registered beforehand with `{@link dusk.sgui.registerExtra}`.
  * @param {string} name The name of the extra to look up.
- * @return {?class(dusk.sgui.Component, string) extends dusk.sgui.extra.Extra} A constructor for the specified extra, or null if it doesn't exist.
+ * @return {?class(dusk.sgui.Component, string) extends dusk.sgui.extra.Extra} A constructor for the specified extra,
+ *  or null if it doesn't exist.
  * @since 0.0.18-alpha
  */
 dusk.sgui.getExtra = function(name) {

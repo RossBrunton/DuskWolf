@@ -36,13 +36,17 @@ dusk.entities.mode = "BINARY";
 dusk.entities.types.createNewType("walk", {
 	"behaviours":{"BackForth":true, "SimpleAni":true, "Persist":true, /*"HitDam":true,*/ "Killable":true}, 
 	"data":{"dx":5, "slowdown":0, "hp":10, "collisionOffsetX":10, "collisionWidth":22, "collisionOffsetY":3},
-	"animation":{"stationary":"0,0", "stationary-r":"0,0", "stationary-l":"0,1", "walk-r":"0,0|1,0|0,0|2,0", "walk-l":"0,1|1,1|0,1|2,1"}
+	"animation":{"stationary":"0,0", "stationary-r":"0,0", "stationary-l":"0,1", "walk-r":"0,0|1,0|0,0|2,0",
+		"walk-l":"0,1|1,1|0,1|2,1"
+	}
 }, "plat");
 
 dusk.entities.types.createNewType("player", {
 	"behaviours":{"Controlled":true, "MarkTrigger":true, "SimpleAni":true, "Killable":true},
 	"data":{"hp":5, "collisionOffsetX":10, "collisionWidth":22, "collisionOffsetY":3},
-	"animation":{"stationary":"0,0", "stationary-r":"0,0", "stationary-l":"0,1", "walk-r":"0,0|1,0|0,0|2,0", "walk-l":"0,1|1,1|0,1|2,1", "jump-r":"3,0", "jump-l":"3,1", "fall-r":"4,0", "fall-l":"4,1"}
+	"animation":{"stationary":"0,0", "stationary-r":"0,0", "stationary-l":"0,1", "walk-r":"0,0|1,0|0,0|2,0",
+		"walk-l":"0,1|1,1|0,1|2,1", "jump-r":"3,0", "jump-l":"3,1", "fall-r":"4,0", "fall-l":"4,1"
+	}
 }, "plat");
 
 dusk.entities.types.createNewType("bad", {
@@ -52,8 +56,12 @@ dusk.entities.types.createNewType("bad", {
 }, "plat");
 
 dusk.entities.types.createNewType("block", {"behaviours":{}, "data":{"anchor":true, "gravity":0}}, "plat");
-dusk.entities.types.createNewType("fall", {"behaviours":{"Fall":true}, "data":{"gravity":0, "fallSpeed":3, "img":"pimg/techFallBlock.png"}}, "plat");
-dusk.entities.types.createNewType("push", {"behaviours":{"Push":true}, "data":{"gravity":0, "img":"pimg/techFreeMove.png"}}, "plat");
+dusk.entities.types.createNewType("fall", {"behaviours":{"Fall":true}, 
+	"data":{"gravity":0, "fallSpeed":3, "img":"pimg/techFallBlock.png"}
+}, "plat");
+dusk.entities.types.createNewType("push", {"behaviours":{"Push":true},
+	"data":{"gravity":0, "img":"pimg/techFreeMove.png"}
+}, "plat");
 
 dusk.plat.becomeRoomManager();
 

@@ -11,7 +11,8 @@ dusk.load.provide("dusk.sgui.Single");
  * 
  * @classdesc A single contains only one component, and typically adds some functionallity to it.
  * 
- * The component must have a name, and the name must be correct when you are referring to it, however, you may use `"*"` in any case where a name is required to specify the component.
+ * The component must have a name, and the name must be correct when you are referring to it,
+ *  however, you may use `"*"` in any case where a name is required to specify the component.
  * 
  * When this class is created, it will have, as its child, a `{@link dusk.sgui.NullCom}` named `"blank"`.
  * 
@@ -49,12 +50,14 @@ dusk.sgui.Single = function(parent, comName) {
 	 */
 	this._cache = null;
 	
-	/** The x offset. The child will be moved to the left this many, and any pixels that have an x less than 0 are not drawn.
+	/** The x offset. The child will be moved to the left this many,
+	 *  and any pixels that have an x less than 0 are not drawn.
 	 * @type integer
 	 * @since 0.0.18-alpha
 	 */
 	this.xOffset = 0;
-	/** The y offset. The child will be moved upwards this many, and any pixels that have an y less than 0 are not drawn.
+	/** The y offset. The child will be moved upwards this many,
+	 *  and any pixels that have an y less than 0 are not drawn.
 	 * @type integer
 	 * @since 0.0.18-alpha
 	 */
@@ -71,7 +74,8 @@ dusk.sgui.Single = function(parent, comName) {
 	this.onActiveChange.listen(function(e){this._component.onActiveChange.fire(e);}, this);
 		
 	//Check interfaces
-	if(!dusk.utils.doesImplement(this, dusk.sgui.IContainer)) console.warn(this.toString()+" does not implement dusk.sgui.IContainer!");
+	if(!dusk.utils.doesImplement(this, dusk.sgui.IContainer))
+		console.warn(this.toString()+" does not implement dusk.sgui.IContainer!");
 	
 	//Render support
 	this.renderSupport |= dusk.sgui.Component.REND_OFFSET | dusk.sgui.Component.REND_SLICE;
@@ -94,7 +98,8 @@ dusk.sgui.Single.prototype.containerKeypress = function(e) {
 
 /** Creates a new component of the specified type, replacing the existing component.
  * 
- * `type` is a string, and must correspond to a property of the namespace `{@link dusk.sgui}` and inherit from the class `{@link dusk.sgui.Component}`.
+ * `type` is a string, and must correspond to a property of the namespace `{@link dusk.sgui}`
+ *   and inherit from the class `{@link dusk.sgui.Component}`.
  *	This will be the object which is created.
  * 
  * @param {string} com The name of the new component.
@@ -116,8 +121,10 @@ dusk.sgui.Single.prototype.newComponent = function(com, type) {
  *	See `{@link dusk.sgui.Component.parseProps}` for a basic description on how JSON properties work.
  * 
  * `data` is either a single object or an array of objects, each describing a component.
- * 	Objects whose `"name"` property isn't `"*"` or this container's child's name and that have no `"type"` property will be ignored.
- * 	If the data has a `"type"` property and the name is different, then a new component of the specified name and type is created.
+ * 	Objects whose `"name"` property isn't `"*"` or this container's child's name
+ *   and that have no `"type"` property will be ignored.
+ * 	If the data has a `"type"` property and the name is different,
+ *   then a new component of the specified name and type is created.
  * 
  * This may be used in the JSON representation with the property `child`.
  * 
@@ -176,10 +183,14 @@ dusk.sgui.Single.prototype._singleDraw = function(e) {
 		destXAdder = com.xOrigin == dusk.sgui.Component.ORIGIN_MIDDLE?(this.width - com.width)<<1:destXAdder;
 		destXAdder = com.yOrigin == dusk.sgui.Component.ORIGIN_MIDDLE?(this.height - com.height)<<1:destYAdder;
 		
-		data.sourceX = (-this.xOffset + com.x + destXAdder - e.d.sourceX)<0 ? -(-this.xOffset + com.x + destXAdder - e.d.sourceX) : 0;
-		data.sourceY = (-this.yOffset + com.y + destYAdder - e.d.sourceY)<0 ? -(-this.yOffset + com.y + destYAdder - e.d.sourceY) : 0;
-		data.destX = (com.x + destXAdder - this.xOffset - e.d.sourceX)<0 ? e.d.destX : (com.x + destXAdder - this.xOffset - e.d.sourceX) + e.d.destX;
-		data.destY = (com.y + destYAdder - this.yOffset - e.d.sourceY)<0 ? e.d.destY : (com.y + destYAdder - this.yOffset - e.d.sourceY) + e.d.destY;
+		data.sourceX = (-this.xOffset + com.x + destXAdder - e.d.sourceX)<0
+		 ? -(-this.xOffset + com.x + destXAdder - e.d.sourceX) : 0;
+		data.sourceY = (-this.yOffset + com.y + destYAdder - e.d.sourceY)<0
+		 ? -(-this.yOffset + com.y + destYAdder - e.d.sourceY) : 0;
+		data.destX = (com.x + destXAdder - this.xOffset - e.d.sourceX)<0
+		 ? e.d.destX : (com.x + destXAdder - this.xOffset - e.d.sourceX) + e.d.destX;
+		data.destY = (com.y + destYAdder - this.yOffset - e.d.sourceY)<0
+		 ? e.d.destY : (com.y + destYAdder - this.yOffset - e.d.sourceY) + e.d.destY;
 		data.width = com.width - data.sourceX;
 		data.height = com.height - data.sourceY;
 		
@@ -229,7 +240,8 @@ dusk.sgui.Single.prototype._singleDraw = function(e) {
 
 /** Returns the component in the group, or creates a new one.
  * 
- * If `type` is not undefined, and the name is incorrect, then a new component with the name and type specified will be created.
+ * If `type` is not undefined, and the name is incorrect, 
+ *  then a new component with the name and type specified will be created.
  * 
  * @param {string} com The name of the component to get.
  * @param {?string} type The type of component to create if needed.
@@ -243,7 +255,8 @@ dusk.sgui.Single.prototype.getComponent = function(com, type) { //Component
 	return type?this.newComponent(com, type):null;
 };
 
-/** Deletes the component, replacing it with a `{@link dusk.sgui.NullCom}` named `"blank"`; which is the default component.
+/** Deletes the component, replacing it with a `{@link dusk.sgui.NullCom}` named `"blank"`
+ *  which is the default component.
  * 
  * @param {string} com Must be any false value, "*" or the name of the component.
  * @return {boolean} If the delete was successfull, this will return false if the name was invalid.
@@ -258,7 +271,8 @@ dusk.sgui.Single.prototype.deleteComponent = function(com) {
 	return false;
 };
 
-/** Deletes the component, replacing it with a `{@link dusk.sgui.NullCom}` named `"blank"`; which is the default component.
+/** Deletes the component, replacing it with a `{@link dusk.sgui.NullCom}` named `"blank"`
+ *  which is the default component.
  * @since 0.0.18-alpha
  */
 dusk.sgui.Single.prototype.deleteAllComponents = function(com) {

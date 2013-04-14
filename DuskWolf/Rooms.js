@@ -15,16 +15,21 @@ dusk.load.provide("dusk.editor");
  * Essentially, rooms consists of a room in which entities roam about in.
  * 
  * The main game area consists of four "layers".
- * 	The first layer is the schematic layer, which describes how entities react to certain tiles in a general sense, for example, walls.
- * 	The second layer is the background layer, which is a tilemap (`{@link dusk.sgui.EditableTileMap}`) which describes what the backgroud is to look like.
+ * 	The first layer is the schematic layer, 
+ *   which describes how entities react to certain tiles in a general sense, for example, walls.
+ * 	The second layer is the background layer, which is a tilemap (`{@link dusk.sgui.EditableTileMap}`)
+ *   which describes what the backgroud is to look like.
  * 	The third layer is the entity layer, this is the layer on which the entities live and act.
- * 	The fourth layer is an "above the entities" layer, it describes what the foreground is to look like, and appears over the entities.
+ * 	The fourth layer is an "above the entities" layer, it describes what the foreground is to look like,
+ *   and appears over the entities.
  * 
- * The schematic layer is a normal tilemap, which is invisible. Each tile on the map describes how entities should interact with it, as such:
+ * The schematic layer is a normal tilemap, which is invisible.
+ *  Each tile on the map describes how entities should interact with it, as such:
  * 
  * - [0, 0] Air, the entity will go through this as normal, and nothing happens.
  * - [1, 0] Wall, the entity cannot enter this tile.
- * - [1, 0] - [1, 9] Marks, when the entity touches this (or the player is in it and presses up) and has the `{@link dusk.behave.MarkTrigger}` behaviour, `{@link dusk.plat.markTrigger}` will fire an event.
+ * - [1, 0] - [1, 9] Marks, when the entity touches this (or the player is in it and presses up)
+ *  and has the `{@link dusk.behave.MarkTrigger}` behaviour, `{@link dusk.plat.markTrigger}` will fire an event.
  * 
  * The background and foreground layer (named `back` and `over`) are normal, visible tilemaps.
  * 
@@ -34,7 +39,9 @@ dusk.load.provide("dusk.editor");
  * - `overSrc`, `backSrc`: The image for the respective layer, must be usable by a tilemap.
  * - `rows`, `cols`: The dimensons of the map.
  * - `back`, `over`, `scheme`: The actual tilemaps of the respective layer. Must be a valid tilemap map.
- * - `entities`: The entities in the map. It is an array, each element is an object containing `name` (the entity's name), `type` (the entity's type) `x` and `y` (the entities location).
+ * - `entities`: The entities in the map. It is an array,
+ *  each element is an object containing `name` (the entity's name), `type` (the entity's type),
+ *  `x` and `y` (the entities location).
  * 
  * @since 0.0.16-alpha
  */
@@ -49,12 +56,14 @@ dusk.rooms._rooms = {};
 
 /** An event dispatcher which fires when a room is loaded.
  * 
- * This is fired by `{@link dusk.rooms.setRoom}`, and has the properties `"room"`; the name of the room, and `"spawn"` the mark number of the spawn point.
+ * This is fired by `{@link dusk.rooms.setRoom}`, and has the properties `"room"`;
+ *  the name of the room, and `"spawn"` the mark number of the spawn point.
  * @type dusk.EventDispatcher
  */
 dusk.rooms.roomLoaded = new dusk.EventDispatcher("dusk.rooms.roomLoaded");
 
-/** This is the `{@link dusk.sgui.BasicMain}` that controls the current room, this will be used to set the room data when needed.
+/** This is the `{@link dusk.sgui.BasicMain}` that controls the current room,
+ *  this will be used to set the room data when needed.
  *	It is null if there is no room manager yet.
  * @type ?dusk.sgui.BasicMain
  */
@@ -122,7 +131,8 @@ Object.seal(dusk.rooms);
  */
 dusk.editor.active = false;
 
-/** The names of the entity types that the number keys will drop if editing is enabled and the `{@link dusk.sgui.EntityGroup}` has focus.
+/** The names of the entity types that the number keys will drop if editing is enabled
+ *  and the `{@link dusk.sgui.EntityGroup}` has focus.
  * 
  * The array index corresponds to the number of the key, pressing 0 will drop the entity at index 0, for example.
  * 
@@ -132,7 +142,8 @@ dusk.editor.editDroppers = [];
 
 /** The name of the next entity that will be dropped.
  * 
- * Once that Entity is dropped, then this will be reset to `""`. If it is `""`, then the next entity will have a unique but not specified name.
+ * Once that Entity is dropped, then this will be reset to `""`.
+ *  If it is `""`, then the next entity will have a unique but not specified name.
  * 
  * @type string
  */

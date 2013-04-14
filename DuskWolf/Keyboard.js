@@ -44,7 +44,9 @@ $(document).bind("keyup", function je_keyup(e){dusk.keyboard.keyUp.fire(e);});
 
 /** An object describing the properties of keys relative to their keycodes.
  * 
- * Each property in this object is a three element array, the first being the "name" of the key, the second being a boolean indicating whether it is printable or not, and the third being a smaller (upto 3 chars) name of the key.
+ * Each property in this object is a three element array, the first being the "name" of the key, 
+ *  the second being a boolean indicating whether it is printable or not,
+ *  and the third being a smaller (upto 3 chars) name of the key.
  * 
  * Property names of this object are the same as the keycodes they describe.
  * 
@@ -194,7 +196,9 @@ dusk.keyboard.isKeyPressed = function(code) {
 
 /** Given a keycode, this returns information about that key.
  * 
- * It returns an array; the first element is the name of the key, the second is a boolean indicating whether it is printable, and the third is a shorthand representation of the key.
+ * It returns an array; the first element is the name of the key,
+ *  the second is a boolean indicating whether it is printable,
+ *  and the third is a shorthand representation of the key.
  * 
  * For all "printable" keys, the "name" is what the user would expect to type when pressing that key.
  * 

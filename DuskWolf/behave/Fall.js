@@ -8,9 +8,11 @@ dusk.load.provide("dusk.behave.Fall");
 
 /** @class dusk.behave.Fall
  * 
- * @classdesc An entity with this behaviour will move down a number of pixels specified by the `fallSpeed` data property when landed on.
+ * @classdesc An entity with this behaviour will move down a number of pixels
+ *  specified by the `fallSpeed` data property when landed on.
  * 
- * If this value is lower that the speed the entity is falling at, it will appear as if the entity is standing on top of this.
+ * If this value is lower that the speed the entity is falling at,
+ *  it will appear as if the entity is standing on top of this.
  * 
  * @extends dusk.behave.Behave
  * @param {?dusk.sgui.Entity} entity The entity this behaviour is attached to.

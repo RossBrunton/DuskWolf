@@ -48,7 +48,9 @@ dusk.sgui.EntityGroup = function (parent, comName) {
 		this.keyPress.listen(this._numberDrop, this, {"key":i});
 	}
 	this.keyPress.listen(this._keyDel, this, {"key":46});
-	this.keyPress.listen(function(e) {if(dusk.editor.active && confirm("Delete all entities?")) this.clear();}, this, {"key":46});
+	this.keyPress.listen(function(e) {
+		if(dusk.editor.active && confirm("Delete all entities?")) this.clear();
+	}, this, {"key":46});
 	this.prepareDraw.listen(this._entityGroupDraw, this);
 	this.action.listen(this._entityGroupAction, this);
 	
@@ -146,7 +148,8 @@ dusk.sgui.EntityGroup.prototype.getEntitiesHere = function(x, y, ignore, onlyOne
 	var out = [];
 	for(var c = this._entities.length-1; c >= 0; c --){
 		var com = this._entities[c];
-		if(com != ignore && x >= com.x+com.collisionOffsetX && x < com.x+com.collisionWidth && y >= com.y+com.collisionOffsetY && y < com.y+com.collisionHeight) {
+		if(com != ignore && x >= com.x+com.collisionOffsetX && x < com.x+com.collisionWidth
+		&& y >= com.y+com.collisionOffsetY && y < com.y+com.collisionHeight) {
 			out.push(com);
 			if(onlyOne) return out;
 		}
@@ -159,17 +162,20 @@ dusk.sgui.EntityGroup.prototype.getCollisions = function(x1, y1, x2, y2, ignore,
 	var out = [];
 	for(var c = this._entities.length-1; c >= 0; c --){
 		var com = this._entities[c];
-		if(com != ignore && x1 >= com.x+com.collisionOffsetX && x1 < com.x+com.collisionWidth && y1 >= com.y+com.collisionOffsetY && y1 < com.y+com.collisionHeight) {
+		if(com != ignore && x1 >= com.x+com.collisionOffsetX && x1 < com.x+com.collisionWidth
+		&& y1 >= com.y+com.collisionOffsetY && y1 < com.y+com.collisionHeight) {
 			out.push(com);
 			if(onlyOne) return out;
 			continue;
 		}
-		if(com != ignore && x2 >= com.x+com.collisionOffsetX && x2 < com.x+com.collisionWidth && y2 >= com.y+com.collisionOffsetY && y2 < com.y+com.collisionHeight) {
+		if(com != ignore && x2 >= com.x+com.collisionOffsetX && x2 < com.x+com.collisionWidth
+		&& y2 >= com.y+com.collisionOffsetY && y2 < com.y+com.collisionHeight) {
 			out.push(com);
 			if(onlyOne) return out;
 		}
 		
-		/*if(com != ignore && !(com.x+com.collisionOffsetX < x || com.x+com.collisionWidth > endX || com.y+com.collisionOffsetY < y || com.y+com.collisionHeight > endY)) {
+		/*if(com != ignore && !(com.x+com.collisionOffsetX < x || com.x+com.collisionWidth > endX
+		 *|| com.y+com.collisionOffsetY < y || com.y+com.collisionHeight > endY)) {
 			out.push(com);
 			if(onlyOne) return out;
 		}*/
@@ -267,7 +273,8 @@ dusk.sgui.EntityGroup.prototype._egDownAction = function(e) {
 	if(!dusk.editor.active) return true;
 	if(e.e.ctrlKey) return true;
 	if(e.e.shiftKey) {
-		if((this._offsetY < 1<<this.tsize && this.mode == "BINARY") || (this._offsetY < this.theight && this.mode == "DECIMAL")) this._offsetY ++;
+		if((this._offsetY < 1<<this.tsize && this.mode == "BINARY")
+		|| (this._offsetY < this.theight && this.mode == "DECIMAL")) this._offsetY ++;
 		return false;
 	}
 	
@@ -289,7 +296,8 @@ dusk.sgui.EntityGroup.prototype._egRightAction = function(e) {
 	if(!dusk.editor.active) return true;
 	if(e.e.ctrlKey) return true;
 	if(e.e.shiftKey) {
-		if((this._offsetX < 1<<this.tsize && this.mode == "BINARY") || (this._offsetX < this.twidth && this.mode == "DECIMAL")) this._offsetX ++;
+		if((this._offsetX < 1<<this.tsize && this.mode == "BINARY")
+		|| (this._offsetX < this.twidth && this.mode == "DECIMAL")) this._offsetX ++;
 		return false;
 	}
 	

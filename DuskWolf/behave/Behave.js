@@ -19,7 +19,8 @@ dusk.load.provide("dusk.behave.Behave");
  * 
  * @classdesc A behaviour of an entity.
  * 
- * Object of this class, and it's subclasses, are "attached" to `{@link dusk.sgui.Entity}` instances, and essentially provide behaviours.
+ * Objects of this class, and it's subclasses, are "attached" to `{@link dusk.sgui.Entity}` instances 
+ *  and essentially provide behaviours.
  * 
  * This class is the base class of these behaviours, but does nothing on it's own.
  * 
@@ -40,7 +41,8 @@ dusk.behave.Behave = function(entity) {
 	
 	/** An event dispatcher that is fired when the entity's `{@link dusk.sgui.Entity.behaviourFire}` method is called.
 	 * 
-	 * The properties of the event object will vary depending on it's type, but there will always be a `name` property which contains the name of the event fired.
+	 * The properties of the event object will vary depending on it's type, 
+	 *  but there will always be a `name` property which contains the name of the event fired.
 	 * @type dusk.EventDispatcher
 	 */
 	this.entityEvent = new dusk.EventDispatcher("dusk.behave.Behave.entityEvent", dusk.EventDispatcher.MODE_LAST);
@@ -50,8 +52,8 @@ dusk.behave.Behave = function(entity) {
  * 
  * Behaviour data is data that should only be used by a behaviour, but is shared between all behaviours.
  * @param {string} name The key of the data you want to access.
- * @param {*} value The value to set, unless `init` is true and the data is defined, this will set the specified key to this value.
- * @param {boolean} init If true, then only if the data specified with the key is undefined, then it will be set with the value.
+ * @param {*} value The value to set, unless `init` is true and a value has already been set.
+ * @param {boolean} init If true, then only if the data specified with the key is undefined, it will be set.
  * @return {*} The value of the data specified with the `name`.
  * @protected
  */
