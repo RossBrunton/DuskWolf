@@ -3,6 +3,7 @@
 "use strict";
 
 dusk.load.require("dusk.sgui.Component");
+dusk.load.require(">dusk.data");
 
 dusk.load.provide("dusk.sgui.Tile");
 

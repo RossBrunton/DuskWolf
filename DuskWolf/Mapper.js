@@ -31,58 +31,15 @@ dusk.Mapper = function(target) {
 	this._maps = {};
 };
 
-/** The integer type.
- * @type integer
- * @constant
- */
-dusk.Mapper.TYPE_INT = 0x01;
-
-/** The float type.
- * @type integer
- * @constant
- */
-dusk.Mapper.TYPE_FLOAT = 0x02;
-
-/** The boolean type.
- * @type integer
- * @constant
- */
-dusk.Mapper.TYPE_BOOL = 0x04;
-
-/** The string type.
- * @type integer
- * @constant
- */
-dusk.Mapper.TYPE_STRING = 0x08;
-
-/** The array type.
- * @type integer
- * @constant
- */
-dusk.Mapper.TYPE_ARRAY = 0x10;
-
-/** The object type.
- * @type integer
- * @constant
- */
-dusk.Mapper.TYPE_OBJECT = 0x20;
-
-/** Any type, this is from oring all the other types together.
- * @type integer
- * @constant
- */
-dusk.Mapper.TYPE_ANY = 0x3f;
-
 /** This maps a property from the JSON representation of the object "real" representation of the object.
  * 
  * @param {string} from The name in the JSON representation.
  * @param {string} to The property name that that name shall be mapped to in the "real" representation.
- * @param {integer} type One or more (Ored together) constants from this class beginning `TYPE_*` indicating the property's type.
  * @param {?array} depends An array of "dependencies" of the property.
  * 	All the properties in this array will be set (if they exist in the JSON) before this one.
  */
-dusk.Mapper.prototype.map = function(from, to, type, depends) {
-	this._maps[from] = [to, type, depends];
+dusk.Mapper.prototype.map = function(from, to, depends) {
+	this._maps[from] = [to, depends];
 };
 
 /** Adds new dependancies to an existing mask.
@@ -94,7 +51,7 @@ dusk.Mapper.prototype.addDepends = function(name, depends) {
 	if(name in this._maps) {
 		if(typeof depends == "string") depends = [depends];
 		
-		this._maps[name][2] = this._maps[name][2].concat(depends);
+		this._maps[name][1] = this._maps[name][1].concat(depends);
 	}
 };
 
@@ -127,10 +84,10 @@ dusk.Mapper.prototype.massSet = function(props) {
 	while(toProcess.length) {
 		//loop through all props needing to be processed
 		for(var i = toProcess.length-1; i >= 0; i--) {
-			if(this._maps[toProcess[i]] && this._maps[toProcess[i]][2]) {
+			if(this._maps[toProcess[i]] && this._maps[toProcess[i]][1]) {
 				//Loop to see if dependancies need processing
-				for(var j = this._maps[toProcess[i]][2].length-1; j >= 0; j--) {
-					if(toProcess.indexOf(this._maps[toProcess[i]][2][j]) !== -1) {
+				for(var j = this._maps[toProcess[i]][1].length-1; j >= 0; j--) {
+					if(toProcess.indexOf(this._maps[toProcess[i]][1][j]) !== -1) {
 						//If so, then skip this one
 						j = -2;
 					}

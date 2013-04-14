@@ -13,7 +13,8 @@ dusk.load.provide("dusk.sgui.Group");
  * 
  * Components have names, which are used to reference them, these names are strings and are not case sensitive.
  * 
- * One (or none) component may be focused. Focused components are the ONLY components that will receive keypress events.
+ * The number of components that can be focused depends on the `{@link #focusBehaviour}` property,
+ *  focused components will be the only ones that receive keypresses.
  * 
  * @extends dusk.sgui.IContainer
  * @extends dusk.sgui.Component

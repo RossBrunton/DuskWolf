@@ -230,6 +230,13 @@ dusk.sgui.Component = function (parent, componentName) {
 	 */
 	this._deleted = false;
 	
+	/** Stores all the extras connected to this component. Key names are extra names, and the values are the values.
+	 * @type object
+	 * @private
+	 * @since 0.0.18-alpha
+	 */
+	this._extras = {};
+	
 	//Prop masks
 	this._registerPropMask("x", "x");
 	this._registerPropMask("xOrigin", "xOrigin");
@@ -249,6 +256,7 @@ dusk.sgui.Component = function (parent, componentName) {
 	this._registerPropMask("name", "comName");
 	this._registerPropMask("style", "style");
 	this._registerPropMask("layer", "__layer");
+	this._registerPropMask("extras", "__extras");
 };
 
 /** The name of this component's class.
@@ -404,7 +412,7 @@ dusk.sgui.Component.prototype.doKeyPress = function (e) {
  * @protected
  */
 dusk.sgui.Component.prototype._registerPropMask = function(name, mask, redraw, depends) {
-	this._props.map(name, mask, dusk.Mapper.TYPE_ANY, depends);
+	this._props.map(name, mask, depends);
 };
 
 /** Adds new dependancies to an existing property mask.
@@ -581,6 +589,107 @@ dusk.sgui.Component.prototype.fullPath = function() {
 	
 	return this._container.fullPath() + this.comName;
 };
+
+
+/** Adds the specified extra to this component.
+ * @param {string} type The class name of the extra to add.
+ * @param {string} name The name to give the extra.
+ * @param {object} data Initial properties of the extra.
+ * @since 0.0.18-alpha
+ */
+dusk.sgui.Component.prototype.addExtra = function(type, name, data) {
+	this._extras[name] = new (dusk.sgui.getExtra(type))(this, name);
+	this._extras[name].parseProps(data);
+};
+
+/** Removes a previously added extra from this component, if it exists.
+ * @param {string} name The name of the extra to remove.
+ * @return {boolean} Whether the extra exists and was removed.
+ * @since 0.0.18-alpha
+ */
+dusk.sgui.Component.prototype.removeExtra = function(name) {
+	if(name in this._extras) {
+		this._extras[name].onDelete.fire();
+		delete this._extras[name];
+		return true;
+	}else{
+		return false;
+	}
+};
+
+/** Modifies an extra, if it exists.
+ * 	If it does not exist, it will be attempted to be created with the type specified by the "type" property, or it will fail.
+ * @param {string} name The name of the extra to modify.
+ * @param {object} data The data to use to modify.
+ * @since 0.0.18-alpha
+ */
+dusk.sgui.Component.prototype.modExtra = function(name, data) {
+	if(name in this._extras) {
+		this._extras[name].parseProps(data);
+	}else if("type" in data) {
+		this.addExtra(data.type, name, data);
+	}else{
+		console.warn("Tried to modify "+name+", but it does not exist and has no type.");
+	}
+};
+
+/** Returns the extra with the specified name, or null.
+ * @param {string} name The name of the extra to get.
+ * @return {?dusk.sgui.extras.Extra} The extra.
+ * @since 0.0.18-alpha
+ */
+dusk.sgui.Component.prototype.getExtra = function(name) {
+	if(name in this._extras) return this._extras[name];
+	return null;
+};
+
+/** Returns the extra with the specified type or null.
+ * @param {string} type The name of the type of extra to get.
+ * @return {?dusk.sgui.extras.Extra} The first extra found of that type, or null.
+ * @since 0.0.18-alpha
+ */
+dusk.sgui.Component.prototype.getExtraByType = function(type) {
+	for(var p in this._extras) {
+		if(this._extras[p] instanceof dusk.sgui.getExtra(type)) return this._extras[p];
+	}
+	
+	return null;
+};
+
+/** Returns the extra with the specified type, if it doesn't exist, it checks if the parent has it, and so on.
+ * @param {string} type The name of the type of extra to get.
+ * @return {?dusk.sgui.extras.Extra} The first extra found of that type, or null.
+ * @since 0.0.18-alpha
+ */
+dusk.sgui.Component.prototype.getExtraByTypeFromParents = function(type) {
+	if(this.getExtraByType(type)) return this.getExtraByType(type);
+	if(this._container) return this._container.getExtraByTypeFromParents(type);
+	return null;
+};
+
+/** Modifies multiple extras. The argument is an object. Keys are the name of the extra to edit/create,
+ * 	and the value is either an object describing properties of the extra, or false to explictly delete the extra.
+ * 
+ * This may be used in the JSON representation with the property "extras".
+ * 
+ * @param {object} data Data to describe the extras, as described above.
+ * @since 0.0.18-alpha
+ */
+dusk.sgui.Component.prototype.modExtras = function(data) {
+	for(var p in data) {
+		if(data[p]) {
+			this.modExtra(p, data[p]);
+		}else{
+			this.removeExtra(p);
+		}
+	}
+};
+Object.defineProperty(dusk.sgui.Component.prototype, "__extras", {
+	set: function(value) {this.modExtras(value);},
+	
+	get: function() {return {};}
+});
+
 
 /** Returns the container that this component is in.
  * @return {?dusk.sgui.IContainer} This component's container, or null if this has no parent.

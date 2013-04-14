@@ -126,6 +126,13 @@ dusk.sgui._init = function() {
 	 */
 	this._types = {};
 	
+	/** An object containing all the extras that can be used. The key is the extra name, while the value is the constructor.
+	 * @type object
+	 * @private
+	 * @since 0.0.18-alpha
+	 */
+	this._extras = {};
+	
 	/** The display mode of the canvas; this determines how the canvas will resize.
 	 *	Must be one of the `dusk.sgui.MODE_*` constants.
 	 * @type integer
@@ -338,6 +345,26 @@ dusk.sgui.registerType = function(name, type) {
 dusk.sgui.getType = function(name) {
 	if(!(name in this._types)) return null;
 	return this._types[name];
+};
+
+
+/** Adds a new extra that can be accessed using `{@link dusk.sgui.getExtra}`.
+ * @param {string} name The name of the added extra.
+ * @param {class(dusk.sgui.Component, string) extends dusk.sgui.extras.Extra} extra The extra to add.
+ * @since 0.0.18-alpha
+ */
+dusk.sgui.registerExtra = function(name, extra) {
+	this._extras[name] = extra;
+};
+
+/** Returns a constructor for the specified extra, provided it has been registered beforehand with `{@link dusk.sgui.registerExtra}`.
+ * @param {string} name The name of the extra to look up.
+ * @return {?class(dusk.sgui.Component, string) extends dusk.sgui.extra.Extra} A constructor for the specified extra, or null if it doesn't exist.
+ * @since 0.0.18-alpha
+ */
+dusk.sgui.getExtra = function(name) {
+	if(!(name in this._extras)) return null;
+	return this._extras[name];
 };
 
 //width
