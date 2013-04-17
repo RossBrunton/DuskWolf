@@ -230,7 +230,7 @@ dusk.utils.dataToString = function(arr, type) {
 		}
 	}else if(type === dusk.utils.SD_BC16) {
 		// 1 100000 00000000 Marked, patternId, count
-		// First two bytes are the size of the uncompressed data. Then the next bite is the pattern count
+		// First two bytes are the size of the uncompressed data. Then the next byte is the pattern count
 		var hold = new ArrayBuffer(arr.byteLength*2);
 		var patterns = [];
 		var currentlyFeeding = -1;

@@ -20,13 +20,13 @@ dusk.load.provide("dusk");
  * 
  * - CapitalLetters denotes a class.
  * 
- * - camelCase denotes a public property of an object, namespace or anything that isn't a lass.
+ * - camelCase denotes a public property of an object, namespace or anything that isn't a class.
  * 
  * - YELLING for constants.
  * 
- * - \_\_doubleUnderscore\_\_ denotes a configuration var, these are all global.
+ * - __doubleUnderscore__ denotes a configuration var, these are all global.
  * 
- * - _singleUnderscore denotes ether a private or protected function.
+ * - _singleUnderscore denotes ether a private or protected function or property.
  */
 
 /** Version of the DW engine.

@@ -158,7 +158,7 @@ dusk.sgui.BasicMain.prototype.getFirstLayerOfType = function(type) {
 };
 
 dusk.sgui.BasicMain.prototype.getAllLayersOfType = function(type) {
-	var out = []
+	var out = [];
 	for(var i = 0; i < this._layers.length; i ++) {
 		if((this._layers[i].type & type) > 0) out.push(this.getComponent(this._layers[i].name));
 	}

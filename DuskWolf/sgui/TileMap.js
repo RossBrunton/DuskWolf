@@ -323,8 +323,6 @@ dusk.sgui.TileMap.prototype.tilePointIn = function(x, y, exactX, exactY) {
 dusk.sgui.TileMap.prototype._tileMapDraw = function(e) {
 	if(!this._img) return;
 	if(!this._drawn) this.drawAll();
-	var u = this.ubound < 0 ? 0 : this.ubound;
-	var l = this.lbound < 0 ? 0 : this.lbound;
 	if(this.mode == "BINARY") {
 		var scale = this.tsize-this.ssize;
 		e.c.drawImage(this._all, e.d.sourceX>>scale, e.d.sourceY>>scale, e.d.width>>scale, e.d.height>>scale,

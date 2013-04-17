@@ -29,8 +29,7 @@ dusk.sgui.Pane = function (parent, comName) {
 	this.height = -2;
 	this.width = -2;
 };
-dusk.sgui.Pane.prototype = new dusk.sgui.Group();
-dusk.sgui.Pane.constructor = dusk.sgui.Pane;
+dusk.sgui.Pane.prototype = Object.create(dusk.sgui.Group.prototype);
 
 dusk.sgui.Pane.prototype.className = "Pane";
 

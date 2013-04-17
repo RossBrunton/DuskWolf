@@ -8,6 +8,7 @@ dusk.load.require("dusk.sgui.Label");
 dusk.load.require("dusk.sgui.Grid");
 dusk.load.require("dusk.sgui.Selection");
 dusk.load.require("dusk.sgui.Checkbox");
+dusk.load.require("dusk.sgui.extras.Fade");
 dusk.load.require("dusk.sgui.extras.Radiobox");
 dusk.load.require("dusk");
 
@@ -84,6 +85,10 @@ dusk.sgui.getPane("newGui").parseProps({
 dusk.sgui.getPane("grid").parseProps({
 	"active":true,
 	"focus":"check",
+	"extras":{
+		"fadey":{"type":"Fade", "duration":100, "delay":500, "on":true, "from":0, "to":1, "next":"fada"},
+		//"fada":{"type":"Fade", "duration":1000, "from":0, "to":1,}
+	},
 	"children":{
 		"check":{
 			"type":"Grid",
@@ -92,6 +97,7 @@ dusk.sgui.getPane("grid").parseProps({
 			},
 			"rows":5,
 			"cols":5,
+			"alpha":0.5,
 			"vspacing":5,
 			"hspacing":5,
 			"populate":{

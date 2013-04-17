@@ -36,8 +36,7 @@ dusk.sgui.extras.Radiobox = function(owner, name) {
 	//Prop masks
 	this._props.map("selected", "selected");
 };
-dusk.sgui.extras.Radiobox.prototype = new dusk.sgui.extras.Extra();
-dusk.sgui.extras.Radiobox.constructor = dusk.sgui.extras.Radiobox;
+dusk.sgui.extras.Radiobox.prototype = Object.create(dusk.sgui.extras.Extra.prototype);
 
 /** Returns the currently selected checkbox, or null if none are selected.
  * @return {?dusk.sgui.Checkbox} The current selection.

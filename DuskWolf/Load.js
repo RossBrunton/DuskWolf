@@ -122,6 +122,8 @@ dusk.load._capability = function() {
 		Object.seal = function(obj) {return obj;};
 	}
 	
+	if(!("create" in Object)) return "Object.create not supported!";
+	
 	if(!("ArrayBuffer" in window)) return "Typed arrays not supported!";
 	
 	if((function() {"use strict";return this;})() !== undefined) return "Strict mode not supported!";

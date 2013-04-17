@@ -244,6 +244,7 @@ dusk.sgui._draw = function() {
 	//Draw panes
 	for(var c in dusk.sgui._panes){
 		var data = {};
+		data.alpha = 1;
 		data.sourceX = 0;
 		data.sourceY = 0;
 		data.destX = dusk.sgui._panes[c].x;

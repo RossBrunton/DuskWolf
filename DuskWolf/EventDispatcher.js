@@ -94,7 +94,7 @@ dusk.EventDispatcher.MODE_LAST = 4;
  * 
  * @param {function(object):*} callback The function that will be called when an event is fired.
  *  It will be given a single argument; the event object.
- * @param {object} scope The scope to run the callback in. This will be the value of `this` in the callback function.
+ * @param {*} scope The scope to run the callback in. This will be the value of `this` in the callback function.
  * @param {?object} propsYes The listener will only fire if every property of this object
  *  is equal to the same named property in the event object.
  * @param {?object} propsNo The listener will only fire if every property of this object
@@ -108,6 +108,20 @@ dusk.EventDispatcher.prototype.listen = function(callback, scope, propsYes, prop
 	}
 	
 	this._listeners.push([callback, propsYes?propsYes:{}, propsNo?propsNo:{}, scope]);
+};
+
+/** Removes a listener.
+ * 
+ * @param {function(object):*} listener The function that would be called on the listener you want to remove.
+ * @param {*} scope The scope that the function would have ran in.
+ * @since 0.0.18-alpha
+ */
+dusk.EventDispatcher.prototype.unlisten = function(listener, scope) {
+	for(var i = this._listeners.length-1; i >= 0; i --) {
+		if(this._listeners[i][0] == listener && this._listeners[i][3] == scope) {
+			this._listeners.splice(i, 1);
+		}
+	}
 };
 
 /** Fires an event; triggering all the listeners that apply.

@@ -226,9 +226,8 @@ dusk.sgui.Group.prototype.modifyComponent = function(data) {
 		if("name" in data && typeof data.name == "string") {
 			if(this.getComponent(data.name.toLowerCase(), data.type)) {
 				return this.getComponent(data.name.toLowerCase()).parseProps(data);
-			}else{
-				console.warn(data.name + " has not been given a type and does not exist, ignoring.");
 			}
+			console.warn(data.name + " has not been given a type and does not exist, ignoring.");
 		}else{
 			for(var p in data) {
 				if(this.getComponent(p.toLowerCase(), data[p].type)) {
@@ -300,7 +299,7 @@ dusk.sgui.Group.prototype._groupDraw = function(e) {
 		for(var i = 0; i < this._drawOrder.length; i++) {
 			if(this._drawOrder[i] in this._components) {
 				var com = this._components[this._drawOrder[i]];
-				var data = {};
+				var data = {"alpha":e.alpha};
 				var destXAdder = com.xOrigin == dusk.sgui.Component.ORIGIN_MAX?this.width - com.width:0;
 				var destYAdder = com.yOrigin == dusk.sgui.Component.ORIGIN_MAX?this.height - com.height:0;
 				destXAdder = com.xOrigin == dusk.sgui.Component.ORIGIN_MIDDLE?(this.width - com.width)>>1:destXAdder;
@@ -343,7 +342,7 @@ dusk.sgui.Group.prototype._groupDraw = function(e) {
 		for(var i = 0; i < this._drawOrder.length; i++) {
 			if(this._drawOrder[i] in this._components) {
 				var com = this._components[this._drawOrder[i]];
-				var data = {};
+				var data = {"alpha":e.alpha};
 				var destXAdder = com.xOrigin == dusk.sgui.Component.ORIGIN_MAX?this.width - com.width:0;
 				var destYAdder = com.yOrigin == dusk.sgui.Component.ORIGIN_MAX?this.height - com.height:0;
 				destXAdder = com.xOrigin == dusk.sgui.Component.ORIGIN_MIDDLE?(this.width - com.width)>>1:destXAdder;
@@ -516,7 +515,7 @@ Object.defineProperty(dusk.sgui.Group.prototype, "focusBehaviour", {
 	},
 	
 	get: function() {
-		return this._focusBehaviour
+		return this._focusBehaviour;
 	}
 });
 
@@ -576,9 +575,9 @@ Object.defineProperty(dusk.sgui.Group.prototype, "width", {
 		if(this._width == -2) {
 			if(this._container !== null) {
 				return this._container.width;
-			}else{
-				return dusk.sgui.width;
 			}
+			
+			return dusk.sgui.width;
 		}else if(this._width == -1) {
 			var max = 0;
 			for(var c in this._components) {
@@ -603,9 +602,9 @@ Object.defineProperty(dusk.sgui.Group.prototype, "height", {
 		if(this._height == -2) {
 			if(this._container !== null) {
 				return this._container.height;
-			}else{
-				return dusk.sgui.height;
 			}
+			
+			return dusk.sgui.height;
 		}else if(this._height == -1) {
 			var max = 0;
 			for(var c in this._components) {

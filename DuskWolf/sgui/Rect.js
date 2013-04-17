@@ -33,7 +33,7 @@ dusk.sgui.Rect = function (parent, comName) {
 	 * @default "#cccccc"
 	 */
 	this.bColour = "#cccccc";
-	/** The thinkness of the rectangle border.
+	/** The thickness of the rectangle border.
 	 * 	If 0, there will be no border.
 	 * @type float
 	 * @default 1
@@ -54,8 +54,7 @@ dusk.sgui.Rect = function (parent, comName) {
 	this.renderSupport =
 	 dusk.sgui.Component.REND_LOCATION | dusk.sgui.Component.REND_OFFSET | dusk.sgui.Component.REND_SLICE;
 };
-dusk.sgui.Rect.prototype = new dusk.sgui.Component();
-dusk.sgui.Rect.constructor = dusk.sgui.Rect;
+dusk.sgui.Rect.prototype = Object.create(dusk.sgui.Component.prototype);
 
 dusk.sgui.Rect.prototype.className = "Rect";
 

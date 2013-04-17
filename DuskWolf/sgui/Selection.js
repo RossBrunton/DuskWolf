@@ -30,8 +30,7 @@ dusk.sgui.Selection = function (parent, comName) {
 	this._populationEvent.listen(this._update, this, {"action":"complete"});
 	this.dirPress.listen(this._update, this);
 };
-dusk.sgui.Selection.prototype = new dusk.sgui.Grid();
-dusk.sgui.Selection.constructor = dusk.sgui.Selection;
+dusk.sgui.Selection.prototype = Object.create(dusk.sgui.Grid.prototype);
 
 dusk.sgui.Selection.prototype.className = "Selection";
 

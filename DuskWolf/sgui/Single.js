@@ -72,7 +72,7 @@ dusk.sgui.Single = function(parent, comName) {
 	this.prepareDraw.listen(this._singleDraw, this);
 	this.frame.listen(this._singleFrame, this);
 	this.onActiveChange.listen(function(e){this._component.onActiveChange.fire(e);}, this);
-		
+	
 	//Check interfaces
 	if(!dusk.utils.doesImplement(this, dusk.sgui.IContainer))
 		console.warn(this.toString()+" does not implement dusk.sgui.IContainer!");
@@ -177,7 +177,7 @@ dusk.sgui.Single.prototype._singleDraw = function(e) {
 	
 	if(!cacheNeeded) {
 		var com = this._component;
-		var data = {};
+		var data = {"alpha":e.alpha};
 		var destXAdder = com.xOrigin == dusk.sgui.Component.ORIGIN_MAX?this.width - com.width:0;
 		var destYAdder = com.yOrigin == dusk.sgui.Component.ORIGIN_MAX?this.height - com.height:0;
 		destXAdder = com.xOrigin == dusk.sgui.Component.ORIGIN_MIDDLE?(this.width - com.width)<<1:destXAdder;
@@ -212,7 +212,7 @@ dusk.sgui.Single.prototype._singleDraw = function(e) {
 		}
 		
 		var com = this._component;
-		var data = {};
+		var data = {"alpha":e.alpha};
 		var destXAdder = com.xOrigin == dusk.sgui.Component.ORIGIN_MAX?this.width - com.width:0;
 		var destYAdder = com.yOrigin == dusk.sgui.Component.ORIGIN_MAX?this.height - com.height:0;
 		destXAdder = com.xOrigin == dusk.sgui.Component.ORIGIN_MIDDLE?(this.width - com.width)<<1:destXAdder;

@@ -8,12 +8,27 @@ dusk.load.require(">dusk.Mapper");
 
 dusk.load.provide("dusk.sgui.extras.Extra");
 
-/** @class dusk.sgui.extras.Extra
+/** @namespace dusk.sgui.extras
+ * @name dusk.sgui.extras
  * 
- * @classdesc An "extra" object can be attached to a component and gives it extra features.
+ * @description An "extra" can be attached to a component and gives it extra features.
  * 
  * For example, it could either fade the component in or out
  *  or make all the children inside it radio buttons instead of checkboxes.
+ * 
+ * Extras are added to components using `{@link dusk.sgui.Component#addExtra}`,
+ *  removed using `{@link dusk.sgui.Component#removeExtra}`
+ *  and retreived using `{@link dusk.sgui.Component#getExtra}`.
+ * 
+ * Extras must first be registered using `{@link dusk.sgui.registerExtra}` before use.
+ * 
+ * The base class for all extras is `{@link dusk.sgui.extras.Extra}`
+ * @since 0.0.18-alpha
+ */
+
+/** @class dusk.sgui.extras.Extra
+ * 
+ * @classdesc Base class for all extras; all extras must have this in their prototype chain.
  * 
  * @param {dusk.sgui.Component} owner The component this extra is "attached to".
  * @param {string} name This extra's name.

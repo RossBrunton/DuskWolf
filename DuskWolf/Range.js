@@ -82,6 +82,20 @@ dusk.Range.prototype.down = function() {
 	this.value -= this.stepDown;
 };
 
+/** Sets the amount that `{@link dusk.Range#up}` will change to a fraction of the possible range.
+ * @param {float} fract The fraction to set it to.
+ */
+dusk.Range.prototype.setUpFraction = function(fract) {
+	this.stepUp = (this.max - this.min) * fract;
+};
+
+/** Sets the amount that `{@link dusk.Range#down}` will change to a fraction of the possible range.
+ * @param {float} fract The fraction to set it to.
+ */
+dusk.Range.prototype.setDownFraction = function(fract) {
+	this.stepDown = (this.max - this.min) * fract;
+};
+
 /** Returns a string representation of this range.
  * @return {string} A representation of this range.
  */

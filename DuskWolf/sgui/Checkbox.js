@@ -15,7 +15,7 @@ dusk.load.provide("dusk.sgui.Checkbox");
  * 
  * @class dusk.sgui.Checkbox
  * 
- * @classdesc A checkbox has two states, on or off. This is represented by the property "checked" and it's apperance.
+ * @classdesc A checkbox has two states, on or off. This is represented by the property "checked" and it's appearance.
  * 
  * A checkbox inherits from `{@link dusk.sgui.Tile}`, where each tile indicates a different state of the checkbox:
  * - `0,0`: Not active, not checked.

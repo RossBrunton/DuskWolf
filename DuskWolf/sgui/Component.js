@@ -523,19 +523,21 @@ dusk.sgui.Component.prototype.draw = function(d, c) {
 	if(!this.visible || this.alpha <= 0) return;
 	
 	var oldAlpha = -1;
-	if(this.alpha != c.globalAlpha) {
+	var alpha = d.alpha;
+	if(this.alpha != c.globalAlpha && this.alpha != 1) {
 		oldAlpha = c.globalAlpha;
-		c.globalAlpha = this.alpha;
+		alpha *= this.alpha;
+		c.globalAlpha = alpha;
 	}
 	
-	this.prepareDraw.fire({"d":d, "c":c});
+	this.prepareDraw.fire({"d":d, "c":c, "alpha":alpha});
 
 	if(this.mark !== null) {
 		c.strokeStyle = this.mark;
 		c.strokeRect(d.destX, d.destY, d.width, d.height);
 	}
 	
-	if(oldAlpha >= 0) c.globalAlpha = oldAlpha
+	if(oldAlpha >= 0) c.globalAlpha = oldAlpha;
 };
 
 /** Alters the layer this is on.
@@ -638,9 +640,9 @@ dusk.sgui.Component.prototype.removeExtra = function(name) {
 		this._extras[name].onDelete.fire();
 		delete this._extras[name];
 		return true;
-	}else{
-		return false;
 	}
+	
+	return false;
 };
 
 /** Modifies an extra, if it exists.

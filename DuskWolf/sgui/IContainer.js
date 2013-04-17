@@ -40,7 +40,7 @@ dusk.sgui.IContainer = function() {};
 /** Container specific method of handling keypresses.
  * 
  * This is different from the normal keypress handler, in that it is ran before the listener is fired.
- * 	If it returns true, then proccessing the keypress stops, hence the event doesn't "bubble".
+ * 	If it returns true, then processing the keypress stops, hence the event doesn't "bubble".
  * 
  * It is expected that a Container use this method to call one or more of it's children
  *  and if any of those return values are true, then this must return true.
@@ -51,16 +51,16 @@ dusk.sgui.IContainer = function() {};
 dusk.sgui.IContainer.containerKeypress = function(e) {};
 
 /** Deletes a component from this container if possible.
- * 	It is not expected that this method remove all refrences outside itself
+ * 	It is not expected that this method remove all references outside itself
  *   but it must fire the component's `{@link dusk.sgui.Component.onDelete}` event dispatcher.
  * 
  * @param {string} com The name of the component to delete.
- * @return {boolean} If the delete was successfull, this will return false if the component doesn't exist.
+ * @return {boolean} If the delete was successful, this will return false if the component doesn't exist.
  */
 dusk.sgui.IContainer.deleteComponent = function(com) {};
 
 /** Deletes all the components from this container
- *   under the same critera as `{@link dusk.sgui.IContainer#deleteComponent}`.
+ *   under the same criteria as `{@link dusk.sgui.IContainer#deleteComponent}`.
  * 
  * @since 0.0.18-alpha
  */
@@ -98,7 +98,7 @@ dusk.sgui.IContainer.modifyComponent = function(data) {};
  *  and `{@link dusk.sgui.Component.onActiveChange}` as appropriate.
  * 
  * @param {string} to The name of the component to flow into.
- * @return {boolean} Whether the flow was successfull.
+ * @return {boolean} Whether the flow was successful.
  */
 dusk.sgui.IContainer.flow = function(to) {};
 
@@ -111,7 +111,7 @@ dusk.sgui.IContainer.flow = function(to) {};
  * - `"+"` Raises the component to the top, making it on top of all other components.
  * - `"-"` Lowers the component below all the others, meaning that it will appear below them.
  * - `"+com"` Raises it just above the component named "com" (which must exist).
- * - `"-com"` Lowers it just below the compoment named "com" (which must exist).
+ * - `"-com"` Lowers it just below the component named "com" (which must exist).
  * 
  * If changing layers is not possible for the container, this should exit silently.
  * 
