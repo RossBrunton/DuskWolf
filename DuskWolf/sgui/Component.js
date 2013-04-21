@@ -28,9 +28,8 @@ dusk.load.provide("dusk.sgui.NullCom");
 dusk.sgui.Component = function (parent, componentName) {
 	/** The parent container that this component is inside.
 	 * @type ?dusk.sgui.Component
-	 * @private
 	 */
-	this._container = parent===undefined?null:parent;
+	this.container = parent===undefined?null:parent;
 	/** This component's name.
 	 * @type string
 	 */
@@ -405,16 +404,16 @@ dusk.sgui.Component.prototype.doKeyPress = function (e) {
 		//Directions
 		if(dusk.controls.checkKey("sgui_left", e.which)) {
 			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.Component.DIR_LEFT, "e":e})) && !this._noFlow
-			&& this.leftFlow && this._container.flow(this.leftFlow)) return false;
+			&& this.leftFlow && this.container.flow(this.leftFlow)) return false;
 		}else if(dusk.controls.checkKey("sgui_up", e.which)) {
 			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.Component.DIR_UP, "e":e})) && !this._noFlow
-			&& this.upFlow && this._container.flow(this.upFlow)) return false;
+			&& this.upFlow && this.container.flow(this.upFlow)) return false;
 		}else if(dusk.controls.checkKey("sgui_right", e.which)) {
 			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.Component.DIR_RIGHT, "e":e})) && !this._noFlow
-			&& this.rightFlow && this._container.flow(this.rightFlow)) return false;
+			&& this.rightFlow && this.container.flow(this.rightFlow)) return false;
 		}else if(dusk.controls.checkKey("sgui_down", e.which)) {
 			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.Component.DIR_DOWN, "e":e})) && !this._noFlow
-			&& this.downFlow && this._container.flow(this.downFlow)) return false;
+			&& this.downFlow && this.container.flow(this.downFlow)) return false;
 		}else if(dusk.controls.checkKey("sgui_action", e.which)) {
 			return this.action.fire({"keyPress":e});
 		}
@@ -501,7 +500,7 @@ Object.defineProperty(dusk.sgui.Component.prototype, "deleted", {
 	set: function (value) {
 		if(value && !this._deleted) {
 			this._deleted = true;
-			this._container.deleteComponent(this.comName);
+			this.container.deleteComponent(this.comName);
 		}
 	},
 	
@@ -549,8 +548,8 @@ dusk.sgui.Component.prototype.draw = function(d, c) {
  * @since 0.0.17-alpha
  */
 dusk.sgui.Component.prototype.alterLayer = function(alteration) {
-	if(this._container) {
-		this._container.alterChildLayer(this.comName, alteration);
+	if(this.container) {
+		this.container.alterChildLayer(this.comName, alteration);
 	}
 };
 Object.defineProperty(dusk.sgui.Component.prototype, "__layer", {
@@ -582,8 +581,8 @@ dusk.sgui.Component.prototype.path = function(path) {
 	var p = path.pop();
 	switch(p) {
 		case "..":
-			if(path.length) return this._container.path(path);
-			return this._container;
+			if(path.length) return this.container.path(path);
+			return this.container;
 		
 		case ".":
 			return this;
@@ -591,7 +590,7 @@ dusk.sgui.Component.prototype.path = function(path) {
 		case "":
 			if(!path.length) return this;
 			if(this instanceof dusk.sgui.Pane) return this.path(path);
-			return this._container.path(path);
+			return this.container.path(path);
 		
 		default:
 			if(dusk.utils.doesImplement(this, dusk.sgui.IContainer)){
@@ -613,9 +612,9 @@ dusk.sgui.Component.prototype.path = function(path) {
 dusk.sgui.Component.prototype.fullPath = function() {
 	if(this instanceof dusk.sgui.Pane) return this.comName+":/";
 	
-	if(dusk.utils.doesImplement(this, dusk.sgui.IContainer)) return this._container.fullPath() + this.comName+"/";
+	if(dusk.utils.doesImplement(this, dusk.sgui.IContainer)) return this.container.fullPath() + this.comName+"/";
 	
-	return this._container.fullPath() + this.comName;
+	return this.container.fullPath() + this.comName;
 };
 
 
@@ -692,7 +691,7 @@ dusk.sgui.Component.prototype.getExtraByType = function(type) {
  */
 dusk.sgui.Component.prototype.getExtraByTypeFromParents = function(type) {
 	if(this.getExtraByType(type)) return this.getExtraByType(type);
-	if(this._container) return this._container.getExtraByTypeFromParents(type);
+	if(this.container) return this.container.getExtraByTypeFromParents(type);
 	return null;
 };
 
@@ -718,15 +717,6 @@ Object.defineProperty(dusk.sgui.Component.prototype, "__extras", {
 	
 	get: function() {return {};}
 });
-
-
-/** Returns the container that this component is in.
- * @return {?dusk.sgui.IContainer} This component's container, or null if this has no parent.
- * @since 0.0.17-alpha
- */
-dusk.sgui.Component.prototype.getContainer = function() {
-	return this._container;
-};
 
 
 /** Returns a string representation of the component. 

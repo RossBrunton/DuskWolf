@@ -183,7 +183,7 @@ dusk.sgui.extras.Effect.prototype._effectFrame = function(e) {
 		if(this.duration < 0) this._left = -1;
 	}
 		
-	if(this._left > 0 && this._state == 2) {
+	if(this._left != 0 && this._state == 2) {
 		this._tick.fire({});
 	}
 	

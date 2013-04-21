@@ -293,7 +293,7 @@ dusk.sgui.Single.prototype._singleFrame = function() {
  * @return {boolean} Whether the flow was successfull.
  */
 dusk.sgui.Single.prototype.flow = function(to) {
-	return this._container.flow(to);
+	return this.container.flow(to);
 };
 
 /** As there is only one component in this container, this does nothing.
@@ -310,7 +310,7 @@ dusk.sgui.Single.prototype.alterChildLayer = function(com, alter) {
 Object.defineProperty(dusk.sgui.Single.prototype, "width", {
 	get: function() {
 		if(this._width == -2) {
-			return this._container.width;
+			return this.container.width;
 		}else if(this._width == -1) {
 			return this._component.x + this._component.width - this.xOffset;
 		}else{
@@ -327,7 +327,7 @@ Object.defineProperty(dusk.sgui.Single.prototype, "width", {
 Object.defineProperty(dusk.sgui.Single.prototype, "height", {
 	get: function() {
 		if(this._height == -2) {
-			return this._container.height;
+			return this.container.height;
 		}else if(this._height == -1) {
 			return this._component.y + this._component.height - this.yOffset;
 		}else{

@@ -325,7 +325,7 @@ dusk.sgui.getStyles = function(com) {
 				break;
 			}
 			
-			hold = hold.getContainer();
+			hold = hold.container;
 		}
 		
 		if(valid) matchedStyles.push(dusk.sgui._styleData[s][1]);

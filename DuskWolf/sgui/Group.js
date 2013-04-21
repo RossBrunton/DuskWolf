@@ -573,8 +573,8 @@ dusk.sgui.Group.prototype.alterChildLayer = function(com, alter) {
 Object.defineProperty(dusk.sgui.Group.prototype, "width", {
 	get: function() {
 		if(this._width == -2) {
-			if(this._container !== null) {
-				return this._container.width;
+			if(this.container !== null) {
+				return this.container.width;
 			}
 			
 			return dusk.sgui.width;
@@ -600,8 +600,8 @@ Object.defineProperty(dusk.sgui.Group.prototype, "width", {
 Object.defineProperty(dusk.sgui.Group.prototype, "height", {
 	get: function() {
 		if(this._height == -2) {
-			if(this._container !== null) {
-				return this._container.height;
+			if(this.container !== null) {
+				return this.container.height;
 			}
 			
 			return dusk.sgui.height;

@@ -123,8 +123,8 @@ dusk.sgui.Entity.prototype.performMotion = function(cdx, cdy, main) {
 	var dirX = cdx>0?1:-1;
 	
 	function checkCollisionEntities(x1, y1, x2, y2) {
-		if(this._container instanceof dusk.sgui.EntityGroup)
-			return this._container.getCollisions(x1, y1, x2, y2, this);
+		if(this.container instanceof dusk.sgui.EntityGroup)
+			return this.container.getCollisions(x1, y1, x2, y2, this);
 		return [];
 	}
 	
