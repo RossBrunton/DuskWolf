@@ -34,9 +34,9 @@ dusk.sgui.Selection.prototype = Object.create(dusk.sgui.Grid.prototype);
 
 dusk.sgui.Selection.prototype.className = "Selection";
 
-dusk.sgui.Selection.ORIENT_HOR = 0;
+dusk.sgui.Selection.ORIENT_HOR = 0x01;
 
-dusk.sgui.Selection.ORIENT_VER = 1;
+dusk.sgui.Selection.ORIENT_VER = 0x02;
 
 dusk.sgui.Selection.prototype._update = function(e) {
 	if(!this.getFocused()) return false;

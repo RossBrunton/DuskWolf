@@ -83,8 +83,7 @@ dusk.sgui.Grid = function (parent, comName) {
 	//Listeners
 	this.dirPress.listen(this._gridDirAction, this);
 };
-dusk.sgui.Grid.prototype = new dusk.sgui.Group();
-dusk.sgui.Grid.constructor = dusk.sgui.Grid;
+dusk.sgui.Grid.prototype = Object.create(dusk.sgui.Group.prototype);
 
 dusk.sgui.Grid.prototype.className = "Grid";
 
@@ -112,6 +111,12 @@ dusk.sgui.Grid.prototype.populate = function(child) {
 	
 	//Add them
 	child = this._populationEvent.fire({"action":"before", "child":child}).child;
+	
+	if(this.rows <= 0 || this.cols <= 0) {
+		this._populationEvent.fire({"action":"complete", "child":child});
+		return;
+	}
+	
 	var p = -1;
 	var xpoint = 0;
 	var ypoint = 0;

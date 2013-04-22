@@ -51,6 +51,8 @@ dusk.sgui.Group = function(parent, comName) {
 	/** The current behaviour used to say how focus works.
 	 *  
 	 * Changing this will affect any currently existing components.
+	 * 
+	 * Should be one of the `FOCUS_*` constants.
 	 * @type integer
 	 * @default FOCUS_ONE
 	 */
@@ -126,8 +128,7 @@ dusk.sgui.Group = function(parent, comName) {
 		console.warn(this.toString()+" does not implement dusk.sgui.IContainer!");
 	}
 };
-dusk.sgui.Group.prototype = new dusk.sgui.Component();
-dusk.sgui.Group.constructor = dusk.sgui.Group;
+dusk.sgui.Group.prototype = Object.create(dusk.sgui.Component.prototype);
 
 dusk.sgui.Group.prototype.className = "Group";
 

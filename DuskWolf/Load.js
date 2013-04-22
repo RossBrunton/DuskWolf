@@ -293,7 +293,9 @@ dusk.load.importList = function(path, callback) {
 dusk.load._tryToImport = function(name, ignoreDefer) {
 	if(dusk.load._names[name][1] != 0) return false;
 	for(var i = dusk.load._names[name][2].length-1; i >= 0; i --) {
-		if(!(dusk.load._names[name][2][i].charAt(0) === ">" && ignoreDefer)
+		if(!(dusk.load._names[name][2][i].replace(">", "") in dusk.load._names)) {
+			console.warn("Dependency "+dusk.load._names[name][2][i].replace(">", "")+" for "+name+" not found!");
+		}else if(!(dusk.load._names[name][2][i].charAt(0) === ">" && ignoreDefer)
 		&& dusk.load._names[dusk.load._names[name][2][i].replace(">", "")][1] < 2) return false;
 	}
 	

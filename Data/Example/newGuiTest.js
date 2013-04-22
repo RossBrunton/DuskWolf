@@ -10,13 +10,16 @@ dusk.load.require("dusk.sgui.Selection");
 dusk.load.require("dusk.sgui.Checkbox");
 dusk.load.require("dusk.sgui.extras.SineSlide");
 dusk.load.require("dusk.sgui.extras.Radiobox");
+dusk.load.require("dusk.sgui.DynamicGrid");
+dusk.load.require("dusk.Range");
 dusk.load.require("dusk");
 
 dusk.load.provide("example.newGui");
 
+example.newGui.testRange = new dusk.Range(0, 10, 5);
+
 //Basic offsets and such
 dusk.sgui.getPane("newGui").parseProps({
-	"active":true,
 	"xOffset":50,
 	"yOffset":45,
 	"x":50,
@@ -84,7 +87,7 @@ dusk.sgui.getPane("newGui").parseProps({
 //Grids
 dusk.sgui.getPane("grid").parseProps({
 	"active":true,
-	"focus":"check",
+	"focus":"grd",
 	"extras":{
 		"fadey":{"type":"SineSlide", "duration":60, "delay":0, "on":true,
 			"peak":75, "modifier":1.5, "dir":dusk.sgui.Component.DIR_RIGHT
@@ -112,7 +115,7 @@ dusk.sgui.getPane("grid").parseProps({
 			"type":"Selection",
 			"xOrigin":dusk.sgui.Component.ORIGIN_MAX,
 			"yOrigin":dusk.sgui.Component.ORIGIN_MAX,
-			"x":-5,
+			"x":-50,
 			"y":-50,
 			"options":10,
 			"globals":{"type":"Label", "height":20, "padding":5, "colour":"#0000ff"},
@@ -139,6 +142,18 @@ dusk.sgui.getPane("grid").parseProps({
 			"height":3,
 			"x":dusk.sgui.width/2 - 1,
 			"y":dusk.sgui.height/2 - 1
+		},
+		"dg":{
+			"type":"DynamicGrid",
+			"range":example.newGui.testRange,
+			"orientation":dusk.sgui.DynamicGrid.ORIENT_VER,
+			"populate":{
+				"type":"Rect",
+				"width":20,
+				"height":40,
+				"colour":"#00ff00",
+				"bColour":"009900"
+			}
 		}
 	}
 });
