@@ -11,6 +11,7 @@ dusk.load.require("dusk.sgui.Checkbox");
 dusk.load.require("dusk.sgui.extras.SineSlide");
 dusk.load.require("dusk.sgui.extras.Radiobox");
 dusk.load.require("dusk.sgui.DynamicGrid");
+dusk.load.require("dusk.sgui.extras.DynamicWidth");
 dusk.load.require("dusk.Range");
 dusk.load.require("dusk");
 
@@ -26,6 +27,30 @@ dusk.sgui.getPane("newGui").parseProps({
 	"y":50,
 	"width":500,
 	"children":{
+		"bar":{
+			"type":"Group",
+			"x":200,
+			"y":200,
+			"children":{
+				"case":{
+					"type":"Rect",
+					"width":100,
+					"height":30,
+					"colour":"#003300",
+					"bwidth":0,
+				},
+				"body":{
+					"type":"Rect",
+					"height":28,
+					"x":1,
+					"y":1,
+					"extras":{
+						"dwidth":{"type":"DynamicWidth", "min":0, "max":98, "range":example.newGui.testRange}
+					},
+					"colour":"#00ff00"
+				}
+			}
+		},
 		"rect":{
 			"type":"Rect",
 			"width":100,

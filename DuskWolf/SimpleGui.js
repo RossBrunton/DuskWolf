@@ -367,6 +367,22 @@ dusk.sgui.getType = function(name) {
 	return this._types[name];
 };
 
+/** Given a component, this returns the name it's constructor was registered as.
+ * 
+ * @param {dusk.sgui.Component} com The component to look up.
+ * @return {?string} The name that component was registered under, or null if it hasn't been registered.
+ * @since 0.0.18-alpha
+ */
+dusk.sgui.getTypeName = function(com) {
+	for(var p in this._types) {
+		if(Object.getPrototypeOf(com) == this._types[p].prototype) {
+			return p;
+		}
+	}
+	
+	return null;
+};
+
 
 /** Adds a new extra that can be accessed using `{@link dusk.sgui.getExtra}`.
  * @param {string} name The name of the added extra.

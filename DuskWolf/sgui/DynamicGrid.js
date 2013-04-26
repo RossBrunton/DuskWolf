@@ -95,9 +95,10 @@ Object.defineProperty(dusk.sgui.DynamicGrid.prototype, "range", {
  * @private
  */
 dusk.sgui.DynamicGrid.prototype._rangeChanged = function(e) {
-	if(!this._pop) return false;
+	if(!this._pop) return e;
 	
 	this.populate(this._pop);
+	return e;
 };
 
 Object.seal(dusk.sgui.DynamicGrid);

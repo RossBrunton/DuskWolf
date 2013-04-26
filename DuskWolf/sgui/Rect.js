@@ -36,9 +36,9 @@ dusk.sgui.Rect = function (parent, comName) {
 	/** The thickness of the rectangle border.
 	 * 	If 0, there will be no border.
 	 * @type float
-	 * @default 1
+	 * @default 0
 	 */
-	this.bWidth = 1;
+	this.bWidth = 0;
 	
 	//Prop masks
 	this._registerPropMask("colour", "colour", true);

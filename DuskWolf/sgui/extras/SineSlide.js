@@ -83,19 +83,19 @@ dusk.sgui.extras.SineSlide.prototype._ssOnTick = function() {
 	
 	switch(this.dir) {
 		case dusk.sgui.Component.DIR_UP:
-			this._owner.y = this._base - (this.peak * Math.sin(this.modifier * this._range));
+			this._owner.y = ~~(this._base - (this.peak * Math.sin(this.modifier * this._range)));
 			break;
 		
 		case dusk.sgui.Component.DIR_DOWN:
-			this._owner.y = this._base + (this.peak * Math.sin(this.modifier * this._range));
+			this._owner.y = ~~(this._base + (this.peak * Math.sin(this.modifier * this._range)));
 			break;
 		
 		case dusk.sgui.Component.DIR_LEFT:
-			this._owner.x = this._base - (this.peak * Math.sin(this.modifier * this._range));
+			this._owner.x = ~~(this._base - (this.peak * Math.sin(this.modifier * this._range)));
 			break;
 		
 		case dusk.sgui.Component.DIR_RIGHT:
-			this._owner.x = this._base + (this.peak * Math.sin(this.modifier * this._range));
+			this._owner.x = ~~(this._base + (this.peak * Math.sin(this.modifier * this._range)));
 			break;
 	}
 };

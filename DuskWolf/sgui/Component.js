@@ -723,7 +723,7 @@ Object.defineProperty(dusk.sgui.Component.prototype, "__extras", {
  * 
  * @return {string} A string representation of this component.
  */
-dusk.sgui.Component.prototype.toString = function() {return "[sgui "+this.className+" "+this.comName+"]";};
+dusk.sgui.Component.prototype.toString = function() {return "[sgui "+dusk.sgui.getTypeName(this)+" "+this.comName+"]";};
 
 Object.seal(dusk.sgui.Component);
 Object.seal(dusk.sgui.Component.prototype);

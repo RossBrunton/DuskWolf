@@ -148,7 +148,7 @@ Object.defineProperty(dusk.sgui.Single.prototype, "__child", {
 	
 	get: function() {
 		var hold = this._component.bundle();
-		hold.type = this._component.className;
+		hold.type = dusk.sgui.getTypeName(this._component);
 		return hold;
 	}
 });

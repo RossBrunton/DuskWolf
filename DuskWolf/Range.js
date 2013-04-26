@@ -96,6 +96,15 @@ dusk.Range.prototype.setDownFraction = function(fract) {
 	this.stepDown = (this.max - this.min) * fract;
 };
 
+/** Returns the fraction that the current value is between the two ranges.
+ * 
+ * A float between 0.0 and 1.0, higher numbers are closer to the max value.
+ * @return {float} The fraction that the current value is.
+ */
+dusk.Range.prototype.getFraction = function() {
+	return (this.value-this.min) / (this.max-this.min);
+};
+
 /** Returns a string representation of this range.
  * @return {string} A representation of this range.
  */

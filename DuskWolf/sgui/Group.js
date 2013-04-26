@@ -247,7 +247,7 @@ Object.defineProperty(dusk.sgui.Group.prototype, "__children", {
 		var hold = [];
 		for(var i = 0; i < this._drawOrder.length; i++) {
 			hold[hold.length] = this._components[this._drawOrder[i]].bundle();
-			hold[hold.length-1].type = this._components[this._drawOrder[i]].className;
+			hold[hold.length-1].type = dusk.sgui.getTypeName(this._components[this._drawOrder[i]]);
 		}
 		return hold;
 	}
