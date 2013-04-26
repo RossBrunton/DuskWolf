@@ -78,10 +78,10 @@ dusk.sgui.EditableTileMap = function (parent, comName) {
 	this.frame.listen(this._editTileMapFrame, this);
 	
 	//Directions
-	this.dirPress.listen(this._etmRightAction, this, {"dir":dusk.sgui.Component.DIR_RIGHT});
-	this.dirPress.listen(this._etmLeftAction, this, {"dir":dusk.sgui.Component.DIR_LEFT});
-	this.dirPress.listen(this._etmUpAction, this, {"dir":dusk.sgui.Component.DIR_UP});
-	this.dirPress.listen(this._etmDownAction, this, {"dir":dusk.sgui.Component.DIR_DOWN});
+	this.dirPress.listen(this._etmRightAction, this, {"dir":dusk.sgui.c.DIR_RIGHT});
+	this.dirPress.listen(this._etmLeftAction, this, {"dir":dusk.sgui.c.DIR_LEFT});
+	this.dirPress.listen(this._etmUpAction, this, {"dir":dusk.sgui.c.DIR_UP});
+	this.dirPress.listen(this._etmDownAction, this, {"dir":dusk.sgui.c.DIR_DOWN});
 };
 dusk.sgui.EditableTileMap.prototype = new dusk.sgui.TileMap();
 dusk.sgui.EditableTileMap.constructor = dusk.sgui.EditableTileMap;

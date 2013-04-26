@@ -8,6 +8,7 @@ dusk.load.require("dusk.sgui.Label");
 dusk.load.require("dusk.sgui.Grid");
 dusk.load.require("dusk.sgui.Selection");
 dusk.load.require("dusk.sgui.Checkbox");
+dusk.load.require("dusk.sgui.BitmapLabel");
 dusk.load.require("dusk.sgui.extras.SineSlide");
 dusk.load.require("dusk.sgui.extras.Radiobox");
 dusk.load.require("dusk.sgui.DynamicGrid");
@@ -60,7 +61,7 @@ dusk.sgui.getPane("newGui").parseProps({
 			"colour":"#00ff00"
 		},
 		"tex":{
-			"type":"Label",
+			"type":"BitmapLabel",
 			"height":15,
 			"x":125,
 			"y":50,
@@ -116,7 +117,7 @@ dusk.sgui.getPane("grid").parseProps({
 	"focus":"tr",
 	"extras":{
 		"fadey":{"type":"SineSlide", "duration":60, "delay":0, "on":true,
-			"peak":75, "modifier":1.5, "dir":dusk.sgui.Component.DIR_RIGHT
+			"peak":75, "modifier":1.5, "dir":dusk.sgui.c.DIR_RIGHT
 		},
 		//"fada":{"type":"Fade", "duration":1000, "from":0, "to":1,}
 	},
@@ -187,6 +188,16 @@ dusk.sgui.getPane("grid").parseProps({
 				"colour":"#00ff00",
 				"bColour":"009900"
 			}
+		}
+	}
+});
+
+//Text
+dusk.sgui.getPane("textTest").parseProps({
+	"children":{
+		"textTest":{
+			"type":"BitmapLabel",
+			"text":"Hello [[]World!] [test] Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi adipiscing molestie tristique. Sed pretium justo sed neque dignissim facilisis. Phasellus consequat sagittis erat. Aliquam sagittis odio quis enim tempus laoreet. Aliquam erat volutpat. Cras sit amet lorem quis massa laoreet tincidunt euismod sed neque. Cras hendrerit, nunc ac eleifend porta, ipsum augue imperdiet est, in lobortis nulla lacus sed augue. Aliquam ornare cursus massa, quis dapibus turpis interdum non. Suspendisse accumsan metus in dui facilisis ultricies. Integer sit amet velit et neque pulvinar vehicula. Suspendisse laoreet pretium metus et vestibulum. Nunc quis dui sit amet odio pharetra aliquet. Praesent varius interdum iaculis. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.Suspendisse neque odio, interdum ac pharetra sed, aliquam eget nisl. Ut tincidunt diam diam, at tincidunt odio. Vivamus non dui purus. Vestibulum eu ligula ut enim iaculis feugiat. Pellentesque congue, est elementum fermentum hendrerit, velit neque gravida diam, nec posuere lectus sem id ante. Morbi consectetur orci nec quam gravida nec vehicula justo fermentum. Integer velit velit, tincidunt sed elementum sit amet, eleifend et tellus. Duis malesuada elit a neque mollis vel iaculis diam interdum. Sed dapibus semper ante non volutpat. Mauris porttitor leo sit amet lacus faucibus et euismod leo ultrices. Fusce ut lacus commodo arcu ultrices gravida eget ac felis. Donec tincidunt auctor mattis. Donec rhoncus aliquet tempor. Nullam lectus magna, lobortis quis ullamcorper nec, rhoncus in lorem. Duis non nibh vitae urna imperdiet tincidunt. Aliquam aliquam, enim eget fermentum dapibus, nisl purus porta enim, consequat ultricies libero nisl quis justo. Maecenas non risus et mauris varius pharetra at nec nibh. Vivamus et est tortor, sed vestibulum quam. In hac habitasse platea dictumst. Integer congue ultrices massa, quis pretium elit auctor sit amet. Vivamus sed rhoncus dolor. Vivamus fringilla hendrerit lectus quis eleifend. Proin aliquam porttitor commodo. Morbi faucibus nunc vel magna porta aliquam. Suspendisse ultricies, sem ut porta vehicula, enim metus tempor dui, et accumsan augue erat quis nisl. Fusce nec dui ut tellus ultrices gravida ac at lectus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Aliquam sollicitudin magna ac nisi interdum non viverra quam tincidunt. Ut gravida nulla sit amet enim interdum eget adipiscing libero hendrerit. Aliquam ullamcorper, enim vitae commodo varius, sapien est mollis nunc, ut commodo turpis lacus ac elit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Ut a risus vitae mauris placerat convallis eu sit amet nunc. Etiam non venenatis diam. Vestibulum neque purus, sodales ut fringilla eu, luctus et ipsum. Proin et nibh nec dui tempus cursus non ac ligula. Suspendisse molestie risus eu nibh cursus non sagittis erat dignissim. Maecenas eget metus quam, in condimentum ante. Suspendisse potenti. Nam risus dolor, tincidunt ut placerat ut, aliquam in massa. Fusce sagittis nulla et dolor volutpat vulputate consectetur mi viverra. Nam dignissim massa sem, vitae condimentum lacus. ",
 		}
 	}
 });

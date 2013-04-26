@@ -279,47 +279,6 @@ dusk.sgui.Component = function (parent, componentName) {
 	this._registerPropMask("extras", "__extras");
 };
 
-/** The name of this component's class.
- * @type string
- * @static
- * @memberof dusk.sgui.Component
- * 
- */
-dusk.sgui.Component.prototype.className = "Component";
-
-/** The direction up, negative in the y axis.
- * @type integer
- * @value 0
- * @constant
- * @memberof dusk.sgui.Component
- */
-dusk.sgui.Component.DIR_UP = 0;
-
-/** The direction down, positive in the y axis.
- * @type integer
- * @value 1
- * @constant
- * @memberof dusk.sgui.Component
- */
-dusk.sgui.Component.DIR_DOWN = 1;
-
-/** The direction left, negative in the x axis.
- * @type integer
- * @value 2
- * @static
- * @constant
- * @memberof dusk.sgui.Component
- */
-dusk.sgui.Component.DIR_LEFT = 2;
-
-/** The direction right, negative in the x axis.
- * @type integer
- * @value 3
- * @constant
- * @memberof dusk.sgui.Component
- */
-dusk.sgui.Component.DIR_RIGHT = 3;
-
 /** Components which support this (and all must do so) must support being drawn at arbitary locations.
  * 
  * They should use the `destX` and `destY` properties of the rendering data as the x and y coordinates to draw on.
@@ -412,16 +371,16 @@ dusk.sgui.Component.prototype.doKeyPress = function (e) {
 	if(this.keyPress.fire(eventObject)) {
 		//Directions
 		if(dusk.controls.checkKey("sgui_left", e.which)) {
-			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.Component.DIR_LEFT, "e":e})) && !this._noFlow
+			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.c.DIR_LEFT, "e":e})) && !this._noFlow
 			&& this.leftFlow && this.container.flow(this.leftFlow)) return false;
 		}else if(dusk.controls.checkKey("sgui_up", e.which)) {
-			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.Component.DIR_UP, "e":e})) && !this._noFlow
+			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.c.DIR_UP, "e":e})) && !this._noFlow
 			&& this.upFlow && this.container.flow(this.upFlow)) return false;
 		}else if(dusk.controls.checkKey("sgui_right", e.which)) {
-			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.Component.DIR_RIGHT, "e":e})) && !this._noFlow
+			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.c.DIR_RIGHT, "e":e})) && !this._noFlow
 			&& this.rightFlow && this.container.flow(this.rightFlow)) return false;
 		}else if(dusk.controls.checkKey("sgui_down", e.which)) {
-			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.Component.DIR_DOWN, "e":e})) && !this._noFlow
+			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.c.DIR_DOWN, "e":e})) && !this._noFlow
 			&& this.downFlow && this.container.flow(this.downFlow)) return false;
 		}else if(dusk.controls.checkKey("sgui_action", e.which)) {
 			return this.action.fire({"keyPress":e});

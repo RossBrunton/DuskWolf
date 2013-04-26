@@ -55,10 +55,10 @@ dusk.sgui.EntityGroup = function (parent, comName) {
 	this.action.listen(this._entityGroupAction, this);
 	
 	//Directions
-	this.dirPress.listen(this._egRightAction, this, {"dir":dusk.sgui.Component.DIR_RIGHT});
-	this.dirPress.listen(this._egLeftAction, this, {"dir":dusk.sgui.Component.DIR_LEFT});
-	this.dirPress.listen(this._egUpAction, this, {"dir":dusk.sgui.Component.DIR_UP});
-	this.dirPress.listen(this._egDownAction, this, {"dir":dusk.sgui.Component.DIR_DOWN});
+	this.dirPress.listen(this._egRightAction, this, {"dir":dusk.sgui.c.DIR_RIGHT});
+	this.dirPress.listen(this._egLeftAction, this, {"dir":dusk.sgui.c.DIR_LEFT});
+	this.dirPress.listen(this._egUpAction, this, {"dir":dusk.sgui.c.DIR_UP});
+	this.dirPress.listen(this._egDownAction, this, {"dir":dusk.sgui.c.DIR_DOWN});
 };
 dusk.sgui.EntityGroup.prototype = new dusk.sgui.Group();
 dusk.sgui.EntityGroup.constructor = dusk.sgui.EntityGroup;

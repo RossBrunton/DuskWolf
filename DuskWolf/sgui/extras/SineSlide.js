@@ -31,7 +31,7 @@ dusk.sgui.extras.SineSlide = function(owner, name) {
 	 * @type integer
 	 * @default dusk.sgui.Component#DIR_UP
 	 */
-	this.dir = dusk.sgui.Component.DIR_UP;
+	this.dir = dusk.sgui.c.DIR_UP;
 	/** The modifier; n where x or y = sin(nx). Typically between 0.0 and 2.0, higher numbers (>1.0) make the component
 	 *  come back down once it has reached the peak, while smaler numers (<1.0) makes the component end prematurley.
 	 * @type float
@@ -68,9 +68,9 @@ dusk.sgui.extras.SineSlide.prototype._ssOnStart = function() {
 	this._range = new dusk.Range(0, Math.PI/2, 0);
 	this._range.setUpFraction(1/this.duration);
 	
-	if(this.dir == dusk.sgui.Component.DIR_UP || this.dir == dusk.sgui.Component.DIR_DOWN) {
+	if(this.dir == dusk.sgui.c.DIR_UP || this.dir == dusk.sgui.c.DIR_DOWN) {
 		this._base = this._owner.y;
-	}else if(this.dir == dusk.sgui.Component.DIR_LEFT || this.dir == dusk.sgui.Component.DIR_RIGHT) {
+	}else if(this.dir == dusk.sgui.c.DIR_LEFT || this.dir == dusk.sgui.c.DIR_RIGHT) {
 		this._base = this._owner.x;
 	}
 };
@@ -82,19 +82,19 @@ dusk.sgui.extras.SineSlide.prototype._ssOnTick = function() {
 	this._range.up();
 	
 	switch(this.dir) {
-		case dusk.sgui.Component.DIR_UP:
+		case dusk.sgui.c.DIR_UP:
 			this._owner.y = ~~(this._base - (this.peak * Math.sin(this.modifier * this._range)));
 			break;
 		
-		case dusk.sgui.Component.DIR_DOWN:
+		case dusk.sgui.c.DIR_DOWN:
 			this._owner.y = ~~(this._base + (this.peak * Math.sin(this.modifier * this._range)));
 			break;
 		
-		case dusk.sgui.Component.DIR_LEFT:
+		case dusk.sgui.c.DIR_LEFT:
 			this._owner.x = ~~(this._base - (this.peak * Math.sin(this.modifier * this._range)));
 			break;
 		
-		case dusk.sgui.Component.DIR_RIGHT:
+		case dusk.sgui.c.DIR_RIGHT:
 			this._owner.x = ~~(this._base + (this.peak * Math.sin(this.modifier * this._range)));
 			break;
 	}

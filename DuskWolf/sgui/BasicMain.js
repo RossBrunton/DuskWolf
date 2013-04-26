@@ -33,10 +33,10 @@ dusk.sgui.BasicMain = function(parent, comName) {
 	this.keyPress.listen(this.save, this, {"key":83});
 	
 	//Directions
-	this.dirPress.listen(this._bmRightAction, this, {"dir":dusk.sgui.Component.DIR_RIGHT});
-	this.dirPress.listen(this._bmLeftAction, this, {"dir":dusk.sgui.Component.DIR_LEFT});
-	this.dirPress.listen(this._bmUpAction, this, {"dir":dusk.sgui.Component.DIR_UP});
-	this.dirPress.listen(this._bmDownAction, this, {"dir":dusk.sgui.Component.DIR_DOWN});
+	this.dirPress.listen(this._bmRightAction, this, {"dir":dusk.sgui.c.DIR_RIGHT});
+	this.dirPress.listen(this._bmLeftAction, this, {"dir":dusk.sgui.c.DIR_LEFT});
+	this.dirPress.listen(this._bmUpAction, this, {"dir":dusk.sgui.c.DIR_UP});
+	this.dirPress.listen(this._bmDownAction, this, {"dir":dusk.sgui.c.DIR_DOWN});
 };
 dusk.sgui.BasicMain.prototype = new dusk.sgui.Group();
 dusk.sgui.BasicMain.constructor = dusk.sgui.BasicMain;

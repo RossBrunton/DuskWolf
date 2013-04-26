@@ -4,7 +4,7 @@
 
 dusk.load.require("dusk.sgui.Group");
 dusk.load.require("dusk.sgui.Tile");
-dusk.load.require("dusk.sgui.Label");
+dusk.load.require("dusk.sgui.BitmapLabel");
 dusk.load.require("dusk.controls");
 dusk.load.require("dusk.keyboard");
 
@@ -30,7 +30,7 @@ dusk.sgui.ControlConfig = function (parent, comName) {
 	this.setting = false;
 	this.control = "";
 	
-	this._keyChild = this.getComponent("key", "Label");
+	this._keyChild = this.getComponent("key", "BitmapLabel");
 	this._buttonChild = this.getComponent("button", "Tile");
 	
 	this.border = "#cccccc";
@@ -109,11 +109,11 @@ Object.seal(dusk.sgui.ControlConfig);
 Object.seal(dusk.sgui.ControlConfig.prototype);
 
 dusk.sgui.registerType("ControlConfig", dusk.sgui.ControlConfig);
-dusk.sgui.addStyle("ControlConfig>Label#key", {
+dusk.sgui.addStyle("ControlConfig>#key", {
 	"height":16,
 	"width":40
 });
-dusk.sgui.addStyle("ControlConfig>Tile#button", {
+dusk.sgui.addStyle("ControlConfig>#button", {
 	"src":"sgui/buttons.png",
 	"x":40,
 	"ssize":4,

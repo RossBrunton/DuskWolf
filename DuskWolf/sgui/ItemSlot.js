@@ -4,7 +4,7 @@
 
 dusk.load.require("dusk.sgui.Group");
 dusk.load.require("dusk.sgui.Tile");
-dusk.load.require("dusk.sgui.Label");
+dusk.load.require("dusk.sgui.BitmapLabel");
 dusk.load.require("dusk.sgui.Image");
 dusk.load.require("dusk.items");
 dusk.load.require("dusk.items.Invent");
@@ -20,8 +20,8 @@ dusk.sgui.ItemSlot = function (parent, comName) {
 	
 	this._itemChild = this.getComponent("item", "Tile");
 	this._handItemChild = this.getComponent("handitem", "Tile");
-	this._textChild = this.getComponent("count", "Label");
-	this._handTextChild = this.getComponent("handcount", "Label");
+	this._textChild = this.getComponent("count", "BitmapLabel");
+	this._handTextChild = this.getComponent("handcount", "BitmapLabel");
 	this._selectChild = this.getComponent("select", "Image");
 	this.alterChildLayer("count", "+");
 	
@@ -33,10 +33,7 @@ dusk.sgui.ItemSlot = function (parent, comName) {
 	this.frame.listen(this._itemSlotFrame, this);
 	this.action.listen(this._itemSlotAction, this);
 };
-dusk.sgui.ItemSlot.prototype = new dusk.sgui.Group();
-dusk.sgui.ItemSlot.constructor = dusk.sgui.ItemSlot;
-
-dusk.sgui.ItemSlot.prototype.className = "ItemSlot";
+dusk.sgui.ItemSlot.prototype = Object.create(dusk.sgui.Group.prototype);
 
 dusk.sgui.ItemSlot.prototype.setInventory = function(invent) {
 	if(!(invent instanceof dusk.items.Invent)) {

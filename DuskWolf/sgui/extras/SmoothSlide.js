@@ -28,7 +28,7 @@ dusk.sgui.extras.SmoothSlide = function(owner, name) {
 	 * @type integer
 	 * @default dusk.sgui.Component#DIR_UP
 	 */
-	this.dir = dusk.sgui.Component.DIR_UP;
+	this.dir = dusk.sgui.c.DIR_UP;
 	/** The range used internally to move the component.
 	 * @type dusk.Range
 	 * @private
@@ -56,25 +56,25 @@ dusk.sgui.extras.SmoothSlide.prototype = Object.create(dusk.sgui.extras.Effect.p
  */
 dusk.sgui.extras.SmoothSlide.prototype._ssOnStart = function() {
 	switch(this.dir) {
-		case dusk.sgui.Component.DIR_UP:
+		case dusk.sgui.c.DIR_UP:
 			this._range = new dusk.Range(this._owner.y - this.by, this._owner.y, this._owner.y);
 			this._range.setDownFraction(1/this.duration);
 			this._decreasing = true;
 			break;
 		
-		case dusk.sgui.Component.DIR_DOWN:
+		case dusk.sgui.c.DIR_DOWN:
 			this._range = new dusk.Range(this._owner.y, this._owner.y + this.by, this._owner.y);
 			this._range.setUpFraction(1/this.duration);
 			this._decreasing = false;
 			break;
 		
-		case dusk.sgui.Component.DIR_LEFT:
+		case dusk.sgui.c.DIR_LEFT:
 			this._range = new dusk.Range(this._owner.x - this.by, this._owner.x, this._owner.x);
 			this._range.setDownFraction(1/this.duration);
 			this._decreasing = true;
 			break;
 		
-		case dusk.sgui.Component.DIR_RIGHT:
+		case dusk.sgui.c.DIR_RIGHT:
 			this._range = new dusk.Range(this._owner.x, this._owner.x + this.by, this._owner.x);
 			this._range.setUpFraction(1/this.duration);
 			this._decreasing = false;
@@ -95,9 +95,9 @@ dusk.sgui.extras.SmoothSlide.prototype._ssOnTick = function() {
 		this._range.up();
 	}
 	
-	if(this.dir == dusk.sgui.Component.DIR_UP || this.dir == dusk.sgui.Component.DIR_DOWN) {
+	if(this.dir == dusk.sgui.c.DIR_UP || this.dir == dusk.sgui.c.DIR_DOWN) {
 		this._owner.y = this._range.value;
-	}else if(this.dir == dusk.sgui.Component.DIR_LEFT || this.dir == dusk.sgui.Component.DIR_RIGHT) {
+	}else if(this.dir == dusk.sgui.c.DIR_LEFT || this.dir == dusk.sgui.c.DIR_RIGHT) {
 		this._owner.x = this._range.value;
 	}
 };
@@ -107,19 +107,19 @@ dusk.sgui.extras.SmoothSlide.prototype._ssOnTick = function() {
  */
 dusk.sgui.extras.SmoothSlide.prototype._ssOnEnd = function() {
 	switch(this.dir) {
-		case dusk.sgui.Component.DIR_UP:
+		case dusk.sgui.c.DIR_UP:
 			this._owner.y = this._range.min;
 			break;
 		
-		case dusk.sgui.Component.DIR_DOWN:
+		case dusk.sgui.c.DIR_DOWN:
 			this._owner.y = this._range.max;
 			break;
 		
-		case dusk.sgui.Component.DIR_LEFT:
+		case dusk.sgui.c.DIR_LEFT:
 			this._owner.x = this._range.min;
 			break;
 		
-		case dusk.sgui.Component.DIR_RIGHT:
+		case dusk.sgui.c.DIR_RIGHT:
 			this._owner.x = this._range.max;
 			break;
 	}

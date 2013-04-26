@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-dusk.load.require("dusk.sgui.Label");
+dusk.load.require("dusk.sgui.BitmapLabel");
 dusk.load.require(">dusk.Range");
 
 dusk.load.provide("dusk.sgui.RangeText");
@@ -15,14 +15,14 @@ dusk.load.provide("dusk.sgui.RangeText");
  * 
  * If an orientation is specified, then the range can be changed by using a direction control.
  * 
- * @extends dusk.sgui.Label
+ * @extends dusk.sgui.BitmapLabel
  * @param {?dusk.sgui.Component} parent The container that this component is in.
  * @param {string} componentName The name of the component.
  * @since 0.0.18-alpha
  * @constructor
  */
 dusk.sgui.RangeText = function (parent, comName) {
-	dusk.sgui.Label.call(this, parent, comName);
+	dusk.sgui.BitmapLabel.call(this, parent, comName);
 	
 	/** Internal storage for the range used in this component.
 	 * @type dusk.Range
@@ -49,7 +49,7 @@ dusk.sgui.RangeText = function (parent, comName) {
 	this._registerPropMask("orientation", "orientation");
 	this.dirPress.listen(this._changeValue, this);
 };
-dusk.sgui.RangeText.prototype = Object.create(dusk.sgui.Label.prototype);
+dusk.sgui.RangeText.prototype = Object.create(dusk.sgui.BitmapLabel.prototype);
 
 dusk.sgui.RangeText.ORIENT_HOR = 0x01;
 
@@ -87,22 +87,22 @@ dusk.sgui.RangeText.prototype._rangeChanged = function(e) {
 dusk.sgui.RangeText.prototype._changeValue = function(e) {
 	if(!this._active || !this._range) return true;
 	if(this.orientation == dusk.sgui.RangeText.ORIENT_HOR) {
-		if(e.dir == dusk.sgui.Component.DIR_RIGHT) {
+		if(e.dir == dusk.sgui.c.DIR_RIGHT) {
 			this._range.up();
 			return false;
 		}
 		
-		if(e.dir == dusk.sgui.Component.DIR_LEFT) {
+		if(e.dir == dusk.sgui.c.DIR_LEFT) {
 			this._range.down();
 			return false;
 		}
 	}else if(this.orientation == dusk.sgui.RangeText.ORIENT_VER) {
-		if(e.dir == dusk.sgui.Component.DIR_UP) {
+		if(e.dir == dusk.sgui.c.DIR_UP) {
 			this._range.up();
 			return false;
 		}
 		
-		if(e.dir == dusk.sgui.Component.DIR_DOWN) {
+		if(e.dir == dusk.sgui.c.DIR_DOWN) {
 			this._range.down();
 			return false;
 		}

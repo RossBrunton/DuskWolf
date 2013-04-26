@@ -8,6 +8,7 @@ dusk.load.require("dusk.frameTicker");
 dusk.load.require("dusk.EventDispatcher");
 dusk.load.require("dusk.controls");
 dusk.load.require("dusk");
+dusk.load.require("dusk.sgui.c");
 
 dusk.load.provide("dusk.sgui");
 

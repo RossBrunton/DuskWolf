@@ -195,16 +195,16 @@ dusk.sgui.Grid.prototype.componentRelative = function(name, dir) {
 	var cy = name.split(",")[1];
 	
 	switch(dir) {
-		case dusk.sgui.Component.DIR_LEFT:
+		case dusk.sgui.c.DIR_LEFT:
 			return this.getComponent((+cx-1)+","+cy);
 		
-		case dusk.sgui.Component.DIR_RIGHT:
+		case dusk.sgui.c.DIR_RIGHT:
 			return this.getComponent((+cx+1)+","+cy);
 		
-		case dusk.sgui.Component.DIR_UP:
+		case dusk.sgui.c.DIR_UP:
 			return this.getComponent(cx+","+(+cy-1));
 		
-		case dusk.sgui.Component.DIR_DOWN:
+		case dusk.sgui.c.DIR_DOWN:
 			return this.getComponent(cx+","+(+cy+1));
 		
 		default:
