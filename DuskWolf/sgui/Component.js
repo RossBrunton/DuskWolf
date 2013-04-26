@@ -87,6 +87,14 @@ dusk.sgui.Component = function (parent, componentName) {
 	 * @default null
 	 */
 	this.mark = null;
+	/** If set to a string representing a colour ("#ff0000" or "red", for example) this will draw a border
+	 *  of that colour around the component if it is active. This should be used to provide a hint to the user as to 
+	 *   what is currently selected.
+	 * @type string
+	 * @default null
+	 * @since 0.0.18-alpha
+	 */
+	this.activeBorder = null;
 
 	/** The name of the group's component that will be focused when the left key is pressed
 	 *  and `{@link dusk.sgui.Component.leftDirection}` returns true.
@@ -258,6 +266,7 @@ dusk.sgui.Component = function (parent, componentName) {
 	this._registerPropMask("alpha", "alpha");
 	this._registerPropMask("visible", "visible");
 	this._registerPropMask("mark", "mark");
+	this._registerPropMask("activeBorder", "activeBorder");
 	this._registerPropMask("upFlow", "upFlow");
 	this._registerPropMask("downFlow", "downFlow");
 	this._registerPropMask("leftFlow", "leftFlow");
@@ -534,6 +543,11 @@ dusk.sgui.Component.prototype.draw = function(d, c) {
 	if(this.mark !== null) {
 		c.strokeStyle = this.mark;
 		c.strokeRect(d.destX, d.destY, d.width, d.height);
+	}
+	
+	if(this.activeBorder !== null && this._active) {
+		c.strokeStyle = this.activeBorder;
+		c.strokeRect(d.destX+0.5, d.destY+0.5, d.width-1, d.height-1);
 	}
 	
 	if(oldAlpha >= 0) c.globalAlpha = oldAlpha;

@@ -48,7 +48,7 @@ dusk.sgui.Label.constructor = dusk.sgui.Label;
 dusk.sgui.Label.prototype.className = "Label";
 
 dusk.sgui.Label.prototype._labelDraw = function(e) {
-	if(this.text){
+	if(this.text !== ""){
 		e.c.fillStyle = this.colour;
 		e.c.font = this.size + "px "+this.font;
 		if(e.c.textBaseline != "middle") e.c.textBaseline = "middle";

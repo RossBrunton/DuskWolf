@@ -12,6 +12,7 @@ dusk.load.require("dusk.sgui.extras.SineSlide");
 dusk.load.require("dusk.sgui.extras.Radiobox");
 dusk.load.require("dusk.sgui.DynamicGrid");
 dusk.load.require("dusk.sgui.extras.DynamicWidth");
+dusk.load.require("dusk.sgui.RangeText");
 dusk.load.require("dusk.Range");
 dusk.load.require("dusk");
 
@@ -112,7 +113,7 @@ dusk.sgui.getPane("newGui").parseProps({
 //Grids
 dusk.sgui.getPane("grid").parseProps({
 	"active":true,
-	"focus":"grd",
+	"focus":"tr",
 	"extras":{
 		"fadey":{"type":"SineSlide", "duration":60, "delay":0, "on":true,
 			"peak":75, "modifier":1.5, "dir":dusk.sgui.Component.DIR_RIGHT
@@ -120,6 +121,12 @@ dusk.sgui.getPane("grid").parseProps({
 		//"fada":{"type":"Fade", "duration":1000, "from":0, "to":1,}
 	},
 	"children":{
+		"tr":{
+			"type":"RangeText",
+			"range":example.newGui.testRange,
+			"x":50,
+			"y":50
+		},
 		"check":{
 			"type":"Grid",
 			"extras":{
@@ -146,7 +153,8 @@ dusk.sgui.getPane("grid").parseProps({
 			"globals":{"type":"Label", "height":20, "padding":5, "colour":"#0000ff"},
 			"populate":[
 				{"text":"1"}, {"text":"2"}, {"text":"3"}, {"text":"4"}, {"text":"5"}
-			]
+			],
+			"activeBorder":"#ff0000"
 		}/*,
 		"test":{
 			"type":"Label",
