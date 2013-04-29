@@ -126,6 +126,19 @@ dusk.load._capability = function() {
 	
 	if(!("ArrayBuffer" in window)) return "Typed arrays not supported!";
 	
+	if (!("slice" in ArrayBuffer.prototype)) {
+		console.warn("ArrayBuffer.prototype.slice not supported, doing workaround.");
+		ArrayBuffer.prototype.slice = function (start, end) {
+			var that = new Uint8Array(this);
+			if (end == undefined) end = that.length;
+			var result = new ArrayBuffer(end - start);
+			var resultArray = new Uint8Array(result);
+			for (var i = 0; i < resultArray.length; i++)
+				resultArray[i] = that[i + start];
+			return result;
+		}
+	}
+	
 	if((function() {"use strict";return this;})() !== undefined) return "Strict mode not supported!";
 	
 	if(!(navigator.getGamepads || navigator.webkitGetGamepads)) return "Gamepad API not supported!";

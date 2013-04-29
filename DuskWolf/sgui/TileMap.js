@@ -110,34 +110,63 @@ dusk.sgui.TileMap = function (parent, comName) {
 		 */
 		this._img = null;
 		
-		/** A canvas that has the full drawn tilemap on it.
+		/** An array of canvases that has the full drawn tilemap for each frame on it.
 		 *  This will be copied onto the real canvas when it's time to draw it.
-		 * @type HTMLCanvasElement
+		 * @type array
 		 * @private
 		 */
-		this._all = null;
+		this._all = [];
 		/** True if the current map has been drawn yet, else false.
 		 * @type boolean
 		 * @private
 		 */
 		this._drawn = false;
 		
-		/** A buffer used to store all the tiles.
-		 * @type ArrayBuffer
+		/** An array of buffers used to store all the tiles.
+		 * @type array
 		 * @protected
 		 */
-		this._tileBuffer = new ArrayBuffer(0);
-		/** All the tiles that the tilemap contains,
+		this._tileBuffer = [];
+		/** An array of all the tiles that the tilemap contains per frame,
 		 *  in order of where they appear on the screen (left to right, then up to down).
 		 * 
 		 * Each coordinate has two bytes (hence to entries in this array), `x` then `y`,
 		 *  and refers to the location on the origin image for the tile.
-		 * @type Uint8Array
+		 * @type array
 		 * @protected
 		 */
-		this._tiles = new Uint8Array(this._tileBuffer);
+		this._tiles = [];
 		
-		this._mark = "#0000ff";
+		/** The time left before changing frames.
+		 * @type integer
+		 * @private
+		 * @since 0.0.19-alpha
+		 */
+		this._frameRemaining = 0;
+		/** The delay between each animation frame, in frames.
+		 * @type integer
+		 * @private
+		 * @since 0.0.19-alpha
+		 */
+		this._frameDelay = 5;
+		/** The current frame the animation is on.
+		 * @type integer
+		 * @private
+		 * @since 0.0.19-alpha
+		 */
+		this._currentFrame = 0;
+		/** The total number of frames needed.
+		 * @type integer
+		 * @private
+		 * @since 0.0.19-alpha
+		 */
+		this._frames = 0;
+		/** Whether the tilemap is animating or not.
+		 * @type boolean
+		 * @default true
+		 * @since 0.0.19-alpha
+		 */
+		this.animating = true;
 		
 		//Prop masks
 		this._registerPropMask("map", "map", true, 
@@ -147,6 +176,7 @@ dusk.sgui.TileMap = function (parent, comName) {
 		this._registerPropMask("rows", "rows");
 		this._registerPropMask("cols", "cols");
 		this._registerPropMask("mode", "mode");
+		this._registerPropMask("animated", "animated");
 		
 		this._registerPropMask("ssize", "ssize");
 		this._registerPropMask("sheight", "sheight");
@@ -158,13 +188,13 @@ dusk.sgui.TileMap = function (parent, comName) {
 		
 		//Listeners
 		this.prepareDraw.listen(this._tileMapDraw, this);
-	
+		this.frame.listen(this._tileMapFrame, this);
+		
 		//Render support
 		this.renderSupport |= dusk.sgui.Component.REND_OFFSET | dusk.sgui.Component.REND_SLICE;
 	}
 };
-dusk.sgui.TileMap.prototype = new dusk.sgui.Component();
-dusk.sgui.TileMap.constructor = dusk.sgui.TileMap;
+dusk.sgui.TileMap.prototype = Object.create(dusk.sgui.Component.prototype);
 
 dusk.sgui.TileMap.prototype.className = "TileMap";
 
@@ -186,6 +216,14 @@ Object.defineProperty(dusk.sgui.TileMap.prototype, "map", {
 			this._img = dusk.data.grabImage(this.src);
 		}
 		
+		if("ani" in map) {
+			for(var i = map.ani.length-1; i >= 0; i --) {
+				dusk.sgui.TileMap.setAnimation(this.src, map.ani[i]);
+			}
+		}
+		
+		this._frames = this._framesNeeded();
+		
 		var singleW = 0;
 		var singleH = 0;
 		if(this.mode == "BINARY"){
@@ -196,30 +234,31 @@ Object.defineProperty(dusk.sgui.TileMap.prototype, "map", {
 			singleH = this.theight;
 		}
 		
-		if(map.map.indexOf(":") === -1) {
-			//Old style
-			this._tileBuffer = new ArrayBuffer((map.rows*map.cols)<<1);
-			this._tiles = new Uint8Array(this._tileBuffer);
-			var tiles = map.map.split(/\s+/g);
-			var pointer = 0;
-			for(var i = 0; i < tiles.length; i++){
-				if(tiles[i].indexOf(",") === -1) continue;
-				this._tiles[pointer++] = tiles[i].split(",")[0];
-				this._tiles[pointer++] = tiles[i].split(",")[1];
+		var t = performance.now();
+		
+		this._tileBuffer = [];
+		this._tiles = [];
+		this._all = [];
+		
+		var buffer = dusk.utils.stringToData(map.map);
+		this._tileBuffer[0] = buffer;
+		this._tiles[0] = new Uint8Array(this._tileBuffer[0]);
+		this._all[0] = dusk.utils.createCanvas((this.cols*singleW)+this.width, (this.rows*singleH)+this.height);
+		
+		if(this._frames > 1) {
+			for(var i = 1; i < this._frames; i ++) {
+				this._tileBuffer[i] = buffer.slice(0);
+				this._tiles[i] = new Uint8Array(this._tileBuffer[i]);
+				this._all[i] = dusk.utils.createCanvas((this.cols*singleW)+this.width, (this.rows*singleH)+this.height);
 			}
-		}else{
-			this._tileBuffer = dusk.utils.stringToData(map.map);
-			this._tiles = new Uint8Array(this._tileBuffer);
 		}
 		
 		this.rows = map.rows;
 		this.cols = map.cols;
 		
-		this._all = dusk.utils.createCanvas((this.cols*singleW) + this.width, (this.rows*singleH) + this.height);
 		
 		this.drawAll();
-		
-		this.setBoundsCoord(0, 0, this.width, this.height);
+		console.log("Map took "+(performance.now()-t)+"ms to render!");
 	},
 	
 	get: function(){
@@ -227,6 +266,12 @@ Object.defineProperty(dusk.sgui.TileMap.prototype, "map", {
 		hold.rows = this.rows;
 		hold.cols = this.cols;
 		hold.src = this.src;
+		hold.ani = [];
+		
+		var ani = dusk.sgui.TileMap.getAllAnimation(this.src);
+		for(var p in ani) {
+			hold.ani[hold.ani.length] = ani[p];
+		}
 		
 		//Use new style
 		//hold.map = "";
@@ -250,38 +295,68 @@ dusk.sgui.TileMap.prototype.drawAll = function() {
 	
 	if(!this._img.complete) return false;
 	
-	if(this.mode == "BINARY") {
-		var i = 0;
-		this._all.getContext("2d").clearRect(0, 0, this._all.width, this._all.height);
-		for (var yi = 0; yi < this.rows; yi++) {
-			for (var xi = 0; xi < this.cols; xi++) {
-				if(this._tiles[i] !== undefined) {
-					this._all.getContext("2d").drawImage(this._img,
-						this._tiles[i]<<this.ssize, this._tiles[i+1]<<this.ssize, 1<<this.ssize, 1<<this.ssize,
-						xi<<this.ssize, yi<<this.ssize, 1<<this.ssize, 1<<this.ssize
-					);
+	this._frames = this._framesNeeded();
+	this._currentFrame = 0;
+	this._framesRemaining = this._frameDelay;
+	
+	for(var f = 0; f < this._frames; f ++) {
+		this._editAnimation(this._tiles[0], this._tiles[f], f);
+		
+		if(this.mode == "BINARY") {
+			var i = 0;
+			this._all[f].getContext("2d").clearRect(0, 0, this._all[f].width, this._all[f].height);
+			for (var yi = 0; yi < this.rows; yi++) {
+				for (var xi = 0; xi < this.cols; xi++) {
+					if(this._tiles[f][i] !== undefined) {
+						this._all[f].getContext("2d").drawImage(this._img,
+							this._tiles[f][i]<<this.ssize, this._tiles[f][i+1]<<this.ssize,
+							1<<this.ssize, 1<<this.ssize, xi<<this.ssize, yi<<this.ssize, 1<<this.ssize, 1<<this.ssize
+						);
+					}
+					i+=2;
 				}
-				i+=2;
 			}
-		}
-	}else{
-		var i = 0;
-		this._all.getContext("2d").clearRect(0, 0, this._all.width, this._all.height);
-		for (var yi = 0; yi < this.rows; yi++) {
-			for (var xi = 0; xi < this.cols; xi++) {
-				if(this._tiles[i] !== undefined) {
-					this._all.getContext("2d").drawImage(this._img, 
-						this._tiles[i]*this.swidth, this._tiles[i+1]*this.sheight, this.swidth, this.sheight, 
-						xi*this.swidth, yi*this.sheight, this.swidth, this.sheight
-					);
+		}else{
+			var i = 0;
+			this._all[f].getContext("2d").clearRect(0, 0, this._all.width, this._all.height);
+			for (var yi = 0; yi < this.rows; yi++) {
+				for (var xi = 0; xi < this.cols; xi++) {
+					if(this._tiles[f][i] !== undefined) {
+						this._all.getContext("2d").drawImage(this._img, 
+							this._tiles[f][i]*this.swidth, this._tiles[f][i+1]*this.sheight, this.swidth, this.sheight, 
+							xi*this.swidth, yi*this.sheight, this.swidth, this.sheight
+						);
+					}
+					i+=2;
 				}
-				i+=2;
 			}
 		}
 	}
 	
 	this._drawn = true;
 	return true;
+};
+
+/** Given the first frame in the tilemap, will update `arr` such that it is `offset` frames array.
+ * @param {Uint8Array} origin The first frame.
+ * @param {Uint8Array} orr The destination array.
+ * @param {integer} offset The frame to set.
+ * @private
+ * @since 0.0.19-alpha
+ */
+dusk.sgui.TileMap.prototype._editAnimation = function(origin, arr, offset) {
+	var ani = dusk.sgui.TileMap.getAllAnimation(this.src);
+	var hold = [];
+	
+	for(var i = arr.length-2; i >= 0; i -= 2) {
+		for(var p in ani) {
+			if(p == origin[i]+","+origin[i+1]) {
+				hold = ani[p][offset].split(",");
+				arr[i] = +hold[0];
+				arr[i + 1] = +hold[1];
+			}
+		}
+	}
 };
 
 /** Returns the location of the source tile on the origin image
@@ -316,8 +391,23 @@ dusk.sgui.TileMap.prototype.tilePointIn = function(x, y, exactX, exactY) {
 	}
 };
 
+/** Used internally to manage frames.
+ * @param {object} e A `frame` event object.
+ * @private
+ */
+dusk.sgui.TileMap.prototype._tileMapFrame = function(e) {
+	if(this.animating && (!("editor" in dusk) || !dusk.editor.active)) {
+		if(--this._framesRemaining == 0) {
+			this._framesRemaining = this._frameDelay;
+			this._currentFrame = (this._currentFrame + 1) % this._frames;
+		}
+	}else{
+		this._currentFrame = 0;
+	}
+};
+
 /** Used internally to draw the tilemap.
- * @param {CanvasRenderingContext2D} c The canvas on which to draw.
+ * @param {object} e A `prepareDraw` event object.
  * @private
  */
 dusk.sgui.TileMap.prototype._tileMapDraw = function(e) {
@@ -325,13 +415,13 @@ dusk.sgui.TileMap.prototype._tileMapDraw = function(e) {
 	if(!this._drawn) this.drawAll();
 	if(this.mode == "BINARY") {
 		var scale = this.tsize-this.ssize;
-		e.c.drawImage(this._all, e.d.sourceX>>scale, e.d.sourceY>>scale, e.d.width>>scale, e.d.height>>scale,
+		e.c.drawImage(this._all[this._currentFrame], e.d.sourceX>>scale, e.d.sourceY>>scale, e.d.width>>scale, e.d.height>>scale,
 			e.d.destX, e.d.destY, e.d.width, e.d.height
 		);
 	}else{
 		var hscale = this.swidth/this.twidth;
 		var vscale = this.sheight/this.theight;
-		e.c.drawImage(this._all, e.d.sourceX*hscale, e.d.sourceY*vscale, e.d.width*hscale, e.d.height*vscale, 
+		e.c.drawImage(this._all[this._currentFrame], e.d.sourceX*hscale, e.d.sourceY*vscale, e.d.width*hscale, e.d.height*vscale, 
 			e.d.destX, e.d.destY, e.d.width, e.d.height
 		);
 	}
@@ -343,8 +433,8 @@ dusk.sgui.TileMap.prototype._tileMapDraw = function(e) {
  * @return {array} An `[x,y]` style array of the tile at this location.
  */
 dusk.sgui.TileMap.prototype.getTile = function(x, y) {
-	if(this._tiles[((y*this.cols)+x)<<1] !== undefined) {
-		return [this._tiles[((y*this.cols)+x)<<1], this._tiles[(((y*this.cols)+x)<<1)+1]];
+	if(this._tiles[0][((y*this.cols)+x)<<1] !== undefined) {
+		return [this._tiles[0][((y*this.cols)+x)<<1], this._tiles[0][(((y*this.cols)+x)<<1)+1]];
 	}
 	
 	console.warn("Tile "+x+","+y+" not found on "+this.comName+".");
@@ -361,9 +451,9 @@ dusk.sgui.TileMap.prototype.getTile = function(x, y) {
  *  If this is not true, then the changes won't take effect until the map is redrawn.
  */
 dusk.sgui.TileMap.prototype.setTile = function(x, y, tx, ty, update) {
-	if(this._tiles[((y*this.cols)+x)<<1] !== undefined) {
-		this._tiles[((y*this.cols)+x)<<1] = tx;
-		this._tiles[(((y*this.cols)+x)<<1)+1] = ty;
+	if(this._tiles[0][((y*this.cols)+x)<<1] !== undefined) {
+		this._tiles[0][((y*this.cols)+x)<<1] = tx;
+		this._tiles[0][(((y*this.cols)+x)<<1)+1] = ty;
 		if(update) this.drawAll();
 	}else{
 		console.warn("Tile "+x+","+y+" not found on "+this.comName+".");
@@ -425,7 +515,7 @@ dusk.sgui.TileMap.prototype.visibleRows = function() {
  */
 dusk.sgui.TileMap.prototype.lookTile = function(x, y) {
 	for(var t = (this.rows*this.cols)<<1; t > 0; t-=2){
-		if(this._tiles[t] == x && this._tiles[t+1] == y) {
+		if(this._tiles[0][t] == x && this._tiles[0][t+1] == y) {
 			return [(t >> 1) % this.cols, Math.floor((t >> 1)/this.cols)];
 		}
 	}
@@ -452,6 +542,68 @@ Object.defineProperty(dusk.sgui.TileMap.prototype, "height", {
 
 	set: function(value) {if(value > 0) console.warn("TileMap setting height is not supported.");}
 });
+
+/** Internal storage for the animation data.
+ * 
+ * Keys are tilesheet paths and the value is another object. In the second object, the keys are the first frame of the
+ *  animation, and their value is the whole animation.
+ * @type object
+ * @private
+ * @since 0.0.19-alpha
+ */
+dusk.sgui.TileMap._animationData = {};
+
+/** Sets an animation on the specified sheet, animating all tiles that match the first element of the animation array.
+ * 
+ * @param {string} sheet The path of the sheet to animate with. Must be exactly the same as the src used to specify the 
+ *  tiles on the TileMap.
+ * @param {array} animation An array of tile strings (`"0,0"` for example) that describe the animation. The first
+ *  element must be the tile set on the map data.
+ * @static
+ * @since 0.0.19-alpha
+ */
+dusk.sgui.TileMap.setAnimation = function(sheet, animation) {
+	if(!(sheet in dusk.sgui.TileMap._animationData)) {
+		dusk.sgui.TileMap._animationData[sheet] = {};
+	}
+	dusk.sgui.TileMap._animationData[sheet][animation[0]] = animation;
+};
+
+/** Returns an object of all the animations registered on the specified sheet.
+ * 
+ * @param {string} sheet The path of the sheet to get the animations for.
+ * @return {object} All the animations. The key is the first frame in the animation, while the values are the full
+ *  animation. Returns an empty object if no animations have been registered for the sheet.
+ * @static
+ * @since 0.0.19-alpha
+ */
+dusk.sgui.TileMap.getAllAnimation = function(sheet) {
+	if(!(sheet in dusk.sgui.TileMap._animationData)) {
+		dusk.sgui.TileMap._animationData[sheet] = {};
+	}
+	return dusk.sgui.TileMap._animationData[sheet];
+};
+
+/** Returns the minimum number of frames needed to animate.
+ * 
+ * @param {?integer} test Used for recursion; the number to test to see if it works.
+ * @return {integer} The lowest number of frames that the animation can use.
+ * @since 0.0.19-alpha
+ */
+dusk.sgui.TileMap.prototype._framesNeeded = function(test) {
+	if(test === undefined) test = 1;
+	var ani = dusk.sgui.TileMap.getAllAnimation(this.src);
+	var valid = true;
+	for(var p in ani) {
+		if((test % ani[p].length) != 0) {
+			valid = false;
+			break;
+		}
+	};
+	
+	if(valid == true) return test;
+	return this._framesNeeded(test+1);
+};
 
 Object.seal(dusk.sgui.TileMap);
 Object.seal(dusk.sgui.TileMap.prototype);

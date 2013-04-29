@@ -8,6 +8,7 @@ example.plat.rooms.exhall = [
     {
         "rows": 15,
         "cols": 24,
+        "ani":[["1,0", "2,0", "3,0", "2,0"]],
         "src": "pimg/techB.png",
         "map": "BC16:0x:d002010000009b800100cc80"
     },

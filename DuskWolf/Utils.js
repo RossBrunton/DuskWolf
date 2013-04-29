@@ -12,6 +12,7 @@ dusk.load.provide("dusk.utils");
 
 /** Makes a simple copy of the parameter object, and returns it.
  *   This will only work for simple objects, and not anything with prototypes and such like.
+ *   Anything which isn't a basic object will have it's reference copied, rather than it's value.
  * @param {object} o The source object to copy.
  * @return {object} A copy of the source object.
  */
@@ -19,7 +20,13 @@ dusk.utils.clone = function(o) {
 	if(o == null || typeof(o) != 'object') return o;
 
 	var tmp = o.constructor(); 
-	for(var p in o) tmp[p] = this.clone(o[p]);
+	for(var p in o) {
+		if(typeof o[p] == "object" && Object.getPrototypeOf(o[p]) != Object.prototype) {
+			tmp[p] = o[p];
+		}else{
+			tmp[p] = this.clone(o[p]);
+		}
+	}
 
 	return tmp;
 };
