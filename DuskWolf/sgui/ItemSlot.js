@@ -4,7 +4,7 @@
 
 dusk.load.require("dusk.sgui.Group");
 dusk.load.require("dusk.sgui.Tile");
-dusk.load.require("dusk.sgui.BitmapLabel");
+dusk.load.require("dusk.sgui.Label");
 dusk.load.require("dusk.sgui.Image");
 dusk.load.require("dusk.items");
 dusk.load.require("dusk.items.Invent");
@@ -20,8 +20,8 @@ dusk.sgui.ItemSlot = function (parent, comName) {
 	
 	this._itemChild = this.getComponent("item", "Tile");
 	this._handItemChild = this.getComponent("handitem", "Tile");
-	this._textChild = this.getComponent("count", "BitmapLabel");
-	this._handTextChild = this.getComponent("handcount", "BitmapLabel");
+	this._textChild = this.getComponent("count", "Label");
+	this._handTextChild = this.getComponent("handcount", "Label");
 	this._selectChild = this.getComponent("select", "Image");
 	this.alterChildLayer("count", "+");
 	

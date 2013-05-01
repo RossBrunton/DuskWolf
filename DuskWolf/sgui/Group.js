@@ -300,21 +300,34 @@ dusk.sgui.Group.prototype._groupDraw = function(e) {
 		for(var i = 0; i < this._drawOrder.length; i++) {
 			if(this._drawOrder[i] in this._components) {
 				var com = this._components[this._drawOrder[i]];
-				var data = {"alpha":e.alpha};
-				var destXAdder = com.xOrigin == dusk.sgui.Component.ORIGIN_MAX?this.width - com.width:0;
-				var destYAdder = com.yOrigin == dusk.sgui.Component.ORIGIN_MAX?this.height - com.height:0;
-				destXAdder = com.xOrigin == dusk.sgui.Component.ORIGIN_MIDDLE?(this.width - com.width)>>1:destXAdder;
-				destYAdder = com.yOrigin == dusk.sgui.Component.ORIGIN_MIDDLE?(this.height - com.height)>>1:destYAdder;
+				var data = {"alpha":e.alpha, "sourceX":0, "sourceY":0, "destX":e.d.destX, "destY":e.d.destY,
+					"width":0, "height":0
+				};
 				
-				data.sourceX = (-this.xOffset + com.x + destXAdder - e.d.sourceX)<0
-				 ? -(-this.xOffset + com.x + destXAdder - e.d.sourceX) : 0;
-				data.sourceY = (-this.yOffset + com.y + destYAdder - e.d.sourceY)<0
-				 ? -(-this.yOffset + com.y + destYAdder - e.d.sourceY) : 0;
+				var destXAdder = 0;
+				if(com.xOrigin == dusk.sgui.Component.ORIGIN_MAX) destXAdder = this.width - com.width;
+				if(com.xOrigin == dusk.sgui.Component.ORIGIN_MIDDLE) destXAdder = (this.width - com.width)>>1;
 				
-				data.destX = (com.x - this.xOffset - e.d.sourceX + destXAdder)<0
-				 ? e.d.destX : com.x - this.xOffset - e.d.sourceX + e.d.destX + destXAdder;
-				data.destY = (com.y - this.yOffset - e.d.sourceY + destYAdder)<0
-				 ? e.d.destY : com.y - this.yOffset - e.d.sourceY + e.d.destY + destYAdder;
+				var destYAdder = 0;
+				if(com.yOrigin == dusk.sgui.Component.ORIGIN_MAX) destYAdder = this.height - com.height;
+				if(com.yOrigin == dusk.sgui.Component.ORIGIN_MIDDLE) destYAdder = (this.height - com.height)>>1;
+				
+				
+				if((-this.xOffset + com.x + destXAdder - e.d.sourceX)<0) {
+					data.sourceX = -(-this.xOffset + com.x + destXAdder - e.d.sourceX);
+				}
+				
+				if((-this.yOffset + com.y + destYAdder - e.d.sourceY)<0) {
+					data.sourceY = -(-this.yOffset + com.y + destYAdder - e.d.sourceY);
+				}
+				
+				if((com.x - this.xOffset - e.d.sourceX + destXAdder) > 0) {
+					data.destX = com.x - this.xOffset - e.d.sourceX + e.d.destX + destXAdder;
+				}
+				
+				if((com.y - this.yOffset - e.d.sourceY + destYAdder) > 0) {
+					data.destY = com.y - this.yOffset - e.d.sourceY + e.d.destY + destYAdder;
+				}
 				
 				data.width = com.width - data.sourceX;
 				data.height = com.height - data.sourceY;

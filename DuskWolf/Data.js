@@ -4,6 +4,7 @@
 
 dusk.load.require("dusk");
 dusk.load.require("dusk.utils");
+dusk.load.require("dusk.EventDispatcher");
 
 dusk.load.provide("dusk.data");
 
@@ -26,6 +27,14 @@ dusk.data._init = function() {
 	 * @private
 	 */
 	dusk.data._loaded = {};
+	
+	/** Fired once when an image has completed loading.
+	 * 
+	 * The event object has two properties; `src`, the full src of the image, and `img`, the actual image object.
+	 * @type dusk.EventDispatcher
+	 * @since 0.0.19-alpha
+	 */
+	dusk.data.imgLoad = new dusk.EventDispatcher("dusk.data.imgLoad");
 	
 	//Enable/disable cache
 	$.ajaxSetup({"cache": !dusk.dev});
@@ -85,11 +94,22 @@ dusk.data.grabImage = function(file) {
 		console.log("Downloading image "+file+"...");
 		
 		this._loaded[file] = new Image();
-        this._loaded[file].src = dusk.utils.resolveRelative(file, dusk.dataDir) 
-        /*+ (dusk.dev?"?_="+(new Date()).getTime():"")*/;
+		this._loaded[file].src = dusk.utils.resolveRelative(file, dusk.dataDir);
+        this._loaded[file].onload = dusk.data._imgOnLoad;
+        
 		return this._loaded[file];
 	}
 	return this._loaded[file];
+};
+
+/** Attached to images' `onLoad` event. Manages firing of `{@link dusk.data.imgLoad}`.
+ * 
+ * @param {HTMLImageElement} The image.
+ * @private
+ * @since 0.0.19-alpha
+ */
+dusk.data._imgOnLoad = function(e) {
+	dusk.data.imgLoad.fire({"src":this.src, "img":this});
 };
 
 dusk.data._init();
