@@ -98,11 +98,38 @@ dusk.sgui.Group = function(parent, comName) {
 	 */
 	this.yOffset = 0;
 	
+	/** The horizontal scrolling. Set to a range, and the fractional value of the range (from 0.0 to 1.0) will be
+	 * interpreted as the "scrolling" where 0.0 is an xOffset of 0, while 1.0 is the maximum offset possible.
+	 * @type dusk.Range
+	 * @since 0.0.19-alpha
+	 */
+	this.horScroll = null;
+	/** Internal storage for horizontal scrolling.
+	 * @type dusk.Range
+	 * @private
+	 * @since 0.0.19-alpha
+	 */
+	this._horScroll = null;
+	/** The vertical scrolling. Set to a range, and the fractional value of the range (from 0.0 to 1.0) will be
+	 * interpreted as the "scrolling" where 0.0 is an yOffset of 0, while 1.0 is the maximum offset possible.
+	 * @type dusk.Range
+	 * @since 0.0.19-alpha
+	 */
+	this.verScroll = null;
+	/** Internal storage for vertical scrolling.
+	 * @type dusk.Range
+	 * @private
+	 * @since 0.0.19-alpha
+	 */
+	this._verScroll = null;
+	
 	//Prop masks
 	this._registerPropMask("focus", "focus", true, ["children"]);
 	this._registerPropMask("focusBehaviour", "focusBehaviour");
 	this._registerPropMask("xOffset", "xOffset");
 	this._registerPropMask("yOffset", "yOffset");
+	this._registerPropMask("horScroll", "horScroll", undefined, ["children", "allChildren", "width"]);
+	this._registerPropMask("verScroll", "verScroll", undefined, ["children", "allChildren", "height"]);
 	this._registerPropMask("children", "__children", undefined, ["focusBehaviour"]);
 	this._registerPropMask("allChildren", "__allChildren", undefined, ["focusBehaviour"]);
 	
@@ -593,13 +620,7 @@ Object.defineProperty(dusk.sgui.Group.prototype, "width", {
 			
 			return dusk.sgui.width;
 		}else if(this._width == -1) {
-			var max = 0;
-			for(var c in this._components) {
-				if(this._components[c].x + this._components[c].width > max)
-					max = this._components[c].x + this._components[c].width;
-			}
-			
-			return max - this.xOffset;
+			return this.getContentsWidth(true);
 		}else{
 			return this._width;
 		}
@@ -620,13 +641,7 @@ Object.defineProperty(dusk.sgui.Group.prototype, "height", {
 			
 			return dusk.sgui.height;
 		}else if(this._height == -1) {
-			var max = 0;
-			for(var c in this._components) {
-				if(this._components[c].y + this._components[c].height > max)
-					max = this._components[c].y + this._components[c].height;
-			}
-		
-			return max - this.yOffset;
+			return this.getContentsHeight(true);
 		}else{
 			return this._height;
 		}
@@ -641,10 +656,9 @@ Object.defineProperty(dusk.sgui.Group.prototype, "height", {
  * 
  * @param {boolean} includeOffset If true, then the offset is taken into account, and removed from the figure.
  * @return {integer} The smallest possible width where all the components are fully inside.
- * @protected
  * @since 0.0.18-alpha
  */
-dusk.sgui.Group.prototype._getTrueWidth = function(includeOffset) {
+dusk.sgui.Group.prototype.getContentsWidth = function(includeOffset) {
 	var max = 0;
 	for(var c in this._components) {
 		if(this._components[c].x + this._components[c].width > max)
@@ -658,10 +672,9 @@ dusk.sgui.Group.prototype._getTrueWidth = function(includeOffset) {
  * 
  * @param {boolean} includeOffset If true, then the offset is taken into account, and removed from the figure.
  * @return {integer} The smallest possible height where all the components are fully inside.
- * @protected
  * @since 0.0.18-alpha
  */
-dusk.sgui.Group.prototype._getTrueHeight = function(includeOffset) {
+dusk.sgui.Group.prototype.getContentsHeight = function(includeOffset) {
 	var max = 0;
 	for(var c in this._components) {
 		if(this._components[c].y + this._components[c].height > max)
@@ -669,6 +682,64 @@ dusk.sgui.Group.prototype._getTrueHeight = function(includeOffset) {
 	}
 	
 	return max - (includeOffset?this.yOffset:0);
+};
+
+//horScroll
+Object.defineProperty(dusk.sgui.Group.prototype, "horScroll", {
+	set: function(value) {
+		if(this._horScroll) this._horScroll.onChange.unlisten(this._horChanged, this);
+		this._horScroll = value;
+		if(this._horScroll) {
+			this._horScroll.onChange.listen(this._horChanged, this);
+			this._horChanged({});
+		}
+	},
+	
+	get: function() {
+		return this._horScroll;
+	}
+});
+
+/** Used to manage the changing of horizontal scrolling.
+ * @param {object} e The event object.
+ * @private
+ * @since 0.0.19-alpha
+ */
+dusk.sgui.Group.prototype._horChanged = function(e) {
+	if(this.getContentsWidth() < this.width) {
+		this.xOffset = 0;
+		return;
+	}
+	this.xOffset = ~~(this._horScroll.getFraction() * (this.getContentsWidth() - this.width));
+};
+
+//verScroll
+Object.defineProperty(dusk.sgui.Group.prototype, "verScroll", {
+	set: function(value) {
+		if(this._verScroll) this._verScroll.onChange.unlisten(this._verChanged, this);
+		this._verScroll = value;
+		if(this._verScroll) {
+			this._verScroll.onChange.listen(this._verChanged, this);
+			this._verChanged({});
+		}
+	},
+	
+	get: function() {
+		return this._verScroll;
+	}
+});
+
+/** Used to manage the changing of vertical scrolling.
+ * @param {object} e The event object.
+ * @private
+ * @since 0.0.19-alpha
+ */
+dusk.sgui.Group.prototype._verChanged = function(e) {
+	if(this.getContentsHeight() < this.height) {
+		this.yOffset = 0;
+		return;
+	}
+	this.yOffset = ~~(this._verScroll.getFraction() * (this.getContentsHeight() - this.height));
 };
 
 Object.seal(dusk.sgui.Group);

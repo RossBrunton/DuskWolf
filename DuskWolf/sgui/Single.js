@@ -340,6 +340,34 @@ Object.defineProperty(dusk.sgui.Single.prototype, "height", {
 	}
 });
 
+/** Returns the smallest width which has all the components fully drawn inside.
+ * 
+ * @param {boolean} includeOffset If true, then the offset is taken into account, and removed from the figure.
+ * @return {integer} The smallest possible width where all the components are fully inside.
+ * @since 0.0.19-alpha
+ */
+dusk.sgui.Single.prototype.getContentsWidth = function(includeOffset) {
+	if(includeOffset) {
+		return this._component.x + this._component.width - this.xOffset;
+	}else{
+		return this._component.x + this._component.width;
+	}
+};
+
+/** Returns the smallest height which has all the components fully drawn inside.
+ * 
+ * @param {boolean} includeOffset If true, then the offset is taken into account, and removed from the figure.
+ * @return {integer} The smallest possible height where all the components are fully inside.
+ * @since 0.0.19-alpha
+ */
+dusk.sgui.Single.prototype.getContentsHeight = function(includeOffset) {
+	if(includeOffset) {
+		return this._component.y + this._component.height - this.yOffset;
+	}else{
+		return this._component.y + this._component.height;
+	}
+};
+
 Object.seal(dusk.sgui.Single);
 Object.seal(dusk.sgui.Single.prototype);
 

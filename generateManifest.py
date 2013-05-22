@@ -15,6 +15,11 @@ from time import gmtime, strftime
 print "CACHE MANIFEST"
 print "# Updated: "+strftime("%Y-%m-%d %H:%M:%S", gmtime())
 
+print "NETWORK:"
+print "*"
+print ""
+print "CACHE:"
+
 baseDir = os.getcwd()
 
 for i in xrange(1, len(sys.argv) - 1, 2):

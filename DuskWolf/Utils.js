@@ -66,7 +66,7 @@ dusk.utils.merge = function(a, b) {
  */
 dusk.utils.doesImplement = function(obj, inter) {
 	for(var p in inter) {
-		if(!(p in obj) || typeof obj[p] != "function") {
+		if(!(p in obj)) {
 			return false;
 		}
 	}

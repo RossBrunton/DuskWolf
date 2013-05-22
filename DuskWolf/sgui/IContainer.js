@@ -121,4 +121,20 @@ dusk.sgui.IContainer.flow = function(to) {};
  */
 dusk.sgui.IContainer.alterChildLayer = function(com, alter) {};
 
+/** Returns the smallest width which has all the components fully drawn inside.
+ * 
+ * @param {boolean} includeOffset If true, then the offset is taken into account, and removed from the figure.
+ * @return {integer} The smallest possible width where all the components are fully inside.
+ * @since 0.0.19-alpha
+ */
+dusk.sgui.IContainer.getContentsWidth = function(includeOffset) {};
+
+/** Returns the smallest height which has all the components fully drawn inside.
+ * 
+ * @param {boolean} includeOffset If true, then the offset is taken into account, and removed from the figure.
+ * @return {integer} The smallest possible height where all the components are fully inside.
+ * @since 0.0.19-alpha
+ */
+dusk.sgui.IContainer.getContentsHeight = function(includeOffset) {};
+
 Object.seal(dusk.sgui.IContainer);

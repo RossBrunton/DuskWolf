@@ -219,8 +219,8 @@ dusk.sgui.BasicMain.prototype.autoScroll = function() {
 	this.xOffset = seekCoords[0] - (this.width >> 1);
 	this.yOffset = seekCoords[1] - (this.height >> 1);
 	
-	if(this.xOffset > this._getTrueWidth(false) - this.width) this.xOffset = this._getTrueWidth(false) - this.width;
-	if(this.yOffset > this._getTrueHeight(false) - this.height) this.yOffset = this._getTrueHeight(false) - this.height;
+	if(this.xOffset > this.getContentsWidth(false) - this.width) this.xOffset = this.getContentsWidth(false) - this.width;
+	if(this.yOffset > this.getContentsHeight(false) - this.height) this.yOffset = this.getContentsHeight(false) - this.height;
 	
 	if(this.xOffset < 0) this.xOffset = 0;
 	if(this.yOffset < 0) this.yOffset = 0;

@@ -213,4 +213,24 @@ dusk.sgui.getPane("textTest").parseProps({
 	}
 });
 
+//Scrolling
+dusk.sgui.getPane("scrollTest").parseProps({
+	"width":50,
+	"horScroll":example.newGui.testRange,
+	"children":{
+		"recta":{
+			"type":"Rect",
+			"width":50,
+			"height":50,
+			"colour":"#ff0000"
+		},
+		"rectb":{
+			"type":"Rect",
+			"width":50,
+			"height":50,
+			"x":50,
+			"colour":"#ffff00"
+		}
+	}
+});
 dusk.startGame();
