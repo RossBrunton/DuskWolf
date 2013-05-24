@@ -3,9 +3,10 @@
 "use strict";
 
 dusk.load.require("dusk.sgui.Image");
+dusk.load.require("dusk.sgui.Tile");
 
 dusk.load.provide("dusk.sgui.FocusChecker");
-
+dusk.load.provide("dusk.sgui.FocusCheckerTile");
 
 /** @class dusk.sgui.FocusChecker
  * 
@@ -51,12 +52,86 @@ dusk.sgui.FocusChecker = function(parent, comName) {
 	this.onActiveChange.listen(function(e) {if(this.activeImg) this.src = this.activeImg;}, this, {"active":true});
 	this.onActiveChange.listen(function(e) {if(this.focusedImg) this.src = this.focusedImg;}, this, {"active":false});
 };
-dusk.sgui.FocusChecker.prototype = new dusk.sgui.Image();
-dusk.sgui.FocusChecker.constructor = dusk.sgui.FocusChecker;
+dusk.sgui.FocusChecker.prototype = Object.create(dusk.sgui.Image.prototype);
 
 dusk.sgui.FocusChecker.prototype.className = "FocusChecker";
 
 Object.seal(dusk.sgui.FocusChecker);
 Object.seal(dusk.sgui.FocusChecker.prototype);
+
+dusk.sgui.registerType("FocusChecker", dusk.sgui.FocusChecker);
+
+//-----
+
+/** @class dusk.sgui.FocusCheckerTile
+ * 
+ * @classdesc Functions like a `{@link dusk.sgui.FocusChecker}` only it uses a tile instead of an image.
+ * 
+ * @param {dusk.sgui.IContainer} parent The container that this component is in.
+ * @param {string} comName The name of the component.
+ * @extends dusk.sgui.Tile
+ * @constructor
+ * @since 0.0.19-alpha
+ */
+dusk.sgui.FocusCheckerTile = function(parent, comName) {
+	dusk.sgui.Tile.call(this, parent, comName);
+	
+	/** The orientation to set the tiles for. One of the `dusk.sgui.c.ORIENT_*` constants.
+	 * Vertical means the y coordianate will be set, while horizontal means the x one.
+	 * @type integer
+	 * @default dusk.sgui.c.ORIENT_VER
+	 */
+	this.focusOrient = dusk.sgui.c.ORIENT_VER;
+	
+	/** The values to set the tile depending on the current state. This will be set to the x or y coordinate when the 
+	 * state changes.
+	 * 
+	 * A three elemnt array in the form `[inactive, focused, active]`.
+	 * @type array
+	 * @default [0, 0, 1]
+	 */
+	this.focusValues = [0, 0, 1];
+	
+	//Prop masks
+	this._registerPropMask("focusOrient", "focusOrient");
+	this._registerPropMask("focusValues", "focusValues");
+	
+	//Listeners
+	this.onFocusChange.listen(function(e) {
+		if(this.focusOrient == dusk.sgui.c.ORIENT_HOR) {
+			this.tile = [this.focusValues[1], this.tile[1]];
+		}else{
+			this.tile = [this.tile[0], this.focusValues[1]];
+		}
+	}, this, {"focus":true});
+	this.onFocusChange.listen(function(e) {
+		if(this.focusOrient == dusk.sgui.c.ORIENT_HOR) {
+			this.tile = [this.focusValues[0], this.tile[1]];
+		}else{
+			this.tile = [this.tile[0], this.focusValues[0]];
+		}
+	}, this, {"focus":false});
+	
+	this.onActiveChange.listen(function(e) {
+		if(this.focusOrient == dusk.sgui.c.ORIENT_HOR) {
+			this.tile = [this.focusValues[2], this.tile[1]];
+		}else{
+			this.tile = [this.tile[0], this.focusValues[2]];
+		}
+	}, this, {"active":true});
+	this.onActiveChange.listen(function(e) {
+		if(this.focusOrient == dusk.sgui.c.ORIENT_HOR) {
+			this.tile = [this.focusValues[0], this.tile[1]];
+		}else{
+			this.tile = [this.tile[0], this.focusValues[0]];
+		}
+	}, this, {"active":false});
+};
+dusk.sgui.FocusCheckerTile.prototype = Object.create(dusk.sgui.Tile.prototype);
+
+dusk.sgui.FocusCheckerTile.prototype.className = "FocusCheckerTile";
+
+Object.seal(dusk.sgui.FocusCheckerTile);
+Object.seal(dusk.sgui.FocusCheckerTile.prototype);
 
 dusk.sgui.registerType("FocusChecker", dusk.sgui.FocusChecker);

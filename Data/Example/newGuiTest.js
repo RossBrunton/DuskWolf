@@ -114,7 +114,7 @@ dusk.sgui.getPane("newGui").parseProps({
 //Grids
 dusk.sgui.getPane("grid").parseProps({
 	"active":true,
-	"focus":"tr",
+	"focus":"check",
 	"extras":{
 		"fadey":{"type":"SineSlide", "duration":60, "delay":0, "on":true,
 			"peak":75, "modifier":1.5, "dir":dusk.sgui.c.DIR_RIGHT
@@ -198,7 +198,6 @@ dusk.sgui.getPane("grid").parseProps({
 
 //Text
 dusk.sgui.getPane("textTest").parseProps({
-	"active":true,
 	"focus":"in",
 	"children":{
 		"textTest":{

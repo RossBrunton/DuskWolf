@@ -3,7 +3,7 @@
 "use strict";
 
 dusk.load.require("dusk.sgui.Group");
-dusk.load.require("dusk.sgui.Tile");
+dusk.load.require("dusk.sgui.FocusCheckerTile");
 dusk.load.require("dusk.keyboard");
 
 dusk.load.provide("dusk.sgui.Checkbox");
@@ -15,25 +15,26 @@ dusk.load.provide("dusk.sgui.Checkbox");
  * 
  * @class dusk.sgui.Checkbox
  * 
- * @classdesc A checkbox has two states, on or off. This is represented by the property "checked" and it's appearance.
+ * @classdesc A checkbox has two states, on or off. This is represented by the property "checked" and its appearance.
  * 
- * A checkbox inherits from `{@link dusk.sgui.Tile}`, where each tile indicates a different state of the checkbox:
- * - `0,0`: Not active, not checked.
- * - `1,0`: Not active, checked.
- * - `2,0`: Active, not checked.
- * - `3,0`: Active, checked.
+ * A checkbox (eventually) inherits from `{@link dusk.sgui.Tile}`, where each tile indicates a different state:
+ * - `0,0`: Not checked.
+ * - `1,0`: Checked.
+ * - `2,0`: Not checked, but in a radiobox.
+ * - `3,0`: Checked, and in a radiobox.
  * 
- * In addition, a checkbox that is inside a group which has `{@link dusk.sgui.extras.Radiobox}` as an extra
- *  will function like a radio button as described in that class. This also means it has a different apperence.
- *  Instead of using the 0th row (where y = 0) it will use the first row (where y = 1).
+ * Checkboxes will have slightly different behavior in a container with `{@link dusk.sgui.extras.Radiobox}` as an extra.
+ * 
+ * As well as the top row, there is another row underneath it. The bottom row is used when the checkbox is the active
+ *  component.
  * 
  * By default, a checkbox has a src of `"sgui/check.png"`, a width and height of 16, and a sprite size of 4.
  * 
- * @extends dusk.sgui.Tile
+ * @extends dusk.sgui.FocusCheckerTile
  * @constructor
  */
 dusk.sgui.Checkbox = function (parent, comName) {
-	dusk.sgui.Tile.call(this, parent, comName);
+	dusk.sgui.FocusCheckerTile.call(this, parent, comName);
 	
 	/** Used internally to store if this is checked.
 	 * @type boolean
@@ -67,10 +68,8 @@ dusk.sgui.Checkbox = function (parent, comName) {
 	
 	//Listeners
 	this.action.listen(function(e) {this.checked = !this.checked; return false;}, this);
-	this.onActiveChange.listen(function(e){this.checked = this.checked;}, this);
 };
-dusk.sgui.Checkbox.prototype = new dusk.sgui.Tile();
-dusk.sgui.Checkbox.constructor = dusk.sgui.Checkbox;
+dusk.sgui.Checkbox.prototype = Object.create(dusk.sgui.FocusCheckerTile.prototype);
 
 dusk.sgui.Checkbox.prototype.className = "Checkbox";
 
@@ -79,9 +78,9 @@ Object.defineProperty(dusk.sgui.Checkbox.prototype, "checked", {
 	set: function(value) {
 		this._checked = value == true;
 		if(this._checked) {
-			this.tile = [1 + (this._active?2:0), this._radiobox?1:0];
+			this.tile = [this._radiobox?3:1, this.tile[1]];
 		}else{
-			this.tile = [0 + (this._active?2:0), this._radiobox?1:0];
+			this.tile = [this._radiobox?2:0, this.tile[1]];
 		}
 		
 		if(this._radiobox && this._checked)

@@ -10,6 +10,7 @@ dusk.load.provide("dusk.sgui.c");
  * @description  This namespace contains a number of constants that various components in the SGui system use.
  * 
  * You may assume that this has been imported if any SGui component has been imported.
+ * @since 0.0.19-alpha
  */
 
 /** The direction up, negative in the y axis.
@@ -39,3 +40,18 @@ dusk.sgui.c.DIR_LEFT = 0x04;
  * @constant
  */
 dusk.sgui.c.DIR_RIGHT = 0x08;
+
+
+/** The horizontal orientation.
+ * @type integer
+ * @value 0x01
+ * @constant
+ */
+dusk.sgui.c.ORIENT_HOR = 0x01;
+
+/** The vertical orientation.
+ * @type integer
+ * @value 0x02
+ * @constant
+ */
+dusk.sgui.c.ORIENT_VER = 0x02;
