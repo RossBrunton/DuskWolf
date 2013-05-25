@@ -80,7 +80,7 @@ dusk.sgui.IContainer.getComponent = function(com, type) {};
 /** Modifies a component in this container using JSON data.
  *	
  * A container is expected to check what component to send the data to (Possibly using the `name` property)
- *  and call `{@link dusk.sgui.Component.parseProps}` on the data.
+ *  and call `{@link dusk.sgui.Component.parseProps}` on the data, followed by `{@link dusk.sgui.applyStyles}`.
  * 
  * An array may also be specified,
  * 	in which case it should behave as if multiple called had been made; one for each element.

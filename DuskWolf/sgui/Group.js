@@ -244,6 +244,7 @@ dusk.sgui.Group.prototype.modifyComponent = function(data) {
 		for (var i = 0; i < data.length; i++) {
 			if(("name" in data[i]) && this.getComponent(data[i].name.toLowerCase(), data[i].type)) {
 				this.getComponent(data[i].name.toLowerCase()).parseProps(data[i]);
+				dusk.sgui.applyStyles(this.getComponent(data[i].name.toLowerCase()));
 			} else if(data[i].name) {
 				console.warn(data[i].name + " has not been given a type and does not exist, ignoring.");
 			} else {
@@ -254,12 +255,14 @@ dusk.sgui.Group.prototype.modifyComponent = function(data) {
 		if("name" in data && typeof data.name == "string") {
 			if(this.getComponent(data.name.toLowerCase(), data.type)) {
 				return this.getComponent(data.name.toLowerCase()).parseProps(data);
+				dusk.sgui.applyStyles(this.getComponent(data.name.toLowerCase()));
 			}
 			console.warn(data.name + " has not been given a type and does not exist, ignoring.");
 		}else{
 			for(var p in data) {
 				if(this.getComponent(p.toLowerCase(), data[p].type)) {
 					this.getComponent(p.toLowerCase()).parseProps(data[p]);
+					dusk.sgui.applyStyles(this.getComponent(p.toLowerCase()));
 				}else{
 					console.warn(p + " has not been given a type and does not exist, ignoring.");
 				}
@@ -702,6 +705,7 @@ Object.defineProperty(dusk.sgui.Group.prototype, "horScroll", {
 
 /** Used to manage the changing of horizontal scrolling.
  * @param {object} e The event object.
+ * @return {object} The event object, unchanged.
  * @private
  * @since 0.0.19-alpha
  */
@@ -711,6 +715,8 @@ dusk.sgui.Group.prototype._horChanged = function(e) {
 		return;
 	}
 	this.xOffset = ~~(this._horScroll.getFraction() * (this.getContentsWidth() - this.width));
+	
+	return e;
 };
 
 //verScroll
@@ -731,6 +737,7 @@ Object.defineProperty(dusk.sgui.Group.prototype, "verScroll", {
 
 /** Used to manage the changing of vertical scrolling.
  * @param {object} e The event object.
+ * @return {object} The event object, unchanged.
  * @private
  * @since 0.0.19-alpha
  */
@@ -740,6 +747,7 @@ dusk.sgui.Group.prototype._verChanged = function(e) {
 		return;
 	}
 	this.yOffset = ~~(this._verScroll.getFraction() * (this.getContentsHeight() - this.height));
+	return e;
 };
 
 Object.seal(dusk.sgui.Group);

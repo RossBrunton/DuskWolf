@@ -321,7 +321,8 @@ dusk.sgui.getStyles = function(com) {
 			if((current[1] && dusk.sgui.getType(current[1]) && !(hold instanceof dusk.sgui.getType(current[1])))
 			|| (current[2] && !Array.isArray(hold.style) && hold.style != current[2])
 			|| (current[2] && Array.isArray(hold.style) && current[2] in hold.style)
-			|| (current[3] && hold.comName != current[3])) {
+			|| (current[3] && hold.comName != current[3])
+			|| (current[4] && !current[5] && hold.prop(current[4]) != current[6])) {
 				valid = false;
 				break;
 			}

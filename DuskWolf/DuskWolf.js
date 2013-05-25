@@ -33,7 +33,7 @@ dusk.load.provide("dusk");
  *  Must contain at least one number, and numbers furthest to the left indicate newer versions.
  * @type string
  */
-dusk.ver = "0.0.18-alpha";
+dusk.ver = "0.0.19-alpha";
 
 /** The frame rate, in frames per second.
  * 

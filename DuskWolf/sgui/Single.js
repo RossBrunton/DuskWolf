@@ -138,6 +138,7 @@ dusk.sgui.Single.prototype.modifyComponent = function(data) {
 	}else{
 		if(data.name && this.getComponent(data.name.toLowerCase(), data.type)) {
 			this._component.parseProps(data);
+			dusk.sgui.applyStyles(this._component);
 		} else {
 			console.warn(data.name + " has not been given a type and does not exist, ignoring.");
 		}

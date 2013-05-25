@@ -14,6 +14,7 @@ dusk.load.require("dusk.sgui.extras.Radiobox");
 dusk.load.require("dusk.sgui.DynamicGrid");
 dusk.load.require("dusk.sgui.extras.DynamicWidth");
 dusk.load.require("dusk.sgui.RangeText");
+dusk.load.require("dusk.sgui.Scroller");
 dusk.load.require("dusk.Range");
 dusk.load.require("dusk");
 
@@ -214,22 +215,57 @@ dusk.sgui.getPane("textTest").parseProps({
 
 //Scrolling
 dusk.sgui.getPane("scrollTest").parseProps({
-	"width":50,
-	"horScroll":example.newGui.testRange,
+	"active":true,
+	"focus":"scroll",
 	"children":{
-		"recta":{
-			"type":"Rect",
+		"rects":{
+			"horScroll":example.newGui.testRange,
+			"type":"Group",
 			"width":50,
 			"height":50,
-			"colour":"#ff0000"
+			"children":{
+				"recta":{
+					"type":"Rect",
+					"width":50,
+					"height":50,
+					"colour":"#ff0000"
+				},
+				"rectb":{
+					"type":"Rect",
+					"width":50,
+					"height":50,
+					"x":50,
+					"colour":"#ffff00"
+				},
+				"rectc":{
+					"type":"Rect",
+					"width":50,
+					"height":50,
+					"y":50,
+					"colour":"#00ff00"
+				},
+				"rectd":{
+					"type":"Rect",
+					"width":50,
+					"height":50,
+					"x":50,
+					"y":50,
+					"colour":"#0000ff"
+				},
+			}
 		},
-		"rectb":{
-			"type":"Rect",
-			"width":50,
-			"height":50,
-			"x":50,
-			"colour":"#ffff00"
-		}
+		"scroll":{
+			"target":"../rects",
+			"type":"Scroller",
+			"orientation":dusk.sgui.c.ORIENT_HOR,
+			"upFlow":"scrollV"
+		},
+		"scrollV":{
+			"target":"../rects",
+			"type":"Scroller",
+			"orientation":dusk.sgui.c.ORIENT_VER,
+			"leftFlow":"scroll"
+		},
 	}
 });
 dusk.startGame();
