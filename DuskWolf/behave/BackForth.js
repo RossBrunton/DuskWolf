@@ -22,22 +22,24 @@ dusk.behave.BackForth = function(entity) {
 	dusk.behave.Behave.call(this, entity);
 		
 	this._data("hspeed", 1, true);
-		
+	
 	this.entityEvent.listen(this._bfCollide, this, {"name":"collide"});
+	
+	this._entity.applyDx("bf_move", this._data("hspeed"));
+	window.hook = this;
 };
-dusk.behave.BackForth.prototype = new dusk.behave.Behave();
-dusk.behave.BackForth.constructor = dusk.behave.BackForth;
+dusk.behave.BackForth.prototype = Object.create(dusk.behave.Behave.prototype);
 
 /** Used to manage collisions internally.
  * @param {object} e A "collide" event dispatched from `{@link dusk.behave.Behave.entityEvent}`.
  * @private
  */
 dusk.behave.BackForth.prototype._bfCollide = function(e) {
-	if(e.dir == "l") {
-		this._entity.dx = this._entity.behaviourData.hspeed;
+	if(e.dir == dusk.sgui.c.DIR_LEFT) {
+		this._entity.applyDx("bf_move", this._data("hspeed"));
 	}
-	if(e.dir == "r") {
-		this._entity.dx = -this._entity.behaviourData.hspeed;
+	if(e.dir == dusk.sgui.c.DIR_RIGHT) {
+		this._entity.applyDx("bf_move", -this._data("hspeed"));
 	}
 };
 

@@ -54,6 +54,18 @@ example.plat.rooms.exhall = [
             "type": "fall",
             "x": 576,
             "y": 224
+        },
+        {
+            "name": "nextToRight",
+            "type": "fall",
+            "x": 512,
+            "y": 192
+        },
+        {
+            "name": "nextToLeft",
+            "type": "fall",
+            "x": 224,
+            "y": 192
         }
     ],
     {

@@ -24,7 +24,7 @@ dusk.behave.Fall = function(entity) {
 		
 		this._data("fallSpeed", 1, true);
 		
-		this.entityEvent.listen(this._fallFall, this, {"name":"collidedInto", "dir":"d"});
+		this.entityEvent.listen(this._fallFall, this, {"name":"collidedInto", "dir":dusk.sgui.c.DIR_UP});
 	}
 };
 dusk.behave.Fall.prototype = new dusk.behave.Behave();
@@ -35,7 +35,8 @@ dusk.behave.Fall.constructor = dusk.behave.Fall;
  * @private
  */
 dusk.behave.Fall.prototype._fallFall = function(name, e) {
-	this._entity.performMotion(0, this._entity.eProp("fallSpeed"));
+	//this._entity.performMotion(0, this._entity.eProp("fallSpeed"));
+	this._entity.applyDy("fall_fall", 1/*this._data("fallSpeed")*/);
 };
 
 Object.seal(dusk.behave.Fall);

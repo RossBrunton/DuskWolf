@@ -36,10 +36,10 @@ dusk.behave.Push.constructor = dusk.behave.Push;
  */
 dusk.behave.Push.prototype._pCollided = function(e) {
 	switch(e.dir) {
-		case "d": this._entity.performMotion(0, this._entity.behaviourData.speed);break;
-		case "u": this._entity.performMotion(0, -this._entity.behaviourData.speed); break;
-		case "r": this._entity.performMotion(this._entity.behaviourData.speed, 0); break;
-		case "l": this._entity.performMotion(-this._entity.behaviourData.speed, 0); break;
+		case dusk.sgui.c.DIR_DOWN: this._entity.applyDy("push_push", -this._data("speed"), 1);break;
+		case dusk.sgui.c.DIR_UP: this._entity.applyDy("push_push", this._data("speed"), 1);break;
+		case dusk.sgui.c.DIR_RIGHT: this._entity.applyDx("push_push", -this._data("speed"), 1);break;
+		case dusk.sgui.c.DIR_LEFT: this._entity.applyDx("push_push", this._data("speed"), 1);break;
 	}
 };
 

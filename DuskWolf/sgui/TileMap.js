@@ -234,7 +234,7 @@ Object.defineProperty(dusk.sgui.TileMap.prototype, "map", {
 			singleH = this.theight;
 		}
 		
-		var t = performance.now();
+		if("performance" in window && "now" in window.performance) var t = performance.now();
 		
 		this._tileBuffer = [];
 		this._tiles = [];
@@ -258,7 +258,7 @@ Object.defineProperty(dusk.sgui.TileMap.prototype, "map", {
 		
 		
 		this.drawAll();
-		console.log("Map took "+(performance.now()-t)+"ms to render!");
+		if(t) console.log("Map took "+(performance.now()-t)+"ms to render!");
 	},
 	
 	get: function(){
@@ -339,7 +339,7 @@ dusk.sgui.TileMap.prototype.drawAll = function() {
 
 /** Given the first frame in the tilemap, will update `arr` such that it is `offset` frames array.
  * @param {Uint8Array} origin The first frame.
- * @param {Uint8Array} orr The destination array.
+ * @param {Uint8Array} arr The destination array.
  * @param {integer} offset The frame to set.
  * @private
  * @since 0.0.19-alpha
@@ -437,7 +437,7 @@ dusk.sgui.TileMap.prototype.getTile = function(x, y) {
 		return [this._tiles[0][((y*this.cols)+x)<<1], this._tiles[0][(((y*this.cols)+x)<<1)+1]];
 	}
 	
-	console.warn("Tile "+x+","+y+" not found on "+this.comName+".");
+	//console.warn("Tile "+x+","+y+" not found on "+this.comName+".");
 	return [0, 0];
 };
 
@@ -456,7 +456,7 @@ dusk.sgui.TileMap.prototype.setTile = function(x, y, tx, ty, update) {
 		this._tiles[0][(((y*this.cols)+x)<<1)+1] = ty;
 		if(update) this.drawAll();
 	}else{
-		console.warn("Tile "+x+","+y+" not found on "+this.comName+".");
+		//console.warn("Tile "+x+","+y+" not found on "+this.comName+".");
 	}
 };
 

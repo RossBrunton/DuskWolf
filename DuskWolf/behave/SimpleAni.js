@@ -17,10 +17,10 @@ dusk.behave.SimpleAni.prototype = new dusk.behave.Behave();
 dusk.behave.SimpleAni.constructor = dusk.behave.SimpleAni;
 
 dusk.behave.SimpleAni.prototype._simpleAniFrame = function(e) {
-	if(this._entity.dy < 0) {
-		if(this._entity.dx > 0) {
+	if(this._entity.getDy() < 0) {
+		if(this._entity.getDx() > 0) {
 			this._entity.setAnimation("jump", {"flags":["r"]});
-		}else if(this._entity.dx < 0) {
+		}else if(this._entity.getDx() < 0) {
 			this._entity.setAnimation("jump", {"flags":["l"]});
 		}else{
 			if(this._entity.aniFlagActive("l")) {
@@ -29,10 +29,10 @@ dusk.behave.SimpleAni.prototype._simpleAniFrame = function(e) {
 				this._entity.setAnimation("jump", {"flags":["r"]});
 			}
 		}
-	}else if(this._entity.dy > 0) {
-		if(this._entity.dx > 0) {
+	}else if(this._entity.getDy() > 0) {
+		if(this._entity.getDx() > 0) {
 			this._entity.setAnimation("fall", {"flags":["r"]});
-		}else if(this._entity.dx < 0) {
+		}else if(this._entity.getDx() < 0) {
 			this._entity.setAnimation("fall", {"flags":["l"]});
 		}else{
 			if(this._entity.aniFlagActive("l")) {
@@ -41,9 +41,9 @@ dusk.behave.SimpleAni.prototype._simpleAniFrame = function(e) {
 				this._entity.setAnimation("fall", {"flags":["r"]});
 			}
 		}
-	}else if(this._entity.dx > 0) {
+	}else if(this._entity.getDx() > 0) {
 		this._entity.setAnimation("walk", {"flags":["r"]});
-	}else if(this._entity.dx < 0) {
+	}else if(this._entity.getDx() < 0) {
 		this._entity.setAnimation("walk", {"flags":["l"]});
 	}else{
 		if(this._entity.aniFlagActive("l")) {

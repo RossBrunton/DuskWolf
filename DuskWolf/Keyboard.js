@@ -39,7 +39,10 @@ dusk.keyboard.keyPress = new dusk.EventDispatcher("dusk.keyboard.keyPress");
  */
 dusk.keyboard.keyUp = new dusk.EventDispatcher("dusk.keyboard.keyUp");
 
-$(document).bind("keydown", function je_keydown(e){dusk.keyboard.keyPress.fire(e);});
+$(document).bind("keydown", function je_keydown(e){
+	if(!dusk.keyboard._keys[e.keyCode]) 
+		dusk.keyboard.keyPress.fire(e);
+});
 $(document).bind("keyup", function je_keyup(e){dusk.keyboard.keyUp.fire(e);});
 
 /** An object describing the properties of keys relative to their keycodes.

@@ -11,8 +11,8 @@ dusk.load.provide("dusk.sgui.Entity");
 dusk.sgui.Entity = function (parent, comName) {
 	dusk.sgui.Tile.call(this, parent, comName);
 	
-	this.dy = 0;
-	this.dx = 0;
+	this._dy = {};
+	this._dx = {};
 	
 	this._behaviours = {};
 	this.behaviourData = {};
@@ -30,7 +30,11 @@ dusk.sgui.Entity = function (parent, comName) {
 	this._frameDelay = 5;
 	this._frameCountdown = 0;
 	
-	this._touchers = {"l":[], "r":[], "u":[], "d":[]};
+	this._touchers = {};
+	this._touchers[dusk.sgui.c.DIR_UP] = [];
+	this._touchers[dusk.sgui.c.DIR_DOWN] = [];
+	this._touchers[dusk.sgui.c.DIR_LEFT] = [];
+	this._touchers[dusk.sgui.c.DIR_RIGHT] = [];
 	
 	this.collisionOffsetX = 0;
 	this.collisionOffsetY = 0;
@@ -68,154 +72,90 @@ dusk.sgui.Entity = function (parent, comName) {
 	//Listeners
 	if(this.collisionMark) this.prepareDraw.listen(this._collisionDraw, this);
 };
-dusk.sgui.Entity.prototype = new dusk.sgui.Tile();
-dusk.sgui.Entity.constructor = dusk.sgui.Entity;
+dusk.sgui.Entity.prototype = Object.create(dusk.sgui.Tile.prototype);
 
 dusk.sgui.Entity.prototype.className = "Entity";
 
-dusk.sgui.Entity.prototype.moveAndCollide = function() {
-	//Gravity
-	if(this.dy < this.behaviourData.terminal  /*&& !this.touchers("d").length && !this._teatherHost*/){
-		this.dy += this.behaviourData.gravity;
+dusk.sgui.Entity.prototype.getDx = function() {
+	var dx = 0;
+	for(var p in this._dx) {
+		dx += this._dx[p][0];
 	}
-	
-	//Slowdown
-	if(this.dx > this.behaviourData.slowdown){
-		this.dx -= this.behaviourData.slowdown;
-	}else if(this.dx < -this.behaviourData.slowdown){
-		this.dx += this.behaviourData.slowdown;
-	}else{
-		this.dx = 0;
-	}
-	
-	this.performMotion(this.dx, this.dy, true);
-	
-	//Tethering
-	/*for(var i = this._teatherClients.length-1; i >= 0; i--) {
-		if(this._teatherClients[i][1].indexOf("u") !== -1) {
-			this._teatherClients[i][0].y = this.y - this._teatherClients[i][0].height;
-			if(this._teatherClients[i][1].indexOf("X") !== -1
-			&& (this._teatherClients[i][0].x + this._teatherClients[i][0].width < this.x
-			|| this._teatherClients[i][0].x > this.x + this.width)) {
-				this.unteather(this._teatherClients[i][0]);
-				break;
-			}
-		}
-		
-		if(this._teatherClients[i][1].indexOf("d") !== -1) {
-			this._teatherClients[i][0].y = this.y + this.height;
-		}
-				
-		if(this._teatherClients[i][1].indexOf("l") !== -1) {
-			this._teatherClients[i][0].x = this.x - this._teatherClients[i][0].width;
-		}
-			
-		if(this._teatherClients[i][1].indexOf("r") !== -1) {
-			this._teatherClients[i][0].x = this.x + this.width;
-		}
-	}*/
+	return dx;
 };
 
-dusk.sgui.Entity.prototype.performMotion = function(cdx, cdy, main) {
-	var collidedWithY = [];
-	var collidedWithX = [];
-	var dirY = cdy>0?1:-1;
-	var dirX = cdx>0?1:-1;
-	
-	function checkCollisionEntities(x1, y1, x2, y2) {
-		if(this.container instanceof dusk.sgui.EntityGroup)
-			return this.container.getCollisions(x1, y1, x2, y2, this);
-		return [];
+dusk.sgui.Entity.prototype.getDy = function() {
+	var dy = 0;
+	for(var p in this._dy) {
+		dy += this._dy[p][0];
 	}
-	
-	function doCollision(x1, y1, x2, y2, dir, isX) {
-		if(this.scheme && this.scheme.tilePointIn(x1, y1).toString() == [1, 0].toString()
-		|| this.scheme.tilePointIn(x2, y2).toString() == [1, 0].toString()) {
-			if(isX) {
-				cdx = 0;
-				if(main) this.dx = 0;
-			} else {
-				cdy = 0;
-				if(main) this.dy = 0;
-			}
-			
-			this._touchers[dir].push("wall");
-			this.behaviourFire("collide", {"dir":dir, "target":"wall"});
-		}
-		
-		//Entities
-		var pastSpeed = isX?this.dx:this.dy;
-		var collidedWith = isX?collidedWithX:collidedWithY;
-		var coll = checkCollisionEntities.call(this, x1, y1, x2, y2);
-		for(var c = coll.length-1; c >= 0; c --) {
-			if(collidedWith.indexOf(coll[c]) === -1) {
-				this._touchers[dir].push(coll[c]);
-				this.behaviourFire("collide", {"dir":dir, "target":coll[c]});
-				coll[c].behaviourFire("collidedInto", {"dir":dir, "target":this});
-				
-				collidedWith.push(coll[c]);
-			}
-		}
-		
-		if(checkCollisionEntities.call(this, x1, y1, x2, y2).length){
-			if(isX) {
-				cdx = 0;
-				if(main && this.dx == pastSpeed) this.dx = 0;
-			} else {
-				cdy = 0;
-				if(main && this.dy == pastSpeed) this.dy = 0;
-			}
-		}
-	}
-	
-	cdy = ~~Math.abs(cdy);
-	cdx = ~~Math.abs(cdx);
-	while(cdy > 0 || cdx > 0) {
-		if(cdy > 0) {
-			if(dirY == 1) {
-				//Going down
-				doCollision.call(this, this.x+this.collisionOffsetX, this.y+this.collisionHeight,
-					this.x+this.collisionWidth-1, this.y+this.collisionHeight, "d", false
-				);
-			}else{
-				//Going up
-				doCollision.call(this, this.x+this.collisionOffsetX, this.y+this.collisionOffsetY-1,
-					this.x+this.collisionWidth-1, this.y+this.collisionOffsetY-1, "u", false
-				);
-			}
-			
-			if(cdy) this.y += dirY;
-			cdy --;
-		}
-		
-		if(cdx > 0) {
-			if(dirX == 1) {
-				//Going right
-				doCollision.call(this, this.x+this.collisionWidth, this.y+this.collisionOffsetY,
-					this.x+this.collisionWidth, this.y+this.collisionHeight-1, "r", true
-				);
-			}else{
-				//Going left
-				doCollision.call(this, this.x+this.collisionOffsetX-1, this.y+this.collisionOffsetY,
-					this.x+this.collisionOffsetX-1, this.y+this.collisionHeight-1, "l", true
-				);
-			}
-			
-			if(cdx) this.x += dirX;
-			cdx --;
-		}
-	}
+	return dy;
+};
+
+dusk.sgui.Entity.prototype.applyDx = function(name, value, duration, accel, limit, noReplace) {
+	if(duration == undefined) duration = -1;
+	if(!accel) accel = 0;
+	if(noReplace && name in this._dx) value = this._dx[name][0];
+	this._dx[name] = [value, duration, accel, limit];
+};
+
+dusk.sgui.Entity.prototype.applyDy = function(name, value, duration, accel, limit, noReplace) {
+	if(duration == undefined) duration = -1;
+	if(!accel) accel = 0;
+	if(noReplace && name in this._dy) value = this._dy[name][0];
+	this._dy[name] = [value, duration, accel, limit];
 };
 
 dusk.sgui.Entity.prototype.startFrame = function() {
 	this.behaviourFire("frame");
-	this._touchers = {"l":[], "r":[], "u":[], "d":[]};
+	
+	//Gravity
+	//this.applyDy("gravity", this.behaviourData.gravity);
+	if(this.touchers(dusk.sgui.c.DIR_DOWN).length) {
+		this.applyDy("gravity", 1, 1, 1, this.behaviourData.gravity);
+	}else{
+		this.applyDy("gravity", 1, 1, 1, this.behaviourData.gravity, true);
+	}
 	
 	//Animation
 	this._frameCountdown--;
 	if(this._frameCountdown <= 0) {
 		this._animationTick();
 		this._frameCountdown = this._frameDelay+1;
+	}
+};
+
+dusk.sgui.Entity.prototype.beforeMove = function() {
+	//Clear touchers
+	this._touchers[dusk.sgui.c.DIR_UP] = [];
+	this._touchers[dusk.sgui.c.DIR_DOWN] = [];
+	this._touchers[dusk.sgui.c.DIR_LEFT] = [];
+	this._touchers[dusk.sgui.c.DIR_RIGHT] = [];
+	
+	for(var p in this._dx) {
+		if(this._dx[p][1] == 0) {
+			delete this._dx[p];
+		}else{
+			if(this._dx[p][1] > 0) this._dx[p][1] --;
+			this._dx[p][0] += this._dx[p][2];
+			if(this._dx[p][3] != undefined && this._dx[p][2] < 0 && this._dx[p][0] < this._dx[p][3])
+				this._dx[p][0] = this._dx[p][3];
+			if(this._dx[p][3] != undefined && this._dx[p][2] > 0 && this._dx[p][0] > this._dx[p][3])
+				this._dx[p][0] = this._dx[p][3];
+		}
+	}
+	
+	for(var p in this._dy) {
+		if(this._dy[p][1] == 0) {
+			delete this._dy[p];
+		}else{
+			if(this._dy[p][1] > 0) this._dy[p][1] --;
+			this._dy[p][0] += this._dy[p][2];
+			if(this._dy[p][3] != undefined && this._dy[p][2] < 0 && this._dy[p][0] < this._dy[p][3])
+				this._dy[p][0] = this._dy[p][3];
+			if(this._dy[p][3] != undefined && this._dy[p][2] > 0 && this._dy[p][0] > this._dy[p][3])
+				this._dy[p][0] = this._dy[p][3];
+		}
 	}
 };
 
@@ -245,8 +185,6 @@ Object.defineProperty(dusk.sgui.Entity.prototype, "entType", {
 		
 		this.setAnimation("stationary");
 		this.prop("src", this.behaviourData.img);
-		if("dx" in this.behaviourData) this.dx = this.behaviourData.dx;
-		if("dy" in this.behaviourData) this.dy = this.behaviourData.dy;
 		
 		if("collisionWidth" in this.behaviourData) {
 			this.collisionWidth = this.behaviourData.collisionWidth;
@@ -344,7 +282,12 @@ dusk.sgui.Entity.prototype.touchers = function(dir) {
 	return this._touchers[dir];
 };
 
-dusk.sgui.Entity.prototype.teather = function(target, dir) {
+dusk.sgui.Entity.prototype.addToucher = function(dir, entity) {
+	this._touchers[dir][this._touchers[dir].length] = entity;
+};
+
+
+/*dusk.sgui.Entity.prototype.teather = function(target, dir) {
 	this._teatherClients[this._teatherClients.length] = [target, dir];
 	target.receiveTeather(this, dir);
 };
@@ -363,7 +306,7 @@ dusk.sgui.Entity.prototype.receiveTeather = function(host, dir) {
 
 dusk.sgui.Entity.prototype.teatherClients = function() {
 	return this._teatherClients;
-};
+};*/
 
 
 
@@ -378,10 +321,12 @@ dusk.sgui.Entity.prototype.eProp = function(prop, set) {
 	}
 };
 
-dusk.sgui.Entity.prototype._collisionDraw = function(c) {
-	c.strokeStyle = this.collisionMark;
-	c.strokeRect(this.x + this.collisionOffsetX, this.y + this.collisionOffsetY,
-		-this.collisionOffsetX+this.collisionWidth, -this.collisionOffsetY+this.collisionHeight
+dusk.sgui.Entity.prototype._collisionDraw = function(e) {
+	e.c.strokeStyle = this.collisionMark;
+	e.c.lineWidth = 1;
+	e.c.strokeRect(
+		e.d.destX + this.collisionOffsetX, e.d.destY + this.collisionOffsetY, 
+		this.collisionWidth - this.collisionOffsetX, this.collisionHeight - this.collisionOffsetY
 	);
 };
 

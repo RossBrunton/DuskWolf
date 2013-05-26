@@ -41,7 +41,7 @@ dusk.ver = "0.0.19-alpha";
  * @type integer
  * @default 60
  */
-dusk.frameRate = ("__frameRate__" in window)?__frameRate__:60;
+dusk.frameRate = ("__frameRate__" in window)?__frameRate__:60; 
 
 /** The path to the data directory,
  *   this is where the game will look for all it's data (like images) if given a relative URL.

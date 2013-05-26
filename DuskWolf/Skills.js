@@ -23,8 +23,8 @@ dusk.skills._init = function() {
 	 */
 	this._skills = [];
 	this.giveSkill("jump");
-	this.giveSkill("dubjump");
-	this.giveSkill("infinijump");
+	//this.giveSkill("dubjump");
+	//this.giveSkill("infinijump");
 };
 
 /** Gives the player a skill.
