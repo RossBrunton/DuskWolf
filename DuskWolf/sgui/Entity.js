@@ -20,13 +20,11 @@ dusk.sgui.Entity = function (parent, comName) {
 	this._type = "";
 	this.entType = "root";
 	
-	this.aniName = "";
 	this.animationData = {};
-	this._currentAni = [];
+	this._currentAni = 0;
 	this._aniPointer = 0;
-	this._aniTerminate = false;
-	this._aniFlags = [];
-	this._aniPriority = 0;
+	this._aniLock = false;
+	this._aniVars = {};
 	this._frameDelay = 5;
 	this._frameCountdown = 0;
 	
@@ -119,10 +117,7 @@ dusk.sgui.Entity.prototype.startFrame = function() {
 	
 	//Animation
 	this._frameCountdown--;
-	if(this._frameCountdown <= 0) {
-		this._animationTick();
-		this._frameCountdown = this._frameDelay+1;
-	}
+	this.performAnimation(null, this._frameCountdown <= 0);
 };
 
 dusk.sgui.Entity.prototype.beforeMove = function() {
@@ -183,7 +178,8 @@ Object.defineProperty(dusk.sgui.Entity.prototype, "entType", {
 		this.behaviourData = dusk.utils.clone(dusk.entities.types.getAll(type).data);
 		this.animationData = dusk.utils.clone(dusk.entities.types.getAll(type).animation);
 		
-		this.setAnimation("stationary");
+		this._currentAni = -1;
+		this.performAnimation();
 		this.prop("src", this.behaviourData.img);
 		
 		if("collisionWidth" in this.behaviourData) {
@@ -231,50 +227,159 @@ dusk.sgui.Entity.prototype.addBehaviour = function(name, reInit) {
 
 
 
-dusk.sgui.Entity.prototype.setAnimation = function(name, data, reInit, terminates) {
-	if(data === undefined) data = {};
-	if(!("flags" in data)) data.flags = [];
-	
-	this._aniTerminate = terminates==true;
-	if(name == this.aniName && !reInit && dusk.utils.arrayEqual(data.flags, this._aniFlags)) return;
-	
-	this._aniFlags = data.flags;
-	
-	if(!this.lookupFlaggedAni(name, this._aniFlags)) {
-		if(terminates) this.behaviourFire("aniComplete", {"name":name});
-		return;
+dusk.sgui.Entity.prototype.performAnimation = function(event, advance) {
+	if(this._aniLock) {
+		if(advance) this._aniForward(event);
+		if(this._frameCountdown <= 0) this._frameCountdown = this._frameDelay+1;
+		return false;
 	}
 	
-	this._currentAni = this.animationData[this.lookupFlaggedAni(name, this._aniFlags)].split("|");
-	this._aniPointer = 0;
-	this.aniName = name;
-	this._animationTick();
+	for(var i = this.animationData.length-1; i >= 0; i --) {
+		if(typeof this.animationData[i][1] == "string") this.animationData[i][1] = this.animationData[i][1].split("|");
+		
+		var out = this._evalTrigger(i, event);
+		if(out[0]) {
+			if(i == this._currentAni || (this._aniLock && !event)) {
+				//Forward one frame
+				if(advance) {
+					this._aniPointer = (this._aniPointer + 1) % this.animationData[i][1].length;
+					this._performFrame(event);
+				}
+			}else if(i != this._currentAni && !this._aniLock) {
+				//Change animation
+				this._setNewAni(i, event);
+			}
+			
+			if(this._frameCountdown <= 0) this._frameCountdown = this._frameDelay+1;
+			return out[1];
+		}
+	}
 };
 
-dusk.sgui.Entity.prototype._animationTick = function() {
-	this.tileStr = this._currentAni[this._aniPointer];
-	this._aniPointer ++;
-	if(this._aniPointer == this._currentAni.length) {
+dusk.sgui.Entity.prototype._setNewAni = function(id, event) {
+	this._currentAni = id;
+	if(!this.animationData[id][2].supressSmooth && this.animationData[id][1].indexOf(this.tileStr) !== -1) {
+		this._aniPointer = this.animationData[id][1].indexOf(this.tileStr);
+	}else{
 		this._aniPointer = 0;
-		if(this._aniTerminate) this.behaviourFire("aniComplete", {"name":this.aniName});
 	}
+	this._performFrame(event);
 };
 
-dusk.sgui.Entity.prototype.lookupFlaggedAni = function(name, flags) {
-	for(var i = 0; i < flags.length; i ++) {
-		if(name+"-"+flags[i] in this.animationData) {
-			return name+"-"+flags[i];
+dusk.sgui.Entity.prototype._evalTrigger = function(id, event) {
+	if(typeof this.animationData[id][0] == "string") this.animationData[id][0] = this.animationData[id][0].split("&");
+	
+	return this._evalTriggerArr(this.animationData[id][0], event);
+};
+
+dusk.sgui.Entity.prototype._evalTriggerArr = function(arr, event) {
+	var eventTriggered = false;
+	for(var i = 0; i < arr.length; i ++) {
+		var current = arr[i];
+		
+		if(current === "") return [true, eventTriggered];
+		if(typeof current == "string" && current.substr(0, 3) == "on ") {
+			if(event == current.substr(3).trim()) {
+				eventTriggered = true;
+			}else{
+				return [false, true];
+			}
+		}else{
+			if(typeof current == "string") {
+				arr[i] = /^([^!<>=]+)\s*([<|>|=|<=|=>|!=])\s*([^!<>=]+)$/gi.exec(current);
+				current = arr[i];
+			}
+			
+			var lhs = this._evalOperand(current[1]);
+			var rhs = this._evalOperand(current[3]);
+			
+			switch(current[2]) {
+				case "=": if(lhs != rhs) return [false, eventTriggered]; break;
+				case "!=": if(lhs = rhs) return [false, eventTriggered]; break;
+				case ">": if(lhs <= rhs) return [false, eventTriggered]; break;
+				case "<": if(lhs >= rhs) return [false, eventTriggered]; break;
+				case ">=": if(lhs < rhs) return [false, eventTriggered]; break;
+				case "<=": if(lhs > rhs) return [false, eventTriggered]; break;
+			}
 		}
 	}
 	
-	if(name in this.animationData) return name;
-	return null;
+	return [true, eventTriggered];
 };
 
-dusk.sgui.Entity.prototype.aniFlagActive = function(flag) {
-	return this._aniFlags.indexOf(flag) !== -1;
+dusk.sgui.Entity.prototype._evalOperand = function(operand) {
+	operand = operand.trim();
+	if(operand == "#dx") return this.getDx();
+	if(operand == "#dy") return this.getDy();
+	if(operand == "#tb") return this.touchers(dusk.sgui.c.DIR_DOWN).length;
+	if(operand == "#tu") return this.touchers(dusk.sgui.c.DIR_UP).length;
+	if(operand == "#tl") return this.touchers(dusk.sgui.c.DIR_LEFT).length;
+	if(operand == "#tr") return this.touchers(dusk.sgui.c.DIR_RIGHT).length;
+	
+	if(operand.charAt(0) == "$") return this._aniVars[operand.substr(1)];
+	if(operand.charAt(0) == ".") return this.prop(operand.substr(1));
+	if(operand.charAt(0) == ":") return this.eprop(operand.substr(1));
+	
+	return operand;
 };
 
+dusk.sgui.Entity.prototype._performFrame = function(event) {
+	var current = this.animationData[this._currentAni][1][this._aniPointer];
+	
+	switch(current.charAt(0)) {
+		case "$":
+			var frags = current.substr(1).split("=");
+			this._aniVars[frags[0]] = frags[1];
+			this._aniForward(event);
+			break;
+		
+		case "+":
+			this._frameCountdown = +current.substr(1);
+			break;
+		
+		case "?":
+			var frags = current.substr(1).split("?");
+			if(this._evalTriggerArr(frags[0].split("&"))) {
+				this._aniForward(event, frags[1]);
+			}else{
+				this._aniForward(event, frags[2]);
+			}
+			break;
+		
+		case ">":
+			for(var i = this.animationData.length -1; i >= 0; i --) {
+				if(this.animationData[i][2].name == current.substr(1)) {
+					this._setNewAni(i, name);
+					break;
+				}
+			}
+			break;
+		
+		case "!":
+			this.behaviourFire("animation", {"given":current.substr(1)});
+			this._aniForward(event);
+			break;
+		
+		case "l":
+			this._aniLock = false;
+			this._aniForward(event);
+			break;
+		
+		case "L":
+			this._aniLock = true;
+			this._aniForward(event);
+			break;
+		
+		default:
+			this.tileStr = current;
+	}
+};
+
+dusk.sgui.Entity.prototype._aniForward = function(event, by) {
+	if(by === undefined) by = 1;
+	this._aniPointer = (this._aniPointer + by) % this.animationData[this._currentAni][1].length;
+	this._performFrame(event);
+};
 
 
 dusk.sgui.Entity.prototype.touchers = function(dir) {

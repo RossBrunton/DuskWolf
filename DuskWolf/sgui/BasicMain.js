@@ -213,7 +213,8 @@ dusk.sgui.BasicMain.prototype.autoScroll = function() {
 	}else if(this.getSeek()) {
 		seekCoords = [this.getSeek().x, this.getSeek().y];
 	}else{
-		seekCoords = [0, 0];
+		//seekCoords = [0, 0];
+		return;
 	}
 	
 	this.xOffset = seekCoords[0] - (this.width >> 1);
