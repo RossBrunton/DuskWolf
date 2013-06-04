@@ -20,11 +20,13 @@ dusk.sgui.Entity = function (parent, comName) {
 	this._type = "";
 	this.entType = "root";
 	
-	this.animationData = {};
+	this.animationData = [];
 	this._currentAni = 0;
 	this._aniPointer = 0;
 	this._aniLock = false;
 	this._aniVars = {};
+	this._particleData = [];
+	this._particleCriteria = [];
 	this._frameDelay = 5;
 	this._frameCountdown = 0;
 	
@@ -43,6 +45,8 @@ dusk.sgui.Entity = function (parent, comName) {
 	
 	this.scheme = null;
 	this.schemePath = null;
+	this.particles = null;
+	this.particlesPath = null;
 	
 	this._teatherClients = [];
 	this._teatherHost = null;
@@ -65,6 +69,7 @@ dusk.sgui.Entity = function (parent, comName) {
 	this._registerPropMask("dx", "dx");
 	this._registerPropMask("dy", "dy");
 	this._registerPropMask("scheme", "schemePath");
+	this._registerPropMask("particles", "particlesPath");
 	this._registerPropMask("entType", "entType");
 	
 	//Listeners
@@ -117,6 +122,13 @@ dusk.sgui.Entity.prototype.startFrame = function() {
 	
 	//Animation
 	this._frameCountdown--;
+	
+	if(this._particleData) for(var i = this._particleCriteria.length-1; i >= 0; i --) {
+		if("cooldown" in this._particleCriteria[i] && this._particleCriteria[i].cooldown) {
+			this._particleCriteria[i].cooldown --;
+		}
+	}
+	
 	this.performAnimation(null, this._frameCountdown <= 0);
 };
 
@@ -166,6 +178,17 @@ Object.defineProperty(dusk.sgui.Entity.prototype, "schemePath", {
 	}
 });
 
+//particlesPath
+Object.defineProperty(dusk.sgui.Entity.prototype, "particlesPath", {
+	get: function() {
+		return this.particles?this.particles.fullPath():undefined;
+	},
+	
+	set: function(value) {
+		if(value) this.particles = this.path(value);
+	}
+});
+
 
 //entType
 Object.defineProperty(dusk.sgui.Entity.prototype, "entType", {
@@ -177,8 +200,10 @@ Object.defineProperty(dusk.sgui.Entity.prototype, "entType", {
 		this._type = type;
 		this.behaviourData = dusk.utils.clone(dusk.entities.types.getAll(type).data);
 		this.animationData = dusk.utils.clone(dusk.entities.types.getAll(type).animation);
+		this._particleData = dusk.utils.clone(dusk.entities.types.getAll(type).particles);
 		
 		this._currentAni = -1;
+		this._particleCriteria = [];
 		this.performAnimation();
 		this.prop("src", this.behaviourData.img);
 		
@@ -232,6 +257,39 @@ dusk.sgui.Entity.prototype.performAnimation = function(event, advance) {
 		if(advance) this._aniForward(event);
 		if(this._frameCountdown <= 0) this._frameCountdown = this._frameDelay+1;
 		return false;
+	}
+	
+	if(this._particleData) for(var i = this._particleData.length-1; i >= 0; i --) {
+		if(this._evalTriggerArr(this._particleData[i][0].split("&"), event)[0]) {
+			if(!this._particleCriteria[i]) this._particleCriteria[i] = {};
+			if("cooldown" in this._particleCriteria[i] && this._particleCriteria[i].cooldown > 0) {
+				continue;
+			}
+			if("falsified" in this._particleCriteria[i] && !this._particleCriteria[i].falsified) {
+				continue;
+			}
+			
+			if(this._particleData[i][2].initial === false && !("falsified" in this._particleCriteria[i])) {
+				
+			}else{
+				var frags = this._particleData[i][1].split("|");
+				for(var j = 0; j < frags.length; j ++) {
+					this._performFrame(event, frags[j], true);
+				}
+			}
+			
+			if("cooldown" in this._particleData[i][2]) {
+				this._particleCriteria[i].cooldown = this._particleData[i][2].cooldown;
+			}
+			
+			if("onlyOnce" in this._particleData[i][2]) {
+				this._particleCriteria[i].falsified = false;
+			}
+		}else{
+			if(this._particleCriteria[i] && "falsified" in this._particleCriteria[i]) {
+				this._particleCriteria[i].falsified = true;
+			}
+		}
 	}
 	
 	for(var i = this.animationData.length-1; i >= 0; i --) {
@@ -307,42 +365,73 @@ dusk.sgui.Entity.prototype._evalTriggerArr = function(arr, event) {
 	return [true, eventTriggered];
 };
 
-dusk.sgui.Entity.prototype._evalOperand = function(operand) {
+dusk.sgui.Entity.prototype._evalOperand = function(operand, base) {
+	if(base === undefined) base = "";
+	if(!(typeof operand == "string")) return operand;
 	operand = operand.trim();
-	if(operand == "#dx") return this.getDx();
-	if(operand == "#dy") return this.getDy();
-	if(operand == "#tb") return this.touchers(dusk.sgui.c.DIR_DOWN).length;
-	if(operand == "#tu") return this.touchers(dusk.sgui.c.DIR_UP).length;
-	if(operand == "#tl") return this.touchers(dusk.sgui.c.DIR_LEFT).length;
-	if(operand == "#tr") return this.touchers(dusk.sgui.c.DIR_RIGHT).length;
+	if(operand === "") return base;
 	
-	if(operand.charAt(0) == "$") return this._aniVars[operand.substr(1)];
-	if(operand.charAt(0) == ".") return this.prop(operand.substr(1));
-	if(operand.charAt(0) == ":") return this.eprop(operand.substr(1));
+	if(operand.charAt(0) == "*")
+		return +base * +this._evalOperand(operand.substr(1), 0);
+	if(operand.charAt(0) == "/")
+		return +base / +this._evalOperand(operand.substr(1), 0);
+	if(operand.charAt(0) == "+")
+		return +base + +this._evalOperand(operand.substr(1), 0);
+	if(operand.charAt(0) == "-")
+		return +base - +this._evalOperand(operand.substr(1), 0);
 	
-	return operand;
+	if(operand.substr(0, 3) == "#dx")
+		return base + this._evalOperand(operand.substr(3), this.getDx());
+	if(operand.substr(0, 3) == "#dy")
+		return base + this._evalOperand(operand.substr(3), this.getDy());
+	if(operand.substr(0, 3) == "#tb")
+		return base + this._evalOperand(operand.substr(3), this.touchers(dusk.sgui.c.DIR_DOWN).length);
+	if(operand.substr(0, 3) == "#tu")
+		return base + this._evalOperand(operand.substr(3), this.touchers(dusk.sgui.c.DIR_UP).length);
+	if(operand.substr(0, 3) == "#tl")
+		return base + this._evalOperand(operand.substr(3), this.touchers(dusk.sgui.c.DIR_LEFT).length);
+	if(operand.substr(0, 3) == "#tr")
+		return base + this._evalOperand(operand.substr(3), this.touchers(dusk.sgui.c.DIR_RIGHT).length);
+	if(operand.substr(0, 5) == "#path")
+		return base + this._evalOperand(operand.substr(5), this.fullPath());
+	
+	if(operand.charAt(0) == "$") {
+		var name = operand.substr(1).split(/[\+\-\/\*\#\.\$\:]/)[0];
+		return this._evalOperand(operand.substr(name.length+1), this._aniVars[name]);
+	}
+	if(operand.charAt(0) == ".") {
+		var name = operand.substr(1).split(/[\+\-\/\*\#\.\$\:]/)[0];
+		return base + this._evalOperand(operand.substr(name.length+1), this.prop(name));
+	}
+	if(operand.charAt(0) == ":") {
+		var name = operand.substr(1).split(/[\+\-\/\*\#\.\$\:]/)[0];
+		return base + this._evalOperand(operand.substr(name.length+1), this.eprop(name));
+	}
+	
+	var frags = operand.split(/[\+\-\/\*\#\.\$\:]/);
+	return base + this._evalOperand(operand.substr(frags[0].length+1), frags[0]);
 };
 
-dusk.sgui.Entity.prototype._performFrame = function(event) {
-	var current = this.animationData[this._currentAni][1][this._aniPointer];
+dusk.sgui.Entity.prototype._performFrame = function(event, current, noContinue) {
+	if(!current) current = this.animationData[this._currentAni][1][this._aniPointer];
 	
 	switch(current.charAt(0)) {
 		case "$":
 			var frags = current.substr(1).split("=");
 			this._aniVars[frags[0]] = frags[1];
-			this._aniForward(event);
+			if(!noContinue) this._aniForward(event);
 			break;
 		
 		case "+":
-			this._frameCountdown = +current.substr(1);
+			if(!noContinue) this._frameCountdown = +current.substr(1);
 			break;
 		
 		case "?":
 			var frags = current.substr(1).split("?");
 			if(this._evalTriggerArr(frags[0].split("&"))) {
-				this._aniForward(event, frags[1]);
+				if(!noContinue) this._aniForward(event, frags[1]);
 			}else{
-				this._aniForward(event, frags[2]);
+				if(!noContinue) this._aniForward(event, frags[2]);
 			}
 			break;
 		
@@ -357,17 +446,32 @@ dusk.sgui.Entity.prototype._performFrame = function(event) {
 		
 		case "!":
 			this.behaviourFire("animation", {"given":current.substr(1)});
-			this._aniForward(event);
+			if(!noContinue) this._aniForward(event);
+			break;
+		
+		case "*":
+			var name = current.substr(1).split(" ")[0];
+			var data = dusk.utils.jsonParse(current.substr(name.length+1));
+			for(var p in data) {
+				if(Array.isArray(data[p])) {
+					data[p] = [this._evalOperand(data[p][0]), this._evalOperand(data[p][1])];
+				}else{
+					if(typeof data[p] == "string") data[p] = this._evalOperand(data[p]);
+				}
+			}
+			
+			if(this.particles) this.particles.applyEffect(name, data);
+			if(!noContinue) this._aniForward(event);
 			break;
 		
 		case "l":
 			this._aniLock = false;
-			this._aniForward(event);
+			if(!noContinue) this._aniForward(event);
 			break;
 		
 		case "L":
 			this._aniLock = true;
-			this._aniForward(event);
+			if(!noContinue) this._aniForward(event);
 			break;
 		
 		default:

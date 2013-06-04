@@ -39,11 +39,16 @@ dusk.behave.Controlled.prototype._controlledFrame = function(e) {
 	}
 	
 	if(this._isControlActive("entity_jump")) {
-		if(this._jumpReleased && ((this._jumps == 0 && dusk.skills.hasSkill("jump"))
-		|| (this._jumps == 1 && dusk.skills.hasSkill("dubjump"))
+		if(this._jumpReleased && ((this._entity.touchers(dusk.sgui.c.DIR_DOWN).length && dusk.skills.hasSkill("jump"))
+		|| (this._jumps == 0 && dusk.skills.hasSkill("dubjump"))
 		|| dusk.skills.hasSkill("infinijump"))) {
 			this._entity.applyDy("control_jump", -15, 15, 1, 0);
-			this._jumps ++;
+			if(!this._entity.touchers(dusk.sgui.c.DIR_DOWN).length) {
+				this._jumps ++;
+				this._entity.performAnimation("airjump");
+			}else{
+				this._entity.performAnimation("groundjump");
+			}
 			this._jumping = 10;
 			this._jumpReleased = false;
 		}else if(this._jumping) {

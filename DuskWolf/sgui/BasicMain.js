@@ -6,6 +6,7 @@ dusk.load.require("dusk.sgui.Entity");
 dusk.load.require("dusk.sgui.Group");
 dusk.load.require("dusk.sgui.EditableTileMap");
 dusk.load.require("dusk.sgui.EntityGroup");
+dusk.load.require("dusk.sgui.ParticleField");
 dusk.load.require("dusk.editor");
 dusk.load.require("dusk.rooms");
 
@@ -46,8 +47,9 @@ dusk.sgui.BasicMain.prototype.className = "BasicMain";
 dusk.sgui.BasicMain.LAYER_TILEMAP = 0x01;
 dusk.sgui.BasicMain.LAYER_SCHEME = 0x02;
 dusk.sgui.BasicMain.LAYER_ENTITIES = 0x04;
+dusk.sgui.BasicMain.LAYER_PARTICLES = 0x08;
 
-dusk.sgui.BasicMain._LAYER_COLOURS = ["#ff0000", "#00ff00", "#ffff00", "#0000ff"];
+dusk.sgui.BasicMain._LAYER_COLOURS = ["#ff0000", "#00ff00", "#ffff00", "#0000ff", "#00ffff", "#ff00ff"];
 
 dusk.sgui.BasicMain.prototype.createRoom = function(name, spawn) {
 	var room = dusk.rooms.getRoomData(name);
@@ -66,9 +68,18 @@ dusk.sgui.BasicMain.prototype.createRoom = function(name, spawn) {
 	var entLayers = this.getAllLayersOfType(dusk.sgui.BasicMain.LAYER_ENTITIES);
 	for(var i = entLayers.length-1; i >= 0; i --) {
 		entLayers[i].scheme = this.getFirstLayerOfType(dusk.sgui.BasicMain.LAYER_SCHEME);
+		entLayers[i].particles = this.getFirstLayerOfType(dusk.sgui.BasicMain.LAYER_PARTICLES);
 		entLayers[i].width = 
 		 this.getFirstLayerOfType(dusk.sgui.BasicMain.LAYER_SCHEME | dusk.sgui.BasicMain.LAYER_TILEMAP).width;
 		entLayers[i].height = 
+		 this.getFirstLayerOfType(dusk.sgui.BasicMain.LAYER_SCHEME | dusk.sgui.BasicMain.LAYER_TILEMAP).height;
+	}
+	
+	var pLayers = this.getAllLayersOfType(dusk.sgui.BasicMain.LAYER_PARTICLES);
+	for(var i = pLayers.length-1; i >= 0; i --) {
+		pLayers[i].width = 
+		 this.getFirstLayerOfType(dusk.sgui.BasicMain.LAYER_SCHEME | dusk.sgui.BasicMain.LAYER_TILEMAP).width;
+		pLayers[i].height = 
 		 this.getFirstLayerOfType(dusk.sgui.BasicMain.LAYER_SCHEME | dusk.sgui.BasicMain.LAYER_TILEMAP).height;
 	}
 	
@@ -136,6 +147,12 @@ Object.defineProperty(dusk.sgui.BasicMain.prototype, "layers", {
 					});
 					
 					if("primary" in val[i] && val[i].primary) this._primaryEntityGroup = val[i].name;
+					
+					break;
+				
+				case dusk.sgui.BasicMain.LAYER_PARTICLES:
+					this.getComponent(val[i].name, "ParticleField").parseProps(
+					{});
 					
 					break;
 			}

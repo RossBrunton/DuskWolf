@@ -403,6 +403,7 @@ example.plat.rooms.roomb = [
             "y": 704
         }
     ],
+    {},
     {
         "rows": 27,
         "cols": 24,

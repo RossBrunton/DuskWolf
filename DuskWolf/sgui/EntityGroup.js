@@ -309,6 +309,7 @@ dusk.sgui.EntityGroup.prototype.dropEntity = function(entity, takeFocus) {
 	dropped.y = entity.y;
 	dropped.entType = entity.type;
 	if(this.scheme) dropped.scheme = this.scheme;
+	if(this.particles) dropped.particles = this.particles;
 	this._entities.push(dropped);
 	dropped.onDelete.listen(dusk.sgui.EntityGroup.prototype._entityDeleted, this);
 	if(takeFocus) this.flow(entity.name);

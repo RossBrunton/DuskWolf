@@ -379,6 +379,7 @@ example.plat.rooms.roomc = [
             "y": 224
         }
     ],
+    {},
     {
         "rows": 15,
         "cols": 41,

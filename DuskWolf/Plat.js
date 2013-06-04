@@ -38,6 +38,7 @@ dusk.plat._init = function() {
 		{"name":"back", "type":dusk.sgui.BasicMain.LAYER_TILEMAP},
 		{"name":"scheme", "type":dusk.sgui.BasicMain.LAYER_SCHEME},
 		{"name":"entities", "type":dusk.sgui.BasicMain.LAYER_ENTITIES, "primary":true},
+		{"name":"parts", "type":dusk.sgui.BasicMain.LAYER_PARTICLES},
 		{"name":"over", "type":dusk.sgui.BasicMain.LAYER_TILEMAP}
 	];
 	

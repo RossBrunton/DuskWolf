@@ -65,6 +65,7 @@ Object.defineProperty(dusk.Range.prototype, "value", {
 	},
 	
 	set: function(value) {
+		if(this._value == value) return;
 		this._value = value;
 		if(this._value < this.min) this._value = this.min;
 		if(this._value > this.max) this._value = this.max;

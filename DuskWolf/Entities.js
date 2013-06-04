@@ -132,20 +132,6 @@ dusk.entities._init = function() {
 	 * @type dusk.EventDispatcher
 	 */
 	this.markTrigger = new dusk.EventDispatcher("dusk.entities.markTrigger");
-	/** An event dispatcher that is fired when persistant entity data is updated.
-	 * 
-	 * See `{@link dusk.behaviours.Persist}` for details on persistant entities.
-	 * @type dusk.EventDispatcher
-	 */
-	this.persistDataUpdate = new dusk.EventDispatcher("dusk.entities.persistDataUpdate");
-	
-	/** An object containing persistant entity data, key name is the name of the entity, while data is it's data.
-	 * 
-	 * See `{@link dusk.behaviours.Persist}` for details on persistant entities.
-	 * @type object
-	 * @private
-	 */
-	this._persistData = {};
 	
 	/** An inheritable container containing all the defined entity types.
 	 *	Use this to add or get entity types.
@@ -164,28 +150,6 @@ dusk.entities._init = function() {
 	 * @since 0.0.18-alpha
 	 */
 	this._behaviours = {};
-};
-
-/** Stores entity data for a persistant entity.
- * 
- * See `{@link dusk.behaviours.Persist}` for details on persistant entities.
- * @param {string} name The name of the entity to store data for.
- * @param {object} data The actual data to save.
- */
-dusk.entities.storePersist = function(name, data) {
-	this._persistData[name] = data;
-	data.entityName = name;
-	this.persistDataUpdate.fire({"name":name, "data":data});
-};
-
-/** Returns stored entity data for a persistant entity.
- * 
- * See `{@link dusk.behaviours.Persist}` for details on persistant entities.
- * @param {string} name The name of the entity to store data for.
- * @return {object} The stored entity data for that entity.
- */
-dusk.entities.getPersist = function(name) {
-	return this._persistData[name];
 };
 
 /** Adds a new behaviour that can be added to entities. This must be called before the behaviour can be used.

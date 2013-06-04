@@ -8,22 +8,56 @@ dusk.load.require("dusk.entities");
 dusk.load.provide("dusk.behave.Persist");
 
 dusk.behave.Persist = function(entity) {
-	if(entity !== undefined){
-		dusk.behave.Behave.call(this, entity);
-		
-		this.entityEvent.listen(this._persistFrame, this, {"name":"frame"});
-		this.entityEvent.listen(this._persistLoad, this, {"name":"typeChange"});
-	}
+	dusk.behave.Behave.call(this, entity);
+	
+	this.entityEvent.listen(this._persistFrame, this, {"name":"frame"});
+	this.entityEvent.listen(this._persistLoad, this, {"name":"typeChange"});
 };
-dusk.behave.Persist.prototype = new dusk.behave.Behave();
-dusk.behave.Persist.constructor = dusk.behave.Persist;
+dusk.behave.Persist.prototype = Object.create(dusk.behave.Behave.prototype);
 
 dusk.behave.Persist.prototype._persistLoad = function(data) {
-	this._entity.behaviourData = dusk.entities.getPersist(this._entity.comName) || this._entity.behaviourData;
+	this._entity.behaviourData = dusk.behave.Persist.getPersist(this._entity.comName) || this._entity.behaviourData;
 };
 
 dusk.behave.Persist.prototype._persistFrame = function(data) {
-	dusk.entities.storePersist(this._entity.comName, this._entity.behaviourData);
+	dusk.behave.Persist.storePersist(this._entity.comName, this._entity.behaviourData);
+};
+
+/** An event dispatcher that is fired when persistant entity data is updated.
+ * 
+ * See `{@link dusk.behaviours.Persist}` for details on persistant entities.
+ * @type dusk.EventDispatcher
+ */
+dusk.behave.Persist.persistDataUpdate = new dusk.EventDispatcher("dusk.entities.persistDataUpdate");
+
+/** An object containing persistant entity data, key name is the name of the entity, while data is it's data.
+ * 
+ * See `{@link dusk.behaviours.Persist}` for details on persistant entities.
+ * @type object
+ * @private
+ */
+dusk.behave.Persist._persistData = {};
+
+/** Stores entity data for a persistant entity.
+ * 
+ * See `{@link dusk.behaviours.Persist}` for details on persistant entities.
+ * @param {string} name The name of the entity to store data for.
+ * @param {object} data The actual data to save.
+ */
+dusk.behave.Persist.storePersist = function(name, data) {
+	this._persistData[name] = data;
+	data.entityName = name;
+	this.persistDataUpdate.fire({"name":name, "data":data});
+};
+
+/** Returns stored entity data for a persistant entity.
+ * 
+ * See `{@link dusk.behaviours.Persist}` for details on persistant entities.
+ * @param {string} name The name of the entity to store data for.
+ * @return {object} The stored entity data for that entity.
+ */
+dusk.behave.Persist.getPersist = function(name) {
+	return this._persistData[name];
 };
 
 Object.seal(dusk.behave.Persist);

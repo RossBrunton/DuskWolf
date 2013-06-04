@@ -273,12 +273,7 @@ Object.defineProperty(dusk.sgui.TileMap.prototype, "map", {
 			hold.ani[hold.ani.length] = ani[p];
 		}
 		
-		//Use new style
-		//hold.map = "";
-		//for(var i = 0; i < this._tiles.length; i ++){
-		//	hold.map += this._tiles[i]+(i+1< this._tiles.length?(i%2?" ":","):"");
-		//}
-		hold.map = dusk.utils.dataToString(this._tileBuffer, dusk.utils.SD_BC16);
+		hold.map = dusk.utils.dataToString(this._tileBuffer[0], dusk.utils.SD_BC16);
 		
 		return hold;
 	}

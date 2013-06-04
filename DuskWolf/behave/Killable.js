@@ -11,7 +11,7 @@ dusk.behave.Killable = function(entity) {
 		dusk.behave.Behave.call(this, entity);
 		
 		this._data("hp", 1, true);
-		this._data("mercyTime", 10, true);
+		this._data("mercyTime", 30, true);
 		this._data("currentMercy", 0, true);
 		
 		this.entityEvent.listen(this._killableTakeDamage, this, {"name":"takeDamage"});
@@ -29,13 +29,16 @@ dusk.behave.Killable.prototype._killableTakeDamage = function(e) {
 		return;
 	}
 	
-	this._data("hp", this._data("hp")-e.damage);
-	
-	if(this._data("hp") <= 0 && !this._data("currentMercy")) {
-		console.log("I'm dead! :D");
-		if(this._entity.behaviourFire("die", {}).indexOf(true) === -1) {
-			if(!this._entity.performAnimation("die")) {
-				this._entity.behaviourFire("terminate", {});
+	if(!this._data("currentMercy")) {
+		this._data("hp", this._data("hp")-e.damage);
+		this._data("currentMercy", this._data("mercyTime"));
+		
+		if(this._data("hp") <= 0) {
+			console.log("I'm dead! :D");
+			if(this._entity.behaviourFire("die", {}).indexOf(true) === -1) {
+				if(!this._entity.performAnimation("die")) {
+					this._entity.behaviourFire("terminate", {});
+				}
 			}
 		}
 	}

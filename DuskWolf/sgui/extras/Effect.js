@@ -217,7 +217,7 @@ dusk.sgui.extras.Effect.prototype.addTrigger = function(trigger) {
 	}
 	
 	if(trigger[0] instanceof dusk.EventDispatcher) {
-		trigger[i].listen(this._startEvent, this);
+		trigger[0].listen(this._startEvent, this);
 	}else if(trigger[0] instanceof dusk.Range) {
 		this._rangeTriggers.push(trigger);
 	}else if(trigger === true) {
