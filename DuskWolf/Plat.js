@@ -6,7 +6,7 @@ dusk.load.require("dusk.sgui");
 dusk.load.require("dusk.sgui.BasicMain");
 dusk.load.require("dusk.EventDispatcher");
 dusk.load.require("dusk.entities");
-dusk.load.require("dusk.rooms");
+dusk.load.require("dusk.RoomManager");
 dusk.load.require("dusk.skills");
 
 dusk.load.provide("dusk.plat");
@@ -44,18 +44,15 @@ dusk.plat._init = function() {
 	
 	dusk.entities.types.createNewType("plat", {
 		"data":{
-			"hp":1, "gravity":7, "terminal":9, "haccel":2, "hspeed":7, "jump":15, "slowdown":1,
-			"img":"pimg/hero.png", "solid":true, "anchor":false
+			"hp":1, "gravity":2, "terminal":7, "haccel":2, "hspeed":7, "jump":15, "slowdown":1,
+			"img":"pimg/hero.png", "solid":true, "anchor":false, "collides":true
 		},
 		"animation":{"stationary":"0,0"},
 		"behaviours":{}
 	});
-};
-
-/** Requests that the `{@link dusk.sgui.BasicMain}` used by the plat system be the main room manager used to load rooms.
- */
-dusk.plat.becomeRoomManager = function() {
-	dusk.rooms.roomManager = dusk.sgui.path("plat:/main");
+	
+	dusk.plat.rooms = new dusk.RoomManager("dusk.plat", "dusk.plat.rooms");
+	dusk.plat.rooms.setBasicMain(main.getComponent("main"));
 };
 
 dusk.plat._init();

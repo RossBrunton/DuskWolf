@@ -108,6 +108,7 @@ dusk.sgui.Label.prototype._blDraw = function(e) {
 	if(this.text !== ""){
 		if(this._sig != this._genSig()) {
 			//Rebuild the text cache
+			this._updateCache(true);
 			this._updateCache();
 		}
 		
@@ -215,7 +216,7 @@ dusk.sgui.Label.prototype._updateCache = function(widthOnly) {
 	if(!widthOnly) this._sig = this._genSig();
 };
 
-//hidth
+//width
 Object.defineProperty(dusk.sgui.Label.prototype, "width", {
 	get: function() {
 		if(this._width >=0 ) {
@@ -245,13 +246,15 @@ Object.defineProperty(dusk.sgui.Label.prototype, "text", {
 		return this._text;
 	},
 	set: function(value) {
-		this._text = ""+value;
-		this._updateCache(true);
+		if(this._text != value) {
+			this._text = ""+value;
+			this._updateCache(true);
+		}
 	}
 });
 
 dusk.sgui.Label.prototype._genSig = function() {
-	return this.size+"/"+this.font+"/"+this.colour+"/"+this.borderColour+"/"+(this.padding<<1)+"/"+this.borderSize
+	return this.size+"/"+this.font+"/"+this.colour+"/"+this.borderColour+"/"+this.padding+"/"+this.borderSize
 	+"/"+this.text+"/"+this.format;
 };
 

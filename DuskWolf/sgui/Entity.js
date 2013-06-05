@@ -48,6 +48,8 @@ dusk.sgui.Entity = function (parent, comName) {
 	this.particles = null;
 	this.particlesPath = null;
 	
+	this.terminated = false;
+	
 	this._teatherClients = [];
 	this._teatherHost = null;
 	
@@ -112,19 +114,11 @@ dusk.sgui.Entity.prototype.applyDy = function(name, value, duration, accel, limi
 dusk.sgui.Entity.prototype.startFrame = function() {
 	this.behaviourFire("frame");
 	
-	//Gravity
-	//this.applyDy("gravity", this.behaviourData.gravity);
-	if(this.touchers(dusk.sgui.c.DIR_DOWN).length) {
-		this.applyDy("gravity", 1, 1, 1, this.behaviourData.gravity);
-	}else{
-		this.applyDy("gravity", 1, 1, 1, this.behaviourData.gravity, true);
-	}
-	
 	//Animation
 	this._frameCountdown--;
 	
 	if(this._particleData) for(var i = this._particleCriteria.length-1; i >= 0; i --) {
-		if("cooldown" in this._particleCriteria[i] && this._particleCriteria[i].cooldown) {
+		if(this._particleCriteria[i] && "cooldown" in this._particleCriteria[i] && this._particleCriteria[i].cooldown) {
 			this._particleCriteria[i].cooldown --;
 		}
 	}
@@ -324,6 +318,10 @@ dusk.sgui.Entity.prototype._setNewAni = function(id, event) {
 	this._performFrame(event);
 };
 
+dusk.sgui.Entity.prototype.meetsTrigger = function(trigger) {
+	return this._evalTriggerArr(trigger.split("&"))[0];
+};
+
 dusk.sgui.Entity.prototype._evalTrigger = function(id, event) {
 	if(typeof this.animationData[id][0] == "string") this.animationData[id][0] = this.animationData[id][0].split("&");
 	
@@ -446,6 +444,7 @@ dusk.sgui.Entity.prototype._performFrame = function(event, current, noContinue) 
 		
 		case "!":
 			this.behaviourFire("animation", {"given":current.substr(1)});
+			if(this.terminated && current.substr(1) == "terminate") this.deleted = true;
 			if(!noContinue) this._aniForward(event);
 			break;
 		
@@ -537,6 +536,15 @@ dusk.sgui.Entity.prototype._collisionDraw = function(e) {
 		e.d.destX + this.collisionOffsetX, e.d.destY + this.collisionOffsetY, 
 		this.collisionWidth - this.collisionOffsetX, this.collisionHeight - this.collisionOffsetY
 	);
+};
+
+dusk.sgui.Entity.prototype.terminate = function() {
+	this.terminated = true;
+	if(this.behaviourFire("terminate", {}).indexOf(true) === -1) {
+		if(!this.performAnimation("terminate")) {
+			this.deleted = true;
+		}
+	}
 };
 
 Object.seal(dusk.sgui.Entity);

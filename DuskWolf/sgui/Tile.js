@@ -131,14 +131,15 @@ dusk.sgui.Tile.prototype.className = "Tile";
 dusk.sgui.Tile.prototype._tileDraw = function(e) {
 	if(this._img){
 		if(this.mode == "BINARY") {
-			var scale = this.width/(1<<this.ssize);
-			e.c.drawImage(this._img, (this._tx << this.ssize) + (e.d.sourceX*scale), 
-				(this._ty << this.ssize) + (e.d.sourceY*scale), e.d.width*scale, e.d.height*scale,
+			var scaleX = (1<<this.ssize)/this.width;
+			var scaleY = (1<<this.ssize)/this.height;
+			e.c.drawImage(this._img, (this._tx << this.ssize) + (e.d.sourceX*scaleX), 
+				(this._ty << this.ssize) + (e.d.sourceY*scaleY), e.d.width*scaleX, e.d.height*scaleY,
 				e.d.destX, e.d.destY, e.d.width, e.d.height
 			);
 		}else{
-			var hscale = this.swidth/this.width;
-			var vscale = this.sheight/this.height;
+			var hscale = this.width/this.swidth;
+			var vscale = this.height/this.sheight;
 			e.c.drawImage(this._img, this._tx * this.swidth + e.d.sourceX * hscale,
 				this._ty * this.sheight + e.d.sourceY * vscale, e.d.width*hscale, e.d.height*vscale,
 				e.d.destX, e.d.destY, e.d.width, e.d.height

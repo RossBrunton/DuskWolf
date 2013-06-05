@@ -21,6 +21,9 @@ dusk.behave.Controlled = function(entity) {
 			this._jumps = 0;
 			this._jumping = 0;
 		}, this, {"name":"collide", "dir":dusk.sgui.c.DIR_DOWN});
+		this.entityEvent.listen(function(e) {
+			this._jumping = 0;
+		}, this, {"name":"collide", "dir":dusk.sgui.c.DIR_UP});
 		
 		dusk.controls.addControl("entity_left", 37, "0-0.5");
 		dusk.controls.addControl("entity_right", 39, "0+0.5");

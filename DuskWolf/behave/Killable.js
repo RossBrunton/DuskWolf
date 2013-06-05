@@ -11,13 +11,13 @@ dusk.behave.Killable = function(entity) {
 		dusk.behave.Behave.call(this, entity);
 		
 		this._data("hp", 1, true);
+		this._data("maxHp", 1, true);
 		this._data("mercyTime", 30, true);
 		this._data("currentMercy", 0, true);
 		
 		this.entityEvent.listen(this._killableTakeDamage, this, {"name":"takeDamage"});
-		this.entityEvent.listen(this._killableTerminate, this, {"name":"terminate"});
+		this.entityEvent.listen(this._killableHeal, this, {"name":"heal"});
 		this.entityEvent.listen(this._killableFrame, this, {"name":"frame"});
-		this.entityEvent.listen(this._killableEndAnimate, this, {"name":"animation", "given":"kill"});
 	}
 };
 dusk.behave.Killable.prototype = new dusk.behave.Behave();
@@ -30,15 +30,12 @@ dusk.behave.Killable.prototype._killableTakeDamage = function(e) {
 	}
 	
 	if(!this._data("currentMercy")) {
-		this._data("hp", this._data("hp")-e.damage);
-		this._data("currentMercy", this._data("mercyTime"));
-		
-		if(this._data("hp") <= 0) {
-			console.log("I'm dead! :D");
-			if(this._entity.behaviourFire("die", {}).indexOf(true) === -1) {
-				if(!this._entity.performAnimation("die")) {
-					this._entity.behaviourFire("terminate", {});
-				}
+		if(this._entity.behaviourFire("performDamage", e).indexOf(true) === -1) {
+			this._data("hp", this._data("hp")-e.damage);
+			this._data("currentMercy", this._data("mercyTime"));
+			
+			if(this._data("hp") <= 0) {
+				this._entity.terminate();
 			}
 		}
 	}
@@ -46,19 +43,24 @@ dusk.behave.Killable.prototype._killableTakeDamage = function(e) {
 	this._data("currentMercy", this._data("mercyTime"));
 };
 
-dusk.behave.Killable.prototype._killableTerminate = function(name, e) {
-	console.log("I'm terminated. D:");
-	this._entity.deleted = true;
+dusk.behave.Killable.prototype._killableHeal = function(e) {
+	if(isNaN(e.amount)) {
+		console.warn("Tried to heal entity with NaN "+e.amount+".");
+		return;
+	}
+	
+	if(this._data("hp") >= this._data("maxHp")) return;
+	
+	if(this._entity.behaviourFire("performHeal", e).indexOf(true) === -1) {
+		this._data("hp", this._data("hp")+e.amount);
+		if(this._data("hp") >= this._data("maxHp")) this._data("hp", this._data("maxHp"));
+	}
 };
 
 dusk.behave.Killable.prototype._killableFrame = function(name, e) {
 	if(this._data("currentMercy")) {
 		this._data("currentMercy", this._data("currentMercy")-1);
 	}
-};
-
-dusk.behave.Killable.prototype._killableEndAnimate = function(name, e) {
-	this._entity.behaviourFire("terminate", {});
 };
 
 Object.seal(dusk.behave.Killable);

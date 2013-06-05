@@ -8,7 +8,7 @@ dusk.load.require("dusk.sgui.EditableTileMap");
 dusk.load.require("dusk.sgui.EntityGroup");
 dusk.load.require("dusk.sgui.ParticleField");
 dusk.load.require("dusk.editor");
-dusk.load.require("dusk.rooms");
+dusk.load.require("dusk.RoomManager");
 
 dusk.load.provide("dusk.sgui.BasicMain");
 dusk.load.provide("dusk.sgui.IBasicMainLayer");
@@ -23,6 +23,8 @@ dusk.sgui.BasicMain = function(parent, comName) {
 	
 	this.layers = [];
 	this._layers = [];
+	
+	this.roomManager = null;
 	
 	//Prop masks
 	this._registerPropMask("spawn", "spawn");
@@ -52,11 +54,14 @@ dusk.sgui.BasicMain.LAYER_PARTICLES = 0x08;
 dusk.sgui.BasicMain._LAYER_COLOURS = ["#ff0000", "#00ff00", "#ffff00", "#0000ff", "#00ffff", "#ff00ff"];
 
 dusk.sgui.BasicMain.prototype.createRoom = function(name, spawn) {
-	var room = dusk.rooms.getRoomData(name);
+	var room = null;
+	if(this.roomManager) room = this.roomManager.getRoomData(name);
 	if(!room) {
 		console.error("Room "+name+" does not exist.");
 		return;
 	}
+	
+	this.roomName = name;
 	
 	//Yes.
 	this.layers = this.layers;
@@ -96,8 +101,6 @@ dusk.sgui.BasicMain.prototype.createRoom = function(name, spawn) {
 	}
 	
 	this.getComponent(this._primaryEntityGroup).dropEntity(playerData, true);
-	
-	this.roomName = name;
 	
 	this.autoScroll();
 };
@@ -360,12 +363,12 @@ dusk.sgui.BasicMain.prototype._bmRightAction = function(e) {
 
 dusk.sgui.BasicMain.prototype.save = function(e) {
 	if(!dusk.editor.active) return true;
-	if(e === undefined || typeof e == "object") e = prompt("Please enter a package name.");
+	if(e === undefined || typeof e == "object") e = prompt("Please enter a package name.", this.roomName);
 	
 	console.log("----- Exported Room Data "+e+" -----");
 	var out = "";
 	out += "\"use strict\";\n\n";
-	out += "dusk.load.require(\"dusk.rooms\");\n";
+	out += "dusk.load.require(\""+this.roomManager.packageName+"\");\n";
 	out += "dusk.load.require(\"dusk.entities\");\n";
 	out += "dusk.load.provide(\""+e+"\");\n\n";
 	var a = [];
@@ -373,7 +376,7 @@ dusk.sgui.BasicMain.prototype.save = function(e) {
 		a.push(this.getComponent(this._layers[i].name).saveBM());
 	}
 	out += e + " = "+JSON.stringify(a, undefined, 0)+";\n\n";
-	out += "dusk.rooms.createRoom(\""+this.roomName+"\", "+e+");\n\n";
+	out += this.roomManager.managerPath+".createRoom(\""+this.roomName+"\", "+e+");\n\n";
 	out += "//Remember to add your listeners!";
 	console.log(out);
 	console.log("----- End Exported Room Data -----");

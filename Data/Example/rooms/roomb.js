@@ -1,6 +1,6 @@
 "use strict";
 
-dusk.load.require("dusk.rooms");
+dusk.load.require("dusk.plat");
 dusk.load.require("dusk.entities");
 dusk.load.provide("example.plat.rooms.roomb");
 
@@ -412,9 +412,9 @@ example.plat.rooms.roomb = [
     }
 ];
 
-dusk.rooms.createRoom("roomb", example.plat.rooms.roomb);
+dusk.plat.rooms.createRoom("roomb", example.plat.rooms.roomb);
 
 //Navigation
 dusk.entities.markTrigger.listen(function e_roombTrigger0(e) {
-	dusk.rooms.setRoom("exhall", 2);
+	dusk.plat.rooms.setRoom("exhall", 2);
 }, this, {"room":"roomb", "up":false, "mark":0});

@@ -4,10 +4,10 @@
 
 dusk.load.require("dusk.EventDispatcher");
 
-dusk.load.provide("dusk.rooms");
+dusk.load.provide("dusk.RoomManager");
 dusk.load.provide("dusk.editor");
 
-/** @namespace dusk.rooms
+/*  @namespace dusk.rooms
  * @name dusk.rooms
  * 
  * @description This namespace contains rooms for the various game engines.
@@ -46,37 +46,35 @@ dusk.load.provide("dusk.editor");
  * @since 0.0.16-alpha
  */
 
-/** All the rooms that have been created and added.
- * 
- * This is an object containing objects. The key is the name of the room.
- * @type object
- * @private
- */
-dusk.rooms._rooms = {};
+dusk.RoomManager = function(packageName, managerPath) {
+	/** All the rooms that have been created and added.
+	 * 
+	 * This is an object containing objects. The key is the name of the room.
+	 * @type object
+	 * @private
+	 */
+	this._rooms = {};
 
-/** An event dispatcher which fires when a room is loaded.
- * 
- * This is fired by `{@link dusk.rooms.setRoom}`, and has the properties `"room"`;
- *  the name of the room, and `"spawn"` the mark number of the spawn point.
- * @type dusk.EventDispatcher
- */
-dusk.rooms.roomLoaded = new dusk.EventDispatcher("dusk.rooms.roomLoaded");
-
-/** This is the `{@link dusk.sgui.BasicMain}` that controls the current room,
- *  this will be used to set the room data when needed.
- *	It is null if there is no room manager yet.
- * @type ?dusk.sgui.BasicMain
- */
-dusk.rooms.roomManager = null;
-
-
+	/** An event dispatcher which fires when a room is loaded.
+	 * 
+	 * This is fired by `{@link dusk.rooms.setRoom}`, and has the properties `"room"`;
+	 *  the name of the room, and `"spawn"` the mark number of the spawn point.
+	 * @type dusk.EventDispatcher
+	 */
+	this.roomLoaded = new dusk.EventDispatcher("dusk.RoomManager.roomLoaded");
+	
+	this.basicMain = null;
+	
+	this.packageName = packageName;
+	this.managerPath = managerPath;
+};
 
 /** Stores a room.
  * 
  * @param {string} name The name of the room.
  * @param {object} data The room data to store.
  */
-dusk.rooms.createRoom = function(name, data) {
+dusk.RoomManager.prototype.createRoom = function(name, data) {
 	this._rooms[name] = data;
 };
 
@@ -85,7 +83,7 @@ dusk.rooms.createRoom = function(name, data) {
  * @param {string} name The name to look up.
  * @return {object} The stored room with that name.
  */
-dusk.rooms.getRoomData = function(name) {
+dusk.RoomManager.prototype.getRoomData = function(name) {
 	return this._rooms[name];
 };
 
@@ -93,22 +91,28 @@ dusk.rooms.getRoomData = function(name) {
  * @param {string} room The name of the room to load.
  * @param {integer} spawn The mark ID for the seek entity to appear at.
  */
-dusk.rooms.setRoom = function(room, spawn) {
+dusk.RoomManager.prototype.setRoom = function(room, spawn) {
 	if(!room) {
 		console.error("No room specified to set!");
 		return;
 	}
-	if(!dusk.rooms.roomManager) {
-		console.error("No room manager to set the room!");
+	if(!this.basicMain) {
+		console.error("No BasicMain to set the room!");
 		return;
 	}
 	console.log("Setting room "+room);
-	
-	dusk.rooms.roomManager.createRoom(room, spawn);
-	dusk.rooms.roomLoaded.fire({"room":room, "spawn":spawn});
+
+	this.basicMain.createRoom(room, spawn);
+	this.roomLoaded.fire({"room":room, "spawn":spawn});
 };
 
-Object.seal(dusk.rooms);
+dusk.RoomManager.prototype.setBasicMain = function(bm) {
+	this.basicMain = bm;
+	bm.roomManager = this;
+};
+
+Object.seal(dusk.RoomManager);
+Object.seal(dusk.RoomManager.prototype);
 
 // ----
 

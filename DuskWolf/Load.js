@@ -27,7 +27,8 @@ dusk.load._init = function() {
 	 * Each key is an import name, and the value is an array.
 	 *  The first element is the filename that provides the file, 
 	 *  the second is a state value, as shown below, 
-	 *  and the third is an array of all the dependancies of the namespace.
+	 *  the third is an array of all the dependancies of the namespace,
+	 *  and the fourth is the size of the file.
 	 * 
 	 * Possible values for the state are either 0 (not imported), 
 	 *  1 (currently in the proccess of importing) or 2 (successfully imported and ran).
@@ -184,11 +185,13 @@ dusk.load.provide = function(name) {
  * @param {array} provided An array of namespace names which are provided by the file.
  * @param {array} required An array of namespace names that are required for this file to run.
  *  These will be downloaded before this one if any provided namespaces are requested.
+ * @param {integer=0} size The size of the file, in bytes. Optional.
  * @since 0.0.12-alpha
  */
-dusk.load.addDependency = function(file, provided, required) {
+dusk.load.addDependency = function(file, provided, required, size) {
+	if(!size) size = 0;
 	for(var i = provided.length-1; i >= 0; i--) {
-		this._names[provided[i]] = [file, 0, required];
+		this._names[provided[i]] = [file, 0, required, size];
 	}
 };
 
@@ -289,7 +292,7 @@ dusk.load.importList = function(path, callback) {
 		for(var i = data.length-1; i >= 0; i--) {
 			dusk.load._observedDeps[data[i][0]] = [data[i][1], []];
 			if(data[i][0].indexOf(":") === -1 && data[i][0][0] != "/") data[i][0] = relativePath + data[i][0];
-			dusk.load.addDependency(data[i][0], data[i][1], data[i][2]);
+			dusk.load.addDependency(data[i][0], data[i][1], data[i][2], data[i][3]);
 		}
 	}, callback], "beforeSend":function(jqXHR, settings) {jqXHR.responseURL = path;},
 	"url":path});
@@ -356,6 +359,24 @@ dusk.load._checkIfHandleable = function() {
 };
 dusk.load._checkIfHandleable();
 
+/** Returns the total size of files that are being downloaded, if the deps file has this information.
+ * @return {integer} The total download remaining, in kilobytes.
+ * @private
+ * @since 0.0.20-alpha
+ */
+dusk.load._getBytes = function() {
+	var seen = [];
+	var sum = 0;
+	for(var i = dusk.load._currentlyImporting.length-1; i >= 0; i --) {
+		if(dusk.load._names[dusk.load._currentlyImporting[i]].length > 3
+		&& seen.indexOf(dusk.load._names[dusk.load._currentlyImporting[i]][0]) === -1) {
+			sum += dusk.load._names[dusk.load._currentlyImporting[i]][3];
+			seen[seen.length] = dusk.load._names[dusk.load._currentlyImporting[i]][0];
+		}
+	};
+	return ~~(sum/1024);
+};
+
 /** Called on requestAnimationFrame to display the loading text untill the game has loaded. 
  * @private
  * @since 0.0.17-alpha
@@ -371,6 +392,9 @@ dusk.load._displayLoad = function() {
 			"Hold on! Loading "+dusk.load._currentlyImporting.length+" files!", 5, textY+=15
 		);
 		$("#"+dusk.canvas)[0].getContext("2d").fillText("Now loading "+dusk.load._current+"!", 5, textY+=15);
+		$("#"+dusk.canvas)[0].getContext("2d").fillText(
+			"That's about "+dusk.load._getBytes()+"KiB, excluding image data!", 5, textY+=15
+		);
 		
 		if("onLine" in navigator && !navigator.onLine) {
 			$("#"+dusk.canvas)[0].getContext("2d").fillText(
