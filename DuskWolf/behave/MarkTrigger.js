@@ -51,7 +51,7 @@ dusk.behave.MarkTrigger.prototype._markTriggerFrame = function(name, e) {
 		
 		if(!this._coolDown) {
 			dusk.entities.markTrigger.fire({
-				"up":false, "mark":this._markAt, "activator":this._entity.comName, 
+				"up":false, "mark":this._markAt, "activator":this._entity.comName, "entity":this._entity,
 				"room":this._entity.path("../..").roomName
 			});
 			this._coolDown = 5;

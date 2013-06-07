@@ -83,8 +83,7 @@ dusk.sgui.EditableTileMap = function (parent, comName) {
 	this.dirPress.listen(this._etmUpAction, this, {"dir":dusk.sgui.c.DIR_UP});
 	this.dirPress.listen(this._etmDownAction, this, {"dir":dusk.sgui.c.DIR_DOWN});
 };
-dusk.sgui.EditableTileMap.prototype = new dusk.sgui.TileMap();
-dusk.sgui.EditableTileMap.constructor = dusk.sgui.EditableTileMap;
+dusk.sgui.EditableTileMap.prototype = Object.create(dusk.sgui.TileMap.prototype);
 
 dusk.sgui.EditableTileMap.prototype.className = "EditableTileMap";
 
@@ -129,6 +128,12 @@ dusk.sgui.EditableTileMap.prototype._editTileMapDraw = function(e) {
 	e.c.strokeStyle = this.cursorColour;
 	e.c.strokeRect(e.d.destX - e.d.sourceX + (this._cx*this.tileWidth()),
 		e.d.destX - e.d.sourceY + (this._cy*this.tileHeight()), width, height
+	);
+	
+	e.c.fillStyle = this.cursorColour;
+	e.c.fillText(this.getTile(this._cx, this._cy),
+		e.d.destX - e.d.sourceX + (this._cx*this.tileWidth()) + 1,
+		e.d.destX - e.d.sourceY + (this._cy*this.tileHeight()) + 6
 	);
 };
 
@@ -308,11 +313,11 @@ dusk.sgui.EditableTileMap.prototype.carveTop = function() {
 	
 	var point = this.cols<<1;
 	for(var i = 0; i < (this.rows*this.cols)<<1; i++) {
-		newTiles[i] = this._tiles[point++];
+		newTiles[i] = this._tiles[0][point++];
 	}
 	
-	this._tileBuffer = newTileBuffer;
-	this._tiles = new Uint8Array(this._tileBuffer);
+	this._tileBuffer[0] = newTileBuffer;
+	this._tiles[0] = new Uint8Array(this._tileBuffer[0]);
 	this.drawAll();
 };
 
@@ -329,11 +334,11 @@ dusk.sgui.EditableTileMap.prototype.graftTop = function() {
 			continue;
 		}
 		
-		newTiles[i] = this._tiles[point++];
+		newTiles[i] = this._tiles[0][point++];
 	}
 	
-	this._tileBuffer = newTileBuffer;
-	this._tiles = new Uint8Array(this._tileBuffer);
+	this._tileBuffer[0] = newTileBuffer;
+	this._tiles[0] = new Uint8Array(this._tileBuffer[0]);
 	this.drawAll();
 };
 
@@ -345,11 +350,11 @@ dusk.sgui.EditableTileMap.prototype.carveBottom = function() {
 	
 	var point = 0;
 	for(var i = 0; i < (this.rows*this.cols)<<1; i++) {
-		newTiles[i] = this._tiles[point++];
+		newTiles[i] = this._tiles[0][point++];
 	}
 	
-	this._tileBuffer = newTileBuffer;
-	this._tiles = new Uint8Array(this._tileBuffer);
+	this._tileBuffer[0] = newTileBuffer;
+	this._tiles[0] = new Uint8Array(this._tileBuffer[0]);
 	this.drawAll();
 };
 
@@ -361,16 +366,16 @@ dusk.sgui.EditableTileMap.prototype.graftBottom = function() {
 	
 	var point = 0;
 	for(var i = 0; i < (this.rows*this.cols)<<1; i++) {
-		if(point >= this._tiles.length) {
+		if(point >= this._tiles[0].length) {
 			newTiles[i] = 0;
 			continue;
 		}
 		
-		newTiles[i] = this._tiles[point++];
+		newTiles[i] = this._tiles[0][point++];
 	}
 	
-	this._tileBuffer = newTileBuffer;
-	this._tiles = new Uint8Array(this._tileBuffer);
+	this._tileBuffer[0] = newTileBuffer;
+	this._tiles[0] = new Uint8Array(this._tileBuffer[0]);
 	this.drawAll();
 };
 
@@ -388,11 +393,11 @@ dusk.sgui.EditableTileMap.prototype.graftLeft = function() {
 			continue;
 		}
 		
-		newTiles[i] = this._tiles[point++];
+		newTiles[i] = this._tiles[0][point++];
 	}
 	
-	this._tileBuffer = newTileBuffer;
-	this._tiles = new Uint8Array(this._tileBuffer);
+	this._tileBuffer[0] = newTileBuffer;
+	this._tiles[0] = new Uint8Array(this._tileBuffer[0]);
 	this.drawAll();
 };
 
@@ -408,11 +413,11 @@ dusk.sgui.EditableTileMap.prototype.carveLeft = function() {
 			point += 2;
 		}
 		
-		newTiles[i] = this._tiles[point++];
+		newTiles[i] = this._tiles[0][point++];
 	}
 	
-	this._tileBuffer = newTileBuffer;
-	this._tiles = new Uint8Array(this._tileBuffer);
+	this._tileBuffer[0] = newTileBuffer;
+	this._tiles[0] = new Uint8Array(this._tileBuffer[0]);
 	this.drawAll();
 };
 
@@ -430,11 +435,11 @@ dusk.sgui.EditableTileMap.prototype.graftRight = function() {
 			continue;
 		}
 		
-		newTiles[i] = this._tiles[point++];
+		newTiles[i] = this._tiles[0][point++];
 	}
 	
-	this._tileBuffer = newTileBuffer;
-	this._tiles = new Uint8Array(this._tileBuffer);
+	this._tileBuffer[0] = newTileBuffer;
+	this._tiles[0] = new Uint8Array(this._tileBuffer[0]);
 	this.drawAll();
 };
 
@@ -450,11 +455,11 @@ dusk.sgui.EditableTileMap.prototype.carveRight = function() {
 			point+=2;
 		}
 		
-		newTiles[i] = this._tiles[point++];
+		newTiles[i] = this._tiles[0][point++];
 	}
 	
-	this._tileBuffer = newTileBuffer;
-	this._tiles = new Uint8Array(this._tileBuffer);
+	this._tileBuffer[0] = newTileBuffer;
+	this._tiles[0] = new Uint8Array(this._tileBuffer[0]);
 	this.drawAll();
 };
 

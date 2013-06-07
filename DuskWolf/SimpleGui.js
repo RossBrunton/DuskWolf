@@ -11,6 +11,7 @@ dusk.load.require("dusk");
 dusk.load.require("dusk.sgui.c");
 
 dusk.load.provide("dusk.sgui");
+dusk.load.provide("dusk.pause");
 
 /** @namespace dusk.sgui
  * @name dusk.sgui
@@ -437,3 +438,40 @@ Object.defineProperty(dusk.sgui, "height", {
 
 //Init the simpleGui
 dusk.sgui._init();
+
+//-----
+
+dusk.pause._init = function() {
+	dusk.pause._previous = "";
+	
+	dusk.controls.addControl("pause", 13, 9);
+	dusk.controls.controlPressed.listen(function(e){dusk.pause.toggle();}, this, {"control":"pause"});
+};
+
+dusk.pause.pause = function() {
+	if(!dusk.pause._previous) dusk.pause._previous = dusk.sgui.getActivePane().comName;
+	dusk.sgui.setActivePane("paused");
+	dusk.sgui.getPane("paused").visible = true;
+};
+
+dusk.pause.unpause = function() {
+	dusk.sgui.setActivePane(dusk.pause._previous);
+	dusk.pause._previous = "";
+	dusk.sgui.getPane("paused").visible = false;
+};
+
+dusk.pause.isPaused = function() {
+	return dusk.pause._previous !== "";
+};
+
+dusk.pause.toggle = function() {
+	if(dusk.pause.isPaused()) {
+		dusk.pause.unpause();
+	}else{
+		dusk.pause.pause();
+	}
+};
+
+
+dusk.pause._init();
+Object.seal(dusk.pause);

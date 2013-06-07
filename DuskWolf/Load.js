@@ -65,7 +65,7 @@ dusk.load._init = function() {
 	 * 
 	 * The event will be fired after the script is ran; so you can be sure that the module has been initiated.
 	 * 
-	 * The event object has only one property, a string with the package name in it.
+	 * The event object has only one property, package, a string with the package name in it.
 	 * 
 	 * This object will be `null` until `{@link dusk.EventDispatcher}` is imported; 
 	 *  and this namespace will not make any attempt to import it.
@@ -358,6 +358,27 @@ dusk.load._checkIfHandleable = function() {
 	}
 };
 dusk.load._checkIfHandleable();
+
+/** Stops all currently importing packages.
+ * @since 0.0.20-alpha
+ */
+dusk.load.abort = function() {
+	dusk.load._currentlyImporting = [];
+	dusk.load._current = "";
+};
+
+/** Checks if the specified package is imported.
+ * @param {string} name The package name to check.
+ * @return {boolean} Whether the package is imported.
+ * @since 0.0.20-alpha
+ */
+dusk.load.isImported = function(name) {
+	if(name in dusk.load._names && dusk.load._names[name][1] == 2) {
+		return true;
+	}
+	
+	return false;
+};
 
 /** Returns the total size of files that are being downloaded, if the deps file has this information.
  * @return {integer} The total download remaining, in kilobytes.

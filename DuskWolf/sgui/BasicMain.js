@@ -6,7 +6,8 @@ dusk.load.require("dusk.sgui.Entity");
 dusk.load.require("dusk.sgui.Group");
 dusk.load.require("dusk.sgui.EditableTileMap");
 dusk.load.require("dusk.sgui.EntityGroup");
-dusk.load.require("dusk.sgui.ParticleField");
+dusk.load.require(">dusk.sgui.ParticleField");
+dusk.load.require(">dusk.sgui.TransitionManager");
 dusk.load.require("dusk.editor");
 dusk.load.require("dusk.RoomManager");
 
@@ -25,15 +26,21 @@ dusk.sgui.BasicMain = function(parent, comName) {
 	this._layers = [];
 	
 	this.roomManager = null;
+	this.editorColour = "#000000";
 	
 	//Prop masks
 	this._registerPropMask("spawn", "spawn");
 	this._registerPropMask("layers", "layers");
+	this._registerPropMask("editorColour", "editorColour");
+	this._registerPropMask("editorColor", "editorColor");
 	this._registerPropMask("room", "room", true, ["spawn"]);
 	
 	//Listeners
 	this.frame.listen(this._platMainFrame, this);
 	this.keyPress.listen(this.save, this, {"key":83});
+	this.keyPress.listen(function(e) {
+		if(dusk.editor.active) this.createRoom(prompt("Enter a room to go to.", this.roomName), 0);
+	}, this, {"key":71});
 	
 	//Directions
 	this.dirPress.listen(this._bmRightAction, this, {"dir":dusk.sgui.c.DIR_RIGHT});
@@ -41,8 +48,7 @@ dusk.sgui.BasicMain = function(parent, comName) {
 	this.dirPress.listen(this._bmUpAction, this, {"dir":dusk.sgui.c.DIR_UP});
 	this.dirPress.listen(this._bmDownAction, this, {"dir":dusk.sgui.c.DIR_DOWN});
 };
-dusk.sgui.BasicMain.prototype = new dusk.sgui.Group();
-dusk.sgui.BasicMain.constructor = dusk.sgui.BasicMain;
+dusk.sgui.BasicMain.prototype = Object.create(dusk.sgui.Group.prototype);
 
 dusk.sgui.BasicMain.prototype.className = "BasicMain";
 
@@ -50,8 +56,9 @@ dusk.sgui.BasicMain.LAYER_TILEMAP = 0x01;
 dusk.sgui.BasicMain.LAYER_SCHEME = 0x02;
 dusk.sgui.BasicMain.LAYER_ENTITIES = 0x04;
 dusk.sgui.BasicMain.LAYER_PARTICLES = 0x08;
+dusk.sgui.BasicMain.LAYER_TRANSITIONS = 0x10;
 
-dusk.sgui.BasicMain._LAYER_COLOURS = ["#ff0000", "#00ff00", "#ffff00", "#0000ff", "#00ffff", "#ff00ff"];
+dusk.sgui.BasicMain._LAYER_COLOURS = ["#ff0000", "#00ff00", "#0000ff"];
 
 dusk.sgui.BasicMain.prototype.createRoom = function(name, spawn) {
 	var room = null;
@@ -67,7 +74,7 @@ dusk.sgui.BasicMain.prototype.createRoom = function(name, spawn) {
 	this.layers = this.layers;
 	
 	for(var i = 0; i < room.length; i ++) {
-		this.getComponent(this._layers[i].name).loadBM(room[i]);
+		this.getComponent(this._layers[i].name).loadBM(room[i], spawn);
 	}
 	
 	var entLayers = this.getAllLayersOfType(dusk.sgui.BasicMain.LAYER_ENTITIES);
@@ -117,11 +124,13 @@ Object.defineProperty(dusk.sgui.BasicMain.prototype, "layers", {
 		
 		this.deleteAllComponents();
 		
+		var colour = 0;
+		
 		for(var i = 0; i < val.length; i ++) {
 			switch(val[i].type) {
 				case dusk.sgui.BasicMain.LAYER_TILEMAP:
 					this.getComponent(val[i].name, "EditableTileMap").parseProps(
-					{"cursorColour":dusk.sgui.BasicMain._LAYER_COLOURS[i % dusk.sgui.BasicMain._LAYER_COLOURS.length],
+					{"cursorColour":dusk.sgui.BasicMain._LAYER_COLOURS[colour++],
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
 						"tsize":dusk.entities.tsize, "ssize":dusk.entities.ssize, "mode":dusk.entities.mode,
 						"twidth":dusk.entities.twidth, "theight":dusk.entities.theight,
@@ -132,7 +141,7 @@ Object.defineProperty(dusk.sgui.BasicMain.prototype, "layers", {
 				
 				case dusk.sgui.BasicMain.LAYER_SCHEME:
 					this.getComponent(val[i].name, "EditableTileMap").parseProps(
-					{"cursorColour":dusk.sgui.BasicMain._LAYER_COLOURS[i % dusk.sgui.BasicMain._LAYER_COLOURS.length],
+					{"cursorColour":dusk.sgui.BasicMain._LAYER_COLOURS[colour++],
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
 						"tsize":dusk.entities.tsize, "ssize":dusk.entities.ssize, "mode":dusk.entities.mode,
 						"twidth":dusk.entities.twidth, "theight":dusk.entities.theight,
@@ -154,8 +163,12 @@ Object.defineProperty(dusk.sgui.BasicMain.prototype, "layers", {
 					break;
 				
 				case dusk.sgui.BasicMain.LAYER_PARTICLES:
-					this.getComponent(val[i].name, "ParticleField").parseProps(
-					{});
+					this.getComponent(val[i].name, "ParticleField").parseProps({"upFlow":(i > 0?val[i-1].name:"")});
+					
+					break;
+				
+				case dusk.sgui.BasicMain.LAYER_TRANSITIONS:
+					this.getComponent(val[i].name, "TransitionManager").parseProps({"upFlow":(i > 0?val[i-1].name:"")});
 					
 					break;
 			}
@@ -166,6 +179,12 @@ Object.defineProperty(dusk.sgui.BasicMain.prototype, "layers", {
 		this.getComponent(val[0].name).upFlow = val[val.length-1].name;
 		this.getComponent(val[val.length-1].name).downFlow = val[0].name;
 		this.flow(val[0].name);
+		
+		this.getComponent("editorLabel", "Label").parseProps({
+			"visible":false,
+			"text":"",
+			"height":18
+		});
 	}
 });
 
@@ -190,6 +209,10 @@ dusk.sgui.BasicMain.prototype.getPrimaryEntityLayer = function() {
 	return this.getComponent(this._primaryEntityGroup);
 };
 
+dusk.sgui.BasicMain.prototype.getTransitionManager = function() {
+	return this.getAllLayersOfType(dusk.sgui.BasicMain.LAYER_TRANSITIONS)[0];
+};
+
 dusk.sgui.BasicMain.prototype.getSeek = function() {
 	if(!this.getComponent(this._primaryEntityGroup)) return null;
 	return this.getComponent(this._primaryEntityGroup).getComponent(dusk.entities.seek);
@@ -210,8 +233,21 @@ dusk.sgui.BasicMain.prototype._platMainFrame = function(e) {
 	//Editing
 	if(dusk.editor.active) {
 		this.focusBehaviour = dusk.sgui.Group.FOCUS_ONE;
+		
+		if(this.getComponent("editorLabel")) {
+			this.getComponent("editorLabel").visible = true;
+			this.getComponent("editorLabel").text = "Editing: " + this.focus;
+			this.getComponent("editorLabel").x = this.xOffset + this.width/2 - this.getComponent("editorLabel").width/2;
+			this.getComponent("editorLabel").y = this.yOffset + 10;
+			this.getComponent("editorLabel").colour = this.editorColour;
+		}
 	}else{
 		this.focusBehaviour = dusk.sgui.Group.FOCUS_ALL;
+		
+		if(this.getComponent("editorLabel")) {
+			this.getComponent("editorLabel").visible = false;
+			this.getComponent("editorLabel").text = this.focus;
+		}
 	}
 };
 
@@ -378,6 +414,13 @@ dusk.sgui.BasicMain.prototype.save = function(e) {
 	out += e + " = "+JSON.stringify(a, undefined, 0)+";\n\n";
 	out += this.roomManager.managerPath+".createRoom(\""+this.roomName+"\", "+e+");\n\n";
 	out += "//Remember to add your listeners!";
+	
+	var count = 0;
+	while(out.indexOf('"%'+count+'"') !== -1) {
+		out = out.replace('"%'+count+'"', prompt("Please enter a replacement for %"+count));
+		count ++;
+	}
+	
 	console.log(out);
 	console.log("----- End Exported Room Data -----");
 	

@@ -21,7 +21,7 @@ dusk.utils.clone = function(o) {
 
 	var tmp = o.constructor(); 
 	for(var p in o) {
-		if(typeof o[p] == "object" && Object.getPrototypeOf(o[p]) != Object.prototype) {
+		if(typeof o[p] == "object" && Object.getPrototypeOf(o[p]) != Object.prototype && !Array.isArray(o[p])) {
 			tmp[p] = o[p];
 		}else{
 			tmp[p] = this.clone(o[p]);

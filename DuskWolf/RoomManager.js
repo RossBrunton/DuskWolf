@@ -101,7 +101,7 @@ dusk.RoomManager.prototype.setRoom = function(room, spawn) {
 		return;
 	}
 	console.log("Setting room "+room);
-
+	
 	this.basicMain.createRoom(room, spawn);
 	this.roomLoaded.fire({"room":room, "spawn":spawn});
 };

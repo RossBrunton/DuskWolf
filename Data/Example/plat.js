@@ -11,6 +11,7 @@ dusk.load.require("dusk.behave.Killable");
 dusk.load.require("dusk.behave.Controlled");
 dusk.load.require("dusk.behave.MarkTrigger");
 dusk.load.require("dusk.sgui.DynamicGrid");
+dusk.load.require("dusk.sgui.ControlConfig");
 dusk.load.require("dusk.sgui.Label");
 dusk.load.require("dusk.sgui.Image");
 dusk.load.require("dusk.behave.Fall");
@@ -22,10 +23,6 @@ dusk.load.require("dusk");
 dusk.load.require("dusk.sgui.effects.spread");
 
 dusk.load.require("example.plat.rooms.exhall");
-dusk.load.require("example.plat.rooms.rooma");
-dusk.load.require("example.plat.rooms.roomb");
-dusk.load.require("example.plat.rooms.roomc");
-dusk.load.require("example.plat.rooms.roomd");
 
 dusk.load.provide("example.plat");
 
@@ -155,6 +152,77 @@ dusk.sgui.getPane("hud").parseProps({
 			"x":25,
 			"y":21
 		}
+	}
+});
+
+dusk.sgui.getPane("paused").parseProps({
+	"visible":false,
+	"focus":"controlPause",
+	"children":{
+		"pauseText":{
+			"type":"Label",
+			"text":"Paused",
+			"xOrigin":dusk.sgui.Component.ORIGIN_MAX,
+			"colour":"#0000ff",
+		},
+		"controlPauseText":{
+			"type":"Label",
+			"height":16,
+			"x":5,
+			"y":40,
+			"text":"Pause",
+		},
+		"controlPause":{
+			"type":"ControlConfig",
+			"x":50,
+			"y":40,
+			"control":"pause",
+			"downFlow":"controlLeft"
+		},
+		"controlLeftText":{
+			"type":"Label",
+			"height":16,
+			"x":5,
+			"y":60,
+			"text":"Left",
+		},
+		"controlLeft":{
+			"type":"ControlConfig",
+			"x":50,
+			"y":60,
+			"control":"entity_left",
+			"downFlow":"controlRight",
+			"upFlow":"controlPause",
+		},
+		"controlRightText":{
+			"type":"Label",
+			"height":16,
+			"x":5,
+			"y":80,
+			"text":"Right",
+		},
+		"controlRight":{
+			"type":"ControlConfig",
+			"x":50,
+			"y":80,
+			"control":"entity_right",
+			"upFlow":"controlLeft",
+			"downFlow":"controlJump"
+		},
+		"controlJumpText":{
+			"type":"Label",
+			"height":16,
+			"x":5,
+			"y":100,
+			"text":"Jump",
+		},
+		"controlJump":{
+			"type":"ControlConfig",
+			"x":50,
+			"y":100,
+			"control":"entity_jump",
+			"upFlow":"controlRight"
+		},
 	}
 });
 

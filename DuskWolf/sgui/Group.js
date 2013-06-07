@@ -217,12 +217,13 @@ dusk.sgui.Group.prototype._newComponent = function(com, type) {
 		type = "NullCom";
 	}
 	
-	this._components[com] = new (dusk.sgui.getType(type))(this, com.toLowerCase());
-	this._drawOrder[this._drawOrder.length] = com;
-	dusk.sgui.applyStyles(this._components[com]);
-	if(this.focusBehaviour == dusk.sgui.Group.FOCUS_ALL) this._components[com].onFocusChange.fire({"focus":true});
+	this._components[com.toLowerCase()] = new (dusk.sgui.getType(type))(this, com.toLowerCase());
+	this._drawOrder[this._drawOrder.length] = com.toLowerCase();
+	dusk.sgui.applyStyles(this._components[com.toLowerCase()]);
+	if(this.focusBehaviour == dusk.sgui.Group.FOCUS_ALL)
+		this._components[com.toLowerCase()].onFocusChange.fire({"focus":true});
 	
-	return this._components[com];
+	return this._components[com.toLowerCase()];
 };
 
 /** Modifies this component's children using JSON data.

@@ -64,12 +64,13 @@ dusk.sgui.ControlConfig.prototype._ccFrame = function(e) {
 		
 		if(controls[1] !== null) {
 			if(typeof controls[1] == "string") {
+				var axis = "";
 				if(controls[1].indexOf("+") != -1) {
-					controls[1] = controls[1].split("+")[0];
-					this._buttonChild.tile = [(+controls[1] * 2) + 1, 1];
+					axis = controls[1].split("+")[0];
+					this._buttonChild.tile = [(+axis * 2) + 1, 1];
 				}else{
-					controls[1] = controls[1].split("-")[0];
-					this._buttonChild.tile = [(+controls[1] * 2), 1];
+					axis = controls[1].split("-")[0];
+					this._buttonChild.tile = [(+axis * 2), 1];
 				}
 			}else{
 				this._buttonChild.tile = [+controls[1] + 1, 0];
