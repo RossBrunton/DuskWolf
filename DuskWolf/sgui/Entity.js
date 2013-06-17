@@ -25,6 +25,7 @@ dusk.sgui.Entity = function (parent, comName) {
 	this._aniPointer = 0;
 	this._aniLock = false;
 	this._aniVars = {};
+	this._aniWaits = {};
 	this._particleData = [];
 	this._particleCriteria = [];
 	this._frameDelay = 5;
@@ -198,6 +199,7 @@ Object.defineProperty(dusk.sgui.Entity.prototype, "entType", {
 		
 		this._currentAni = -1;
 		this._particleCriteria = [];
+		this._aniWaits = {};
 		this.performAnimation();
 		this.prop("src", this.behaviourData.img);
 		
@@ -448,6 +450,13 @@ dusk.sgui.Entity.prototype._performFrame = function(event, current, noContinue) 
 			if(!noContinue) this._aniForward(event);
 			break;
 		
+		case "/":
+			if(current.substr(1) in this._aniWaits) {
+				this._aniWaits[current.substr(1)][0].call(this._aniWaits[current.substr(1)][1]);
+			}
+			if(!noContinue) this._aniForward(event);
+			break;
+		
 		case "*":
 			var name = current.substr(1).split(" ")[0];
 			var data = dusk.utils.jsonParse(current.substr(name.length+1));
@@ -541,9 +550,15 @@ dusk.sgui.Entity.prototype._collisionDraw = function(e) {
 dusk.sgui.Entity.prototype.terminate = function() {
 	this.terminated = true;
 	if(this.behaviourFire("terminate", {}).indexOf(true) === -1) {
-		if(!this.performAnimation("terminate")) {
-			this.deleted = true;
-		}
+		this.animationWait("terminate", function() {this.deleted = true;}, this);
+	}
+};
+
+dusk.sgui.Entity.prototype.animationWait = function(name, funct, scope) {
+	if(!this.performAnimation("beh_"+name)) {
+		funct.call(scope);
+	}else{
+		this._aniWaits[name] = [funct, scope];
 	}
 };
 

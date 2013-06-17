@@ -21,6 +21,8 @@ dusk.load.require("dusk.behave.Pickup");
 dusk.load.require("dusk.behave.HealthRestore");
 dusk.load.require("dusk");
 dusk.load.require("dusk.sgui.effects.spread");
+dusk.load.require("dusk.sgui.FpsMeter");
+dusk.load.require("dusk.sgui.PlusText");
 
 dusk.load.require("example.plat.rooms.exhall");
 
@@ -45,7 +47,7 @@ example.plat.playerAni = [
 	["#dy<0&$dir=l", "3,1", {}],
 	["#dy>0 & #tb=0", "4,0", {}],
 	["#dy>0 & $dir=l & #tb=0", "4,1", {}],
-	["on terminate", "L|0,1|0,2|1,2|2,2|3,2|4,2|5,2|6,2|7,2|!terminate", {}]
+	["on beh_terminate", "L|0,1|0,2|1,2|2,2|3,2|4,2|5,2|6,2|7,2|/terminate", {}]
 ];
 
 example.plat.playerParts = [
@@ -157,7 +159,7 @@ dusk.sgui.getPane("hud").parseProps({
 
 dusk.sgui.getPane("paused").parseProps({
 	"visible":false,
-	"focus":"controlPause",
+	"focus":"controls",
 	"children":{
 		"pauseText":{
 			"type":"Label",
@@ -165,65 +167,40 @@ dusk.sgui.getPane("paused").parseProps({
 			"xOrigin":dusk.sgui.Component.ORIGIN_MAX,
 			"colour":"#0000ff",
 		},
-		"controlPauseText":{
-			"type":"Label",
-			"height":16,
-			"x":5,
+		"controls":{
+			"type":"Grid",
+			"rows":4,
+			"cols":1,
 			"y":40,
-			"text":"Pause",
-		},
-		"controlPause":{
-			"type":"ControlConfig",
-			"x":50,
-			"y":40,
-			"control":"pause",
-			"downFlow":"controlLeft"
-		},
-		"controlLeftText":{
-			"type":"Label",
-			"height":16,
 			"x":5,
-			"y":60,
-			"text":"Left",
-		},
-		"controlLeft":{
-			"type":"ControlConfig",
-			"x":50,
-			"y":60,
-			"control":"entity_left",
-			"downFlow":"controlRight",
-			"upFlow":"controlPause",
-		},
-		"controlRightText":{
-			"type":"Label",
-			"height":16,
-			"x":5,
-			"y":80,
-			"text":"Right",
-		},
-		"controlRight":{
-			"type":"ControlConfig",
-			"x":50,
-			"y":80,
-			"control":"entity_right",
-			"upFlow":"controlLeft",
-			"downFlow":"controlJump"
-		},
-		"controlJumpText":{
-			"type":"Label",
-			"height":16,
-			"x":5,
-			"y":100,
-			"text":"Jump",
-		},
-		"controlJump":{
-			"type":"ControlConfig",
-			"x":50,
-			"y":100,
-			"control":"entity_jump",
-			"upFlow":"controlRight"
+			"globals":{
+				"type":"PlusText",
+				"plusType":"ControlConfig",
+				"label":{
+					"size":12,
+				},
+				"width":120
+			},
+			"populate":[
+				{"text":"pause", "plus":{"control":"pause"}},
+				{"text":"left", "plus":{"control":"entity_left"}},
+				{"text":"right", "plus":{"control":"entity_right"}},
+				{"text":"jump", "plus":{"control":"entity_jump"}},
+			]
 		},
 	}
+});
+
+dusk.sgui.getPane("rate").parseProps({
+	"children":{
+		"meter":{
+			"type":"FpsMeter",
+			"yOrigin":dusk.sgui.Component.ORIGIN_MAX,
+			"xOrigin":dusk.sgui.Component.ORIGIN_MAX,
+		}
+	},
+	"width":dusk.sgui.width,
+	"height":dusk.sgui.height
 });
 
 dusk.frameTicker.onFrame.listen(function(e) {

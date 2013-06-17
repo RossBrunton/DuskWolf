@@ -37,15 +37,6 @@ dusk.load._init = function() {
 	 * @since 0.0.12-alpha
 	 */
 	dusk.load._names = {};
-
-	/** The currently observed dependancies, used for creating dependancy lists.
-	 * 
-	 * Each key is the "true" filename, the value is an array of the form `[provided, requires]`.
-	 * @type object
-	 * @private
-	 * @since 0.0.15-alpha
-	 */
-	dusk.load._observedDeps = {};
 	 
 	/** The currently imported package which is running now, or ran last.
 	 * @type string
@@ -202,13 +193,7 @@ dusk.load.addDependency = function(file, provided, required, size) {
  * @since 0.0.15-alpha
  */
 dusk.load.require = function(name) {
-	if(dusk.load._current) {
-		for(var p in dusk.load._observedDeps) {
-			if(dusk.load._observedDeps[p][0].indexOf(dusk.load._current) !== -1) {
-				dusk.load._observedDeps[p][1].push(name);
-			}
-		}
-	}
+	//Do nothing
 };
 
 /** Imports a package.
@@ -244,36 +229,6 @@ dusk.load.importAll = function() {
 	}
 };
 
-/** Returns a JSON string containing all the dependancy information of all the elements matching the regexp specified.
- * 
- * This should be importable using `{@link dusk.load.importList}`.
- * @param {regex} patt The pattern to match.
- * @return {string} A list of dependancies.
- * @since 0.0.15-alpha
- */
-dusk.load.buildDeps = function(patt) {
-	var holdString = "[\n\t";
-	var first = true;
-	for(var d in dusk.load._observedDeps) {
-		for(var i = dusk.load._observedDeps[d][0].length-1; i >= 0; i --) {
-			if(patt.test(dusk.load._observedDeps[d][0][i])) {
-				if(!first) holdString += ",\n\t";
-				first = false;
-				var holdArray = [];
-				holdArray[0] = d;
-				holdArray[1] = dusk.load._observedDeps[d][0];
-				holdArray[1].sort();
-				holdArray[2] = dusk.load._observedDeps[d][1];
-				holdArray[2].sort();
-				holdString += JSON.stringify(holdArray);
-				break;
-			}
-		}
-	}
-	holdString += "\n]";
-	return holdString;
-};
-
 /** Download a JSON containing an array of dependancies. These will be looped through,
  *  and the entries will be given to `{@link dusk.load.addDependency}`.
  * 
@@ -290,7 +245,6 @@ dusk.load.importList = function(path, callback) {
 		relativePath.splice(-1, 1);
 		relativePath = relativePath.join("/")+"/";
 		for(var i = data.length-1; i >= 0; i--) {
-			dusk.load._observedDeps[data[i][0]] = [data[i][1], []];
 			if(data[i][0].indexOf(":") === -1 && data[i][0][0] != "/") data[i][0] = relativePath + data[i][0];
 			dusk.load.addDependency(data[i][0], data[i][1], data[i][2], data[i][3]);
 		}

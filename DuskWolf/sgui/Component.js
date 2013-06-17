@@ -256,6 +256,12 @@ dusk.sgui.Component = function (parent, componentName) {
 	 */
 	this._extras = {};
 	
+	/** The component's type. Setting this to a string will change the component to that type.
+	 * @type string
+	 * @since 0.0.19-alpha
+	 */
+	this.type = null;
+	
 	//Prop masks
 	this._registerPropMask("x", "x");
 	this._registerPropMask("xOrigin", "xOrigin");
@@ -277,6 +283,7 @@ dusk.sgui.Component = function (parent, componentName) {
 	this._registerPropMask("style", "style");
 	this._registerPropMask("layer", "__layer");
 	this._registerPropMask("extras", "__extras");
+	this._registerPropMask("type", "type");
 };
 
 /** Components which support this (and all must do so) must support being drawn at arbitary locations.
@@ -698,6 +705,27 @@ Object.defineProperty(dusk.sgui.Component.prototype, "__extras", {
  */
 dusk.sgui.Component.prototype.toString = function() {return "[sgui "+dusk.sgui.getTypeName(this)+" "+this.comName+"]";};
 
+
+//type
+Object.defineProperty(dusk.sgui.Component.prototype, "type", {
+	set: function(value) {
+		if(value && value != dusk.sgui.getTypeName(this)) {
+			this.deleted = true;
+			
+			var data = this.bundle();
+			data.type = value;
+			data.deleted = false;
+			
+			this.container.getComponent(this.comName, value).parseProps(data);
+			dusk.sgui.applyStyles(this.container.getComponent(this.comName));
+		}
+	},
+	
+	get: function() {
+		return dusk.sgui.getTypeName(this);
+	}
+});
+
 Object.seal(dusk.sgui.Component);
 Object.seal(dusk.sgui.Component.prototype);
 
@@ -722,6 +750,13 @@ dusk.sgui.NullCom.prototype = new dusk.sgui.Component();
 dusk.sgui.NullCom.constructor = dusk.sgui.NullCom;
 
 dusk.sgui.NullCom.prototype.className = "NullCom";
+
+/** A NullComponent bundles up as an empty object.
+ * 
+ * @return {object} An empty object.
+ * @since 0.0.19-alpha
+ */
+dusk.sgui.NullCom.prototype.bundle = function() {return {};}
 
 Object.seal(dusk.sgui.NullCom);
 Object.seal(dusk.sgui.NullCom.prototype);
