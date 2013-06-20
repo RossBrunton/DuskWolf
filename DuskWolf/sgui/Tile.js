@@ -17,10 +17,7 @@ dusk.load.provide("dusk.sgui.Tile");
  *	It is given the dimensions of each "tile" on the source image,
  *   and expects the source image to be a grid of images of those sizes.
  * 
- * The mode is either `"BINARY"` or `"DECIMAL"`, and this determines how dimensions are interpreted.
- *	If the mode is `"BINARY"` the origin sprites are square, with each side being `2^this.ssize`.
- * 	While, if the mode is the slower `"DECIMAL"` mode,
- *   then the origin sprites have their width and height described using `this.swidth` and `this.sheight`.
+ *  The origin sprites have their width and height described using `this.swidth` and `this.sheight`.
  * 	This only determines the size of the sprites on the source image,
  *   the tile can be resized as normal using the `height` and `width` properties.
  * 
@@ -38,33 +35,14 @@ dusk.sgui.Tile = function(parent, comName) {
 	 * @private
 	 */
 	this._img = null;
-	
-	/** The current mode. Must be either `"BINARY"` or `"DECIMAL"`.
-	 * 
-	 * This takes the value of the theme key `tile.mode`, which by default is `"BINARY"`.
-	 * @type string
-	 * @default "BINARY"
-	 */
-	this.mode = "BINARY";
-	
-	/** Origin sprite size if this is running in `"BINARY"` mode.
-	 * 
-	 * This is considered to be the width and height of the sprites when reading them from the image.
-	 * 
-	 * This should be `n` such that the width and height of the sprite is `2^n`.
-	 *  If this is 4, then the sprites will be 16x16, for example.
-	 * @type integer
-	 * @default 4
-	 */
-	this.ssize = 4;
-	/** Origin sprite width if this is running in `"DECIMAL"` mode.
+	/** Origin sprite width.
 	 * 
 	 * This is considered to be the width of the sprites when reading them from the image.
 	 * @type integer
 	 * @default 16
 	 */
 	this.swidth = 16;
-	/** Origin sprite height if this is running in `"DECIMAL"` mode.
+	/** Origin sprite height.
 	 * 
 	 * This is considered to be the height of the sprites when reading them from the image.
 	 * @type integer
@@ -110,7 +88,6 @@ dusk.sgui.Tile = function(parent, comName) {
 	this._registerPropMask("ssize", "ssize", true);
 	this._registerPropMask("swidth", "swidth", true);
 	this._registerPropMask("sheight", "sheight", true);
-	this._registerPropMask("mode", "mode", true);
 	
 	//Listeners
 	this.prepareDraw.listen(this._tileDraw, this);
@@ -118,8 +95,7 @@ dusk.sgui.Tile = function(parent, comName) {
 	//Render support
 	this.renderSupport |= dusk.sgui.Component.REND_OFFSET | dusk.sgui.Component.REND_SLICE;
 };
-dusk.sgui.Tile.prototype = new dusk.sgui.Component();
-dusk.sgui.Tile.constructor = dusk.sgui.Tile;
+dusk.sgui.Tile.prototype = Object.create(dusk.sgui.Component.prototype);
 
 dusk.sgui.Tile.prototype.className = "Tile";
 
@@ -130,21 +106,12 @@ dusk.sgui.Tile.prototype.className = "Tile";
  */
 dusk.sgui.Tile.prototype._tileDraw = function(e) {
 	if(this._img){
-		if(this.mode == "BINARY") {
-			var scaleX = (1<<this.ssize)/this.width;
-			var scaleY = (1<<this.ssize)/this.height;
-			e.c.drawImage(this._img, (this._tx << this.ssize) + (e.d.sourceX*scaleX), 
-				(this._ty << this.ssize) + (e.d.sourceY*scaleY), e.d.width*scaleX, e.d.height*scaleY,
-				e.d.destX, e.d.destY, e.d.width, e.d.height
-			);
-		}else{
-			var hscale = this.width/this.swidth;
-			var vscale = this.height/this.sheight;
-			e.c.drawImage(this._img, this._tx * this.swidth + e.d.sourceX * hscale,
-				this._ty * this.sheight + e.d.sourceY * vscale, e.d.width*hscale, e.d.height*vscale,
-				e.d.destX, e.d.destY, e.d.width, e.d.height
-			);
-		}
+		var hscale = this.swidth/this.width;
+		var vscale = this.sheight/this.height;
+		e.c.drawImage(this._img, this._tx * this.swidth + e.d.sourceX,
+			this._ty * this.sheight + e.d.sourceY, e.d.width*hscale, e.d.height*vscale,
+			e.d.destX, e.d.destY, e.d.width, e.d.height
+		);
 	}
 };
 

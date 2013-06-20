@@ -43,6 +43,10 @@ dusk.sgui.TransitionManager = function(parent, comName) {
 	this.keyPress.listen(function(e) {
 		if(dusk.editor.active) this.remove(prompt("Enter a transition to remove.", 0));
 	}, this, {"key":82});
+	this.keyPress.listen(function(e) {
+		if(dusk.editor.active) this._transitions.in =
+			dusk.utils.jsonParse(prompt("Edit in transition.", "{}"));
+	}, this, {"key":73});
 	
 	//Render support
 	this.renderSupport |= dusk.sgui.Component.REND_OFFSET | dusk.sgui.Component.REND_SLICE;

@@ -128,6 +128,7 @@ dusk.sgui.ParticleField.prototype._pfDraw = function(e) {
 	}
 	
 	if(c) e.c.putImageData(c, e.d.destX, e.d.destY);
+	
 	return e;
 };
 

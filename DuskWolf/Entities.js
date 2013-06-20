@@ -12,7 +12,7 @@ dusk.load.provide("dusk.entities");
  * 
  * @description This manages entities.
  * 
- * Entities are essentially "things that doo stuff" in games, they are the player, enemies, pickups.
+ * Entities are essentially "things that do stuff" in games, they are the player, enemies, pickups.
  * 	In general, if it is animated, it's an entity.
  * 
  * Entities are described using types;
@@ -46,16 +46,6 @@ dusk.load.provide("dusk.entities");
  * @private
  */
 dusk.entities._init = function() {
-	/** Sprite size of binary entities and tilemap tiles.
-	 * 
-	 * If the mode is binary this is considered to be the width and height of the tiles when reading them from the image.
-	 * 
-	 * This should be `n` such that the width and height of the sprite is `2^n`.
-	 *  If this is 4, then the sprites will be 16x16, for example.
-	 * @type integer
-	 * @default 4
-	 */
-	dusk.entities.ssize = 4;
 	/** Sprite width of decimal entities and tilemap tiles.
 	 * 
 	 * If the mode is decimal, then this is the width of tiles when reading them from the image.
@@ -71,16 +61,6 @@ dusk.entities._init = function() {
 	 */
 	this.sheight = 16;
 	
-	/** Tile size of binary entities and tilemap tiles.
-	 * 
-	 * If the mode is binary, this is considered to be the width and height of the tiles when drawing them to the canvas.
-	 * 
-	 * This should be `n` such that the width and height of the tile to draw is `2^n`.
-	 * 	If this is 4, then the sprites will be 16x16, for example.
-	 * @type integer
-	 * @default 5
-	 */
-	this.tsize = 5;
 	/** Tile width of decimal entities and tilemap tiles.
 	 * 
 	 * If the mode is decimal, then this is the width of tiles when drawing them to the canvas.
@@ -95,15 +75,6 @@ dusk.entities._init = function() {
 	 * @default 32
 	 */
 	this.theight = 32;
-	
-	/** The mode entities and tilemaps should run in.
-	 * 
-	 * This must be either `"DECIMAL"` or `"BINARY"`.
-	 * @type string
-	 * @default "BINARY"
-	 * @see {@link dusk.sgui.Tile.mode}
-	 */
-	this.mode = "BINARY";
 	
 	/** The name of the "seek" entity.
 	 * 

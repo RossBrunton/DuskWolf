@@ -15,15 +15,11 @@ dusk.sgui.EntityGroup = function (parent, comName) {
 	this._cx = 0;
 	this._cy = 0;
 	
-	this.tsize = 0;
 	this.twidth = 0;
 	this.theight = 0;
 	
-	this.ssize = 0;
 	this.sheight = 0;
 	this.swidth = 0;
-	
-	this.mode = "BINARY";
 	
 	this._scheme = null;
 	this.scheme = null;
@@ -33,15 +29,12 @@ dusk.sgui.EntityGroup = function (parent, comName) {
 	this._selectedEntity = null;
 	this._offsetX = 0;
 	this._offsetY = 0;
+	this._showEntities = false;
 	
 	//Prop masks
-	this._registerPropMask("mode", "mode");
-	
-	this._registerPropMask("ssize", "ssize");
 	this._registerPropMask("sheight", "sheight");
 	this._registerPropMask("swidth", "swidth");
 	
-	this._registerPropMask("tsize", "tsize");
 	this._registerPropMask("theight", "theight");
 	this._registerPropMask("twidth", "twidth");
 	
@@ -53,6 +46,30 @@ dusk.sgui.EntityGroup = function (parent, comName) {
 	this.keyPress.listen(function(e) {
 		if(dusk.editor.active && confirm("Clear all entities?")) this.clear();
 	}, this, {"key":67});
+	this.keyPress.listen(function(e) {
+		if(dusk.editor.active) dusk.editor.editNext = prompt("Enter name for next entity.");
+	}, this, {"key":78});
+	this.keyPress.listen(function(e) {
+		if(dusk.editor.active) this._showEntities = !this._showEntities;
+	}, this, {"key":69});
+	this.keyPress.listen(function(e) {
+		if(dusk.editor.active) {
+			dusk.load.import("dusk.sgui.EntityWorkshop");
+			
+			if("EntityWorkshop" in dusk.sgui) {
+				dusk.sgui.getPane("workshop").parseProps({
+					"focus":"ew",
+					"children":{
+						"ew":{
+							"type":"EntityWorkshop",
+							"visible":true,
+						}
+					},
+					"active":true,
+				});
+			}
+		}
+	}, this, {"key":87});
 	this.prepareDraw.listen(this._entityGroupDraw, this);
 	this.action.listen(this._entityGroupAction, this);
 	
@@ -79,13 +96,8 @@ dusk.sgui.EntityGroup.prototype.doFrame = function() {
 		}
 		
 		if(this._selectedEntity){
-			if(this.mode == "BINARY") {
-				this._selectedEntity.x = (this._cx<<this.tsize)+this._offsetX;
-				this._selectedEntity.y = (this._cy<<this.tsize)+this._offsetY;
-			}else{
-				this._selectedEntity.x = (this._cx*this.twidth)+this._offsetX;
-				this._selectedEntity.y = (this._cy*this.theight)+this._offsetY;
-			}
+			this._selectedEntity.x = (this._cx*this.twidth)+this._offsetX;
+			this._selectedEntity.y = (this._cy*this.theight)+this._offsetY;
 		}
 	}else{
 		//Call every entities' startFrame function
@@ -104,11 +116,11 @@ dusk.sgui.EntityGroup.prototype._entityGroupDraw = function(e) {
 	if(!dusk.editor.active) return;
 	if(!this._focused) return;
 	
-	var width = this.mode=="BINARY"?1<<this.tsize:this.twidth;
-	var height = this.mode=="BINARY"?1<<this.tsize:this.theight;
+	var width = this.twidth;
+	var height = this.theight;
 	
-	var xAt = this.mode=="BINARY"?this._cx<<this.tsize:this._cx*this.twidth;
-	var yAt = this.mode=="BINARY"?this._cy<<this.tsize:this._cy*this.theight;
+	var xAt = this._cx*this.twidth;
+	var yAt = this._cy*this.theight;
 	
 	if(-e.d.sourceX + xAt > e.d.width) return;
 	if(-e.d.sourceY + yAt > e.d.height) return;
@@ -119,7 +131,7 @@ dusk.sgui.EntityGroup.prototype._entityGroupDraw = function(e) {
 	if(!this._selectedEntity){
 		e.c.strokeStyle = "#00ffff";
 	}else{
-		e.c.strokeStyle = "#ff00ff";
+		e.c.strokeStyle = "#00ffff";
 	}
 	
 	e.c.strokeRect(e.d.destX - e.d.sourceX + xAt,
@@ -128,18 +140,40 @@ dusk.sgui.EntityGroup.prototype._entityGroupDraw = function(e) {
 	e.c.strokeRect(e.d.destX - e.d.sourceX + xAt + this._offsetX - 1,
 		e.d.destY - e.d.sourceY + yAt + this._offsetY - 1, 3, 3
 	);
+	
+	e.c.fillStyle = this.container.editorColour;
+	e.c.fillText(dusk.editor.editNext,
+		e.d.destX - e.d.sourceX + xAt + 1,
+		e.d.destY - e.d.sourceY + yAt - 6
+	);
+	
+	if(this._showEntities) {
+		var y = 50 + e.d.destY + 10;
+		var x = 5 + e.d.destX;
+		e.c.fillStyle = this.container.editorColour;
+		e.c.fillText("ENTITY LIST:", x, y);
+		y += 10;
+		var out = "";
+		var names = dusk.entities.types.getAllNames();
+		for(var i = 0; i < names.length; i ++) {
+			out += names[i];
+			if((i+1) % 20 == 0) {
+				e.c.fillText(out, x, y);
+				y += 10;
+				out = "";
+			}else if(i != names.length-1) {
+				out += " | ";
+			}
+		}
+		e.c.fillText(out, x, y);
+	}
 };
 
 dusk.sgui.EntityGroup.prototype._entityGroupAction = function(e) {
 	if(!dusk.editor.active) return;
 	
 	if(!this._selectedEntity){
-		var entityList = [];
-		if(this.mode == "BINARY") {
-			entityList = this.getEntitiesHere((this._cx<<this.tsize)+this._offsetX, (this._cy<<this.tsize)+this._offsetY, null);
-		}else{
-			entityList = this.getEntitiesHere((this._cx*this.twidth)+this._offsetX, (this._cy*this.theight)+this._offsetY, null);
-		}
+		var entityList = this.getEntitiesHere((this._cx*this.twidth)+this._offsetX, (this._cy*this.theight)+this._offsetY, null);
 		if(entityList.length) this._selectedEntity = entityList[0];
 	}else{
 		this._selectedEntity = null;
@@ -413,8 +447,7 @@ dusk.sgui.EntityGroup.prototype._egDownAction = function(e) {
 	if(!dusk.editor.active) return true;
 	if(e.e.ctrlKey) return true;
 	if(e.e.shiftKey) {
-		if((this._offsetY < 1<<this.tsize && this.mode == "BINARY")
-		|| (this._offsetY < this.theight && this.mode == "DECIMAL")) this._offsetY ++;
+		if(this._offsetY < this.theight) this._offsetY ++;
 		return false;
 	}
 	
@@ -436,8 +469,7 @@ dusk.sgui.EntityGroup.prototype._egRightAction = function(e) {
 	if(!dusk.editor.active) return true;
 	if(e.e.ctrlKey) return true;
 	if(e.e.shiftKey) {
-		if((this._offsetX < 1<<this.tsize && this.mode == "BINARY")
-		|| (this._offsetX < this.twidth && this.mode == "DECIMAL")) this._offsetX ++;
+		if(this._offsetX < this.twidth) this._offsetX ++;
 		return false;
 	}
 	
@@ -446,6 +478,11 @@ dusk.sgui.EntityGroup.prototype._egRightAction = function(e) {
 
 dusk.sgui.EntityGroup.prototype._numberDrop = function(e) {
 	if(!dusk.editor.active) return true;
+	
+	if(e.shift) {
+		dusk.editor.editDroppers[e.key-48] = prompt("Enter a type for dropper #"+(e.key-48));
+		return;
+	}
 	
 	var entity = {};
 	
@@ -461,8 +498,8 @@ dusk.sgui.EntityGroup.prototype._numberDrop = function(e) {
 	
 	dusk.editor.editNext = "";
 	entity.type = dusk.editor.editDroppers[e.key-48];
-	entity.x = (this._cx<<this.tsize)+this._offsetX;
-	entity.y = (this._cy<<this.tsize)+this._offsetY;
+	entity.x = (this._cx*this.twidth)+this._offsetX;
+	entity.y = (this._cy*this.theight)+this._offsetY;
 	this.dropEntity(entity, false);
 	
 	return false;

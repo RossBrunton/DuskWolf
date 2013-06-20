@@ -195,7 +195,41 @@ dusk.sgui.Component = function (parent, componentName) {
 	 * @default ""
 	 */
 	this.style = "";
-	 
+	
+	/** Current x location of the mouse, relative to this component.
+	 * @type integer
+	 * @protected
+	 * @since 0.0.20-alpha
+	 */
+	this._mouseX = 0;
+	/** Current y location of the mouse, relative to this component.
+	 * @type integer
+	 * @protected
+	 * @since 0.0.20-alpha
+	 */
+	this._mouseY = 0;
+	/** Whether focus should be changed to this component if the user rolls over it with the mouse, and the container
+	 *  allows it.
+	 * 
+	 * The default value of this varies on the type, things like buttons have it as true, other things have false.
+	 * @type boolean
+	 * @since 0.0.20-alpha
+	 */
+	this.allowMouse = false;
+	/** Whether clicking on this component will triger it's action.
+	 * 
+	 * @type boolean
+	 * @since 0.0.20-alpha
+	 * @default true
+	 */
+	this.mouseAction = true;
+	/** Fired when this component is clicked on.
+	 * 
+	 * The event object has at least a property `button`, which is the number of the button clicked.
+	 * @type dusk.EventDispatcher
+	 */
+	this.onClick = new dusk.EventDispatcher("dusk.sgui.Component.onClick", dusk.EventDispatcher.MODE_AND);
+	
 	this.enabled = true;
 	/** Whether the component can become focused, if false it cannot be flowed into. 
 	 * @type boolean
@@ -258,7 +292,7 @@ dusk.sgui.Component = function (parent, componentName) {
 	
 	/** The component's type. Setting this to a string will change the component to that type.
 	 * @type string
-	 * @since 0.0.19-alpha
+	 * @since 0.0.20-alpha
 	 */
 	this.type = null;
 	
@@ -284,6 +318,8 @@ dusk.sgui.Component = function (parent, componentName) {
 	this._registerPropMask("layer", "__layer");
 	this._registerPropMask("extras", "__extras");
 	this._registerPropMask("type", "type");
+	this._registerPropMask("allowMouse", "allowMouse");
+	this._registerPropMask("mouseAction", "mouseAction");
 };
 
 /** Components which support this (and all must do so) must support being drawn at arbitary locations.
@@ -397,6 +433,27 @@ dusk.sgui.Component.prototype.doKeyPress = function (e) {
 	return dirReturn;
 };
 
+/** Handles a mouse click. This will fire `{@link dusk.sgui.Component.onClick}`, and possibly fire the 
+ *  `{@link dusk.sgui.Component.action}` handler.
+ * 
+ * If the component running this is a container 
+ *  then it's `{@link dusk.sgui.IContainer#containerClick}` function will be called.
+ *	If that function returns true, then this shall return true without doing anything else.
+ * 
+ * @param {object} e The click event.
+ * @return {boolean} Whether the parent container should run it's own actions.
+ */
+dusk.sgui.Component.prototype.doClick = function (e) {
+	if(dusk.utils.doesImplement(this, dusk.sgui.IContainer) && !this.containerClick(e)){return false;}
+	
+	if(this.onClick.fire(e)) {
+		if(this.mouseAction) {
+			return this.action.fire({"click":e});
+		}
+	}
+	
+	return true;
+};
 
 /** This maps a property from the JSON representation of the object (One from {@link #parseProps})
  *  to the JavaScript representation of the object.
@@ -698,6 +755,20 @@ Object.defineProperty(dusk.sgui.Component.prototype, "__extras", {
 	get: function() {return {};}
 });
 
+
+/** Updates the locatons of the mouse for this component.
+ * 
+ * If this is a container, `{@link dusk.sgui.IContainer.containerUpdateMouse}` is called.
+ * @param {integer} x New x coordinate.
+ * @param {integer} y New y coordinate.
+ * @since 0.0.20-alpha
+ */
+dusk.sgui.Component.prototype.updateMouse = function(x, y) {
+	this._mouseX = x;
+	this._mouseY = y;
+	
+	if(dusk.utils.doesImplement(this, dusk.sgui.IContainer)) this.containerUpdateMouse();
+};
 
 /** Returns a string representation of the component. 
  * 

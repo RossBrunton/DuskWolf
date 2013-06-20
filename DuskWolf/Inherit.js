@@ -114,6 +114,30 @@ dusk.InheritableContainer.prototype.getAll = function(name) {
 	return this._objectData[name];
 };
 
+/** Returns an object containing all the properties of the specified type, but none from it's parents.
+ * 
+ * @param {string} name The type to get.
+ * @return {object} An object containing all the properties that the specified type has.
+ * @since 0.0.20-alpha
+ */
+dusk.InheritableContainer.prototype.getRaw = function(name) {
+	if(!(name in this._objectData)) return undefined;
+	
+	return this._objectData[name];
+};
+
+/** Sets an object with the specified type to the specified name.
+ * 
+ * @param {string} name The type to set.
+ * @param {object} data The data to set.
+ * @param {string} extendee The type this type will extend.
+ * @since 0.0.20-alpha
+ */
+dusk.InheritableContainer.prototype.setRaw = function(name, data, extendee) {
+	this._objectData[name] = data;
+	this._objectChain[name] = extendee;
+};
+
 /** Creates a new instance of `{@link dusk.Inheritable}` of the specified type, which is linked to this.
  * 
  * If the type is not found, then the Inheritable will use the type `"root"` instead.
@@ -140,6 +164,32 @@ dusk.InheritableContainer.prototype.isValidType = function(name) {
 	if(!(name in this._objectData)) return false;
 	
 	return true;
+};
+
+/** Gets the extendee of the current type.
+ * 
+ * @param {string} name The name to look up.
+ * @return {string} The type the specified type is linked to.
+ * @since 0.0.20-alpha
+ */
+dusk.InheritableContainer.prototype.getExtendee = function(name) {
+	if(!(name in this._objectData)) return "";
+	
+	return this._objectChain[name];
+};
+
+/** Returns an array of all the names of the types in this container.
+ * 
+ * @return {array} All the names of types in this container, as strings.
+ */
+dusk.InheritableContainer.prototype.getAllNames = function() {
+	var out = [];
+	
+	for(var p in this._objectData) {
+		out.push(p);
+	}
+	
+	return out;
 };
 
 Object.seal(dusk.InheritableContainer);

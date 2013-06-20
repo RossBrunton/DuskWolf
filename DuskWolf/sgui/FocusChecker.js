@@ -4,9 +4,11 @@
 
 dusk.load.require("dusk.sgui.Image");
 dusk.load.require("dusk.sgui.Tile");
+dusk.load.require("dusk.sgui.Rect");
 
 dusk.load.provide("dusk.sgui.FocusChecker");
 dusk.load.provide("dusk.sgui.FocusCheckerTile");
+dusk.load.provide("dusk.sgui.FocusCheckerRect");
 
 /** @class dusk.sgui.FocusChecker
  * 
@@ -51,6 +53,9 @@ dusk.sgui.FocusChecker = function(parent, comName) {
 	
 	this.onActiveChange.listen(function(e) {if(this.activeImg) this.src = this.activeImg;}, this, {"active":true});
 	this.onActiveChange.listen(function(e) {if(this.focusedImg) this.src = this.focusedImg;}, this, {"active":false});
+	
+	//Defaults
+	this.allowMouse = true;
 };
 dusk.sgui.FocusChecker.prototype = Object.create(dusk.sgui.Image.prototype);
 
@@ -126,6 +131,9 @@ dusk.sgui.FocusCheckerTile = function(parent, comName) {
 			this.tile = [this.tile[0], this.focusValues[0]];
 		}
 	}, this, {"active":false});
+	
+	//Defaults
+	this.allowMouse = true;
 };
 dusk.sgui.FocusCheckerTile.prototype = Object.create(dusk.sgui.Tile.prototype);
 
@@ -135,3 +143,57 @@ Object.seal(dusk.sgui.FocusCheckerTile);
 Object.seal(dusk.sgui.FocusCheckerTile.prototype);
 
 dusk.sgui.registerType("FocusChecker", dusk.sgui.FocusChecker);
+
+// ----
+
+/** @class dusk.sgui.FocusCheckerRect
+ * 
+ * @classdesc A rectangle that changes colour depending on whether it is active or focused.
+ * 
+ * @param {dusk.sgui.IContainer} parent The container that this component is in.
+ * @param {string} comName The name of the component.
+ * @extends dusk.sgui.Rect
+ * @constructor
+ */
+dusk.sgui.FocusCheckerRect = function(parent, comName) {
+	dusk.sgui.Rect.call(this, parent, comName);
+	
+	/** The colour when the component is not focused or active.
+	 * @type string
+	 * @default "#ff9999"
+	 */
+	this.inactive = "#ff9999";
+	/** The colour when the component is focused, but not active.
+	 * @type string
+	 * @default "#ff9999"
+	 */
+	this.focused = "#ff9999";
+	/** The colour when the component is active.
+	 * @type string
+	 * @default "#99ff99"
+	 */
+	this.active = "#99ff99";
+	
+	this.src = this.inactiveImg;
+	
+	//Prop masks
+	this._registerPropMask("inactive", "inactive");
+	this._registerPropMask("focused", "focused");
+	this._registerPropMask("active", "active");
+	
+	//Listeners
+	this.onFocusChange.listen(function(e) {this.colour = this.focused;}, this, {"focus":true});
+	this.onFocusChange.listen(function(e) {this.colour = this.inactive;}, this, {"focus":false});
+	
+	this.onActiveChange.listen(function(e) {this.colour = this.active;}, this, {"active":true});
+	this.onActiveChange.listen(function(e) {this.colour = this.focused;}, this, {"active":false});
+	
+	//Defaults
+	this.allowMouse = true;
+};
+dusk.sgui.FocusCheckerRect.prototype = Object.create(dusk.sgui.Rect.prototype);
+
+Object.seal(dusk.sgui.FocusCheckerRect);
+Object.seal(dusk.sgui.FocusCheckerRect.prototype);
+
+dusk.sgui.registerType("FocusCheckerRect", dusk.sgui.FocusCheckerRect);

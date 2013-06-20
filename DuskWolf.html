@@ -27,17 +27,18 @@
 		</canvas>
 		
 		<div>
-			<input id="editing" type="checkbox" onchange="dusk.editor.active = this.checked;"/><label for='editing'>Edit mode active</label>
-			 | 
-			<button onclick="dusk.editor.editDroppers[+prompt('Number (0-9) to set entity for.')] = prompt('Entity type to drop.');">Set dropper</button>
-			 | 
-			<button onclick="dusk.editor.editNext = prompt('Enter name for next entity.');">Name next entity</button>
+			<input id="editing" type="checkbox" onchange="dusk.editor.active = this.checked;"/>
+			<label for='editing'>Edit mode active</label>
 			
 			<div style='color:#999999'>
-				ARROW: Move frame | CTRL+ARROW: Change layer | ++ARROW: Extend map | -+ARROW: Shrink map | S: Save<br/>
-				<b>On tilemap layers</b> -=- A+ARROW: Adjust alpha | F+ARROW: Resize frame | SHIFT+ARROW: Change tile</br>
-				<b>On entity layer</b> -=- SPACE: Pick up/put down | SHIFT+ARROW: Move slightly | DEL: Delete entity | C: Clear all entities | 0-9: Drop defined entity<br/>
-				<b>On transition layer</b> -=- A: Add a new transition | R: Remove a transition
+				<b>On all layers</b> -=- ARROW: Move frame | CTRL+ARROW: Change layer | ++ARROW: Extend map | 
+				-+ARROW: Shrink map | S: Save (to console) | G: Go to another room<br/>
+				<b>On tilemap layers</b> -=- A+ARROW: Adjust alpha | F+ARROW: Resize frame | SHIFT+ARROW: Change tile | 
+				I: Set source image | E: Edit animation</br>
+				<b>On entity layer</b> -=- A: Pick up/put down | SHIFT+ARROW: Move slightly | DEL: Delete entity | 
+				C: Clear all entities | 0-9: Drop defined entity | SHIFT+0-9: Set defined entry | 
+				E: Show/Hide entity list | N: Name next entity | W: Open workshop<br/>
+				<b>On transition layer</b> -=- A: Add a new transition | R: Remove a transition | I: Edit transition in
 			</div>
 		</div>
 	</body>

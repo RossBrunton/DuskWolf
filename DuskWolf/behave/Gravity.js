@@ -39,6 +39,14 @@ dusk.behave.Gravity.prototype._gravFrame = function(name, e) {
 	}
 };
 
+dusk.behave.Gravity.workshopData = {
+	"help":"Will accelerate downwards.",
+	"data":[
+		["gravity", "integer", "Acceleration by gravity."],
+		["terminal", "integer", "Fastest speed for gravity."],
+	]
+};
+
 Object.seal(dusk.behave.Gravity);
 Object.seal(dusk.behave.Gravity.prototype);
 

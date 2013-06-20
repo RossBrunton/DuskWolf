@@ -45,6 +45,13 @@ dusk.sgui.Checkbox = function (parent, comName) {
 	 * @type boolean
 	 */
 	this.checked = false;
+	/** An EventDispatcher that is fired when the box is checked or unchecked.
+	 * 
+	 * The event object has two properties, `checked` and `component`.
+	 * @type EventDispatcher
+	 * @since 0.0.20-alpha
+	 */
+	this.onCheck = new dusk.EventDispatcher("dusk.sgui.Checkbox.onCheck");
 	/** The radiobox this is using, or null.
 	 * @type {dusk.sgui.extras.Radiobox}
 	 * @protected
@@ -67,11 +74,16 @@ dusk.sgui.Checkbox = function (parent, comName) {
 	this._registerPropMask("checked", "checked");
 	
 	//Listeners
-	this.action.listen(function(e) {this.checked = !this.checked; return false;}, this);
+	this.action.listen(function(e) {
+		this.checked = !this.checked;
+		this.onCheck.fire({"checked":this.checked, "component":this});
+		return false;
+	}, this);
+	
+	//Defaults
+	this.allowMouse = true;
 };
 dusk.sgui.Checkbox.prototype = Object.create(dusk.sgui.FocusCheckerTile.prototype);
-
-dusk.sgui.Checkbox.prototype.className = "Checkbox";
 
 //checked
 Object.defineProperty(dusk.sgui.Checkbox.prototype, "checked", {

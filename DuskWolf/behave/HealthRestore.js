@@ -20,6 +20,13 @@ dusk.behave.HealthRestore.prototype._healthPickup = function(e) {
 	e.target.behaviourFire("heal", {"amount":this._data("pickupHealth")});
 };
 
+dusk.behave.HealthRestore.workshopData = {
+	"help":"Will restore health to the entity that picks it up.",
+	"data":[
+		["pickupHealth", "integer", "Health restored when picked up."]
+	]
+};
+
 Object.seal(dusk.behave.HealthRestore);
 Object.seal(dusk.behave.HealthRestore.prototype);
 

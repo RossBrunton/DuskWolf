@@ -25,8 +25,7 @@ dusk.behave.MarkTrigger = function(entity) {
 		this.entityEvent.listen(this._markTriggerFrame, this, {"name":"frame"});
 	}
 };
-dusk.behave.MarkTrigger.prototype = new dusk.behave.Behave();
-dusk.behave.MarkTrigger.constructor = dusk.behave.MarkTrigger;
+dusk.behave.MarkTrigger.prototype = Object.create(dusk.behave.Behave.prototype);
 
 dusk.behave.MarkTrigger.prototype._markTriggerFrame = function(name, e) {
 	if(this._coolDown) this._coolDown --;
@@ -57,6 +56,13 @@ dusk.behave.MarkTrigger.prototype._markTriggerFrame = function(name, e) {
 			this._coolDown = 5;
 		}
 	}
+};
+
+dusk.behave.MarkTrigger.workshopData = {
+	"help":"Will trigger marks on the scheme layer.",
+	"data":[
+		
+	]
 };
 
 Object.seal(dusk.behave.MarkTrigger);

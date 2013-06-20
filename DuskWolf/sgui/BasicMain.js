@@ -99,13 +99,8 @@ dusk.sgui.BasicMain.prototype.createRoom = function(name, spawn) {
 	playerData.name = dusk.entities.seek;
 	playerData.type = dusk.entities.seekType;
 	var crd = this.getFirstLayerOfType(dusk.sgui.BasicMain.LAYER_SCHEME).lookTile(spawn, 1);
-	if(dusk.entities.mode == "BINARY") {
-		playerData.x = crd[0]<<dusk.entities.tsize;
-		playerData.y = crd[1]<<dusk.entities.tsize;
-	}else{
-		playerData.x = crd[0]*dusk.entities.twidth;
-		playerData.y = crd[1]*dusk.entities.theight;
-	}
+	playerData.x = crd[0]*dusk.entities.twidth;
+	playerData.y = crd[1]*dusk.entities.theight;
 	
 	this.getComponent(this._primaryEntityGroup).dropEntity(playerData, true);
 	
@@ -132,7 +127,6 @@ Object.defineProperty(dusk.sgui.BasicMain.prototype, "layers", {
 					this.getComponent(val[i].name, "EditableTileMap").parseProps(
 					{"cursorColour":dusk.sgui.BasicMain._LAYER_COLOURS[colour++],
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
-						"tsize":dusk.entities.tsize, "ssize":dusk.entities.ssize, "mode":dusk.entities.mode,
 						"twidth":dusk.entities.twidth, "theight":dusk.entities.theight,
 						"swidth":dusk.entities.swidth, "sheight":dusk.entities.sheight, "globalCoords":true
 					});
@@ -143,7 +137,6 @@ Object.defineProperty(dusk.sgui.BasicMain.prototype, "layers", {
 					this.getComponent(val[i].name, "EditableTileMap").parseProps(
 					{"cursorColour":dusk.sgui.BasicMain._LAYER_COLOURS[colour++],
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
-						"tsize":dusk.entities.tsize, "ssize":dusk.entities.ssize, "mode":dusk.entities.mode,
 						"twidth":dusk.entities.twidth, "theight":dusk.entities.theight,
 						"swidth":dusk.entities.swidth, "sheight":dusk.entities.sheight, "alpha":0, "globalCoords":true
 					});
@@ -152,8 +145,8 @@ Object.defineProperty(dusk.sgui.BasicMain.prototype, "layers", {
 				
 				case dusk.sgui.BasicMain.LAYER_ENTITIES:
 					this.getComponent(val[i].name, "EntityGroup").parseProps(
-					{"name":"entities", "type":"EntityGroup", "tsize":dusk.entities.tsize,
-						"ssize":dusk.entities.ssize, "downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
+					{"name":"entities", "type":"EntityGroup",
+						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
 						"twidth":dusk.entities.twidth, "theight":dusk.entities.theight,
 						"swidth":dusk.entities.swidth, "sheight":dusk.entities.sheight, "globalCoords":true
 					});
@@ -255,17 +248,10 @@ dusk.sgui.BasicMain.prototype.autoScroll = function() {
 	// Centre the player
 	var seekCoords = [];
 	if(dusk.editor.active) {
-		if(dusk.entities.mode == "BINARY") {
-			seekCoords = [
-				(dusk.sgui.EditableTileMap.globalEditX+3)<<(dusk.entities.tsize),
-				(dusk.sgui.EditableTileMap.globalEditY+3)<<(dusk.entities.tsize)
-			];
-		}else{
-			seekCoords = [
-				(dusk.sgui.EditableTileMap.globalEditX+3)*(dusk.entities.twidth),
-				(dusk.sgui.EditableTileMap.globalEditY+3)*(dusk.entities.theight)
-			];
-		}
+		seekCoords = [
+			(dusk.sgui.EditableTileMap.globalEditX+3)*(dusk.entities.twidth),
+			(dusk.sgui.EditableTileMap.globalEditY+3)*(dusk.entities.theight)
+		];
 	}else if(this.getSeek()) {
 		seekCoords = [this.getSeek().x, this.getSeek().y];
 	}else{
@@ -292,7 +278,7 @@ dusk.sgui.BasicMain.prototype._bmUpAction = function(e) {
 				this.getComponent(this._layers[i].name).graftTop();
 			}
 			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.EntityGroup) {
-				this.getComponent(this._layers[i].name).adjustAll(0, 1<<dusk.entities.tsize);
+				this.getComponent(this._layers[i].name).adjustAll(0, dusk.entities.theight);
 			}
 		}
 		
@@ -306,7 +292,7 @@ dusk.sgui.BasicMain.prototype._bmUpAction = function(e) {
 				this.getComponent(this._layers[i].name).carveTop();
 			}
 			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.EntityGroup) {
-				this.getComponent(this._layers[i].name).adjustAll(0, -(1<<dusk.entities.tsize));
+				this.getComponent(this._layers[i].name).adjustAll(0, -dusk.entities.theight);
 			}
 		}
 		
@@ -350,7 +336,7 @@ dusk.sgui.BasicMain.prototype._bmLeftAction = function(e) {
 				this.getComponent(this._layers[i].name).graftLeft();
 			}
 			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.EntityGroup) {
-				this.getComponent(this._layers[i].name).adjustAll(1<<dusk.entities.tsize, 0);
+				this.getComponent(this._layers[i].name).adjustAll(dusk.entities.twidth, 0);
 			}
 		}
 		return false;
@@ -363,7 +349,7 @@ dusk.sgui.BasicMain.prototype._bmLeftAction = function(e) {
 				this.getComponent(this._layers[i].name).carveLeft();
 			}
 			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.EntityGroup) {
-				this.getComponent(this._layers[i].name).adjustAll(-(1<<dusk.entities.tsize), 0);
+				this.getComponent(this._layers[i].name).adjustAll(-dusk.entities.twidth, 0);
 			}
 		}
 		return false;
@@ -397,8 +383,9 @@ dusk.sgui.BasicMain.prototype._bmRightAction = function(e) {
 	return true;
 };
 
-dusk.sgui.BasicMain.prototype.save = function(e) {
+dusk.sgui.BasicMain.prototype.save = function(e, returnRoom) {
 	if(!dusk.editor.active) return true;
+	
 	if(e === undefined || typeof e == "object") e = prompt("Please enter a package name.", this.roomName);
 	
 	console.log("----- Exported Room Data "+e+" -----");
@@ -424,6 +411,7 @@ dusk.sgui.BasicMain.prototype.save = function(e) {
 	console.log(out);
 	console.log("----- End Exported Room Data -----");
 	
+	if(returnRoom) return out;
 	return false;
 };
 

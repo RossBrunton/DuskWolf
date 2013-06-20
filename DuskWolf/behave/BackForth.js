@@ -43,6 +43,13 @@ dusk.behave.BackForth.prototype._bfCollide = function(e) {
 	}
 };
 
+dusk.behave.BackForth.workshopData = {
+	"help":"Will move side to side and bounce of walls.",
+	"data":[
+		["hspeed", "integer", "Horizontal speed."]
+	]
+};
+
 Object.seal(dusk.behave.BackForth);
 Object.seal(dusk.behave.BackForth.prototype);
 

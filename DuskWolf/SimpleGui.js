@@ -73,6 +73,12 @@ dusk.sgui._init = function() {
 		if(this.getActivePane()) this.getActivePane().doKeyPress(event);
 	}, this);
 	
+	//Listen for mouseclicks
+	$("#"+dusk.canvas).click(function(e) {
+		e.button = e.which;
+		if(dusk.sgui.getActivePane()) dusk.sgui.getActivePane().doClick(e);
+	});
+	
 	//Listen for frame events
 	dusk.frameTicker.onFrame.listen(function() {
 		if(dusk.sgui.displayMode == dusk.sgui.MODE_FULL) {
@@ -82,6 +88,13 @@ dusk.sgui._init = function() {
 			}else{
 				dusk.sgui.height = $("#"+dusk.canvas).parent().height();
 			}
+		}
+		
+		for(var p in dusk.sgui._panes){
+			dusk.sgui._panes[p].updateMouse(
+				dusk.sgui._mouseX - dusk.sgui._panes[p].x,
+				dusk.sgui._mouseY - dusk.sgui._panes[p].y
+			);
 		}
 		
 		for(var p in dusk.sgui._panes){
@@ -154,6 +167,19 @@ dusk.sgui._init = function() {
 	 */
 	this.displayMode = dusk.sgui.MODE_FIXED;
 	
+	/** Mouse x value relative to canvas.
+	 * @type integer
+	 * @private
+	 * @since 0.0.20-alpha
+	 */
+	this._mouseX = 0;
+	/** Mouse y value relative to canvas.
+	 * @type integer
+	 * @private
+	 * @since 0.0.20-alpha
+	 */
+	this._mouseY = 0;
+	
 	//Set up the cached canvas
 	this._cacheCanvas.height = this.height;
 	this._cacheCanvas.width = this.width;
@@ -163,6 +189,12 @@ dusk.sgui._init = function() {
 	this._cacheCanvas.getContext("2d").webkitImageSmoothingEnabled = false;
 	this._cacheCanvas.getContext("2d").imageSmoothingEnabled = false;
 	this._cacheCanvas.getContext("2d").textBaseline = "middle";
+	
+	//Listen for canvas mouse movements
+	$("#"+dusk.canvas).mousemove(function(e){
+		dusk.sgui._mouseX = e.offsetX;
+		dusk.sgui._mouseY = e.offsetY;
+	});
 	
 	//Controls
 	dusk.controls.addControl("sgui_up", 38, "1-0.5");

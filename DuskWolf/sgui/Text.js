@@ -8,7 +8,7 @@ dusk.load.require(">dusk.controls");
 dusk.load.require(">dusk.data");
 
 dusk.load.provide("dusk.sgui.Label");
-dusk.load.provide("dusk.sgui.Textbox");
+dusk.load.provide("dusk.sgui.TextBox");
 
 dusk.sgui.Label = function(parent, comName) {
 	dusk.sgui.Component.call(this, parent, comName);
@@ -292,6 +292,9 @@ dusk.sgui.TextBox = function(parent, comName) {
 		//Listeners
 		this.prepareDraw.listen(this._boxDraw, this);
 		this.keyPress.listen(this._boxKey, this, {"ctrl":false});
+		
+		//Defaults
+		this.allowMouse = true;
 	}
 };
 dusk.sgui.TextBox.prototype = Object.create(dusk.sgui.Label.prototype);

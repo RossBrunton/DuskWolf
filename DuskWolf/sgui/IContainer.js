@@ -23,11 +23,13 @@ dusk.load.provide("dusk.sgui.IContainer");
  * List of methods required:
  * 
  * - {@link dusk.sgui.IContainer.containerKeypress}
+ * - {@link dusk.sgui.IContainer.containerClick}
  * - {@link dusk.sgui.IContainer.deleteComponent}
  * - {@link dusk.sgui.IContainer.deleteAllComponents}
  * - {@link dusk.sgui.IContainer.flow}
  * - {@link dusk.sgui.IContainer.getComponent}
  * - {@link dusk.sgui.IContainer.alterChildLayer}
+ * - {@link dusk.sgui.IContainer.containerUpdateMouse}
  * 
  * This class cannot be used on its own as a component.
  * 
@@ -49,6 +51,18 @@ dusk.sgui.IContainer = function() {};
  * @return {boolean} The return value of the focused component's keypress.
  */
 dusk.sgui.IContainer.containerKeypress = function(e) {};
+
+/** Container specific method of handling clicks.
+ * 
+ * This is different from the normal click handler, in that it is ran before the listener is fired.
+ * 	If it returns true, then processing the click stops, hence the event doesn't "bubble".
+ * 
+ * It is expected that a Container use this method to call the relevent method on the child that the cursor is on.
+ * 
+ * @param {object} e The click event.
+ * @return {boolean} The return value of the click.
+ */
+dusk.sgui.IContainer.containerClick = function(e) {};
 
 /** Deletes a component from this container if possible.
  * 	It is not expected that this method remove all references outside itself
@@ -136,5 +150,11 @@ dusk.sgui.IContainer.getContentsWidth = function(includeOffset) {};
  * @since 0.0.19-alpha
  */
 dusk.sgui.IContainer.getContentsHeight = function(includeOffset) {};
+
+/** Should call `{dusk.sgui.Component.updateMouse}` on it's children with the appropriate coordinates.
+ * 
+ * @since 0.0.20-alpha
+ */
+dusk.sgui.IContainer.containerUpdateMouse = function() {};
 
 Object.seal(dusk.sgui.IContainer);

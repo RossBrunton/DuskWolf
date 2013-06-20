@@ -7,14 +7,14 @@ dusk.load.require("dusk.performance");
 
 dusk.load.provide("dusk.sgui.FpsMeter");
 
-/** 
+/** Creates a new FpsMeter component.
  * 
  * @param {dusk.sgui.Component} parent The container that this component is in.
  * @param {string} comName The name of the component.
  * 
  * @class dusk.sgui.FpsMeter
  * 
- * @classdesc 
+ * @classdesc A simple label that sets itself to the frame rate every frame.
  * 
  * @extends dusk.sgui.Label
  * @constructor
@@ -27,6 +27,10 @@ dusk.sgui.FpsMeter = function (parent, comName) {
 };
 dusk.sgui.FpsMeter.prototype = Object.create(dusk.sgui.Label.prototype);
 
+/** Called every frame, and sets the text to the frame rate.
+ * @param {object} e The event object.
+ * @private
+ */
 dusk.sgui.FpsMeter.prototype._fpsFrame = function(e) {
 	this.text = (Math.round(dusk.performance.frameRate*1000)/1000) + "fps / " 
 	+ (Math.round(dusk.performance.renderFrameRate*1000)/1000) + "Hz";

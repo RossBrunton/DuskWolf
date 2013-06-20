@@ -20,8 +20,7 @@ dusk.behave.Killable = function(entity) {
 		this.entityEvent.listen(this._killableFrame, this, {"name":"frame"});
 	}
 };
-dusk.behave.Killable.prototype = new dusk.behave.Behave();
-dusk.behave.Killable.constructor = dusk.behave.Killable;
+dusk.behave.Killable.prototype = Object.create(dusk.behave.Behave.prototype);
 
 dusk.behave.Killable.prototype._killableTakeDamage = function(e) {
 	if(isNaN(e.damage)) {
@@ -61,6 +60,16 @@ dusk.behave.Killable.prototype._killableFrame = function(name, e) {
 	if(this._data("currentMercy")) {
 		this._data("currentMercy", this._data("currentMercy")-1);
 	}
+};
+
+dusk.behave.Killable.workshopData = {
+	"help":"Will allow the entity to be killed and damaged.",
+	"data":[
+		["hp", "integer", "Initial HP."],
+		["maxHp", "integer", "Max HP."],
+		["mercyTime", "integer", "Invincibilty frames after being hit."],
+		["currentMercy", "integer", "Initial invincibility frames."],
+	]
 };
 
 Object.seal(dusk.behave.Killable);

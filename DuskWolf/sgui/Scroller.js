@@ -54,6 +54,9 @@ dusk.sgui.Scroller = function (parent, comName) {
 	//Listeners
 	this.frame.listen(this._sFrame, this);
 	this.dirPress.listen(this._sDir, this);
+	
+	//Defaults
+	this.allowMouse = true;
 };
 dusk.sgui.Scroller.prototype = Object.create(dusk.sgui.FocusCheckerTile.prototype);
 
@@ -119,7 +122,6 @@ dusk.sgui.registerType("Scroller", dusk.sgui.Scroller);
 dusk.sgui.addStyle("Scroller[orientation="+dusk.sgui.c.ORIENT_VER+"]", {
 	"height":32,
 	"width":16,
-	"mode":"DECIMAL",
 	"focusOrient":dusk.sgui.c.ORIENT_HOR,
 	"swidth":16,
 	"sheight":32,
@@ -128,7 +130,6 @@ dusk.sgui.addStyle("Scroller[orientation="+dusk.sgui.c.ORIENT_VER+"]", {
 dusk.sgui.addStyle("Scroller[orientation="+dusk.sgui.c.ORIENT_HOR+"]", {
 	"height":16,
 	"width":32,
-	"mode":"DECIMAL",
 	"focusOrient":dusk.sgui.c.ORIENT_VER,
 	"swidth":32,
 	"sheight":16,

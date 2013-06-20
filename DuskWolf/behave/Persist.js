@@ -60,6 +60,13 @@ dusk.behave.Persist.getPersist = function(name) {
 	return this._persistData[name];
 };
 
+dusk.behave.Persist.workshopData = {
+	"help":"Will have it's data persist accross rooms.",
+	"data":[
+		
+	]
+};
+
 Object.seal(dusk.behave.Persist);
 Object.seal(dusk.behave.Persist.prototype);
 

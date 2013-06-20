@@ -91,6 +91,16 @@ dusk.behave.Pickup.collected = function(type, name, room) {
 	}
 };
 
+dusk.behave.Pickup.workshopData = {
+	"help":"Will be pickupable and collectable.",
+	"data":[
+		["type", "string", "The collectable type."],
+		["value", "integer", "How much it rises how much you have by."],
+		["roomLinked", "boolean", "Should be true unless you give each one a unique name."],
+		["pickupBy", "string", "Trigger criteria for entities that can pick this up."],
+	]
+};
+
 Object.seal(dusk.behave.Pickup);
 Object.seal(dusk.behave.Pickup.prototype);
 

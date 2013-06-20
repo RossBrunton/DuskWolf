@@ -27,8 +27,7 @@ dusk.behave.Fall = function(entity) {
 		this.entityEvent.listen(this._fallFall, this, {"name":"collidedInto", "dir":dusk.sgui.c.DIR_UP});
 	}
 };
-dusk.behave.Fall.prototype = new dusk.behave.Behave();
-dusk.behave.Fall.constructor = dusk.behave.Fall;
+dusk.behave.Fall.prototype = Object.create(dusk.behave.Behave.prototype);
 
 /** Used to manage collisions internally.
  * @param {object} e A "collidedInto" event dispatched from `{@link dusk.behave.Behave.entityEvent}`.
@@ -37,6 +36,13 @@ dusk.behave.Fall.constructor = dusk.behave.Fall;
 dusk.behave.Fall.prototype._fallFall = function(name, e) {
 	//this._entity.performMotion(0, this._entity.eProp("fallSpeed"));
 	this._entity.applyDy("fall_fall", 1/*this._data("fallSpeed")*/);
+};
+
+dusk.behave.Fall.workshopData = {
+	"help":"Will fall when collided with.",
+	"data":[
+		["fallSpeed", "integer", "The speed to fall."]
+	]
 };
 
 Object.seal(dusk.behave.Fall);

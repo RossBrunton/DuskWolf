@@ -67,5 +67,28 @@ dusk.behave.Behave.prototype._data = function(name, value, init) {
 	return this._entity.behaviourData[name];
 };
 
+/** Returns true if the specified control is active.
+ * 
+ * Entities should listen for the "controlActive" event, whose object has the property "control"; the name of the
+ *  control. Any of these listeners returning true will mean the control is active.
+ * 
+ * If the control is in an entity data element "controlsOn", this will always return true, as well.
+ * 
+ * @param {string} name The name of the control to check.
+ * @return {boolean} Whether the control is activated or not.
+ * @protected
+ */
+dusk.behave.Behave.prototype._controlActive = function(name) {
+	if(this._data("controlsOn") && this._data("controlsOn").indexOf(name) !== -1) {
+		return true;
+	}
+	
+	if(this._entity.behaviourFire("controlActive", {"control":name}).indexOf(true) !== -1) {
+		return true;
+	}
+	
+	return false;
+};
+
 Object.seal(dusk.behave.Behave);
 Object.seal(dusk.behave.Behave.prototype);

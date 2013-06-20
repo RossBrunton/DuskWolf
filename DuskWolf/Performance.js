@@ -63,7 +63,6 @@ dusk.frameTicker.onFrame.listen(function e_frame(e) {
 		this.frameRate = Math.round(300000000/((new Date()).getTime()-this._time))/1000;
 		dusk.performance._time = (new Date()).getTime();
 		dusk.performance._framesRan = 0;
-		if(this.frameRate < dusk.frameRate * 0.75) console.warn("Frame rate is low: "+this.frameRate+"fps.");
 	}
 }, dusk.performance);
 
@@ -74,7 +73,6 @@ dusk.sgui.onRender.listen(function e_onRender(e) {
 		this.renderFrameRate = Math.round(300000000/((new Date()).getTime()-this._rtime))/1000;
 		dusk.performance._rtime = (new Date()).getTime();
 		dusk.performance._rframesRan = 0;
-		if(this.renderFrameRate < 40) console.warn("Render frame rate is below 40Hz: "+this.renderFrameRate+"fps.");
 	}
 }, dusk.performance);
 

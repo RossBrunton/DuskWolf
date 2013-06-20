@@ -63,10 +63,19 @@ dusk.sgui.Single = function(parent, comName) {
 	 */
 	this.yOffset = 0;
 	
+	/** If true, then you can roll over the component components that have their
+	 * `{@link dusk.sgui.Component.allowMouse}` property set to true to focus them.
+	 * @type boolean
+	 * @default true
+	 * @since 0.0.20-alpha
+	 */
+	this.mouseFocus = true;
+	
 	this.newComponent("blank", "NullCom");
 	
 	//Prop masks
 	this._registerPropMask("child", "__child", false);
+	this._registerPropMask("mouseFocus", "mouseFocus", false);
 	
 	//Listeners
 	this.prepareDraw.listen(this._singleDraw, this);
@@ -94,6 +103,26 @@ dusk.sgui.Single.prototype.className = "Single";
  */
 dusk.sgui.Single.prototype.containerKeypress = function(e) {
 	return this._component.doKeyPress(e);
+};
+
+/** Container specific method of handling clicks.
+ * 
+ * In this case, it will call `{@link dusk.sgui.Component.doClick}` of the component if the mouse is on it, and
+ *  and return that value. Failing that, it will return true.
+ * 
+ * @param {object} e The keypress event, must be a JQuery keypress event object.
+ * @return {boolean} The return value of the focused component's keypress.
+ */
+dusk.sgui.Single.prototype.containerClick = function(e) {
+	if(this.mouseFocus) {
+		var com = this._component;
+		if(!(this._mouseX < com.x || this._mouseX > com.x + com.width
+		|| this._mouseY < com.y || this._mouseY > com.y + com.height)) {
+			return this._components[this._drawOrder[i]].doClick(e);
+		}
+	}
+	
+	return true;
 };
 
 /** Creates a new component of the specified type, replacing the existing component.
@@ -367,6 +396,34 @@ dusk.sgui.Single.prototype.getContentsHeight = function(includeOffset) {
 	}else{
 		return this._component.y + this._component.height;
 	}
+};
+
+/** Updates mouse location of all children.
+ * 
+ * @since 0.0.20-alpha
+ */
+dusk.sgui.Group.prototype.containerUpdateMouse = function() {
+	var x = this._mouseX;
+	var y = this._mouseY;
+	
+	var com = this._component;
+	if(!com) return;
+	var destX = x;
+	var destY = y;
+	
+	var destXAdder = 0;
+	if(com.xOrigin == dusk.sgui.Component.ORIGIN_MAX) destXAdder = this.width - com.width;
+	if(com.xOrigin == dusk.sgui.Component.ORIGIN_MIDDLE) destXAdder = (this.width - com.width)>>1;
+	
+	var destYAdder = 0;
+	if(com.yOrigin == dusk.sgui.Component.ORIGIN_MAX) destYAdder = this.height - com.height;
+	if(com.yOrigin == dusk.sgui.Component.ORIGIN_MIDDLE) destYAdder = (this.height - com.height)>>1;
+	
+	destX += -com.x + this.xOffset - destXAdder;
+	
+	destY += -com.y + this.yOffset - destYAdder;
+	
+	com.updateMouse(destX, destY);
 };
 
 Object.seal(dusk.sgui.Single);

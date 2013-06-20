@@ -76,6 +76,21 @@ dusk.sgui.EditableTileMap = function (parent, comName) {
 	//Listeners
 	this.prepareDraw.listen(this._editTileMapDraw, this);
 	this.frame.listen(this._editTileMapFrame, this);
+	this.keyPress.listen(function(e) {
+		if(dusk.editor.active) {
+			this.src = prompt("Please enter an image path.", this.src);
+			this.drawAll();
+		}
+	}, this, {"key":73});
+	this.keyPress.listen(function(e) {
+		if(dusk.editor.active) {
+			dusk.sgui.TileMap.setAnimation(this.src, prompt(
+				"Enter a (whitespace seperated) animation for "+this.getTile(this._cx, this._cy),
+				dusk.sgui.TileMap.getAnimation(this.src, this.getTile(this._cx, this._cy)).join(" ")
+			).split(/\s+/));
+			this.drawAll();
+		}
+	}, this, {"key":69});
 	
 	//Directions
 	this.dirPress.listen(this._etmRightAction, this, {"dir":dusk.sgui.c.DIR_RIGHT});
@@ -133,8 +148,15 @@ dusk.sgui.EditableTileMap.prototype._editTileMapDraw = function(e) {
 	e.c.fillStyle = this.cursorColour;
 	e.c.fillText(this.getTile(this._cx, this._cy),
 		e.d.destX - e.d.sourceX + (this._cx*this.tileWidth()) + 1,
-		e.d.destX - e.d.sourceY + (this._cy*this.tileHeight()) + 6
+		e.d.destY - e.d.sourceY + (this._cy*this.tileHeight()) + 6
 	);
+	
+	if(dusk.sgui.TileMap.getAnimation(this.src, this.getTile(this._cx, this._cy)).length > 1) {
+		e.c.fillText("\u27F3",
+			e.d.destX - e.d.sourceX + ((this._cx+1)*this.tileWidth()) - 8,
+			e.d.destY - e.d.sourceY + ((this._cy+1)*this.tileHeight()) - 3
+		);
+	} 
 };
 
 /** Called every frame, it updates the global editor coordinates if appropriate.

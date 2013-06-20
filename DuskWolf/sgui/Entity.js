@@ -55,18 +55,10 @@ dusk.sgui.Entity = function (parent, comName) {
 	this._teatherHost = null;
 	
 	//Default sizes
-	if(dusk.entities.mode == "BINARY") {
-		this.mode = "BINARY";
-		this.ssize = dusk.entities.ssize;
-		this.width = 1 << dusk.entities.tsize;
-		this.height = 1 << dusk.entities.tsize;
-	}else{
-		this.mode = "DECIMAL";
-		this.sheight = dusk.entities.sheight;
-		this.swidth = dusk.entities.swidth;
-		this.width = dusk.entities.twidth;
-		this.height = dusk.entities.theight;
-	}
+	this.sheight = dusk.entities.sheight;
+	this.swidth = dusk.entities.swidth;
+	this.width = dusk.entities.twidth;
+	this.height = dusk.entities.theight;
 	
 	//Prop masks
 	this._registerPropMask("dx", "dx");

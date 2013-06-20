@@ -8,7 +8,8 @@ dusk.load.require("dusk.behave.BackForth");
 dusk.load.require("dusk.behave.Persist");
 dusk.load.require("dusk.behave.HitDam");
 dusk.load.require("dusk.behave.Killable");
-dusk.load.require("dusk.behave.Controlled");
+dusk.load.require("dusk.behave.PlayerControl");
+dusk.load.require("dusk.behave.Jumper");
 dusk.load.require("dusk.behave.MarkTrigger");
 dusk.load.require("dusk.sgui.DynamicGrid");
 dusk.load.require("dusk.sgui.ControlConfig");
@@ -23,18 +24,16 @@ dusk.load.require("dusk");
 dusk.load.require("dusk.sgui.effects.spread");
 dusk.load.require("dusk.sgui.FpsMeter");
 dusk.load.require("dusk.sgui.PlusText");
+dusk.load.require("dusk.sgui.EntityWorkshop");
 
 dusk.load.require("example.plat.rooms.exhall");
 
 dusk.load.provide("example.plat");
 
-dusk.entities.tsize = 5;
-dusk.entities.ssize = 5;
 dusk.entities.twidth = 32;
 dusk.entities.theight = 32;
 dusk.entities.swidth = 32;
 dusk.entities.sheight = 32;
-dusk.entities.mode = "BINARY";
 
 example.plat.health = new dusk.Range(0, 5, 0);
 
@@ -75,7 +74,7 @@ dusk.entities.types.createNewType("walk", {
 }, "plat");
 
 dusk.entities.types.createNewType("player", {
-	"behaviours":{"Persist":true, "Controlled":true, "MarkTrigger":true, "Killable":true, "Gravity":true},
+	"behaviours":{"Persist":true, "PlayerControl":true, "Jumper":true, "MarkTrigger":true, "Killable":true, "Gravity":true, "LeftRightControl":true},
 	"data":{"hp":5, "maxHp":5, "collisionOffsetX":10, "collisionWidth":22, "collisionOffsetY":3},
 	"animation":example.plat.playerAni, "particles":example.plat.playerParts
 }, "plat");
@@ -140,7 +139,8 @@ dusk.sgui.getPane("hud").parseProps({
 			"type":"Tile",
 			"width":16,
 			"height":16,
-			"ssize":5,
+			"swidth":32,
+			"sheight":32,
 			"x":5,
 			"y":24,
 			"src":"Example/Coin.png"
@@ -202,6 +202,16 @@ dusk.sgui.getPane("rate").parseProps({
 	"width":dusk.sgui.width,
 	"height":dusk.sgui.height
 });
+
+/*dusk.sgui.getPane("ew").parseProps({
+	"active":true,
+	"children":{
+		"ew":{
+			"type":"EntityWorkshop",
+		}
+	},
+	"focus":"ew"
+});*/
 
 dusk.frameTicker.onFrame.listen(function(e) {
 	if(dusk.behave.Persist.getPersist("hero")) {

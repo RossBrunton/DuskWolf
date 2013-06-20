@@ -22,7 +22,7 @@ dusk.load.provide("dusk.sgui.PlusText");
  * 
  * @extends dusk.sgui.Group
  * @constructor
- * @since 0.0.19-alpha
+ * @since 0.0.20-alpha
  */
 dusk.sgui.PlusText = function (parent, comName) {
 	dusk.sgui.Group.call(this, parent, comName);
@@ -50,6 +50,11 @@ dusk.sgui.PlusText = function (parent, comName) {
 	 * @default false
 	 */
 	this.onLeft = false;
+	/** If true, then the plus component will be behind the text, rather than next to it.
+	 * @type boolean
+	 * @default false
+	 */
+	this.behind = false;
 	/** The spacing between the plus and the label, in pixels.
 	 * @type integer
 	 * @default 2
@@ -67,6 +72,7 @@ dusk.sgui.PlusText = function (parent, comName) {
 	this._registerPropMask("plus", "plus", undefined, ["plusType"]);
 	this._registerPropMask("label", "label");
 	this._registerPropMask("spacing", "spacing");
+	this._registerPropMask("behind", "behind");
 	this._registerPropMask("onLeft", "onLeft");
 	this._registerPropMask("plusType", "plusType");
 	
@@ -75,6 +81,7 @@ dusk.sgui.PlusText = function (parent, comName) {
 	
 	//Setup
 	this.focusBehaviour = dusk.sgui.Group.FOCUS_ALL;
+	this.allowMouse = true;
 };
 dusk.sgui.PlusText.prototype = Object.create(dusk.sgui.Group.prototype);
 
@@ -83,13 +90,20 @@ dusk.sgui.PlusText.prototype = Object.create(dusk.sgui.Group.prototype);
  * @private
  */
 dusk.sgui.PlusText.prototype._ptFrame = function(e) {
-	this.getComponent("label").width = this.getComponent("plus").width - this.spacing;
+	this.getComponent("label").width = this.width - this.getComponent("plus").width - this.spacing;
 	
 	if(this.onLeft) {
 		this.getComponent("plus").x = 0;
 		this.getComponent("label").x = this.getComponent("plus").width + this.spacing;
 	}else{
 		this.getComponent("plus").x = this.width - this.getComponent("plus").width;
+		this.getComponent("label").x = 0;
+	}
+	
+	if(this.behind) {
+		this.getComponent("label").width = -1;
+		this.getComponent("plus").x = 0;
+		this.getComponent("label").xOrigin = dusk.sgui.Component.ORIGIN_MIDDLE;
 		this.getComponent("label").x = 0;
 	}
 	
@@ -118,6 +132,7 @@ Object.defineProperty(dusk.sgui.PlusText.prototype, "label", {
 	
 	set: function(value) {
 		this.getComponent("label").parseProps(value);
+		this.getComponent("plus").alterLayer("-label");
 	}
 });
 
@@ -125,7 +140,10 @@ Object.defineProperty(dusk.sgui.PlusText.prototype, "label", {
 Object.defineProperty(dusk.sgui.PlusText.prototype, "plusType", {
 	get: function() {return this.getComponent("plus").type;},
 	
-	set: function(value) {this.getComponent("plus").type = value;}
+	set: function(value) {
+		this.getComponent("plus").type = value;
+		this.getComponent("plus").alterLayer("-label");
+	}
 });
 
 Object.seal(dusk.sgui.PlusText);

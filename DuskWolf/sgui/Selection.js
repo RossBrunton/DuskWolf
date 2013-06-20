@@ -29,6 +29,9 @@ dusk.sgui.Selection = function (parent, comName) {
 	}, this, {"action":"before"});
 	this._populationEvent.listen(this._update, this, {"action":"complete"});
 	this.dirPress.listen(this._update, this);
+	
+	//Defaults
+	this.allowMouse = true;
 };
 dusk.sgui.Selection.prototype = Object.create(dusk.sgui.Grid.prototype);
 

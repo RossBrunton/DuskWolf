@@ -17,14 +17,21 @@ dusk.behave.HitDam = function(entity) {
 		this.entityEvent.listen(this._hdCollide, this, {"name":"collidedInto"});
 	}
 };
-dusk.behave.HitDam.prototype = new dusk.behave.Behave();
-dusk.behave.HitDam.constructor = dusk.behave.HitDam;
+dusk.behave.HitDam.prototype = Object.create(dusk.behave.Behave.prototype);
 
 dusk.behave.HitDam.prototype._hdCollide = function(e) {
 	if(e.target === "wall") return;
 	e.target.behaviourFire("takeDamage", {
 		"damage":this._data("damage"), "source":this._entity, "types":this._data("types")
 	});
+};
+
+dusk.behave.HitDam.workshopData = {
+	"help":"Will deal damage to Killable entities.",
+	"data":[
+		["damage", "integer", "Amount of damage done."],
+		["types", "array", "Damage types. (:: seperated)"],
+	]
 };
 
 Object.seal(dusk.behave.HitDam);

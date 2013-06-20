@@ -158,15 +158,15 @@ dusk.sgui.addStyle("ItemSlot", {
 		},
 		{
 			"name":"item",
-			"mode":"BINARY",
-			"ssize":5,
+			"swidth":32,
+			"sheight":32,
 			"width":32,
 			"height":32
 		},
 		{
 			"name":"handItem",
-			"mode":"BINARY",
-			"ssize":5,
+			"swidth":32,
+			"sheight":32,
 			"width":32,
 			"height":32,
 			"alpha":0.75
