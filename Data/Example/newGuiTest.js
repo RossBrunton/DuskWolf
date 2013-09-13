@@ -268,4 +268,24 @@ dusk.sgui.getPane("scrollTest").parseProps({
 		},
 	}
 });
+
+dusk.sgui.getPane("inputs").parseProps({
+	"active":true,
+	"focus":"inp",
+	"children":{
+		"inp":{
+			"type":"Grid",
+			"populate":{
+				"type":"TextBox",
+				"range":example.newGui.testRange,
+				"height":20,
+				"width":50,
+			},
+			"rows":10,
+			"x":100,
+			"y":100
+		}
+	}
+});
+
 dusk.startGame();

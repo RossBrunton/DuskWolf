@@ -95,6 +95,9 @@ dusk.sgui.Entity.prototype.applyDx = function(name, value, duration, accel, limi
 	if(!accel) accel = 0;
 	if(noReplace && name in this._dx) value = this._dx[name][0];
 	this._dx[name] = [value, duration, accel, limit];
+	
+	if(this.getDx() < 0) this.eProp("lastMoveLeft", true);
+	if(this.getDx() > 0) this.eProp("lastMoveLeft", false);
 };
 
 dusk.sgui.Entity.prototype.applyDy = function(name, value, duration, accel, limit, noReplace) {
@@ -102,6 +105,9 @@ dusk.sgui.Entity.prototype.applyDy = function(name, value, duration, accel, limi
 	if(!accel) accel = 0;
 	if(noReplace && name in this._dy) value = this._dy[name][0];
 	this._dy[name] = [value, duration, accel, limit];
+	
+	if(this.getDy() < 0) this.eProp("lastMoveUp", true);
+	if(this.getDy() > 0) this.eProp("lastMoveUp", false);
 };
 
 dusk.sgui.Entity.prototype.startFrame = function() {
@@ -336,7 +342,7 @@ dusk.sgui.Entity.prototype._evalTriggerArr = function(arr, event) {
 			}
 		}else{
 			if(typeof current == "string") {
-				arr[i] = /^([^!<>=]+)\s*([<|>|=|<=|=>|!=])\s*([^!<>=]+)$/gi.exec(current);
+				arr[i] = /^([^!<>=]+)\s*(<|>|=|==|<=|=>|\!=)\s*([^!<>=]+)$/gi.exec(current);
 				current = arr[i];
 			}
 			
@@ -344,8 +350,8 @@ dusk.sgui.Entity.prototype._evalTriggerArr = function(arr, event) {
 			var rhs = this._evalOperand(current[3]);
 			
 			switch(current[2]) {
-				case "=": if(lhs != rhs) return [false, eventTriggered]; break;
-				case "!=": if(lhs = rhs) return [false, eventTriggered]; break;
+				case "=": case "==": if(lhs != rhs) return [false, eventTriggered]; break;
+				case "!=": if(lhs == rhs) return [false, eventTriggered]; break;
 				case ">": if(lhs <= rhs) return [false, eventTriggered]; break;
 				case "<": if(lhs >= rhs) return [false, eventTriggered]; break;
 				case ">=": if(lhs < rhs) return [false, eventTriggered]; break;
@@ -397,7 +403,7 @@ dusk.sgui.Entity.prototype._evalOperand = function(operand, base) {
 	}
 	if(operand.charAt(0) == ":") {
 		var name = operand.substr(1).split(/[\+\-\/\*\#\.\$\:]/)[0];
-		return base + this._evalOperand(operand.substr(name.length+1), this.eprop(name));
+		return base + this._evalOperand(operand.substr(name.length+1), this.eProp(name));
 	}
 	
 	var frags = operand.split(/[\+\-\/\*\#\.\$\:]/);
@@ -474,6 +480,11 @@ dusk.sgui.Entity.prototype._performFrame = function(event, current, noContinue) 
 			if(!noContinue) this._aniForward(event);
 			break;
 		
+		case "t":
+			this.terminate();
+			if(!noContinue) this._aniForward(event);
+			break;
+		
 		default:
 			this.tileStr = current;
 	}
@@ -520,6 +531,22 @@ dusk.sgui.Entity.prototype.teatherClients = function() {
 
 
 dusk.sgui.Entity.prototype.eProp = function(prop, set) {
+	if(prop == "img" && set) {
+		this.src = set;
+	}
+	if(prop == "collisionWidth" && set !== undefined) {
+		this.collisionWidth = set;
+	}
+	if(prop == "collisionHeight" && set !== undefined) {
+		this.collisionHeight = set;
+	}
+	if(prop == "collisionOffsetX" && set !== undefined) {
+		this.collisionOffsetX = set;
+	}
+	if(prop == "collisionOffsetY" && set !== undefined) {
+		this.collisionOffsetY = set;
+	}
+	
 	if(set !== undefined) {
 		this.behaviourData[prop] = set;
 		return set;

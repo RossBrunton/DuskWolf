@@ -45,8 +45,8 @@ dusk.plat._init = function() {
 	
 	dusk.entities.types.createNewType("plat", {
 		"data":{
-			"hp":1, "gravity":2, "terminal":7, "haccel":2, "hspeed":7, "jump":15, "slowdown":1,
-			"img":"pimg/hero.png", "solid":true, "anchor":false, "collides":true
+			"headingLeft":false, "headingUp":false,
+			"img":"pimg/hero.png", "solid":true, "collides":true
 		},
 		"animation":{"stationary":"0,0"},
 		"behaviours":{}

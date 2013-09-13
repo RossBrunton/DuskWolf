@@ -12,7 +12,7 @@ dusk.load.provide("dusk.sgui.ParticleField");
  * 
  * @param {dusk.sgui.IContainer} parent The container that this component is in.
  * @param {string} comName The name of the component.
- * @extends dusk.sgui.Image
+ * @extends dusk.sgui.Component
  * @constructor
  */
 dusk.sgui.ParticleField = function(parent, comName) {

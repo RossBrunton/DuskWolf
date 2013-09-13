@@ -19,15 +19,15 @@ dusk.load.provide("dusk.behave.Behave");
  * 
  * @classdesc A behaviour of an entity.
  * 
- * Objects of this class, and it's subclasses, are "attached" to `{@link dusk.sgui.Entity}` instances 
- *  and essentially provide behaviours.
+ * Objects of this class, and it's subclasses, are "attached" to `{@link dusk.sgui.Entity}` instances and essentially
+ * provide details on how the entity should act.
  * 
  * This class is the base class of these behaviours, but does nothing on it's own.
  * 
  * Entities may have multiple behaviours, but each behaviour instance can only be attached to one entity.
  * 
- * Messages are passed to the behaviour using `{@link dusk.sgui.Entity.behaviourFire}`, which fires an event.
- * 	The behaviour itself should edit the entity's public properties directly.
+ * Messages are passed to the behaviour using `{@link dusk.sgui.Entity.behaviourFire}`, which fires an event. The
+ * behaviour itself should edit the entity's public properties directly.
  * 
  * @param {dusk.sgui.Entity} entity The entity this behaviour will act with.
  * @constructor
@@ -41,8 +41,8 @@ dusk.behave.Behave = function(entity) {
 	
 	/** An event dispatcher that is fired when the entity's `{@link dusk.sgui.Entity.behaviourFire}` method is called.
 	 * 
-	 * The properties of the event object will vary depending on it's type, 
-	 *  but there will always be a `name` property which contains the name of the event fired.
+	 * The properties of the event object will vary depending on it's type, but there will always be a `name` property
+	 * which contains the name of the event fired.
 	 * @type dusk.EventDispatcher
 	 */
 	this.entityEvent = new dusk.EventDispatcher("dusk.behave.Behave.entityEvent", dusk.EventDispatcher.MODE_LAST);
@@ -50,7 +50,8 @@ dusk.behave.Behave = function(entity) {
 
 /** This accesses or sets behaviour data of the entity.
  * 
- * Behaviour data is data that should only be used by a behaviour, but is shared between all behaviours.
+ * Behaviour data is data that is used by a behaviours, and is shared between all of them. It is also saved and loaded
+ * with the entitiy and generally "represents" it.
  * @param {string} name The key of the data you want to access.
  * @param {*} value The value to set, unless `init` is true and a value has already been set.
  * @param {boolean} init If true, then only if the data specified with the key is undefined, it will be set.
@@ -72,7 +73,7 @@ dusk.behave.Behave.prototype._data = function(name, value, init) {
  * Entities should listen for the "controlActive" event, whose object has the property "control"; the name of the
  *  control. Any of these listeners returning true will mean the control is active.
  * 
- * If the control is in an entity data element "controlsOn", this will always return true, as well.
+ * If the control is in an entity data earray "controlsOn", this will always return true, as well.
  * 
  * @param {string} name The name of the control to check.
  * @return {boolean} Whether the control is activated or not.

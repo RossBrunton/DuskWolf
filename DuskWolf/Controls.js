@@ -195,6 +195,7 @@ dusk.controls.checkButton = function(name, button) {
  * @return {boolean} Whether the control is active.
  */
 dusk.controls.controlActive = function(name) {
+	if(!(name in dusk.controls._mappings)) return false;
 	return dusk.keyboard.isKeyPressed(dusk.controls._mappings[name][0])
 	|| dusk.controls.isButtonPressed(dusk.controls._mappings[name][1]);
 };
@@ -262,6 +263,7 @@ dusk.controls.buttonPress.listen(dusk.controls._buttonPressed, null);
  * @private
  */
 dusk.controls._frame = function(e) {
+	if(document.hidden || document.webkitHidden || document.msHidden) return;
 	var navigatorGetGamepads = navigator.getGamepads || navigator.webkitGetGamepads || function(){return [null];};
 	var gamepad = navigatorGetGamepads.call(navigator)[0];
 	if(gamepad) {

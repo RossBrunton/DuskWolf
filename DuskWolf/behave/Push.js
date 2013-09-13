@@ -43,6 +43,9 @@ dusk.behave.Push.prototype._pCollided = function(e) {
 	}
 };
 
+/** Workshop data used by `{@link dusk.sgui.EntityWorkshop}`.
+ * @static
+ */
 dusk.behave.Push.workshopData = {
 	"help":"Will move when pushed.",
 	"data":[

@@ -37,9 +37,9 @@ dusk.behave.Killable.prototype._killableTakeDamage = function(e) {
 				this._entity.terminate();
 			}
 		}
+		
+		this._data("currentMercy", this._data("mercyTime"));
 	}
-	
-	this._data("currentMercy", this._data("mercyTime"));
 };
 
 dusk.behave.Killable.prototype._killableHeal = function(e) {
@@ -62,6 +62,9 @@ dusk.behave.Killable.prototype._killableFrame = function(name, e) {
 	}
 };
 
+/** Workshop data used by `{@link dusk.sgui.EntityWorkshop}`.
+ * @static
+ */
 dusk.behave.Killable.workshopData = {
 	"help":"Will allow the entity to be killed and damaged.",
 	"data":[

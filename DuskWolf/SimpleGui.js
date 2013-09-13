@@ -31,12 +31,12 @@ dusk.load.provide("dusk.pause");
  * 
  * In the JSON, if you are describing a group's children, each child element must contain a `name` and `type` property.
  * 	This is the name and type of the object, surprisingly.
- * 	`type` must be a valid type (extends `{@link dusk.sgui.Component}` and be in the namespace `{@link dusk.sgui}`.
+ * 	`type` must be a valid type (extends `{@link dusk.sgui.Component}` and be registered using 
+ * `{@link dusk.sgui.registerType}`).
  * 
  * Components can be "active", a component which is active will receive keyboard events,
  *   and should act like the user is paying attention to it.
- * 	When a component becomes active, it's `{@link sgui.Component.onActive} method is called,
- *   when it looses it, {@link sgui.Component.onDeactive} is called.
+ * 	When a component changes whether it is active, its `{@link dusk.sgui.Component.onActiveChange}` event is fired.
  * 	For a component to be active, all it's parent groups must be too.
  * 
  * Components can also be "focused", focused components will be made active when the container it is in becomes active.
@@ -45,6 +45,7 @@ dusk.load.provide("dusk.pause");
  * 	If a direction key is pressed, a function like `{@link sgui.Component.upAction}` returns true,
  *   and a variable like `{@link upFlow}` is not empty, focus changes to the named element in this one's container.
  *	The arrow keys can be overriden by using the controls "sgui_up", "sgui_down", "sgui_left" and "sgui_right".
+ *  If a component changes whether it is focused , its `{@link dusk.sgui.Component.onFocusChange}` event will fire.
  * 
  * Component paths also exist, these paths are similar to file names
  *   and allow you to specify one component relative to another.
@@ -55,12 +56,39 @@ dusk.load.provide("dusk.pause");
  * - c/c1 - Access the child "c1" of the container "c", which is in "X".
  * - ../ - Access this parent, "Y".
  * - /Y - Access the child "Y" in the pane "Z".
+ * - Z:/Y - Directly accesses Y from the pane.
  * 
- * This namespace registeres the following controls for `{@link dusk.controls}`:
+ * Components can be styled similarly to CSS. When a new component is created, the list of styles (Set by 
+ * `{@dusk.sgui.addStyle}` is checked. If it matches that component, all the properties in the object set with the style
+ * will be applied to the object (see the JSON representation above). This only occurs when the object is created or
+ * its type changes, it won't happen at any other time. The syntax for a rule contains the following, they must be in 
+ * this order, but are all optional: 
  * 
- * `dusk_up`, `dusk_down`, `dusk_left` and `dusk_right` are the controls used to change the active component,
+ * - `typename` - The name of the component's type, as registered using `{@link dusk.sgui.registerType}`.
+ * - `.style` - The value of, or one of the values of, the component's `{@link dusk.sgui.Component.style}` property.
+ * - `#name` - The component's name.
+ * - `[prop=value]` - The property must equal the value, the property is a name that can be looked up using the JSON 
+ *  representation, and must equal the value. At the moment only `=` is supported, and there can only be one of these.
+ * 
+ * Concisely, `typename.style#name[prop=value]`.
+ * 
+ * Components can also have "extras" which are essentially objects that are bolted onto components and give them extra
+ * functionality. They are stored on the component, and are deleted when the component is, or on their own accord.
+ * Extras are added to components using `{@link dusk.sgui.Component#addExtra}`, removed using
+ * `{@link dusk.sgui.Component#removeExtra}` and retreived using `{@link dusk.sgui.Component#getExtra}`.
+ * 
+ * Mouse control is also supported for components. A component will be able to see the mouse location, relative to
+ * themselves in their `{@link dusk.sgui.Component._mouseX}` and `{@link dusk.sgui.Component._mouseY}` properties.
+ * If the property `{@link dusk.sgui.Component.allowMouse}` is true, then rolling over the component will set the focus
+ * to that component, whether the default is true depends on the component's type. If
+ * `{@link dusk.sgui.Component.mouseAction}` is true, then clicking on the component will fire its
+ * `{@link dusk.sgui.Component.action}` event.
+ * 
+ * This namespace registers the following controls for `{@link dusk.controls}`:
+ * 
+ * - `dusk_up`, `dusk_down`, `dusk_left` and `dusk_right` are the controls used to change the active component,
  *   these are the arrow keys or first stick by default.
- * `dusk_action` is used to trigger the "action" event on a component, this is by default the `a` key, or button 0.
+ * - `dusk_action` is used to trigger the "action" event on a component, this is by default the `a` key, or button 0.
  */
 
 /** Initiates the simpleGui system.
@@ -74,7 +102,7 @@ dusk.sgui._init = function() {
 	}, this);
 	
 	//Listen for mouseclicks
-	$("#"+dusk.canvas).click(function(e) {
+	$("#"+dusk.elemPrefix+"-canvas").click(function(e) {
 		e.button = e.which;
 		if(dusk.sgui.getActivePane()) dusk.sgui.getActivePane().doClick(e);
 	});
@@ -82,11 +110,11 @@ dusk.sgui._init = function() {
 	//Listen for frame events
 	dusk.frameTicker.onFrame.listen(function() {
 		if(dusk.sgui.displayMode == dusk.sgui.MODE_FULL) {
-			dusk.sgui.width = $("#"+dusk.canvas).parent().width();
-			if($("#"+dusk.canvas).parent().height() > window.innerHeight) {
+			dusk.sgui.width = $("#"+dusk.elemPrefix).parent().width();
+			if($("#"+dusk.elemPrefix).parent().height() > window.innerHeight) {
 				dusk.sgui.height = window.innerHeight;
 			}else{
-				dusk.sgui.height = $("#"+dusk.canvas).parent().height();
+				dusk.sgui.height = $("#"+dusk.elemPrefix).parent().height();
 			}
 		}
 		
@@ -118,11 +146,11 @@ dusk.sgui._init = function() {
 	/** The current width of the canvas.
 	 * @type integer
 	 */
-	this.width = $("#"+dusk.canvas)[0].width;
+	this.width = $("#"+dusk.elemPrefix+"-canvas")[0].width;
 	/** The current height of the canvas.
 	 * @type integer
 	 */
-	this.height = $("#"+dusk.canvas)[0].height;
+	this.height = $("#"+dusk.elemPrefix+"-canvas")[0].height;
 	
 	/** Fires when the simpleGui system is about to draw a new frame.
 	 * 
@@ -191,9 +219,9 @@ dusk.sgui._init = function() {
 	this._cacheCanvas.getContext("2d").textBaseline = "middle";
 	
 	//Listen for canvas mouse movements
-	$("#"+dusk.canvas).mousemove(function(e){
-		dusk.sgui._mouseX = e.offsetX;
-		dusk.sgui._mouseY = e.offsetY;
+	$("#"+dusk.elemPrefix+"-canvas").mousemove(function(e){
+		dusk.sgui._mouseX = e.clientX;
+		dusk.sgui._mouseY = e.clientY;
 	});
 	
 	//Controls
@@ -272,7 +300,7 @@ dusk.sgui._draw = function() {
 	requestAnimationFrame(dusk.sgui._draw);
 	if(!dusk.started) return;
 
-	$("#"+dusk.canvas)[0].getContext("2d").clearRect(0, 0, dusk.sgui.width, dusk.sgui.height);
+	$("#"+dusk.elemPrefix+"-canvas")[0].getContext("2d").clearRect(0, 0, dusk.sgui.width, dusk.sgui.height);
 	dusk.sgui._cacheCanvas.getContext("2d").clearRect(0, 0, dusk.sgui.width, dusk.sgui.height);
 	
 	//Draw panes
@@ -288,7 +316,9 @@ dusk.sgui._draw = function() {
 		dusk.sgui._panes[c].draw(data, dusk.sgui._cacheCanvas.getContext("2d"));
 	}
 
-	$("#"+dusk.canvas)[0].getContext("2d").drawImage(dusk.sgui._cacheCanvas, 0, 0, dusk.sgui.width, dusk.sgui.height);	
+	$("#"+dusk.elemPrefix+"-canvas")[0].getContext("2d").drawImage(dusk.sgui._cacheCanvas,
+		0, 0, dusk.sgui.width, dusk.sgui.height
+	);	
 	dusk.sgui.onRender.fire({});
 
 	return true;
@@ -445,12 +475,13 @@ Object.defineProperty(dusk.sgui, "width", {
     set:function(value) {
     	if(value == this.width) return;
     	
-    	$("#"+dusk.canvas)[0].width = value;
+    	$("#"+dusk.elemPrefix)[0].setAttribute("width", value);
+    	$("#"+dusk.elemPrefix+"-canvas")[0].width = value;
     	this._cacheCanvas.width = this.width;
     },
     
     get: function() {
-	    return $("#"+dusk.canvas)[0].width;
+	    return $("#"+dusk.elemPrefix+"-canvas")[0].width;
     }
 });
 
@@ -459,12 +490,13 @@ Object.defineProperty(dusk.sgui, "height", {
 	set:function(value) {
 		if(value == this.height) return;
 		
-		$("#"+dusk.canvas)[0].height = value;
+		$("#"+dusk.elemPrefix)[0].setAttribute("height", value);
+		$("#"+dusk.elemPrefix+"-canvas")[0].height = value;
 		this._cacheCanvas.height = this.height;
 	},
 	
 	get:function() {
-		return $("#"+dusk.canvas)[0].height;
+		return $("#"+dusk.elemPrefix+"-canvas")[0].height;
 	}
 });
 

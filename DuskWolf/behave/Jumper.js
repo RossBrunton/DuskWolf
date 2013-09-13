@@ -50,6 +50,9 @@ dusk.behave.Jumper.prototype._jumpFrame = function(e) {
 	}
 };
 
+/** Workshop data used by `{@link dusk.sgui.EntityWorkshop}`.
+ * @static
+ */
 dusk.behave.Jumper.workshopData = {
 	"help":"Will jump on input.",
 	"data":[

@@ -11,20 +11,16 @@
 		<script src='DuskWolf/Load.js' type='text/javascript'></script>
 		<script>
 			dusk.load.importList("DuskWolf/deps.json", function() {
-				dusk.load.importList("Data/Example/deps.json", function() {
-					dusk.load.import("example.plat");
-				});
+				dusk.load.import("dusk");
 			});
 		</script>
 	</head>
 	
 	<body style='margin:0px;padding:0px'>
 		<noscript>You need to enable JavaScript!</noscript>
-		<canvas id='canvas' width='768'  height='480' style='image-rendering: -webkit-optimize-contrast;'>
-			Your browser doesn't support canvas. Ha-ha!<br/>
-			Uh, if you are using the Browser of the Damned (Internet Explorer), please switch to <a href='http://www.mozilla.org/en-US/firefox/new/'>Firefox</a> or <a href='http://www.google.com/chrome/'>Chrome</a>.<br/>
-			If not, just upgrade your browser!
-		</canvas>
+		<swo-duskwolf width='768' height='480' dev package='example.plat' deps='Data/Example/deps.json'>
+			Sorry, for whatever reason DuskWolf isn't working! D:
+		</swo-duskwolf>
 		
 		<div>
 			<input id="editing" type="checkbox" onchange="dusk.editor.active = this.checked;"/>

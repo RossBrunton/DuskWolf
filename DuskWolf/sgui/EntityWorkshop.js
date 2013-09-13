@@ -272,6 +272,9 @@ dusk.sgui.EntityWorkshop.coreWorkshopData = [
 	["collisionOffsetY", "integer", "Y value to start collision rectangle.", "0"],
 	["solid", "boolean", "Whether other entities can collide into this.", "true"],
 	["collides", "boolean", "Whether this can collide into other entities.", "true"],
+	["controlsOn", "array", "An :: seperated array of all the controls that are always on.", "[]"],
+	["headingLeft", "boolean", "If true, then the entity heads left by default.", "false"],
+	["headingUp", "boolean", "If true, then the entity heads up by default.", "false"],
 ];
 
 dusk.sgui.EntityWorkshop.prototype._ewFrame = function(e) {
@@ -412,7 +415,7 @@ dusk.sgui.EntityWorkshop.prototype._updateData = function() {
 		var n = dusk.sgui.EntityWorkshop.coreWorkshopData[i][0];
 		var t = dusk.sgui.EntityWorkshop.coreWorkshopData[i][1].charAt(0);
 		if(n in this._workingWith.data) {
-			l.push({"text":t+" Core: "+n, "plus":{"text":this._workingWith.data[n]}});
+			l.push({"text":t+" Core: "+n, "plus":{"text":""+this._workingWith.data[n]}});
 		}else{
 			l.push({"text":t+" Core: "+n});
 		}
@@ -427,7 +430,7 @@ dusk.sgui.EntityWorkshop.prototype._updateData = function() {
 					var datStr = this._workingWith.data[n];
 					if(Array.isArray(datStr)) datStr = datStr.join("::");
 					if(typeof datStr == "object") datStr = JSON.stringify(datStr);
-					l.push({"text":t+" "+p+": "+n, "plus":{"text":datStr}});
+					l.push({"text":t+" "+p+": "+n, "plus":{"text":""+datStr}});
 				}else{
 					l.push({"text":t+" "+p+": "+n});
 				}

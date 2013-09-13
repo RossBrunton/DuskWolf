@@ -20,6 +20,8 @@ dusk.load.provide("dusk.sgui.NullCom");
  * This class doesn't actually display anything itself, classes that inherit from it do.
  * 	The properties for this apply to all components.
  * 
+ * More information about how this class works is in the documentation for `{@link dusk.sgui}`.
+ * 
  * @param {?dusk.sgui.IContainer} parent The container that this component is in.
  * @param {string} componentName The name of the component.
  * @see {@link dusk.sgui}
@@ -216,7 +218,7 @@ dusk.sgui.Component = function (parent, componentName) {
 	 * @since 0.0.20-alpha
 	 */
 	this.allowMouse = false;
-	/** Whether clicking on this component will triger it's action.
+	/** Whether clicking on this component will trigger its action.
 	 * 
 	 * @type boolean
 	 * @since 0.0.20-alpha
@@ -269,7 +271,7 @@ dusk.sgui.Component = function (parent, componentName) {
 	this.onActiveChange = new dusk.EventDispatcher("dusk.sgui.Component.onActiveChange");
 	this.onActiveChange.listen(function(e){this._active = e.active;}, this);
 	
-	/** If the component is deleted from it's group.
+	/** If the component is deleted from its group.
 	 * 
 	 * Set this to true to delete the component.
 	 * 
@@ -328,7 +330,6 @@ dusk.sgui.Component = function (parent, componentName) {
  * @type integer
  * @value 0x01
  * @constant
- * @memberof dusk.sgui.Component
  * @since 0.0.18-alpha
  */
 dusk.sgui.Component.REND_LOCATION = 0x01;
@@ -340,7 +341,6 @@ dusk.sgui.Component.REND_LOCATION = 0x01;
  * @type integer
  * @value 0x02
  * @constant
- * @memberof dusk.sgui.Component
  * @since 0.0.18-alpha
  */
 dusk.sgui.Component.REND_OFFSET = 0x02;
@@ -352,7 +352,6 @@ dusk.sgui.Component.REND_OFFSET = 0x02;
  * @type integer
  * @value 0x04
  * @constant
- * @memberof dusk.sgui.Component
  * @since 0.0.18-alpha
  */
 dusk.sgui.Component.REND_SLICE = 0x04;
@@ -362,7 +361,6 @@ dusk.sgui.Component.REND_SLICE = 0x04;
  * @type integer
  * @value 0
  * @constant
- * @memberof dusk.sgui.Component
  * @since 0.0.18-alpha
  */
 dusk.sgui.Component.ORIGIN_MIN = 0;
@@ -371,7 +369,6 @@ dusk.sgui.Component.ORIGIN_MIN = 0;
  * @type integer
  * @value 1
  * @constant
- * @memberof dusk.sgui.Component
  * @since 0.0.18-alpha
  */
 dusk.sgui.Component.ORIGIN_MAX = 1;
@@ -380,15 +377,14 @@ dusk.sgui.Component.ORIGIN_MAX = 1;
  * @type integer
  * @value 2
  * @constant
- * @memberof dusk.sgui.Component
  * @since 0.0.18-alpha
  */
 dusk.sgui.Component.ORIGIN_MIDDLE = 2;
 
-/** This causes the component to handle a keypress, it should be called by ether it's parent container or SimpleGui.
+/** This causes the component to handle a keypress, it should be called by ether its parent container or SimpleGui.
  * 
  * If the component running this is a container 
- *  then it's `{@link dusk.sgui.IContainer#containerKeypress}` function will be called.
+ *  then its `{@link dusk.sgui.IContainer#containerKeypress}` function will be called.
  *	If that function returns true, then this shall return true without doing anything else.
  * 
  * This function will first check the key to see if it is a direction or the action key,
@@ -401,7 +397,7 @@ dusk.sgui.Component.ORIGIN_MIDDLE = 2;
  *	If this returns false, then the event must not be ran by its container.
  * 
  * @param {object} e The JQuery keypress object that should be ran.
- * @return {boolean} Whether the parent container should run it's own actions.
+ * @return {boolean} Whether the parent container should run its own actions.
  */
 dusk.sgui.Component.prototype.doKeyPress = function (e) {
 	if(dusk.utils.doesImplement(this, dusk.sgui.IContainer) && !this.containerKeypress(e)){return false;}
@@ -410,8 +406,8 @@ dusk.sgui.Component.prototype.doKeyPress = function (e) {
 	
 	this._noFlow = false;
 	
-	var dirReturn = true;
-	if(this.keyPress.fire(eventObject)) {
+	var dirReturn = this.keyPress.fire(eventObject);
+	if(dirReturn) {
 		//Directions
 		if(dusk.controls.checkKey("sgui_left", e.which)) {
 			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.c.DIR_LEFT, "e":e})) && !this._noFlow
@@ -437,11 +433,11 @@ dusk.sgui.Component.prototype.doKeyPress = function (e) {
  *  `{@link dusk.sgui.Component.action}` handler.
  * 
  * If the component running this is a container 
- *  then it's `{@link dusk.sgui.IContainer#containerClick}` function will be called.
+ *  then its `{@link dusk.sgui.IContainer#containerClick}` function will be called.
  *	If that function returns true, then this shall return true without doing anything else.
  * 
  * @param {object} e The click event.
- * @return {boolean} Whether the parent container should run it's own actions.
+ * @return {boolean} Whether the parent container should run its own actions.
  */
 dusk.sgui.Component.prototype.doClick = function (e) {
 	if(dusk.utils.doesImplement(this, dusk.sgui.IContainer) && !this.containerClick(e)){return false;}
@@ -457,7 +453,7 @@ dusk.sgui.Component.prototype.doClick = function (e) {
 
 /** This maps a property from the JSON representation of the object (One from {@link #parseProps})
  *  to the JavaScript representation of the object.
- * 	If the property `name` exists in the JSON properties, then `mask` will be assigned it's value.
+ * 	If the property `name` exists in the JSON properties, then `mask` will be assigned its value.
  * 
  * @param {string} name The name in the JSON representation.
  * @param {string} mask The property name that that name shall be mapped to.
@@ -577,7 +573,7 @@ dusk.sgui.Component.prototype.draw = function(d, c) {
 };
 
 /** Alters the layer this is on.
- *	This calls `{@link dusk.sgui.IContainer#alterChildLayer}` of it's container.
+ *	This calls `{@link dusk.sgui.IContainer#alterChildLayer}` of its container.
  * 
  * This can be set in the JSON representation using the property `"layer"`
  * 
@@ -799,7 +795,6 @@ Object.defineProperty(dusk.sgui.Component.prototype, "type", {
 
 Object.seal(dusk.sgui.Component);
 Object.seal(dusk.sgui.Component.prototype);
-
 
 //-----
 

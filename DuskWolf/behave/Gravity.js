@@ -10,6 +10,9 @@ dusk.load.provide("dusk.behave.Gravity");
  * 
  * @classdesc An entity with this behaviour will move down at a constant acceleration.
  * 
+ * The acceleration is given by the behaviour property `"gravity"` (default 2), and the maximum speed is given by
+ * `"terminal"` (default 7).
+ * 
  * @extends dusk.behave.Behave
  * @param {?dusk.sgui.Entity} entity The entity this behaviour is attached to.
  * @constructor
@@ -39,6 +42,9 @@ dusk.behave.Gravity.prototype._gravFrame = function(name, e) {
 	}
 };
 
+/** Workshop data used by `{@link dusk.sgui.EntityWorkshop}`.
+ * @static
+ */
 dusk.behave.Gravity.workshopData = {
 	"help":"Will accelerate downwards.",
 	"data":[

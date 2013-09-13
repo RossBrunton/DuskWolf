@@ -10,7 +10,9 @@ dusk.load.require("dusk.behave.HitDam");
 dusk.load.require("dusk.behave.Killable");
 dusk.load.require("dusk.behave.PlayerControl");
 dusk.load.require("dusk.behave.Jumper");
+dusk.load.require("dusk.behave.Spawner");
 dusk.load.require("dusk.behave.MarkTrigger");
+dusk.load.require("dusk.behave.Volatile");
 dusk.load.require("dusk.sgui.DynamicGrid");
 dusk.load.require("dusk.sgui.ControlConfig");
 dusk.load.require("dusk.sgui.Label");
@@ -39,13 +41,13 @@ example.plat.health = new dusk.Range(0, 5, 0);
 
 example.plat.playerAni = [
 	["", "0,0", {}],
-	["$dir=l", "0,1", {}],
-	["#dx>0", '$dir=r|0,0|1,0|0,0|2,0', {"name":"walkRight"}],
-	["#dx<0", "$dir=l|0,1|1,1|0,1|2,1", {}],
+	[":lastMoveLeft=true", "0,1", {}],
+	["#dx>0", '0,0|1,0|0,0|2,0', {"name":"walkRight"}],
+	["#dx<0", "0,1|1,1|0,1|2,1", {}],
 	["#dy<0", "3,0", {}],
-	["#dy<0&$dir=l", "3,1", {}],
+	["#dy<0 & :lastMoveLeft=true", "3,1", {}],
 	["#dy>0 & #tb=0", "4,0", {}],
-	["#dy>0 & $dir=l & #tb=0", "4,1", {}],
+	["#dy>0 & :lastMoveLeft=true & #tb=0", "4,1", {}],
 	["on beh_terminate", "L|0,1|0,2|1,2|2,2|3,2|4,2|5,2|6,2|7,2|/terminate", {}]
 ];
 
@@ -69,13 +71,26 @@ example.plat.playerParts = [
 //Define entities
 dusk.entities.types.createNewType("walk", {
 	"behaviours":{"BackForth":true, "Persist":true, /*"HitDam":true,*/ "Killable":true}, 
-	"data":{"dx":5, "slowdown":0, "hp":10, "collisionOffsetX":10, "collisionWidth":22, "collisionOffsetY":3},
+	"data":{"dx":5, "slowdown":0, "hp":1, "collisionOffsetX":10, "collisionWidth":22, "collisionOffsetY":3},
 	"animation":example.plat.playerAni, "particles":example.plat.playerParts
 }, "plat");
 
 dusk.entities.types.createNewType("player", {
-	"behaviours":{"Persist":true, "PlayerControl":true, "Jumper":true, "MarkTrigger":true, "Killable":true, "Gravity":true, "LeftRightControl":true},
-	"data":{"hp":5, "maxHp":5, "collisionOffsetX":10, "collisionWidth":22, "collisionOffsetY":3},
+	"behaviours":{
+		"Persist":true, "PlayerControl":true, "Jumper":true, "MarkTrigger":true, "Killable":true,
+		"Gravity":true, "LeftRightControl":true, "Spawner":true
+	},
+	"data":{
+		"hp":5, "maxHp":5, "collisionOffsetX":10, "collisionWidth":22, "collisionOffsetY":3,
+		"spawns":{
+			"shot":{"type":"shot", "horBase":"facing", "cooldown":10},
+			"slash":{"type":"slash", "horBase":"facing", "cooldown":30, "data":[{
+				"img":"Example/Slashl.png"
+			}, {
+				"img":"Example/Slash.png"
+			}]}
+		}
+	},
 	"animation":example.plat.playerAni, "particles":example.plat.playerParts
 }, "plat");
 
@@ -109,6 +124,28 @@ dusk.entities.types.createNewType("fall", {"behaviours":{"Fall":true},
 }, "plat");
 dusk.entities.types.createNewType("push", {"behaviours":{"Push":true},
 	"data":{"gravity":0, "img":"pimg/techFreeMove.png"}
+}, "plat");
+
+dusk.entities.types.createNewType("slash", {"behaviours":{"HitDam":true},
+	"data":{"gravity":0, "collides":false, "solid":false, "img":"Example/Slash.png", "damages":".entType != player"},
+	"animation":[
+		["", "0,0|1,0|2,0|3,0|4,0|t", {}]
+	],
+}, "plat");
+
+dusk.entities.types.createNewType("slashl", {"behaviours":{},
+	"data":{"img":"Example/Slashl.png"},
+}, "slash");
+
+dusk.entities.types.createNewType("shot", {
+	"behaviours":{"HitDam":true, "BackForth":true, "Volatile":true},
+	"data":{"solid":false, "img":"Example/Shot.png", "collisionOffsetX":8, "collisionOffsetY":8,
+		"collisionWidth":26, "collisionHeight":26, "hspeed":8, "damages":".entType != player",
+		"killedBy":".entType!=player"
+	},
+	"animation":[
+		["", "0,0|1,0", {}]
+	]
 }, "plat");
 
 dusk.sgui.getPane("hud").parseProps({
@@ -212,6 +249,9 @@ dusk.sgui.getPane("rate").parseProps({
 	},
 	"focus":"ew"
 });*/
+
+dusk.controls.addControl("entity_spawn_slash", 79, 1);
+dusk.controls.addControl("entity_spawn_shot", 69, 2);
 
 dusk.frameTicker.onFrame.listen(function(e) {
 	if(dusk.behave.Persist.getPersist("hero")) {

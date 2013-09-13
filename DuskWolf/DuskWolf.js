@@ -9,24 +9,6 @@ dusk.load.provide("dusk");
 /** @namespace dusk
  * 
  * @description This is the "root" object for DuskWolf, and provides a few functions and configuration thingies.
- * 
- * The DuskWolf engine is created by SavageWolf (Ross Brunton)
- *  who can be contacted by email at savagewolf8@gmail.com if you so desire.
- * 
- * You could read readme.md for more information about the engine,
- *  but I doubt you'd be able to figure out that you can open it in a text editor.
- * 
- * My naming standard of things are as follows:
- * 
- * - CapitalLetters denotes a class.
- * 
- * - camelCase denotes a public property of an object, namespace or anything that isn't a class.
- * 
- * - YELLING for constants.
- * 
- * - __doubleUnderscore__ denotes a configuration var, these are all global.
- * 
- * - _singleUnderscore denotes ether a private or protected function or property.
  */
 
 /** Version of the DW engine.
@@ -37,37 +19,37 @@ dusk.ver = "0.0.19-alpha";
 
 /** The frame rate, in frames per second.
  * 
- * If it exists, this is set the value of `window.__frameRate__`.
+ * If it exists, this is set the value of the DuskWolf element's "frameRate" property.
  * @type integer
  * @default 60
  */
-dusk.frameRate = ("__frameRate__" in window)?__frameRate__:60; 
+dusk.frameRate = 60; 
 
 /** The path to the data directory,
  *   this is where the game will look for all it's data (like images) if given a relative URL.
  * 
- *  If it exists, this is set the value of `window.__dataDir__`.
+ * If it exists, this is set the value of the DuskWolf element's "data" property.
  * @type string
  * @defualt "Data/"
  */
-dusk.dataDir = ("__dataDir__" in window)?__dataDir__:"Data/";
+dusk.dataDir = "Data/";
 
-/** The name of the HTML canvas object SimpleGui uses.
+/** The id of the DuskWolf element, used for referencing it's children.
  * 
- * If it exists, this is set the value of `window.__canvas__`.
+ * This is set automatically.
  * @type string
  * @see dusk.sgui
  * @default "canvas"
  */
-dusk.canvas = ("__canvas__" in window)?__canvas__:"canvas";
+dusk.elemPrefix = "";
 
 /** If true, then some features for developers are added, such as no caching for scripts and FPS info.
  * 
- * If it exists, this is set the value of `window.__development__`.
+ * If it exists, this is set the value of the DuskWolf element's "dev" property.
  * @type boolean
  * @default true
  */
-dusk.dev = ("__development__" in window)?__development__:true;
+dusk.dev = true;
 
 /** If true, then the game has been started (`{@link dusk.startGame}` has been called).
  * @type boolean
@@ -88,3 +70,55 @@ dusk.startGame = function() {
 	dusk.started = true;
 	dusk.onLoad.fire();
 };
+
+dusk.HTMLDuskwolfElement = null;
+if("register" in document) {
+	dusk.HTMLDuskwolfElement = document.register("swo-duskwolf", {
+		prototype: Object.create(HTMLDivElement.prototype),
+		extends: "div",
+		attributeChangedCallback:function(attrName, oldVal, newVal) {
+			function toPx(a) {
+				if((""+a).slice(-2) != "px") return a+"px";
+				return ""+a;
+			}
+			
+			switch(attrName) {
+				case "width":
+				case "height":
+					this.style[attrName] = toPx(newVal);
+					$("#"+this.id+"-canvas")[0].style[attrName] = toPx(newVal);
+					break;
+			}
+		}
+	});
+}
+
+$(document).ready(function(e) {
+	function toPx(a) {
+		if((""+a).slice(-2) != "px") return a+"px";
+		return ""+a;
+	}
+	
+	if($("swo-duskwolf").length) {
+		var elem = $("swo-duskwolf")[0];
+		if(elem.getAttribute("frameRate")) dusk.frameRate = elem.getAttribute("frameRate");
+		if(elem.getAttribute("data")) dusk.dataDir = elem.getAttribute("data");
+		if(elem.getAttribute("dev")) dusk.dev = true;
+		
+		elem.style.display = "block";
+		if(!elem.style.width) elem.style.width = toPx(elem.getAttribute("width"));
+		if(!elem.style.height) elem.style.height = toPx(elem.getAttribute("height"));
+		
+		if(!elem.id) elem.id = "swo-duskwolf";
+		elem.innerHTML = "<input id='"+elem.id+"-input' type='text'\
+		style='position:absolute; visibility:hidden; background:transparent; border:none;'>";
+		elem.innerHTML += "<canvas id='"+elem.id+"-canvas' style='image-rendering: -webkit-optimize-contrast;'\
+		width='"+elem.getAttribute("width")+"' height='"+elem.getAttribute("height")+"'\
+		></canvas>";
+		dusk.elemPrefix = elem.id;
+		
+		dusk.load.importList(elem.getAttribute("deps"), function() {
+			dusk.load.import(elem.getAttribute("package"));
+		});
+	}
+});

@@ -357,27 +357,27 @@ dusk.load._getBytes = function() {
  * @since 0.0.17-alpha
  */
 dusk.load._displayLoad = function() {
-	if(!dusk.started && dusk.canvas) {
-		$("#"+dusk.canvas)[0].getContext("2d").clearRect(0, 0, 
-			$("#"+dusk.canvas)[0].width, $("#"+dusk.canvas)[0].height
+	if(!dusk.started && dusk.elemPrefix) {
+		$("#"+dusk.elemPrefix+"-canvas")[0].getContext("2d").clearRect(0, 0, 
+			$("#"+dusk.elemPrefix+"-canvas")[0].width, $("#"+dusk.elemPrefix+"-canvas")[0].height
 		);
 		var textY = 0;
 		
-		$("#"+dusk.canvas)[0].getContext("2d").fillText(
+		$("#"+dusk.elemPrefix+"-canvas")[0].getContext("2d").fillText(
 			"Hold on! Loading "+dusk.load._currentlyImporting.length+" files!", 5, textY+=15
 		);
-		$("#"+dusk.canvas)[0].getContext("2d").fillText("Now loading "+dusk.load._current+"!", 5, textY+=15);
-		$("#"+dusk.canvas)[0].getContext("2d").fillText(
+		$("#"+dusk.elemPrefix+"-canvas")[0].getContext("2d").fillText("Now loading "+dusk.load._current+"!", 5, textY+=15);
+		$("#"+dusk.elemPrefix+"-canvas")[0].getContext("2d").fillText(
 			"That's about "+dusk.load._getBytes()+"KiB, excluding image data!", 5, textY+=15
 		);
 		
 		if("onLine" in navigator && !navigator.onLine) {
-			$("#"+dusk.canvas)[0].getContext("2d").fillText(
+			$("#"+dusk.elemPrefix+"-canvas")[0].getContext("2d").fillText(
 				"You have no internet connection; good luck with that.", 5, textY+=15
 			);
 		}
 		if(dusk.load.capabilityIssue) {
-			$("#"+dusk.canvas)[0].getContext("2d").fillText(dusk.load.capabilityIssue, 5, textY+=15);
+			$("#"+dusk.elemPrefix+"-canvas")[0].getContext("2d").fillText(dusk.load.capabilityIssue, 5, textY+=15);
 		}
 	}
 	

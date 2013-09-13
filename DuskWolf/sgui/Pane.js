@@ -46,6 +46,36 @@ Object.defineProperty(dusk.sgui.Pane.prototype, "__active", {
 	get: function() {return dusk.sgui.getActivePane() == this;}
 });
 
+/** Returns the actual X location, relative to the screen, that the component is at.
+ * @param {string} name The component to find X for.
+ * @return {int} The X value, relative to the screen.
+ * @since 0.0.20-alpha
+ */
+dusk.sgui.Pane.prototype.getTrueX = function(name) {
+	var com = this._components[name];
+	
+	var destXAdder = 0;
+	if(com.xOrigin == dusk.sgui.Component.ORIGIN_MAX) destXAdder = this.width - com.width;
+	if(com.xOrigin == dusk.sgui.Component.ORIGIN_MIDDLE) destXAdder = (this.width - com.width)>>1;
+	
+	return this.x + com.x - this.xOffset + destXAdder;
+};
+
+/** Returns the actual Y location, relative to the screen, that the component is at.
+ * @param {string} name The component to find X for.
+ * @return {int} The Y value, relative to the screen.
+ * @since 0.0.20-alpha
+ */
+dusk.sgui.Group.prototype.getTrueY = function(name) {
+	var com = this._components[name];
+	
+	var destYAdder = 0;
+	if(com.yOrigin == dusk.sgui.Component.ORIGIN_MAX) destYAdder = this.height - com.height;
+	if(com.yOrigin == dusk.sgui.Component.ORIGIN_MIDDLE) destYAdder = (this.height - com.height)>>1;
+	
+	return this.y + com.y - this.yOffset + destYAdder;
+};
+
 Object.seal(dusk.sgui.Pane);
 Object.seal(dusk.sgui.Pane.prototype);
 

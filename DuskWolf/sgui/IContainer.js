@@ -151,10 +151,24 @@ dusk.sgui.IContainer.getContentsWidth = function(includeOffset) {};
  */
 dusk.sgui.IContainer.getContentsHeight = function(includeOffset) {};
 
-/** Should call `{dusk.sgui.Component.updateMouse}` on it's children with the appropriate coordinates.
+/** Should call `{@link dusk.sgui.Component.updateMouse}` on it's children with the appropriate coordinates.
  * 
  * @since 0.0.20-alpha
  */
 dusk.sgui.IContainer.containerUpdateMouse = function() {};
+
+/** Returns the actual X location, relative to the screen, that the component is at.
+ * @param {string} name An identifier for the component.
+ * @return {int} The X value, relative to the screen.
+ * @since 0.0.20-alpha
+ */
+dusk.sgui.IContainer.prototype.getTrueX = function(name) {};
+
+/** Returns the actual Y location, relative to the screen, that the component is at.
+ * @param {string} name An identifier for the component.
+ * @return {int} The Y value, relative to the screen.
+ * @since 0.0.20-alpha
+ */
+dusk.sgui.IContainer.prototype.getTrueY = function(name) {};
 
 Object.seal(dusk.sgui.IContainer);

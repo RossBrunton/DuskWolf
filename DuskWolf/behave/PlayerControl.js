@@ -22,10 +22,9 @@ dusk.behave.PlayerControl = function(entity) {
 };
 dusk.behave.PlayerControl.prototype = Object.create(dusk.behave.Behave.prototype);
 
-dusk.behave.PlayerControl.prototype._isControlActive = function(name) {
-	return dusk.controls.controlActive(name);
-};
-
+/** Workshop data used by `{@link dusk.sgui.EntityWorkshop}`.
+ * @static
+ */
 dusk.behave.PlayerControl.workshopData = {
 	"help":"Will allow the player to control it.",
 	"data":[
@@ -52,9 +51,10 @@ dusk.behave.LeftRightControl.prototype = Object.create(dusk.behave.Behave.protot
 
 dusk.behave.LeftRightControl.prototype._lrControlFrame = function(e) {
 	if(this._controlActive("left")) {
-		//this._entity.dx -= this._entity.eProp("haccel");
+		this._data("headingLeft", true);
 		this._entity.applyDx("control_move", 0, 1, -this._entity.eProp("haccel"), -this._entity.eProp("hspeed"), true);
 	}else if(this._controlActive("right")) {
+		this._data("headingLeft", false);
 		this._entity.applyDx("control_move", 0, 1, this._entity.eProp("haccel"), this._entity.eProp("hspeed"), true);
 	}
 };

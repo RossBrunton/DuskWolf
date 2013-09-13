@@ -19,7 +19,6 @@ dusk.load.provide("dusk.entities");
  *  each entity has only one type which describes how they act, their data and animations.
  * 	Entity types are simple objects with three properties, `data`, `animation` and `behaviours`.
  * 
- * 
  * Entity types are set using `{@link dusk.entities.modifyEntityType}` 
  *  which allows you to specify an entity to inherit from.
  * 	This means you can make an entity type that shares the same properties of another type easily.
@@ -46,31 +45,31 @@ dusk.load.provide("dusk.entities");
  * @private
  */
 dusk.entities._init = function() {
-	/** Sprite width of decimal entities and tilemap tiles.
+	/** Sprite width of entities and tilemap tiles.
 	 * 
-	 * If the mode is decimal, then this is the width of tiles when reading them from the image.
+	 * This is the width of tiles when reading them from the image.
 	 * @type integer
 	 * @default 16
 	 */
 	this.swidth = 16;
-	/** Sprite height of decimal entities and tilemap tiles.
+	/** Sprite height of entities and tilemap tiles.
 	 * 
-	 * If the mode is decimal, then this is the height of tiles when reading them from the image.
+	 * This is the height of tiles when reading them from the image.
 	 * @type number
 	 * @default 16
 	 */
 	this.sheight = 16;
 	
-	/** Tile width of decimal entities and tilemap tiles.
+	/** Tile width of entities and tilemap tiles.
 	 * 
-	 * If the mode is decimal, then this is the width of tiles when drawing them to the canvas.
+	 * This is the width of tiles when drawing them to the canvas.
 	 * @type number
 	 * @default 32
 	 */
 	this.twidth = 32;
-	/** Tile height of decimal entities and tilemap tiles.
+	/** Tile height of entities and tilemap tiles.
 	 * 
-	 * If the mode is decimal, then this is the height of tiles when drawing them to the canvas.
+	 * Then this is the height of tiles when drawing them to the canvas.
 	 * @type number
 	 * @default 32
 	 */

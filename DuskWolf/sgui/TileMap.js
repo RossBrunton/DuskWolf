@@ -227,7 +227,6 @@ Object.defineProperty(dusk.sgui.TileMap.prototype, "map", {
 		this.rows = map.rows;
 		this.cols = map.cols;
 		
-		
 		this.drawAll();
 		if(t) console.log("Map took "+(performance.now()-t)+"ms to render!");
 	},

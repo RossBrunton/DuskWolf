@@ -6,7 +6,7 @@ dusk.load.require("dusk.behave.Behave");
 
 dusk.load.provide("dusk.behave.Pickup");
 
-/** @class dusk.behave.Pickup
+/* * @class dusk.behave.Pickup
  * @memberof dusk.behave
  * 
  * @classdesc 
@@ -16,17 +16,15 @@ dusk.load.provide("dusk.behave.Pickup");
  * @constructor
  */
 dusk.behave.Pickup = function(entity, events) {
-	if(entity !== undefined){
-		dusk.behave.Behave.call(this, entity, events);
-		
-		this._data("type", "coin", true);
-		this._data("value", 1, true);
-		this._data("roomLinked", true, true);
-		this._data("pickupBy", "", true);
-		
-		this.entityEvent.listen(this._pickCollided, this, {"name":"collidedInto"});
-		this.entityEvent.listen(this._pickLoad, this, {"name":"typeChange"});
-	}
+	dusk.behave.Behave.call(this, entity, events);
+	
+	this._data("type", "coin", true);
+	this._data("value", 1, true);
+	this._data("roomLinked", true, true);
+	this._data("pickupBy", "", true);
+	
+	this.entityEvent.listen(this._pickCollided, this, {"name":"collidedInto"});
+	this.entityEvent.listen(this._pickLoad, this, {"name":"typeChange"});
 };
 dusk.behave.Pickup.prototype = new dusk.behave.Behave();
 dusk.behave.Pickup.constructor = dusk.behave.Pickup;
@@ -91,6 +89,9 @@ dusk.behave.Pickup.collected = function(type, name, room) {
 	}
 };
 
+/** Workshop data used by `{@link dusk.sgui.EntityWorkshop}`.
+ * @static
+ */
 dusk.behave.Pickup.workshopData = {
 	"help":"Will be pickupable and collectable.",
 	"data":[

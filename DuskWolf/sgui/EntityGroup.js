@@ -239,45 +239,6 @@ dusk.sgui.EntityGroup.prototype.moveEverything = function() {
 		var destX = now.x + now.getDx();
 		var destY = now.y + now.getDy();
 		
-		if(destX >= now.x
-		&& (now.scheme.tilePointIn(destX + now.collisionWidth -1, now.y + now.collisionOffsetY +1).toString() == solid
-		  || now.scheme.tilePointIn(destX + now.collisionWidth -1, now.y + now.collisionHeight -1).toString() == solid)
-		) {
-			if(now.eProp("collides")) destX = destX - (destX % now.scheme.tileWidth()) + now.width - now.collisionWidth;
-			now.behaviourFire("collide", {"dir":dusk.sgui.c.DIR_RIGHT, "target":"wall"});
-			now.addToucher(dusk.sgui.c.DIR_RIGHT, "wall");
-		}
-		
-		if(destX <= now.x
-		&& (now.scheme.tilePointIn(destX + now.collisionOffsetX, now.y + now.collisionOffsetY +1).toString() == solid
-		  || now.scheme.tilePointIn(destX + now.collisionOffsetX, now.y + now.collisionHeight -1).toString() == solid)
-		) {
-			if(now.eProp("collides"))
-				destX = destX - (destX % now.scheme.tileWidth()) + now.scheme.tileWidth() - now.collisionOffsetX;
-			now.behaviourFire("collide", {"dir":dusk.sgui.c.DIR_LEFT, "target":"wall"});
-			now.addToucher(dusk.sgui.c.DIR_LEFT, "wall");
-		}
-		
-		if(destY >= now.y
-		&& (now.scheme.tilePointIn(now.x + now.collisionOffsetX +1, destY + now.collisionHeight -1).toString() == solid
-		  || now.scheme.tilePointIn(now.x + now.collisionWidth -1, destY + now.collisionHeight -1).toString() == solid)
-		) {
-			if(now.eProp("collides")) destY = destY - (destY % now.scheme.tileHeight()) + now.height - now.collisionHeight;
-			now.behaviourFire("collide", {"dir":dusk.sgui.c.DIR_DOWN, "target":"wall"});
-			now.addToucher(dusk.sgui.c.DIR_DOWN, "wall");
-		}
-		
-		if(destY <= now.y
-		&& (now.scheme.tilePointIn(now.x + now.collisionOffsetX +1, destY + now.collisionOffsetY).toString() == solid
-		  || now.scheme.tilePointIn(now.x + now.collisionWidth -1, destY + now.collisionOffsetY).toString() == solid)
-		) {
-			if(now.eProp("collides")) 
-				destY = destY - (destY % now.scheme.tileHeight()) + now.scheme.tileHeight() - now.collisionOffsetY;
-			now.behaviourFire("collide", {"dir":dusk.sgui.c.DIR_UP, "target":"wall"});
-			now.addToucher(dusk.sgui.c.DIR_UP, "wall");
-		}
-		
-		now.mark = null;
 		for(var t = this._entities.length-1; t >= 0; t --) {
 			var testee = this._entities[t];
 			if(testee == now) continue;
@@ -325,7 +286,7 @@ dusk.sgui.EntityGroup.prototype.moveEverything = function() {
 					}else if(destY + now.collisionHeight > testee.y + testee.collisionHeight && now.getDy()) {
 						diffY = testee.y + testee.collisionHeight - destY - now.collisionOffsetY;
 					}
-					destX += diffX;
+					
 					if(destY > now.y) {
 						if(testee.eProp("solid"))
 							now.behaviourFire("collide", {"dir":dusk.sgui.c.DIR_DOWN, "target":testee});
@@ -352,16 +313,63 @@ dusk.sgui.EntityGroup.prototype.moveEverything = function() {
 			}
 		}
 		
+		if(destX >= now.x
+		&& (now.scheme.tilePointIn(destX + now.collisionWidth -1, now.y + now.collisionOffsetY +1).toString() == solid
+		  || now.scheme.tilePointIn(destX + now.collisionWidth -1, now.y + now.collisionHeight -1).toString() == solid)
+		) {
+			if(now.eProp("collides")) destX = destX - (destX % now.scheme.tileWidth()) + now.width - now.collisionWidth;
+			now.behaviourFire("collide", {"dir":dusk.sgui.c.DIR_RIGHT, "target":"wall"});
+			now.addToucher(dusk.sgui.c.DIR_RIGHT, "wall");
+		}
+		
+		if(destX <= now.x
+		&& (now.scheme.tilePointIn(destX + now.collisionOffsetX, now.y + now.collisionOffsetY +1).toString() == solid
+		  || now.scheme.tilePointIn(destX + now.collisionOffsetX, now.y + now.collisionHeight -1).toString() == solid)
+		) {
+			if(now.eProp("collides"))
+				destX = destX - (destX % now.scheme.tileWidth()) + now.scheme.tileWidth() - now.collisionOffsetX;
+			now.behaviourFire("collide", {"dir":dusk.sgui.c.DIR_LEFT, "target":"wall"});
+			now.addToucher(dusk.sgui.c.DIR_LEFT, "wall");
+		}
+		
+		if(destY >= now.y
+		&& (now.scheme.tilePointIn(now.x + now.collisionOffsetX +1, destY + now.collisionHeight -1).toString() == solid
+		  || now.scheme.tilePointIn(now.x + now.collisionWidth -1, destY + now.collisionHeight -1).toString() == solid)
+		) {
+			if(now.eProp("collides")) destY = destY - (destY % now.scheme.tileHeight()) + now.height - now.collisionHeight;
+			now.behaviourFire("collide", {"dir":dusk.sgui.c.DIR_DOWN, "target":"wall"});
+			now.addToucher(dusk.sgui.c.DIR_DOWN, "wall");
+		}
+		
+		if(destY <= now.y
+		&& (now.scheme.tilePointIn(now.x + now.collisionOffsetX +1, destY + now.collisionOffsetY).toString() == solid
+		  || now.scheme.tilePointIn(now.x + now.collisionWidth -1, destY + now.collisionOffsetY).toString() == solid)
+		) {
+			if(now.eProp("collides")) 
+				destY = destY - (destY % now.scheme.tileHeight()) + now.scheme.tileHeight() - now.collisionOffsetY;
+			now.behaviourFire("collide", {"dir":dusk.sgui.c.DIR_UP, "target":"wall"});
+			now.addToucher(dusk.sgui.c.DIR_UP, "wall");
+		}
+		
 		now.x = destX;
 		now.y = destY;
 	}
 };
 
 dusk.sgui.EntityGroup.prototype.dropEntity = function(entity, takeFocus) {
+	if(!("name" in entity)) {
+		var i = 0;
+		do {
+			i ++;
+			entity.name = "#"+i;
+		} while(this.getComponent("#"+i));
+	}
+	
 	var dropped = this.getComponent(entity.name, "Entity");
 	dropped.x = entity.x;
 	dropped.y = entity.y;
 	dropped.entType = entity.type;
+	
 	if(this.scheme) dropped.scheme = this.scheme;
 	if(this.particles) dropped.particles = this.particles;
 	this._entities.push(dropped);
@@ -488,12 +496,6 @@ dusk.sgui.EntityGroup.prototype._numberDrop = function(e) {
 	
 	if(dusk.editor.editNext) {
 		entity.name = dusk.editor.editNext;
-	}else{
-		var i = 0;
-		do {
-			i ++;
-			entity.name = "#"+i;
-		} while(this.getComponent("#"+i));
 	}
 	
 	dusk.editor.editNext = "";

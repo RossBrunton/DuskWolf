@@ -216,7 +216,11 @@ dusk.keyboard.lookupCode = function(code) {
 
 //Block keys from moving page
 document.onkeydown = function(e) {
-	if([37, 38, 39, 40, 9, 13, 32].indexOf(e.keyCode) !== -1) return false;
+	if([37, 38, 39, 40, 9, 13, 32].indexOf(e.keyCode) !== -1
+		&& document.activeElement.parentNode.id != dusk.elemPrefix
+	) return false;
+	
+	if([9, 13].indexOf(e.keyCode) !== -1) return false;
 };
 
 Object.seal(dusk.keyboard);

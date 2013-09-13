@@ -60,6 +60,9 @@ dusk.behave.Persist.getPersist = function(name) {
 	return this._persistData[name];
 };
 
+/** Workshop data used by `{@link dusk.sgui.EntityWorkshop}`.
+ * @static
+ */
 dusk.behave.Persist.workshopData = {
 	"help":"Will have it's data persist accross rooms.",
 	"data":[

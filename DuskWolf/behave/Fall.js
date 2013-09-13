@@ -38,6 +38,9 @@ dusk.behave.Fall.prototype._fallFall = function(name, e) {
 	this._entity.applyDy("fall_fall", 1/*this._data("fallSpeed")*/);
 };
 
+/** Workshop data used by `{@link dusk.sgui.EntityWorkshop}`.
+ * @static
+ */
 dusk.behave.Fall.workshopData = {
 	"help":"Will fall when collided with.",
 	"data":[

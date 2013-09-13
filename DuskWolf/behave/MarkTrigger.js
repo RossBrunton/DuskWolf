@@ -58,6 +58,9 @@ dusk.behave.MarkTrigger.prototype._markTriggerFrame = function(name, e) {
 	}
 };
 
+/** Workshop data used by `{@link dusk.sgui.EntityWorkshop}`.
+ * @static
+ */
 dusk.behave.MarkTrigger.workshopData = {
 	"help":"Will trigger marks on the scheme layer.",
 	"data":[
