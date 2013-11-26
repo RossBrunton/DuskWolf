@@ -24,9 +24,7 @@ dusk.behave.BackForth = function(entity) {
 	this._data("hspeed", 5, true);
 	
 	this.entityEvent.listen(this._bfCollide, this, {"name":"collide"});
-	this.entityEvent.listen(this._bfFrame, this, {"name":"frame"});
-	
-	this._entity.applyDx("bf_move", this._data("hspeed"));
+	this.entityEvent.listen(this._bfFrame, this, {"name":"beforeMove"});
 };
 dusk.behave.BackForth.prototype = Object.create(dusk.behave.Behave.prototype);
 

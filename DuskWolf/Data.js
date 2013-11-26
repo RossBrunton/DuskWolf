@@ -104,7 +104,7 @@ dusk.data.grabImage = function(file) {
 
 /** Attached to images' `onLoad` event. Manages firing of `{@link dusk.data.imgLoad}`.
  * 
- * @param {HTMLImageElement} The image.
+ * @param {Event} e The image onLoad event.
  * @private
  * @since 0.0.19-alpha
  */

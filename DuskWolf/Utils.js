@@ -13,7 +13,7 @@ dusk.load.provide("dusk.utils");
 /** Makes a simple copy of the parameter object, and returns it.
  *   This will only work for simple objects, and not anything with prototypes and such like.
  *   Anything which isn't a basic object will have it's reference copied, rather than it's value.
- * @param {object} o The source object to copy.
+ * @param {*} o The source object to copy.
  * @return {object} A copy of the source object.
  */
 dusk.utils.clone = function(o) {
@@ -60,11 +60,13 @@ dusk.utils.merge = function(a, b) {
  * The object wishing to implement this interface must have all the specified property names be functions.
  * 
  * @param {object} obj The object you wish to check.
- * @param {object} inter The interface that you want to check the object by.
+ * @param {object|function()} inter The interface that you want to check the object by.
  * @return {boolean} Whether the object implements the interface or not.
  * @since 0.0.18-alpha
  */
 dusk.utils.doesImplement = function(obj, inter) {
+	if(!dusk.dev) return true;
+	
 	for(var p in inter) {
 		if(!(p in obj)) {
 			return false;
@@ -197,6 +199,22 @@ dusk.utils.arrayEqual = function(a, b) {
 	}
 	
 	return true;
+};
+
+/** Returns a new array containing all that occur at least once in a and b in no order.
+ * 
+ * @param {array} a The first array.
+ * @param {array} b The second array.
+ * @return {array} The union of both arrays.
+ */
+dusk.utils.arrayUnion = function(a, b) {
+	var out = [];
+	
+	for(var i = a.length-1; i >= 0; i --) {
+		if(b.indexOf(a[i]) != -1) out[out.length] = a[i];
+	}
+	
+	return out;
 };
 
 /** A conversion type that converts the data to and from a hexadecimal string.

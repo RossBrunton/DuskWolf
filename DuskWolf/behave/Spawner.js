@@ -75,7 +75,7 @@ dusk.behave.Spawner.prototype._spawn = function(name, dirOverride) {
 		if(!("verOffset" in spawn)) spawn.verOffset = 0;
 		
 		if(horFacing == "right") {
-			dropped.x += this._entity.collisionWidth + spawn.horOffset;
+			dropped.x += this._entity.collisionWidth + spawn.horOffset - dropped.collisionOffsetX;
 		}
 		
 		if(horFacing == "left") {
@@ -83,12 +83,13 @@ dusk.behave.Spawner.prototype._spawn = function(name, dirOverride) {
 		}
 		
 		if(horFacing == "middle") {
-			dropped.x += (this._entity.collisionWidth/2) + (dropped.collisionWidth/2) + spawn.horOffset;
+			dropped.x += (this._entity.collisionWidth/2) + (dropped.collisionWidth/2) + (dropped.collisionOffsetX/2)
+			 + spawn.horOffset;
 		}
 		
 		
 		if(verFacing == "bottom") {
-			dropped.y += this._entity.collisionHeight + spawn.verOffset;
+			dropped.y += this._entity.collisionHeight + spawn.verOffset - dropped.collisionOffsetY;
 		}
 		
 		if(verFacing == "top") {
@@ -96,10 +97,22 @@ dusk.behave.Spawner.prototype._spawn = function(name, dirOverride) {
 		}
 		
 		if(verFacing == "middle") {
-			dropped.y += (this._entity.collisionHeight/2) - (dropped.collisionHeight/2) + spawn.verOffset;
+			dropped.y += (this._entity.collisionHeight/2) - (dropped.collisionHeight/2) - (dropped.collisionOffsetY/2)
+			 + spawn.verOffset;
 		}
 		
 		if("cooldown" in spawn) this._data("cooldowns")[name] = spawn.cooldown;
+		
+		var horInitial = horFacing == "left";
+		if(horFacing == "middle") horInitial = this._data("headingLeft");
+		if("horInitial" in spawn) horInitial = spawn.horInitial == "left";
+		dropped.eProp("headingLeft", horInitial);
+		
+		var verInitial = verFacing == "up";
+		if(verFacing == "middle") verInitial = this._data("headingUp");
+		if("verInitial" in spawn) verInitial = spawn.verInitial == "up";
+		dropped.eProp("headingUp", verInitial);
+		
 		if(spawn.data) {
 			var dat = this._resolve(dir, spawn.data);
 			for(var p in dat) {

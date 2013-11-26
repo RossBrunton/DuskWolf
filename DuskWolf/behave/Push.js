@@ -18,9 +18,9 @@ dusk.load.provide("dusk.behave.Push");
  * @param {?dusk.sgui.Entity} entity The entity this behaviour is attached to.
  * @constructor
  */
-dusk.behave.Push = function(entity, events) {
+dusk.behave.Push = function(entity) {
 	if(entity !== undefined){
-		dusk.behave.Behave.call(this, entity, events);
+		dusk.behave.Behave.call(this, entity);
 		
 		this._data("pspeed", 1, true);
 		

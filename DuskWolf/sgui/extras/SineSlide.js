@@ -64,7 +64,7 @@ dusk.sgui.extras.SineSlide.prototype = Object.create(dusk.sgui.extras.Effect.pro
 /** Used internally to start the effect.
  * @private
  */
-dusk.sgui.extras.SineSlide.prototype._ssOnStart = function() {
+dusk.sgui.extras.SineSlide.prototype._ssOnStart = function(e) {
 	this._range = new dusk.Range(0, Math.PI/2, 0);
 	this._range.setUpFraction(1/this.duration);
 	
@@ -78,7 +78,7 @@ dusk.sgui.extras.SineSlide.prototype._ssOnStart = function() {
 /** Used internally to do a single tick of the effect.
  * @private
  */
-dusk.sgui.extras.SineSlide.prototype._ssOnTick = function() {
+dusk.sgui.extras.SineSlide.prototype._ssOnTick = function(e) {
 	this._range.up();
 	
 	switch(this.dir) {
@@ -103,7 +103,7 @@ dusk.sgui.extras.SineSlide.prototype._ssOnTick = function() {
 /** Used internally once the effect has ended to set the end location correctly.
  * @private
  */
-dusk.sgui.extras.SineSlide.prototype._ssOnEnd = function() {
+dusk.sgui.extras.SineSlide.prototype._ssOnEnd = function(e) {
 	this._range.value = this._range.max;
 	this._tick.fire();
 };

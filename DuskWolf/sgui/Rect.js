@@ -59,7 +59,7 @@ dusk.sgui.Rect.prototype = Object.create(dusk.sgui.Component.prototype);
 dusk.sgui.Rect.prototype.className = "Rect";
 
 /** A draw handler which draws the rectangle.
- * @param {CanvasRenderingContext2D} c A 2D canvas perspective to draw onto.
+ * @param {object} e A draw event.
  * @private
  */
 dusk.sgui.Rect.prototype._rectDraw = function(e) {

@@ -15,8 +15,8 @@ dusk.load.provide("dusk.behave.Pickup");
  * @param {?dusk.sgui.Entity} entity The entity this behaviour is attached to.
  * @constructor
  */
-dusk.behave.Pickup = function(entity, events) {
-	dusk.behave.Behave.call(this, entity, events);
+dusk.behave.Pickup = function(entity) {
+	dusk.behave.Behave.call(this, entity);
 	
 	this._data("type", "coin", true);
 	this._data("value", 1, true);

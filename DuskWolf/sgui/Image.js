@@ -54,7 +54,7 @@ dusk.sgui.Image.constructor = dusk.sgui.Image;
 dusk.sgui.Image.prototype.className = "Image";
 
 /** Used to draw the image.
- * @param {CanvasRenderingContext2D} c The canvas on which to draw.
+ * @param {object} e A draw event.
  * @private
  */
 dusk.sgui.Image.prototype._imageDraw = function(e) {

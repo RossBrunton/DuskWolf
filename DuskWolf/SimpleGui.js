@@ -108,7 +108,7 @@ dusk.sgui._init = function() {
 	});
 	
 	//Listen for frame events
-	dusk.frameTicker.onFrame.listen(function() {
+	dusk.frameTicker.onFrame.listen(function(e) {
 		if(dusk.sgui.displayMode == dusk.sgui.MODE_FULL) {
 			dusk.sgui.width = $("#"+dusk.elemPrefix).parent().width();
 			if($("#"+dusk.elemPrefix).parent().height() > window.innerHeight) {

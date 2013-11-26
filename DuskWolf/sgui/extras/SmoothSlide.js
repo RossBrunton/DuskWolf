@@ -54,7 +54,7 @@ dusk.sgui.extras.SmoothSlide.prototype = Object.create(dusk.sgui.extras.Effect.p
 /** Used internally to start the effect.
  * @private
  */
-dusk.sgui.extras.SmoothSlide.prototype._ssOnStart = function() {
+dusk.sgui.extras.SmoothSlide.prototype._ssOnStart = function(e) {
 	switch(this.dir) {
 		case dusk.sgui.c.DIR_UP:
 			this._range = new dusk.Range(this._owner.y - this.by, this._owner.y, this._owner.y);
@@ -88,7 +88,7 @@ dusk.sgui.extras.SmoothSlide.prototype._ssOnStart = function() {
 /** Used internally to do a single tick of the effect.
  * @private
  */
-dusk.sgui.extras.SmoothSlide.prototype._ssOnTick = function() {
+dusk.sgui.extras.SmoothSlide.prototype._ssOnTick = function(e) {
 	if(this._decreasing) {
 		this._range.down();
 	}else{
@@ -105,7 +105,7 @@ dusk.sgui.extras.SmoothSlide.prototype._ssOnTick = function() {
 /** Used internally once the effect has ended to set the end location correctly.
  * @private
  */
-dusk.sgui.extras.SmoothSlide.prototype._ssOnEnd = function() {
+dusk.sgui.extras.SmoothSlide.prototype._ssOnEnd = function(e) {
 	switch(this.dir) {
 		case dusk.sgui.c.DIR_UP:
 			this._owner.y = this._range.min;

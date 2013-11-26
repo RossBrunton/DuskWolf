@@ -54,6 +54,11 @@ dusk.sgui.Entity = function (parent, comName) {
 	this._teatherClients = [];
 	this._teatherHost = null;
 	
+	this.iltr = 0;
+	this.irtl = 0;
+	this.ittb = 0;
+	this.ibtt = 0;
+	
 	//Default sizes
 	this.sheight = dusk.entities.sheight;
 	this.swidth = dusk.entities.swidth;
@@ -157,6 +162,8 @@ dusk.sgui.Entity.prototype.beforeMove = function() {
 				this._dy[p][0] = this._dy[p][3];
 		}
 	}
+	
+	this.behaviourFire("beforeMove");
 };
 
 

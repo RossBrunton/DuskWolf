@@ -101,7 +101,7 @@ dusk.sgui.Tile.prototype.className = "Tile";
 
 /** Used to draw the tile.
  * 
- * @param {CanvasRenderingContext2D} c The canvas on which to draw.
+ * @param {object} e A draw event.
  * @private
  */
 dusk.sgui.Tile.prototype._tileDraw = function(e) {

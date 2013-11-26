@@ -61,7 +61,7 @@ dusk.sgui.extras.Fade.prototype = Object.create(dusk.sgui.extras.Effect.prototyp
 /** Used internally to start the effect.
  * @private
  */
-dusk.sgui.extras.Fade.prototype._fdeOnStart = function() {
+dusk.sgui.extras.Fade.prototype._fdeOnStart = function(e) {
 	if(this.from > this.to) {
 		this._range = new dusk.Range(this.to, this.from, this.from);
 		this._range.setDownFraction(1/this.duration);
@@ -76,7 +76,7 @@ dusk.sgui.extras.Fade.prototype._fdeOnStart = function() {
 /** Used internally to do a single tick of the effect.
  * @private
  */
-dusk.sgui.extras.Fade.prototype._fdeOnTick = function() {
+dusk.sgui.extras.Fade.prototype._fdeOnTick = function(e) {
 	if(this._decreasing) {
 		this._range.down();
 	}else{
@@ -88,7 +88,7 @@ dusk.sgui.extras.Fade.prototype._fdeOnTick = function() {
 /** Used internally once the effect has ended to set the end alpha correctly.
  * @private
  */
-dusk.sgui.extras.Fade.prototype._fdeOnEnd = function() {
+dusk.sgui.extras.Fade.prototype._fdeOnEnd = function(e) {
 	this._owner.alpha = this.to;
 };
 

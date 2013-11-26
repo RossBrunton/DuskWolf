@@ -185,7 +185,7 @@ Object.defineProperty(dusk.sgui.Single.prototype, "__child", {
 
 /** Draws the child onto the canvas.
  * 
- * @param {CanvasRenderingContext2D} The canvas context on which to draw.
+ * @param {object} A draw event.
  * @private
  */
 dusk.sgui.Single.prototype._singleDraw = function(e) {

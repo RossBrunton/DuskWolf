@@ -172,3 +172,5 @@ dusk.sgui.IContainer.prototype.getTrueX = function(name) {};
 dusk.sgui.IContainer.prototype.getTrueY = function(name) {};
 
 Object.seal(dusk.sgui.IContainer);
+
+if("tcheckIgnore" in window) window.tcheckIgnore("dusk.sgui.IContainer");

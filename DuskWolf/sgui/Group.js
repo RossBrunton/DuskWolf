@@ -483,9 +483,9 @@ dusk.sgui.Group.prototype._getLeastRenderSupport = function() {
  * 
  * @private
  */
-dusk.sgui.Group.prototype._groupFrame = function() {
+dusk.sgui.Group.prototype._groupFrame = function(e) {
 	for(var p in this._components){
-		this._components[p].frame.fire();
+		this._components[p].frame.fire(e);
 	}
 };
 

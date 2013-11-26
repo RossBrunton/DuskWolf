@@ -4,6 +4,7 @@
 
 dusk.load.require("dusk.sgui.Component");
 dusk.load.require("dusk.data");
+dusk.load.require("dusk.utils");
 
 dusk.load.provide("dusk.sgui.TileMap");
 
@@ -357,6 +358,37 @@ dusk.sgui.TileMap.prototype.tilePointIn = function(x, y, exactX, exactY) {
 	}else{
 		return this.getTile(Math.floor(xpt), Math.floor(ypt));
 	}
+};
+
+/** Assumes this TileMap is a schematic, and returns whether the specified coordinates are in a solid place.
+ * 
+ * If they are in a solid place, it returns the number of pixels to add to the x or y coordinate such that there is no
+ * collision.
+ * @param {integer} x The x coordinate to check.
+ * @param {integer} y The y coordinate to check.
+ * @param {boolean=false} shiftRight If true, then the entitiy will be shifted right/down, else left/up.
+ * @param {boolean=false} shiftVer If true, then this will return the shift for vertical, rather than horizontal.
+ * @return {integer} The number of pixels to shift this. This will be negative for left or up shifts.
+ * @since 0.0.20-alpha
+ */
+dusk.sgui.TileMap.prototype.mapSolidIn = function(x, y, shiftRightDown, shiftVer) {
+	//Hardcoded now, should be fixed later
+	var solid = [1, 0];
+	
+	var tileNow = this.tilePointIn(x, y);
+	
+	if(dusk.utils.arrayEqual(solid, tileNow)) {
+		if(!shiftRightDown && !shiftVer)
+			return -(x % this.tileWidth());
+		if(shiftRightDown && !shiftVer)
+			return -(x % this.tileWidth()) + this.tileWidth();
+		if(!shiftRightDown && shiftVer)
+			return -(y % this.tileHeight());
+		if(shiftRightDown && shiftVer)
+			return -(y % this.tileHeight()) + this.tileHeight();
+	}
+	
+	return 0;
 };
 
 /** Used internally to manage frames.

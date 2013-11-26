@@ -500,8 +500,8 @@ dusk.sgui.Component.prototype.parseProps = function(props) {
  * If value is omitted, no value will be set.
  * 
  * @param {string} name The property to set.
- * @param {?object} value The new value to set for the object.
- * @return {?object} The (new) value of the object, or null if no property by that name can be handled.
+ * @param {?*} value The new value to set for the object.
+ * @return {?*} The (new) value of the object, or null if no property by that name can be handled.
  * @see {dusk.sgui.Component#parseProps}
  */
 dusk.sgui.Component.prototype.prop = function(name, value) {
@@ -596,7 +596,7 @@ Object.defineProperty(dusk.sgui.Component.prototype, "__layer", {
  * 
  * See `{@link dusk.sgui}` for a description on how paths work.
  * 
- * @param {string} path The path to resolve.
+ * @param {string|array} path The path to resolve.
  * @return {dusk.sgui.Component} The component the path is a path to.
  */
 dusk.sgui.Component.prototype.path = function(path) {

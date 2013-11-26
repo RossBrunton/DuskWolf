@@ -81,9 +81,9 @@ dusk.entities.types.createNewType("player", {
 		"Gravity":true, "LeftRightControl":true, "Spawner":true
 	},
 	"data":{
-		"hp":5, "maxHp":5, "collisionOffsetX":10, "collisionWidth":22, "collisionOffsetY":3,
+		"hp":5, "maxHp":5, "collisionOffsetX":10, "collisionWidth":22, "collisionOffsetY":3, "hspeed":5,
 		"spawns":{
-			"shot":{"type":"shot", "horBase":"facing", "cooldown":10},
+			"shot":{"type":"shot", "horBase":"facing", "verBase":"middle", "cooldown":10, "horOffset":1},
 			"slash":{"type":"slash", "horBase":"facing", "cooldown":30, "data":[{
 				"img":"Example/Slashl.png"
 			}, {
@@ -133,15 +133,10 @@ dusk.entities.types.createNewType("slash", {"behaviours":{"HitDam":true},
 	],
 }, "plat");
 
-dusk.entities.types.createNewType("slashl", {"behaviours":{},
-	"data":{"img":"Example/Slashl.png"},
-}, "slash");
-
 dusk.entities.types.createNewType("shot", {
 	"behaviours":{"HitDam":true, "BackForth":true, "Volatile":true},
-	"data":{"solid":false, "img":"Example/Shot.png", "collisionOffsetX":8, "collisionOffsetY":8,
-		"collisionWidth":26, "collisionHeight":26, "hspeed":8, "damages":".entType != player",
-		"killedBy":".entType!=player"
+	"data":{"solid":false, "img":"Example/Shot.png", "collisionOffsetX":12, "collisionOffsetY":12,
+		"collisionWidth":20, "collisionHeight":20, "hspeed":5, "damages":".entType != player",
 	},
 	"animation":[
 		["", "0,0|1,0", {}]

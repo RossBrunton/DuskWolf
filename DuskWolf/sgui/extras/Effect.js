@@ -131,14 +131,16 @@ dusk.sgui.extras.Effect.prototype.end = function() {
 	
 	if(this.then) {
 		var then = this.then;
-		if(typeof this.then == "string") {
+		if(typeof this.then == "string" || "call" in this.then) {
 			then = [this.then];
 		}
 		
 		for(var i = 0; i < then.length; i ++) {
-			if(this._owner.getExtra(this.then[i]) instanceof dusk.sgui.extra.Effect) {
-				this._owner.getExtra(this.then[i]).start();
-			}
+			if(this._owner.getExtra(then[i]) instanceof dusk.sgui.extras.Effect) {
+				this._owner.getExtra(then[i]).start();
+			}else if("call" in then[i]) {
+				then[i](this._owner);
+			} 
 		}
 	}
 	
@@ -205,7 +207,7 @@ dusk.sgui.extras.Effect.prototype._effectFrame = function(e) {
  * 
  * This may be used in the JSON representation using the key "on".
  * 
- * @param {array} A trigger as described above.
+ * @param {dusk.EventDispatcher|dusk.Range|boolean|array} A trigger as described above.
  */
 dusk.sgui.extras.Effect.prototype.addTrigger = function(trigger) {
 	if(Array.isArray(trigger[0])) {

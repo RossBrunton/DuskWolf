@@ -61,7 +61,7 @@ dusk.sgui.extras.Flash.prototype = Object.create(dusk.sgui.extras.Effect.prototy
 /** Used internally to start the effect.
  * @private
  */
-dusk.sgui.extras.Flash.prototype._flsOnStart = function() {
+dusk.sgui.extras.Flash.prototype._flsOnStart = function(e) {
 	this._range = new dusk.Range(this.min, this.max, this.max);
 	this._range.setDownFraction(1/this.speed);
 	this._range.setUpFraction(1/this.speed);
@@ -72,7 +72,7 @@ dusk.sgui.extras.Flash.prototype._flsOnStart = function() {
 /** Used internally to do a single tick of the effect.
  * @private
  */
-dusk.sgui.extras.Flash.prototype._flsOnTick = function() {
+dusk.sgui.extras.Flash.prototype._flsOnTick = function(e) {
 	if(this._decreasing) {
 		this._range.down();
 		if(this._range < this.min + 0.01) this._decreasing = false;
@@ -87,7 +87,7 @@ dusk.sgui.extras.Flash.prototype._flsOnTick = function() {
 /** Used internally once the effect has ended to set the end alpha correctly.
  * @private
  */
-dusk.sgui.extras.Flash.prototype._flsOnEnd = function() {
+dusk.sgui.extras.Flash.prototype._flsOnEnd = function(e) {
 	this._owner.alpha = this.max;
 };
 

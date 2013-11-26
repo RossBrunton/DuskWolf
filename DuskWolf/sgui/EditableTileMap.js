@@ -124,7 +124,7 @@ dusk.sgui.EditableTileMap.globalEditHeight = 1;
 dusk.sgui.EditableTileMap.globalEditWidth = 1;
 
 /** Used internally to draw the frame around tiles that are being edited.
- * @param {CanvasRenderingContext2D} c The canvas on which to draw.
+ * @param {object} e A draw event.
  * @private
  */
 dusk.sgui.EditableTileMap.prototype._editTileMapDraw = function(e) {
