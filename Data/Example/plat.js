@@ -53,11 +53,11 @@ example.plat.playerAni = [
 
 example.plat.playerParts = [
 	["#tb>0",
-		'*spew {"source":"C.#path", "x":".x+16", "y":".y+.height", "count":25, "d":[0, 1.5], "lifespan":10, "angle":[1, 2]}',
+		'*spew {"source":"C^#path", "x":".x+16", "y":".y+.height", "count":25, "d":[0, 1.5], "lifespan":10, "angle":[1, 2]}',
 		{"cooldown":30, "initial":false, "onlyOnce":true}
 	],
 	["#tb>0",
-		'*image {"source":"C.#path", "effect":"spew", "count":1, "x":".x+16", "y":".y+16",\
+		'*image {"source":"C^#path", "effect":"spew", "count":1, "x":".x+16", "y":".y+16",\
 		"lifespan":10, "dx":0, "dy":0,\
 		"alterU":{"dy":0.5}}',
 		{"cooldown":30, "initial":false, "onlyOnce":true}
@@ -70,7 +70,7 @@ example.plat.playerParts = [
 
 //Define entities
 dusk.entities.types.createNewType("walk", {
-	"behaviours":{"BackForth":true, "Persist":true, /*"HitDam":true,*/ "Killable":true}, 
+	"behaviours":{"BackForth":true, "Persist":true, /*"HitDam":true,*/ "Killable":true, "Gravity":true}, 
 	"data":{"dx":5, "slowdown":0, "hp":1, "collisionOffsetX":10, "collisionWidth":22, "collisionOffsetY":3},
 	"animation":example.plat.playerAni, "particles":example.plat.playerParts
 }, "plat");

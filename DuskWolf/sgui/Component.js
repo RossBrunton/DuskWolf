@@ -771,7 +771,9 @@ dusk.sgui.Component.prototype.updateMouse = function(x, y) {
  * 
  * @return {string} A string representation of this component.
  */
-dusk.sgui.Component.prototype.toString = function() {return "[sgui "+dusk.sgui.getTypeName(this)+" "+this.comName+"]";};
+dusk.sgui.Component.prototype.toString = function() {
+	return "[sgui "+dusk.sgui.getTypeName(this)+" "+this.comName+"]";
+};
 
 
 //type

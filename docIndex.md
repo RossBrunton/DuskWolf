@@ -29,6 +29,9 @@ I'm going to list them all here.
 - {@link dusk.keyboard}
 - {@link dusk.load}
 - {@link dusk.Mapper}
+- {@link dusk.parseTree}
+- {@link dusk.parseTree.Compiler}
+- {@link dusk.parseTree.Node}
 - {@link dusk.performance}
 - {@link dusk.plat}
 - {@link dusk.Range}

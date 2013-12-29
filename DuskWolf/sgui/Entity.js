@@ -4,6 +4,7 @@
 
 dusk.load.require("dusk.sgui.Tile");
 dusk.load.require("dusk.utils");
+dusk.load.require("dusk.parseTree");
 
 dusk.load.provide("dusk.sgui.Entity");
 
@@ -58,6 +59,51 @@ dusk.sgui.Entity = function (parent, comName) {
 	this.irtl = 0;
 	this.ittb = 0;
 	this.ibtt = 0;
+	
+	this._eventTriggeredMark = false;
+	this._currentEvent = "";
+	this._triggerTree = new dusk.parseTree.Compiler([
+		["*", function(o, l, r) {return +l.eval() * +r.eval();}],
+		["/", function(o, l, r) {return +l.eval() / +r.eval();}],
+		["+", function(o, l, r) {return +l.eval() + +r.eval();}],
+		["-", function(o, l, r) {return +l.eval() - +r.eval();}],
+		["^", function(o, l, r) {return "" + l.eval() +r.eval();}],
+		
+		["=", function(o, l, r) {return l.eval() == r.eval() || l.eval() && r.eval() == "true"}],
+		["!=", function(o, l, r) {return l.eval() != r.eval()}],
+		[">", function(o, l, r) {return l.eval() > r.eval()}],
+		["<", function(o, l, r) {return l.eval() < r.eval()}],
+		[">=", function(o, l, r) {return l.eval() >= r.eval()}],
+		["<=", function(o, l, r) {return l.eval() <= r.eval()}],
+		
+		["&", function(o, l, r) {return l.eval() && r.eval()}],
+		["|", function(o, l, r) {return l.eval() || r.eval()}],
+	], [
+		["on", (function(o, v) {
+				if(this._currentEvent == v.eval()) {
+					this._eventTriggeredMark = true;
+					return true;
+				}
+				return false;
+			}).bind(this)
+		],
+		["#", (function(o, v) {
+				switch(v.eval()) {
+					case "dx": return this.getDx();
+					case "dy": return this.getDy();
+					case "tb": return this.touchers(dusk.sgui.c.DIR_DOWN).length;
+					case "tu": return this.touchers(dusk.sgui.c.DIR_UP).length;
+					case "tl": return this.touchers(dusk.sgui.c.DIR_LEFT).length;
+					case "tr": return this.touchers(dusk.sgui.c.DIR_RIGHT).length;
+					case "path": return this.fullPath();
+					default: return "ERROR!";
+				}
+			}).bind(this)
+		],
+		["$", (function(o, v) {return this._aniVars[v.eval()];}).bind(this)],
+		[".", (function(o, v) {return this.prop(v.eval());}).bind(this)],
+		[":", (function(o, v) {return this.eProp(v.eval());}).bind(this)],
+	]);
 	
 	//Default sizes
 	this.sheight = dusk.entities.sheight;
@@ -262,7 +308,7 @@ dusk.sgui.Entity.prototype.performAnimation = function(event, advance) {
 	}
 	
 	if(this._particleData) for(var i = this._particleData.length-1; i >= 0; i --) {
-		if(this._evalTriggerArr(this._particleData[i][0].split("&"), event)[0]) {
+		if(this.meetsTrigger(this._particleData[i][0], event)) {
 			if(!this._particleCriteria[i]) this._particleCriteria[i] = {};
 			if("cooldown" in this._particleCriteria[i] && this._particleCriteria[i].cooldown > 0) {
 				continue;
@@ -295,10 +341,11 @@ dusk.sgui.Entity.prototype.performAnimation = function(event, advance) {
 	}
 	
 	for(var i = this.animationData.length-1; i >= 0; i --) {
-		if(typeof this.animationData[i][1] == "string") this.animationData[i][1] = this.animationData[i][1].split("|");
+		if(typeof this.animationData[i][1] == "string")
+			this.animationData[i][1] = this.animationData[i][1].split("|");
 		
-		var out = this._evalTrigger(i, event);
-		if(out[0]) {
+		var out = this.meetsTrigger(this.animationData[i][0], event);
+		if(out) {
 			if(i == this._currentAni || (this._aniLock && !event)) {
 				//Forward one frame
 				if(advance) {
@@ -311,7 +358,7 @@ dusk.sgui.Entity.prototype.performAnimation = function(event, advance) {
 			}
 			
 			if(this._frameCountdown <= 0) this._frameCountdown = this._frameDelay+1;
-			return out[1];
+			return this._eventTriggeredMark;
 		}
 	}
 };
@@ -326,96 +373,13 @@ dusk.sgui.Entity.prototype._setNewAni = function(id, event) {
 	this._performFrame(event);
 };
 
-dusk.sgui.Entity.prototype.meetsTrigger = function(trigger) {
-	return this._evalTriggerArr(trigger.split("&"))[0];
-};
-
-dusk.sgui.Entity.prototype._evalTrigger = function(id, event) {
-	if(typeof this.animationData[id][0] == "string") this.animationData[id][0] = this.animationData[id][0].split("&");
+dusk.sgui.Entity.prototype.meetsTrigger = function(trigger, event) {
+	if(trigger == "") return true;
+	this._eventTriggeredMark = false;
+	this._currentEvent = event;
+	var e = this._triggerTree.compile(trigger).eval();
 	
-	return this._evalTriggerArr(this.animationData[id][0], event);
-};
-
-dusk.sgui.Entity.prototype._evalTriggerArr = function(arr, event) {
-	var eventTriggered = false;
-	for(var i = 0; i < arr.length; i ++) {
-		var current = arr[i];
-		
-		if(current === "") return [true, eventTriggered];
-		if(typeof current == "string" && current.substr(0, 3) == "on ") {
-			if(event == current.substr(3).trim()) {
-				eventTriggered = true;
-			}else{
-				return [false, true];
-			}
-		}else{
-			if(typeof current == "string") {
-				arr[i] = /^([^!<>=]+)\s*(<|>|=|==|<=|=>|\!=)\s*([^!<>=]+)$/gi.exec(current);
-				current = arr[i];
-			}
-			
-			var lhs = this._evalOperand(current[1]);
-			var rhs = this._evalOperand(current[3]);
-			
-			switch(current[2]) {
-				case "=": case "==": if(lhs != rhs) return [false, eventTriggered]; break;
-				case "!=": if(lhs == rhs) return [false, eventTriggered]; break;
-				case ">": if(lhs <= rhs) return [false, eventTriggered]; break;
-				case "<": if(lhs >= rhs) return [false, eventTriggered]; break;
-				case ">=": if(lhs < rhs) return [false, eventTriggered]; break;
-				case "<=": if(lhs > rhs) return [false, eventTriggered]; break;
-			}
-		}
-	}
-	
-	return [true, eventTriggered];
-};
-
-dusk.sgui.Entity.prototype._evalOperand = function(operand, base) {
-	if(base === undefined) base = "";
-	if(!(typeof operand == "string")) return operand;
-	operand = operand.trim();
-	if(operand === "") return base;
-	
-	if(operand.charAt(0) == "*")
-		return +base * +this._evalOperand(operand.substr(1), 0);
-	if(operand.charAt(0) == "/")
-		return +base / +this._evalOperand(operand.substr(1), 0);
-	if(operand.charAt(0) == "+")
-		return +base + +this._evalOperand(operand.substr(1), 0);
-	if(operand.charAt(0) == "-")
-		return +base - +this._evalOperand(operand.substr(1), 0);
-	
-	if(operand.substr(0, 3) == "#dx")
-		return base + this._evalOperand(operand.substr(3), this.getDx());
-	if(operand.substr(0, 3) == "#dy")
-		return base + this._evalOperand(operand.substr(3), this.getDy());
-	if(operand.substr(0, 3) == "#tb")
-		return base + this._evalOperand(operand.substr(3), this.touchers(dusk.sgui.c.DIR_DOWN).length);
-	if(operand.substr(0, 3) == "#tu")
-		return base + this._evalOperand(operand.substr(3), this.touchers(dusk.sgui.c.DIR_UP).length);
-	if(operand.substr(0, 3) == "#tl")
-		return base + this._evalOperand(operand.substr(3), this.touchers(dusk.sgui.c.DIR_LEFT).length);
-	if(operand.substr(0, 3) == "#tr")
-		return base + this._evalOperand(operand.substr(3), this.touchers(dusk.sgui.c.DIR_RIGHT).length);
-	if(operand.substr(0, 5) == "#path")
-		return base + this._evalOperand(operand.substr(5), this.fullPath());
-	
-	if(operand.charAt(0) == "$") {
-		var name = operand.substr(1).split(/[\+\-\/\*\#\.\$\:]/)[0];
-		return this._evalOperand(operand.substr(name.length+1), this._aniVars[name]);
-	}
-	if(operand.charAt(0) == ".") {
-		var name = operand.substr(1).split(/[\+\-\/\*\#\.\$\:]/)[0];
-		return base + this._evalOperand(operand.substr(name.length+1), this.prop(name));
-	}
-	if(operand.charAt(0) == ":") {
-		var name = operand.substr(1).split(/[\+\-\/\*\#\.\$\:]/)[0];
-		return base + this._evalOperand(operand.substr(name.length+1), this.eProp(name));
-	}
-	
-	var frags = operand.split(/[\+\-\/\*\#\.\$\:]/);
-	return base + this._evalOperand(operand.substr(frags[0].length+1), frags[0]);
+	return e;
 };
 
 dusk.sgui.Entity.prototype._performFrame = function(event, current, noContinue) {
@@ -434,7 +398,7 @@ dusk.sgui.Entity.prototype._performFrame = function(event, current, noContinue) 
 		
 		case "?":
 			var frags = current.substr(1).split("?");
-			if(this._evalTriggerArr(frags[0].split("&"))) {
+			if(this.meetsTrigger(frags[0])) {
 				if(!noContinue) this._aniForward(event, frags[1]);
 			}else{
 				if(!noContinue) this._aniForward(event, frags[2]);
@@ -468,9 +432,9 @@ dusk.sgui.Entity.prototype._performFrame = function(event, current, noContinue) 
 			var data = dusk.utils.jsonParse(current.substr(name.length+1));
 			for(var p in data) {
 				if(Array.isArray(data[p])) {
-					data[p] = [this._evalOperand(data[p][0]), this._evalOperand(data[p][1])];
+					data[p] = [this.meetsTrigger(data[p][0]), this.meetsTrigger(data[p][1])];
 				}else{
-					if(typeof data[p] == "string") data[p] = this._evalOperand(data[p]);
+					if(typeof data[p] == "string") data[p] = this.meetsTrigger(data[p]);
 				}
 			}
 			
