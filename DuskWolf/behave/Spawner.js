@@ -116,9 +116,11 @@ dusk.behave.Spawner.prototype._spawn = function(name, dirOverride) {
 		if(spawn.data) {
 			var dat = this._resolve(dir, spawn.data);
 			for(var p in dat) {
-				dropped.eProp(p, dat[p]);
+				dropped.eProp(p, this._resolve(dir, dat[p]));
 			}
 		}
+		
+		dropped.behaviourFire("spawned", {"spawner":this._entity, "data":spawn, "dir":dir});
 	}, this);
 };
 

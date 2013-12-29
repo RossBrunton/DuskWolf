@@ -33,6 +33,13 @@ dusk.sgui.RangeText = function (parent, comName) {
 	 * @type dusk.Range
 	 */
 	this.range = null;
+	/** The id of the "onchanged" listener for range.
+	 * @type integer
+	 * @private
+	 * @since 0.0.20-alpha
+	 */
+	this._rangeChangedId = 0;
+	
 	/** The orientation; this determines whether the horizontal or vertical keys will do the range changing.
 	 *  
 	 * Must be one of the `ORIENT_*` constants in this class.
@@ -58,10 +65,10 @@ dusk.sgui.RangeText.ORIENT_VER = 0x02;
 //range
 Object.defineProperty(dusk.sgui.RangeText.prototype, "range", {
 	set: function(value) {
-		if(this._range) this._range.onChange.unlisten(this._rangeChanged, this);
+		if(this._range) this._range.onChange.unlisten(this._rangeChangedId);
 		this._range = value;
 		if(this._range) {
-			this._range.onChange.listen(this._rangeChanged, this);
+			this._rangeChangedId = this._range.onChange.listen(this._rangeChanged.bind(this));
 			this.text = this._range.value;
 		}
 	},

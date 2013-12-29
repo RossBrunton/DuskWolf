@@ -37,7 +37,7 @@ dusk.load.provide("dusk.sgui.IContainer");
  * @see {@link dusk.sgui.Single}
  * @constructor
  */
-dusk.sgui.IContainer = function() {};
+dusk.sgui.IContainer = {};
 
 /** Container specific method of handling keypresses.
  * 
@@ -162,14 +162,16 @@ dusk.sgui.IContainer.containerUpdateMouse = function() {};
  * @return {int} The X value, relative to the screen.
  * @since 0.0.20-alpha
  */
-dusk.sgui.IContainer.prototype.getTrueX = function(name) {};
+dusk.sgui.IContainer.getTrueX = function(name) {};
 
 /** Returns the actual Y location, relative to the screen, that the component is at.
  * @param {string} name An identifier for the component.
  * @return {int} The Y value, relative to the screen.
  * @since 0.0.20-alpha
  */
-dusk.sgui.IContainer.prototype.getTrueY = function(name) {};
+dusk.sgui.IContainer.getTrueY = function(name) {};
+
+dusk.sgui.IContainer = Object.keys(dusk.sgui.IContainer);
 
 Object.seal(dusk.sgui.IContainer);
 

@@ -515,8 +515,8 @@ dusk.sgui.EntityGroup.prototype.adjustAll = function(dx, dy) {
 };
 
 dusk.sgui.EntityGroup.prototype.clear = function() {
-	for(var c in this._components) {
-		if(c != "blank") {
+	for(var c = this._componentsArr.length-1; c >= 0; c --) {
+		if(this._componentsArr[c].comName != "blank") {
 			this.deleteComponent(c);
 		}
 	}
@@ -607,9 +607,9 @@ dusk.sgui.EntityGroup.prototype._numberDrop = function(e) {
 dusk.sgui.EntityGroup.prototype._keyDel = function(e) {
 	if(!dusk.editor.active || !this._selectedEntity) return true;
 	
-	for(var c in this._components) {
-		if(this._components[c] == this._selectedEntity) {
-			this._entities.splice(this._entities.indexOf(this._components[c]), 1);
+	for(var c = this._componentsArr.length-1; c >= 0; c --) {
+		if(this._componentsArr[c] == this._selectedEntity) {
+			this._entities.splice(this._entities.indexOf(this._componentsArr[c]), 1);
 			this.deleteComponent(c);
 			this._selectedEntity = null;
 		}

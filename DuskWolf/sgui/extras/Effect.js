@@ -78,6 +78,13 @@ dusk.sgui.extras.Effect = function(owner, name) {
 	 */
 	this._autoTrigger = false;
 	
+	/** The id of the "frame" listener, so it can be removed.
+	 * @type integer
+	 * @private
+	 * @since 0.0.20-alpha
+	 */
+	this._effectFrameId = 0;
+	
 	/** Fired when the effect should do one frame of whatever it is doing.
 	 * 
 	 * While the effect is active, this will be called once per frame.
@@ -98,7 +105,7 @@ dusk.sgui.extras.Effect = function(owner, name) {
 	this._onEnd = new dusk.EventDispatcher("dusk.sgui.extras.Effect._onEnd");
 	
 	//Listeners
-	this._owner.frame.listen(this._effectFrame, this);
+	this._effectFrameId = this._owner.frame.listen(this._effectFrame.bind(this));
 	this.onDelete.listen(this._effDeleted, this);
 	
 	//Prop masks
@@ -152,7 +159,7 @@ dusk.sgui.extras.Effect.prototype.end = function() {
  * @private
  */
 dusk.sgui.extras.Effect.prototype._effDeleted = function(e) {
-	this._owner.frame.unlisten(this._effectFrame, this);
+	this._owner.frame.unlisten(this._effectFrameId);
 };
 
 /** Called every frame by it's owner, this does effect stuff.
@@ -207,7 +214,7 @@ dusk.sgui.extras.Effect.prototype._effectFrame = function(e) {
  * 
  * This may be used in the JSON representation using the key "on".
  * 
- * @param {dusk.EventDispatcher|dusk.Range|boolean|array} A trigger as described above.
+ * @param {dusk.EventDispatcher|dusk.Range|boolean|array} trigger A trigger as described above.
  */
 dusk.sgui.extras.Effect.prototype.addTrigger = function(trigger) {
 	if(Array.isArray(trigger[0])) {

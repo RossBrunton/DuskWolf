@@ -239,8 +239,9 @@ dusk.sgui.Entity.prototype.behaviourFire = function(event, data) {
 	var output = [];
 	if(!data) data = {};
 	data.name = event;
-	for(var b in this._behaviours) {
-		output.push(this._behaviours[b].entityEvent.fire(data));
+	var keys = Object.keys(this._behaviours);
+	for(var b = keys.length-1; b >= 0; b --) {
+		output.push(this._behaviours[keys[b]].entityEvent.fire(data));
 	}
 	
 	return output;

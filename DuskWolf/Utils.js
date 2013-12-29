@@ -57,22 +57,29 @@ dusk.utils.merge = function(a, b) {
  * The interface is an object where the enumerable property names 
  *  with any value equivalent to true represent functions.
  * 
+ * Arrays of string names of all the functions are accepted and preferable.
+ * 
  * The object wishing to implement this interface must have all the specified property names be functions.
  * 
  * @param {object} obj The object you wish to check.
- * @param {object|function()} inter The interface that you want to check the object by.
+ * @param {object|function()|array} inter The interface that you want to check the object by.
  * @return {boolean} Whether the object implements the interface or not.
  * @since 0.0.18-alpha
  */
 dusk.utils.doesImplement = function(obj, inter) {
-	if(!dusk.dev) return true;
-	
-	for(var p in inter) {
-		if(!(p in obj)) {
-			return false;
+	if(Array.isArray(inter)) {
+		for(var i = inter.length-1; i > 0; i --) {
+			if(!(inter[i] in obj)) {
+				return false;
+			}
+		}
+	}else{
+		for(var p in inter) {
+			if(!(p in obj)) {
+				return false;
+			}
 		}
 	}
-	
 	return true;
 };
 

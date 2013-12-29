@@ -118,25 +118,23 @@ dusk.sgui._init = function() {
 			}
 		}
 		
-		for(var p in dusk.sgui._panes){
+		for(var p = dusk.sgui._panes.length-1; p >= 0; p --){
 			dusk.sgui._panes[p].updateMouse(
 				dusk.sgui._mouseX - dusk.sgui._panes[p].x,
 				dusk.sgui._mouseY - dusk.sgui._panes[p].y
 			);
 		}
 		
-		for(var p in dusk.sgui._panes){
+		for(var p = dusk.sgui._panes.length-1; p >= 0; p --){
 			dusk.sgui._panes[p].frame.fire();
 		}
 	}, this);
 
 	/** All the planes.
-	 * 
-	 * Property names are the names of panes, and the values are the actual panes.
 	 * @type array
 	 * @private
 	 */
-	this._panes = {};
+	this._panes = [];
 	/** The name of the currently active pane.
 	 * @type string
 	 * @private
@@ -256,11 +254,14 @@ dusk.sgui.MODE_FULL = 1;
  * @return {?dusk.sgui.Pane} The pane, or `null` if it doesn't exist and `noNew` is `true`.
  */
 dusk.sgui.getPane = function(name, noNew) {
-	if(this._panes[name.toLowerCase()]) return this._panes[name.toLowerCase()];
+	//if(this._panes[name.toLowerCase()]) return this._panes[name.toLowerCase()];
+	for(var p = this._panes.length-1; p >= 0; p --) {
+		if(this._panes[p].comName == name.toLowerCase()) return this._panes[p];
+	}
 	
 	if(!noNew) {
-		this._panes[name.toLowerCase()] = new dusk.sgui.Pane(this, name);
-		return this._panes[name.toLowerCase()];
+		this._panes.push(new dusk.sgui.Pane(this, name));
+		return this._panes[this._panes.length-1];
 	}
 	
 	return null;
@@ -285,7 +286,7 @@ dusk.sgui.setActivePane = function(to) {
  */
 dusk.sgui.getActivePane = function() {
 	if(this._activePane === "") return null;
-	return this._panes[this._activePane];
+	return this.getPane(this._activePane);
 };
 
 /** Draws all the panes onto the main canvas specified, and fires the onRender event.
@@ -304,7 +305,7 @@ dusk.sgui._draw = function() {
 	dusk.sgui._cacheCanvas.getContext("2d").clearRect(0, 0, dusk.sgui.width, dusk.sgui.height);
 	
 	//Draw panes
-	for(var c in dusk.sgui._panes){
+	for(var c = 0; c < dusk.sgui._panes.length; c ++){
 		var data = {};
 		data.alpha = 1;
 		data.sourceX = 0;

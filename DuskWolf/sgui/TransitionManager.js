@@ -77,6 +77,12 @@ dusk.sgui.TransitionManager = function(parent, comName) {
 	 * @private
 	 */
 	this._waits = 0;
+	/** The id of the markTrigger event we listen for, so we can remove it when this is deleted.
+	 * @type integer
+	 * @private
+	 * @since 0.0.20-alpha
+	 */
+	this._mtId = 0;
 	
 	//Defaults
 	this.width = 1;
@@ -105,8 +111,10 @@ dusk.sgui.TransitionManager = function(parent, comName) {
 	this.renderSupport |= dusk.sgui.Component.REND_OFFSET | dusk.sgui.Component.REND_SLICE;
 	
 	//Add to the MarkTrigger listener
-	dusk.entities.markTrigger.listen(this._tmMarkTrigger, this);
-	this.onDelete.listen(function(e) {dusk.entities.markTrigger.unlisten(this._tmMarkTrigger, this);}, this);
+	this._mtId = dusk.entities.markTrigger.listen(this._tmMarkTrigger, this);
+	this.onDelete.listen(
+		(function(e) {dusk.entities.markTrigger.unlisten(this._mtId);}).bind(this)
+	);
 };
 dusk.sgui.TransitionManager.prototype = Object.create(dusk.sgui.Component.prototype);
 

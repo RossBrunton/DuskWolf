@@ -36,6 +36,13 @@ dusk.sgui.DynamicGrid = function (parent, comName) {
 	 * @type dusk.Range
 	 */
 	this.range = null;
+	/** The id of the "onchanged" listener for range.
+	 * @type integer
+	 * @private
+	 * @since 0.0.20-alpha
+	 */
+	this._rangeChangedId = 0;
+	
 	/** The orientation; this determines whether the DynamicGrid scales horizontaly or vertically.
 	 *  
 	 * Must be one of the `ORIENT_*` constants in this class.
@@ -79,9 +86,10 @@ dusk.sgui.DynamicGrid.ORIENT_VER = 0x02;
 //range
 Object.defineProperty(dusk.sgui.DynamicGrid.prototype, "range", {
 	set: function(value) {
-		if(this._range) this._range.onChange.unlisten(this._rangeChanged, this);
+		if(this._range) this._range.onChange.unlisten(this._rangeChangedId);
 		this._range = value;
-		if(this._range) this._range.onChange.listen(this._rangeChanged, this);
+		if(this._range)
+			this._rangeChangedId = this._range.onChange.listen(this._rangeChanged.bind(this));
 		this._rangeChanged({});
 	},
 	

@@ -32,6 +32,12 @@ dusk.sgui.extras.DynamicWidth = function(owner, name) {
 	 * @type dusk.Range
 	 */
 	this.range = null;
+	/** The id of the "onchanged" listener for range.
+	 * @type integer
+	 * @private
+	 * @since 0.0.20-alpha
+	 */
+	this._rangeChangedId = 0;
 	
 	/** The minimum width that the component can be.
 	 * @type integer
@@ -52,10 +58,10 @@ dusk.sgui.extras.DynamicWidth.prototype = Object.create(dusk.sgui.extras.Extra.p
 //range
 Object.defineProperty(dusk.sgui.extras.DynamicWidth.prototype, "range", {
 	set: function(value) {
-		if(this._range) this._range.onChange.unlisten(this._rangeChanged, this);
+		if(this._range) this._range.onChange.unlisten(this._rangeChangedId);
 		this._range = value;
 		if(this._range) {
-			this._range.onChange.listen(this._rangeChanged, this);
+			this._rangeChangedId = this._range.onChange.listen(this._rangeChanged.bind(this));
 			this._rangeChanged({});
 		}
 	},
@@ -105,6 +111,12 @@ dusk.sgui.extras.DynamicHeight = function(owner, name) {
 	 * @type dusk.Range
 	 */
 	this.range = null;
+	/** The id of the "onchanged" listener for range.
+	 * @type integer
+	 * @private
+	 * @since 0.0.20-alpha
+	 */
+	this._rangeChangedId = 0;
 	
 	/** The minimum width that the component can be.
 	 * @type integer
@@ -125,10 +137,10 @@ dusk.sgui.extras.DynamicHeight.prototype = Object.create(dusk.sgui.extras.Extra.
 //range
 Object.defineProperty(dusk.sgui.extras.DynamicHeight.prototype, "range", {
 	set: function(value) {
-		if(this._range) this._range.onChange.unlisten(this._rangeChanged, this);
+		if(this._range) this._range.onChange.unlisten(this._rangeChangedId);
 		this._range = value;
 		if(this._range) {
-			this._range.onChange.listen(this._rangeChanged, this);
+			this._rangeChangedId = this._range.onChange.listen(this._rangeChanged.bind(this));
 			this._rangeChanged({});
 		}
 	},

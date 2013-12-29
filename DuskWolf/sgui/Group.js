@@ -30,6 +30,12 @@ dusk.sgui.Group = function(parent, comName) {
 	 * @protected
 	 */
 	this._components = {};
+	/** All the components in this container, as an array for faster and better iteration.
+	 * @type array
+	 * @protected
+	 * @since 0.0.20-alpha
+	 */
+	this._componentsArr = [];
 	/** The current drawing order of all the components.
 	 *   An array of string component names, earlier entries are drawn first.
 	 * @type array
@@ -102,12 +108,6 @@ dusk.sgui.Group = function(parent, comName) {
 	 * @since 0.0.18-alpha
 	 */
 	this._height = -1;
-	/** Used to cache drawn stuff.
-	 * @type HTMLCanvasElement
-	 * @private
-	 * @since 0.0.18-alpha
-	 */
-	this._cache = null;
 	/** The x offset. All the contents of this container will be moved to the left this many
 	 *   and any pixels that have an x less than 0 are not drawn.
 	 * @type integer
@@ -133,6 +133,12 @@ dusk.sgui.Group = function(parent, comName) {
 	 * @since 0.0.19-alpha
 	 */
 	this._horScroll = null;
+	/** The id of the "onchanged" listener for horizontal scrolling.
+	 * @type integer
+	 * @private
+	 * @since 0.0.20-alpha
+	 */
+	this._horChangedId = 0;
 	/** The vertical scrolling. Set to a range, and the fractional value of the range (from 0.0 to 1.0) will be
 	 * interpreted as the "scrolling" where 0.0 is an yOffset of 0, while 1.0 is the maximum offset possible.
 	 * @type dusk.Range
@@ -145,6 +151,12 @@ dusk.sgui.Group = function(parent, comName) {
 	 * @since 0.0.19-alpha
 	 */
 	this._verScroll = null;
+	/** The id of the "onchanged" listener for vertical scrolling.
+	 * @type integer
+	 * @private
+	 * @since 0.0.20-alpha
+	 */
+	this._verChangedId = 0;
 	
 	//Prop masks
 	this._registerPropMask("focus", "focus", true, ["children"]);
@@ -165,8 +177,8 @@ dusk.sgui.Group = function(parent, comName) {
 	
 	this.onActiveChange.listen(function(e){
 		if(this.focusBehaviour == dusk.sgui.Group.FOCUS_ALL) {
-			for(var c in this._components) {
-				this._components[c].onActiveChange.fire(e);
+			for(var c = this._componentsArr.length-1; c >= 0; c --) {
+				this._componentsArr[c].onActiveChange.fire(e);
 			}
 		}else if(this.getFocused()) {
 			this.getFocused().onActiveChange.fire(e);
@@ -217,8 +229,8 @@ dusk.sgui.Group.FOCUS_ALL = 1;
 dusk.sgui.Group.prototype.containerKeypress = function(e) {
 	if(this.focusBehaviour == dusk.sgui.Group.FOCUS_ALL) {
 		var toReturn = true;
-		for(var c in this._components) {
-			toReturn = this._components[c].doKeyPress(e) && toReturn;
+		for(var c = this._componentsArr.length-1; c >= 0; c --) {
+			toReturn = this._componentsArr[c].doKeyPress(e) && toReturn;
 		}
 		return toReturn;
 	}
@@ -268,6 +280,7 @@ dusk.sgui.Group.prototype._newComponent = function(com, type) {
 	}
 	
 	this._components[com.toLowerCase()] = new (dusk.sgui.getType(type))(this, com.toLowerCase());
+	this._componentsArr.push(this._components[com.toLowerCase()]);
 	this._drawOrder[this._drawOrder.length] = com.toLowerCase();
 	dusk.sgui.applyStyles(this._components[com.toLowerCase()]);
 	if(this.focusBehaviour == dusk.sgui.Group.FOCUS_ALL)
@@ -344,8 +357,8 @@ Object.defineProperty(dusk.sgui.Group.prototype, "__children", {
  * @param {object} data Data used to modify all the children in this group.
  */
 dusk.sgui.Group.prototype.modifyAllChildren = function(data) {
-	for(var c in this._components) {
-		this._components[c].parseProps(data);
+	for(var c = this._componentsArr.length-1; c >= 0; c --) {
+		this._componentsArr[c].parseProps(data);
 	}
 };
 Object.defineProperty(dusk.sgui.Group.prototype, "__allChildren", {
@@ -360,108 +373,54 @@ Object.defineProperty(dusk.sgui.Group.prototype, "__allChildren", {
  * @private
  */
 dusk.sgui.Group.prototype._groupDraw = function(e) {
-	//Check support of children
-	var support = this._getLeastRenderSupport();
-	var cacheNeeded = false;
-	
-	if(!(support & dusk.sgui.Component.REND_LOCATION)) {
-		console.error("All components must support origin location.");
-		return;
-	}
-	
-	if(!(support & dusk.sgui.Component.REND_OFFSET) && (this.xOffset || this.yOffset)) {
-		cacheNeeded = true;
-	}
-	
-	if(!(support & dusk.sgui.Component.REND_SLICE) && (this.width >= 0 || this.height >= 0)) {
-		cacheNeeded = true;
-	}
-	
-	if(!cacheNeeded) {
-		for(var i = 0; i < this._drawOrder.length; i++) {
-			if(this._drawOrder[i] in this._components) {
-				var com = this._components[this._drawOrder[i]];
-				var data = {"alpha":e.alpha, "sourceX":0, "sourceY":0, "destX":e.d.destX, "destY":e.d.destY,
-					"width":0, "height":0
-				};
-				
-				var destXAdder = 0;
-				if(com.xOrigin == dusk.sgui.Component.ORIGIN_MAX) destXAdder = this.width - com.width;
-				if(com.xOrigin == dusk.sgui.Component.ORIGIN_MIDDLE) destXAdder = (this.width - com.width)>>1;
-				
-				var destYAdder = 0;
-				if(com.yOrigin == dusk.sgui.Component.ORIGIN_MAX) destYAdder = this.height - com.height;
-				if(com.yOrigin == dusk.sgui.Component.ORIGIN_MIDDLE) destYAdder = (this.height - com.height)>>1;
-				
-				
-				if((-this.xOffset + com.x + destXAdder - e.d.sourceX)<0) {
-					data.sourceX = -(-this.xOffset + com.x + destXAdder - e.d.sourceX);
-				}
-				
-				if((-this.yOffset + com.y + destYAdder - e.d.sourceY)<0) {
-					data.sourceY = -(-this.yOffset + com.y + destYAdder - e.d.sourceY);
-				}
-				
-				if((com.x - this.xOffset - e.d.sourceX + destXAdder) > 0) {
-					data.destX = com.x - this.xOffset - e.d.sourceX + e.d.destX + destXAdder;
-				}
-				
-				if((com.y - this.yOffset - e.d.sourceY + destYAdder) > 0) {
-					data.destY = com.y - this.yOffset - e.d.sourceY + e.d.destY + destYAdder;
-				}
-				
-				data.width = com.width - data.sourceX;
-				data.height = com.height - data.sourceY;
-				
-				if(data.destX >= e.d.width + e.d.destX) continue;
-				if(data.destY >= e.d.height + e.d.destY) continue;
-				
-				if(data.width <= 0 || data.height <= 0) continue;
-				
-				if(data.width + data.destX > e.d.width + e.d.destX) 
-					data.width = (e.d.destX + e.d.width) - data.destX;
-				if(data.height + data.destY > e.d.height + e.d.destY) 
-					data.height = (e.d.destY + e.d.height) - data.destY;
-				
-				com.draw(data, e.c);
+	//Assume all children can support all rendering options
+	for(var i = 0; i < this._drawOrder.length; i++) {
+		if(this._drawOrder[i] in this._components) {
+			var com = this._components[this._drawOrder[i]];
+			var data = {"alpha":e.alpha, "sourceX":0, "sourceY":0, "destX":e.d.destX, "destY":e.d.destY,
+				"width":0, "height":0
+			};
+			
+			var destXAdder = 0;
+			if(com.xOrigin == dusk.sgui.Component.ORIGIN_MAX) destXAdder = this.width - com.width;
+			if(com.xOrigin == dusk.sgui.Component.ORIGIN_MIDDLE) destXAdder = (this.width - com.width)>>1;
+			
+			var destYAdder = 0;
+			if(com.yOrigin == dusk.sgui.Component.ORIGIN_MAX) destYAdder = this.height - com.height;
+			if(com.yOrigin == dusk.sgui.Component.ORIGIN_MIDDLE) destYAdder = (this.height - com.height)>>1;
+			
+			
+			if((-this.xOffset + com.x + destXAdder - e.d.sourceX)<0) {
+				data.sourceX = -(-this.xOffset + com.x + destXAdder - e.d.sourceX);
 			}
-		}
-	}else{
-		if(this._cache == null) {
-			this._cache = dusk.utils.createCanvas(e.d.width + this.xOffset, e.d.height + this.yOffset);
-		}else{
-			this._cache.width = e.d.width + this.xOffset;
-			this._cache.height = e.d.height + this.yOffset;
-		}
-		
-		for(var i = 0; i < this._drawOrder.length; i++) {
-			if(this._drawOrder[i] in this._components) {
-				var com = this._components[this._drawOrder[i]];
-				var data = {"alpha":e.alpha};
-				var destXAdder = com.xOrigin == dusk.sgui.Component.ORIGIN_MAX?this.width - com.width:0;
-				var destYAdder = com.yOrigin == dusk.sgui.Component.ORIGIN_MAX?this.height - com.height:0;
-				destXAdder = com.xOrigin == dusk.sgui.Component.ORIGIN_MIDDLE?(this.width - com.width)>>1:destXAdder;
-				destYAdder = com.yOrigin == dusk.sgui.Component.ORIGIN_MIDDLE?(this.height - com.height)>>1:destYAdder;
-				
-				data.sourceX = 0;
-				data.sourceY = 0;
-				data.destX = com.x + destXAdder;
-				data.destY = com.y + destYAdder;
-				data.width = com.width;
-				data.height = com.height;
-				
-				//if(data.destX >= e.d.width + e.d.destX) continue; // No idea what this does...
-				//if(data.destY >= e.d.height + e.d.destY) continue;
-				
-				if(data.width <= 0 || data.height <= 0) continue;
-				
-				com.draw(data, this._cache.getContext("2d"));
+			
+			if((-this.yOffset + com.y + destYAdder - e.d.sourceY)<0) {
+				data.sourceY = -(-this.yOffset + com.y + destYAdder - e.d.sourceY);
 			}
+			
+			if((com.x - this.xOffset - e.d.sourceX + destXAdder) > 0) {
+				data.destX = com.x - this.xOffset - e.d.sourceX + e.d.destX + destXAdder;
+			}
+			
+			if((com.y - this.yOffset - e.d.sourceY + destYAdder) > 0) {
+				data.destY = com.y - this.yOffset - e.d.sourceY + e.d.destY + destYAdder;
+			}
+			
+			data.width = com.width - data.sourceX;
+			data.height = com.height - data.sourceY;
+			
+			if(data.destX >= e.d.width + e.d.destX) continue;
+			if(data.destY >= e.d.height + e.d.destY) continue;
+			
+			if(data.width <= 0 || data.height <= 0) continue;
+			
+			if(data.width + data.destX > e.d.width + e.d.destX) 
+				data.width = (e.d.destX + e.d.width) - data.destX;
+			if(data.height + data.destY > e.d.height + e.d.destY) 
+				data.height = (e.d.destY + e.d.height) - data.destY;
+			
+			com.draw(data, e.c);
 		}
-		
-		e.c.drawImage(this._cache, this.xOffset + e.d.sourceX, this.yOffset + e.d.sourceY, e.d.width, e.d.height,
-			e.d.destX, e.d.destY, e.d.width, e.d.height
-		);
 	}
 };
 
@@ -473,8 +432,8 @@ dusk.sgui.Group.prototype._groupDraw = function(e) {
  */
 dusk.sgui.Group.prototype._getLeastRenderSupport = function() {
 	var hold = 0xffff;
-	for(var p in this._components){
-		hold &= this._components[p].renderSupport;
+	for(var c = this._componentsArr.length-1; c >= 0; c --){
+		hold &= this._componentsArr[c].renderSupport;
 	}
 	return hold;
 };
@@ -484,8 +443,8 @@ dusk.sgui.Group.prototype._getLeastRenderSupport = function() {
  * @private
  */
 dusk.sgui.Group.prototype._groupFrame = function(e) {
-	for(var p in this._components){
-		this._components[p].frame.fire(e);
+	for(var c = this._componentsArr.length-1; c >= 0; c --){
+		this._componentsArr[c].frame.fire(e);
 	}
 };
 
@@ -517,7 +476,8 @@ dusk.sgui.Group.prototype.deleteComponent = function(com) {
 	if (this._components[com.toLowerCase()]){
 		if(this._focusedCom == com.toLowerCase()) this.focus = "";
 		this._components[com.toLowerCase()].onDelete.fire({"com":this._components[com.toLowerCase()]});
-		delete this._components[com.toLowerCase()];
+		this._componentsArr.splice(this._componentsArr.indexOf(this._components[com.toLowerCase()]), 1);
+		this._components[com.toLowerCase()] = null;
 		this._drawOrder.splice(this._drawOrder.indexOf(com.toLowerCase()), 1);
 		return true;
 	}
@@ -529,8 +489,8 @@ dusk.sgui.Group.prototype.deleteComponent = function(com) {
  * @since 0.0.18-alpha
  */
 dusk.sgui.Group.prototype.deleteAllComponents = function(com) {
-	for(var p in this._components) {
-		this.deleteComponent(p);
+	for(var c = this._componentsArr.length-1; c >= 0; c --) {
+		this.deleteComponent(this._componentsArr[c].comName);
 	}
 };
 
@@ -594,19 +554,21 @@ Object.defineProperty(dusk.sgui.Group.prototype, "focusBehaviour", {
 		
 		switch(this._focusBehaviour) {
 			case dusk.sgui.Group.FOCUS_ONE:
-				for(var c in this._components) {
+				for(var c = this._componentsArr.length-1; c >= 0; c --) {
 					if(this._focusedCom != c) {
-						if(this._active) this._components[c].onActiveChange.fire({"active":false});
-						this._components[c].onFocusChange.fire({"focus":false});
+						if(this._active)
+							this._componentsArr[c].onActiveChange.fire({"active":false});
+						this._componentsArr[c].onFocusChange.fire({"focus":false});
 					}
 				}
 				break;
 				
 			case dusk.sgui.Group.FOCUS_ALL:
-				for(var c in this._components) {
+				for(var c = this._componentsArr.length-1; c >= 0; c --) {
 					if(this._focusedCom != c) {
-						if(this._active) this._components[c].onActiveChange.fire({"active":true});
-						this._components[c].onFocusChange.fire({"focus":true});
+						if(this._active)
+							this._componentsArr[c].onActiveChange.fire({"active":true});
+						this._componentsArr[c].onFocusChange.fire({"focus":true});
 					}
 				}
 				break;
@@ -625,11 +587,11 @@ Object.defineProperty(dusk.sgui.Group.prototype, "focusVisible", {
 		this._focusVisible = !!value;
 		
 		if(this._focusVisible) {
-			for(var c in this._components) {
-				if(this._focusedCom != c) {
-					this._components[c].visible = false;
+			for(var c = this._componentsArr.length-1; c >= 0; c --) {
+				if(this._focusedCom != this._componentsArr[c].comName) {
+					this._componentsArr[c].visible = false;
 				}else{
-					this._components[c].visible = true;
+					this._componentsArr[c].visible = true;
 				}
 			}
 		}
@@ -740,9 +702,9 @@ Object.defineProperty(dusk.sgui.Group.prototype, "height", {
  */
 dusk.sgui.Group.prototype.getContentsWidth = function(includeOffset) {
 	var max = 0;
-	for(var c in this._components) {
-		if(this._components[c].x + this._components[c].width > max)
-			max = this._components[c].x + this._components[c].width;
+	for(var c = this._componentsArr.length-1; c >= 0; c --) {
+		if(this._componentsArr[c].x + this._componentsArr[c].width > max)
+			max = this._componentsArr[c].x + this._componentsArr[c].width;
 	}
 	
 	return max - (includeOffset?this.xOffset:0);
@@ -756,9 +718,9 @@ dusk.sgui.Group.prototype.getContentsWidth = function(includeOffset) {
  */
 dusk.sgui.Group.prototype.getContentsHeight = function(includeOffset) {
 	var max = 0;
-	for(var c in this._components) {
-		if(this._components[c].y + this._components[c].height > max)
-			max = this._components[c].y + this._components[c].height;
+	for(var c = this._componentsArr.length-1; c >= 0; c --) {
+		if(this._componentsArr[c].y + this._componentsArr[c].height > max)
+			max = this._componentsArr[c].y + this._componentsArr[c].height;
 	}
 	
 	return max - (includeOffset?this.yOffset:0);
@@ -767,10 +729,10 @@ dusk.sgui.Group.prototype.getContentsHeight = function(includeOffset) {
 //horScroll
 Object.defineProperty(dusk.sgui.Group.prototype, "horScroll", {
 	set: function(value) {
-		if(this._horScroll) this._horScroll.onChange.unlisten(this._horChanged, this);
+		if(this._horScroll) this._horScroll.onChange.unlisten(this._horChangedId);
 		this._horScroll = value;
 		if(this._horScroll) {
-			this._horScroll.onChange.listen(this._horChanged, this);
+			this._horChangedId = this._horScroll.onChange.listen(this._horChanged.bind(this));
 			this._horChanged({});
 		}
 	},
@@ -799,10 +761,10 @@ dusk.sgui.Group.prototype._horChanged = function(e) {
 //verScroll
 Object.defineProperty(dusk.sgui.Group.prototype, "verScroll", {
 	set: function(value) {
-		if(this._verScroll) this._verScroll.onChange.unlisten(this._verChanged, this);
+		if(this._verScroll) this._verScroll.onChange.unlisten(this._verChangedId);
 		this._verScroll = value;
 		if(this._verScroll) {
-			this._verScroll.onChange.listen(this._verChanged, this);
+			this._horChangedId = this._verScroll.onChange.listen(this._verChanged.bind(this));
 			this._verChanged({});
 		}
 	},
@@ -835,8 +797,8 @@ dusk.sgui.Group.prototype._verChanged = function(e) {
  * @since 0.0.20-alpha
  */
 dusk.sgui.Group.prototype.forEach = function(func, scope) {
-	for(var p in this._components) {
-		func.call(scope, this._components[p]);
+	for(var c = this._componentsArr.length-1; c >= 0; c --) {
+		func.call(scope, this._componentsArr[c]);
 	}
 };
 
@@ -848,8 +810,8 @@ dusk.sgui.Group.prototype.containerUpdateMouse = function() {
 	var x = this._mouseX;
 	var y = this._mouseY;
 	
-	for(var c in this._components) {
-		var com = this._components[c];
+	for(var c = this._componentsArr.length-1; c >= 0; c --) {
+		var com = this._componentsArr[c];
 		var destX = x;
 		var destY = y;
 		

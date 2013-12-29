@@ -171,10 +171,11 @@ dusk.sgui.Component = function (parent, componentName) {
 	
 	/** The supported ways in which this component can render itself.
 	 * 
-	 * This is a bitmask using the `REND_*` constants.
+	 * This is no longer used, as all components should be able to render themselves with all ways.
 	 * @type integer
 	 * @default dusk.sgui.Component.REND_LOCATION
 	 * @since 0.0.18-alpha
+	 * @depreciated
 	 */
 	this.renderSupport = dusk.sgui.Component.REND_LOCATION;
 	
@@ -763,7 +764,7 @@ dusk.sgui.Component.prototype.updateMouse = function(x, y) {
 	this._mouseX = x;
 	this._mouseY = y;
 	
-	if(dusk.utils.doesImplement(this, dusk.sgui.IContainer)) this.containerUpdateMouse();
+	if("containerUpdateMouse" in this) this.containerUpdateMouse();
 };
 
 /** Returns a string representation of the component. 

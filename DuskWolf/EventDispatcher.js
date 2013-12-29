@@ -35,6 +35,13 @@ dusk.EventDispatcher = function(name, mode) {
 	 * @private
 	 */
 	this._name = name;
+	
+	/** The listener slots that are "free", as a stack.
+	 * @type array
+	 * @private
+	 * @since 0.0.20-alpha
+	 */
+	this._free = [];
     
 	/** The current mode of the EventDispatcher.
 	 * 
@@ -94,11 +101,13 @@ dusk.EventDispatcher.MODE_LAST = 4;
  * 
  * @param {function(object):*} callback The function that will be called when an event is fired.
  *  It will be given a single argument; the event object.
- * @param {*} scope The scope to run the callback in. This will be the value of `this` in the callback function.
+ *  If you want the function to run in a scope, then you should bind it with `bind`.
+ * @param {*} scope Depreciated, do not use.
  * @param {?object} propsYes The listener will only fire if every property of this object
  *  is equal to the same named property in the event object.
  * @param {?object} propsNo The listener will only fire if every property of this object
  *  is not equal to the same named property in the event object.
+ * @return {integer} A unique ID for the listener, call this when it should be deleted. 
  */
 dusk.EventDispatcher.prototype.listen = function(callback, scope, propsYes, propsNo) {
 	if(!callback) {
@@ -107,21 +116,26 @@ dusk.EventDispatcher.prototype.listen = function(callback, scope, propsYes, prop
 		return;
 	}
 	
-	this._listeners.push([callback, propsYes?propsYes:{}, propsNo?propsNo:{}, scope]);
+	if(scope) callback = callback.bind(scope);
+	
+	if(!this._free.length) {
+		this._listeners.push([callback, propsYes?propsYes:null, propsNo?propsNo:null]);
+		return this._listeners.length-1;
+	}else{
+		var free = this._free.pop();
+		this._listeners[free] = [callback, propsYes?propsYes:null, propsNo?propsNo:null];
+		return free;
+	}
 };
 
 /** Removes a listener.
  * 
- * @param {function(object):*} listener The function that would be called on the listener you want to remove.
- * @param {*} scope The scope that the function would have ran in.
+ * @param {integer} id The id that was given when the listener was registered.
  * @since 0.0.18-alpha
  */
-dusk.EventDispatcher.prototype.unlisten = function(listener, scope) {
-	for(var i = this._listeners.length-1; i >= 0; i --) {
-		if(this._listeners[i][0] == listener && this._listeners[i][3] == scope) {
-			this._listeners.splice(i, 1);
-		}
-	}
+dusk.EventDispatcher.prototype.unlisten = function(id) {
+	this._listeners[id] = null;
+	this._free.push(id);
 };
 
 /** Fires an event; triggering all the listeners that apply.
@@ -133,66 +147,66 @@ dusk.EventDispatcher.prototype.fire = function(event) {
 	var majorRet = null;
 	
 	switch(this.mode) {
-		case dusk.EventDispatcher.MODE_AND:
+		case 1: //AND
 			majorRet = true;
 			break;
 		
-		case dusk.EventDispatcher.MODE_OR:
+		case 2: //OR
 			majorRet = false;
 			break;
 		
-		case dusk.EventDispatcher.MODE_PASS:
+		case 3: //PASS
 			majorRet = event;
 			break;
 	}
 	
 	for(var i = 0; i < this._listeners.length; i ++) {
+		if(this._listeners[i] === null) continue;
+		
 		var valid = true;
 		
 		//Check propsYes
-		for(var p in this._listeners[i][1]) {
-			if(event[p] !== this._listeners[i][1][p]) {
-				valid = false;
-				break;
-			}
-		}
-		
-		if(!valid) continue;
+		if(this._listeners[i][1] && !this._checkProps(event, this._listeners[i][1], true))
+			continue;
 		
 		//Check propsNo
-		for(var p in this._listeners[i][2]) {
-			if(event[p] === this._listeners[i][2][p]) {
-				valid = false;
-				break;
-			}
-		}
+		if(this._listeners[i][2] && !this._checkProps(event, this._listeners[i][2], false))
+			continue;
 		
 		//Fire listener
-		if(valid) {
-			var ret = null;
-			ret = this._listeners[i][0].call(this._listeners[i][3], event);
-		
-			switch(this.mode) {
-				case dusk.EventDispatcher.MODE_AND:
-					majorRet = majorRet&&ret;
-					break;
-				
-				case dusk.EventDispatcher.MODE_OR:
-					majorRet = majorRet||ret;
-					break;
-				
-				case dusk.EventDispatcher.MODE_PASS:
-					majorRet = ret;
-					break;
-				
-				case dusk.EventDispatcher.MODE_LAST:
-					majorRet = ret===undefined?majorRet:ret;
-					break;
-			}
+		var ret = this._listeners[i][0](event);
+	
+		switch(this.mode) {
+			case 1: //AND
+				majorRet = majorRet&&ret;
+				break;
+			
+			case 2: //OR
+				majorRet = majorRet||ret;
+				break;
+			
+			case 3: //PASS
+				majorRet = ret;
+				break;
+			
+			case 4: //LAST
+				majorRet = ret===undefined?majorRet:ret;
+				break;
 		}
 	}
 	
 	return majorRet;
+};
+
+dusk.EventDispatcher.prototype._checkProps = function(event, props, positive) {
+	for(var p in props) {
+		if((!positive && event[p] === props[p])
+		|| (positive && event[p] !== props[p])) {
+			return false;
+		}
+	}
+	
+	return true;
 };
 
 /** Returns whether this EventDispatcher has any listeners or not.
