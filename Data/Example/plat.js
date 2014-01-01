@@ -48,7 +48,7 @@ example.plat.playerAni = [
 	["#dy<0 & :lastMoveLeft=true", "3,1", {}],
 	["#dy>0 & #tb=0", "4,0", {}],
 	["#dy>0 & :lastMoveLeft=true & #tb=0", "4,1", {}],
-	["on beh_terminate", "L|0,1|0,2|1,2|2,2|3,2|4,2|5,2|6,2|7,2|/terminate", {}]
+	["on terminate", "L|0,1|0,2|1,2|2,2|3,2|4,2|5,2|6,2|7,2|/terminate", {}]
 ];
 
 example.plat.playerParts = [

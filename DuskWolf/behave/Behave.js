@@ -73,7 +73,7 @@ dusk.behave.Behave.prototype._data = function(name, value, init) {
  * Entities should listen for the "controlActive" event, whose object has the property "control"; the name of the
  *  control. Any of these listeners returning true will mean the control is active.
  * 
- * If the control is in an entity data earray "controlsOn", this will always return true, as well.
+ * If the control is in an entity data array "controlsOn", this will always return true, as well.
  * 
  * @param {string} name The name of the control to check.
  * @return {boolean} Whether the control is activated or not.

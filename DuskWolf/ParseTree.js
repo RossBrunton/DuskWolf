@@ -195,7 +195,7 @@ dusk.parseTree.Compiler.prototype.compile = function(str, init) {
 /** Reads until it finds an operand and then an operator.
  * 
  * @param {string} str The string to read.
- * @param {int} init When to start reading from.
+ * @param {integer} init When to start reading from.
  * @returns {array} Array containing, in order, the operand, the operator, exec function, priority, 
  *  the new "init" value and array of [op, function] pairs for all the unary operations on the
  *  operand. Operand may be null if there is no more operators in the string. It may also be an open
@@ -301,8 +301,9 @@ Object.seal(dusk.parseTree.ParseTreeCompileError.prototype);
  * @param {string} value For leaves it is it's value, for nodes it is the operator.
  * @param {int=0} priority Used when building the tree, priority  of the operator. Lower values are
  *  higher priority.
- * @param {?function(string, *, *):*} exec The function that should be called to evaluate this node.
- * In leaves, this is null and serves as a way to identify that it is a leaf.
+ * @param {?function(string, *, *):* | function(string, *):*} exec The function that should be
+ *  called to evaluate this node. In leaves, this is null and serves as a way to identify that it is
+ *  a leaf.
 
  * @param {?dusk.parseTree.Node} lhs The left branch, if it is known.
  * @param {?dusk.parseTree.Node} rhs The right branch, if it is known.

@@ -234,7 +234,7 @@ dusk.load.importAll = function() {
  * 
  * Each entry of the array must itself be an array of the form `[file, provided, required]`.
  * @param {string} path The path to the JSON file.
- * @param {function()} callback Will be called when the imports are completed.
+ * @param {function()} callback Will be called when the file load is completed.
  * @since 0.0.15-alpha
  */
 dusk.load.importList = function(path, callback) {

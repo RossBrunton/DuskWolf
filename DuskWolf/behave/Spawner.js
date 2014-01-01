@@ -52,7 +52,7 @@ dusk.behave.Spawner.prototype._spFrame = function(e) {
 dusk.behave.Spawner.prototype._spawn = function(name, dirOverride) {
 	if(!("EntityGroup" in dusk.sgui && this._entity.container instanceof dusk.sgui.EntityGroup)) return;
 	
-	this._entity.animationWait("spawn_"+name, function() {
+	this._entity.animationWait("spawn_"+name, (function() {
 		var spawn = this._data("spawns")[name];
 		var horFacing = spawn.horBase == "facing"?(this._data("headingLeft")?"left":"right"):spawn.horBase;
 		var verFacing = spawn.verBase == "facing"?(this._data("headingUp")?"up":"down"):spawn.verBase;
@@ -121,7 +121,7 @@ dusk.behave.Spawner.prototype._spawn = function(name, dirOverride) {
 		}
 		
 		dropped.behaviourFire("spawned", {"spawner":this._entity, "data":spawn, "dir":dir});
-	}, this);
+	}).bind(this));
 };
 
 dusk.behave.Spawner.prototype._resolve = function(dir, arr) {

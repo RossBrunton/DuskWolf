@@ -101,7 +101,7 @@ dusk.utils.createCanvas = function(width, height) {
 
 /** Retrieves a HTTP get var (the ?name=value part of the URL).
  * @param {string} name The name of the var to get.
- * @return {string} The value of the requested var.
+ * @return {?string} The value of the requested var.
  * 
  * @since 0.0.12-alpha
  */
@@ -112,7 +112,7 @@ dusk.utils.urlGet = function(name) {
 		if(pair[0] == name) return decodeURIComponent(pair[1]);
 	}
 	
-	return false;
+	return null;
 };
 
 /** Returns if the object can be parsed as a JSON string.
@@ -121,13 +121,13 @@ dusk.utils.urlGet = function(name) {
  * @param {string} str The string to test.
  * @return {boolean} Whether the string is a valid JSON string.
  */
-dusk.utils.isJson = function(str) {
+/*dusk.utils.isJson = function(str) {
 	return /^[\],:{}\s]*$/.test(String(str)
 		.replace(/\\["\\\/bfnrtu]/g, '@')
 		.replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']')
 		.replace(/(?:^|:|,)(?:\s*\[)+/g, '')
 	);
-};
+}; Doesn't work */
 
 /** Strips anything that looks like a comment from a JSON string.
  * 
@@ -140,7 +140,7 @@ dusk.utils.isJson = function(str) {
 dusk.utils.jsonParse = function(json) {
 	json = json.replace(/\t/g, " ").replace(/\/\*(?:.|\n)*?\*\//g, "").replace(/\n/g, " ");
 	
-	if(dusk.utils.isJson(json)) return JSON.parse(json);
+	/*if(dusk.utils.isJson(json))*/ return JSON.parse(json);
 	return null;
 };
 
@@ -245,7 +245,7 @@ dusk.utils.SD_BC16 = "BC16";
  * 
  * What this string looks like depends on the co
  * @param {ArrayBuffer} arr The array buffer to stringify.
- * @param {string=dusk.utils.COM_HEX} type The method to stringify.
+ * @param {string=dusk.utils.SD_HEX} type The method to stringify.
  * @return {string} A string representing the data.
  */
 dusk.utils.dataToString = function(arr, type) {

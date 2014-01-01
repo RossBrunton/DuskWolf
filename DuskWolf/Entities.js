@@ -19,21 +19,15 @@ dusk.load.provide("dusk.entities");
  *  each entity has only one type which describes how they act, their data and animations.
  * 	Entity types are simple objects with three properties, `data`, `animation` and `behaviours`.
  * 
- * Entity types are set using `{@link dusk.entities.modifyEntityType}` 
- *  which allows you to specify an entity to inherit from.
- * 	This means you can make an entity type that shares the same properties of another type easily.
+ * Entity types are set using the `{@link dusk.entities.types}` inheritable container, which 
+ *  allows you to specify an entity to inherit from. This means you can make an entity type that 
+ *  shares the same properties of another type easily.
  * 
  * The `data` property describes data used by the entity by its behaviours to do something.
- * 	If a property used by a behaviour is not in this object, it will be created automatically by the behaviour.
- * 	This is a standard object.
+ * 	If a property used by a behaviour is not in this object, it will be created automatically by the
+ *  behaviour. This is a standard object.
  * 
- * The `animation` property describes animation.
- * 	It is an object, the key names are animation names with optional flags (in the form `"name-flag"`)
- *   and the values are data that is used by the animation system, in frames seperated by "|".
- * 	Flags are specified when setting the animation as an array of strings, 
- *   if the animation name and any flag (ones at the start of the array have priority) matches a key
- *   then that animation will run.
- * 	Flags are optional, in that if no flags match, but the name (with no flags) does, then that animation will run.
+ * The `animation` property describes animation, and is described at `{@link dusk.sgui.Entity}`.
  * 
  * @since 0.0.17-alpha
  * @see {@link dusk.sgui.Entity}
@@ -109,8 +103,8 @@ dusk.entities._init = function() {
 	 */
 	this.types = new dusk.InheritableContainer("dusk.entities.types");
 	this.types.createNewType("root", {
-		"data":{},
-		"animation":{"stationary":"0,0"},
+		"data":{"solid":true, "collides":true},
+		"animation":["", "0,0", {}],
 		"behaviours":{}
 	});
 	
@@ -144,5 +138,3 @@ dusk.entities.getBehaviour = function(name) {
 };
 
 dusk.entities._init();
-
-Object.seal(dusk.entities);

@@ -159,14 +159,14 @@ dusk.sgui.IContainer.containerUpdateMouse = function() {};
 
 /** Returns the actual X location, relative to the screen, that the component is at.
  * @param {string} name An identifier for the component.
- * @return {int} The X value, relative to the screen.
+ * @return {integer} The X value, relative to the screen.
  * @since 0.0.20-alpha
  */
 dusk.sgui.IContainer.getTrueX = function(name) {};
 
 /** Returns the actual Y location, relative to the screen, that the component is at.
  * @param {string} name An identifier for the component.
- * @return {int} The Y value, relative to the screen.
+ * @return {integer} The Y value, relative to the screen.
  * @since 0.0.20-alpha
  */
 dusk.sgui.IContainer.getTrueY = function(name) {};
