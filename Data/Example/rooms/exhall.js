@@ -10,6 +10,6 @@ example.plat.rooms.exhall = [{"rows":15,"cols":24,"src":"pimg/techB.png","ani":[
 	[".entType=player", 2, false, {"package":"example.plat.rooms.roomb", "room":"roomb", "mark":0}],
 	[".entType=player", 3, false, {"package":"example.plat.rooms.roomc", "room":"roomc", "mark":0}],
 	[".entType=player", 4, false, {"package":"example.plat.rooms.roomd", "room":"roomd", "mark":0}]
-], "in":{"custom":[function(e, m){console.log("Hello");}, window]}}];
+], "in":{}}];
 
 dusk.plat.rooms.createRoom("exhall", example.plat.rooms.exhall);

@@ -207,6 +207,20 @@ dusk.sgui.Entity = function(parent, comName) {
 	 * @private
 	 */
 	this._dy = {};
+	/** An object containing all the dx multiplications.
+	 * Each key is the name of the source, and each value is an array of the form 
+	 * `[factor, duration, ignores]` as per `{@link dusk.sgui.Entity#multDx}`.
+	 * @type object
+	 * @private
+	 */
+	this._dxMults = {};
+	/** An object containing all the dy multiplications.
+	 * Each key is the name of the source, and each value is an array of the form 
+	 * `[factor, duration, ignores]` as per `{@link dusk.sgui.Entity#multDy}`.
+	 * @type object
+	 * @private
+	 */
+	this._dyMults = {};
 	
 	/** All the behaviours that this entity is using. Each key name is the name of the behaviour,
 	 *  and the value is a `{@link dusk.behave.Behave}` instance.
@@ -219,17 +233,6 @@ dusk.sgui.Entity = function(parent, comName) {
 	 * @type object
 	 */
 	this.behaviourData = {};
-	
-	/** Internal storage of this entity's type's name.
-	 * @type string
-	 * @private
-	 */
-	this._type = "";
-	/** The entity's type. This is the string name of the type in `{@link dusk.entities.types}`.
-	 *  Setting this value will change the entity's type, changing its behaviours and animations.
-	 * @type string
-	 */
-	this.entType = "root";
 	
 	/** The animation data for the entity, in the same format as described in the entity type
 	 *  description. For speed, the second element of the value will be sliced once, and so will be
@@ -379,25 +382,9 @@ dusk.sgui.Entity = function(parent, comName) {
 	 * @type dusk.parseTree
 	 * @private
 	 */
-	this._triggerTree = new dusk.parseTree.Compiler([
-		["*", function(o, l, r) {return +l.eval() * +r.eval();}],
-		["/", function(o, l, r) {return +l.eval() / +r.eval();}],
-		["+", function(o, l, r) {return +l.eval() + +r.eval();}],
-		["-", function(o, l, r) {return +l.eval() - +r.eval();}],
-		["^", function(o, l, r) {return "" + l.eval() +r.eval();}],
-		
-		["=", function(o, l, r) {return l.eval() == r.eval() || l.eval() && r.eval() == "true"}],
-		["!=", function(o, l, r) {return l.eval() != r.eval()}],
-		[">", function(o, l, r) {return l.eval() > r.eval()}],
-		["<", function(o, l, r) {return l.eval() < r.eval()}],
-		[">=", function(o, l, r) {return l.eval() >= r.eval()}],
-		["<=", function(o, l, r) {return l.eval() <= r.eval()}],
-		
-		["&", function(o, l, r) {return l.eval() && r.eval()}],
-		["|", function(o, l, r) {return l.eval() || r.eval()}],
-	], [
+	this._triggerTree = new dusk.parseTree.Compiler(dusk.sgui.Entity._TT_OPS, [
 		["on", (function(o, v) {
-				if(this._currentEvent == v.eval()) {
+				if(this._currentEvent == v) {
 					this._eventTriggeredMark = true;
 					return true;
 				}
@@ -405,7 +392,7 @@ dusk.sgui.Entity = function(parent, comName) {
 			}).bind(this)
 		],
 		["#", (function(o, v) {
-				switch(v.eval()) {
+				switch(v) {
 					case "dx": return this.getDx();
 					case "dy": return this.getDy();
 					case "tb": return this.touchers(dusk.sgui.c.DIR_DOWN).length;
@@ -413,17 +400,29 @@ dusk.sgui.Entity = function(parent, comName) {
 					case "tl": return this.touchers(dusk.sgui.c.DIR_LEFT).length;
 					case "tr": return this.touchers(dusk.sgui.c.DIR_RIGHT).length;
 					case "path": return this.fullPath();
-					default: return "#"+v.eval();
+					default: return "#"+v;
 				}
 			}).bind(this)
 		],
-		["$", (function(o, v) {return this._aniVars[v.eval()];}).bind(this)],
+		["$", (function(o, v) {return this._aniVars[v];}).bind(this)],
 		[".", (function(o, v) {
 				if(this.isLight()) return undefined;
-				return this.prop(v.eval());
+				return this.prop(v);
 			}).bind(this)],
-		[":", (function(o, v) {return this.eProp(v.eval());}).bind(this)],
+		[":", (function(o, v) {return this.eProp(v);}).bind(this)],
+		["-", function(o, v) {return - v;}]
 	]);
+	
+	/** Internal storage of this entity's type's name.
+	 * @type string
+	 * @private
+	 */
+	this._type = "";
+	/** The entity's type. This is the string name of the type in `{@link dusk.entities.types}`.
+	 *  Setting this value will change the entity's type, changing its behaviours and animations.
+	 * @type string
+	 */
+	this.entType = "root";
 	
 	//Default sizes
 	this.sheight = dusk.entities.sheight;
@@ -444,6 +443,31 @@ dusk.sgui.Entity = function(parent, comName) {
 dusk.sgui.Entity.prototype = Object.create(dusk.sgui.Tile.prototype);
 
 dusk.sgui.Entity.prototype.className = "Entity";
+
+//Trigger tree template
+/** The binary tree binary operators. Defined here so that we aren't maknig loads of functions at once.
+ * @type array
+ * @constant
+ * @static
+ * @private
+ */
+dusk.sgui.Entity._TT_OPS = [
+	["*", function(o, l, r) {return +l * +r;}],
+	["/", function(o, l, r) {return +l / +r;}],
+	["+", function(o, l, r) {return +l + +r;}],
+	["-", function(o, l, r) {return +l - +r;}],
+	["^", function(o, l, r) {return "" + l +r;}],
+	
+	["=", function(o, l, r) {return l == r || l && r == "true"}],
+	["!=", function(o, l, r) {return l != r}],
+	[">", function(o, l, r) {return l > r}],
+	["<", function(o, l, r) {return l < r}],
+	[">=", function(o, l, r) {return l >= r}],
+	["<=", function(o, l, r) {return l <= r}],
+	
+	["&", function(o, l, r) {return l && r}],
+	["|", function(o, l, r) {return l || r}],
+];
 
 //Basic getters and setters
 //schemePath
@@ -526,7 +550,13 @@ Object.defineProperty(dusk.sgui.Entity.prototype, "entType", {
 dusk.sgui.Entity.prototype.getDx = function() {
 	var dx = 0;
 	for(var p in this._dx) {
-		dx += this._dx[p][0];
+		var hold = this._dx[p][0];
+		for(var i in this._dxMults) {
+			if(this._dxMults[i][2].indexOf(p) === -1) {
+				hold *= this._dxMults[i][0];
+			}
+		}
+		dx += hold;
 	}
 	return dx;
 };
@@ -537,7 +567,13 @@ dusk.sgui.Entity.prototype.getDx = function() {
 dusk.sgui.Entity.prototype.getDy = function() {
 	var dy = 0;
 	for(var p in this._dy) {
-		dy += this._dy[p][0];
+		var hold = this._dy[p][0];
+		for(var i in this._dyMults) {
+			if(this._dyMults[i][2].indexOf(p) === -1) {
+				hold *= this._dyMults[i][0];
+			}
+		}
+		dy += hold;
 	}
 	return dy;
 };
@@ -584,6 +620,36 @@ dusk.sgui.Entity.prototype.applyDy = function(name, value, duration, accel, limi
 	if(this.getDy() > 0) this.eProp("lastMoveUp", false);
 };
 
+/** Applies a multiplication factor onto the dx. This multiplies the dx value by some value, and can
+ *  be used to stop motion if the factor is 0.
+ * @param {string} name The name of the mult, so it can be referred to later.
+ * @param {float} factor The factor to multiply each dx vaue by.
+ * @param {integer=-1} duration The duration of the effect, or -1 for no limit to the duration.
+ * @param {array=[]} ignores An array of strings, each value is a dx source which will NOT be
+ *  multiplied.
+ */
+dusk.sgui.Entity.prototype.multDx = function(name, factor, duration, ignores) {
+	if(duration === undefined) duration = -1;
+	if(!ignores) ignores = [];
+	if(factor == 1.0) delete this._dxMults[name];
+	else this._dxMults[name] = [factor, duration, ignores];
+};
+
+/** Applies a multiplication factor onto the dy. This multiplies the dy value by some value, and can
+ *  be used to stop motion if the factor is 0.
+ * @param {string} name The name of the mult, so it can be referred to later.
+ * @param {float} factor The factor to multiply each dy vaue by.
+ * @param {integer=-1} duration The duration of the effect, or -1 for no limit to the duration.
+ * @param {array=[]} ignores An array of strings, each value is a dy source which will NOT be
+ *  multiplied.
+ */
+dusk.sgui.Entity.prototype.multDy = function(name, factor, duration, ignores) {
+	if(duration === undefined) duration = -1;
+	if(!ignores) ignores = [];
+	if(factor == 1.0) delete this._dyMults[name];
+	else this._dyMults[name] = [factor, duration, ignores];
+};
+
 /** Called before all entities are moved by `{@link dusk.sgui.EntityGroup}`, and causes all the 
  *  speeds of this entity to accelerate or decelerate if needed.
  * 
@@ -622,6 +688,23 @@ dusk.sgui.Entity.prototype.beforeMove = function() {
 				this._dy[p][0] = this._dy[p][3];
 			if(this._dy[p][3] != undefined && this._dy[p][2] > 0 && this._dy[p][0] > this._dy[p][3])
 				this._dy[p][0] = this._dy[p][3];
+		}
+	}
+	
+	//Timeout mults
+	for(var p in this._dxMults) {
+		if(this._dxMults[p][1] == 0) {
+			delete this._dxMults[p];
+		}else{
+			if(this._dxMults[p][1] > 0) this._dxMults[p][1] --;
+		}
+	}
+	
+	for(var p in this._dyMults) {
+		if(this._dyMults[p][1] == 0) {
+			delete this._dyMults[p];
+		}else{
+			if(this._dyMults[p][1] > 0) this._dyMults[p][1] --;
 		}
 	}
 	
@@ -768,8 +851,9 @@ dusk.sgui.Entity.prototype.performAnimation = function(event, advance) {
 	
 	//Look through animations
 	for(var i = this._animationData.length-1; i >= 0; i --) {
-		if(typeof this._animationData[i][1] == "string")
+		if(typeof this._animationData[i][1] == "string") {
 			this._animationData[i][1] = this._animationData[i][1].split("|");
+		}
 		
 		if(this.meetsTrigger(this._animationData[i][0], event)) {
 			if(i == this._currentAni || (this._aniLock && !event)) {
@@ -854,7 +938,7 @@ dusk.sgui.Entity.prototype._aniAction = function(event, action) {
 		
 		case "/":
 			if(action.substr(1) in this._aniWaits) {
-				this._aniWaits[action.substr(1)][0].call(this._aniWaits[action.substr(1)][1]);
+				this._aniWaits[action.substr(1)]();
 			}
 			if(cont) this._aniForward(event);
 			break;
@@ -911,6 +995,7 @@ dusk.sgui.Entity.prototype._aniForward = function(event, by) {
  * @param {*} trigger The trigger.
  * @param {?string} event The name of the event, if appropriate.
  * @return {*} The result of the evaluated parse tree.
+ * @depreciated
  */
 dusk.sgui.Entity.prototype.meetsTrigger = function(trigger, event) {
 	return this.evalTrigger(trigger, event);
@@ -929,7 +1014,15 @@ dusk.sgui.Entity.prototype.evalTrigger = function(trigger, event) {
 	if(trigger.trim() == "") return true;
 	this._eventTriggeredMark = false;
 	this._currentEvent = event;
+	
+	//var t = performance.now();
 	var e = this._triggerTree.compile(trigger).eval();
+	//var ta = performance.now() - t;
+	//t = performance.now();
+	////var f = this._triggerTree.compileToFunct(trigger)();
+	//var tb = performance.now() - t;
+	//console.log(ta + " vs " + tb);
+	
 	
 	return e;
 };

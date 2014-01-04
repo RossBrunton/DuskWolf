@@ -104,7 +104,7 @@ dusk.entities._init = function() {
 	this.types = new dusk.InheritableContainer("dusk.entities.types");
 	this.types.createNewType("root", {
 		"data":{"solid":true, "collides":true},
-		"animation":["", "0,0", {}],
+		"animation":[["", "0,0", {}]],
 		"behaviours":{}
 	});
 	

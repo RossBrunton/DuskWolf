@@ -66,6 +66,12 @@ dusk.parseTree.Compiler = function(operators, uoperators, whitespace) {
 	 */
 	this._caches = {};
 	
+	/** Cached functions for all that have been run with this compiler, for faster reteival.
+	 * @type object
+	 * @private
+	 */
+	this._functCaches = {};
+	
 	//Populate forth and 4th properties
 	for(var i = this._ops.length-1; i >= 0; i --) {
 		this._ops[i][2] = /^[a-z0-9]+$/i.test(this._ops[i][0]);
@@ -116,10 +122,11 @@ dusk.parseTree.Compiler.WS_OPTIONAL = 2;
  * 
  * @param {string} str The string to compile.
  * @param {int=0} init The character to start evaluating from.
+ * @param {boolean=false} noCache If true, then there will be no caching, and the tree won't be saved for later.
  * @returns {dusk.parseTree.Node} The root of the tree it was compiled to.
  */
-dusk.parseTree.Compiler.prototype.compile = function(str, init) {
-	if(str in this._caches && (init == 0 || init == undefined)) {
+dusk.parseTree.Compiler.prototype.compile = function(str, init, noCache) {
+	if(!noCache && str in this._caches && (init == 0 || init == undefined)) {
 		return this._caches[str];
 	}
 	
@@ -192,6 +199,18 @@ dusk.parseTree.Compiler.prototype.compile = function(str, init) {
 	}
 };
 
+/** Compiles a string directly to a function with caching.
+ * @param {string} The string to compile.
+ * @returns {function():*} A function that returns the value of the evaluated string.
+ */
+dusk.parseTree.Compiler.prototype.compileToFunct = function(str) {
+	if(str in this._functCaches) return this._functCaches[str];
+	
+	var f = this.compile(str, 0, true).toFunction();
+	this._functCaches[str] = f;
+	return f;
+}
+
 /** Reads until it finds an operand and then an operator.
  * 
  * @param {string} str The string to read.
@@ -219,26 +238,6 @@ dusk.parseTree.Compiler.prototype._read = function(str, init) {
 			];
 		}
 		
-		opsloop: for(var i = 0; i < this._ops.length; i++) {
-			if(buffer.endsWith(this._ops[i][0])) {
-				var op = buffer.substring(buffer.length-this._ops[i][0].length);
-				var opand = buffer.substring(0, buffer.length-this._ops[i][0].length);
-				
-				for(var j = 0; j < this._ops[i][3].length; j ++) {
-					if(buffer.endsWith(this._ops[i][3][j])) continue opsloop;
-				}
-				
-				if(this._whitespace == dusk.parseTree.Compiler.WS_ALWAYS
-				|| (this._whitespace == dusk.parseTree.Compiler.WS_ONLYCHARS && this._ops[i][2])) {
-					if(/\s/.test(str[c+1]) && /\s$/.test(opand)) {
-						return [opand.trim(), op, this._ops[i][1], i+1, c+1, uops];
-					}
-				}else{
-					return [opand.trim(), op, this._ops[i][1], i+1, c+1, uops];
-				}
-			}
-		}
-		
 		for(var i = 0; i < this._uops.length; i++) {
 			if(buffer.trim() == this._uops[i][0]) {
 				var op = this._uops[i][0];
@@ -256,6 +255,26 @@ dusk.parseTree.Compiler.prototype._read = function(str, init) {
 				}else{
 					uops.push([op, this._uops[i][1]]);
 					buffer = "";
+				}
+			}
+		}
+		
+		opsloop: for(var i = 0; i < this._ops.length; i++) {
+			if(buffer.endsWith(this._ops[i][0])) {
+				var op = buffer.substring(buffer.length-this._ops[i][0].length);
+				var opand = buffer.substring(0, buffer.length-this._ops[i][0].length);
+				
+				for(var j = 0; j < this._ops[i][3].length; j ++) {
+					if(buffer.endsWith(this._ops[i][3][j])) continue opsloop;
+				}
+				
+				if(this._whitespace == dusk.parseTree.Compiler.WS_ALWAYS
+				|| (this._whitespace == dusk.parseTree.Compiler.WS_ONLYCHARS && this._ops[i][2])) {
+					if(/\s/.test(str[c+1]) && /\s$/.test(opand)) {
+						return [opand.trim(), op, this._ops[i][1], i+1, c+1, uops];
+					}
+				}else{
+					return [opand.trim(), op, this._ops[i][1], i+1, c+1, uops];
 				}
 			}
 		}
@@ -356,7 +375,25 @@ dusk.parseTree.Node.prototype.isUnary = function() {
  */
 dusk.parseTree.Node.prototype.eval = function() {
 	if(this.isLeaf()) return this.value;
-	return this.exec(this.value, this.lhs, this.rhs);
+	if(this.isUnary()) return this.exec(this.value, this.lhs.eval());
+	return this.exec(this.value, this.lhs.eval(), this.rhs.eval());
+};
+
+/** Returns a function that, when called, will return the value of evaluating this tree.
+ * @return {function():*} A function representing this tree.
+ */
+dusk.parseTree.Node.prototype.toFunction = function() {
+	if(this.isLeaf()) return (function(){return this}).bind(this);
+	
+	if(this.isUnary()) {
+		return (function(l) {
+			return this.exec(this.value, l());
+		}).bind(this, this.lhs.toFunction());
+	}else{
+		return (function(l, r) {
+			return this.exec(this.value, l(), r());
+		}).bind(this, this.lhs.toFunction(), this.rhs.toFunction());
+	}
 };
 
 /** Returns a multiline string representation of this node and it's children.

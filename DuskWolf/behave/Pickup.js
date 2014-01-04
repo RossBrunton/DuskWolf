@@ -22,6 +22,7 @@ dusk.behave.Pickup = function(entity) {
 	this._data("value", 1, true);
 	this._data("roomLinked", true, true);
 	this._data("pickupBy", "", true);
+	this._data("pickupName", "", true);
 	
 	this.entityEvent.listen(this._pickCollided, this, {"name":"collidedInto"});
 	this.entityEvent.listen(this._pickLoad, this, {"name":"typeChange"});
@@ -44,10 +45,11 @@ dusk.behave.Pickup.prototype._pickCollided = function(e) {
 	if(!dusk.behave.Pickup.collected(this._data("type"), name, room) && this._entity.behaviourFire("pickup",
 	  {"type":this._data("type"), "value":this._data("value"), "target":e.target}).indexOf(true) === -1
 	) {
-		
-		dusk.behave.Pickup.collect(this._data("type"), this._data("value"), name, room);
-		
-		this._entity.terminate();
+		this._entity.animationWait("pickup", (function() {
+			dusk.behave.Pickup.collect(this._data("type"), this._data("value"), name, room);
+			
+			this._entity.terminate();
+		}).bind(this));
 	}
 };
 
@@ -99,6 +101,8 @@ dusk.behave.Pickup.workshopData = {
 		["value", "integer", "How much it rises how much you have by."],
 		["roomLinked", "boolean", "Should be true unless you give each one a unique name."],
 		["pickupBy", "string", "Trigger criteria for entities that can pick this up."],
+		["pickupName", "string", "If not empty, this will be considered the name of the pickup, rather than its comName"
+		]
 	]
 };
 

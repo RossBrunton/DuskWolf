@@ -57,7 +57,6 @@ I'm going to list them all here.
 - {@link dusk.behave.Pickup}
 - {@link dusk.behave.PlayerControl}
 - {@link dusk.behave.Push}
-- {@link dusk.behave.Spawnable}
 - {@link dusk.behave.Spawner}
 - {@link dusk.behave.Volatile}
 

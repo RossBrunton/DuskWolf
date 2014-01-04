@@ -70,7 +70,7 @@ example.plat.playerParts = [
 
 //Define entities
 dusk.entities.types.createNewType("walk", {
-	"behaviours":{"BackForth":true, "Persist":true, /*"HitDam":true,*/ "Killable":true, "Gravity":true}, 
+	"behaviours":{"BackForth":true, "Persist":true, /*"HitDam":true,*/ "Killable":true, "Gravity":true, "Spawner":true}, 
 	"data":{"dx":5, "slowdown":0, "hp":1, "collisionOffsetX":10, "collisionWidth":22, "collisionOffsetY":3},
 	"animation":example.plat.playerAni, "particles":example.plat.playerParts
 }, "plat");
@@ -83,8 +83,12 @@ dusk.entities.types.createNewType("player", {
 	"data":{
 		"hp":5, "maxHp":5, "collisionOffsetX":10, "collisionWidth":22, "collisionOffsetY":3, "hspeed":5,
 		"spawns":{
-			"shot":{"type":"shot", "horBase":"facing", "verBase":"middle", "cooldown":10, "horOffset":1},
-			"slash":{"type":"slash", "horBase":"facing", "cooldown":30, "data":[{
+			"shot":{
+				"type":"shot", "horBase":"facing", "verBase":"middle", "cooldown":10,
+				"horOffset":1, "multDx":[[0.5, 10, []]], "applyDx":[[1, 5], [-1, 5]]}, //value, duration, accel, limit
+			"slash":{"type":"slash", "horBase":"facing", "cooldown":30, "multDx":[0.5, 10, []],
+			"onlyIf":"#dx<1 & #dx>-1",
+			"data":[{
 				"img":"Example/Slashl.png"
 			}, {
 				"img":"Example/Slash.png"
@@ -137,6 +141,7 @@ dusk.entities.types.createNewType("shot", {
 	"behaviours":{"HitDam":true, "BackForth":true, "Volatile":true},
 	"data":{"solid":false, "img":"Example/Shot.png", "collisionOffsetX":12, "collisionOffsetY":12,
 		"collisionWidth":20, "collisionHeight":20, "hspeed":5, "damages":".entType != player",
+		"killedBy":".entType != player"
 	},
 	"animation":[
 		["", "0,0|1,0", {}]
