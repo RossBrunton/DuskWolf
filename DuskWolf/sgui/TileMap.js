@@ -444,6 +444,8 @@ dusk.sgui.TileMap.prototype.getTile = function(x, y) {
  *  If this is not true, then the changes won't take effect until the map is redrawn.
  */
 dusk.sgui.TileMap.prototype.setTile = function(x, y, tx, ty, update) {
+	if(x > this.cols || y > this.rows || x < 0 || y < 0) return;
+	
 	if(this._tiles[0][((y*this.cols)+x)<<1] !== undefined) {
 		this._tiles[0][((y*this.cols)+x)<<1] = tx;
 		this._tiles[0][(((y*this.cols)+x)<<1)+1] = ty;

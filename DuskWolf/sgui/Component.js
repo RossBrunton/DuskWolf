@@ -233,7 +233,6 @@ dusk.sgui.Component = function (parent, componentName) {
 	 */
 	this.onClick = new dusk.EventDispatcher("dusk.sgui.Component.onClick", dusk.EventDispatcher.MODE_AND);
 	
-	this.enabled = true;
 	/** Whether the component can become focused, if false it cannot be flowed into. 
 	 * @type boolean
 	 * @default true
@@ -271,6 +270,43 @@ dusk.sgui.Component = function (parent, componentName) {
 	 */
 	this.onActiveChange = new dusk.EventDispatcher("dusk.sgui.Component.onActiveChange");
 	this.onActiveChange.listen(function(e){this._active = e.active;}, this);
+	
+	/** If this component becomes focused, then the components specified by these paths will also become focused.
+	 * 
+	 * @type array
+	 * @since 0.0.21-alpha
+	 */
+	this.alsoFocus = [];
+	this.onFocusChange.listen((function(e){
+		if(this.alsoFocus) {
+			for(var i = this.alsoFocus.length-1; i >= 0; i --) {
+				if(this.path(this.alsoFocus[i]) && this.path(this.alsoFocus[i]).container) {
+					this.path(this.alsoFocus[i]).container.flow(this.path(this.alsoFocus[i]).comName);
+				}
+			}
+		}
+	}).bind(this), undefined, {"focus":true});
+	
+	/** If this component's action fires, then the components specified by these paths will become focused.
+	 * 
+	 * If any components are focused due to this, then the action event isn't bubbled to the container.
+	 * 
+	 * @type array
+	 * @since 0.0.21-alpha
+	 */
+	this.actionFocus = [];
+	this.action.listen((function(e){
+		var toReturn = true;
+		if(this.actionFocus) {
+			for(var i = this.actionFocus.length-1; i >= 0; i --) {
+				if(this.path(this.actionFocus[i]) && this.path(this.actionFocus[i]).container) {
+					this.path(this.actionFocus[i]).container.flow(this.path(this.actionFocus[i]).comName);
+					toReturn = false;
+				}
+			}
+		}
+		return toReturn;
+	}).bind(this));
 	
 	/** If the component is deleted from its group.
 	 * 
@@ -323,6 +359,8 @@ dusk.sgui.Component = function (parent, componentName) {
 	this._registerPropMask("type", "type");
 	this._registerPropMask("allowMouse", "allowMouse");
 	this._registerPropMask("mouseAction", "mouseAction");
+	this._registerPropMask("alsoFocus", "alsoFocus");
+	this._registerPropMask("actionFocus", "actionFocus");
 };
 
 /** Components which support this (and all must do so) must support being drawn at arbitary locations.
@@ -593,12 +631,12 @@ Object.defineProperty(dusk.sgui.Component.prototype, "__layer", {
 });
 
 
-/** Resolves a path relative to the current component.
+/** Resolves a path relative to the current component, or null, if it doesn't exist.
  * 
  * See `{@link dusk.sgui}` for a description on how paths work.
  * 
  * @param {string|array} path The path to resolve.
- * @return {dusk.sgui.Component} The component the path is a path to.
+ * @return {?dusk.sgui.Component} The component the path is a path to.
  */
 dusk.sgui.Component.prototype.path = function(path) {
 	if(!path){
@@ -629,7 +667,11 @@ dusk.sgui.Component.prototype.path = function(path) {
 		default:
 			if(dusk.utils.doesImplement(this, dusk.sgui.IContainer)){
 				if(!path.length) return this.getComponent(p);
-				return this.getComponent(p).path(path);
+				if(this.getComponent(p)) {
+					return this.getComponent(p).path(path);
+				}else{
+					return null;
+				}
 			}
 			
 			console.warn(path + " from " + this.comName + " was not found.");

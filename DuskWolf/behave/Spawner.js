@@ -101,13 +101,13 @@ dusk.behave.Spawner.prototype._spFrame = function(e) {
 	
 	for(var p in this._data("spawns")) {
 		if(!this._data("_spawn_cooldowns")[p]) {
-			if(this._controlActive("spawn_"+p+"_l")) this._spawn(p, "left");
-			else if(this._controlActive("spawn_"+p+"_r")) this._spawn(p, "right");
-			else if(this._controlActive("spawn_"+p+"_d")) this._spawn(p, "down");
-			else if(this._controlActive("spawn_"+p+"_u")) this._spawn(p, "up");
-			else if(this._controlActive("spawn_"+p+"_h")) this._spawn(p, "horizontal");
-			else if(this._controlActive("spawn_"+p+"_v")) this._spawn(p, "vertical");
-			else if(this._controlActive("spawn_"+p)) this._spawn(p);
+			if(this._controlActive("spawn_"+p+"_l")) this.spawn(p, "left");
+			else if(this._controlActive("spawn_"+p+"_r")) this.spawn(p, "right");
+			else if(this._controlActive("spawn_"+p+"_d")) this.spawn(p, "down");
+			else if(this._controlActive("spawn_"+p+"_u")) this.spawn(p, "up");
+			else if(this._controlActive("spawn_"+p+"_h")) this.spawn(p, "horizontal");
+			else if(this._controlActive("spawn_"+p+"_v")) this.spawn(p, "vertical");
+			else if(this._controlActive("spawn_"+p)) this.spawn(p);
 		}
 	}
 };
@@ -115,9 +115,8 @@ dusk.behave.Spawner.prototype._spFrame = function(e) {
 /** Actually spawns an entity with the given name.
  * @param {string} name The name of the entity to spawn.
  * @param {?string} dirOverride The direction to spawn; if omitted, then this is determined by the data.
- * @private
  */
-dusk.behave.Spawner.prototype._spawn = function(name, dirOverride) {
+dusk.behave.Spawner.prototype.spawn = function(name, dirOverride) {
 	if(!("EntityGroup" in dusk.sgui && this._entity.container instanceof dusk.sgui.EntityGroup))
 		return;
 	

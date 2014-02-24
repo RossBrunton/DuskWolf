@@ -91,6 +91,7 @@ I'm going to list them all here.
 - {@link dusk.sgui.Rect}
 - {@link dusk.sgui.Scroller}
 - {@link dusk.sgui.Selection}
+- {@link dusk.sgui.Single}
 - {@link dusk.sgui.TextBox}
 - {@link dusk.sgui.Tile}
 - {@link dusk.sgui.TileMap}
@@ -99,8 +100,6 @@ I'm going to list them all here.
 **{@link dusk.sgui.effects}**
 
 - {@link dusk.sgui.effects.core}
-- {@link dusk.sgui.effects.spew}
-- {@link dusk.sgui.effects.spread}
 
 **{@link dusk.sgui.extras}**
 
@@ -114,3 +113,5 @@ I'm going to list them all here.
 - {@link dusk.sgui.extras.Radiobox}
 - {@link dusk.sgui.extras.SineSlide}
 - {@link dusk.sgui.extras.SmoothSlide}
+
+**{@link test}**

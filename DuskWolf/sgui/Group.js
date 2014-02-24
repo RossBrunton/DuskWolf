@@ -168,7 +168,7 @@ dusk.sgui.Group = function(parent, comName) {
 	this._registerPropMask("horScroll", "horScroll", undefined, ["children", "allChildren", "width"]);
 	this._registerPropMask("verScroll", "verScroll", undefined, ["children", "allChildren", "height"]);
 	this._registerPropMask("children", "__children", undefined, ["focusBehaviour"]);
-	this._registerPropMask("allChildren", "__allChildren", undefined, ["focusBehaviour"]);
+	this._registerPropMask("allChildren", "__allChildren", undefined, ["focusBehaviour", "children"]);
 	this._registerPropMask("mouseFocus", "mouseFocus", false);
 	
 	//Listeners
@@ -555,7 +555,7 @@ Object.defineProperty(dusk.sgui.Group.prototype, "focusBehaviour", {
 		switch(this._focusBehaviour) {
 			case dusk.sgui.Group.FOCUS_ONE:
 				for(var c = this._componentsArr.length-1; c >= 0; c --) {
-					if(this._focusedCom != c) {
+					if(this._components[this._focusedCom] != this._componentsArr[c]) {
 						if(this._active)
 							this._componentsArr[c].onActiveChange.fire({"active":false});
 						this._componentsArr[c].onFocusChange.fire({"focus":false});
@@ -565,7 +565,7 @@ Object.defineProperty(dusk.sgui.Group.prototype, "focusBehaviour", {
 				
 			case dusk.sgui.Group.FOCUS_ALL:
 				for(var c = this._componentsArr.length-1; c >= 0; c --) {
-					if(this._focusedCom != c) {
+					if(this._components[this._focusedCom] != this._componentsArr[c]) {
 						if(this._active)
 							this._componentsArr[c].onActiveChange.fire({"active":true});
 						this._componentsArr[c].onFocusChange.fire({"focus":true});

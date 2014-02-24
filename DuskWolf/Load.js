@@ -208,13 +208,15 @@ dusk.load.require = function(name) {
  */
 dusk.load.import = function(name) {
 	if(this._currentlyImporting.indexOf(name) !== -1) return;
-	if(!(name in this._names)) {
+	if(!(name in this._names) && name.charAt(0) != "@") {
 		console.error("Package "+name+" not found; could not be imported.");
 		return;
 	}
 	this._currentlyImporting.push(name);
-	for(var i = this._names[name][2].length-1; i >= 0; i --) {
-		dusk.load.import(this._names[name][2][i].replace(">", ""));
+	if(name.charAt(0) != "@") {
+		for(var i = this._names[name][2].length-1; i >= 0; i --) {
+			dusk.load.import(this._names[name][2][i].replace(">", ""));
+		}
 	}
 };
 
@@ -261,20 +263,29 @@ dusk.load.importList = function(path, callback) {
  * @since 0.0.17-alpha
  */
 dusk.load._tryToImport = function(name, ignoreDefer) {
-	if(dusk.load._names[name][1] != 0) return false;
-	for(var i = dusk.load._names[name][2].length-1; i >= 0; i --) {
-		if(!(dusk.load._names[name][2][i].replace(">", "") in dusk.load._names)) {
-			console.warn("Dependency "+dusk.load._names[name][2][i].replace(">", "")+" for "+name+" not found!");
-		}else if(!(dusk.load._names[name][2][i].charAt(0) === ">" && ignoreDefer)
-		&& dusk.load._names[dusk.load._names[name][2][i].replace(">", "")][1] < 2) return false;
-	}
+	if(name.charAt(0) != "@") {
+		if(dusk.load._names[name][1] != 0) return false;
+		for(var i = dusk.load._names[name][2].length-1; i >= 0; i --) {
+			if(!(dusk.load._names[name][2][i].replace(">", "") in dusk.load._names)) {
+				console.warn("Dependency "+dusk.load._names[name][2][i].replace(">", "")+" for "+name+" not found!");
+			}else if(!(dusk.load._names[name][2][i].charAt(0) === ">" && ignoreDefer)
+			&& dusk.load._names[dusk.load._names[name][2][i].replace(">", "")][1] < 2) return false;
+		}
 	
-	console.log("Now importing: "+name);
-	dusk.load._current = name;
-	var js = document.createElement("script");
-	js.src = dusk.load._names[name][0];// + ((!("dev" in dusk) || dusk.dev)?"?_="+(new Date()).getTime():"");
-	document.head.appendChild(js);
-	dusk.load._names[name][1] = 1;
+		console.log("Now importing: "+name);
+		dusk.load._current = name;
+		var js = document.createElement("script");
+		js.src = dusk.load._names[name][0];// + ((!("dev" in dusk) || dusk.dev)?"?_="+(new Date()).getTime():"");
+		document.head.appendChild(js);
+		dusk.load._names[name][1] = 1;
+	}else{
+		console.log("Now importing from "+name.substring(1));
+		dusk.load._current = name;
+		var js = document.createElement("script");
+		js.src = name.substring(1);
+		document.head.appendChild(js);
+		dusk.load._names[name] = [name, 2, [], 0];
+	}
 	return true;
 };
 

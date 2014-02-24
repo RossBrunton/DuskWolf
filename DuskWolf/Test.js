@@ -16,12 +16,6 @@ dusk.load.provide("test");
  * @private
  */
 test._init = function() {
-	/** An array of strings, each string is the name of a package that when imported will do tests.
-	 * @type array
-	 * @private
-	 */
-	this._testPackages = [];
-	
 	/** The currently running test package, should be set at the top of every testing package.
 	 * @type string
 	 */
@@ -44,6 +38,13 @@ test._init = function() {
 	 * @default false
 	 */
 	this.debug = false;
+	
+	/** An array of all testing functions.
+	 * @type array
+	 * @private
+	 * @since 0.0.21-alpha
+	 */
+	this._tests = [];
 };
 
 /** Loads a dependancy file that contains only tests. This will be used with `{@link test.testAll}`
@@ -53,17 +54,27 @@ test._init = function() {
 test.loadTests = function(url) {
 	dusk.load.importList(url, function(data, textStatus, url) {
 		for(var i = data.length-1; i >= 0; i--) {
-			test._testPackages = test._testPackages.concat(data[i][1]);
+			dusk.load.import(data[i][1]);
 		}
 	});
 };
 
-/** Imports all testing packages, in effect running all the tests. */
-test.doAllTests = function() {
-	for(var i = this._testPackages.length-1; i >= 0; i--) {
-		dusk.load.import(this._testPackages[i]);
+/** Registers a function as a test; it will be called when tests are ran.
+ * @param {function():undefined} test The test function.
+ */
+test.registerTestFunction = function(test) {
+	this._tests.push(test);
+};
+
+/** Calls all testing functions; running all tests. 
+ * @since 0.0.21-alpha
+ */
+test.testAll = function() {
+	for(var i = this._tests.length-1; i >= 0; i --){
+		this._tests[i](window);
 	}
 };
+
 
 /** Starts running a test, it is assumed it passes unless it explictly fails.
  * @param {string} name The name of the test.
@@ -111,6 +122,16 @@ test.assertNotEqual = function(a, b) {
 test.assertExists = function(a) {
 	if(a === undefined || a === null) {
 		test.fail("Assertion "+a+" exists failed.");
+	}
+};
+
+/** Fails the test if the assertion that the argument is not null or undefined fails.
+ * @param {*} a The object to check.
+ * @since 0.0.21-alpha
+ */
+test.assertNotExists = function(a) {
+	if(!(a === undefined || a === null)) {
+		test.fail("Assertion "+a+" does not exist failed.");
 	}
 };
 

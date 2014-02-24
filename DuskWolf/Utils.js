@@ -94,7 +94,7 @@ dusk.utils.createCanvas = function(width, height) {
 	var hold = document.createElement("canvas");
 	hold.width = width;
 	hold.height = height;
-	hold.style.imageRendering = "-webkit-optimize-contrast";
+	//hold.style.imageRendering = "-webkit-optimize-contrast";
 	hold.getContext("2d").textBaseline = "middle";
 	return hold;
 };
@@ -179,6 +179,28 @@ dusk.utils.verCompare = function(a, b) {
 	}
 };
 
+/** Given a base and a "." seperated list of object names, resolves that object.
+ * 
+ * For example, `dusk.utils(a, "b.c")` would be the same as `a.b.c`.
+ * 
+ * @param {*} base The base to start looking up from.
+ * @param {string} path The path to look up.
+ * @return {*} The object that was looked up, or undefined if it doesn't exist.
+ * @since 0.0.21-alpha
+ */
+dusk.utils.lookup = function(base, path) {
+	var frags = path.split(".");
+	
+	var now = base;
+	var p = 0;
+	while(p < frags.length && now) {
+		now = now[frags[p]];
+		p ++;
+	}
+	
+	return now;
+};
+
 /** Resolves a relative URL into an absolute one.
  * 
  * If the URL provided is relative, then the base URL will be prepended to it.
@@ -243,7 +265,8 @@ dusk.utils.SD_BC16 = "BC16";
 
 /** Converts a byte buffer to a string.
  * 
- * What this string looks like depends on the co
+ * What this string looks like depends on the compression function.
+ * 
  * @param {ArrayBuffer} arr The array buffer to stringify.
  * @param {string=dusk.utils.SD_HEX} type The method to stringify.
  * @return {string} A string representing the data.

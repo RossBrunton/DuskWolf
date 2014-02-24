@@ -136,7 +136,9 @@ dusk.sgui.EntityWorkshop = function (parent, comName) {
 				"height":20,
 			},
 			"populate":[
-				{"text":"Behaviours"}, {"text":"Data"}, {"text":"Animation"}
+				{"text":"Behaviours", "actionFocus":["../../bodies/behaviours"]},
+				{"text":"Data", "actionFocus":["../../bodies/data"]},
+				{"text":"Animation", "actionFocus":["../../bodies/animation"]}
 			]
 		},
 		"bodies":{
@@ -220,11 +222,6 @@ dusk.sgui.EntityWorkshop = function (parent, comName) {
 	});
 	this.focus = "top";
 	
-	//Lets make buttons do things!
-	this.path("sections/0,0").action.listen(function(e) {this.path("bodies").flow("behaviours");}, this);
-	this.path("sections/1,0").action.listen(function(e) {this.path("bodies").flow("data");}, this);
-	this.path("sections/2,0").action.listen(function(e) {this.path("bodies").flow("animation");}, this);
-	
 	this.path("top/savebutton").action.listen(function(e) {this.saveEntity();}, this);
 	this.path("top/loadbutton").action.listen(function(e) {
 		console.log("Loading "+this.path("top/name").text);
@@ -278,7 +275,8 @@ dusk.sgui.EntityWorkshop.coreWorkshopData = [
 ];
 
 dusk.sgui.EntityWorkshop.prototype._ewFrame = function(e) {
-	if(this.path("bodies/behaviours/list").getFocused().text in dusk.behave) {
+	if(this.path("bodies/behaviours/list").getFocused()
+	&& this.path("bodies/behaviours/list").getFocused().text in dusk.behave) {
 		this.path("bodies/behaviours/help").text = 
 			dusk.behave[this.path("bodies/behaviours/list").getFocused().text].workshopData.help;
 	}else{
@@ -321,6 +319,7 @@ dusk.sgui.EntityWorkshop.prototype._ewKey = function(e) {
 };
 
 dusk.sgui.EntityWorkshop.prototype._behaviourChecked = function(e) {
+	if(e.component.path("..").text == "---") return;
 	if(e.checked) {
 		this._workingWith.behaviours[e.component.path("..").text] = true;
 	}else{
@@ -402,7 +401,7 @@ dusk.sgui.EntityWorkshop.prototype.saveEntity = function() {
 		ent.data[ewd[0]] = toSet;
 	}, this);
 	
-	console.log(ent);
+	console.log(JSON.stringify(ent));
 	
 	dusk.entities.types.setRaw(this.path("top/name").text, ent, this.path("top/extends").text);
 };

@@ -57,17 +57,25 @@ dusk.entities._init = function() {
 	/** Tile width of entities and tilemap tiles.
 	 * 
 	 * This is the width of tiles when drawing them to the canvas.
-	 * @type number
+	 * @type integer
 	 * @default 32
 	 */
 	this.twidth = 32;
 	/** Tile height of entities and tilemap tiles.
 	 * 
 	 * Then this is the height of tiles when drawing them to the canvas.
-	 * @type number
+	 * @type integer
 	 * @default 32
 	 */
 	this.theight = 32;
+	
+	/** Default frame delay for animation.
+	 * 
+	 * This is the amount of time, by default, to wait between each animation event on every entity.
+	 * @type integer
+	 * @default 5
+	 */
+	this.frameDelay = 5;
 	
 	/** The name of the "seek" entity.
 	 * 

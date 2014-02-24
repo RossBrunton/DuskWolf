@@ -20,7 +20,7 @@ dusk.behave.Persist.prototype._persistLoad = function(data) {
 };
 
 dusk.behave.Persist.prototype._persistFrame = function(data) {
-	dusk.behave.Persist.storePersist(this._entity.comName, this._entity.behaviourData);
+	dusk.behave.Persist.storePersist(this._entity.comName, this._entity.behaviourData, this._entity.entType);
 };
 
 /** An event dispatcher that is fired when persistant entity data is updated.
@@ -44,9 +44,10 @@ dusk.behave.Persist._persistData = {};
  * @param {string} name The name of the entity to store data for.
  * @param {object} data The actual data to save.
  */
-dusk.behave.Persist.storePersist = function(name, data) {
+dusk.behave.Persist.storePersist = function(name, data, type) {
 	this._persistData[name] = data;
 	data.entityName = name;
+	data.entityType = type;
 	this.persistDataUpdate.fire({"name":name, "data":data});
 };
 
@@ -58,6 +59,42 @@ dusk.behave.Persist.storePersist = function(name, data) {
  */
 dusk.behave.Persist.getPersist = function(name) {
 	return this._persistData[name];
+};
+
+dusk.behave.Persist.save = function(type, arg) {
+	if(type !== "data") return {};
+	
+	var out = {};
+	
+	if(!("names" in arg) && !("types" in arg)) {
+		for(var p in this._persistData) {
+			out[p] = this._persistData[p];
+		}
+	}else{
+		if("names" in arg) {
+			for(var i = arg.names.length-1; i >= 0; i --) {
+				out[arg.names[i]] = this._persistData[arg.names[i]];
+			}
+		}
+		
+		if("types" in arg) {
+			for(var p in this._persistData) {
+				if(arg.types.indexOf(this._persistData[p].entityType) != -1) {
+					out[p] = this._persistData[p];
+				}
+			}
+		}
+	}
+	
+	return out;
+};
+
+dusk.behave.Persist.load = function(data, type, arg) {
+	if(type != "data") return;
+	
+	for(var p in data) {
+		this._persistData[p] = data[p];
+	}
 };
 
 /** Workshop data used by `{@link dusk.sgui.EntityWorkshop}`.

@@ -523,7 +523,7 @@ dusk.sgui.EntityGroup.prototype.adjustAll = function(dx, dy) {
 dusk.sgui.EntityGroup.prototype.clear = function() {
 	for(var c = this._componentsArr.length-1; c >= 0; c --) {
 		if(this._componentsArr[c].comName != "blank") {
-			this.deleteComponent(c);
+			this.deleteComponent(this._componentsArr[c].comName);
 		}
 	}
 	
@@ -595,6 +595,11 @@ dusk.sgui.EntityGroup.prototype._numberDrop = function(e) {
 		return;
 	}
 	
+	if(!dusk.editor.editDroppers[e.key-48]) {
+		console.warn("Dropper "+(e.key-48)+" not yet set.");
+		return;
+	}
+	
 	var entity = {};
 	
 	if(dusk.editor.editNext) {
@@ -616,7 +621,7 @@ dusk.sgui.EntityGroup.prototype._keyDel = function(e) {
 	for(var c = this._componentsArr.length-1; c >= 0; c --) {
 		if(this._componentsArr[c] == this._selectedEntity) {
 			this._entities.splice(this._entities.indexOf(this._componentsArr[c]), 1);
-			this.deleteComponent(c);
+			this.deleteComponent(this._componentsArr[c].comName);
 			this._selectedEntity = null;
 		}
 	}

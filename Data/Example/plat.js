@@ -148,6 +148,7 @@ dusk.entities.types.createNewType("shot", {
 	]
 }, "plat");
 
+
 dusk.sgui.getPane("hud").parseProps({
 	"children":{
 		"healthBack":{

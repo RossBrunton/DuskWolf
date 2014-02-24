@@ -209,7 +209,7 @@ dusk.keyboard.isKeyPressed = function(code) {
  * @return {array} Information on that key.
  */
 dusk.keyboard.lookupCode = function(code) {
-	if(!(code in this._codes)) return ["UNKNOWN", false, "???"];
+	if(!(code in this._codes)) return ["UNKNOWN", false, ""+code];
 	
 	return this._codes[code];
 };

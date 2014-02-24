@@ -7,7 +7,7 @@ dusk.load.require("dusk.utils");
 
 dusk.load.provide("test.dusk.utils");
 
-(function(window) {
+test.registerTestFunction(function(window) {
 	test.package = "test.dusk.utils";
 
 	test.start("dusk.utils.clone");
@@ -118,6 +118,18 @@ dusk.load.provide("test.dusk.utils");
 	test.assertEqual(dusk.utils.verCompare("10", "11"), -1);
 	
 	
+	test.start("dusk.utils.lookup");
+	var a = {};
+	a.b = {};
+	b.c = {};
+	
+	test.assertEqual(dusk.utils.lookup(a, ""), a);
+	test.assertEqual(dusk.utils.lookup(a, "b"), a.b);
+	test.assertEqual(dusk.utils.lookup(a, "b.c"), a.b.c);
+	
+	test.assertNotExists(dusk.utils.lookup(a, "b.c.d"));
+	
+	
 	test.start("dusk.utils.resolveRelative");
 	
 	test.assertEqual(
@@ -215,4 +227,4 @@ dusk.load.provide("test.dusk.utils");
 		)
 	);
 	
-})(window);
+});

@@ -7,7 +7,7 @@ dusk.load.require("dusk.Range");
 
 dusk.load.provide("test.dusk.Range");
 
-(function(window) {
+test.registerTestFunction(function(window) {
 	test.package = "test.dusk.Range";
 	
 	test.start("Construction");
@@ -89,4 +89,4 @@ dusk.load.provide("test.dusk.Range");
 	ten.value = 10;
 	test.assertEqual(ten.getFraction(), 1.0);
 	
-})(window);
+});

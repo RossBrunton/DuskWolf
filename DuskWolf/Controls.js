@@ -30,6 +30,7 @@ dusk.load.provide("dusk.controls");
  * 	The second example means that for the control to be active,
  *   stick 2 must be 20% or more to it's maximum negative (up or left) value.
  * 
+ * @extends dusk.save.ISavable
  * @since 0.0.15-alpha
  */
 
@@ -107,8 +108,8 @@ dusk.controls.buttonUp = new dusk.EventDispatcher("dusk.controls.buttonUp");
  * 
  * If the control is already registered, this does nothing.
  * @param {string} name The name of the controll to add.
- * @param {integer} defaultKey The default key to fire this control on, as a keycode.
- * @param {integer|string} defaultButton The default button to fire this control on,
+ * @param {?integer} defaultKey The default key to fire this control on, as a keycode.
+ * @param {?integer|string} defaultButton The default button to fire this control on,
  *  either a button ID, or a axis description.
  */
 dusk.controls.addControl = function(name, defaultKey, defaultButton) {
@@ -136,6 +137,7 @@ dusk.controls.lookupControl = function(name) {
  * @param {integer} key The key to set the control to, as a keycode.
  */
 dusk.controls.mapKey = function(name, key) {
+	if(!(name in dusk.controls._mappings)) return;
 	dusk.controls._mappings[name][0] = key;
 };
 
@@ -145,6 +147,7 @@ dusk.controls.mapKey = function(name, key) {
  * @param {integer|string} button The button ID, or the axis description to register to the control.
  */
 dusk.controls.mapButton = function(name, button) {
+	if(!(name in dusk.controls._mappings)) return;
 	dusk.controls._mappings[name][1] = button;
 };
 
@@ -157,7 +160,7 @@ dusk.controls.mapButton = function(name, button) {
  * @return {boolean} Whether either the button or the key match the specified control.
  */
 dusk.controls.check = function(name, key, button) {
-	return dusk.controls.checkKey(key) || dusk.controls.checkButton(button);
+	return dusk.controls.checkKey(name, key) || dusk.controls.checkButton(name, button);
 };
 
 /** Checks if a key matches the specified control.
@@ -166,6 +169,7 @@ dusk.controls.check = function(name, key, button) {
  * @return {boolean} Whether the specified key is the same key used to trigger the control.
  */
 dusk.controls.checkKey = function(name, key) {
+	if(!(name in dusk.controls._mappings) || key == null || key == undefined) return false;
 	return dusk.controls._mappings[name][0] == key;
 };
 
@@ -175,6 +179,7 @@ dusk.controls.checkKey = function(name, key) {
  * @return {boolean} Whether the specified button or axis matches the control.
  */
 dusk.controls.checkButton = function(name, button) {
+	if(!(name in dusk.controls._mappings) || button == null || button == undefined) return false;
 	if(typeof dusk.controls._mappings[name][1] == "string") {
 		var axis = dusk.controls._mappings[name][1].split("+")[0].split("-")[0];
 		if(axis == button) {
@@ -283,5 +288,52 @@ dusk.controls._frame = function(e) {
 	}
 };
 dusk.frameTicker.onFrame.listen(dusk.controls._frame, dusk.controls);
+
+/** Saves the bindings to a save source.
+ * 
+ * Type can only be `"bindings"`, everything else is ignored. The argument is an array of what controls should have
+ *  their bindings saved. If it contains `"*"` then all keybindings are saved.
+ * 
+ * @param {string} type The type of thing to save; must be `"bindings"`.
+ * @param {array} arg The argument to the save, as described above.
+ * @return {object} Save data that can be loaded later.
+ * @since 0.0.21-alpha
+ */
+dusk.controls.save = function(type, arg) {
+	if(type == "bindings") {
+		var out = {};
+		
+		if(!arg || arg.indexOf("*") !== -1) {
+			for(p in this._mappings) {
+				out[p] = this._mappings[p];
+			}
+		}else{
+			for(var i = arg.length-1; i >= 0; i --) {
+				if(this._mappings[arg[p]]) {
+					out[arg[i]] = this._mappings[arg[i]];
+				}
+			}
+		}
+		
+		return out;
+	}
+};
+
+/** Restores data that was saved via `{@link dusk.controls.save}`.
+ * 
+ * @param {object} data The data that was saved.
+ * @param {string} type The type of data that was saved.
+ * @param {array} arg The argument that was used in saving.
+ * @since 0.0.21-alpha
+ */
+dusk.controls.load = function(data, type, arg) {
+	if(type == "bindings") {
+		for(var p in data) {
+			this.addControl(p);
+			this.mapKey(p, data[p][0]);
+			this.mapButton(p, data[p][1]);
+		}
+	}
+};
 
 Object.seal(dusk.controls);

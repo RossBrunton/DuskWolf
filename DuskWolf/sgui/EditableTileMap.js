@@ -65,6 +65,13 @@ dusk.sgui.EditableTileMap = function (parent, comName) {
 	 * @default 1
 	 */
 	this.frameWidth = 1;
+	/** The current copied selection.
+	 * 
+	 * @type Uint8Array
+	 * @private
+	 * @since 0.0.21-alpha
+	 */
+	this._clipboard = null;
 	
 	//Prop masks
 	this._registerPropMask("cursorColour", "cursorColour");
@@ -91,6 +98,9 @@ dusk.sgui.EditableTileMap = function (parent, comName) {
 			this.drawAll();
 		}
 	}, this, {"key":69});
+	
+	this.keyPress.listen(this._copy.bind(this), undefined, {"key":67});
+	this.keyPress.listen(this._paste.bind(this), undefined, {"key":80});
 	
 	//Directions
 	this.dirPress.listen(this._etmRightAction, this, {"dir":dusk.sgui.c.DIR_RIGHT});
@@ -177,6 +187,46 @@ dusk.sgui.EditableTileMap.prototype._editTileMapFrame = function(e) {
 			this.frameHeight = dusk.sgui.EditableTileMap.globalEditHeight;
 		}
 	}
+};
+
+/** Does a copy operation, copying the current frame to the clipboard.
+ * @param {object} e An event object from `{@link dusk.sgui.Component#keyPress}`.
+ * @private
+ * @since 0.0.21-alpha
+ */
+dusk.sgui.EditableTileMap.prototype._copy = function(e) {
+	if(e.ctrlKey || !dusk.editor.active) return true;
+	
+	this._clipboard = [];
+	
+	var p = 0;
+	for(var x = this.frameWidth-1; x >= 0; x --) {
+		for(var y = this.frameHeight-1; y >= 0; y --) {
+			this._clipboard[p++] = this.getTile(this._cx+x, this._cy+y);
+		}
+	}
+	
+	return false;
+};
+
+/** Does a paste operation, coping the current frame from the clipboard to the map.
+ * @param {object} e An event object from `{@link dusk.sgui.Component#keyPress}`.
+ * @private
+ * @since 0.0.21-alpha
+ */
+dusk.sgui.EditableTileMap.prototype._paste = function(e) {
+	if(e.ctrlKey || !dusk.editor.active) return true;
+	
+	var p = 0;
+	for(var x = this.frameWidth-1; x >= 0; x --) {
+		for(var y = this.frameHeight-1; y >= 0; y --) {
+			var tile = this._clipboard[p++];
+			this.setTile(this._cx+x, this._cy+y, tile[0], tile[1]);
+		}
+	}
+	this.drawAll();
+	
+	return false;
 };
 
 /** Used to manage what happens when "up" is pressed, and any other keyboard combinations.

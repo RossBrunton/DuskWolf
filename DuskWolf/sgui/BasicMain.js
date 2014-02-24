@@ -8,6 +8,7 @@ dusk.load.require("dusk.sgui.EditableTileMap");
 dusk.load.require("dusk.sgui.EntityGroup");
 dusk.load.require(">dusk.sgui.ParticleField");
 dusk.load.require(">dusk.sgui.TransitionManager");
+dusk.load.require(">dusk.sgui.Label");
 dusk.load.require("dusk.editor");
 dusk.load.require("dusk.RoomManager");
 
@@ -95,14 +96,16 @@ dusk.sgui.BasicMain.prototype.createRoom = function(name, spawn) {
 		 this.getFirstLayerOfType(dusk.sgui.BasicMain.LAYER_SCHEME | dusk.sgui.BasicMain.LAYER_TILEMAP).height;
 	}
 	
-	var playerData = {};
-	playerData.name = dusk.entities.seek;
-	playerData.type = dusk.entities.seekType;
 	var crd = this.getFirstLayerOfType(dusk.sgui.BasicMain.LAYER_SCHEME).lookTile(spawn, 1);
-	playerData.x = crd[0]*dusk.entities.twidth;
-	playerData.y = crd[1]*dusk.entities.theight;
+	if(crd){
+		var playerData = {};
+		playerData.name = dusk.entities.seek;
+		playerData.type = dusk.entities.seekType;
+		playerData.x = crd[0]*dusk.entities.twidth;
+		playerData.y = crd[1]*dusk.entities.theight;
 	
-	this.getComponent(this._primaryEntityGroup).dropEntity(playerData, true);
+		this.getComponent(this._primaryEntityGroup).dropEntity(playerData, true);
+	}
 	
 	this.autoScroll();
 };

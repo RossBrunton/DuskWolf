@@ -269,9 +269,9 @@ dusk.sgui.Entity = function(parent, comName) {
 	this._aniWaits = {};
 	/** The delay between two frames of animation, in frames.
 	 * @type integer
-	 * @default 5
+	 * @default {@link dusk.entities.frameDelay}
 	 */
-	this.frameDelay = 5;
+	this.frameDelay = dusk.entities.frameDelay;
 	/** The amount of time left before the next frame event is ran.
 	 * @type integer
 	 * @private
@@ -740,6 +740,10 @@ dusk.sgui.Entity.prototype.behaviourFire = function(event, data) {
  */
 dusk.sgui.Entity.prototype.addBehaviour = function(name, reInit) {
 	if(name in this._behaviours && !reInit) return null;
+	if(!dusk.entities.getBehaviour(name)) {
+		console.error("Behaviour "+name+" does not exist for "+this.entType);
+		return;
+	}
 	this._behaviours[name] = new (dusk.entities.getBehaviour(name))(this);
 };
 

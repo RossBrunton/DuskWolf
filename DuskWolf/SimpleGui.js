@@ -144,11 +144,11 @@ dusk.sgui._init = function() {
 	/** The current width of the canvas.
 	 * @type integer
 	 */
-	this.width = $("#"+dusk.elemPrefix+"-canvas")[0].width;
+	this.width = dusk.sgui._getCanvas().width;
 	/** The current height of the canvas.
 	 * @type integer
 	 */
-	this.height = $("#"+dusk.elemPrefix+"-canvas")[0].height;
+	this.height = dusk.sgui._getCanvas().height;
 	
 	/** Fires when the simpleGui system is about to draw a new frame.
 	 * 
@@ -246,6 +246,15 @@ dusk.sgui.MODE_FIXED = 0;
  */
 dusk.sgui.MODE_FULL = 1;
 
+/** Returns the canvas element that sgui is using.
+ * 
+ * @return {HTMLCanvasElement} The canvas.
+ * @private
+ * @since 0.0.21-alpha
+ */
+dusk.sgui._getCanvas = function() {
+	return document.getElementById(dusk.elemPrefix+"-canvas");
+};
 
 /** Returns or creates a pane.
  * @param {string} name The name of the pane to get or create.
@@ -301,7 +310,7 @@ dusk.sgui._draw = function() {
 	requestAnimationFrame(dusk.sgui._draw);
 	if(!dusk.started) return;
 
-	$("#"+dusk.elemPrefix+"-canvas")[0].getContext("2d").clearRect(0, 0, dusk.sgui.width, dusk.sgui.height);
+	dusk.sgui._getCanvas().getContext("2d").clearRect(0, 0, dusk.sgui.width, dusk.sgui.height);
 	dusk.sgui._cacheCanvas.getContext("2d").clearRect(0, 0, dusk.sgui.width, dusk.sgui.height);
 	
 	//Draw panes
@@ -317,7 +326,7 @@ dusk.sgui._draw = function() {
 		dusk.sgui._panes[c].draw(data, dusk.sgui._cacheCanvas.getContext("2d"));
 	}
 
-	$("#"+dusk.elemPrefix+"-canvas")[0].getContext("2d").drawImage(dusk.sgui._cacheCanvas,
+	dusk.sgui._getCanvas().getContext("2d").drawImage(dusk.sgui._cacheCanvas,
 		0, 0, dusk.sgui.width, dusk.sgui.height
 	);	
 	dusk.sgui.onRender.fire({});
@@ -477,12 +486,12 @@ Object.defineProperty(dusk.sgui, "width", {
     	if(value == this.width) return;
     	
     	$("#"+dusk.elemPrefix)[0].setAttribute("width", value);
-    	$("#"+dusk.elemPrefix+"-canvas")[0].width = value;
+    	dusk.sgui._getCanvas().width = value;
     	this._cacheCanvas.width = this.width;
     },
     
     get: function() {
-	    return $("#"+dusk.elemPrefix+"-canvas")[0].width;
+	    return dusk.sgui._getCanvas().width;
     }
 });
 
@@ -492,12 +501,12 @@ Object.defineProperty(dusk.sgui, "height", {
 		if(value == this.height) return;
 		
 		$("#"+dusk.elemPrefix)[0].setAttribute("height", value);
-		$("#"+dusk.elemPrefix+"-canvas")[0].height = value;
+		dusk.sgui._getCanvas().height = value;
 		this._cacheCanvas.height = this.height;
 	},
 	
 	get:function() {
-		return $("#"+dusk.elemPrefix+"-canvas")[0].height;
+		return dusk.sgui._getCanvas().height;
 	}
 });
 
@@ -509,11 +518,14 @@ dusk.sgui._init();
 dusk.pause._init = function() {
 	dusk.pause._previous = "";
 	
+	dusk.pause.allow = false;
+	
 	dusk.controls.addControl("pause", 13, 9);
 	dusk.controls.controlPressed.listen(function(e){dusk.pause.toggle();}, this, {"control":"pause"});
 };
 
 dusk.pause.pause = function() {
+	if(!dusk.pause.allow) return;
 	if(!dusk.pause._previous) dusk.pause._previous = dusk.sgui.getActivePane().comName;
 	dusk.sgui.setActivePane("paused");
 	dusk.sgui.getPane("paused").visible = true;
