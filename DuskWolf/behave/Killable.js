@@ -29,7 +29,7 @@ dusk.behave.Killable.prototype._killableTakeDamage = function(e) {
 	}
 	
 	if(!this._data("currentMercy")) {
-		if(this._entity.behaviourFire("performDamage", e).indexOf(true) === -1) {
+		if(this._entity.behaviourFireWithReturn("performDamage", e).indexOf(true) === -1) {
 			this._data("hp", this._data("hp")-e.damage);
 			this._data("currentMercy", this._data("mercyTime"));
 			
@@ -50,7 +50,7 @@ dusk.behave.Killable.prototype._killableHeal = function(e) {
 	
 	if(this._data("hp") >= this._data("maxHp")) return;
 	
-	if(this._entity.behaviourFire("performHeal", e).indexOf(true) === -1) {
+	if(this._entity.behaviourFireWithReturn("performHeal", e).indexOf(true) === -1) {
 		this._data("hp", this._data("hp")+e.amount);
 		if(this._data("hp") >= this._data("maxHp")) this._data("hp", this._data("maxHp"));
 	}

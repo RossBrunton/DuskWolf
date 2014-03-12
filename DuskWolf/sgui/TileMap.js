@@ -413,6 +413,7 @@ dusk.sgui.TileMap.prototype._tileMapFrame = function(e) {
 dusk.sgui.TileMap.prototype._tileMapDraw = function(e) {
 	if(!this._img) return;
 	if(!this._drawn) this.drawAll();
+	
 	var hscale = this.swidth/this.twidth;
 	var vscale = this.sheight/this.theight;
 	e.c.drawImage(this._all[this._currentFrame], e.d.sourceX*hscale, e.d.sourceY*vscale, e.d.width*hscale, e.d.height*vscale, 

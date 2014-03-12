@@ -42,7 +42,8 @@ dusk.behave.Pickup.prototype._pickCollided = function(e) {
 	var room = "*";
 	if(this._data("roomLinked") && this._entity.path("..")) room = this._entity.path("../..").roomName;
 	
-	if(!dusk.behave.Pickup.collected(this._data("type"), name, room) && this._entity.behaviourFire("pickup",
+	if(!dusk.behave.Pickup.collected(this._data("type"), name, room)
+	&& this._entity.behaviourFireWithReturn("pickup",
 	  {"type":this._data("type"), "value":this._data("value"), "target":e.target}).indexOf(true) === -1
 	) {
 		this._entity.animationWait("pickup", (function() {

@@ -84,7 +84,7 @@ dusk.behave.Behave.prototype._controlActive = function(name) {
 		return true;
 	}
 	
-	if(this._entity.behaviourFire("controlActive", {"control":name}).indexOf(true) !== -1) {
+	if(this._entity.behaviourFireWithReturn("controlActive", {"control":name}).indexOf(true) !== -1) {
 		return true;
 	}
 	

@@ -12,25 +12,25 @@ dusk.save.DropboxSource = function(appKey) {
 };
 dusk.save.DropboxSource.prototype = Object.create(dusk.save.SaveSource.prototype);
 
-dusk.save.DropboxSource.prototype.save = function(saveData, spec, identifier, callback) {
-	Dropbox.appKey = this.appKey;
-	
-	saveData.meta().identifier = identifier;
-	Dropbox.save({
-		"files": [
-			{"url":saveData.toDataUrl(), "filename":spec.prettyName+".json"}
-		],
+dusk.save.DropboxSource.prototype.save = function(saveData, spec, identifier) {
+	return new Promise(function(fullfill, reject) {
+		Dropbox.appKey = this.appKey;
 		
-		"success": function(){callback(true);},
-		"cancel": function(){callback(false);},
-		"error": function(){callback(false);}
+		saveData.meta().identifier = identifier;
+		Dropbox.save({
+			"files": [
+				{"url":saveData.toDataUrl(), "filename":spec.prettyName+".json"}
+			],
+			
+			"success": function(){fullfill(true);},
+			"cancel": function(){reject(new Error("User canceled"));},
+			"error": function(){reject(new Error("Unknown error"));}
+		});
 	});
-	
-	callback(true);
 };
 
 dusk.save.DropboxSource.prototype.autoSave = function(saveData, spec, identifier) {
-	(new dusk.save.LocalStorageSource()).save(saveData, spec, "dropboxAutosave_"+identifier);
+	return (new dusk.save.LocalStorageSource()).save(saveData, spec, "dropboxAutosave_"+identifier);
 };
 
 dusk.save.DropboxSource.prototype.load = function(spec, identifier, callback) {

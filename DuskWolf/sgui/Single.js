@@ -189,83 +189,37 @@ Object.defineProperty(dusk.sgui.Single.prototype, "__child", {
  * @private
  */
 dusk.sgui.Single.prototype._singleDraw = function(e) {
-	var support = this._component.renderSupport;
-	var cacheNeeded = false;
+	var com = this._component;
+	var data = dusk.sgui.drawDataPool.alloc();
 	
-	if(!(support & dusk.sgui.Component.REND_LOCATION)) {
-		console.error("All components must support origin location.");
-		return e;
-	}
+	data.alpha = e.alpha;
 	
-	if(!(support & dusk.sgui.Component.REND_OFFSET) && (this.xOffset || this.yOffset)) {
-		cacheNeeded = true;
-	}
+	var destXAdder = com.xOrigin == dusk.sgui.Component.ORIGIN_MAX?this.width - com.width:0;
+	var destYAdder = com.yOrigin == dusk.sgui.Component.ORIGIN_MAX?this.height - com.height:0;
+	destXAdder = com.xOrigin == dusk.sgui.Component.ORIGIN_MIDDLE?(this.width - com.width)<<1:destXAdder;
+	destXAdder = com.yOrigin == dusk.sgui.Component.ORIGIN_MIDDLE?(this.height - com.height)<<1:destYAdder;
 	
-	if(!(support & dusk.sgui.Component.REND_SLICE) && (this.width >= 0 || this.height >= 0)) {
-		cacheNeeded = true;
-	}
+	data.sourceX = (-this.xOffset + com.x + destXAdder - e.d.sourceX)<0
+	 ? -(-this.xOffset + com.x + destXAdder - e.d.sourceX) : 0;
+	data.sourceY = (-this.yOffset + com.y + destYAdder - e.d.sourceY)<0
+	 ? -(-this.yOffset + com.y + destYAdder - e.d.sourceY) : 0;
+	data.destX = (com.x + destXAdder - this.xOffset - e.d.sourceX)<0
+	 ? e.d.destX : (com.x + destXAdder - this.xOffset - e.d.sourceX) + e.d.destX;
+	data.destY = (com.y + destYAdder - this.yOffset - e.d.sourceY)<0
+	 ? e.d.destY : (com.y + destYAdder - this.yOffset - e.d.sourceY) + e.d.destY;
+	data.width = com.width - data.sourceX;
+	data.height = com.height - data.sourceY;
 	
-	if(!cacheNeeded) {
-		var com = this._component;
-		var data = {"alpha":e.alpha};
-		var destXAdder = com.xOrigin == dusk.sgui.Component.ORIGIN_MAX?this.width - com.width:0;
-		var destYAdder = com.yOrigin == dusk.sgui.Component.ORIGIN_MAX?this.height - com.height:0;
-		destXAdder = com.xOrigin == dusk.sgui.Component.ORIGIN_MIDDLE?(this.width - com.width)<<1:destXAdder;
-		destXAdder = com.yOrigin == dusk.sgui.Component.ORIGIN_MIDDLE?(this.height - com.height)<<1:destYAdder;
-		
-		data.sourceX = (-this.xOffset + com.x + destXAdder - e.d.sourceX)<0
-		 ? -(-this.xOffset + com.x + destXAdder - e.d.sourceX) : 0;
-		data.sourceY = (-this.yOffset + com.y + destYAdder - e.d.sourceY)<0
-		 ? -(-this.yOffset + com.y + destYAdder - e.d.sourceY) : 0;
-		data.destX = (com.x + destXAdder - this.xOffset - e.d.sourceX)<0
-		 ? e.d.destX : (com.x + destXAdder - this.xOffset - e.d.sourceX) + e.d.destX;
-		data.destY = (com.y + destYAdder - this.yOffset - e.d.sourceY)<0
-		 ? e.d.destY : (com.y + destYAdder - this.yOffset - e.d.sourceY) + e.d.destY;
-		data.width = com.width - data.sourceX;
-		data.height = com.height - data.sourceY;
-		
-		if(data.destX >= e.d.width + e.d.destX) return;
-		if(data.destY >= e.d.height + e.d.destY) return;
-		
-		if(data.width <= 0 || data.height <= 0) return;
-		
-		if(data.width + data.destX > e.d.width + e.d.destX) data.width = (e.d.destX + e.d.width) - data.destX;
-		if(data.height + data.destY > e.d.height + e.d.destY) data.height = (e.d.destY + e.d.height) - data.destY;
-		
-		com.draw(data, e.c);
-	}else{
-		if(this._cache == null) {
-			this._cache = dusk.utils.createCanvas(e.d.width + this.xOffset, e.d.height + this.yOffset);
-		}else{
-			this._cache.width = e.d.width + this.xOffset;
-			this._cache.height = e.d.height + this.yOffset;
-		}
-		
-		var com = this._component;
-		var data = {"alpha":e.alpha};
-		var destXAdder = com.xOrigin == dusk.sgui.Component.ORIGIN_MAX?this.width - com.width:0;
-		var destYAdder = com.yOrigin == dusk.sgui.Component.ORIGIN_MAX?this.height - com.height:0;
-		destXAdder = com.xOrigin == dusk.sgui.Component.ORIGIN_MIDDLE?(this.width - com.width)<<1:destXAdder;
-		destXAdder = com.yOrigin == dusk.sgui.Component.ORIGIN_MIDDLE?(this.height - com.height)<<1:destYAdder;
-		
-		data.sourceX = 0;
-		data.sourceY = 0;
-		data.destX = com.x + destXAdder;
-		data.destY = com.y + destYAdder;
-		data.width = com.width;
-		data.height = com.height;
-		
-		//if(data.destX >= e.d.width + e.d.destX) return;
-		//if(data.destY >= e.d.height + e.d.destY) return;
-		
-		if(data.width <= 0 || data.height <= 0) return;
-		
-		com.draw(data, this._cache.getContext("2d"));
-		
-		e.c.drawImage(this._cache, this.xOffset + e.d.sourceX, this.yOffset + e.d.sourceY, e.d.width, e.d.height,
-			e.d.destX, e.d.destY, e.d.width, e.d.height
-		);
-	}
+	if(data.destX >= e.d.width + e.d.destX) return;
+	if(data.destY >= e.d.height + e.d.destY) return;
+	
+	if(data.width <= 0 || data.height <= 0) return;
+	
+	if(data.width + data.destX > e.d.width + e.d.destX) data.width = (e.d.destX + e.d.width) - data.destX;
+	if(data.height + data.destY > e.d.height + e.d.destY) data.height = (e.d.destY + e.d.height) - data.destY;
+	
+	com.draw(data, e.c);
+	dusk.sgui.drawDataPool.free(data);
 };
 
 /** Returns the component in the group, or creates a new one.

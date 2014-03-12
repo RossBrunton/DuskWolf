@@ -140,62 +140,76 @@ dusk.EventDispatcher.prototype.unlisten = function(id) {
 
 /** Fires an event; triggering all the listeners that apply.
  * 
- * @param {?object} event The event object to fire, and pass to all listeners.
+ * @param {?object} event The event object to fire, and pass to all listeners. This may be undefined.
  */
 dusk.EventDispatcher.prototype.fire = function(event) {
-	if(event === undefined) event = {};
-	var majorRet = null;
-	
-	switch(this.mode) {
-		case 1: //AND
-			majorRet = true;
-			break;
+	if(this.mode == 0) {
+		for(var i = 0; i < this._listeners.length; i ++) {
+			if(this._listeners[i] === null) continue;
+			
+			//Check propsYes
+			if(event && this._listeners[i][1] && !this._checkProps(event, this._listeners[i][1], true))
+				continue;
+			
+			//Check propsNo
+			if(event && this._listeners[i][2] && !this._checkProps(event, this._listeners[i][2], false))
+				continue;
+			
+			//Fire listener
+			this._listeners[i][0](event);
+		}
+	}else{
+		var majorRet = null;
 		
-		case 2: //OR
-			majorRet = false;
-			break;
-		
-		case 3: //PASS
-			majorRet = event;
-			break;
-	}
-	
-	for(var i = 0; i < this._listeners.length; i ++) {
-		if(this._listeners[i] === null) continue;
-		
-		var valid = true;
-		
-		//Check propsYes
-		if(this._listeners[i][1] && !this._checkProps(event, this._listeners[i][1], true))
-			continue;
-		
-		//Check propsNo
-		if(this._listeners[i][2] && !this._checkProps(event, this._listeners[i][2], false))
-			continue;
-		
-		//Fire listener
-		var ret = this._listeners[i][0](event);
-	
 		switch(this.mode) {
 			case 1: //AND
-				majorRet = majorRet&&ret;
+				majorRet = true;
 				break;
 			
 			case 2: //OR
-				majorRet = majorRet||ret;
+				majorRet = false;
 				break;
 			
 			case 3: //PASS
-				majorRet = ret;
-				break;
-			
-			case 4: //LAST
-				majorRet = ret===undefined?majorRet:ret;
+				majorRet = event;
 				break;
 		}
+		
+		for(var i = 0; i < this._listeners.length; i ++) {
+			if(this._listeners[i] === null) continue;
+			
+			//Check propsYes
+			if(event && this._listeners[i][1] && !this._checkProps(event, this._listeners[i][1], true))
+				continue;
+			
+			//Check propsNo
+			if(event && this._listeners[i][2] && !this._checkProps(event, this._listeners[i][2], false))
+				continue;
+			
+			//Fire listener
+			var ret = this._listeners[i][0](event);
+		
+			switch(this.mode) {
+				case 1: //AND
+					majorRet = majorRet&&ret;
+					break;
+				
+				case 2: //OR
+					majorRet = majorRet||ret;
+					break;
+				
+				case 3: //PASS
+					majorRet = ret;
+					break;
+				
+				case 4: //LAST
+					majorRet = ret===undefined?majorRet:ret;
+					break;
+			}
+		}
+		
+		return majorRet;
 	}
-	
-	return majorRet;
 };
 
 dusk.EventDispatcher.prototype._checkProps = function(event, props, positive) {

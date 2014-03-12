@@ -102,8 +102,6 @@ dusk.sgui.EntityGroup = function (parent, comName) {
 	this.dirPress.listen(this._egLeftAction, this, {"dir":dusk.sgui.c.DIR_LEFT});
 	this.dirPress.listen(this._egUpAction, this, {"dir":dusk.sgui.c.DIR_UP});
 	this.dirPress.listen(this._egDownAction, this, {"dir":dusk.sgui.c.DIR_DOWN});
-	
-	window.hook = this;
 };
 dusk.sgui.EntityGroup.prototype = new dusk.sgui.Group();
 dusk.sgui.EntityGroup.constructor = dusk.sgui.EntityGroup;
@@ -282,9 +280,11 @@ dusk.sgui.EntityGroup.prototype._singleMoveAndCollide = function(ent, noMove) {
 			var diffX = 0;
 			if(ent.y + ent.collisionOffsetY < testee.y + testee.collisionHeight
 			&& ent.y + ent.collisionHeight > testee.y + testee.collisionOffsetY) {
-				if(destX + ent.collisionOffsetX < testee.x + testee.collisionOffsetX && ent.getDx()) {
+				if(testee.eProp("solid")
+				&& destX + ent.collisionOffsetX < testee.x + testee.collisionOffsetX && ent.getDx()) {
 					diffX = testee.x + testee.collisionOffsetX - destX - ent.collisionWidth;
-				}else if(destX + ent.collisionWidth > testee.x + testee.collisionWidth && ent.getDx()) {
+				}else if(testee.eProp("solid")
+				&& destX + ent.collisionWidth > testee.x + testee.collisionWidth && ent.getDx()) {
 					diffX = testee.x + testee.collisionWidth - destX - ent.collisionOffsetX;
 				}
 				
@@ -299,9 +299,11 @@ dusk.sgui.EntityGroup.prototype._singleMoveAndCollide = function(ent, noMove) {
 			var diffY = 0;
 			if(ent.x + ent.collisionOffsetX < testee.x + testee.collisionWidth
 			&& ent.x + ent.collisionWidth > testee.x + testee.collisionOffsetX) {
-				if(destY + ent.collisionOffsetY < testee.y + testee.collisionOffsetY && ent.getDy()) {
+				if(testee.eProp("solid")
+				&& destY + ent.collisionOffsetY < testee.y + testee.collisionOffsetY && ent.getDy()) {
 					diffY = testee.y + testee.collisionOffsetY - destY - ent.collisionHeight;
-				}else if(destY + ent.collisionHeight > testee.y + testee.collisionHeight && ent.getDy()) {
+				}else if(testee.eProp("solid")
+				&& destY + ent.collisionHeight > testee.y + testee.collisionHeight && ent.getDy()) {
 					diffY = testee.y + testee.collisionHeight - destY - ent.collisionOffsetY;
 				}
 				

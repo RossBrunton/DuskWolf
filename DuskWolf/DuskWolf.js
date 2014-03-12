@@ -3,6 +3,7 @@
 "use strict";
 
 dusk.load.require("dusk.EventDispatcher");
+dusk.load.require("dusk.advancedLoad");
 
 dusk.load.provide("dusk");
 
@@ -117,7 +118,7 @@ $(document).ready(function(e) {
 		></canvas>";
 		dusk.elemPrefix = elem.id;
 		
-		dusk.load.importList(elem.getAttribute("deps"), function() {
+		dusk.load.importList(elem.getAttribute("deps")).then(function() {
 			dusk.load.import(elem.getAttribute("package"));
 		});
 	}

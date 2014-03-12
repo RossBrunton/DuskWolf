@@ -2,6 +2,9 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
+//Testing; remove this
+window.Promise = null;
+
 if(!dusk) var dusk = {};
 if(!dusk.load) dusk.load = {};
 
@@ -15,6 +18,8 @@ if(!dusk.load) dusk.load = {};
  * A package name may contain as the first character a ">".
  *  This indicates that it should be downloaded AFTER the current package.
  *  This should be used to fix circular dependancies by marking the one that should be ran first with this.
+ * 
+ * There exists a package `dusk.advancedLoad` that adds new functionality to this class.
  */
 
 /** Inits the `dusk.load` namespace.
@@ -58,7 +63,7 @@ dusk.load._init = function() {
 	 * 
 	 * The event object has only one property, package, a string with the package name in it.
 	 * 
-	 * This object will be `null` until `{@link dusk.EventDispatcher}` is imported; 
+	 * This object will be `null` unless `dusk.advancedLoad` is imported; 
 	 *  and this namespace will not make any attempt to import it.
 	 * @type null|EventDispatcher
 	 * @since 0.0.14-alpha
@@ -118,6 +123,13 @@ dusk.load._capability = function() {
 	
 	if(!("ArrayBuffer" in window)) return "Typed arrays not supported!";
 	
+	if(!("Promise" in window) || typeof Promise != "function") {
+		console.warn("Promise not available, importing polyfill.");
+		var js = document.createElement("script");
+		js.src = "DuskWolf/Promise.js";
+		document.head.appendChild(js);
+	}
+	
 	if (!("slice" in ArrayBuffer.prototype)) {
 		console.warn("ArrayBuffer.prototype.slice not supported, doing workaround.");
 		ArrayBuffer.prototype.slice = function (start, end) {
@@ -128,6 +140,18 @@ dusk.load._capability = function() {
 			for (var i = 0; i < resultArray.length; i++)
 				resultArray[i] = that[i + start];
 			return result;
+		}
+	}
+	
+	if(!("endsWith" in String.prototype)) {
+		console.warn("String.endsWith not found, doing workaround.");
+		String.prototype.endsWith = function(pattern) {
+			for (var i = pattern.length, l = this.length; i--;) {
+				if (this.charAt(--l) != pattern.charAt(i)) {
+					return false;
+				}
+			}
+			return true;
 		}
 	}
 	
@@ -208,6 +232,7 @@ dusk.load.require = function(name) {
  */
 dusk.load.import = function(name) {
 	if(this._currentlyImporting.indexOf(name) !== -1) return;
+	
 	if(!(name in this._names) && name.charAt(0) != "@") {
 		console.error("Package "+name+" not found; could not be imported.");
 		return;
@@ -218,6 +243,8 @@ dusk.load.import = function(name) {
 			dusk.load.import(this._names[name][2][i].replace(">", ""));
 		}
 	}
+	
+	dusk.load._repeat();
 };
 
 /** Imports all packages, usefull for debugging or generating dependancy files.
@@ -235,14 +262,20 @@ dusk.load.importAll = function() {
  *  and the entries will be given to `{@link dusk.load.addDependency}`.
  * 
  * Each entry of the array must itself be an array of the form `[file, provided, required]`.
+ * 
+ * If `dusk.advancedLoad` is imported, this returns a promise that resolves when the file is downloaded or fails to
+ *  download.
  * @param {string} path The path to the JSON file.
  * @param {function()} callback Will be called when the file load is completed.
+ * @param {function()} errorCallback Will be called if there is an error.
+ * @returns {undefined|Promise(object)} Undefined or a promise.
  * @since 0.0.15-alpha
  */
-dusk.load.importList = function(path, callback) {
+dusk.load.importList = function(path, callback, errorCallback) {
 	$.ajax({"async":true, "dataType":"JSON", "error":function(jqXHR, textStatus, errorThrown) {
 		console.error("Error getting import file, "+errorThrown);
-	}, "success":[function importSuccess(data, textStatus, jqXHR){
+		if(errorCallback) errorCallback(errorThrown);
+	}, "success":function importSuccess(data, textStatus, jqXHR){
 		var relativePath = jqXHR.responseURL.split("/");
 		relativePath.splice(-1, 1);
 		relativePath = relativePath.join("/")+"/";
@@ -250,7 +283,8 @@ dusk.load.importList = function(path, callback) {
 			if(data[i][0].indexOf(":") === -1 && data[i][0][0] != "/") data[i][0] = relativePath + data[i][0];
 			dusk.load.addDependency(data[i][0], data[i][1], data[i][2], data[i][3]);
 		}
-	}, callback], "beforeSend":function(jqXHR, settings) {jqXHR.responseURL = path;},
+		if(callback) callback(data);
+	}, "beforeSend":function(jqXHR, settings) {jqXHR.responseURL = path;},
 	"url":path});
 };
 
@@ -263,13 +297,17 @@ dusk.load.importList = function(path, callback) {
  * @since 0.0.17-alpha
  */
 dusk.load._tryToImport = function(name, ignoreDefer) {
+	if(dusk.load._names[name][1] == 2) return true;
+	
 	if(name.charAt(0) != "@") {
 		if(dusk.load._names[name][1] != 0) return false;
+		
 		for(var i = dusk.load._names[name][2].length-1; i >= 0; i --) {
 			if(!(dusk.load._names[name][2][i].replace(">", "") in dusk.load._names)) {
 				console.warn("Dependency "+dusk.load._names[name][2][i].replace(">", "")+" for "+name+" not found!");
 			}else if(!(dusk.load._names[name][2][i].charAt(0) === ">" && ignoreDefer)
-			&& dusk.load._names[dusk.load._names[name][2][i].replace(">", "")][1] < 2) return false;
+				&& dusk.load._names[dusk.load._names[name][2][i].replace(">", "")][1] < 2)
+				return false;
 		}
 	
 		console.log("Now importing: "+name);
@@ -286,6 +324,7 @@ dusk.load._tryToImport = function(name, ignoreDefer) {
 		document.head.appendChild(js);
 		dusk.load._names[name] = [name, 2, [], 0];
 	}
+	
 	return true;
 };
 
@@ -308,9 +347,10 @@ dusk.load._repeat = function() {
 				return;
 			}
 		}
+		
+		setTimeout(dusk.load._repeat, 100);
 	}
 };
-setInterval(dusk.load._repeat, 50);
 
 /** Called every 100ms to check if dusk.EventDispatcher is imported; if so, initiates `{@link dusk.load.onProvide}`.
  * @private
@@ -406,7 +446,57 @@ delete window.raf;
 
 dusk.load._init();
 
-Object.seal(dusk.load);
-
 dusk.load.addDependency("", ["dusk.load"], []);
 dusk.load.provide("dusk.load");
+
+
+// Object pools
+/** @class dusk.Pool
+ * 
+ * @classdesc Object pools, for static memory allocation.
+ * 
+ * Objects are taken from this pool when allocated, and returned when freed. This means that the object that is
+ *  allocated is not a new one, but it cuts down on memory allocations and garbadge collection.
+ * 
+ * This class is included with `{@link dusk.load}`, and thus is always available.
+ * 
+ * @param {class(...)} constructor The constructor for the object in the pool.
+ * @param {function(*, args):*} onAlloc Called with the object and specified arguments every time the object is
+ *  allocated. This should return the object to allocate.
+ * @param {function(*):*} onFree Called when the object is freed; should return the object to return to the pool.
+ * @constructor
+ * @since 0.0.21-alpha
+ */
+dusk.Pool = function(constructor, onAlloc, onFree) {
+	this._constructor = constructor;
+	this._onAlloc = onAlloc?onAlloc:function(o, args){return o;};
+	this._onFree = onFree?onFree:function(o) {return o;};
+	
+	this._inPool = 0;
+	this._objects = [];
+	this.highestCount = 0;
+	this._mlWarning = false;
+};
+
+dusk.Pool.prototype.alloc = function(args) {
+	if(this._inPool == 0) {
+		var o = new this._constructor();
+		return this._onAlloc(o, args);
+	}else{
+		this._inPool --;
+		return this._onAlloc(this._objects[this._inPool], args);
+	}
+};
+
+dusk.Pool.prototype.free = function(object) {
+	this._inPool ++;
+	if(this._inPool > this.highestCount) this.highestCount ++;
+	object = this._onFree(object);
+	this._objects[this._inPool-1] = object;
+	
+	if(this._inPool > 0xffff && !this._mlWarning) {
+		console.log("**** MEMORY LEAK WARNING ****");
+		console.log(this);
+		this._mlWarning = true;
+	}
+};

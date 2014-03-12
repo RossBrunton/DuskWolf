@@ -596,7 +596,12 @@ dusk.sgui.Component.prototype.draw = function(d, c) {
 		c.globalAlpha = alpha;
 	}
 	
-	this.prepareDraw.fire({"d":d, "c":c, "alpha":alpha});
+	var event = dusk.sgui.Component._prepareDrawPool.alloc();
+	event.d = d;
+	event.c = c;
+	event.alpha = alpha;
+	this.prepareDraw.fire(event);
+	dusk.sgui.Component._prepareDrawPool.free(event);
 
 	if(this.mark !== null) {
 		c.strokeStyle = this.mark;
@@ -837,6 +842,13 @@ Object.defineProperty(dusk.sgui.Component.prototype, "type", {
 		return dusk.sgui.getTypeName(this);
 	}
 });
+
+/** Pool of event objects for `{@link dusk.sgui.Component#prepareDraw}`.
+ * @type dusk.Pool<Object>
+ * @private
+ * @since 0.0.21-alpha
+ */
+dusk.sgui.Component._prepareDrawPool = new dusk.Pool(Object);
 
 Object.seal(dusk.sgui.Component);
 Object.seal(dusk.sgui.Component.prototype);

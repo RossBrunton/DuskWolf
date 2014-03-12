@@ -52,7 +52,7 @@ test._init = function() {
  * @param {string} url The url of the file.
  */
 test.loadTests = function(url) {
-	dusk.load.importList(url, function(data, textStatus, url) {
+	dusk.load.importList(url).then(function(data, textStatus, url) {
 		for(var i = data.length-1; i >= 0; i--) {
 			dusk.load.import(data[i][1]);
 		}

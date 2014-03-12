@@ -10,11 +10,9 @@ dusk.save._init = function() {
 	
 };
 
-dusk.save.save = function(spec, source, identifier, callback) {
+dusk.save.save = function(spec, source, identifier) {
 	var saveData = spec.save();
-	source.save(saveData, spec, identifier, function(success) {
-		if(callback) callback(success);
-	});
+	return source.save(saveData, spec, identifier);
 };
 
 dusk.save.load = function(spec, source, identifier, callback) {
@@ -85,13 +83,13 @@ dusk.save.SaveSource = function() {
 	
 };
 
-dusk.save.SaveSource.prototype.save = function(saveData, spec, identifier, callback) {
+dusk.save.SaveSource.prototype.save = function(saveData, spec, identifier) {
 	console.warn("Save Source "+this+" doesn't support saving.");
-	callback(false);
+	return Promise.reject(Error("Save Source "+this+" doesn't support saving."));
 };
 
-dusk.save.SaveSource.prototype.autoSave = function(saveData, spec, identifier, callback) {
-	this.save(saveData, spec, identifier, function(){});
+dusk.save.SaveSource.prototype.autoSave = function(saveData, spec, identifier) {
+	return this.save(saveData, spec, identifier);
 };
 
 dusk.save.SaveSource.prototype.load = function(spec, identifier, callback) {
@@ -114,10 +112,10 @@ dusk.save.LocalStorageSource = function() {
 };
 dusk.save.LocalStorageSource.prototype = Object.create(dusk.save.SaveSource.prototype);
 
-dusk.save.LocalStorageSource.prototype.save = function(saveData, spec, identifier, callback) {
+dusk.save.LocalStorageSource.prototype.save = function(saveData, spec, identifier) {
 	saveData.meta().identifier = identifier;
 	localStorage[saveData.meta().spec+"_"+identifier] = saveData.toDataUrl();
-	callback(true);
+	return Promise.resolve(true);
 };
 
 dusk.save.LocalStorageSource.prototype.load = function(spec, identifier, callback) {

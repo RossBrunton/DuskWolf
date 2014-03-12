@@ -377,9 +377,12 @@ dusk.sgui.Group.prototype._groupDraw = function(e) {
 	for(var i = 0; i < this._drawOrder.length; i++) {
 		if(this._drawOrder[i] in this._components) {
 			var com = this._components[this._drawOrder[i]];
-			var data = {"alpha":e.alpha, "sourceX":0, "sourceY":0, "destX":e.d.destX, "destY":e.d.destY,
-				"width":0, "height":0
-			};
+			var data = dusk.sgui.drawDataPool.alloc();
+			data.alpha = e.alpha;
+			data.destX = e.d.destX;
+			data.destY = e.d.destY;
+			data.sourceX = 0;
+			data.sourceY = 0;
 			
 			var destXAdder = 0;
 			if(com.xOrigin == dusk.sgui.Component.ORIGIN_MAX) destXAdder = this.width - com.width;
@@ -420,6 +423,7 @@ dusk.sgui.Group.prototype._groupDraw = function(e) {
 				data.height = (e.d.destY + e.d.height) - data.destY;
 			
 			com.draw(data, e.c);
+			dusk.sgui.drawDataPool.free(data);
 		}
 	}
 };

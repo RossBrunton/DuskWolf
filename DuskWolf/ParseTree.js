@@ -28,14 +28,51 @@ dusk.parseTree = {};
  *  when the operator should be evaluated. The earlier the element in the array, the higher the
  *  priority.
  * 
+ * A few basic operators are included as a convienience. These operators have a higher priority than the custom ones,
+ *  and are as follows, from low to high priority:
+ * 
+ * - `lhs,rhs`: Builds an array, e.g. `a,b,c,d` would result in `[a, b, c, d]`. You can also insert an object into an
+ *  array using `a, arr`.
+ * 
+ * - `lhs|rhs`: Is true iff `lhs` or `rhs` are true.
+ * - `lhs&rhs`: Is true iff `lhs` and `rhs` are true.
+ * - `lhs<=rhs`: Is true iff `lhs` is less than or equal to `rhs`.
+ * - `lhs>=rhs`: Is true iff `lhs` is greater than or equal to `rhs`.
+ * - `lhs<rhs`: Is true iff `lhs` is less than `rhs`.
+ * - `lhs>rhs`: Is true iff `lhs` is greater than `rhs`.
+ * - `lhs!=rhs`: Is true iff `lhs` is not equal to `rhs`.
+ * - `lhs=rhs`: Is true iff `lhs` is equal to `rhs`.
+ * 
+ * - `lhs in rhs`: Is true iff `lhs` is in the array `rhs` or `lhs` is a key in the object `rhs`.
+ * - `lhs@rhs`: Concats two arrays together.
+ * - `lhs^rhs`: Is the string made from concating `lhs` and `rhs`.
+ * - `lhs-rhs`: Is the value from subtracting the number `rhs` from `lhs`. If `lhs` is an array, instead returns the
+ *  array minus any `rhs` elements.
+ * - `lhs+rhs`: Is the value from the sum of the numbers `lhs` and `rhs`.
+ * - `lhs/rhs`: Is the vaule of the number `lhs` divided by `rhs`.
+ * - `lhs*rhs`: Is the product of the numbers `lhs` and `rhs`.
+ * 
+ * - `lhs.rhs`: Do a property look up, like `lhs`[`rhs`] in JS. This also handles numbers, like `1.5`.
+ * 
+ * - `false`: The constant boolean `false`.
+ * - `true`: The constant boolean `true`.
+ * - `!op`: The negation of `op`.
+ * - `+op`: Casts `op` to a number.
+ * - `-op`: Negative `op`, where `op` is a number.
+ * - `JSON op`: Runs `JSON.parse` on `op`. Note that in most cases, you need to sepecify `op` as a string to avoid
+ *  problems with the `:` operator.
+ * 
+ * 
  * @param {array} operators An array of binary operators.
  * @param {array} uoperators An array of unary operators.
+ * @param {array} consts An array of constant operators.
  * @param {int=dusk.parseTree.Compiler.WS_ONLYCHARS} whitespace Whether whitespace needs to
  *  surround the operators.
+ * @param {boolean=false} noBuiltins If true, then the built in "basic" operators will not be used.
  * @constructor
  * @since 0.0.20-alpha
  */
-dusk.parseTree.Compiler = function(operators, uoperators, whitespace) {
+dusk.parseTree.Compiler = function(operators, uoperators, consts, whitespace, noBuiltins) {
 	/** The operators, as described in class descriptor. A third propetry is added, which is a
 	 *  boolean saying whether the operator contains only characters. Another fourth propetry is
 	 *  added, which is a list of all the operators that end with this operator, to check for 
@@ -43,7 +80,58 @@ dusk.parseTree.Compiler = function(operators, uoperators, whitespace) {
 	 * @type array
 	 * @private
 	 */
-	this._ops = operators;
+	this._ops = [];
+	
+	if(!noBuiltins) {
+		this._ops = [
+			[".", function(o, l, r) {
+				if(!isNaN(Number(l+"."+r))) {
+					return Number(l+"."+r);
+				}
+				return l[r];
+			}],
+			
+			["*", function(o, l, r) {return +l * +r;}],
+			["/", function(o, l, r) {return +l / +r;}],
+			["+", function(o, l, r) {return +l + +r;}],
+			["-", function(o, l, r) {
+				if(Array.isArray(l)) {
+					var out = [];
+					for(var i = 0; i < l.length; i ++) {
+						if(l[i] != r) out.push(l[i]);
+					}
+					return out;
+				}else{
+					return +l - +r;
+				}
+			}],
+			["^", function(o, l, r) {return "" + l +r;}],
+			["@", function(o, l, r) {return l.concat(r);}],
+			["in", function(o, l, r) {
+				if(Array.isArray(r)) {
+					return r.indexOf(l) !== -1;
+				}else{
+					return l in r;
+				}
+			}],
+			
+			["=", function(o, l, r) {return l == r || l && r == "true"}],
+			["!=", function(o, l, r) {return l != r}],
+			[">", function(o, l, r) {return l > r}],
+			["<", function(o, l, r) {return l < r}],
+			[">=", function(o, l, r) {return l >= r}],
+			["<=", function(o, l, r) {return l <= r}],
+			
+			["&", function(o, l, r) {return l && r}],
+			["|", function(o, l, r) {return l || r}],
+			
+			[",", function(o, l, r) {return [l].concat(r);}],
+		];
+	}
+	
+	if(operators) {
+		this._ops = this._ops.concat(operators);
+	}
 	
 	/** The unary operators, as described in class descriptor. A third propetry is added, which is a
 	 *  boolean saying whether the operator contains only characters. Another fourth propetry is
@@ -52,7 +140,48 @@ dusk.parseTree.Compiler = function(operators, uoperators, whitespace) {
 	 * @type array
 	 * @private
 	 */
-	this._uops = uoperators;
+	this._uops = [];
+	
+	if(!noBuiltins) {
+		this._uops = [
+			["!", function(o, l) {return l === "false"?true:!l;}],
+			["+", function(o, l) {return +l;}],
+			["-", function(o, l) {return 0-l;}],
+			
+			["JSON", function(o, l) {
+				try {
+					return JSON.parse(l);
+				} catch(e) {
+					console.error(e);
+					return {};
+				}
+			}]
+		];
+	}
+	
+	if(uoperators) {
+		this._uops = this._uops.concat(uoperators);
+	}
+	
+	/** The constant operators, as described in class descriptor. A third propetry is added, which is a
+	 *  boolean saying whether the operator contains only characters. Another fourth propetry is
+	 *  added, which is a list of all the operators that end with this operator, to check for 
+	 *  things like "=" and "!=".
+	 * @type array
+	 * @private
+	 */
+	this._nops = [];
+	
+	if(!noBuiltins) {
+		this._nops = [
+			["false", function(o) {return false;}],
+			["true", function(o) {return true;}],
+		];
+	}
+	
+	if(consts) {
+		this._nops = this._nops.concat(consts);
+	}
 	
 	/** The whitespace policy.
 	 * @type int
@@ -94,6 +223,17 @@ dusk.parseTree.Compiler = function(operators, uoperators, whitespace) {
 			}
 		}
 	}
+	
+	for(var i = this._nops.length-1; i >= 0; i --) {
+		this._nops[i][2] = /^[a-z0-9]+$/i.test(this._nops[i][0]);
+		
+		this._nops[i][3] = [];
+		for(var j = this._nops.length-1; j >= 0; j --) {
+			if(this._nops[j][0].endsWith(this._nops[i][0]) && i != j) {
+				this._nops[i][3].push(this._nops[j][0]);
+			}
+		}
+	}
 };
 
 /** Whitespace should surround operators only if the operators consist only of a-z characters.
@@ -130,18 +270,34 @@ dusk.parseTree.Compiler.prototype.compile = function(str, init, noCache) {
 		return this._caches[str];
 	}
 	
+	//Think of it as everything on the lhs of a node being data to the left, and the rhs being data to the right.
+	
 	var read = [];
 	var i = init?init:0;
 	var root = null;
+	var justClosedBracket = false;
 	
-	while(read = this._read(str, i)) {
+	while(read = this._read(str, i, justClosedBracket)) {
 		i = read[4];
+		read[5] = read[5].reverse();
+		justClosedBracket = false;
 		
+		var op = new dusk.parseTree.Node(read[1], read[3], read[2]);
+		
+		//Unary operators
 		if(read[1] != "(") {
-			var opand = new dusk.parseTree.Node(read[0], 0);
+			var opand = null;
+			if(read[6]) {
+				justClosedBracket = true;
+				opand = new dusk.parseTree.Node(read[1], 0, read[2]);
+			}else{
+				opand = new dusk.parseTree.Node(read[0], 0);
+			}
+			
 			for(var uo = 0; uo < read[5].length; uo ++) {
 				opand = new dusk.parseTree.Node(read[5][uo][0], 0, read[5][uo][1], opand);
 			}
+			
 			if(root == null) {
 				root = opand;
 			}else{
@@ -151,13 +307,15 @@ dusk.parseTree.Compiler.prototype.compile = function(str, init, noCache) {
 			}
 		}
 		
+		
 		if(!read[1] || read[1] == ")") {
 			if(!read[1])
 				this._caches[str] = root;
+			
 			return root;
 		}else if(read[1] == "("){
 			var bop = new dusk.parseTree.Node("bracket_guard", 0, function(o, l, r) {
-					return l.eval();
+					return l;
 				}, this.compile(str, i)
 			);
 			
@@ -179,22 +337,27 @@ dusk.parseTree.Compiler.prototype.compile = function(str, init, noCache) {
 					throw new dusk.parseTree.ParseTreeCompileError("Brackets not closed properly.");
 				}
 			}
+			
 			i ++;
-		}else{
-			var op = new dusk.parseTree.Node(read[1], read[3], read[2]);
-			
-			var p = null;
-			var n = root;
-			var count = 0;
-			while(n.lhs && n.lhs.value != "bracket_guard" && n.lhs.priority >= op.priority) {
-				p = n;
-				n = n.rhs;
-				count ++;
+			justClosedBracket = true;
+		}else if(!read[6]) {
+			if(root.value != "bracket_guard") {
+				var p = null;
+				var n = root;
+				var count = 0;
+				while(n.lhs && n.lhs.value != "bracket_guard" && n.priority >= op.priority) {
+					p = n;
+					n = n.rhs;
+					count ++;
+				}
+				
+				op.lhs = n;
+				if(!p) root = op;
+				else p.rhs = op;
+			}else{
+				op.lhs = root;
+				root = op;
 			}
-			
-			op.lhs = n;
-			if(!p) root = op;
-			else p.rhs = op;
 		}
 	}
 };
@@ -215,19 +378,69 @@ dusk.parseTree.Compiler.prototype.compileToFunct = function(str) {
  * 
  * @param {string} str The string to read.
  * @param {integer} init When to start reading from.
+ * @param {boolean} afterBracket Whether a bracket has just been closed, this means that unaries are forbidden, and 
+ *  binary operators may have an empty string as an operand.
  * @returns {array} Array containing, in order, the operand, the operator, exec function, priority, 
  *  the new "init" value and array of [op, function] pairs for all the unary operations on the
- *  operand. Operand may be null if there is no more operators in the string. It may also be an open
- *  or close bracket.
+ *  operand, and whether this is a constant or not.
+ * 
+ * Operand may be null if there is no more operators in the string. It may also be an open or close bracket.
  * @private
  */
-dusk.parseTree.Compiler.prototype._read = function(str, init) {
+dusk.parseTree.Compiler.prototype._read = function(str, init, afterBracket) {
 	var buffer = "";
 	var uops = [];
 	
 	for(var c = init; c < str.length; c ++) {
 		buffer += str[c];
 		
+		//Constant operators
+		if(!afterBracket) {
+			for(var i = 0; i < this._nops.length; i++) {
+				if(buffer.trim() == this._nops[i][0]) {
+					var op = this._nops[i][0];
+					
+					for(var j = 0; j < this._nops[i][3].length; j ++) {
+						if(buffer.endsWith(this._nops[i][3][j])) continue;
+					}
+					
+					if(this._whitespace == dusk.parseTree.Compiler.WS_ALWAYS
+					|| (this._whitespace == dusk.parseTree.Compiler.WS_ONLYCHARS && this._nops[i][2])) {
+						if(c == str.length-1 || /[\s()]/.test(str[c+1])) {
+							return ["", op, this._nops[i][1], 0, c+1, uops, true];
+						}
+					}else{
+						return ["", op, this._nops[i][1], 0, c+1, uops, true];
+					}
+				}
+			}
+		}
+		
+		//Unary operators
+		if(!afterBracket) {
+			for(var i = 0; i < this._uops.length; i++) {
+				if(buffer.trim() == this._uops[i][0]) {
+					var op = this._uops[i][0];
+					
+					for(var j = 0; j < this._uops[i][3].length; j ++) {
+						if(buffer.endsWith(this._uops[i][3][j])) continue;
+					}
+					
+					if(this._whitespace == dusk.parseTree.Compiler.WS_ALWAYS
+					|| (this._whitespace == dusk.parseTree.Compiler.WS_ONLYCHARS && this._uops[i][2])) {
+						if(c == str.length-1 || /[\s()]/.test(str[c+1])) {
+							uops.push([op, this._uops[i][1]]);
+							buffer = "";
+						}
+					}else{
+						uops.push([op, this._uops[i][1]]);
+						buffer = "";
+					}
+				}
+			}
+		}
+		
+		//Brackets
 		if(str[c] == "(") {
 			//Bracketing time!
 			return ["", "(", "THIS_IS_A_BRACKET", 0, c+1, uops];
@@ -238,31 +451,21 @@ dusk.parseTree.Compiler.prototype._read = function(str, init) {
 			];
 		}
 		
-		for(var i = 0; i < this._uops.length; i++) {
-			if(buffer.trim() == this._uops[i][0]) {
-				var op = this._uops[i][0];
-				
-				for(var j = 0; j < this._uops[i][3].length; j ++) {
-					if(buffer.endsWith(this._uops[i][3][j])) continue;
-				}
-				
-				if(this._whitespace == dusk.parseTree.Compiler.WS_ALWAYS
-				|| (this._whitespace == dusk.parseTree.Compiler.WS_ONLYCHARS && this._uops[i][2])) {
-					if(/\s/.test(str[c+1])) {
-						uops.push([op, this._uops[i][1]]);
-						buffer = "";
-					}
-				}else{
-					uops.push([op, this._uops[i][1]]);
-					buffer = "";
-				}
-			}
-		}
-		
+		//Binary operators
 		opsloop: for(var i = 0; i < this._ops.length; i++) {
 			if(buffer.endsWith(this._ops[i][0])) {
 				var op = buffer.substring(buffer.length-this._ops[i][0].length);
 				var opand = buffer.substring(0, buffer.length-this._ops[i][0].length);
+				var topand = opand.trim();
+				
+				if(topand === "" && !afterBracket) continue;
+				
+				// Check if opand is a string
+				if(['"', "'"].indexOf(topand.charAt(0)) != -1) {
+					if(topand.charAt(0) != topand.charAt(topand.length-1) || topand.length == 1) {
+						continue;
+					}
+				}
 				
 				for(var j = 0; j < this._ops[i][3].length; j ++) {
 					if(buffer.endsWith(this._ops[i][3][j])) continue opsloop;
@@ -271,16 +474,32 @@ dusk.parseTree.Compiler.prototype._read = function(str, init) {
 				if(this._whitespace == dusk.parseTree.Compiler.WS_ALWAYS
 				|| (this._whitespace == dusk.parseTree.Compiler.WS_ONLYCHARS && this._ops[i][2])) {
 					if(/\s/.test(str[c+1]) && /\s$/.test(opand)) {
-						return [opand.trim(), op, this._ops[i][1], i+1, c+1, uops];
+						//Strip quotes
+						if(topand.charAt(0) == "'" || topand.charAt(0) == '"') topand = topand.substring(1);
+						if(topand.charAt(topand.length-1) == "'" || topand.charAt(topand.length-1) == '"')
+							topand = topand.substring(0, topand.length-1);
+						
+						return [topand, op, this._ops[i][1], i+1, c+1, uops];
 					}
 				}else{
-					return [opand.trim(), op, this._ops[i][1], i+1, c+1, uops];
+					//Strip quotes
+					if(topand.charAt(0) == "'" || topand.charAt(0) == '"') topand = topand.substring(1);
+					if(topand.charAt(topand.length-1) == "'" || topand.charAt(topand.length-1) == '"')
+						topand = topand.substring(0, topand.length-1);
+					
+					return [topand, op, this._ops[i][1], i+1, c+1, uops];
 				}
 			}
 		}
 	}
 	
-	return [buffer.trim(), null, null, 0, 0, uops];
+	//Strip quotes
+	var topand = buffer.trim();
+	if(topand.charAt(0) == "'" || topand.charAt(0) == '"') topand = topand.substring(1);
+	if(topand.charAt(topand.length-1) == "'" || topand.charAt(topand.length-1) == '"')
+		topand = topand.substring(0, topand.length-1);
+	
+	return [topand, null, null, 0, 0, uops];
 };
 
 Object.seal(dusk.parseTree.Compiler);
@@ -356,11 +575,18 @@ dusk.parseTree.Node = function(value, priority, exec, lhs, rhs) {
 	this.rhs = rhs?rhs:null;
 };
 
+/** Returns true if and only if the node has a function it can execute.
+ * @return {boolean} Whether this has a function.
+ */
+dusk.parseTree.Node.prototype.hasNoFunct = function() {
+	return !this.exec;
+};
+
 /** Returns true if and only if the node is a leaf node.
  * @return {boolean} Whether this is a leaf node.
  */
 dusk.parseTree.Node.prototype.isLeaf = function() {
-	return !this.exec;
+	return !(this.lhs && this.lhs.value !== "") && !(this.rhs && this.rhs.value !== "");
 };
 
 /** Returns true if and only if the node represents a unary operation.
@@ -374,7 +600,8 @@ dusk.parseTree.Node.prototype.isUnary = function() {
  * @return {*} The value of this node.
  */
 dusk.parseTree.Node.prototype.eval = function() {
-	if(this.isLeaf()) return this.value;
+	if(this.hasNoFunct()) return this.value;
+	if(!this.hasNoFunct() && this.isLeaf()) return this.exec(this.value);
 	if(this.isUnary()) return this.exec(this.value, this.lhs.eval());
 	return this.exec(this.value, this.lhs.eval(), this.rhs.eval());
 };
@@ -383,7 +610,7 @@ dusk.parseTree.Node.prototype.eval = function() {
  * @return {function():*} A function representing this tree.
  */
 dusk.parseTree.Node.prototype.toFunction = function() {
-	if(this.isLeaf()) return (function(){return this}).bind(this);
+	if(this.hasNoFunct()) return (function(){return this}).bind(this);
 	
 	if(this.isUnary()) {
 		return (function(l) {
@@ -408,8 +635,13 @@ dusk.parseTree.Node.prototype.toString = function(indent) {
 		out += " ";
 	}
 	
-	out += "[node "+this.value+":"+this.priority;
-	if(this.isLeaf()) {
+	if(this.value == "") {
+		out += "[node empty:"+this.priority;
+	}else{
+		out += "[node "+this.value+":"+this.priority;
+	}
+	
+	if(this.hasNoFunct()) {
 		out += "]";
 	}else{
 		out += "\n";

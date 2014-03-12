@@ -158,22 +158,7 @@ dusk.load.provide("dusk.entities.LightEntity");
  *  to allow a more fine control on what they interact with.
  * 
  * They are essentially fed to a parse tree from `{@link dusk.parseTree}`, and support the following
- *  operators, low to high priority, anything that has no operator is considered a string:
- * 
- * - `lhs|rhs`: Is true iff `lhs` or `rhs` are true.
- * - `lhs&rhs`: Is true iff `lhs` and `rhs` are true.
- * - `lhs<=rhs`: Is true iff `lhs` is less than or equal to `rhs`.
- * - `lhs>=rhs`: Is true iff `lhs` is greater than or equal to `rhs`.
- * - `lhs<rhs`: Is true iff `lhs` is less than `rhs`.
- * - `lhs>rhs`: Is true iff `lhs` is greater than `rhs`.
- * - `lhs!=rhs`: Is true iff `lhs` is not equal to `rhs`.
- * - `lhs=rhs`: Is true iff `lhs` is equal to `rhs`.
- * 
- * - `lhs^rhs`: Is the string made from concating `lhs` and `rhs`.
- * - `lhs-rhs`: Is the value from subtracting the number `rhs` from `lhs`.
- * - `lhs+rhs`: Is the value from the sum of the numbers `lhs` and `rhs`.
- * - `lhs/rhs`: Is the vaule of the number `lhs` divided by `rhs`.
- * - `lhs*rhs`: Is the product of the numbers `lhs` and `rhs`.
+ *  operators, low to high priority, in addition to the basic ones:
  * 
  * - `on event`: True iff this trigger is being evaluated because of the animation event `event`.
  * - `#dx`: The entity's horizontal speed.
@@ -382,7 +367,7 @@ dusk.sgui.Entity = function(parent, comName) {
 	 * @type dusk.parseTree
 	 * @private
 	 */
-	this._triggerTree = new dusk.parseTree.Compiler(dusk.sgui.Entity._TT_OPS, [
+	this._triggerTree = new dusk.parseTree.Compiler([], [
 		["on", (function(o, v) {
 				if(this._currentEvent == v) {
 					this._eventTriggeredMark = true;
@@ -409,9 +394,8 @@ dusk.sgui.Entity = function(parent, comName) {
 				if(this.isLight()) return undefined;
 				return this.prop(v);
 			}).bind(this)],
-		[":", (function(o, v) {return this.eProp(v);}).bind(this)],
-		["-", function(o, v) {return - v;}]
-	]);
+		[":", (function(o, v) {return this.eProp(v);}).bind(this)]
+	], []);
 	
 	/** Internal storage of this entity's type's name.
 	 * @type string
@@ -443,31 +427,6 @@ dusk.sgui.Entity = function(parent, comName) {
 dusk.sgui.Entity.prototype = Object.create(dusk.sgui.Tile.prototype);
 
 dusk.sgui.Entity.prototype.className = "Entity";
-
-//Trigger tree template
-/** The binary tree binary operators. Defined here so that we aren't maknig loads of functions at once.
- * @type array
- * @constant
- * @static
- * @private
- */
-dusk.sgui.Entity._TT_OPS = [
-	["*", function(o, l, r) {return +l * +r;}],
-	["/", function(o, l, r) {return +l / +r;}],
-	["+", function(o, l, r) {return +l + +r;}],
-	["-", function(o, l, r) {return +l - +r;}],
-	["^", function(o, l, r) {return "" + l +r;}],
-	
-	["=", function(o, l, r) {return l == r || l && r == "true"}],
-	["!=", function(o, l, r) {return l != r}],
-	[">", function(o, l, r) {return l > r}],
-	["<", function(o, l, r) {return l < r}],
-	[">=", function(o, l, r) {return l >= r}],
-	["<=", function(o, l, r) {return l <= r}],
-	
-	["&", function(o, l, r) {return l && r}],
-	["|", function(o, l, r) {return l || r}],
-];
 
 //Basic getters and setters
 //schemePath
@@ -718,9 +677,25 @@ dusk.sgui.Entity.prototype.beforeMove = function() {
  * @param {string} event The name of the event, will be set as the `name` property on the event
  *  data.
  * @param {object={}} data The event data.
- * @return {array} An array of all the return values of the functions.
  */
 dusk.sgui.Entity.prototype.behaviourFire = function(event, data) {
+	if(!data) data = {};
+	data.name = event;
+	var keys = Object.keys(this._behaviours);
+	for(var b = keys.length-1; b >= 0; b --) {
+		this._behaviours[keys[b]].entityEvent.fire(data);
+	}
+};
+
+/** Fires a behaviour event to all of the behaviours on this entity.
+ * 
+ * This returns an array of the return values of all events.
+ * @param {string} event The name of the event, will be set as the `name` property on the event
+ *  data.
+ * @param {object={}} data The event data.
+ * @return {array} An array of all the return values of the functions.
+ */
+dusk.sgui.Entity.prototype.behaviourFireWithReturn = function(event, data) {
 	var output = [];
 	if(!data) data = {};
 	data.name = event;
@@ -1100,7 +1075,7 @@ dusk.sgui.Entity.prototype._collisionDraw = function(e) {
  */
 dusk.sgui.Entity.prototype.terminate = function() {
 	this.terminated = true;
-	if(this.behaviourFire("terminate", {}).indexOf(true) === -1) {
+	if(this.behaviourFireWithReturn("terminate", {}).indexOf(true) === -1) {
 		this.animationWait("terminate", (function() {this.deleted = true;}).bind(this));
 	}
 };

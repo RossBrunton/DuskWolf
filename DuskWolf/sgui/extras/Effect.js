@@ -134,7 +134,7 @@ dusk.sgui.extras.Effect.prototype._startEvent = function(e) {
 /** Ends the effect, will be called automatically when it ends. */
 dusk.sgui.extras.Effect.prototype.end = function() {
 	this._state = 3;
-	this._onEnd.fire({});
+	this._onEnd.fire();
 	
 	if(this.then) {
 		var then = this.then;
@@ -187,13 +187,13 @@ dusk.sgui.extras.Effect.prototype._effectFrame = function(e) {
 	
 	if(this._left == 0 && this._state == 1) {
 		this._state = 2;
-		this._onStart.fire({});
+		this._onStart.fire();
 		this._left = this.duration;
 		if(this.duration < 0) this._left = -1;
 	}
 		
 	if(this._left != 0 && this._state == 2) {
-		this._tick.fire({});
+		this._tick.fire();
 	}
 	
 	if(this._left == 0 && this._state == 2) {

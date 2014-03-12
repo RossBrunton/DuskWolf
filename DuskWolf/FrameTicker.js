@@ -25,13 +25,6 @@ dusk.load.provide("dusk.frameTicker");
  */
 dusk.frameTicker.onFrame = new dusk.EventDispatcher();
 
-/** The function that fires `{@link dusk.frameTicker.onFrame}`; it is called using `setInterval`.
- * 
- * @private
- */
-dusk.frameTicker._doFrame = function() {
-	dusk.frameTicker.onFrame.fire({});
-};
-setInterval(dusk.frameTicker._doFrame, 1000/dusk.frameRate);
+setInterval(dusk.frameTicker.onFrame.fire.bind(dusk.frameTicker.onFrame), 1000/dusk.frameRate);
 
 Object.seal(dusk.frameTicker);

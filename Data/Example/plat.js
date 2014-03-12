@@ -40,8 +40,8 @@ dusk.entities.sheight = 32;
 example.plat.health = new dusk.Range(0, 5, 0);
 
 example.plat.playerAni = [
-	["", "0,0", {}],
-	[":lastMoveLeft=true", "0,1", {}],
+	["true", "0,0", {}],
+	[":lastMoveLeft", "0,1", {}],
 	["#dx>0", '0,0|1,0|0,0|2,0', {"name":"walkRight"}],
 	["#dx<0", "0,1|1,1|0,1|2,1", {}],
 	["#dy<0", "3,0", {}],
@@ -87,12 +87,13 @@ dusk.entities.types.createNewType("player", {
 				"type":"shot", "horBase":"facing", "verBase":"middle", "cooldown":10,
 				"horOffset":1, "multDx":[[0.5, 10, []]], "applyDx":[[1, 5], [-1, 5]]}, //value, duration, accel, limit
 			"slash":{"type":"slash", "horBase":"facing", "cooldown":30, "multDx":[0.5, 10, []],
-			"onlyIf":"#dx<1 & #dx>-1",
-			"data":[{
-				"img":"Example/Slashl.png"
-			}, {
-				"img":"Example/Slash.png"
-			}]}
+				"onlyIf":"#dx<1 & #dx>-1",
+				"data":[{
+					"img":"Example/Slashl.png"
+				}, {
+					"img":"Example/Slash.png"
+				}]
+			}
 		}
 	},
 	"animation":example.plat.playerAni, "particles":example.plat.playerParts

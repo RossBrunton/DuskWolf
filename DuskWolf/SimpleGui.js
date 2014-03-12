@@ -206,6 +206,15 @@ dusk.sgui._init = function() {
 	 */
 	this._mouseY = 0;
 	
+	/** Object pool containing objects for `{@link dusk.sgui._draw}` and the draw handlers of containers.
+	 * 
+	 * Properties will not be deleted when freed.
+	 * 
+	 * @type dusk.Pool<Object>
+	 * @since 0.0.21-alpha
+	 */
+	this.drawDataPool = new dusk.Pool(Object);
+	
 	//Set up the cached canvas
 	this._cacheCanvas.height = this.height;
 	this._cacheCanvas.width = this.width;
@@ -217,7 +226,7 @@ dusk.sgui._init = function() {
 	this._cacheCanvas.getContext("2d").textBaseline = "middle";
 	
 	//Listen for canvas mouse movements
-	$("#"+dusk.elemPrefix+"-canvas").mousemove(function(e){
+	dusk.sgui._getCanvas().addEventListener("mousemove", function(e){
 		dusk.sgui._mouseX = e.clientX;
 		dusk.sgui._mouseY = e.clientY;
 	});
@@ -254,6 +263,16 @@ dusk.sgui.MODE_FULL = 1;
  */
 dusk.sgui._getCanvas = function() {
 	return document.getElementById(dusk.elemPrefix+"-canvas");
+};
+
+/** Returns the duskwolf element that contains the canvas sgui is using.
+ * 
+ * @return {dusk.HTMLDuskwolfElement} The canvas.
+ * @private
+ * @since 0.0.21-alpha
+ */
+dusk.sgui._getDuskwolf = function() {
+	return document.getElementById(dusk.elemPrefix);
 };
 
 /** Returns or creates a pane.
@@ -315,7 +334,7 @@ dusk.sgui._draw = function() {
 	
 	//Draw panes
 	for(var c = 0; c < dusk.sgui._panes.length; c ++){
-		var data = {};
+		var data = dusk.sgui.drawDataPool.alloc();
 		data.alpha = 1;
 		data.sourceX = 0;
 		data.sourceY = 0;
@@ -323,7 +342,9 @@ dusk.sgui._draw = function() {
 		data.destY = dusk.sgui._panes[c].y;
 		data.width = dusk.sgui._panes[c].width;
 		data.height = dusk.sgui._panes[c].height;
+		
 		dusk.sgui._panes[c].draw(data, dusk.sgui._cacheCanvas.getContext("2d"));
+		dusk.sgui.drawDataPool.free(data);
 	}
 
 	dusk.sgui._getCanvas().getContext("2d").drawImage(dusk.sgui._cacheCanvas,
@@ -485,7 +506,7 @@ Object.defineProperty(dusk.sgui, "width", {
     set:function(value) {
     	if(value == this.width) return;
     	
-    	$("#"+dusk.elemPrefix)[0].setAttribute("width", value);
+    	dusk.sgui._getDuskwolf().setAttribute("width", value);
     	dusk.sgui._getCanvas().width = value;
     	this._cacheCanvas.width = this.width;
     },
@@ -500,7 +521,7 @@ Object.defineProperty(dusk.sgui, "height", {
 	set:function(value) {
 		if(value == this.height) return;
 		
-		$("#"+dusk.elemPrefix)[0].setAttribute("height", value);
+		dusk.sgui._getDuskwolf().setAttribute("height", value);
 		dusk.sgui._getCanvas().height = value;
 		this._cacheCanvas.height = this.height;
 	},
