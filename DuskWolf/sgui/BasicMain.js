@@ -8,6 +8,7 @@ dusk.load.require("dusk.sgui.EditableTileMap");
 dusk.load.require("dusk.sgui.EntityGroup");
 dusk.load.require(">dusk.sgui.ParticleField");
 dusk.load.require(">dusk.sgui.TransitionManager");
+dusk.load.require(">dusk.sgui.TileRegion");
 dusk.load.require(">dusk.sgui.Label");
 dusk.load.require("dusk.editor");
 dusk.load.require("dusk.RoomManager");
@@ -37,7 +38,7 @@ dusk.sgui.BasicMain = function(parent, comName) {
 	this._registerPropMask("room", "room", true, ["spawn"]);
 	
 	//Listeners
-	this.frame.listen(this._platMainFrame, this);
+	this.frame.listen(this._basicMainFrame.bind(this));
 	this.keyPress.listen(this.save, this, {"key":83});
 	this.keyPress.listen(function(e) {
 		if(dusk.editor.active) this.createRoom(prompt("Enter a room to go to.", this.roomName), 0);
@@ -58,6 +59,7 @@ dusk.sgui.BasicMain.LAYER_SCHEME = 0x02;
 dusk.sgui.BasicMain.LAYER_ENTITIES = 0x04;
 dusk.sgui.BasicMain.LAYER_PARTICLES = 0x08;
 dusk.sgui.BasicMain.LAYER_TRANSITIONS = 0x10;
+dusk.sgui.BasicMain.LAYER_REGION = 0x20;
 
 dusk.sgui.BasicMain._LAYER_COLOURS = ["#ff0000", "#00ff00", "#0000ff"];
 
@@ -146,6 +148,17 @@ Object.defineProperty(dusk.sgui.BasicMain.prototype, "layers", {
 					
 					break;
 				
+				case dusk.sgui.BasicMain.LAYER_REGION:
+					this.getComponent(val[i].name, "TileRegion").parseProps(
+					{
+						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
+						"twidth":dusk.entities.twidth, "theight":dusk.entities.theight,
+						"swidth":dusk.entities.swidth, "sheight":dusk.entities.sheight, "globalCoords":true,
+						"alpha":0.50
+					});
+					
+					break;
+				
 				case dusk.sgui.BasicMain.LAYER_ENTITIES:
 					this.getComponent(val[i].name, "EntityGroup").parseProps(
 					{"name":"entities", "type":"EntityGroup",
@@ -209,12 +222,20 @@ dusk.sgui.BasicMain.prototype.getTransitionManager = function() {
 	return this.getAllLayersOfType(dusk.sgui.BasicMain.LAYER_TRANSITIONS)[0];
 };
 
+dusk.sgui.BasicMain.prototype.getScheme = function() {
+	return this.getAllLayersOfType(dusk.sgui.BasicMain.LAYER_SCHEME)[0];
+};
+
+dusk.sgui.BasicMain.prototype.getRegion = function() {
+	return this.getAllLayersOfType(dusk.sgui.BasicMain.LAYER_REGION)[0];
+};
+
 dusk.sgui.BasicMain.prototype.getSeek = function() {
 	if(!this.getComponent(this._primaryEntityGroup)) return null;
 	return this.getComponent(this._primaryEntityGroup).getComponent(dusk.entities.seek);
 };
 
-dusk.sgui.BasicMain.prototype._platMainFrame = function(e) {
+dusk.sgui.BasicMain.prototype._basicMainFrame = function(e) {
 	//Center the player
 	this.autoScroll();
 	
@@ -277,7 +298,8 @@ dusk.sgui.BasicMain.prototype._bmUpAction = function(e) {
 	if(dusk.keyboard.isKeyPressed(187)) {
 		//+
 		for(var i = this._layers.length-1; i >= 0; i --) {
-			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap) {
+			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap
+			|| this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileRegion) {
 				this.getComponent(this._layers[i].name).graftTop();
 			}
 			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.EntityGroup) {
@@ -291,7 +313,8 @@ dusk.sgui.BasicMain.prototype._bmUpAction = function(e) {
 	if(dusk.keyboard.isKeyPressed(189)) {
 		//-
 		for(var i = this._layers.length-1; i >= 0; i --) {
-			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap) {
+			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap
+			|| this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileRegion) {
 				this.getComponent(this._layers[i].name).carveTop();
 			}
 			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.EntityGroup) {
@@ -310,7 +333,8 @@ dusk.sgui.BasicMain.prototype._bmDownAction = function(e) {
 	if(dusk.keyboard.isKeyPressed(187)) {
 		//+
 		for(var i = this._layers.length-1; i >= 0; i --) {
-			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap) {
+			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap
+			|| this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileRegion) {
 				this.getComponent(this._layers[i].name).graftBottom();
 			}
 		}
@@ -320,7 +344,8 @@ dusk.sgui.BasicMain.prototype._bmDownAction = function(e) {
 	if(dusk.keyboard.isKeyPressed(189)) {
 		//-
 		for(var i = this._layers.length-1; i >= 0; i --) {
-			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap) {
+			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap
+			|| this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileRegion) {
 				this.getComponent(this._layers[i].name).carveBottom();
 			}
 		}
@@ -335,7 +360,8 @@ dusk.sgui.BasicMain.prototype._bmLeftAction = function(e) {
 	if(dusk.keyboard.isKeyPressed(187)) {
 		//+
 		for(var i = this._layers.length-1; i >= 0; i --) {
-			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap) {
+			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap
+			|| this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileRegion) {
 				this.getComponent(this._layers[i].name).graftLeft();
 			}
 			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.EntityGroup) {
@@ -348,7 +374,8 @@ dusk.sgui.BasicMain.prototype._bmLeftAction = function(e) {
 	if(dusk.keyboard.isKeyPressed(189)) {
 		//-
 		for(var i = this._layers.length-1; i >= 0; i --) {
-			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap) {
+			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap
+			|| this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileRegion) {
 				this.getComponent(this._layers[i].name).carveLeft();
 			}
 			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.EntityGroup) {
@@ -366,7 +393,8 @@ dusk.sgui.BasicMain.prototype._bmRightAction = function(e) {
 	if(dusk.keyboard.isKeyPressed(187)) {
 		//+
 		for(var i = this._layers.length-1; i >= 0; i --) {
-			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap) {
+			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap
+			|| this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileRegion) {
 				this.getComponent(this._layers[i].name).graftRight();
 			}
 		}
@@ -376,7 +404,8 @@ dusk.sgui.BasicMain.prototype._bmRightAction = function(e) {
 	if(dusk.keyboard.isKeyPressed(189)) {
 		//-
 		for(var i = this._layers.length-1; i >= 0; i --) {
-			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap) {
+			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap
+			|| this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileRegion) {
 				this.getComponent(this._layers[i].name).carveRight();
 			}
 		}

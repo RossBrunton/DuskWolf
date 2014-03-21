@@ -157,10 +157,23 @@ dusk.sgui.Component = function (parent, componentName) {
 	 * 
 	 * This is in AND mode, so that any function registered to this that returns `false`
 	 *  will stop the event bubbling to the container component.
+	 * 
+	 * This has a single event object, `component`, which is the component that fired this event.
 	 * @type dusk.EventDispatcher
 	 * @since 0.0.17-alpha
 	 */
 	this.action = new dusk.EventDispatcher("dusk.sgui.Component.action", dusk.EventDispatcher.MODE_AND);
+	/** An event dispatcher that is fired when the action control `"sgui_cancel"` is pressed.
+	 * 	By default, this is the "esc" key, and should be the key that would cancel a selection.
+	 * 
+	 * This is in AND mode, so that any function registered to this that returns `false`
+	 *  will stop the event bubbling to the container component.
+	 * 
+	 * This has a single event object, `component`, which is the component that fired this event.
+	 * @type dusk.EventDispatcher
+	 * @since 0.0.21-alpha
+	 */
+	this.cancel = new dusk.EventDispatcher("dusk.sgui.Component.cancel", dusk.EventDispatcher.MODE_AND);
 	/** Fired as part of the drawing proccess.
 	 * 
 	 * The event object is a 2D canvas rendering context, which is expected to be drawn on.
@@ -461,7 +474,9 @@ dusk.sgui.Component.prototype.doKeyPress = function (e) {
 			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.c.DIR_DOWN, "e":e})) && !this._noFlow
 			&& this.downFlow && this.container.flow(this.downFlow)) return false;
 		}else if(dusk.controls.checkKey("sgui_action", e.which)) {
-			return this.action.fire({"keyPress":e});
+			return this.action.fire({"keyPress":e, "component":this});
+		}else if(dusk.controls.checkKey("sgui_cancel", e.which)) {
+			return this.cancel.fire({"keyPress":e, "component":this});
 		}
 	}
 	

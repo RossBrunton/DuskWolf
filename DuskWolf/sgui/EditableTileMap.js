@@ -91,10 +91,14 @@ dusk.sgui.EditableTileMap = function (parent, comName) {
 	}, this, {"key":73});
 	this.keyPress.listen(function(e) {
 		if(dusk.editor.active) {
+			var tile = this.getTile(this._cx, this._cy);
+			
 			dusk.sgui.TileMap.setAnimation(this.src, prompt(
-				"Enter a (whitespace seperated) animation for "+this.getTile(this._cx, this._cy),
-				dusk.sgui.TileMap.getAnimation(this.src, this.getTile(this._cx, this._cy)).join(" ")
+				"Enter a (whitespace seperated) animation for "+tile,
+				dusk.sgui.TileMap.getAnimation(this.src, tile).join(" ")
 			).split(/\s+/));
+			
+			dusk.sgui.tileMap.tileData.free(tile);
 			this.drawAll();
 		}
 	}, this, {"key":69});
@@ -156,17 +160,20 @@ dusk.sgui.EditableTileMap.prototype._editTileMapDraw = function(e) {
 	);
 	
 	e.c.fillStyle = this.cursorColour;
-	e.c.fillText(this.getTile(this._cx, this._cy),
+	var t = this.getTile(this._cx, this._cy);
+	e.c.fillText(t,
 		e.d.destX - e.d.sourceX + (this._cx*this.tileWidth()) + 1,
 		e.d.destY - e.d.sourceY + (this._cy*this.tileHeight()) + 6
 	);
 	
-	if(dusk.sgui.TileMap.getAnimation(this.src, this.getTile(this._cx, this._cy)).length > 1) {
+	if(dusk.sgui.TileMap.getAnimation(this.src, t).length > 1) {
 		e.c.fillText("\u27F3",
 			e.d.destX - e.d.sourceX + ((this._cx+1)*this.tileWidth()) - 8,
 			e.d.destY - e.d.sourceY + ((this._cy+1)*this.tileHeight()) - 3
 		);
-	} 
+	}
+	
+	dusk.sgui.TileMap.tileData.free(t);
 };
 
 /** Called every frame, it updates the global editor coordinates if appropriate.
@@ -202,7 +209,11 @@ dusk.sgui.EditableTileMap.prototype._copy = function(e) {
 	var p = 0;
 	for(var x = this.frameWidth-1; x >= 0; x --) {
 		for(var y = this.frameHeight-1; y >= 0; y --) {
-			this._clipboard[p++] = this.getTile(this._cx+x, this._cy+y);
+			var t = this.getTile(this._cx+x, this._cy+y);
+			this._clipboard[p++] = [];
+			this._clipboard[p++][0] = t[0];
+			this._clipboard[p++][1] = t[1];
+			dusk.sgui.TileMap.tileData.free(t);
 		}
 	}
 	
@@ -244,6 +255,7 @@ dusk.sgui.EditableTileMap.prototype._etmUpAction = function(e) {
 				this.setTile(this._cx+x, this._cy+y, current[0], current[1]);
 			}
 		}
+		dusk.sgui.TileMap.tileData.free(current);
 		this.drawAll();
 		return false;
 	}
@@ -281,6 +293,7 @@ dusk.sgui.EditableTileMap.prototype._etmDownAction = function(e) {
 				this.setTile(this._cx+x, this._cy+y, current[0], current[1]);
 			}
 		}
+		dusk.sgui.TileMap.tileData.free(current);
 		this.drawAll();
 		return false;
 	}
@@ -318,6 +331,7 @@ dusk.sgui.EditableTileMap.prototype._etmRightAction = function(e) {
 				this.setTile(this._cx+x, this._cy+y, current[0], current[1]);
 			}
 		}
+		dusk.sgui.TileMap.tileData.free(current);
 		this.drawAll();
 		return false;
 	}
@@ -355,6 +369,7 @@ dusk.sgui.EditableTileMap.prototype._etmLeftAction = function(e) {
 				this.setTile(this._cx+x, this._cy+y, current[0], current[1]);
 			}
 		}
+		dusk.sgui.TileMap.tileData.free(current);
 		this.drawAll();
 		return false;
 	}

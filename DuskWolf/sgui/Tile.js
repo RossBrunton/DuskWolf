@@ -172,6 +172,26 @@ dusk.sgui.Tile.prototype.gridGo = function(x, y) {
 	this.y = y*this.height;
 };*/
 
+/** Imagines that this tile is on a grid, and returns it's x location on the grid.
+ * 
+ * If it was to the right of two other tiles that are next to each other, it would return 2, for example.
+ * @return {integer} The tile's x coordinate in a grid of tiles the same size.
+ * @since 0.0.21-alpha
+ */
+dusk.sgui.Tile.prototype.tileX = function() {
+	return ~~(this.x/this.width);
+};
+
+/** Imagines that this tile is on a grid, and returns it's y location on the grid.
+ * 
+ * If it was below two other tiles that are next to each other, it would return 2, for example.
+ * @return {integer} The tile's y coordinate in a grid of tiles the same size.
+ * @since 0.0.21-alpha
+ */
+dusk.sgui.Tile.prototype.tileY = function() {
+	return ~~(this.y/this.height);
+};
+
 Object.seal(dusk.sgui.Tile);
 Object.seal(dusk.sgui.Tile.prototype);
 

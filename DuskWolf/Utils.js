@@ -194,7 +194,9 @@ dusk.utils.lookup = function(base, path) {
 	var now = base;
 	var p = 0;
 	while(p < frags.length && now) {
-		now = now[frags[p]];
+		if(frags[p]) {
+			now = now[frags[p]];
+		}
 		p ++;
 	}
 	

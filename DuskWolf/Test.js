@@ -54,7 +54,7 @@ test._init = function() {
 test.loadTests = function(url) {
 	dusk.load.importList(url).then(function(data, textStatus, url) {
 		for(var i = data.length-1; i >= 0; i--) {
-			dusk.load.import(data[i][1]);
+			dusk.load.import(data[i][1][0]);
 		}
 	});
 };

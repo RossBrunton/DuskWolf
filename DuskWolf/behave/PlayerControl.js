@@ -12,8 +12,12 @@ dusk.load.provide("dusk.behave.LeftRightControl");
 dusk.behave.PlayerControl = function(entity) {
 	dusk.behave.Behave.call(this, entity);
 	
+	this._data("playerControl", true, true);
+	
 	this.entityEvent.listen(function(e) {
-		return dusk.controls.controlActive("entity_"+e.control);
+		if(this._data("playerControl")) {
+			return dusk.controls.controlActive("entity_"+e.control);
+		}
 	}, this, {"name":"controlActive"});
 	
 	dusk.controls.addControl("entity_left", 37, "0-0.5");
@@ -28,7 +32,7 @@ dusk.behave.PlayerControl.prototype = Object.create(dusk.behave.Behave.prototype
 dusk.behave.PlayerControl.workshopData = {
 	"help":"Will allow the player to control it.",
 	"data":[
-		
+		["playerControl", "boolean", "If false, player control is disabled."],
 	]
 };
 

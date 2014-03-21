@@ -121,7 +121,7 @@ test.registerTestFunction(function(window) {
 	test.start("dusk.utils.lookup");
 	var a = {};
 	a.b = {};
-	b.c = {};
+	a.b.c = {};
 	
 	test.assertEqual(dusk.utils.lookup(a, ""), a);
 	test.assertEqual(dusk.utils.lookup(a, "b"), a.b);

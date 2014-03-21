@@ -150,7 +150,7 @@ dusk.items.Invent = function(capacity, restrictions, maxStack) {
  * @return {boolean} Whether it can be added or not.
  */
 dusk.items.Invent.prototype.isValidAddition = function(item) {
-	if(!item || (this.countItems() >= this._capacity && this.findSlot(item.type) === -1)) return false;
+	if(!item || (this.countOccupiedSlots() >= this._capacity && this.findSlot(item.type) === -1)) return false;
 	
 	for(var i = this._restrictions.length-1; i >= 0; i --) {
 		switch(this._restrictions[i][1]) {
@@ -294,6 +294,21 @@ dusk.items.Invent.prototype.takeAnItem = function(type) {
  * @return {integer} The number of items in the inventory.
  */
 dusk.items.Invent.prototype.countItems = function() {
+	var count = 0;
+	
+	for(var i = 0; i < this._items.length; i ++) {
+		if(this._items[i] != null) {
+			count += this._items[i].length;
+		}
+	}
+	
+	return count;
+};
+
+/** Counts the total number of occupied slots in the inventory.
+ * @return {integer} The number of occupied slots in the inventory.
+ */
+dusk.items.Invent.prototype.countOccupiedSlots = function() {
 	var count = 0;
 	
 	for(var i = 0; i < this._items.length; i ++) {

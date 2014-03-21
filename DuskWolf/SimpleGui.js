@@ -237,6 +237,7 @@ dusk.sgui._init = function() {
 	dusk.controls.addControl("sgui_left", 37, "0+0.5");
 	dusk.controls.addControl("sgui_right", 39, "0-0.5");
 	dusk.controls.addControl("sgui_action", 65, 0);
+	dusk.controls.addControl("sgui_cancel", 27, 1);
 	
 	dusk.sgui._draw();
 };

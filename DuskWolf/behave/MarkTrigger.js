@@ -14,13 +14,15 @@ dusk.behave.MarkTrigger = function(entity) {
 		this._markAt = "";
 		this._coolDown = 5;
 		
-		if(this._entity.scheme && this._entity.scheme.tilePointIn(
-			this._entity.x+(this._entity.prop("width")/2), this._entity.y+(this._entity.prop("height")/2))[1] == 1
-		) {
-			this._markAt = this._entity.scheme.tilePointIn(
-				this._entity.x+(this._entity.prop("width")/2), this._entity.y+(this._entity.prop("height")/2)
-			)[0];
+		var t = this._entity.scheme && this._entity.scheme.tilePointIn(
+			this._entity.x+(this._entity.prop("width")/2), this._entity.y+(this._entity.prop("height")/2)
+		);
+		
+		if(t && t[1] == 1) {
+			this._markAt = t[0];
 		}
+		
+		if(t) dusk.sgui.TileMap.tileData.free(t);
 		
 		this.entityEvent.listen(this._markTriggerFrame, this, {"name":"frame"});
 	}
@@ -32,21 +34,17 @@ dusk.behave.MarkTrigger.prototype._markTriggerFrame = function(name, e) {
 	
 	if(!this._entity.scheme) return;
 	
-	if(this._entity.scheme.tilePointIn(
+	var t = this._entity.scheme.tilePointIn(
 		this._entity.x+(this._entity.prop("width")/2), this._entity.y+(this._entity.prop("height")/2)
-	)[1] != 1) {
+	);
+	
+	if(t[1] != 1) {
 		this._markAt = -1;
 	}
 	
-	if(this._entity.scheme.tilePointIn(
-		this._entity.x+(this._entity.prop("width")/2), this._entity.y+(this._entity.prop("height")/2)
-	)[1] == 1
-	&& this._entity.scheme.tilePointIn(this._entity.x+(
-		this._entity.prop("width")/2), this._entity.y+(this._entity.prop("height")/2))[0] != this._markAt
+	if(t[1] == 1 && t[0] != this._markAt
 	) {
-		this._markAt = this._entity.scheme.tilePointIn(
-			this._entity.x+(this._entity.prop("width")/2), this._entity.y+(this._entity.prop("height")/2)
-		)[0];
+		this._markAt = t[0];
 		
 		if(!this._coolDown) {
 			dusk.entities.markTrigger.fire({
@@ -56,6 +54,8 @@ dusk.behave.MarkTrigger.prototype._markTriggerFrame = function(name, e) {
 			this._coolDown = 5;
 		}
 	}
+	
+	dusk.sgui.TileMap.tileData.free(t);
 };
 
 /** Workshop data used by `{@link dusk.sgui.EntityWorkshop}`.

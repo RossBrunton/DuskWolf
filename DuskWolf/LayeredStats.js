@@ -66,7 +66,6 @@ dusk.LayeredStats.prototype.get = function(untilLayer, field) {
 	for(var i = 0; i < this._layers.length && i <= untilLayer; i ++) {
 		var list = [];
 		
-		
 		for(var p in this._layers[i]) {
 			list = this._toList(this._layers[i][p]);
 			
@@ -108,15 +107,45 @@ dusk.LayeredStats.prototype.geti = function(untilLayer, field) {
 };
 
 dusk.LayeredStats.prototype.countInLayer = function(layer) {
-	
+	return Object.keys(this._layers[layer]).length;
 };
 
 dusk.LayeredStats.prototype.getMaxInLayer = function(layer, field) {
+	var max = undefined;
 	
+	for(var p in this._layers[layer]) {
+		list = this._toList(this._layers[layer][p]);
+		
+		for(var i = 0; i < list.length; i ++) {
+			var d = list[i];
+			
+			if(field in d && typeof d[field] != "function") value = d[field];
+			if(field in d && typeof d[field] == "function") value = d[field](this, field, value, min, max);
+			
+			if(value > max[1] || max === undefined) max = [p, value];
+		}
+	}
+	
+	return max;
 };
 
 dusk.LayeredStats.prototype.getMinInLayer = function(layer, field) {
+	var min = undefined;
 	
+	for(var p in this._layers[layer]) {
+		list = this._toList(this._layers[layer][p]);
+		
+		for(var i = 0; i < list.length; i ++) {
+			var d = list[i];
+			
+			if(field in d && typeof d[field] != "function") value = d[field];
+			if(field in d && typeof d[field] == "function") value = d[field](this, field, value, min, max);
+			
+			if(value < min[1] || min === undefined) min = [p, value];
+		}
+	}
+	
+	return min;
 };
 
 dusk.LayeredStats.prototype._toList = function(value) {

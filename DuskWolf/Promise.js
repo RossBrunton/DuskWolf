@@ -20,7 +20,7 @@ window.Promise = function(promise) {
 		this.value = value; this.state = Promise.STATE_FULFILLED; this._update();
 	}).bind(this), (function(value){
 		this.value = value; this.state = Promise.STATE_REJECTED; this._update();
-	}).bind(this))
+	}).bind(this));
 };
 
 window.Promise.prototype.then = function(onFullfilled, onRejected) {

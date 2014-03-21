@@ -23,6 +23,10 @@ dusk.load.provide("dusk.sgui.TileMap");
  *
  * Only part of the tilemap is visible, as described by the `*bound` properties, and this will be the only area drawn.
  * 
+ * Some functions accept and return tileData objects. This is essentially an array, the first two elements are the x and
+ *  y coordinates of the image displayed (from the original stylesheet), the second two are the x and y coordinates that
+ *  this tiledata describes, and the last element is the weight of this tile if appropriate.
+ * 
  * @extends dusk.sgui.Component
  * @param {?dusk.sgui.Component} parent The container that this component is in.
  * @param {string} componentName The name of the component.
@@ -337,6 +341,8 @@ dusk.sgui.TileMap.prototype._editAnimation = function(origin, offset) {
 
 /** Returns the location of the source tile on the origin image
  *  (as in, the one that was drawn to here) that the specified coordinate is in.
+ * 
+ * Please return the output to `{@link dusk.sgui.TileMap.tileData}` when you are done.
  * @param {integer} x The x coordinate to look in.
  * @param {integer} y The y coordinate to look in.
  * @param {boolean=false} exactX If true
@@ -352,11 +358,11 @@ dusk.sgui.TileMap.prototype.tilePointIn = function(x, y, exactX, exactY) {
 	if(exactX && exactY){
 		return this.getTile(xpt, ypt);
 	}else if(exactX){
-		return this.getTile(xpt, Math.floor(ypt));
+		return this.getTile(xpt, ~~ypt);
 	}else if(exactY){
-		return this.getTile(Math.floor(xpt), ypt);
+		return this.getTile(~~xpt, ypt);
 	}else{
-		return this.getTile(Math.floor(xpt), Math.floor(ypt));
+		return this.getTile(~~xpt, ~~ypt);
 	}
 };
 
@@ -376,19 +382,22 @@ dusk.sgui.TileMap.prototype.mapSolidIn = function(x, y, shiftRightDown, shiftVer
 	var solid = [1, 0];
 	
 	var tileNow = this.tilePointIn(x, y);
+	var toRet = 0;
 	
-	if(dusk.utils.arrayEqual(solid, tileNow)) {
+	if(solid[0] == tileNow[0] && solid[1] == tileNow[1]) {
 		if(!shiftRightDown && !shiftVer)
-			return -(x % this.tileWidth());
+			toRet = -(x % this.tileWidth());
 		if(shiftRightDown && !shiftVer)
-			return -(x % this.tileWidth()) + this.tileWidth();
+			toRet = -(x % this.tileWidth()) + this.tileWidth();
 		if(!shiftRightDown && shiftVer)
-			return -(y % this.tileHeight());
+			toRet = -(y % this.tileHeight());
 		if(shiftRightDown && shiftVer)
-			return -(y % this.tileHeight()) + this.tileHeight();
+			toRet = -(y % this.tileHeight()) + this.tileHeight();
 	}
 	
-	return 0;
+	dusk.sgui.TileMap.tileData.free(tileNow);
+	
+	return toRet;
 };
 
 /** Used internally to manage frames.
@@ -422,17 +431,68 @@ dusk.sgui.TileMap.prototype._tileMapDraw = function(e) {
 };
 
 /** Returns the tile drawn at the specified coordinates.
+ * 
+ * Please return the output to `{@link dusk.sgui.TileMap.tileData}` when you are done.
  * @param {integer} x The x coordinate.
  * @param {integer} y The y coordinate.
  * @return {array} An `[x,y]` style array of the tile at this location.
  */
 dusk.sgui.TileMap.prototype.getTile = function(x, y) {
+	var t = dusk.sgui.TileMap.tileData.alloc();
+	t[2] = x;
+	t[3] = y;
+	
 	if(this._tiles[0][((y*this.cols)+x)<<1] !== undefined) {
-		return [this._tiles[0][((y*this.cols)+x)<<1], this._tiles[0][(((y*this.cols)+x)<<1)+1]];
+		t[0] = this._tiles[0][((y*this.cols)+x)<<1];
+		t[1] = this._tiles[0][(((y*this.cols)+x)<<1)+1];
+		
+		//placeholder
+		if(t[0] == 1 && t[1] == 0) {
+			t[4] = 100;
+		}else{
+			t[4] = 1;
+		}
 	}
 	
 	//console.warn("Tile "+x+","+y+" not found on "+this.comName+".");
-	return [0, 0];
+	
+	return t;
+};
+
+/** Given a tile and a direction, updates the tile data such that it refers to that tile.
+ * 
+ * Please return the output to `{@link dusk.sgui.TileMap.tileData}` when you are done.
+ * @param {Array} t The tile to shift.
+ * @param {integer} dir The direction to shift, one of the `dusk.sgui.c.DIR_*` constants.
+ * @return {array} A tiledata array of the tile at this location.
+ */
+dusk.sgui.TileMap.prototype.shiftTile = function(t, dir) {
+	if(dir == dusk.sgui.c.DIR_UP) {
+		t[3] --;
+		t[0] = this._tiles[0][((t[3]*this.cols)+t[2])<<1];
+		t[1] = this._tiles[0][(((t[3]*this.cols)+t[2])<<1)+1];
+	}else if(dir == dusk.sgui.c.DIR_DOWN) {
+		t[3] ++;
+		t[0] = this._tiles[0][((t[3]*this.cols)+t[2])<<1];
+		t[1] = this._tiles[0][(((t[3]*this.cols)+t[2])<<1)+1];
+	}else if(dir == dusk.sgui.c.DIR_LEFT) {
+		t[2] --;
+		t[0] = this._tiles[0][((t[3]*this.cols)+t[2])<<1];
+		t[1] = this._tiles[0][(((t[3]*this.cols)+t[2])<<1)+1];
+	}else if(dir == dusk.sgui.c.DIR_RIGHT) {
+		t[2] ++;
+		t[0] = this._tiles[0][((t[3]*this.cols)+t[2])<<1];
+		t[1] = this._tiles[0][(((t[3]*this.cols)+t[2])<<1)+1];
+	}
+	
+	//placeholder
+	if(t[0] == 1 && t[1] == 0) {
+		t[4] = 100;
+	}else{
+		t[4] = 1;
+	}
+	
+	return t;
 };
 
 /** Sets the tile to be drawn at a specified location.
@@ -618,6 +678,16 @@ dusk.sgui.TileMap.prototype._framesNeeded = function(test) {
 	if(valid == true) return test;
 	return this._framesNeeded(test+1);
 };
+
+/** A pool containing the values returned by `{@link dusk.sgui.TileMap#getTile}` please return them here when you are
+ *  done.
+ * 
+ * Tile data is an array in the form `[value x, value y, tile x, tile y, weight]`.
+ * 
+ * @type dusk.pool<Array>
+ * @since 0.0.21-alpha
+ */
+dusk.sgui.TileMap.tileData = new dusk.Pool(Array);
 
 Object.seal(dusk.sgui.TileMap);
 Object.seal(dusk.sgui.TileMap.prototype);

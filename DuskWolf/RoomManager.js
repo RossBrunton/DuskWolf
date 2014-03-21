@@ -29,7 +29,7 @@ dusk.load.provide("dusk.editor");
  * - [0, 0] Air, the entity will go through this as normal, and nothing happens.
  * - [1, 0] Wall, the entity cannot enter this tile.
  * - [1, 0] - [1, 9] Marks, when the entity touches this (or the player is in it and presses up)
- *  and has the `{@link dusk.behave.MarkTrigger}` behaviour, `{@link dusk.plat.markTrigger}` will fire an event.
+ *  and has the `{@link dusk.behave.MarkTrigger}` behaviour, `{@link dusk.entities.markTrigger}` will fire an event.
  * 
  * The background and foreground layer (named `back` and `over`) are normal, visible tilemaps.
  * 
