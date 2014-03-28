@@ -33,21 +33,22 @@ dusk.save.DropboxSource.prototype.autoSave = function(saveData, spec, identifier
 	return (new dusk.save.LocalStorageSource()).save(saveData, spec, "dropboxAutosave_"+identifier);
 };
 
-dusk.save.DropboxSource.prototype.load = function(spec, identifier, callback) {
-	Dropbox.appKey = this.appKey;
-	
-	Dropbox.choose({
-		"linkType":"direct",
-		"extensions":[".json"],
+dusk.save.DropboxSource.prototype.load = function(spec, identifier) {
+	return new Promise(function(fullfill, reject) {
+		Dropbox.appKey = this.appKey;
 		
-		"success": function(files) {
-			$.get(files[0].link, "", function(data, textStatus, jqXHR) {
-				callback(data, true);
-				console.log(data);
-			}, "json")
-		},
-		
-		"cancel": function() {callback({}, false);},
+		Dropbox.choose({
+			"linkType":"direct",
+			"extensions":[".json"],
+			
+			"success": function(files) {
+				$.get(files[0].link, "", function(data, textStatus, jqXHR) {
+					fullfill(data);
+				}, "json")
+			},
+			
+			"cancel": function() {reject(new Error("Load from Dropbox canceled."));},
+		});
 	});
 };
 

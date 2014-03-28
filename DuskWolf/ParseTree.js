@@ -73,8 +73,8 @@ dusk.parseTree = {};
  * @since 0.0.20-alpha
  */
 dusk.parseTree.Compiler = function(operators, uoperators, consts, whitespace, noBuiltins) {
-	/** The operators, as described in class descriptor. A third propetry is added, which is a
-	 *  boolean saying whether the operator contains only characters. Another fourth propetry is
+	/** The operators, as described in class descriptor. A fourth propetry is added, which is a
+	 *  boolean saying whether the operator contains only characters. Another fifth propetry is
 	 *  added, which is a list of all the operators that end with this operator, to check for 
 	 *  things like "=" and "!=".
 	 * @type array
@@ -89,11 +89,11 @@ dusk.parseTree.Compiler = function(operators, uoperators, consts, whitespace, no
 					return Number(l+"."+r);
 				}
 				return l[r];
-			}],
+			}, false],
 			
-			["*", function(o, l, r) {return +l * +r;}],
-			["/", function(o, l, r) {return +l / +r;}],
-			["+", function(o, l, r) {return +l + +r;}],
+			["*", function(o, l, r) {return +l * +r;}, true],
+			["/", function(o, l, r) {return +l / +r;}, true],
+			["+", function(o, l, r) {return +l + +r;}, true],
 			["-", function(o, l, r) {
 				if(Array.isArray(l)) {
 					var out = [];
@@ -104,28 +104,28 @@ dusk.parseTree.Compiler = function(operators, uoperators, consts, whitespace, no
 				}else{
 					return +l - +r;
 				}
-			}],
-			["^", function(o, l, r) {return "" + l +r;}],
-			["@", function(o, l, r) {return l.concat(r);}],
+			}, true],
+			["^", function(o, l, r) {return "" + l +r;}, true],
+			["@", function(o, l, r) {return l.concat(r);}, true],
 			["in", function(o, l, r) {
 				if(Array.isArray(r)) {
 					return r.indexOf(l) !== -1;
 				}else{
 					return l in r;
 				}
-			}],
+			}, true],
 			
-			["=", function(o, l, r) {return l == r || l && r == "true"}],
-			["!=", function(o, l, r) {return l != r}],
-			[">", function(o, l, r) {return l > r}],
-			["<", function(o, l, r) {return l < r}],
-			[">=", function(o, l, r) {return l >= r}],
-			["<=", function(o, l, r) {return l <= r}],
+			["=", function(o, l, r) {return l == r || l && r == "true"}, true],
+			["!=", function(o, l, r) {return l != r}, true],
+			[">", function(o, l, r) {return l > r}, true],
+			["<", function(o, l, r) {return l < r}, true],
+			[">=", function(o, l, r) {return l >= r}, true],
+			["<=", function(o, l, r) {return l <= r}, true],
 			
-			["&", function(o, l, r) {return l && r}],
-			["|", function(o, l, r) {return l || r}],
+			["&", function(o, l, r) {return l && r}, true],
+			["|", function(o, l, r) {return l || r}, true],
 			
-			[",", function(o, l, r) {return [l].concat(r);}],
+			[",", function(o, l, r) {return [l].concat(r);}, true],
 		];
 	}
 	
@@ -133,8 +133,8 @@ dusk.parseTree.Compiler = function(operators, uoperators, consts, whitespace, no
 		this._ops = this._ops.concat(operators);
 	}
 	
-	/** The unary operators, as described in class descriptor. A third propetry is added, which is a
-	 *  boolean saying whether the operator contains only characters. Another fourth propetry is
+	/** The unary operators, as described in class descriptor. A fourth propetry is added, which is a
+	 *  boolean saying whether the operator contains only characters. Another fifth propetry is
 	 *  added, which is a list of all the operators that end with this operator, to check for 
 	 *  things like "=" and "!=".
 	 * @type array
@@ -144,9 +144,9 @@ dusk.parseTree.Compiler = function(operators, uoperators, consts, whitespace, no
 	
 	if(!noBuiltins) {
 		this._uops = [
-			["!", function(o, l) {return l === "false"?true:!l;}],
-			["+", function(o, l) {return +l;}],
-			["-", function(o, l) {return 0-l;}],
+			["!", function(o, l) {return l === "false"?true:!l;}, true],
+			["+", function(o, l) {return +l;}, true],
+			["-", function(o, l) {return 0-l;}, true],
 			
 			["JSON", function(o, l) {
 				try {
@@ -155,7 +155,7 @@ dusk.parseTree.Compiler = function(operators, uoperators, consts, whitespace, no
 					console.error(e);
 					return {};
 				}
-			}]
+			}, true]
 		];
 	}
 	
@@ -163,8 +163,8 @@ dusk.parseTree.Compiler = function(operators, uoperators, consts, whitespace, no
 		this._uops = this._uops.concat(uoperators);
 	}
 	
-	/** The constant operators, as described in class descriptor. A third propetry is added, which is a
-	 *  boolean saying whether the operator contains only characters. Another fourth propetry is
+	/** The constant operators, as described in class descriptor. A fourth propetry is added, which is a
+	 *  boolean saying whether the operator contains only characters. Another fifth propetry is
 	 *  added, which is a list of all the operators that end with this operator, to check for 
 	 *  things like "=" and "!=".
 	 * @type array
@@ -174,8 +174,10 @@ dusk.parseTree.Compiler = function(operators, uoperators, consts, whitespace, no
 	
 	if(!noBuiltins) {
 		this._nops = [
-			["false", function(o) {return false;}],
-			["true", function(o) {return true;}],
+			["false", function(o) {return false;}, true],
+			["true", function(o) {return true;}, true],
+			["null", function(o) {return null;}, true],
+			["undefined", function(o) {return undefined;}, true],
 		];
 	}
 	
@@ -201,36 +203,36 @@ dusk.parseTree.Compiler = function(operators, uoperators, consts, whitespace, no
 	 */
 	this._functCaches = {};
 	
-	//Populate forth and 4th properties
+	//Populate third and fourth properties
 	for(var i = this._ops.length-1; i >= 0; i --) {
-		this._ops[i][2] = /^[a-z0-9]+$/i.test(this._ops[i][0]);
+		this._ops[i][3] = /^[a-z0-9]+$/i.test(this._ops[i][0]);
 		
-		this._ops[i][3] = [];
+		this._ops[i][4] = [];
 		for(var j = this._ops.length-1; j >= 0; j --) {
 			if(this._ops[j][0].endsWith(this._ops[i][0]) && i != j) {
-				this._ops[i][3].push(this._ops[j][0]);
+				this._ops[i][4].push(this._ops[j][0]);
 			}
 		}
 	}
 	
 	for(var i = this._uops.length-1; i >= 0; i --) {
-		this._uops[i][2] = /^[a-z0-9]+$/i.test(this._uops[i][0]);
+		this._uops[i][3] = /^[a-z0-9]+$/i.test(this._uops[i][0]);
 		
-		this._uops[i][3] = [];
+		this._uops[i][4] = [];
 		for(var j = this._uops.length-1; j >= 0; j --) {
 			if(this._uops[j][0].endsWith(this._uops[i][0]) && i != j) {
-				this._uops[i][3].push(this._uops[j][0]);
+				this._uops[i][4].push(this._uops[j][0]);
 			}
 		}
 	}
 	
 	for(var i = this._nops.length-1; i >= 0; i --) {
-		this._nops[i][2] = /^[a-z0-9]+$/i.test(this._nops[i][0]);
+		this._nops[i][3] = /^[a-z0-9]+$/i.test(this._nops[i][0]);
 		
-		this._nops[i][3] = [];
+		this._nops[i][4] = [];
 		for(var j = this._nops.length-1; j >= 0; j --) {
 			if(this._nops[j][0].endsWith(this._nops[i][0]) && i != j) {
-				this._nops[i][3].push(this._nops[j][0]);
+				this._nops[i][4].push(this._nops[j][0]);
 			}
 		}
 	}
@@ -278,24 +280,29 @@ dusk.parseTree.Compiler.prototype.compile = function(str, init, noCache) {
 	var justClosedBracket = false;
 	
 	while(read = this._read(str, i, justClosedBracket)) {
-		i = read[4];
-		read[5] = read[5].reverse();
+		i = read[5];
+		read[6] = read[6].reverse();
 		justClosedBracket = false;
 		
-		var op = new dusk.parseTree.Node(read[1], read[3], read[2]);
+		// Strip the quotes surrounding the first entry, if they are there
+		if(read[0] && (read[0].charAt(0) == "'" || read[0].charAt(0) == '"')) read[0] = read[0].substring(1);
+		if(read[0] && (read[0].charAt(read[0].length-1) == "'" || read[0].charAt(read[0].length-1) == '"'))
+			read[0] = read[0].substring(0, read[0].length-1);
+		
+		var op = new dusk.parseTree.Node(read[1], read[4], read[2], read[3]);
 		
 		//Unary operators
 		if(read[1] != "(") {
 			var opand = null;
-			if(read[6]) {
+			if(read[7]) {
 				justClosedBracket = true;
-				opand = new dusk.parseTree.Node(read[1], 0, read[2]);
+				opand = new dusk.parseTree.Node(read[1], 0, read[2], read[3]);
 			}else{
-				opand = new dusk.parseTree.Node(read[0], 0);
+				opand = new dusk.parseTree.Node(read[0], 0, undefined, true);
 			}
 			
-			for(var uo = 0; uo < read[5].length; uo ++) {
-				opand = new dusk.parseTree.Node(read[5][uo][0], 0, read[5][uo][1], opand);
+			for(var uo = 0; uo < read[6].length; uo ++) {
+				opand = new dusk.parseTree.Node(read[6][uo][0], 0, read[6][uo][1], read[6][uo][2], opand);
 			}
 			
 			if(root == null) {
@@ -310,17 +317,17 @@ dusk.parseTree.Compiler.prototype.compile = function(str, init, noCache) {
 		
 		if(!read[1] || read[1] == ")") {
 			if(!read[1])
-				this._caches[str] = root;
+				this._caches[str] = root.collapse();
 			
-			return root;
+			return root.collapse();
 		}else if(read[1] == "("){
 			var bop = new dusk.parseTree.Node("bracket_guard", 0, function(o, l, r) {
 					return l;
-				}, this.compile(str, i)
+				}, true, this.compile(str, i)
 			);
 			
-			for(var uo = 0; uo < read[5].length; uo ++) {
-				bop = new dusk.parseTree.Node(read[5][uo][0], 0, read[5][uo][1], bop);
+			for(var uo = 0; uo < read[6].length; uo ++) {
+				bop = new dusk.parseTree.Node(read[6][uo][0], 0, read[6][uo][1], read[6][uo][2], bop);
 			}
 			
 			if(root == null) {
@@ -340,7 +347,7 @@ dusk.parseTree.Compiler.prototype.compile = function(str, init, noCache) {
 			
 			i ++;
 			justClosedBracket = true;
-		}else if(!read[6]) {
+		}else if(!read[7]) {
 			if(root.value != "bracket_guard") {
 				var p = null;
 				var n = root;
@@ -400,17 +407,17 @@ dusk.parseTree.Compiler.prototype._read = function(str, init, afterBracket) {
 				if(buffer.trim() == this._nops[i][0]) {
 					var op = this._nops[i][0];
 					
-					for(var j = 0; j < this._nops[i][3].length; j ++) {
-						if(buffer.endsWith(this._nops[i][3][j])) continue;
+					for(var j = 0; j < this._nops[i][4].length; j ++) {
+						if(buffer.endsWith(this._nops[i][4][j])) continue;
 					}
 					
 					if(this._whitespace == dusk.parseTree.Compiler.WS_ALWAYS
-					|| (this._whitespace == dusk.parseTree.Compiler.WS_ONLYCHARS && this._nops[i][2])) {
+					|| (this._whitespace == dusk.parseTree.Compiler.WS_ONLYCHARS && this._nops[i][3])) {
 						if(c == str.length-1 || /[\s()]/.test(str[c+1])) {
-							return ["", op, this._nops[i][1], 0, c+1, uops, true];
+							return ["", op, this._nops[i][1], this._nops[i][2], 0, c+1, uops, true];
 						}
 					}else{
-						return ["", op, this._nops[i][1], 0, c+1, uops, true];
+						return ["", op, this._nops[i][1], this._nops[i][2], 0, c+1, uops, true];
 					}
 				}
 			}
@@ -422,18 +429,18 @@ dusk.parseTree.Compiler.prototype._read = function(str, init, afterBracket) {
 				if(buffer.trim() == this._uops[i][0]) {
 					var op = this._uops[i][0];
 					
-					for(var j = 0; j < this._uops[i][3].length; j ++) {
-						if(buffer.endsWith(this._uops[i][3][j])) continue;
+					for(var j = 0; j < this._uops[i][4].length; j ++) {
+						if(buffer.endsWith(this._uops[i][4][j])) continue;
 					}
 					
 					if(this._whitespace == dusk.parseTree.Compiler.WS_ALWAYS
-					|| (this._whitespace == dusk.parseTree.Compiler.WS_ONLYCHARS && this._uops[i][2])) {
+					|| (this._whitespace == dusk.parseTree.Compiler.WS_ONLYCHARS && this._uops[i][3])) {
 						if(c == str.length-1 || /[\s()]/.test(str[c+1])) {
-							uops.push([op, this._uops[i][1]]);
+							uops.push([op, this._uops[i][1], this._upops[i][2]]);
 							buffer = "";
 						}
 					}else{
-						uops.push([op, this._uops[i][1]]);
+						uops.push([op, this._uops[i][1], this._uops[i][2]]);
 						buffer = "";
 					}
 				}
@@ -443,10 +450,10 @@ dusk.parseTree.Compiler.prototype._read = function(str, init, afterBracket) {
 		//Brackets
 		if(str[c] == "(") {
 			//Bracketing time!
-			return ["", "(", "THIS_IS_A_BRACKET", 0, c+1, uops];
+			return ["", "(", "THIS_IS_A_BRACKET", true, 0, c+1, uops];
 		}else if(str[c] == ")") {
 			//Unbracketing time...
-			return [buffer.substring(0, buffer.length-1).trim(), ")", "THIS_IS_A_BRACKET",
+			return [buffer.substring(0, buffer.length-1).trim(), ")", "THIS_IS_A_BRACKET", true,
 				0, c+1, uops
 			];
 		}
@@ -467,39 +474,23 @@ dusk.parseTree.Compiler.prototype._read = function(str, init, afterBracket) {
 					}
 				}
 				
-				for(var j = 0; j < this._ops[i][3].length; j ++) {
-					if(buffer.endsWith(this._ops[i][3][j])) continue opsloop;
+				for(var j = 0; j < this._ops[i][4].length; j ++) {
+					if(buffer.endsWith(this._ops[i][4][j])) continue opsloop;
 				}
 				
 				if(this._whitespace == dusk.parseTree.Compiler.WS_ALWAYS
-				|| (this._whitespace == dusk.parseTree.Compiler.WS_ONLYCHARS && this._ops[i][2])) {
+				|| (this._whitespace == dusk.parseTree.Compiler.WS_ONLYCHARS && this._ops[i][3])) {
 					if(/\s/.test(str[c+1]) && /\s$/.test(opand)) {
-						//Strip quotes
-						if(topand.charAt(0) == "'" || topand.charAt(0) == '"') topand = topand.substring(1);
-						if(topand.charAt(topand.length-1) == "'" || topand.charAt(topand.length-1) == '"')
-							topand = topand.substring(0, topand.length-1);
-						
-						return [topand, op, this._ops[i][1], i+1, c+1, uops];
+						return [topand, op, this._ops[i][1], this._ops[i][2], i+1, c+1, uops];
 					}
 				}else{
-					//Strip quotes
-					if(topand.charAt(0) == "'" || topand.charAt(0) == '"') topand = topand.substring(1);
-					if(topand.charAt(topand.length-1) == "'" || topand.charAt(topand.length-1) == '"')
-						topand = topand.substring(0, topand.length-1);
-					
-					return [topand, op, this._ops[i][1], i+1, c+1, uops];
+					return [topand, op, this._ops[i][1], this._ops[i][2], i+1, c+1, uops];
 				}
 			}
 		}
 	}
 	
-	//Strip quotes
-	var topand = buffer.trim();
-	if(topand.charAt(0) == "'" || topand.charAt(0) == '"') topand = topand.substring(1);
-	if(topand.charAt(topand.length-1) == "'" || topand.charAt(topand.length-1) == '"')
-		topand = topand.substring(0, topand.length-1);
-	
-	return [topand, null, null, 0, 0, uops];
+	return [buffer.trim(), null, null, true, 0, 0, uops];
 };
 
 Object.seal(dusk.parseTree.Compiler);
@@ -539,16 +530,16 @@ Object.seal(dusk.parseTree.ParseTreeCompileError.prototype);
  * @param {string} value For leaves it is it's value, for nodes it is the operator.
  * @param {int=0} priority Used when building the tree, priority  of the operator. Lower values are
  *  higher priority.
- * @param {?function(string, *, *):* | function(string, *):*} exec The function that should be
- *  called to evaluate this node. In leaves, this is null and serves as a way to identify that it is
- *  a leaf.
+ * @param {?function(string, *, *):* | function(string, *):* | function(string):*} exec The function that should be
+ *  called to evaluate this node.
 
- * @param {?dusk.parseTree.Node} lhs The left branch, if it is known.
- * @param {?dusk.parseTree.Node} rhs The right branch, if it is known.
+ * @param {?dusk.parseTree.Node} lhs The left branch, if it is known and exists.
+ * @param {?dusk.parseTree.Node} rhs The right branch, if it is known and exists.
+ * @param {boolean} con If true, then this node will always have the same value if both it's chilren are con.
  * @constructor
  * @since 0.0.20-alpha
  */
-dusk.parseTree.Node = function(value, priority, exec, lhs, rhs) {
+dusk.parseTree.Node = function(value, priority, exec, con, lhs, rhs) {
 	/** The value of this operator. For leaves this is the value, for nodes it is the operator.
 	 * @type string
 	 */
@@ -573,6 +564,13 @@ dusk.parseTree.Node = function(value, priority, exec, lhs, rhs) {
 	 * @type ?dusk.parseTree.Node
 	 */
 	this.rhs = rhs?rhs:null;
+	
+	/** If all of this node's children are con, then this is con. If this is con, then the value will not change.
+	 * @type boolean
+	 * @private
+	 * @since 0.0.21-alpha
+	 */
+	this._con = con;
 };
 
 /** Returns true if and only if the node has a function it can execute.
@@ -587,6 +585,16 @@ dusk.parseTree.Node.prototype.hasNoFunct = function() {
  */
 dusk.parseTree.Node.prototype.isLeaf = function() {
 	return !(this.lhs && this.lhs.value !== "") && !(this.rhs && this.rhs.value !== "");
+};
+
+/** Returns true if and only if the node and all of it's children are con.
+ * @return {boolean} Whether this is con.
+ */
+dusk.parseTree.Node.prototype.isCon = function() {
+	if(!this._con) return false;
+	if(this.rhs && !this.rhs.isCon()) return false;
+	if(this.lhs && !this.lhs.isCon()) return false;
+	return true;
 };
 
 /** Returns true if and only if the node represents a unary operation.
@@ -610,17 +618,44 @@ dusk.parseTree.Node.prototype.eval = function() {
  * @return {function():*} A function representing this tree.
  */
 dusk.parseTree.Node.prototype.toFunction = function() {
-	if(this.hasNoFunct()) return (function(){return this}).bind(this);
+	if(this.hasNoFunct()) return (function(){return this.value}).bind(this);
+	
+	if(!this.hasNoFunct() && this.isLeaf()) return (function() {
+		return this.exec(this.value);
+	}).bind(this);
 	
 	if(this.isUnary()) {
 		return (function(l) {
 			return this.exec(this.value, l());
 		}).bind(this, this.lhs.toFunction());
-	}else{
-		return (function(l, r) {
-			return this.exec(this.value, l(), r());
-		}).bind(this, this.lhs.toFunction(), this.rhs.toFunction());
 	}
+	
+	return (function(l, r) {
+		return this.exec(this.value, l(), r());
+	}).bind(this, this.lhs.toFunction(), this.rhs.toFunction());
+};
+
+/** If this is con, then will evaluate this and turn it into a leaf node with the value. This modifies the original
+ *  node.
+ * 
+ * Otherswise, will call `{@link dusk.parseTree.Node#collapse}` on all it's children.
+ * 
+ * @return {dusk.parseTree.Node} This node; as a convienience.
+ * @since 0.0.21-alpha
+ */
+dusk.parseTree.Node.prototype.collapse = function() {
+	if(this.isCon()) {
+		this.value = this.eval();
+		this.lhs = null;
+		this.rhs = null;
+		this.exec = null;
+		this.priority = 0;
+	}else{
+		if(this.lhs) this.lhs.collapse();
+		if(this.rhs) this.rhs.collapse();
+	}
+	
+	return this;
 };
 
 /** Returns a multiline string representation of this node and it's children.
@@ -635,11 +670,13 @@ dusk.parseTree.Node.prototype.toString = function(indent) {
 		out += " ";
 	}
 	
-	if(this.value == "") {
+	if(this.value === "") {
 		out += "[node empty:"+this.priority;
 	}else{
 		out += "[node "+this.value+":"+this.priority;
 	}
+	
+	if(this.isCon()) out += " CON";
 	
 	if(this.hasNoFunct()) {
 		out += "]";

@@ -218,6 +218,13 @@ dusk.sgui.Entity = function(parent, comName) {
 	 * @type object
 	 */
 	this.behaviourData = {};
+	/** An event disptacher that fires when an entity event happens.
+	 * 
+	 * Firing this event does nothing, use `{@link dusk.sgui.Entity#behaviourFire}` instead.
+	 * @type dusk.EventDispatcher
+	 * @since 0.0.21-alpha
+	 */
+	this.entityEvent = new dusk.EventDispatcher("dusk.sgui.Entity.entityEvent", dusk.EventDispatcher.MODE_LAST);
 	
 	/** The animation data for the entity, in the same format as described in the entity type
 	 *  description. For speed, the second element of the value will be sliced once, and so will be
@@ -374,7 +381,7 @@ dusk.sgui.Entity = function(parent, comName) {
 					return true;
 				}
 				return false;
-			}).bind(this)
+			}).bind(this), false
 		],
 		["#", (function(o, v) {
 				switch(v) {
@@ -387,14 +394,14 @@ dusk.sgui.Entity = function(parent, comName) {
 					case "path": return this.fullPath();
 					default: return "#"+v;
 				}
-			}).bind(this)
+			}).bind(this), false
 		],
-		["$", (function(o, v) {return this._aniVars[v];}).bind(this)],
+		["$", (function(o, v) {return this._aniVars[v];}).bind(this), false],
 		[".", (function(o, v) {
 				if(this.isLight()) return undefined;
 				return this.prop(v);
-			}).bind(this)],
-		[":", (function(o, v) {return this.eProp(v);}).bind(this)]
+			}).bind(this), false],
+		[":", (function(o, v) {return this.eProp(v);}).bind(this), false]
 	], []);
 	
 	/** Internal storage of this entity's type's name.
@@ -692,6 +699,7 @@ dusk.sgui.Entity.prototype.beforeMove = function() {
 dusk.sgui.Entity.prototype.behaviourFire = function(event, data) {
 	if(!data) data = {};
 	data.name = event;
+	this.entityEvent.fire(data);
 	var keys = Object.keys(this._behaviours);
 	for(var b = keys.length-1; b >= 0; b --) {
 		this._behaviours[keys[b]].entityEvent.fire(data);
@@ -710,6 +718,7 @@ dusk.sgui.Entity.prototype.behaviourFireWithReturn = function(event, data) {
 	var output = [];
 	if(!data) data = {};
 	data.name = event;
+	output[0] = this.entityEvent.fire(data);
 	var keys = Object.keys(this._behaviours);
 	for(var b = keys.length-1; b >= 0; b --) {
 		output.push(this._behaviours[keys[b]].entityEvent.fire(data));

@@ -69,7 +69,7 @@ dusk.InheritableContainer.prototype.createNewType = function(name, data, extende
 
 /** Gets a single property from a type.
  * 
- * 	This will chehck if any "parent" types have it as well.
+ * This will check if any "parent" types have it as well.
  * @param {string} name The type to look up the property on.
  * @param {string} key The key of the type to look up.
  * @return {?*} The value of the key on the specified type, or undefined if either the type or the key was not found.

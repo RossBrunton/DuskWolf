@@ -23,7 +23,7 @@ dusk.load.provide("dusk.frameTicker");
  * 
  * @type dusk.EventDispatcher
  */
-dusk.frameTicker.onFrame = new dusk.EventDispatcher();
+dusk.frameTicker.onFrame = new dusk.EventDispatcher("dusk.frameTicker.onFrame");
 
 setInterval(dusk.frameTicker.onFrame.fire.bind(dusk.frameTicker.onFrame), 1000/dusk.frameRate);
 

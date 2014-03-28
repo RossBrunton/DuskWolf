@@ -4,6 +4,7 @@
     },
     "source": {
 		"include":[],
+        "exclude":["DuskWolf/lib"],
         "includePattern": ".+\\.js(doc)?$",
         "excludePattern": "(^|\\/)_"
     },
@@ -13,6 +14,9 @@
     "markdown": {
 		"parser": "gfm"
 	},
+    "templates":{
+        "monospaceLinks": false
+    },
     "jsVersion": 180,
     "lenient":true
 }

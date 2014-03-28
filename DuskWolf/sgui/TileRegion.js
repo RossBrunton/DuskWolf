@@ -70,6 +70,8 @@ dusk.sgui.TileRegion = function (parent, comName) {
 	this.cols = 50;
 	
 	this._regions = {};
+	this._regionOrigins = {};
+	this._regionMaps = {};
 	
 	this._tagColours = [];
 	
@@ -152,44 +154,63 @@ dusk.sgui.TileRegion.prototype._tileRegionDraw = function(e) {
 			e.d.destY + ((c[1] * vscale * this.tileHeight()) - e.d.sourceY) + 1,
 			hscale * this.tileWidth() - 2, vscale * this.tileHeight() - 2
 		);
+		e.c.fillText(c[3]+","+c[4],
+			e.d.destX - e.d.sourceX + (c[0]*this.tileWidth()) + 1,
+			e.d.destY - e.d.sourceY + (c[1]*this.tileHeight()) + 6
+		);
+		
+		e.c.fillText(c[0]+","+c[1],
+			e.d.destX - e.d.sourceX + (c[0]*this.tileWidth()) + 1,
+			e.d.destY - e.d.sourceY + (c[1]*this.tileHeight()) + 18
+		);
+		
+		/*e.c.fillText(this._resolveDirection(c[3], c[4], c[0], c[1]),
+			e.d.destX - e.d.sourceX + (c[0]*this.tileWidth()) + 1,
+			e.d.destY - e.d.sourceY + (c[1]*this.tileHeight()) + 18
+		);*/
 	}
 };
 
 dusk.sgui.TileRegion.prototype.clearRegion = function(name) {
 	this._regions[name] = undefined;
+	this._regionMaps[name] = undefined;
 	
 	this._updateTileColourCache();
 };
 
 dusk.sgui.TileRegion.prototype.addToRegion = function(name, x, y, px, py, weight, e, dist) {
-	if(!(name in this._regions) || !this._regions[name]) this._regions[name] = [];
+	if(!(name in this._regions) || !this._regions[name]) {
+		this._regions[name] = [null];
+		this._regionMaps[name] = new Uint16Array(this.rows * this.cols);
+	}
 	
 	this._regions[name].push([x, y, px, py, weight, e, dist]);
+	this._regionMaps[name][(y * this.cols)+x] = this._regions[name].length-1;
 	this._updateTileColourCache();
 };
 
 dusk.sgui.TileRegion.prototype.getFromRegion = function(name, x, y) {
 	if(!(name in this._regions) || !this._regions[name]) this._regions[name] = [];
 	
-	for(var i = 0; i < this._regions[name].length; i ++) {
+	/*for(var i = 1; i < this._regions[name].length; i ++) {
 		if(this._regions[name][i][0] == x && this._regions[name][i][1] == y) {
 			return this._regions[name][i];
 		}
-	}
+	}*/
 	
-	return null;
+	return this._regions[name][this._regionMaps[name][(y * this.cols) + x]];
 };
 
 dusk.sgui.TileRegion.prototype.isInRegion = function(name, x, y) {
 	if(!(name in this._regions) || !this._regions[name]) return false;
 	
-	for(var i = 0; i < this._regions[name].length; i ++) {
+	/*for(var i = 1; i < this._regions[name].length; i ++) {
 		if(this._regions[name][i][0] == x && this._regions[name][i][1] == y) {
 			return true;
 		}
-	}
+	}*/
 	
-	return false;
+	return this._regionMaps[name][(y * this.cols) + x] != 0;
 };
 
 dusk.sgui.TileRegion.prototype.getRegion = function(name) {
@@ -200,12 +221,26 @@ dusk.sgui.TileRegion.prototype.pathTo = function(name, x, y) {
 	var o = [];
 	var t = this.getFromRegion(name, x, y);
 	
-	while(t[2] >= 0) {
+	while(t && t[2] >= 0) {
 		o.push(this._resolveDirection(t[2], t[3], t[0], t[1]));
 		t = this.getFromRegion(name, t[2], t[3]);
 	}
 	
-	return o;
+	return o.reverse();
+};
+
+dusk.sgui.TileRegion.prototype.followPathFromRegion = function(path, origin, dest) {
+	var o = [-1, -1];
+	var t = [this._regionOrigins[origin][0], this._regionOrigins[origin][1]];
+	var p = 0;
+	
+	while(p <= path.length) {
+		this.addToRegion(dest, t[0], t[1], o[0], o[1]);
+		o[0] = t[0];
+		o[1] = t[1];
+		t = this._goDirection(t[0], t[1], path[p]);
+		p ++;
+	}
 };
 
 dusk.sgui.TileRegion.prototype.expandRegion = function(name, x, y, range, los, ignoreFirst) {
@@ -230,27 +265,31 @@ dusk.sgui.TileRegion.prototype.expandRegion = function(name, x, y, range, los, i
 	var cloud = [[x, y, -1, -1, w]];
 	dusk.sgui.TileMap.tileData.free(t);
 	
+	this._regionOrigins[name] = cloud[0];
+	
 	while(cloud.length) {
 		var c = this._getMinFromCloud(cloud);
 		var t = s.getTile(c[0], c[1]);
 		
-		if(!los || this.checkLOS(name, x, y, c[0], c[1])) {
-			s.shiftTile(t, dusk.sgui.c.DIR_UP);
-			this._updateCloud(cloud, c, t, range);
-			s.shiftTile(t, dusk.sgui.c.DIR_DOWN);
-		
-			s.shiftTile(t, dusk.sgui.c.DIR_RIGHT);
-			this._updateCloud(cloud, c, t, range);
-			s.shiftTile(t, dusk.sgui.c.DIR_LEFT);
-		
-			s.shiftTile(t, dusk.sgui.c.DIR_DOWN);
-			this._updateCloud(cloud, c, t, range);
-			s.shiftTile(t, dusk.sgui.c.DIR_UP);
-		
-			s.shiftTile(t, dusk.sgui.c.DIR_LEFT);
-			this._updateCloud(cloud, c, t, range);
+		if(!this.isInRegion(name, c[0], c[1])) {
+			if(!los || this.checkLOS(name, x, y, c[0], c[1])) {
+				s.shiftTile(t, dusk.sgui.c.DIR_UP);
+				this._updateCloud(cloud, c, t, range);
+				s.shiftTile(t, dusk.sgui.c.DIR_DOWN);
 			
-			this.addToRegion(name, c[0], c[1], c[2], c[3], c[4], c[5], c[6]);
+				s.shiftTile(t, dusk.sgui.c.DIR_RIGHT);
+				this._updateCloud(cloud, c, t, range);
+				s.shiftTile(t, dusk.sgui.c.DIR_LEFT);
+			
+				s.shiftTile(t, dusk.sgui.c.DIR_DOWN);
+				this._updateCloud(cloud, c, t, range);
+				s.shiftTile(t, dusk.sgui.c.DIR_UP);
+			
+				s.shiftTile(t, dusk.sgui.c.DIR_LEFT);
+				this._updateCloud(cloud, c, t, range);
+				
+				this.addToRegion(name, c[0], c[1], c[2], c[3], c[4], c[5], c[6]);
+			}
 		}
 		
 		dusk.sgui.TileMap.tileData.free(t);
@@ -325,7 +364,7 @@ dusk.sgui.TileRegion.prototype._updateTileColourCache = function() {
 		var r = this.getRegion(t[0]);
 		
 		if(r) {
-			for(var j = 0; j < r.length; j ++) {
+			for(var j = 1; j < r.length; j ++) {
 				var set = false;
 				
 				for(var k = 0; k < this._cachedTileColours.length; k ++) {
@@ -336,7 +375,7 @@ dusk.sgui.TileRegion.prototype._updateTileColourCache = function() {
 				}
 				
 				if(!set) {
-					this._cachedTileColours.push([r[j][0], r[j][1], t[1]]);
+					this._cachedTileColours.push([r[j][0], r[j][1], t[1], r[j][2], r[j][3]]);
 				}
 			}
 		}
@@ -389,6 +428,15 @@ dusk.sgui.TileRegion.prototype._resolveDirection = function(xa, ya, xb, yb) {
 	if(xa == xb - 1) return dusk.sgui.c.DIR_RIGHT;
 	if(ya == yb + 1) return dusk.sgui.c.DIR_UP;
 	if(ya == yb - 1) return dusk.sgui.c.DIR_DOWN;
+};
+
+dusk.sgui.TileRegion.prototype._goDirection = function(x, y, dir) {
+	switch(dir) {
+		case dusk.sgui.c.DIR_LEFT: return [x-1, y];
+		case dusk.sgui.c.DIR_RIGHT: return [x+1, y];
+		case dusk.sgui.c.DIR_UP: return [x, y-1];
+		case dusk.sgui.c.DIR_DOWN: return [x, y+1];
+	}
 };
 
 dusk.sgui.TileRegion.prototype.colourRegion = function(name, colour) {

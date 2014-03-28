@@ -126,7 +126,7 @@ dusk.load._capability = function() {
 	if(!("Promise" in window) || typeof Promise != "function") {
 		console.warn("Promise not available, importing polyfill.");
 		var js = document.createElement("script");
-		js.src = "DuskWolf/Promise.js";
+		js.src = "DuskWolf/lib/promise.js";
 		document.head.appendChild(js);
 	}
 	
@@ -417,7 +417,9 @@ dusk.load._displayLoad = function() {
 		$("#"+dusk.elemPrefix+"-canvas")[0].getContext("2d").fillText(
 			"Hold on! Loading "+dusk.load._currentlyImporting.length+" files!", 5, textY+=15
 		);
-		$("#"+dusk.elemPrefix+"-canvas")[0].getContext("2d").fillText("Now loading "+dusk.load._current+"!", 5, textY+=15);
+		$("#"+dusk.elemPrefix+"-canvas")[0].getContext("2d").fillText(
+			"Now loading "+dusk.load._current+"!", 5, textY+=15
+		);
 		$("#"+dusk.elemPrefix+"-canvas")[0].getContext("2d").fillText(
 			"That's about "+dusk.load._getBytes()+"KiB, excluding image data!", 5, textY+=15
 		);

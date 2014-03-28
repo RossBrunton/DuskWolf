@@ -17,10 +17,12 @@ dusk.load.provide("dusk.LayeredStats");
  * @since 0.0.21-alpha
  * @constructor
  */
-dusk.LayeredStats = function(name) {
+dusk.LayeredStats = function(name, layerNames) {
 	this.name = name;
 	
 	this._layers = [];
+	this.layerNames = layerNames?layerNames:[];
+	this._extras = {};
 	
 	this._x = null;
 	this._max = null;
@@ -37,6 +39,7 @@ dusk.LayeredStats = function(name) {
 };
 
 dusk.LayeredStats.prototype.addBlock = function(layer, name, block, copy) {
+	layer = this._lookupLayer(layer);
 	if(copy) block = dusk.utils.clone(block);
 	if(!this._layers[layer]) this._layers[layer] = {};
 	
@@ -44,6 +47,7 @@ dusk.LayeredStats.prototype.addBlock = function(layer, name, block, copy) {
 };
 
 dusk.LayeredStats.prototype.removeBlock = function(layer, name) {
+	layer = this._lookupLayer(layer);
 	if(!this._layers[layer]) return undefined;
 	
 	var toReturn = this._layers[layer][name];
@@ -52,6 +56,7 @@ dusk.LayeredStats.prototype.removeBlock = function(layer, name) {
 };
 
 dusk.LayeredStats.prototype.replaceBlock = function(layer, name, block, copy) {
+	layer = this._lookupLayer(layer);
 	if(copy) block = dusk.utils.clone(block);
 	if(!this._layers[layer]) this._layers[layer] = {};
 	
@@ -62,6 +67,7 @@ dusk.LayeredStats.prototype.get = function(untilLayer, field) {
 	var max = Infinity;
 	var min = -Infinity;
 	var value = null;
+	untilLayer = this._lookupLayer(untilLayer);
 	
 	for(var i = 0; i < this._layers.length && i <= untilLayer; i ++) {
 		var list = [];
@@ -103,15 +109,18 @@ dusk.LayeredStats.prototype.get = function(untilLayer, field) {
 };
 
 dusk.LayeredStats.prototype.geti = function(untilLayer, field) {
+	untilLayer = this._lookupLayer(untilLayer);
 	return ~~this.get(untilLayer, field);
 };
 
 dusk.LayeredStats.prototype.countInLayer = function(layer) {
+	layer = this._lookupLayer(layer);
 	return Object.keys(this._layers[layer]).length;
 };
 
 dusk.LayeredStats.prototype.getMaxInLayer = function(layer, field) {
 	var max = undefined;
+	layer = this._lookupLayer(layer);
 	
 	for(var p in this._layers[layer]) {
 		list = this._toList(this._layers[layer][p]);
@@ -131,6 +140,7 @@ dusk.LayeredStats.prototype.getMaxInLayer = function(layer, field) {
 
 dusk.LayeredStats.prototype.getMinInLayer = function(layer, field) {
 	var min = undefined;
+	layer = this._lookupLayer(layer);
 	
 	for(var p in this._layers[layer]) {
 		list = this._toList(this._layers[layer][p]);
@@ -165,6 +175,17 @@ dusk.LayeredStats.prototype._eval = function(expr, field, value, min, max) {
 	return this._tree.compile(expr).eval();
 };
 
+dusk.LayeredStats.prototype._lookupLayer = function(layer) {
+	if(typeof layer == "number") return layer;
+	
+	for(var i = 0; i < this.layerNames; i ++) {
+		if(this.layerNames[i] == layer) return i;
+	}
+	
+	console.log("Unknown layer "+layer);
+	return undefined;
+};
+
 dusk.LayeredStats.prototype.tickDown = function(field) {
 	for(var i = 0; i < this._layers.length; i ++) {
 		for(var p in this._layers[i]) {
@@ -196,6 +217,15 @@ dusk.LayeredStats.prototype._getRelevant = function(object, field) {
 	}
 	
 	return out;
+};
+
+dusk.LayeredStats.prototype.getExtra = function(name) {
+	if(!(name in this._extras)) return null;
+	return this._extras[name];
+};
+
+dusk.LayeredStats.prototype.setExtra = function(name, object) {
+	this._extras[name] = object;
 };
 
 dusk.LayeredStats.prototype.toString = function() {

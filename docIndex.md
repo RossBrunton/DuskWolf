@@ -27,6 +27,7 @@ I'm going to list them all here.
 - {@link dusk.items}
 - {@link dusk.items.Invent}
 - {@link dusk.keyboard}
+- {@link dusk.LayeredStats}
 - {@link dusk.load}
 - {@link dusk.Mapper}
 - {@link dusk.parseTree}
@@ -34,12 +35,23 @@ I'm going to list them all here.
 - {@link dusk.parseTree.Node}
 - {@link dusk.performance}
 - {@link dusk.plat}
+- {@link dusk.quest}
 - {@link dusk.Range}
+- {@link dusk.reversiblePromiseChain}
 - {@link dusk.RoomManager}
 - {@link dusk.sgui}
 - {@link dusk.pause}
 - {@link dusk.skills}
 - {@link dusk.utils}
+
+**{@link dusk.save}**
+
+- {@link dusk.save.DropboxSource}
+- {@link dusk.save.ISavable}
+- {@link dusk.save.LocalStorageSource}
+- {@link dusk.save.SaveData}
+- {@link dusk.save.SaveSource}
+- {@link dusk.save.SaveSpec}
 
 **{@link dusk.behave}**
 
@@ -47,6 +59,8 @@ I'm going to list them all here.
 - {@link dusk.behave.Behave}
 - {@link dusk.behave.Fall}
 - {@link dusk.behave.Gravity}
+- {@link dusk.behave.GridRecorder}
+- {@link dusk.behave.GridWalker}
 - {@link dusk.behave.HealthRestore}
 - {@link dusk.behave.HitDam}
 - {@link dusk.behave.Jumper}
@@ -56,6 +70,7 @@ I'm going to list them all here.
 - {@link dusk.behave.Persist}
 - {@link dusk.behave.Pickup}
 - {@link dusk.behave.PlayerControl}
+- {@link dusk.behave.PlayerGridWalker}
 - {@link dusk.behave.Push}
 - {@link dusk.behave.Spawner}
 - {@link dusk.behave.Volatile}
@@ -95,6 +110,7 @@ I'm going to list them all here.
 - {@link dusk.sgui.TextBox}
 - {@link dusk.sgui.Tile}
 - {@link dusk.sgui.TileMap}
+- {@link dusk.sgui.TileRegion}
 - {@link dusk.sgui.TransitionManager}
 
 **{@link dusk.sgui.effects}**
@@ -110,6 +126,7 @@ I'm going to list them all here.
 - {@link dusk.sgui.extras.Extra}
 - {@link dusk.sgui.extras.Fade}
 - {@link dusk.sgui.extras.Flash}
+- {@link dusk.sgui.extras.QuestPuppeteer}
 - {@link dusk.sgui.extras.Radiobox}
 - {@link dusk.sgui.extras.SineSlide}
 - {@link dusk.sgui.extras.SmoothSlide}

@@ -107,7 +107,6 @@ dusk.behave.GridWalker.prototype._gwFrame = function(e) {
 			if(this._entity.x >= this._data("gwtargetx")) {
 				this._entity.x = this._data("gwtargetx");
 				this._data("gwmoving", false);
-				this._gwFrame();
 			}else{
 				this._entity.applyDx("gw_move", this._data("gwspeed"), 1, 0, this._data("gwspeed"), false);
 			}
@@ -115,7 +114,6 @@ dusk.behave.GridWalker.prototype._gwFrame = function(e) {
 			if(this._entity.x <= this._data("gwtargetx")) {
 				this._entity.x = this._data("gwtargetx");
 				this._data("gwmoving", false);
-				this._gwFrame();
 			}else{
 				this._entity.applyDx("gw_move", -this._data("gwspeed"), 1, 0, -this._data("gwspeed"), false);
 			}
@@ -123,7 +121,6 @@ dusk.behave.GridWalker.prototype._gwFrame = function(e) {
 			if(this._entity.y >= this._data("gwtargety")) {
 				this._entity.y = this._data("gwtargety");
 				this._data("gwmoving", false);
-				this._gwFrame();
 			}else{
 				this._entity.applyDy("gw_move", this._data("gwspeed"), 1, 0, this._data("gwspeed"), false);
 			}
@@ -131,10 +128,18 @@ dusk.behave.GridWalker.prototype._gwFrame = function(e) {
 			if(this._entity.y <= this._data("gwtargety")) {
 				this._entity.y = this._data("gwtargety");
 				this._data("gwmoving", false);
-				this._gwFrame();
 			}else{
 				this._entity.applyDy("gw_move", -this._data("gwspeed"), 1, 0, -this._data("gwspeed"), false);
 			}
+		}
+		
+		if(!this._data("gwmoving")) {
+			this._entity.behaviourFire("gwStopMove", 
+				{"dir":d, "targetX":this._data("gwtargetx")/this._entity.width, 
+				"targetY":this._data("gwtargety")/this._entity.height}
+			);
+			
+			this._gwFrame();
 		}
 	}
 };
@@ -156,20 +161,47 @@ dusk.behave.GridRecorder = function(entity) {
 	this._data("grmoves", [], true);
 	this._data("grrecording", false, true);
 	this._data("grrange", 0, true);
-	this._data("grregion", 0, true);
+	this._data("grregion", "", true);
+	this._data("grregionto", "", true);
 	this._data("grsnap", false, true);
 	
+	this._leftRegion = false;
+	
 	this.entityEvent.listen(this._gwStartMove.bind(this), undefined, {"name":"gwStartMove"});
+	this.entityEvent.listen(this._gwStopMove.bind(this), undefined, {"name":"gwStopMove"});
 };
 dusk.behave.GridRecorder.prototype = Object.create(dusk.behave.Behave.prototype);
 
 dusk.behave.GridRecorder.prototype._gwStartMove = function(e) {
-	if(this._data("grrecording")) {
-		this._data("grmoves").push(e.dir);
+	if(this._data("grrecording")
+	&& this._entity.container.container.getRegion().isInRegion(this._data("grregion"), e.targetX, e.targetY)) {
+		var moves = this._data("grmoves")
+		moves.push(e.dir);
 		
-		if(this._data("grsnap") && this._data("grmoves").length > this._data("grrange")) {
+		if((moves[moves.length-1] | moves[moves.length-2]) == (dusk.sgui.c.DIR_UP | dusk.sgui.c.DIR_DOWN))
+			moves.splice(-2, 2);
+		
+		if((moves[moves.length-1] | moves[moves.length-2]) == (dusk.sgui.c.DIR_LEFT | dusk.sgui.c.DIR_RIGHT))
+			moves.splice(-2, 2);
+		
+		if(this._leftRegion || (this._data("grsnap") && moves.length > this._data("grrange"))) {
 			this._data("grmoves", 
 				this._entity.container.container.getRegion().pathTo(this._data("grregion"), e.targetX, e.targetY)
+			);
+			this._leftRegion = false;
+		}
+	}else if(this._data("grrecording")) {
+		this._leftRegion = true;
+	}
+};
+
+dusk.behave.GridRecorder.prototype._gwStopMove = function(e) {
+	if(this._data("grrecording")
+	&& this._entity.container.container.getRegion().isInRegion(this._data("grregion"), e.targetX, e.targetY)) {
+		if(this._data("grregionto")) {
+			this._entity.container.container.getRegion().clearRegion(this._data("grregionto"));
+			this._entity.container.container.getRegion().followPathFromRegion(
+				this._data("grmoves"), this._data("grregion"), this._data("grregionto")
 			);
 		}
 	}
