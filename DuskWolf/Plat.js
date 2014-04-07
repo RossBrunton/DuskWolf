@@ -7,6 +7,7 @@ dusk.load.require("dusk.sgui.BasicMain");
 dusk.load.require("dusk.EventDispatcher");
 dusk.load.require("dusk.entities");
 dusk.load.require("dusk.RoomManager");
+dusk.load.require("dusk.sgui.TileMapWeights");
 dusk.load.require("dusk.skills");
 
 dusk.load.provide("dusk.plat");
@@ -34,9 +35,12 @@ dusk.plat._init = function() {
 	main.becomeActive();
 	main.flow("main");
 	
+	dusk.plat.weights = new dusk.sgui.TileMapWeights(2, 10);
+	dusk.plat.weights.addSolid(1, 0, true);
+	
 	main.getComponent("main").layers = [
 		{"name":"back", "type":dusk.sgui.BasicMain.LAYER_TILEMAP},
-		{"name":"scheme", "type":dusk.sgui.BasicMain.LAYER_SCHEME},
+		{"name":"scheme", "type":dusk.sgui.BasicMain.LAYER_SCHEME, "weights":dusk.plat.weights},
 		{"name":"entities", "type":dusk.sgui.BasicMain.LAYER_ENTITIES, "primary":true},
 		{"name":"parts", "type":dusk.sgui.BasicMain.LAYER_PARTICLES},
 		{"name":"over", "type":dusk.sgui.BasicMain.LAYER_TILEMAP},
@@ -46,7 +50,7 @@ dusk.plat._init = function() {
 	dusk.entities.types.createNewType("plat", {
 		"data":{
 			"headingLeft":false, "headingUp":false,
-			"img":"pimg/hero.png", "solid":true, "collides":true
+			"src":"pimg/hero.png", "solid":true, "collides":true
 		},
 		"animation":{"stationary":"0,0"},
 		"behaviours":{}

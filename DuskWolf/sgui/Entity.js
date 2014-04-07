@@ -401,7 +401,9 @@ dusk.sgui.Entity = function(parent, comName) {
 				if(this.isLight()) return undefined;
 				return this.prop(v);
 			}).bind(this), false],
-		[":", (function(o, v) {return this.eProp(v);}).bind(this), false]
+		[":", (function(o, v) {return this.eProp(v);}).bind(this), false],
+		["stat", (function(o, v) {return this.stats.get(v[0], v[1]);}).bind(this), false],
+		["stati", (function(o, v) {return this.stats.geti(v[0], v[1]);}).bind(this), false],
 	], []);
 	
 	/** Internal storage of this entity's type's name.
@@ -414,6 +416,12 @@ dusk.sgui.Entity = function(parent, comName) {
 	 * @type string
 	 */
 	this.entType = "root";
+	
+	/** The stats system that is associated with this entity; if it has one.
+	 * @type dusk.stats.LayeredStatsSystem
+	 * @since 0.0.21-alpha
+	 */
+	this.stats = null;
 	
 	//Default sizes
 	this.sheight = dusk.entities.sheight;
@@ -487,7 +495,7 @@ Object.defineProperty(dusk.sgui.Entity.prototype, "entType", {
 		this.performAnimation("construct", true);
 		
 		//Basic properties
-		if(!this.isLight()) this.prop("src", this.behaviourData.img);
+		if(!this.isLight()) this.prop("src", this.behaviourData.src);
 		
 		if("collisionWidth" in this.behaviourData) {
 			this.collisionWidth = this.behaviourData.collisionWidth;
@@ -748,7 +756,7 @@ dusk.sgui.Entity.prototype.addBehaviour = function(name, reInit) {
  * @return {*} The value of the specified property.
  */
 dusk.sgui.Entity.prototype.eProp = function(prop, set) {
-	if(prop == "img" && set) {
+	if(prop == "src" && set) {
 		this.src = set;
 	}
 	if(prop == "collisionWidth" && set !== undefined) {

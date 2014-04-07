@@ -179,15 +179,12 @@ dusk.load.provide = function(name) {
 		}
 	}
 	
-	dusk.load._names[name][1] = 2;
+	if(name in dusk.load._names) {
+		dusk.load._names[name][1] = 2;
+	}
 	
 	if(dusk.load.onProvide) {
-		var to = (function(pakName) {
-			return function() {
-				dusk.load.onProvide.fire({'package':pakName});
-			};
-		})(name);
-		setTimeout(to, 1);
+		setTimeout(dusk.load.onProvide.fire.bind(dusk.load.onProvide, {"package":name}), 1);
 	}
 };
 

@@ -3,6 +3,7 @@
 "use strict";
 
 dusk.load.provide("dusk.reversiblePromiseChain");
+dusk.load.provide("dusk.UserCancelError");
 
 /** @namespace dusk.reversiblePromiseChain
  * @name dusk.reversiblePromiseChain
@@ -62,8 +63,6 @@ dusk.reversiblePromiseChain = function(promises, cancelOut, initialArg) {
 				}
 			}
 			
-			console.log("> "+this.p);
-			
 			if(this.p > 0) {
 				this.promises[this.p - 1][3] = this.toAdd.length;
 			}
@@ -71,7 +70,6 @@ dusk.reversiblePromiseChain = function(promises, cancelOut, initialArg) {
 			if(this.toAdd.length) {
 				for(var i = this.toAdd.length-1; i >= 0; i --) {
 					this.promises.splice(this.p, 0, this.toAdd[i]);
-					console.log("+");
 				}
 				
 				this.toAdd = [];
@@ -79,7 +77,9 @@ dusk.reversiblePromiseChain = function(promises, cancelOut, initialArg) {
 			
 			this.inverse = false;
 			
-			if(this.p >= this.promises.length) fulfill(value);
+			if(this.p >= this.promises.length) {
+				return fulfill(value);
+			}
 			
 			var ret = null;
 			if(this.p > 0) {
@@ -103,8 +103,11 @@ dusk.reversiblePromiseChain = function(promises, cancelOut, initialArg) {
 				this.promises.splice(this.p+1, this.promises[this.p][3]);
 			}
 			
-			console.log("< "+this.p);
-			console.log(value);
+			if(!(value instanceof dusk.UserCancelError)) {
+				return reject(value);
+			}
+			
+			console.warn(value);
 			
 			if(this.p < 0) {
 				if(cancelOut) {
@@ -115,7 +118,7 @@ dusk.reversiblePromiseChain = function(promises, cancelOut, initialArg) {
 				}
 			}
 			
-			if(!this.promises[this.p][1]) return this.cancel(new Error("Cancelled"));
+			if(!this.promises[this.p][1]) return this.cancel(new dusk.UserCancelError());
 			
 			return this.promises[this.p][1](this.promises[this.p][2], this.queue).then(this.next, this.cancel);
 		}).bind(scope);
@@ -123,3 +126,21 @@ dusk.reversiblePromiseChain = function(promises, cancelOut, initialArg) {
 		scope.next();
 	}));
 };
+
+// ----
+
+/** @class dusk.UserCancelError
+ * 
+ * @classdesc 
+ * 
+ * @extends Error
+ * @constructor
+ * @since 0.0.21-alpha
+ */
+dusk.UserCancelError = function (parent, comName) {
+	Error.call(this);
+	
+	this.name = "UserCancelError";
+	this.message = "User Cancelled";
+};
+dusk.UserCancelError.prototype = Object.create(Error.prototype);

@@ -44,7 +44,7 @@ dusk.quest._init = function() {
 	dusk.entities.types.createNewType("quest", {
 		"data":{
 			"headingLeft":false, "headingUp":false,
-			"img":"pimg/hero.png", "solid":true, "collides":true
+			"src":"pimg/hero.png", "solid":true, "collides":true
 		},
 		"animation":["true", "0,0", {}],
 		"behaviours":{}

@@ -80,12 +80,13 @@ dusk.behave.GridWalker.prototype._gwFrame = function(e) {
 	}
 	
 	if(startMove && this._entity.scheme) {
+		//Try to move
 		var oldT = this._entity.scheme.tilePointIn(this._entity.x, this._entity.y);
 		var newT = this._entity.scheme.tilePointIn(this._entity.x, this._entity.y);
 		
 		this._entity.scheme.shiftTile(newT, d);
 		
-		if((oldT[2] != newT[2] || oldT[3] != newT[3]) && newT[4] < 100) {
+		if(((oldT[2] != newT[2] || oldT[3] != newT[3]) && !newT[5]) || !this._data("collides")) {
 			if(this._data("gwregion") == ""
 			|| this._entity.container.container.getRegion().isInRegion(this._data("gwregion"), newT[2], newT[3])) {
 				this._entity.behaviourFire("gwStartMove", {"dir":d, "targetX":newT[2], "targetY":newT[3]});

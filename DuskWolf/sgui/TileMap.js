@@ -7,6 +7,7 @@ dusk.load.require("dusk.data");
 dusk.load.require("dusk.utils");
 
 dusk.load.provide("dusk.sgui.TileMap");
+dusk.load.provide("dusk.sgui.TileMapWeights");
 
 /** @class dusk.sgui.TileMap
  * 
@@ -25,7 +26,8 @@ dusk.load.provide("dusk.sgui.TileMap");
  * 
  * Some functions accept and return tileData objects. This is essentially an array, the first two elements are the x and
  *  y coordinates of the image displayed (from the original stylesheet), the second two are the x and y coordinates that
- *  this tiledata describes, and the last element is the weight of this tile if appropriate.
+ *  this tiledata describes, and the last two elements is the weight of this tile and an integer which is 0 iff the
+ *  tile is not solid else 1.
  * 
  * @extends dusk.sgui.Component
  * @param {?dusk.sgui.Component} parent The container that this component is in.
@@ -156,6 +158,12 @@ dusk.sgui.TileMap = function (parent, comName) {
 		 * @since 0.0.19-alpha
 		 */
 		this.animating = true;
+		
+		/** If set, this is the weights of a given tile. This can be changed often, and incurs no performance problems.
+		 * @type ?dusk.sgui.TileMapWeights
+		 * @since 0.0.21-alpha
+		 */
+		this.weights = null;
 		
 		//Prop masks
 		this._registerPropMask("map", "map", true, 
@@ -370,6 +378,9 @@ dusk.sgui.TileMap.prototype.tilePointIn = function(x, y, exactX, exactY) {
  * 
  * If they are in a solid place, it returns the number of pixels to add to the x or y coordinate such that there is no
  * collision.
+ * 
+ * Solid tiles have a weight of greater than 100.
+ * 
  * @param {integer} x The x coordinate to check.
  * @param {integer} y The y coordinate to check.
  * @param {boolean=false} shiftRight If true, then the entitiy will be shifted right/down, else left/up.
@@ -378,13 +389,14 @@ dusk.sgui.TileMap.prototype.tilePointIn = function(x, y, exactX, exactY) {
  * @since 0.0.20-alpha
  */
 dusk.sgui.TileMap.prototype.mapSolidIn = function(x, y, shiftRightDown, shiftVer) {
-	//Hardcoded now, should be fixed later
-	var solid = [1, 0];
+	if(!this.weights) {
+		return 0;
+	}
 	
 	var tileNow = this.tilePointIn(x, y);
 	var toRet = 0;
 	
-	if(solid[0] == tileNow[0] && solid[1] == tileNow[1]) {
+	if(this.weights.getSolid(tileNow[0], tileNow[1])) {
 		if(!shiftRightDown && !shiftVer)
 			toRet = -(x % this.tileWidth());
 		if(shiftRightDown && !shiftVer)
@@ -446,11 +458,12 @@ dusk.sgui.TileMap.prototype.getTile = function(x, y) {
 		t[0] = this._tiles[0][((y*this.cols)+x)<<1];
 		t[1] = this._tiles[0][(((y*this.cols)+x)<<1)+1];
 		
-		//placeholder
-		if(t[0] == 1 && t[1] == 0) {
-			t[4] = 100;
+		if(this.weights) {
+			t[4] = this.weights.getWeight(t[0], t[1]);
+			t[5] = this.weights.getSolid(t[0], t[1])?1:0;
 		}else{
 			t[4] = 1;
+			t[5] = 0;
 		}
 	}
 	
@@ -485,11 +498,12 @@ dusk.sgui.TileMap.prototype.shiftTile = function(t, dir) {
 		t[1] = this._tiles[0][(((t[3]*this.cols)+t[2])<<1)+1];
 	}
 	
-	//placeholder
-	if(t[0] == 1 && t[1] == 0) {
-		t[4] = 100;
+	if(this.weights) {
+		t[4] = this.weights.getWeight(t[0], t[1]);
+		t[5] = this.weights.getSolid(t[0], t[1])?1:0;
 	}else{
 		t[4] = 1;
+		t[5] = 0;
 	}
 	
 	return t;
@@ -687,9 +701,70 @@ dusk.sgui.TileMap.prototype._framesNeeded = function(test) {
  * @type dusk.pool<Array>
  * @since 0.0.21-alpha
  */
-dusk.sgui.TileMap.tileData = new dusk.Pool(Array);
+dusk.sgui.TileMap.tileData = new dusk.Pool(Uint8Array.bind(undefined, 5));
 
 Object.seal(dusk.sgui.TileMap);
 Object.seal(dusk.sgui.TileMap.prototype);
 
 dusk.sgui.registerType("TileMap", dusk.sgui.TileMap);
+
+// ----
+
+/** @class dusk.sgui.TileMapWeights
+ * 
+ * @classdesc Stores weights of tilemap schematic layers.
+ * 
+ * Essentially, it maps a given tile on the schematic layer to a weight.
+ * 
+ * Tiles not set have a weight of 1. Tiles cannot have a weight of less than 1 or larger than 127.
+ * 
+ * Tiles can also be either solid or not solid.
+ * 
+ * @param {integer} rows The number of rows in the source image.
+ * @param {integer} cols The number of columns in the source image.
+ * @constructor
+ * @since 0.0.21-alpha
+ */
+dusk.sgui.TileMapWeights = function(rows, cols) {
+	this.rows = rows;
+	this.cols = cols;
+	
+	this._weights = new Uint8Array(this.rows * this.cols);
+};
+
+/** Sets the weight of a given tile.
+ * @param {integer} x The x coordinate of the tile on the tilesheet.
+ * @param {integer} y The y coordinate of the tile on the tilesheet.
+ * @param {integer} w The weight to set the tile.
+ */
+dusk.sgui.TileMapWeights.prototype.addWeight = function(x, y, w) {
+	this._weights[(y * this.cols) + x] = w | (this._weights[(y * this.cols) + x] & 0x80);
+};
+
+/** Gets the weight of a given tile.
+ * @param {integer} x The x coordinate of the tile on the tilesheet.
+ * @param {integer} y The y coordinate of the tile on the tilesheet.
+ * @return {integer} The weight of the given tile.
+ */
+dusk.sgui.TileMapWeights.prototype.getWeight = function(x, y) {
+	if(!this._weights[(y * this.cols) + x]) return 1;
+	return this._weights[(y * this.cols) + x] & 0x7f;
+};
+
+/** Sets whether the tile is solid or not.
+ * @param {integer} x The x coordinate of the tile on the tilesheet.
+ * @param {integer} y The y coordinate of the tile on the tilesheet.
+ * @param {boolean} solid Whether to set the tile as solid or not.
+ */
+dusk.sgui.TileMapWeights.prototype.addSolid = function(x, y, solid) {
+	this._weights[(y * this.cols) + x] = (solid?0x80:0x00) | (this._weights[(y * this.cols) + x] & 0x7f);
+};
+
+/** Sets whether the tile is solid or not.
+ * @param {integer} x The x coordinate of the tile on the tilesheet.
+ * @param {integer} y The y coordinate of the tile on the tilesheet.
+ * @return {boolean} Whether the given tile is solid or not.
+ */
+dusk.sgui.TileMapWeights.prototype.getSolid = function(x, y) {
+	return (this._weights[(y * this.cols) + x] & 0x80) == 0x80;
+};

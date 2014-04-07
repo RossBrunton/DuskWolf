@@ -99,7 +99,7 @@ dusk.sgui.BasicMain.prototype.createRoom = function(name, spawn) {
 	}
 	
 	var crd = this.getFirstLayerOfType(dusk.sgui.BasicMain.LAYER_SCHEME).lookTile(spawn, 1);
-	if(crd){
+	if(crd && dusk.entities.seek){
 		var playerData = {};
 		playerData.name = dusk.entities.seek;
 		playerData.type = dusk.entities.seekType;
@@ -145,6 +145,9 @@ Object.defineProperty(dusk.sgui.BasicMain.prototype, "layers", {
 						"twidth":dusk.entities.twidth, "theight":dusk.entities.theight,
 						"swidth":dusk.entities.swidth, "sheight":dusk.entities.sheight, "alpha":0, "globalCoords":true
 					});
+					
+					if("weights" in val[i] && val[i].weights) 
+						this.getComponent(val[i].name, "EditableTileMap").weights = val[i].weights;
 					
 					break;
 				
@@ -286,8 +289,10 @@ dusk.sgui.BasicMain.prototype.autoScroll = function() {
 	this.xOffset = seekCoords[0] - (this.width >> 1);
 	this.yOffset = seekCoords[1] - (this.height >> 1);
 	
-	if(this.xOffset > this.getContentsWidth(false) - this.width) this.xOffset = this.getContentsWidth(false) - this.width;
-	if(this.yOffset > this.getContentsHeight(false) - this.height) this.yOffset = this.getContentsHeight(false) - this.height;
+	if(this.xOffset > this.getContentsWidth(false) - this.width)
+		this.xOffset = this.getContentsWidth(false) - this.width;
+	if(this.yOffset > this.getContentsHeight(false) - this.height)
+		this.yOffset = this.getContentsHeight(false) - this.height;
 	
 	if(this.xOffset < 0) this.xOffset = 0;
 	if(this.yOffset < 0) this.yOffset = 0;
@@ -298,12 +303,14 @@ dusk.sgui.BasicMain.prototype._bmUpAction = function(e) {
 	if(dusk.keyboard.isKeyPressed(187)) {
 		//+
 		for(var i = this._layers.length-1; i >= 0; i --) {
-			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap
-			|| this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileRegion) {
+			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap) {
 				this.getComponent(this._layers[i].name).graftTop();
 			}
 			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.EntityGroup) {
 				this.getComponent(this._layers[i].name).adjustAll(0, dusk.entities.theight);
+			}
+			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileRegion) {
+				this.getComponent(this._layers[i].name).rows ++;
 			}
 		}
 		
@@ -313,12 +320,14 @@ dusk.sgui.BasicMain.prototype._bmUpAction = function(e) {
 	if(dusk.keyboard.isKeyPressed(189)) {
 		//-
 		for(var i = this._layers.length-1; i >= 0; i --) {
-			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap
-			|| this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileRegion) {
+			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap) {
 				this.getComponent(this._layers[i].name).carveTop();
 			}
 			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.EntityGroup) {
 				this.getComponent(this._layers[i].name).adjustAll(0, -dusk.entities.theight);
+			}
+			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileRegion) {
+				this.getComponent(this._layers[i].name).rows --;
 			}
 		}
 		
@@ -333,9 +342,11 @@ dusk.sgui.BasicMain.prototype._bmDownAction = function(e) {
 	if(dusk.keyboard.isKeyPressed(187)) {
 		//+
 		for(var i = this._layers.length-1; i >= 0; i --) {
-			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap
-			|| this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileRegion) {
+			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap) {
 				this.getComponent(this._layers[i].name).graftBottom();
+			}
+			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileRegion) {
+				this.getComponent(this._layers[i].name).rows ++;
 			}
 		}
 		return false;
@@ -344,9 +355,11 @@ dusk.sgui.BasicMain.prototype._bmDownAction = function(e) {
 	if(dusk.keyboard.isKeyPressed(189)) {
 		//-
 		for(var i = this._layers.length-1; i >= 0; i --) {
-			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap
-			|| this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileRegion) {
+			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap) {
 				this.getComponent(this._layers[i].name).carveBottom();
+			}
+			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileRegion) {
+				this.getComponent(this._layers[i].name).rows --;
 			}
 		}
 		return false;
@@ -360,12 +373,14 @@ dusk.sgui.BasicMain.prototype._bmLeftAction = function(e) {
 	if(dusk.keyboard.isKeyPressed(187)) {
 		//+
 		for(var i = this._layers.length-1; i >= 0; i --) {
-			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap
-			|| this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileRegion) {
+			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap) {
 				this.getComponent(this._layers[i].name).graftLeft();
 			}
 			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.EntityGroup) {
 				this.getComponent(this._layers[i].name).adjustAll(dusk.entities.twidth, 0);
+			}
+			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileRegion) {
+				this.getComponent(this._layers[i].name).cols ++;
 			}
 		}
 		return false;
@@ -374,12 +389,14 @@ dusk.sgui.BasicMain.prototype._bmLeftAction = function(e) {
 	if(dusk.keyboard.isKeyPressed(189)) {
 		//-
 		for(var i = this._layers.length-1; i >= 0; i --) {
-			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap
-			|| this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileRegion) {
+			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap) {
 				this.getComponent(this._layers[i].name).carveLeft();
 			}
 			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.EntityGroup) {
 				this.getComponent(this._layers[i].name).adjustAll(-dusk.entities.twidth, 0);
+			}
+			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileRegion) {
+				this.getComponent(this._layers[i].name).cols --;
 			}
 		}
 		return false;
@@ -393,9 +410,11 @@ dusk.sgui.BasicMain.prototype._bmRightAction = function(e) {
 	if(dusk.keyboard.isKeyPressed(187)) {
 		//+
 		for(var i = this._layers.length-1; i >= 0; i --) {
-			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap
-			|| this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileRegion) {
+			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap) {
 				this.getComponent(this._layers[i].name).graftRight();
+			}
+			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileRegion) {
+				this.getComponent(this._layers[i].name).cols ++;
 			}
 		}
 		return false;
@@ -404,9 +423,11 @@ dusk.sgui.BasicMain.prototype._bmRightAction = function(e) {
 	if(dusk.keyboard.isKeyPressed(189)) {
 		//-
 		for(var i = this._layers.length-1; i >= 0; i --) {
-			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap
-			|| this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileRegion) {
+			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileMap) {
 				this.getComponent(this._layers[i].name).carveRight();
+			}
+			if(this.getComponent(this._layers[i].name) instanceof dusk.sgui.TileRegion) {
+				this.getComponent(this._layers[i].name).cols --;
 			}
 		}
 		return false;
@@ -421,15 +442,26 @@ dusk.sgui.BasicMain.prototype.save = function(e, returnRoom) {
 	if(e === undefined || typeof e == "object") e = prompt("Please enter a package name.", this.roomName);
 	
 	console.log("----- Exported Room Data "+e+" -----");
+	var deps = [this.roomManager.packageName, "dusk.entities"];
 	var out = "";
 	out += "\"use strict\";\n\n";
-	out += "dusk.load.require(\""+this.roomManager.packageName+"\");\n";
-	out += "dusk.load.require(\"dusk.entities\");\n";
-	out += "dusk.load.provide(\""+e+"\");\n\n";
+	
+	var ad = (function(str) {
+		if(deps.indexOf(str) === -1) deps.push(str);
+	}).bind(out);
+	
 	var a = [];
 	for(var i = 0; i < this._layers.length; i ++) {
-		a.push(this.getComponent(this._layers[i].name).saveBM());
+		a.push(this.getComponent(this._layers[i].name).saveBM(ad));
 	}
+	
+	for(var i = 0; i < deps.length; i ++) {
+		out += "dusk.load.require(\""+deps[i]+"\");\n";
+	}
+	
+	out += "\ndusk.load.provide(\""+e+"\");\n";
+	
+	out += "\n";
 	out += e + " = "+JSON.stringify(a, undefined, 0)+";\n\n";
 	out += this.roomManager.managerPath+".createRoom(\""+this.roomName+"\", "+e+");\n\n";
 	out += "//Remember to add your listeners!";

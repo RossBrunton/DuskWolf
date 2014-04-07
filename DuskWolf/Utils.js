@@ -31,6 +31,19 @@ dusk.utils.clone = function(o) {
 	return tmp;
 };
 
+/** Makes a simple copy of the array.
+ *   Anything which isn't a basic object will have it's reference copied, rather than it's value.
+ * @param {array} a The source array to copy.
+ * @return {array} A copy of the source object.
+ */
+dusk.utils.cloneArray = function(a) {
+	var out = [];
+	for(var i = 0; i < a.length; i ++) {
+		out[i] = a[i];
+	}
+	return out;
+};
+
 /** Merges two objects together, combining their properties.
  * 
  * Note that b takes priority, so if a and b both have the same property, b's will be set.

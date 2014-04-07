@@ -436,7 +436,7 @@ dusk.parseTree.Compiler.prototype._read = function(str, init, afterBracket) {
 					if(this._whitespace == dusk.parseTree.Compiler.WS_ALWAYS
 					|| (this._whitespace == dusk.parseTree.Compiler.WS_ONLYCHARS && this._uops[i][3])) {
 						if(c == str.length-1 || /[\s()]/.test(str[c+1])) {
-							uops.push([op, this._uops[i][1], this._upops[i][2]]);
+							uops.push([op, this._uops[i][1], this._uops[i][2]]);
 							buffer = "";
 						}
 					}else{

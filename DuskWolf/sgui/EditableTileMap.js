@@ -161,7 +161,7 @@ dusk.sgui.EditableTileMap.prototype._editTileMapDraw = function(e) {
 	
 	e.c.fillStyle = this.cursorColour;
 	var t = this.getTile(this._cx, this._cy);
-	e.c.fillText(t,
+	e.c.fillText(t[0]+","+t[1],
 		e.d.destX - e.d.sourceX + (this._cx*this.tileWidth()) + 1,
 		e.d.destY - e.d.sourceY + (this._cy*this.tileHeight()) + 6
 	);
@@ -211,8 +211,8 @@ dusk.sgui.EditableTileMap.prototype._copy = function(e) {
 		for(var y = this.frameHeight-1; y >= 0; y --) {
 			var t = this.getTile(this._cx+x, this._cy+y);
 			this._clipboard[p++] = [];
-			this._clipboard[p++][0] = t[0];
-			this._clipboard[p++][1] = t[1];
+			this._clipboard[p-1][0] = t[0];
+			this._clipboard[p-1][1] = t[1];
 			dusk.sgui.TileMap.tileData.free(t);
 		}
 	}

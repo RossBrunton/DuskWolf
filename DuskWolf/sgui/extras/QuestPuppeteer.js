@@ -3,7 +3,9 @@
 "use strict";
 
 dusk.load.require("dusk.sgui.extras.Extra");
+dusk.load.require("dusk.UserCancelError");
 dusk.load.require(">dusk.quest");
+dusk.load.require(">dusk.utils");
 
 dusk.load.provide("dusk.sgui.extras.QuestPuppeteer");
 
@@ -26,27 +28,144 @@ dusk.sgui.extras.QuestPuppeteer = function(owner, name) {
 };
 dusk.sgui.extras.QuestPuppeteer.prototype = Object.create(dusk.sgui.extras.Extra.prototype);
 
+dusk.sgui.extras.QuestPuppeteer.prototype.ensureSelector = function() {
+	if(!this._owner.getPrimaryEntityLayer().hasEntity(this.selector)) {
+		if(this.selector) this.selector.deleted = true;
+		
+		this.selector = this._owner.getPrimaryEntityLayer().dropEntity(
+			{"x":0, "y":0, "type":"puppetSelect", "name":"select"}, true
+		);
+	}
+};
+
 dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedArg) {
 	console.log(type);
+	if(!passedArg) passedArg = {};
 	
 	switch(type) {
 		case "disableFreeControl":
-			var old = this._owner.getSeek().eProp("playerControl");
+			passedArg.oldControl = this._owner.getSeek().eProp("playerControl");
 			this._owner.getSeek().eProp("playerControl", false);
-			return Promise.resolve(old);
+			return Promise.resolve(passedArg);
 		
 		case "enableFreeControl":
-			var old = this._owner.getSeek().eProp("playerControl");
+			passedArg.oldControl = this._owner.getSeek().eProp("playerControl");
 			this._owner.getSeek().eProp("playerControl", true);
-			return Promise.resolve(old);
+			return Promise.resolve(passedArg);
 		
 		case "disableFreeControl^-1":
 		case "enableFreeControl^-1":
-			this._owner.getSeek().eProp("playerControl", passedArg);
-			return Promise.reject(true);
+			this._owner.getSeek().eProp("playerControl", passedArg.oldControl);
+			return Promise.reject(new dusk.UserCancelError());
 		
 		case "getSeek":
-			return Promise.resolve(this._owner.getSeek());
+			passedArg.entity = this._owner.getSeek();
+			return Promise.resolve(passedArg);
+		
+		case "selectEntity":
+			return new Promise((function(fulfill, reject) {
+				var r = this._owner.getRegion();
+				var e = this._owner.getPrimaryEntityLayer();
+				var oldSeek = dusk.entities.seek;
+				this.ensureSelector();
+				
+				if(!args.region) args.region = passedArg.region;
+				if(!args.range) args.range = passedArg.range;
+				if(!args.x) args.x = passedArg.x;
+				if(!args.y) args.y = passedArg.y;
+				if(!args.filter) args.filter = passedArg.filter;
+				
+				if(args.restrict) {
+					this.selector.eProp("gwregion", args.region);
+				}
+				
+				if(args.x !== undefined) this.selector.x = args.x * this.selector.width;
+				if(args.y !== undefined) this.selector.y = args.y * this.selector.height;
+				
+				dusk.entities.seek = this.selector.comName;
+				this.selector.alpha = 1;
+				
+				var l = this.selector.action.listen((function(e) {
+					var e = e.component;
+					var sel = this._owner.getPrimaryEntityLayer().getEntitiesExactlyHere(e.x, e.y, e, true);
+					
+					if(!sel.length) return;
+					sel = sel[0];
+					
+					if(args.region && r.isInRegion(args.region, e.tileX(), e.tileY())) {
+						return;
+					}
+					
+					if(args.filter && !sel.evalTrigger(args.filter)) {
+						return;
+					}
+					
+					passedArg.x = e.tileX();
+					passedArg.y = e.tileY();
+					passedArg.fullX = e.x;
+					passedArg.fullY = e.y;
+					passedArg.entity = sel;
+					
+					e.alpha = 0;
+					if(oldSeek) dusk.entities.seek = oldSeek;
+					e.action.unlisten(l);
+					
+					fulfill(passedArg);
+				}).bind(this));
+				
+				var c = this.selector.cancel.listen(function(e) {
+					var e = e.component;
+					e.alpha = 0;
+					if(oldSeek) dusk.entities.seek = oldSeek;
+					e.cancel.unlisten(c);
+					reject(new dusk.UserCancelError());
+				});
+			}).bind(this));
+		
+		case "generateRegion":
+			return new Promise((function(fulfill, reject) {
+				var r = this._owner.getRegion();
+				var e = this._owner.getPrimaryEntityLayer();
+				
+				if("Entity" in dusk.sgui && !passedArg.ignoreEntity && passedArg.entity) {
+					args.x = passedArg.entity.tileX();
+					args.y = passedArg.entity.tileY();
+				}
+				
+				if("forEach" in args.opts) {
+					for(var i = 0; i < args.opts.forEach.length; i ++) {
+						var e = args.opts.forEach[i];
+						
+						r.clearRegion(e.name);
+					}
+				}
+				
+				r.clearRegion(args.region);
+				//console.profile("Region");
+				r._calls = 0;
+				r.expandRegion(args.region, args.x, args.y, args.range, args.opts);
+				//console.profileEnd("Region");
+				
+				passedArg.region = args.region;
+				passedArg.range = args.range;
+				passedArg.x = args.x;
+				passedArg.y = args.y;
+				
+				fulfill(passedArg);
+			}).bind(this));
+		
+		case "generateRegion^-1":
+			this._owner.getRegion().clearRegion(args.region);
+			
+			if("forEach" in args.opts) {
+				for(var i = 0; i < args.opts.forEach.length; i ++) {
+					var e = args.opts.forEach[i];
+					
+					this._owner.getRegion().clearRegion(e.name);
+				}
+			}
+			
+			return Promise.reject(new dusk.UserCancelError());
 		
 		case "getTileInRange":
 		case "getTilePathInRange":
@@ -54,95 +173,123 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 				var r = this._owner.getRegion();
 				var e = this._owner.getPrimaryEntityLayer();
 				var oldSeek = dusk.entities.seek;
+				this.ensureSelector();
 				
-				if("Entity" in dusk.sgui && passedArg instanceof dusk.sgui.Entity) {
-					args.x = passedArg.tileX();
-					args.y = passedArg.tileY();
+				if(!args.region) args.region = passedArg.region;
+				if(!args.range) args.range = passedArg.range;
+				if(!args.x && args.setCoord) args.x = passedArg.x;
+				if(!args.y && args.setCoord) args.y = passedArg.y;
+				
+				if(args.restrict) {
+					this.selector.eProp("gwregion", args.region);
 				}
-				
-				var sel = e.dropEntity(
-					{"x":0, "y":0, "type":"puppetSelect", "name":args.region+"_select"}, true
-				);
-				
-				sel.eProp("gwregion", args.region);
-				sel.eProp("grregion", args.region);
+				this.selector.eProp("grregion", args.region);
 				
 				if(type == "getTilePathInRange") {
-					sel.eProp("grrecording", true);
-					sel.eProp("grrange", args.range);
-					sel.eProp("grregionto", args.region+"_path");
-					sel.eProp("grsnap", true);
-					sel.eProp("grmoves", []);
+					this.selector.eProp("grrecording", true);
+					this.selector.eProp("grrange", args.range);
+					this.selector.eProp("grregionto", args.region+"_path");
+					this.selector.eProp("grsnap", true);
+					this.selector.eProp("grmoves", []);
 				}
 				
-				sel.src = args.src;
-				sel.x = args.x * sel.width;
-				sel.y = args.y * sel.height;
-				
-				r.clearRegion(args.region);
-				r.expandRegion(args.region, args.x, args.y, args.range, args.los, args.ignoreFirst);
-				
-				if(args.colour) {
-					r.colourRegion(args.region, args.colour);
-				}else{
-					r.uncolourRegion(args.region);
-				}
+				if(args.x !== undefined) this.selector.x = args.x * this.selector.width;
+				if(args.y !== undefined) this.selector.y = args.y * this.selector.height;
 				
 				if(type == "getTilePathInRange") {
 					r.clearRegion(args.region+"_path");
-					if(args.colourPath) {
-						r.colourRegion(args.region+"_path", args.colourPath);
+					if("colour" in args) {
+						r.colourRegion(args.region+"_path", args.colour);
 					}
 				}
 				
-				dusk.entities.seek = args.region+"_select";
+				dusk.entities.seek = this.selector.comName;
+				this.selector.alpha = 1;
 				
-				sel.action.listen(function(e) {
+				var l = this.selector.action.listen((function(e) {
 					var e = e.component;
 					
-					var out = {
-						"x":e.tileX(), "y":e.tileY(), "fullX":e.x, "fullY":e.y, "path":e.eProp("grmoves").reverse(),
-						"entity":passedArg?passedArg:null
-					};
-					e.deleted = true;
-					r.uncolourRegion(args.region);
-					r.uncolourRegion(args.region+"_path");
+					if(!args.allowEntity) {
+						var el = this._owner.getPrimaryEntityLayer().getEntitiesExactlyHere(e.x, e.y, e, true);
+						if(el.length > 0 && (args.blockFirstEnt || el[0] != passedArg.entity)) {
+							return true;
+						}
+					}
 					
-					dusk.entities.seek = oldSeek;
+					passedArg.x = e.tileX();
+					passedArg.y = e.tileY();
+					passedArg.fullX = e.x;
+					passedArg.fullY = e.y;
+					passedArg.path = e.eProp("grmoves").reverse();
 					
-					fulfill(out);
-				});
+					e.alpha = 0;
+					if(oldSeek) dusk.entities.seek = oldSeek;
+					e.action.unlisten(l);
+					
+					if("colour" in args) {
+						r.uncolourRegion(args.region+"_path");
+					}
+					
+					fulfill(passedArg);
+				}).bind(this));
 				
-				sel.cancel.listen(function(e) {
+				var c = this.selector.cancel.listen(function(e) {
 					var e = e.component;
 					
-					var out = {};
-					e.deleted = true;
+					e.alpha = 0;
+					if(oldSeek) dusk.entities.seek = oldSeek;
+					e.cancel.unlisten(c);
 					
-					r.uncolourRegion(args.region);
-					r.uncolourRegion(args.region+"_path");
+					if("colour" in args) {
+						r.uncolourRegion(args.region+"_path");
+					}
 					
-					dusk.entities.seek = oldSeek;
-					
-					reject(out);
+					reject(new dusk.UserCancelError());
 				});
 			}).bind(this));
 		
+		case "getTilePathInRange^-1":
+			this._owner.getRegion().clearRegion(args.region+"_path");
+		case "getTileInRange^1":
+			return Promise.resolve(true);
+		
+		case "uncolourRegion":
+			var r = this._owner.getRegion();
+			passedArg.oldColours = {};
+			for(var i = 0; i < args.regions.length; i ++) {
+				if(r.getRegionColour(args.regions[i])) {
+					passedArg.oldColours[args.regions[i]] = r.getRegionColour(args.regions[i]);
+				}
+				r.uncolourRegion(args.regions[i]);
+			} 
+			return Promise.resolve(passedArg);
+		
+		case "uncolourRegion^-1":
+			var r = this._owner.getRegion();
+			for(var p in passedArg.oldColours) {
+				r.colourRegion(p, passedArg.oldColours[p]);
+			}
+			
+			return Promise.reject(new dusk.UserCancelError());
+		
 		case "moveViaPath":
 			return new Promise((function(fulfill, reject) {
-				passedArg.entity.eProp("gwmoves", passedArg.path);
+				passedArg.entity.eProp("gwmoves", dusk.utils.cloneArray(passedArg.path));
 				var oldX = passedArg.entity.x;
 				var oldY = passedArg.entity.y;
+				
+				passedArg.oldX = oldX;
+				passedArg.oldY = oldY;
 				
 				if(passedArg.path.length){ 
 					var l = passedArg.entity.entityEvent.listen((function(e) {
 						if(!passedArg.entity.eProp("gwmoves").length) {
 							passedArg.entity.entityEvent.unlisten(l);
-							fulfill({"entity":passedArg.entity, "oldX":oldX, "oldY":oldY});
+							fulfill(passedArg);
 						}
 					}).bind(this), undefined, {"name":"gwStopMove"});
 				}else{
-					fulfill({"entity":passedArg.entity, "oldX":oldX, "oldY":oldY});
+					fulfill(passedArg);
 				}
 			}).bind(this));
 		
@@ -150,16 +297,12 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 			passedArg.entity.x = passedArg.oldX;
 			passedArg.entity.y = passedArg.oldY;
 			
-			return Promise.reject(true);
+			return Promise.reject(new dusk.UserCancelError());
 		
 		case "getSeek^-1":
+		case "selectEntity^-1":
 			//When cancel, do nothing, and cancel
-			return Promise.reject(true);
-		
-		case "getTileInRange^1":
-		case "getTilePathInRange^-1":
-			//When cancel, do nothing, but don't cancel
-			return Promise.resolve(true);
+			return Promise.reject(new dusk.UserCancelError());
 			
 		default:
 			console.error("QuestPuppeteer tried to do `"+type+"` but it doesn't know how.");
@@ -181,8 +324,9 @@ dusk.entities.types.createNewType("puppetSelect", {
 		"PlayerGridWalker":true, "GridWalker":true, "GridRecorder":true,
 	},
 	"data":{
-		"solid":false,
-	}
+		"solid":false, "collides":false, "src":"sgui/selector32.png", "noSave":true
+	},
+	"animation":[["true", "0,0|1,0|2,0|1,0", {}]]
 }, "quest");
 
 dusk.sgui.registerExtra("QuestPuppeteer", dusk.sgui.extras.QuestPuppeteer);

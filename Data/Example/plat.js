@@ -89,9 +89,9 @@ dusk.entities.types.createNewType("player", {
 			"slash":{"type":"slash", "horBase":"facing", "cooldown":30, "multDx":[0.5, 10, []],
 				"onlyIf":"#dx<1 & #dx>-1",
 				"data":[{
-					"img":"Example/Slashl.png"
+					"src":"Example/Slashl.png"
 				}, {
-					"img":"Example/Slash.png"
+					"src":"Example/Slash.png"
 				}]
 			}
 		}
@@ -101,13 +101,13 @@ dusk.entities.types.createNewType("player", {
 
 dusk.entities.types.createNewType("bad", {
 	"behaviours":{"HitDam":true},
-	"data":{"gravity":0, "damage":1, "types":["electric", "fire"], "img":"pimg/techBad.png"},
+	"data":{"gravity":0, "damage":1, "types":["electric", "fire"], "src":"psrc/techBad.png"},
 	"animation":[["", "0,0|1,0|+30", {}]]
 }, "plat");
 
 dusk.entities.types.createNewType("coin", {
 	"behaviours":{"Pickup":true},
-	"data":{"gravity":0, "solid":false, "img":"Example/Coin.png", "collisionOffsetX":8, "collisionOffsetY":8,
+	"data":{"gravity":0, "solid":false, "src":"Example/Coin.png", "collisionOffsetX":8, "collisionOffsetY":8,
 		"collisionWidth":26, "collisionHeight":26, "type":"coin", "pickupBy":".entType=player"
 	},
 	"animation":[]
@@ -115,7 +115,7 @@ dusk.entities.types.createNewType("coin", {
 
 dusk.entities.types.createNewType("heart", {
 	"behaviours":{"Pickup":true, "HealthRestore":true, "Gravity":true},
-	"data":{"gravity":1, "terminal":2, "solid":false, "collides": true, "img":"Example/BigHeart.png",
+	"data":{"gravity":1, "terminal":2, "solid":false, "collides": true, "src":"Example/BigHeart.png",
 		"collisionOffsetX":9, "collisionOffsetY":9, "collisionWidth":25, "collisionHeight":25, "type":"heart",
 		"pickupHealth":1
 	},
@@ -124,15 +124,15 @@ dusk.entities.types.createNewType("heart", {
 
 dusk.entities.types.createNewType("block", {"behaviours":{}, "data":{"anchor":true, "gravity":0}}, "plat");
 dusk.entities.types.createNewType("fall", {"behaviours":{"Fall":true}, 
-	"data":{"gravity":0, "fallSpeed":3, "img":"pimg/techFallBlock.png"},
+	"data":{"gravity":0, "fallSpeed":3, "src":"pimg/techFallBlock.png"},
 	"animation":[["", "0,0", {}], ["#dy>0 & #tb=0", "1,0", {}]]
 }, "plat");
 dusk.entities.types.createNewType("push", {"behaviours":{"Push":true},
-	"data":{"gravity":0, "img":"pimg/techFreeMove.png"}
+	"data":{"gravity":0, "src":"psrc/techFreeMove.png"}
 }, "plat");
 
 dusk.entities.types.createNewType("slash", {"behaviours":{"HitDam":true},
-	"data":{"gravity":0, "collides":false, "solid":false, "img":"Example/Slash.png", "damages":".entType != player"},
+	"data":{"gravity":0, "collides":false, "solid":false, "src":"Example/Slash.png", "damages":".entType != player"},
 	"animation":[
 		["", "0,0|1,0|2,0|3,0|4,0|t", {}]
 	],
@@ -140,7 +140,7 @@ dusk.entities.types.createNewType("slash", {"behaviours":{"HitDam":true},
 
 dusk.entities.types.createNewType("shot", {
 	"behaviours":{"HitDam":true, "BackForth":true, "Volatile":true},
-	"data":{"solid":false, "img":"Example/Shot.png", "collisionOffsetX":12, "collisionOffsetY":12,
+	"data":{"solid":false, "src":"Example/Shot.png", "collisionOffsetX":12, "collisionOffsetY":12,
 		"collisionWidth":20, "collisionHeight":20, "hspeed":5, "damages":".entType != player",
 		"killedBy":".entType != player"
 	},

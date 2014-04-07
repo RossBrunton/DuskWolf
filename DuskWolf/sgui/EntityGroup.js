@@ -223,6 +223,19 @@ dusk.sgui.EntityGroup.prototype.getEntitiesHere = function(x, y, ignore, onlyOne
 	return out; 
 };
 
+dusk.sgui.EntityGroup.prototype.getEntitiesExactlyHere = function(x, y, ignore, onlyOne) {
+	var out = [];
+	for(var c = this._entities.length-1; c >= 0; c --){
+		var com = this._entities[c];
+		if(com != ignore && x == com.x && y == com.y) {
+			out.push(com);
+			if(onlyOne) return out;
+		}
+	}
+	
+	return out; 
+};
+
 /*dusk.sgui.EntityGroup.prototype.getCollisions = function(x1, y1, x2, y2, ignore, onlyOne) {
 	var out = [];
 	for(var c = this._entities.length-1; c >= 0; c --){
@@ -406,6 +419,13 @@ dusk.sgui.EntityGroup.prototype.resolveCollision = function(now, testee, dir, op
 		testee.addToucher(oppDir, now);
 };
 
+dusk.sgui.EntityGroup.prototype.hasEntity = function(entity) {
+	for(var i = 0; i < this._entities.length; i ++) {
+		if(this._entities[i] == entity) return true;
+	}
+	return false;
+};
+
 //Runs in O(1) time
 dusk.sgui.EntityGroup.prototype.dropEntity = function(entity, takeFocus) {
 	if(!("name" in entity)) {
@@ -480,10 +500,12 @@ dusk.sgui.EntityGroup.prototype.dropEntity = function(entity, takeFocus) {
 	return dropped; 
 };
 
-dusk.sgui.EntityGroup.prototype.saveBM = function() {
+dusk.sgui.EntityGroup.prototype.saveBM = function(addDep) {
 	var list = [];
 	for(var i = this._entities.length-1; i >= 0; i --){
-		if(this._entities[i].comName != dusk.entities.seek){
+		if(this._entities[i].comName != dusk.entities.seek && !this._entities[i].eProp("noSave")){
+			this._entities[i].behaviourFire("saveBM", {"addDep":addDep});
+			
 			list[list.length] = {};
 			list[list.length-1].name = this._entities[i].comName;
 			list[list.length-1].type = this._entities[i].entType;
