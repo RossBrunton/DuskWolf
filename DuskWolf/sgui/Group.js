@@ -172,8 +172,9 @@ dusk.sgui.Group = function(parent, comName) {
 	this._registerPropMask("mouseFocus", "mouseFocus", false);
 	
 	//Listeners
-	this.prepareDraw.listen(this._groupDraw, this);
-	this.frame.listen(this._groupFrame, this);
+	this.prepareDraw.listen(this._groupDraw.bind(this));
+	this.frame.listen(this._groupFrame.bind(this));
+	this.mouseMove.listen(this._mouseSelect.bind(this));
 	
 	this.onActiveChange.listen(function(e){
 		if(this.focusBehaviour == dusk.sgui.Group.FOCUS_ALL) {
@@ -238,6 +239,17 @@ dusk.sgui.Group.prototype.containerKeypress = function(e) {
 	return true;
 };
 
+/** Fires the mouseMove event on all its children.
+ * 
+ * @return {boolean} The return value of the focused component's keypress.
+ * @since 0.0.21-alpha
+ */
+dusk.sgui.Group.prototype.containerMouseMove = function(e) {
+	for(var c = this._componentsArr.length-1; c >= 0; c --) {
+		this._componentsArr[c].mouseMove.fire();
+	}
+};
+
 /** Container specific method of handling clicks.
  * 
  * In this case, it will call `{@link dusk.sgui.Component.doClick}` of the highest component the mouse is on, and
@@ -249,7 +261,8 @@ dusk.sgui.Group.prototype.containerKeypress = function(e) {
 dusk.sgui.Group.prototype.containerClick = function(e) {
 	if(this.mouseFocus) {
 		for(var i = this._drawOrder.length-1; i >= 0; i --) {
-			if(this._drawOrder[i] in this._components && this._components[this._drawOrder[i]].visible) {
+			if(this._drawOrder[i] in this._components && this._components[this._drawOrder[i]].visible
+			&& !this._components[this._drawOrder[i]].clickPierce) {
 				var com = this._components[this._drawOrder[i]];
 				if(!(this._mouseX < com.x || this._mouseX > com.x + com.width
 				|| this._mouseY < com.y || this._mouseY > com.y + com.height)) {
@@ -833,7 +846,13 @@ dusk.sgui.Group.prototype.containerUpdateMouse = function() {
 		
 		com.updateMouse(destX, destY);
 	}
-	
+};
+
+/** Handles mouse selection of components, if enabled.
+ * 
+ * @since 0.0.21-alpha
+ */
+dusk.sgui.Group.prototype._mouseSelect = function() {
 	if(this.mouseFocus) {
 		for(var i = this._drawOrder.length-1; i >= 0; i --) {
 			if(this._drawOrder[i] in this._components && this._components[this._drawOrder[i]].allowMouse) {
@@ -846,7 +865,7 @@ dusk.sgui.Group.prototype.containerUpdateMouse = function() {
 			}
 		}
 	}
-};
+}
 
 /** Returns the actual X location, relative to the screen, that the component is at.
  * @param {string} name The component to find X for.

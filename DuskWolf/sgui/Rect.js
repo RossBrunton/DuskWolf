@@ -74,7 +74,7 @@ dusk.sgui.Rect.prototype._rectDraw = function(e) {
 	e.c.strokeStyle = this.bColour;
 	e.c.lineWidth = this.bWidth;
 	
-	this._fill(e);
+	this._fill(e, this.bWidth != 0, this.colour == "");
 };
 
 /** Does the rectangle thing, for use in subclasses. Will draw the rectangle, but not set any of the styles.
@@ -82,7 +82,7 @@ dusk.sgui.Rect.prototype._rectDraw = function(e) {
  * @protected
  * @since 0.0.21-alpha
  */
-dusk.sgui.Rect.prototype._fill = function(e) {
+dusk.sgui.Rect.prototype._fill = function(e, border, noFill) {
 	if(this.radius) {
 		e.c.beginPath();
 		e.c.moveTo(e.d.destX + this.radius, e.d.destY);
@@ -95,11 +95,11 @@ dusk.sgui.Rect.prototype._fill = function(e) {
 		e.c.lineTo(e.d.destX, e.d.destY + this.radius);
 		e.c.quadraticCurveTo(e.d.destX, e.d.destY, e.d.destX + this.radius, e.d.destY);
 		e.c.closePath();
-		e.c.fill();
-		if(this.bWidth) e.c.stroke();
+		if(!noFill) e.c.fill();
+		if(border) e.c.stroke();
 	}else{
-		e.c.fillRect(e.d.destX, e.d.destY, e.d.width, e.d.height);
-		if(this.bWidth) e.c.strokeRect(e.d.destX, e.d.destY, e.d.width, e.d.height);
+		if(!noFill) e.c.fillRect(e.d.destX, e.d.destY, e.d.width, e.d.height);
+		if(border) e.c.strokeRect(e.d.destX, e.d.destY, e.d.width, e.d.height);
 	}
 };
 

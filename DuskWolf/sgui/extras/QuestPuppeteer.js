@@ -38,7 +38,7 @@ dusk.sgui.extras.QuestPuppeteer.prototype.ensureSelector = function() {
 	}
 };
 
-dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedArg) {
+dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedArg, queue) {
 	console.log(type);
 	if(!passedArg) passedArg = {};
 	
@@ -60,6 +60,8 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 		
 		case "getSeek":
 			passedArg.entity = this._owner.getSeek();
+			passedArg.x = passedArg.entity.tileX();
+			passedArg.y = passedArg.entity.tileY();
 			return Promise.resolve(passedArg);
 		
 		case "selectEntity":
@@ -69,21 +71,21 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 				var oldSeek = dusk.entities.seek;
 				this.ensureSelector();
 				
-				if(!args.region) args.region = passedArg.region;
-				if(!args.range) args.range = passedArg.range;
-				if(!args.x) args.x = passedArg.x;
-				if(!args.y) args.y = passedArg.y;
-				if(!args.filter) args.filter = passedArg.filter;
+				var region = args.region?args.region:passedArg.region;
+				var range = args.range?args.range:passedArg.range;
+				var x = args.x?args.x:passedArg.x;
+				var y = args.y?args.y:passedArg.y;
 				
 				if(args.restrict) {
-					this.selector.eProp("gwregion", args.region);
+					this.selector.eProp("gwregion", region);
 				}
 				
-				if(args.x !== undefined) this.selector.x = args.x * this.selector.width;
-				if(args.y !== undefined) this.selector.y = args.y * this.selector.height;
+				if(x !== undefined) this.selector.x = x * this.selector.width;
+				if(y !== undefined) this.selector.y = y * this.selector.height;
 				
 				dusk.entities.seek = this.selector.comName;
-				this.selector.alpha = 1;
+				this.selector.visible = true;
+				this.selector.eProp("gmMouseMove", true);
 				
 				var l = this.selector.action.listen((function(e) {
 					var e = e.component;
@@ -92,7 +94,7 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 					if(!sel.length) return;
 					sel = sel[0];
 					
-					if(args.region && r.isInRegion(args.region, e.tileX(), e.tileY())) {
+					if(region && !r.isInRegion(region, e.tileX(), e.tileY())) {
 						return;
 					}
 					
@@ -106,7 +108,8 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 					passedArg.fullY = e.y;
 					passedArg.entity = sel;
 					
-					e.alpha = 0;
+					e.visible = false;
+					e.eProp("gmMouseMove", false);
 					if(oldSeek) dusk.entities.seek = oldSeek;
 					e.action.unlisten(l);
 					
@@ -115,7 +118,8 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 				
 				var c = this.selector.cancel.listen(function(e) {
 					var e = e.component;
-					e.alpha = 0;
+					e.visible = false;
+					e.eProp("gmMouseMove", false);
 					if(oldSeek) dusk.entities.seek = oldSeek;
 					e.cancel.unlisten(c);
 					reject(new dusk.UserCancelError());
@@ -127,14 +131,17 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 				var r = this._owner.getRegion();
 				var e = this._owner.getPrimaryEntityLayer();
 				
+				var x = args.x;
+				var y = args.y;
+				
 				if("Entity" in dusk.sgui && !passedArg.ignoreEntity && passedArg.entity) {
-					args.x = passedArg.entity.tileX();
-					args.y = passedArg.entity.tileY();
+					x = passedArg.entity.tileX();
+					y = passedArg.entity.tileY();
 				}
 				
-				if("forEach" in args.opts) {
-					for(var i = 0; i < args.opts.forEach.length; i ++) {
-						var e = args.opts.forEach[i];
+				if("forEach" in args) {
+					for(var i = 0; i < args.forEach.length; i ++) {
+						var e = args.forEach[i];
 						
 						r.clearRegion(e.name);
 					}
@@ -143,13 +150,14 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 				r.clearRegion(args.region);
 				//console.profile("Region");
 				r._calls = 0;
-				r.expandRegion(args.region, args.x, args.y, args.range, args.opts);
+				r.expandRegion(args.region, x, y, args.range, args);
 				//console.profileEnd("Region");
 				
 				passedArg.region = args.region;
+				passedArg.regionEntities = r.entitiesInRegion(args.region);
 				passedArg.range = args.range;
-				passedArg.x = args.x;
-				passedArg.y = args.y;
+				passedArg.x = x;
+				passedArg.y = y;
 				
 				fulfill(passedArg);
 			}).bind(this));
@@ -157,9 +165,9 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 		case "generateRegion^-1":
 			this._owner.getRegion().clearRegion(args.region);
 			
-			if("forEach" in args.opts) {
-				for(var i = 0; i < args.opts.forEach.length; i ++) {
-					var e = args.opts.forEach[i];
+			if("forEach" in args) {
+				for(var i = 0; i < args.forEach.length; i ++) {
+					var e = args.forEach[i];
 					
 					this._owner.getRegion().clearRegion(e.name);
 				}
@@ -175,36 +183,40 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 				var oldSeek = dusk.entities.seek;
 				this.ensureSelector();
 				
-				if(!args.region) args.region = passedArg.region;
-				if(!args.range) args.range = passedArg.range;
-				if(!args.x && args.setCoord) args.x = passedArg.x;
-				if(!args.y && args.setCoord) args.y = passedArg.y;
+				var region = args.region?args.region:passedArg.region;
+				var range = args.range !== undefined?args.range:passedArg.range;
+				if(args.setCoord) args.x = passedArg.x;
+				if(args.setCoord) args.y = passedArg.y;
 				
 				if(args.restrict) {
-					this.selector.eProp("gwregion", args.region);
+					this.selector.eProp("gwregion", region);
 				}
-				this.selector.eProp("grregion", args.region);
+				this.selector.eProp("grregion", region);
 				
 				if(type == "getTilePathInRange") {
 					this.selector.eProp("grrecording", true);
-					this.selector.eProp("grrange", args.range);
-					this.selector.eProp("grregionto", args.region+"_path");
+					this.selector.eProp("grrange", range);
+					this.selector.eProp("grregionto", region+"_path");
 					this.selector.eProp("grsnap", true);
 					this.selector.eProp("grmoves", []);
+					
+					args.x = passedArg.entity.tileX();
+					args.y = passedArg.entity.tileY();
 				}
 				
 				if(args.x !== undefined) this.selector.x = args.x * this.selector.width;
 				if(args.y !== undefined) this.selector.y = args.y * this.selector.height;
 				
 				if(type == "getTilePathInRange") {
-					r.clearRegion(args.region+"_path");
+					r.clearRegion(region+"_path");
 					if("colour" in args) {
-						r.colourRegion(args.region+"_path", args.colour);
+						r.colourRegion(region+"_path", args.colour);
 					}
 				}
 				
 				dusk.entities.seek = this.selector.comName;
-				this.selector.alpha = 1;
+				this.selector.visible = true;
+				this.selector.eProp("gmMouseMove", true);
 				
 				var l = this.selector.action.listen((function(e) {
 					var e = e.component;
@@ -222,12 +234,13 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 					passedArg.fullY = e.y;
 					passedArg.path = e.eProp("grmoves").reverse();
 					
-					e.alpha = 0;
+					e.visible = false;
+					e.eProp("gmMouseMove", false);
 					if(oldSeek) dusk.entities.seek = oldSeek;
 					e.action.unlisten(l);
 					
 					if("colour" in args) {
-						r.uncolourRegion(args.region+"_path");
+						r.uncolourRegion(region+"_path");
 					}
 					
 					fulfill(passedArg);
@@ -236,12 +249,13 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 				var c = this.selector.cancel.listen(function(e) {
 					var e = e.component;
 					
-					e.alpha = 0;
+					e.visible = false;
+					e.eProp("gmMouseMove", false);
 					if(oldSeek) dusk.entities.seek = oldSeek;
 					e.cancel.unlisten(c);
 					
 					if("colour" in args) {
-						r.uncolourRegion(args.region+"_path");
+						r.uncolourRegion(region+"_path");
 					}
 					
 					reject(new dusk.UserCancelError());
@@ -249,7 +263,8 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 			}).bind(this));
 		
 		case "getTilePathInRange^-1":
-			this._owner.getRegion().clearRegion(args.region+"_path");
+			var region = args.region?args.region:passedArg.region;
+			this._owner.getRegion().clearRegion(region+"_path");
 		case "getTileInRange^1":
 			return Promise.resolve(true);
 		
@@ -299,6 +314,55 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 			
 			return Promise.reject(new dusk.UserCancelError());
 		
+		case "selectListMenu":
+			return new Promise((function(fulfill, reject) {
+				var c = dusk.sgui.path(args.path);
+				
+				var options = args.options?args.options:passedArg.options;
+				
+				c.rows = options.length;
+				c.cols = 1;
+				c.populate(options);
+				c.becomeActive();
+				c.visible = true;
+				
+				var optm = {};
+				
+				var l = c.action.listen((function(e) {
+					var s = c.getFocused();
+					var opt = options[s.comName.split(",")[1]];
+					
+					console.log("Selected: "+opt.listValue);
+					
+					if("listSelectFunction" in opt) {
+						queue(opt.listSelectFunction);
+					}
+					
+					passedArg.selectedValue = opt.listValue;
+					
+					c.visible = false;
+					c.action.unlisten(l);
+					this._owner.becomeActive();
+					
+					if("listSelectCancel" in opt) {
+						reject(new dusk.UserCancelError());
+					}
+					
+					fulfill(passedArg);
+				}).bind(this));
+				
+				var can = c.cancel.listen((function(e) {
+					c.cancel.unlisten(can);
+					this._owner.becomeActive();
+					c.visible = false;
+					
+					reject(new dusk.UserCancelError());
+				}).bind(this));
+			}).bind(this));
+		
+		case "selectListMenu^-1":
+			return Promise.resolve(true);
+		
 		case "getSeek^-1":
 		case "selectEntity^-1":
 			//When cancel, do nothing, and cancel
@@ -321,10 +385,10 @@ dusk.sgui.extras.QuestPuppeteer.prototype.requestBoundPair = function(type, args
 //Create selector entity
 dusk.entities.types.createNewType("puppetSelect", {
 	"behaviours":{
-		"PlayerGridWalker":true, "GridWalker":true, "GridRecorder":true,
+		"PlayerGridWalker":true, "GridWalker":true, "GridRecorder":true, "GridMouse":true
 	},
 	"data":{
-		"solid":false, "collides":false, "src":"sgui/selector32.png", "noSave":true
+		"solid":false, "collides":false, "src":"sgui/selector32.png", "noSave":true, "gmMouseMove":false
 	},
 	"animation":[["true", "0,0|1,0|2,0|1,0", {}]]
 }, "quest");

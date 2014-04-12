@@ -509,7 +509,9 @@ dusk.sgui.TextBox = function(parent, comName) {
 	this.prepareDraw.listen(this._boxDraw, this);
 	this.keyPress.listen(this._boxKey, this, {"ctrl":false});
 	this.onActiveChange.listen(this._activeChange, this);
-	this.frame.listen(function(e) {if(this._active) this.text = $("#"+dusk.elemPrefix+"-input").val();}, this);
+	this.frame.listen(function(e) {
+		if(this._active) this.text = document.getElementById(dusk.elemPrefix+"-input").value
+	}, this);
 	
 	//Defaults
 	this.allowMouse = true;
@@ -535,15 +537,15 @@ dusk.sgui.TextBox.prototype._boxDraw = function(e) {
  */
 dusk.sgui.TextBox.prototype._boxKey = function(e) {
 	var keyDat = dusk.keyboard.lookupCode(e.key);
+	var textElement = document.getElementById(dusk.elemPrefix+"-input");
 	
 	//Check if the user has mapped any inputs to the key...
 	if(dusk.controls.checkKey("sgui_up", e.key)) return true;
 	if(dusk.controls.checkKey("sgui_down", e.key)) return true;
-	if(dusk.controls.checkKey("sgui_left", e.key) && $("#"+dusk.elemPrefix+"-input")[0].selectionStart == 0)
+	if(dusk.controls.checkKey("sgui_left", e.key) && textElement.selectionStart == 0)
 		return true;
-	if(dusk.controls.checkKey("sgui_right", e.key)
-		&& $("#"+dusk.elemPrefix+"-input")[0].selectionStart == $("#"+dusk.elemPrefix+"-input")[0].value.length
-	) return true;
+	if(dusk.controls.checkKey("sgui_right", e.key) && textElement.selectionStart == textElement.value.length)
+		return true;
 	
 	/*if(keyDat[1]) {
 		this.text += e.shift?keyDat[0].toUpperCase():keyDat[0];
@@ -569,7 +571,7 @@ dusk.sgui.TextBox.prototype._boxKey = function(e) {
  * @since 0.0.20-alpha
  */
 dusk.sgui.TextBox.prototype._activeChange = function(e) {
-	var elem = $("#"+dusk.elemPrefix+"-input")[0];
+	var elem = document.getElementById(dusk.elemPrefix+"-input");
 	
 	if(e.active) {
 		elem.style.visibility = "visible";

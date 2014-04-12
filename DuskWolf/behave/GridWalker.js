@@ -7,6 +7,7 @@ dusk.load.require("dusk.controls");
 
 dusk.load.provide("dusk.behave.GridRecorder");
 dusk.load.provide("dusk.behave.GridWalker");
+dusk.load.provide("dusk.behave.GridMouse");
 dusk.load.provide("dusk.behave.PlayerGridWalker");
 
 dusk.behave.PlayerGridWalker = function(entity) {
@@ -177,15 +178,18 @@ dusk.behave.GridRecorder.prototype._gwStartMove = function(e) {
 	if(this._data("grrecording")
 	&& this._entity.container.container.getRegion().isInRegion(this._data("grregion"), e.targetX, e.targetY)) {
 		var moves = this._data("grmoves")
-		moves.push(e.dir);
 		
-		if((moves[moves.length-1] | moves[moves.length-2]) == (dusk.sgui.c.DIR_UP | dusk.sgui.c.DIR_DOWN))
-			moves.splice(-2, 2);
+		if("dir" in e) {
+			moves.push(e.dir);
+			
+			if((moves[moves.length-1] | moves[moves.length-2]) == (dusk.sgui.c.DIR_UP | dusk.sgui.c.DIR_DOWN))
+				moves.splice(-2, 2);
+			
+			if((moves[moves.length-1] | moves[moves.length-2]) == (dusk.sgui.c.DIR_LEFT | dusk.sgui.c.DIR_RIGHT))
+				moves.splice(-2, 2);
+		}
 		
-		if((moves[moves.length-1] | moves[moves.length-2]) == (dusk.sgui.c.DIR_LEFT | dusk.sgui.c.DIR_RIGHT))
-			moves.splice(-2, 2);
-		
-		if(this._leftRegion || (this._data("grsnap") && moves.length > this._data("grrange"))) {
+		if(this._leftRegion || (this._data("grsnap") && moves.length > this._data("grrange")) || !("dir" in e)) {
 			this._data("grmoves", 
 				this._entity.container.container.getRegion().pathTo(this._data("grregion"), e.targetX, e.targetY)
 			);
@@ -216,3 +220,40 @@ dusk.behave.GridRecorder.workshopData = {
 };
 
 dusk.entities.registerBehaviour("GridRecorder", dusk.behave.GridRecorder);
+
+// ----
+
+dusk.behave.GridMouse = function(entity) {
+	dusk.behave.Behave.call(this, entity);
+	
+	this._data("gmMouseMove", true, true);
+	
+	this._entity.mouseAction = true;
+	
+	this.entityEvent.listen(this._gmMouseMove.bind(this), undefined, {"name":"mouseMove"});
+};
+dusk.behave.GridMouse.prototype = Object.create(dusk.behave.Behave.prototype);
+
+dusk.behave.GridMouse.prototype._gmMouseMove = function(e) {
+	if(this._data("gmMouseMove")) {
+		var destX = ~~((this._entity.x + e.x) / this._entity.width);
+		var destY = ~~((this._entity.y + e.y) / this._entity.height);
+		
+		if(this._data("gwregion") == ""
+		|| this._entity.container.container.getRegion().isInRegion(this._data("gwregion"), destX, destY)) {
+			this._entity.behaviourFire("gwStartMove", {"targetX":destX, "targetY":destY});
+			this._entity.x = destX * this._entity.width;
+			this._entity.y = destY * this._entity.height;
+			this._entity.behaviourFire("gwStopMove", {"targetX":destX, "targetY":destY});
+		}
+	}
+};
+
+dusk.behave.GridMouse.workshopData = {
+	"help":"Will record the path that has been taken.",
+	"data":[
+		
+	]
+};
+
+dusk.entities.registerBehaviour("GridMouse", dusk.behave.GridMouse);

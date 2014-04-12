@@ -23,7 +23,11 @@ dusk.load.provide("dusk.save");
  * @private
  */
 dusk.save._init = function() {
+	dusk.save._refOrigins = [];
+	dusk.save._refs = [];
+	dusk.save._refsLoaded = [];
 	
+	dusk.save._refSources = {};
 };
 
 /** Saves data from the specified spec into the specified source.
@@ -52,6 +56,48 @@ dusk.save.load = function(spec, source, identifier) {
 			}
 		});
 	});
+};
+
+dusk.save.saveRef = function(obj) {
+	if(typeof obj != "object" || obj === null) return obj;
+	
+	var imps = dusk.utils.doesImplement(obj, dusk.save.IRefSavable);
+	
+	for(var i = 0; i < this._refOrigins.length; i ++) {
+		if(this._refOrigins[i] == obj) {
+			if(imps) {
+				return {"id":i, "type":imps.refClass()};
+			}else{
+				return {"id":i};
+			}
+		}
+	}
+	
+	if(imps) {
+		this._refs.push(obj.refSave());
+		return {"id":this._refs.length-1, "type":imps.refClass()};
+	}else{
+		this._refs.push(obj);
+		return {"id":this._refs.length-1};
+	}
+};
+
+dusk.save.loadRef = function(ref) {
+	if(typeof ref != "object" || ref === null) return ref;
+	
+	if(this._refsLoaded[ref.id]) return this._refsLoaded[ref.id];
+	
+	if("type" in ref) {
+		this._refsLoaded[ref.id] = this._refSources[ref.type].refLoad(this._refs[ref.id]);
+	}else{
+		this._refsLoaded[ref.id] = this._refs[ref.id];
+	}
+	
+	return this._refsLoaded[ref.id];
+};
+
+dusk.save.addRefSource = function(obj) {
+	this._refSources[obj.refClass()] = obj;
 };
 
 
@@ -113,6 +159,8 @@ dusk.save.SaveSpec.prototype.add = function(path, type, args) {
  */
 dusk.save.SaveSpec.prototype.save = function() {
 	var saveData = new dusk.save.SaveData(this);
+	dusk.save._refs = [];
+	dusk.save._refOrigins = [];
 	
 	for(var i = this._toSave.length-1; i >= 0; i --) {
 		var ob = dusk.utils.lookup(window, this._toSave[i][0]);
@@ -140,6 +188,9 @@ dusk.save.SaveSpec.prototype.save = function() {
  * @param {dusk.save.SaveData} saveData The data to load from.
  */
 dusk.save.SaveSpec.prototype.load = function(saveData) {
+	this._refs = saveData.meta().refs;
+	this._refsLoaded = [];
+	
 	for(var p in saveData.data) {
 		if(p != "meta") {
 			var ob = dusk.utils.lookup(window, p);
@@ -238,54 +289,6 @@ dusk.save.SaveSource.prototype.identifierSupport = true;
 Object.seal(dusk.save.SaveSource);
 
 
-/** Creates a new local storage source
- * 
- * @class dusk.save.LocalStorageSource
- * 
- * @classdesc A basic save source that saves and loads from local storage.
- * 
- * @extends dusk.save.SaveSource
- * @constructor
- * @since 0.0.21-alpha
- */
-dusk.save.LocalStorageSource = function() {
-	
-};
-dusk.save.LocalStorageSource.prototype = Object.create(dusk.save.SaveSource.prototype);
-
-/** Saves the save data to local storage
- * 
- * @param {dusk.save.SaveData} saveData The save data to save.
- * @param {dusk.save.SaveSpec} spec The spec that was used to save this data.
- * @param {?string} identifier An identifier for saving. Combined with the spec name to give the key to save under.
- * @return {Promise(boolean)} A promise that fullfills with true.
- */
-dusk.save.LocalStorageSource.prototype.save = function(saveData, spec, identifier) {
-	saveData.meta().identifier = identifier;
-	localStorage[saveData.meta().spec+"_"+identifier] = saveData.toDataUrl();
-	return Promise.resolve(true);
-};
-
-/** Loads save data from local storage
- * 
- * @param {dusk.save.SaveSpec} spec The spec to be used to load this data.
- * @param {?string} identifier An identifier for loading from. Combined with the spec name to give the key to load from.
- * @return {Promise(dusk.save.SaveData)} A promise that fullfills with the save data.
- */
-dusk.save.LocalStorageSource.prototype.load = function(spec, identifier) {
-	return Promise.resolve(new dusk.save.SaveData(spec, localStorage[spec.name+"_"+identifier]));
-};
-
-/** Returns a string representation of this object.
- * @return {string} A string representation of this object.
- */
-dusk.save.LocalStorageSource.prototype.toString = function() {
-	return "[LocalStorageSource]";
-};
-
-Object.seal(dusk.save.LocalStorageSource);
-
-
 /** Creates a new save data object.
  * 
  * @class dusk.save.SaveSource
@@ -335,6 +338,7 @@ dusk.save.SaveData = function(spec, initial) {
 		this.data.meta.saved = new Date();
 		this.data.meta.spec = spec.name;
 		this.data.meta.ver = dusk.ver;
+		this.data.meta.refs = dusk.save._refs;
 	}
 };
 
@@ -355,7 +359,7 @@ dusk.save.SaveData.prototype.toDataUrl = function() {
 /** Returns a string representation of this object.
  * @return {string} A string representation of this object.
  */
-dusk.save.LocalStorageSource.prototype.toString = function() {
+dusk.save.SaveData.prototype.toString = function() {
 	return "[SaveData "+this.spec.name+"]";
 };
 
@@ -402,5 +406,48 @@ dusk.save.ISavable.load = function(data, type, args) {};
 if("tcheckIgnore" in window) window.tcheckIgnore("dusk.save.ISavable");
 
 Object.seal(dusk.save.ISavable);
+
+
+/* @class dusk.save.IRefSavable
+ * 
+ * @classdesc 
+ * 
+ * List of methods required:
+ * 
+ * - {@link dusk.save.IRefSavable#refSave}
+ * - {@link dusk.save.IRefSavable#refLoad} (static)
+ * - {@link dusk.save.IRefSavable#refClass} (static)
+ * 
+ * @constructor
+ * @since 0.0.21-alpha
+ */
+dusk.save.IRefSavable = {};
+
+/* Should save data of the specified type, and return what was saved.
+ * 
+ * @param {string} type The type of thing to save, will be supplied to the load function.
+ * @param {?*} args Any extra data required to save. This is set when this is added to the scheme, and is also sent to
+ *  the load function.
+ * @return {object} The data that was saved. When it's time to load, this object will be the one loaded.
+ */
+dusk.save.IRefSavable.refSave = function(type, args) {};
+/* Should load previously saved data of the specified type.
+ * 
+ * @param {object} data The data that was previously saved.
+ * @param {string} type The type of thing to load.
+ * @param {?*} args The arguments to load, this will be the same as the `args` parameter used in the saving function.
+ */
+dusk.save.IRefSavable.refLoad = function(data, type, args) {};
+/* Should load previously saved data of the specified type.
+ * 
+ * @param {object} data The data that was previously saved.
+ * @param {string} type The type of thing to load.
+ * @param {?*} args The arguments to load, this will be the same as the `args` parameter used in the saving function.
+ */
+dusk.save.IRefSavable.refClass = function() {};
+
+if("tcheckIgnore" in window) window.tcheckIgnore("dusk.save.IRefSavable");
+
+Object.seal(dusk.save.IRefSavable);
 
 dusk.save._init();

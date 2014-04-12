@@ -10,6 +10,8 @@ dusk.load.provide("dusk.sgui.ParticleField");
  * 
  * @classdesc 
  * 
+ * ParticleFields have the property `{@link dusk.sgui.Component#mousePierce}` set to true by default.
+ * 
  * @param {dusk.sgui.IContainer} parent The container that this component is in.
  * @param {string} comName The name of the component.
  * @extends dusk.sgui.Component
@@ -26,6 +28,9 @@ dusk.sgui.ParticleField = function(parent, comName) {
 	this.stat = false;
 	
 	//Prop masks
+	
+	//Default values
+	this.clickPierce = true;
 	
 	//Listeners
 	this.prepareDraw.listen(this._pfDraw, this);

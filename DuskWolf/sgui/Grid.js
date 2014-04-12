@@ -38,6 +38,7 @@ dusk.sgui.Grid = function (parent, comName) {
 	 * @default 5
 	 */
 	this.cols = 5;
+	
 	/** The space, in pixels, between each grid component horizontally.
 	 * @type integer
 	 * @default 0
@@ -50,6 +51,7 @@ dusk.sgui.Grid = function (parent, comName) {
 	 * @default 0
 	 */
 	this.vspacing = 0;
+	
 	/** Global properties. These will be set to all children during population.
 	 * @type object
 	 * @since 0.0.18-alpha

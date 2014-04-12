@@ -402,8 +402,8 @@ dusk.sgui.Entity = function(parent, comName) {
 				return this.prop(v);
 			}).bind(this), false],
 		[":", (function(o, v) {return this.eProp(v);}).bind(this), false],
-		["stat", (function(o, v) {return this.stats.get(v[0], v[1]);}).bind(this), false],
-		["stati", (function(o, v) {return this.stats.geti(v[0], v[1]);}).bind(this), false],
+		["stat", (function(o, v) {return this.stats?this.stats.get(v[0], v[1]):undefined;}).bind(this), false],
+		["stati", (function(o, v) {return this.stats?this.stats.geti(v[0], v[1]):undefined;}).bind(this), false],
 	], []);
 	
 	/** Internal storage of this entity's type's name.
@@ -438,6 +438,9 @@ dusk.sgui.Entity = function(parent, comName) {
 	
 	//Listeners
 	if(!this.isLight()) if(this.collisionMark) this.prepareDraw.listen(this._collisionDraw, this);
+	if(!this.isLight()) this.mouseMove.listen((function() {
+		this.behaviourFire("mouseMove", {"x":this._mouseX, "y":this._mouseY});
+	}).bind(this));
 };
 dusk.sgui.Entity.prototype = Object.create(dusk.sgui.Tile.prototype);
 

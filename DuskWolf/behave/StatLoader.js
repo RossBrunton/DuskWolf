@@ -19,6 +19,7 @@ dusk.behave.StatLoader = function(entity) {
 	dusk.behave.Behave.call(this, entity);
 	
 	this._data("statsName", "", true);
+	this._data("statsPutBack", false, true);
 	this._data("statsLoadImage", false, true);
 	
 	this.entityEvent.listen(this._slLoad.bind(this), undefined, {"name":"typeChange"});
@@ -28,13 +29,24 @@ dusk.behave.StatLoader.prototype = Object.create(dusk.behave.Behave.prototype);
 
 dusk.behave.StatLoader.prototype._slLoad = function(e) {
 	if(this._data("statsName")) {
-		this._entity.stats = dusk.stats.getStats(this._data("statsName"));
+		var room = "*";
+		if(this._entity.path("..")) room = this._entity.path("../..").roomName;
+		
+		if(dusk.stats.getStats("putback_"+room+"_"+this._entity.comName)) {
+			this._entity.stats = dusk.stats.getStats("putback_"+room+"_"+this._entity.comName)
+		}else{
+			this._entity.stats = dusk.stats.getStats(this._data("statsName"));
+			
+			if(this._data("statsPutBack")) {
+				dusk.stats.addStats("putback_"+room+"_"+this._entity.comName, this._entity.stats);
+			}
+		}
 	}else{
 		this._entity.stats = dusk.stats.getStats(this._entity.stats.comName);
 	}
 	
 	if(this._data("statsLoadImage")) {
-		this._data("src", this._entity.stats.get("image"));
+		this._entity.src = this._entity.stats.get("image");
 	}
 };
 

@@ -19,7 +19,8 @@ dusk.load.provide("dusk.sgui.IBasicMainLayer");
 dusk.sgui.BasicMain = function(parent, comName) {
 	dusk.sgui.Group.call(this, parent, comName);
 	
-	this._scrollSpeed = 0;
+	this.scrollSpeed = 3;
+	this.scrollRegion = 0.60;
 	this.spawn = 0;
 	this.roomName = "";
 	this._primaryEntityGroup = "";
@@ -33,6 +34,8 @@ dusk.sgui.BasicMain = function(parent, comName) {
 	//Prop masks
 	this._registerPropMask("spawn", "spawn");
 	this._registerPropMask("layers", "layers");
+	this._registerPropMask("scrollSpeed", "scrollSpeed");
+	this._registerPropMask("scrollRegion", "scrollRegion");
 	this._registerPropMask("editorColour", "editorColour");
 	this._registerPropMask("editorColor", "editorColor");
 	this._registerPropMask("room", "room", true, ["spawn"]);
@@ -108,6 +111,8 @@ dusk.sgui.BasicMain.prototype.createRoom = function(name, spawn) {
 	
 		this.getComponent(this._primaryEntityGroup).dropEntity(playerData, true);
 	}
+	
+	this.flow(this.getPrimaryEntityLayer().comName);
 	
 	this.autoScroll();
 };
@@ -190,7 +195,6 @@ Object.defineProperty(dusk.sgui.BasicMain.prototype, "layers", {
 		
 		this.getComponent(val[0].name).upFlow = val[val.length-1].name;
 		this.getComponent(val[val.length-1].name).downFlow = val[0].name;
-		this.flow(val[0].name);
 		
 		this.getComponent("editorLabel", "Label").parseProps({
 			"visible":false,
@@ -276,18 +280,32 @@ dusk.sgui.BasicMain.prototype.autoScroll = function() {
 	var seekCoords = [];
 	if(dusk.editor.active) {
 		seekCoords = [
-			(dusk.sgui.EditableTileMap.globalEditX+3)*(dusk.entities.twidth),
-			(dusk.sgui.EditableTileMap.globalEditY+3)*(dusk.entities.theight)
+			(dusk.sgui.EditableTileMap.globalEditX)*(dusk.entities.twidth),
+			(dusk.sgui.EditableTileMap.globalEditY)*(dusk.entities.theight),
+			32,
+			32
 		];
 	}else if(this.getSeek()) {
-		seekCoords = [this.getSeek().x, this.getSeek().y];
+		seekCoords = [this.getSeek().x, this.getSeek().y, this.getSeek().width, this.getSeek().height];
 	}else{
 		//seekCoords = [0, 0];
 		return;
 	}
 	
-	this.xOffset = seekCoords[0] - (this.width >> 1);
-	this.yOffset = seekCoords[1] - (this.height >> 1);
+	//this.xOffset = seekCoords[0] - (this.width >> 1);
+	//this.yOffset = seekCoords[1] - (this.height >> 1);
+	
+	var oldX = this.xOffset;
+	var oldY = this.yOffset;
+	
+	if(seekCoords[0] + (seekCoords[2] >> 1) < this.xOffset + (this.width >> 1) * this.scrollRegion)
+		this.xOffset -= this.scrollSpeed;
+	if(seekCoords[0] + (seekCoords[2] >> 1) > this.xOffset + this.width - ((this.width >> 1) * this.scrollRegion))
+		this.xOffset += this.scrollSpeed;
+	if(seekCoords[1] + (seekCoords[3] >> 1) < this.yOffset + (this.height >> 1) * this.scrollRegion)
+		this.yOffset -= this.scrollSpeed;
+	if(seekCoords[1] + (seekCoords[3] >> 1) > this.yOffset + this.height - ((this.height >> 1) * this.scrollRegion))
+		this.yOffset += this.scrollSpeed;
 	
 	if(this.xOffset > this.getContentsWidth(false) - this.width)
 		this.xOffset = this.getContentsWidth(false) - this.width;
@@ -296,6 +314,12 @@ dusk.sgui.BasicMain.prototype.autoScroll = function() {
 	
 	if(this.xOffset < 0) this.xOffset = 0;
 	if(this.yOffset < 0) this.yOffset = 0;
+	
+	if(oldX != this.xOffset || oldY != this.yOffset) {
+		//It counts, okay!
+		this.containerUpdateMouse();
+		this.mouseMove.fire();
+	}
 };
 
 dusk.sgui.BasicMain.prototype._bmUpAction = function(e) {

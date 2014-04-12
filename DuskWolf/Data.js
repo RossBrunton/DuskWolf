@@ -40,38 +40,6 @@ dusk.data._init = function() {
 	$.ajaxSetup({"cache": !dusk.dev});
 };
 
-/* * Downloads a file, and returns its contents.
- * 
- * @param {string} file The file name, realtive to {@link dusk.dataDir}.
- * @param {string=""} type The file type, this may be any value for <code>"dataType"</code> 
- * that JQuery's ajax method supports.
- * @param {function(object, *):undefined} 
- * /
-dusk.data.download = function(file, type, callback, state) {
-	var url = dusk.util.resolveRelative(file, dusk.dataDir);
-	
-	if(this._loaded[url] === undefined) {
-		console.log("Downloading file "+url+"...");
-		this._loaded[url] = [false, [[callback, state]]];
-		
-		$.ajax({"async":true, "dataType":(type!==undefined?type:"text"),
-			"error":function(jqXHR, textStatus, errorThrown) {
-				console.error("Error getting "+file+", "+errorThrown);
-			}, "success":function(data, textStatus, jqXHR) {
-				this.url = this.url.split("?_=")[0];
-				for(var i = dusk.data._loaded[this.url][1].length-1; i >= 0; i --) {
-					dusk.data._loaded[this.url][1][i][0](data, dusk.data._loaded[this.url][1][i][1]);
-				}
-				dusk.data._loaded[this.url] = data;
-			}, "url":url
-		});
-	}else if(typeof this._loaded[url] === "array" && !this._loaded[url][0]){
-		this._loaded[url][1].push([callback, state]);
-	}else{
-		callback(this._loaded[url], state);
-	}
-};*/
-
 /** Returns a HTML image object with the specified path.
  * 
  * If there is an image that has already been created with this path then it is returned

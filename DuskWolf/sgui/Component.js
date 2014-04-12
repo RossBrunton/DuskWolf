@@ -181,6 +181,15 @@ dusk.sgui.Component = function (parent, componentName) {
 	 * @since 0.0.17-alpha
 	 */
 	this.prepareDraw = new dusk.EventDispatcher("dusk.sgui.Component.prepareDraw");
+	/** Fired when the mouse is moved.
+	 * 
+	 * There is no event object.
+	 * @since 0.0.21-alpha
+	 */
+	this.mouseMove = new dusk.EventDispatcher("dusk.sgui.Component.mouseMove");
+	this.mouseMove.listen((function() {
+		if(dusk.utils.doesImplement(this, dusk.sgui.IContainer)) this.containerMouseMove();
+	}).bind(this));
 	
 	/** The supported ways in which this component can render itself.
 	 * 
@@ -239,6 +248,12 @@ dusk.sgui.Component = function (parent, componentName) {
 	 * @default true
 	 */
 	this.mouseAction = true;
+	/** If true, then this component cannot be clicked, however it will not block click events to any component
+	 *  underneath it.
+	 * @type boolean
+	 * @since 0.0.21-alpha
+	 */
+	this.clickPierce = false;
 	/** Fired when this component is clicked on.
 	 * 
 	 * The event object has at least a property `button`, which is the number of the button clicked.
@@ -372,6 +387,7 @@ dusk.sgui.Component = function (parent, componentName) {
 	this._registerPropMask("type", "type");
 	this._registerPropMask("allowMouse", "allowMouse");
 	this._registerPropMask("mouseAction", "mouseAction");
+	this._registerPropMask("clickPierce", "clickPierce");
 	this._registerPropMask("alsoFocus", "alsoFocus");
 	this._registerPropMask("actionFocus", "actionFocus");
 };
@@ -498,7 +514,7 @@ dusk.sgui.Component.prototype.doClick = function (e) {
 	
 	if(this.onClick.fire(e)) {
 		if(this.mouseAction) {
-			return this.action.fire({"click":e});
+			return this.action.fire({"click":e, "component":this});
 		}
 	}
 	
@@ -827,6 +843,16 @@ dusk.sgui.Component.prototype.updateMouse = function(x, y) {
 	this._mouseY = y;
 	
 	if("containerUpdateMouse" in this) this.containerUpdateMouse();
+};
+
+/** Makes this component the active one, by making all its parents make it active.
+ * @param {?dusk.sgui.Component} child A child that wants to be made active.
+ * @since 0.0.21-alpha
+ */
+dusk.sgui.Component.prototype.becomeActive = function(child) {
+	if("flow" in this && child) this.flow(child.comName);
+	
+	this.container.becomeActive(this);
 };
 
 /** Returns a string representation of the component. 

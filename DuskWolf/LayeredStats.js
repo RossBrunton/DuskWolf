@@ -30,13 +30,15 @@ dusk.stats.LayeredStats = function(name, pack, layerNames) {
 	this._max = null;
 	this._min = null;
 	this._field = null;
+	this._block = null;
 	
 	this._tree = new dusk.parseTree.Compiler([], [], [
 		["X", (function(o) {return this._x;}).bind(this)],
 		["MAX", (function(o) {return this._max;}).bind(this)],
 		["MIN", (function(o) {return this._min;}).bind(this)],
 		["FIELD", (function(o) {return this._field;}).bind(this)],
-		["this", (function(o) {return this;}).bind(this)]
+		["all", (function(o) {return this;}).bind(this)],
+		["block", (function(o) {return this._block;}).bind(this)]
 	]);
 };
 
@@ -46,6 +48,12 @@ dusk.stats.LayeredStats.prototype.addBlock = function(layer, name, block, copy) 
 	if(!this._layers[layer]) this._layers[layer] = {};
 	
 	this._layers[layer][name] = block;
+};
+
+dusk.stats.LayeredStats.prototype.getBlock = function(layer, name) {
+	layer = this._lookupLayer(layer);
+	
+	return this._layers[layer][name];
 };
 
 dusk.stats.LayeredStats.prototype.removeBlock = function(layer, name) {
@@ -77,8 +85,8 @@ dusk.stats.LayeredStats.prototype.get = function(field, untilLayer) {
 		for(var p in this._layers[i]) {
 			list = this._toList(this._layers[i][p], field);
 			
-			for(var i = 0; i < list.length; i ++) {
-				var d = list[i];
+			for(var j = 0; j < list.length; j ++) {
+				var d = list[j];
 				
 				if(field+"_max" in d && typeof d[field+"_max"] != "function")
 					if(d[field+"_max"] > max) max = d[field+"_max"];
@@ -87,22 +95,22 @@ dusk.stats.LayeredStats.prototype.get = function(field, untilLayer) {
 				if(field in d && typeof d[field] != "function") value = d[field];
 				
 				if(field+"_max" in d && typeof d[field+"_max"] == "function")
-					if(d[field+"_max"] > max) max = d[field+"_max"](this, field, value, min, max);
+					if(d[field+"_max"] > max) max = d[field+"_max"](this, field, value, min, max, d);
 				if(field+"_min" in d && typeof d[field+"_max"] == "function")
-					if(d[field+"_min"] > max) max = d[field+"_min"](this, field, value, min, max);
-				if(field in d && typeof d[field] == "function") value = d[field](this, field, value, min, max);
+					if(d[field+"_min"] > max) max = d[field+"_min"](this, field, value, min, max, d);
+				if(field in d && typeof d[field] == "function") value = d[field](this, field, value, min, max, d);
 			}
 		}
 		
 		for(var p in this._layers[i]) {
 			list = this._toList(this._layers[i][p]);
 			
-			for(var i = 0; i < list.length; i ++) {
-				var d = list[i];
+			for(var j = 0; j < list.length; j ++) {
+				var d = list[j];
 				
-				if(field+"_max_mod" in d) max = this._eval(d[field+"_max_mod"], field, value, min, max);
-				if(field+"_min_mod" in d) min = this._eval(d[field+"_min_mod"], field, value, min, max);
-				if(field+"_mod" in d) value = this._eval(d[field+"_mod"], field, value, min, max);
+				if(field+"_max_mod" in d) max = this._eval(d[field+"_max_mod"], field, value, min, max, d);
+				if(field+"_min_mod" in d) min = this._eval(d[field+"_min_mod"], field, value, min, max, d);
+				if(field+"_mod" in d) value = this._eval(d[field+"_mod"], field, value, min, max, d);
 			}
 		}
 	}
@@ -131,7 +139,7 @@ dusk.stats.LayeredStats.prototype.getMaxInLayer = function(field, layer) {
 			var d = list[i];
 			
 			if(field in d && typeof d[field] != "function") value = d[field];
-			if(field in d && typeof d[field] == "function") value = d[field](this, field, value, min, max);
+			if(field in d && typeof d[field] == "function") value = d[field](this, field, value, min, max, d);
 			
 			if(value > max[1] || max === undefined) max = [p, value];
 		}
@@ -161,18 +169,27 @@ dusk.stats.LayeredStats.prototype.getMinInLayer = function(layer, field) {
 };
 
 dusk.stats.LayeredStats.prototype._toList = function(value, field) {
-	if("items" in dusk && object instanceof dusk.Inheritable && object.type == dusk.items.items) {
-		
+	if("items" in dusk && value instanceof dusk.items.Invent) {
+		var out = [];
+		value.forEach((function(item, slot) {
+			if(item.get("stats")) {
+				var block = dusk.utils.clone(item.get("stats"));
+				block.item = item;
+				this.push(block);
+			}
+		}).bind(out));
+		return out;
 	}else{
 		return [this._getRelevant(value, field)];
 	}
 };
 
-dusk.stats.LayeredStats.prototype._eval = function(expr, field, value, min, max) {
+dusk.stats.LayeredStats.prototype._eval = function(expr, field, value, min, max, block) {
 	this._x = value;
 	this._min = min;
 	this._max = max;
 	this._field = field;
+	this._block = block;
 	
 	return this._tree.compile(expr).eval();
 };

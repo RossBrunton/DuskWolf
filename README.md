@@ -9,6 +9,9 @@ You can see an example of it running at [http://www.savagewolf.org/games/duskWol
 This is licensed under the MIT License, see COPYING.txt for details.
 Generally, you can do whatever you want with it. I'd appreciate it if you mentioned me, but you don't strictly HAVE to...
 
+# Contributing #
+I'm afraid this is a rather personal project, so I probably won't accept any pull requests or anything. Feel free to fork it and make your own changes, if for some reason you want to do that, though.
+
 # Flattr #
 Here is a Flattr button, bask in it's awe.
 

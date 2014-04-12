@@ -23,6 +23,11 @@ dusk.utils.clone = function(o) {
 	for(var p in o) {
 		if(typeof o[p] == "object" && Object.getPrototypeOf(o[p]) != Object.prototype && !Array.isArray(o[p])) {
 			tmp[p] = o[p];
+		}else if(Array.isArray(o[p])) {
+			tmp[p] = [];
+			for(var i = 0; i < o[p].length; i ++) {
+				tmp[p][i] = this.clone(o[p][i]);
+			}
 		}else{
 			tmp[p] = this.clone(o[p]);
 		}
@@ -54,6 +59,9 @@ dusk.utils.cloneArray = function(a) {
  */
 dusk.utils.merge = function(a, b) {
 	a = dusk.utils.clone(a);
+	
+	if(typeof a != "object") return b;
+	
 	for(var p in b) {
 		if(b[p].constructor == Object && p in a) {
 			a[p] = dusk.utils.merge(a[p], b[p]);

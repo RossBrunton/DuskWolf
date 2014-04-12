@@ -29,6 +29,8 @@ dusk.load.provide("dusk.sgui.TileMapWeights");
  *  this tiledata describes, and the last two elements is the weight of this tile and an integer which is 0 iff the
  *  tile is not solid else 1.
  * 
+ * TileMaps have the property `{@link dusk.sgui.Component#mousePierce}` set to true by default.
+ * 
  * @extends dusk.sgui.Component
  * @param {?dusk.sgui.Component} parent The container that this component is in.
  * @param {string} componentName The name of the component.
@@ -183,6 +185,9 @@ dusk.sgui.TileMap = function (parent, comName) {
 		//Listeners
 		this.prepareDraw.listen(this._tileMapDraw, this);
 		this.frame.listen(this._tileMapFrame, this);
+		
+		//Default values
+		this.clickPierce = true;
 		
 		//Render support
 		this.renderSupport |= dusk.sgui.Component.REND_OFFSET | dusk.sgui.Component.REND_SLICE;

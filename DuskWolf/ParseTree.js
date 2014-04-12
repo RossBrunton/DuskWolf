@@ -61,6 +61,7 @@ dusk.parseTree = {};
  * - `-op`: Negative `op`, where `op` is a number.
  * - `JSON op`: Runs `JSON.parse` on `op`. Note that in most cases, you need to sepecify `op` as a string to avoid
  *  problems with the `:` operator.
+ * - `sl op`: Makes `op` into a singleton list. i.e. returns `[op]`.
  * 
  * 
  * @param {array} operators An array of binary operators.
@@ -88,6 +89,8 @@ dusk.parseTree.Compiler = function(operators, uoperators, consts, whitespace, no
 				if(!isNaN(Number(l+"."+r))) {
 					return Number(l+"."+r);
 				}
+				if(l == undefined) return undefined;
+				if(typeof l == "object" && !(r in l) && "get" in l) return l.get(r);
 				return l[r];
 			}, false],
 			
@@ -147,6 +150,7 @@ dusk.parseTree.Compiler = function(operators, uoperators, consts, whitespace, no
 			["!", function(o, l) {return l === "false"?true:!l;}, true],
 			["+", function(o, l) {return +l;}, true],
 			["-", function(o, l) {return 0-l;}, true],
+			["sl", function(o, l) {return [l]}, true],
 			
 			["JSON", function(o, l) {
 				try {
@@ -323,7 +327,7 @@ dusk.parseTree.Compiler.prototype.compile = function(str, init, noCache) {
 		}else if(read[1] == "("){
 			var bop = new dusk.parseTree.Node("bracket_guard", 0, function(o, l, r) {
 					return l;
-				}, true, this.compile(str, i)
+				}, true, this.compile(str, i, noCache)
 			);
 			
 			for(var uo = 0; uo < read[6].length; uo ++) {
@@ -338,12 +342,16 @@ dusk.parseTree.Compiler.prototype.compile = function(str, init, noCache) {
 				n.rhs = bop;
 			}
 			
-			while(str[i] != ")") {
-				i ++;
+			var bracketsOpen = 1;
+			while(bracketsOpen) {
+				if(str[i] == "(") bracketsOpen ++;
+				if(str[i] == ")") bracketsOpen --;
 				if(i >= str.length) {
 					throw new dusk.parseTree.ParseTreeCompileError("Brackets not closed properly.");
 				}
+				i ++;
 			}
+			i --;
 			
 			i ++;
 			justClosedBracket = true;
@@ -413,7 +421,7 @@ dusk.parseTree.Compiler.prototype._read = function(str, init, afterBracket) {
 					
 					if(this._whitespace == dusk.parseTree.Compiler.WS_ALWAYS
 					|| (this._whitespace == dusk.parseTree.Compiler.WS_ONLYCHARS && this._nops[i][3])) {
-						if(c == str.length-1 || /[\s()]/.test(str[c+1])) {
+						if(c == str.length-1 || /[^a-zA-Z0-9]/.test(str[c+1])) {
 							return ["", op, this._nops[i][1], this._nops[i][2], 0, c+1, uops, true];
 						}
 					}else{
@@ -435,7 +443,7 @@ dusk.parseTree.Compiler.prototype._read = function(str, init, afterBracket) {
 					
 					if(this._whitespace == dusk.parseTree.Compiler.WS_ALWAYS
 					|| (this._whitespace == dusk.parseTree.Compiler.WS_ONLYCHARS && this._uops[i][3])) {
-						if(c == str.length-1 || /[\s()]/.test(str[c+1])) {
+						if(c == str.length-1 || /[^a-zA-Z0-9]/.test(str[c+1])) {
 							uops.push([op, this._uops[i][1], this._uops[i][2]]);
 							buffer = "";
 						}
@@ -708,7 +716,22 @@ dusk.parseTree.Node.prototype.toString = function(indent) {
 	}
 	
 	return out;
-}
+};
+
+/** Builds a representation (not the original representation) of this node.
+ * 
+ * @return {string} This expression.
+ * @since 0.0.21-alpha
+ */
+dusk.parseTree.Node.prototype.toExpr = function() {
+	var out = "";
+	
+	if(this.hasNoFunct()) out += this.value;
+	if(!this.hasNoFunct() && this.isLeaf()) out += this.value;
+	if(this.isUnary() && this.lhs) out += "("+this.value + " " + this.lhs.toExpr()+")";
+	if(this.lhs && this.rhs) out += "("+this.lhs.toExpr() + " " + this.value + " " + this.rhs.toExpr()+")"
+	return out;
+};
 
 Object.seal(dusk.parseTree.Node);
 Object.seal(dusk.parseTree.Node.prototype);

@@ -33,13 +33,6 @@ dusk.sgui.Pane.prototype = Object.create(dusk.sgui.Group.prototype);
 
 dusk.sgui.Pane.prototype.className = "Pane";
 
-/** Causes the pane to become the active pane.
- * 
- * This can be used in the JSON representation with the property `active` with any true value.
- */
-dusk.sgui.Pane.prototype.becomeActive = function() {
-	dusk.sgui.setActivePane(this.comName);
-};
 Object.defineProperty(dusk.sgui.Pane.prototype, "__active", {
 	set: function(value) {if(value) this.becomeActive();},
 	
@@ -74,6 +67,16 @@ dusk.sgui.Pane.prototype.getTrueY = function(name) {
 	if(com.yOrigin == dusk.sgui.Component.ORIGIN_MIDDLE) destYAdder = (this.height - com.height)>>1;
 	
 	return this.y + com.y - this.yOffset + destYAdder;
+};
+
+/** Makes this component the active one, by making all its parents make it active.
+ * @param {?dusk.sgui.Component} child A child that wants to be made active.
+ * @since 0.0.21-alpha
+ */
+dusk.sgui.Pane.prototype.becomeActive = function(child) {
+	if(child) this.flow(child.comName);
+	
+	dusk.sgui.setActivePane(this.comName);
 };
 
 Object.seal(dusk.sgui.Pane);

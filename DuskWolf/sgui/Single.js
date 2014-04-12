@@ -105,6 +105,14 @@ dusk.sgui.Single.prototype.containerKeypress = function(e) {
 	return this._component.doKeyPress(e);
 };
 
+/** Fires the mouseMove event on its child.
+ * 
+ * @since 0.0.21-alpha
+ */
+dusk.sgui.Single.prototype.containerKeypress = function(e) {
+	this._component.mouseMove.fire();
+};
+
 /** Container specific method of handling clicks.
  * 
  * In this case, it will call `{@link dusk.sgui.Component.doClick}` of the component if the mouse is on it, and

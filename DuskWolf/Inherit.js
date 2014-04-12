@@ -78,11 +78,25 @@ dusk.InheritableContainer.prototype.get = function(name, key) {
 	if(!(name in this._objectData)) return undefined;
 	//if(key === undefined) return dusk.items._itemData[name];
 	
-	if(key in this._objectData[name]) return this._objectData[name][key];
+	var frags = key.split(".").reverse();
+	var hold = this._objectData[name];
 	
-	if(name in this._objectChain && this._objectChain[name]) return this.get(this._objectChain[name], key);
+	var now;
+	while(now = frags.pop()) {
+		if(now in hold) {
+			hold = hold[now];
+		}else if(name in this._objectChain && this._objectChain[name]) {
+			return this.get(this._objectChain[name], key);
+		}else{
+			return undefined;
+		}
+	}
 	
-	return undefined;
+	if(name in this._objectChain && this._objectChain[name] && this.get(this._objectChain[name], key)) {
+		return dusk.utils.merge(this.get(this._objectChain[name], key), hold);
+	} 
+	
+	return hold;
 };
 
 /** Sets a single property onto a type.

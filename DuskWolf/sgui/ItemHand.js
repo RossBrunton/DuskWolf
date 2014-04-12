@@ -11,7 +11,7 @@ dusk.load.provide("dusk.sgui.ItemHand");
 dusk.sgui.ItemHand = function (parent, comName) {
 	dusk.sgui.Group.call(this, parent, comName);
 	
-	this._hand = new dusk.items.Invent(1, [], 0xffffffff);
+	this._hand = new dusk.items.Invent(1, "true", 0xffffffff);
 	this.maxStack = 0xffffffff;
 	this.supressHand = false;
 	

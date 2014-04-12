@@ -59,9 +59,9 @@ dusk.load.provide("dusk.pause");
  * - Z:/Y - Directly accesses Y from the pane.
  * 
  * Components can be styled similarly to CSS. When a new component is created, the list of styles (Set by 
- * `{@dusk.sgui.addStyle}` is checked. If it matches that component, all the properties in the object set with the style
- * will be applied to the object (see the JSON representation above). This only occurs when the object is created or
- * its type changes, it won't happen at any other time. The syntax for a rule contains the following, they must be in 
+ * `{@link dusk.sgui.addStyle}` is checked. If it matches that component, all the properties in the object set with the
+ *  style will be applied to the object (see the JSON representation above). This only occurs when the object is created
+ * or its type changes, it won't happen at any other time. The syntax for a rule contains the following, they must be in 
  * this order, but are all optional: 
  * 
  * - `typename` - The name of the component's type, as registered using `{@link dusk.sgui.registerType}`.
@@ -102,7 +102,7 @@ dusk.sgui._init = function() {
 	}, this);
 	
 	//Listen for mouseclicks
-	$("#"+dusk.elemPrefix+"-canvas").click(function(e) {
+	dusk.sgui._getCanvas().addEventListener("click", function(e) {
 		e.button = e.which;
 		if(dusk.sgui.getActivePane()) dusk.sgui.getActivePane().doClick(e);
 	});
@@ -110,11 +110,20 @@ dusk.sgui._init = function() {
 	//Listen for frame events
 	dusk.frameTicker.onFrame.listen(function(e) {
 		if(dusk.sgui.displayMode == dusk.sgui.MODE_FULL) {
-			dusk.sgui.width = $("#"+dusk.elemPrefix).parent().width();
-			if($("#"+dusk.elemPrefix).parent().height() > window.innerHeight) {
+			//dusk.sgui.width = $("#"+dusk.elemPrefix).parent().width();
+			
+			//if($("#"+dusk.elemPrefix).parent().height() > window.innerHeight) {
+			//	dusk.sgui.height = window.innerHeight;
+			//}else{
+			//	dusk.sgui.height = $("#"+dusk.elemPrefix).parent().height();
+			//}
+			
+			dusk.sgui.width = dusk.sgui._getDuskwolf().parentNode.clientWidth;
+			
+			if(dusk.sgui._getDuskwolf().parentNode.clientHeight > window.innerHeight) {
 				dusk.sgui.height = window.innerHeight;
 			}else{
-				dusk.sgui.height = $("#"+dusk.elemPrefix).parent().height();
+				dusk.sgui.height = dusk.sgui._getDuskwolf().parentNode.clientHeight;
 			}
 		}
 		
@@ -123,7 +132,10 @@ dusk.sgui._init = function() {
 				dusk.sgui._mouseX - dusk.sgui._panes[p].x,
 				dusk.sgui._mouseY - dusk.sgui._panes[p].y
 			);
+			
+			if(dusk.sgui._mouseMoveQueued) dusk.sgui._panes[p].mouseMove.fire();
 		}
+		dusk.sgui._mouseMoveQueued = false;
 		
 		for(var p = dusk.sgui._panes.length-1; p >= 0; p --){
 			dusk.sgui._panes[p].frame.fire();
@@ -205,6 +217,12 @@ dusk.sgui._init = function() {
 	 * @since 0.0.20-alpha
 	 */
 	this._mouseY = 0;
+	/** Whether the next frame event will also fire a mouse move event.
+	 * @type boolean
+	 * @private
+	 * @since 0.0.21-alpha
+	 */
+	this._mouseMoveQueued = false;
 	
 	/** Object pool containing objects for `{@link dusk.sgui._draw}` and the draw handlers of containers.
 	 * 
@@ -227,8 +245,9 @@ dusk.sgui._init = function() {
 	
 	//Listen for canvas mouse movements
 	dusk.sgui._getCanvas().addEventListener("mousemove", function(e){
-		dusk.sgui._mouseX = e.clientX;
-		dusk.sgui._mouseY = e.clientY;
+		dusk.sgui._mouseX = e.clientX - dusk.sgui._getCanvas().getBoundingClientRect().left;
+		dusk.sgui._mouseY = e.clientY - dusk.sgui._getCanvas().getBoundingClientRect().top;
+		dusk.sgui._mouseMoveQueued = true;
 	});
 	
 	//Controls
@@ -268,7 +287,7 @@ dusk.sgui._getCanvas = function() {
 
 /** Returns the duskwolf element that contains the canvas sgui is using.
  * 
- * @return {dusk.HTMLDuskwolfElement} The canvas.
+ * @return {dusk.HTMLDuskwolfElement} The element.
  * @private
  * @since 0.0.21-alpha
  */
@@ -537,15 +556,37 @@ dusk.sgui._init();
 
 //-----
 
+/** @namespace dusk.pause
+ * @name dusk.pause
+ * 
+ * @description Simple module that allows simple pausing and unpausing of a game.
+ * 
+ * Consists of a pane named "pause" that is made active or inactive depending on whether the game is paused or not.
+ *  The pane also is made invisible when it is not active.
+ * 
+ * A control is added, whith defaults to ENTER and button 9. If pausing is enabled, this will pause and unpause the
+ *  game.
+ */
 dusk.pause._init = function() {
+	/** The name of the pane that was active before the game was paused. Used to set the active pane back to what it
+	 *  was. If the game is not paused, this will be an empty string.
+	 * @type string
+	 * @private
+	 */
 	dusk.pause._previous = "";
 	
+	/** Whether pausing is allowed, if this is false, then pausing is disabled, and nothing will happen if the user 
+	 *  attempts to pause.
+	 * @type boolean
+	 */
 	dusk.pause.allow = false;
 	
 	dusk.controls.addControl("pause", 13, 9);
 	dusk.controls.controlPressed.listen(function(e){dusk.pause.toggle();}, this, {"control":"pause"});
 };
 
+/** Pauses the game. 
+ */
 dusk.pause.pause = function() {
 	if(!dusk.pause.allow) return;
 	if(!dusk.pause._previous) dusk.pause._previous = dusk.sgui.getActivePane().comName;
@@ -553,16 +594,23 @@ dusk.pause.pause = function() {
 	dusk.sgui.getPane("paused").visible = true;
 };
 
+/** Unpauses the game.
+ */
 dusk.pause.unpause = function() {
 	dusk.sgui.setActivePane(dusk.pause._previous);
 	dusk.pause._previous = "";
 	dusk.sgui.getPane("paused").visible = false;
 };
 
+/** Checks if the game is paused.
+ * @return {boolean} Whether the game is paused or not.
+ */
 dusk.pause.isPaused = function() {
 	return dusk.pause._previous !== "";
 };
 
+/** If the game is paused, unpause it, else pause it.
+ */
 dusk.pause.toggle = function() {
 	if(dusk.pause.isPaused()) {
 		dusk.pause.unpause();
@@ -570,7 +618,6 @@ dusk.pause.toggle = function() {
 		dusk.pause.pause();
 	}
 };
-
 
 dusk.pause._init();
 Object.seal(dusk.pause);

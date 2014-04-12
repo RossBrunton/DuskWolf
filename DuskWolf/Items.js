@@ -5,6 +5,7 @@
 dusk.load.require("dusk.utils");
 dusk.load.require("dusk.Inheritable");
 dusk.load.require("dusk.InheritableContainer");
+dusk.load.require("dusk.parseTree");
 
 dusk.load.provide("dusk.items");
 dusk.load.provide("dusk.items.Invent");
@@ -43,45 +44,20 @@ dusk.items._init = function() {
 	dusk.items.items.createNewType("root", {"maxStack":64});
 	
 	//Testing
-	dusk.items.items.createNewType("sword", {"type":"Sword"});
+	dusk.items.items.createNewType("sword", {"itemType":"Sword"});
 	dusk.items.items.createNewType("stabbySword", {"damage":12}, "sword");
 	
-	dusk.items.items.createNewType("potion", {"type":"Potion", "src":"pimg/items.png", "tile":"0,0"});
-	dusk.items.items.createNewType("heal", {"restore":50, "tile":"2,0"}, "potion");
+	dusk.items.items.createNewType("potion", {"itemType":"Potion", "src":"pimg/items.png", "tile":"0,0", "obj":{"a":1, "b":7}});
+	dusk.items.items.createNewType("heal", {"restore":50, "tile":"2,0", "obj":{"b":2, "c":3}}, "potion");
 	dusk.items.items.createNewType("blood", {"restore":50, "tile":"1,0"}, "potion");
 	dusk.items.items.createNewType("magic", {"restore":50, "tile":"3,0"}, "potion");
 	
-	window.swords = new dusk.items.Invent(5, [["type", dusk.items.REST_ISEQ, "Sword"]]);
+	window.swords = new dusk.items.Invent(5, "item.itemType = Sword");
 	swords.addItem(dusk.items.items.create("sword"), 5);
 	swords.addItem(dusk.items.items.create("stabbySword"), 1);
 	
-	window.extraInvent = new dusk.items.Invent(5, []);
+	window.extraInvent = new dusk.items.Invent(5, "true");
 };
-
-/** A restriction indicating that the `property` must be equal to the `value`.
- * @type integer
- * @constant
- * @value 0
- */
-dusk.items.REST_ISEQ = 0;
-/** A restriction indicating that the `property` must be not be equal to the `value`.
- * @type integer
- * @constant
- * @value 1
- */
-dusk.items.REST_ISNEQ = 1;
-/** A restriction indicating that the `property` must be in the array `value`.
- * @type integer
- * @constant
- * @value 2
- */
-dusk.items.REST_ISIN = 2;
-/** A restriction indicating that the `property` must not be in the array `value`.
- * @type integer
- * @constant
- * @value 3
- */
-dusk.items.REST_ISNIN = 3;
 
 /** Creates a new inventory. 
  * 
@@ -91,18 +67,9 @@ dusk.items.REST_ISNIN = 3;
  * 
  * It is recommended that this be used whenever multiple items need to be stored, rather than in an array or the like.
  * 
- * An inventory carries restrictions on what items can be stored in it, this is done by specifying restrictions;
- *  if an item does not match the restrictions, then it will not be added.
- *	Rules are arrays in the form `[prop, REST_*, value]` where:
- * 
- * - `prop` is a string with the name of a property on the item to look up.
- * - `REST_*` is a constant on `dusk.items` starting with `REST_`.
- *  This specifies what the rule is (is it equal to? Greater than? One of multiple options?)
- * - `value` is the value that will be checked, if the property specified correctly matches this, 
- *  as described by the rule, then the item is allowed in.
- * 
- * For example, the restriction `["type", dusk.items.REST_ISEQ, "Potion"]` 
- *  will only allow items whose `"type"` property is equal to `"Potion"`.
+ * An inventory carries restrictions on what items can be stored in it, this is done by specifying a string for a 
+ *  `{@link dusk.sgui.parseTree`}. An "item" operator is added, which is the item to be added, and you can do things
+ *  like `"item.itemType = Sword"` to allow only swords.
  * 
  * Items are arranged in "slots", and are not sorted automatically.
  *  The number of slots the inventory has is defined when it is created, and each slot can contain one type of item.
@@ -110,23 +77,17 @@ dusk.items.REST_ISNIN = 3;
  *   or the Invent's `"maxStack"` value, whichever is lower.
  * 
  * @param {integer} capacity The number of inventory slots this inventory should have.
- * @param {array} restrictions An array of restrictions on this inventory, 
- *  each element should be an array as described above.
+ * @param {string} restriction The restriction on what items can be added to this inventory.
  * @param {integer=0xffffffff} maxStack The maximum number of items that can be stored in one single slot.
  * @since 0.0.17-alpha
  * @constructor
  */
-dusk.items.Invent = function(capacity, restrictions, maxStack) {
+dusk.items.Invent = function(capacity, restriction, maxStack) {
 	/** The capacity of the inventory, this is how many slots it has.
 	 * @type integer
 	 * @private
 	 */
 	this._capacity = capacity;
-	/** The restrictions on this inventory, as an array of rules.
-	 * @type array
-	 * @private
-	 */
-	this._restrictions = restrictions;
 	/** An array of items.
 	 *  Each element of this array will itself be either an array of `{@link dusk.Inheritable}` items, 
 	 *  or null if the stack is empty.
@@ -137,6 +98,30 @@ dusk.items.Invent = function(capacity, restrictions, maxStack) {
 	 */
 	this._items = [];
 	for(var i = 0; i < capacity; i ++) this._items[i] = null;
+	
+	/** The tree used for restrictions.
+	 * 
+	 * @type dusk.parseTree.Compiler
+	 * @private
+	 * @since 0.0.21-alpha
+	 */
+	this._tree = new dusk.parseTree.Compiler([], [], [
+		["item", (function(o) {return this._item;}).bind(this)],
+	]);
+	/** The compiled node for the restriction tree.
+	 * 
+	 * @type function
+	 * @private
+	 * @since 0.0.21-alpha
+	 */
+	this._restriction = this._tree.compile(restriction).toFunction();
+	/** Temporary storage for the item that is to be added for the parse tree.
+	 * 
+	 * @type ?dusk.Inheritable
+	 * @private
+	 * @since 0.0.21-alpha
+	 */
+	this._item = null;
 	
 	/** The maximum number of items that can be in one stack.
 	 * No item stack will have larger than this number of elements.
@@ -152,7 +137,7 @@ dusk.items.Invent = function(capacity, restrictions, maxStack) {
 dusk.items.Invent.prototype.isValidAddition = function(item) {
 	if(!item || (this.countOccupiedSlots() >= this._capacity && this.findSlot(item.type) === -1)) return false;
 	
-	for(var i = this._restrictions.length-1; i >= 0; i --) {
+	/*for(var i = this._restrictions.length-1; i >= 0; i --) {
 		switch(this._restrictions[i][1]) {
 			case dusk.items.REST_ISEQ:
 				if(item.get(this._restrictions[i][0]) != this._restrictions[i][2]) return false;break;
@@ -167,9 +152,10 @@ dusk.items.Invent.prototype.isValidAddition = function(item) {
 			default:
 				console.warn(this.toString()+" has invalid restrictions.");
 		}
-	}
+	}*/
 	
-	return true;
+	this._item = item;
+	return this._restriction();
 };
 
 /** Checks if the specified item can be addet to an item slot.
@@ -438,7 +424,7 @@ dusk.items.Invent.prototype.getItemFromSlot = function(slot) {
  */
 dusk.items.Invent.prototype.takeItemFromSlot = function(slot) {
 	if(!this._items[slot]) return null;
-	var toReturn = this._items[slot][0];
+	var toReturn = this._items[slot][this._items[slot].length-1];
 	
 	if(this._items[slot].length == 1) {
 		this._items[slot] = null;
@@ -503,6 +489,32 @@ dusk.items.Invent.prototype.findEmptySlot = function() {
 	}
 	
 	return -1;
+};
+
+/** Calls the given function once for each item in the invent.
+ * @param {function(dusk.Inheritable, int):undefined} funct The function to call. Second argument is the slot.
+ * @since 0.0.21-alpha
+ */
+dusk.items.Invent.prototype.forEach = function(funct) {
+	for(var i = 0; i < this._items.length; i ++) {
+		if(this._items[i]) {
+			for(var j = 0; j < this._items[i].length; j ++) {
+				funct(this._items[i][j], i);
+			}
+		}
+	}
+};
+
+/** Calls the given function once for each slot in the invent. For each slot, the top item in it will be the argument.
+ * @param {function(dusk.Inheritable, int):undefined} funct The function to call. Second argument is the slot.
+ * @since 0.0.21-alpha
+ */
+dusk.items.Invent.prototype.forEach = function(funct) {
+	for(var i = 0; i < this._items.length; i ++) {
+		if(this._items[i]) {
+			funct(this._items[i][this._items[i].length-1], i);
+		}
+	}
 };
 
 /** Returns a string representation of the inventory, and all it's items.

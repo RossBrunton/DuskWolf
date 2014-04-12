@@ -14,7 +14,7 @@ dusk.load.provide("dusk.sgui.ItemSlot");
 dusk.sgui.ItemSlot = function (parent, comName) {
 	dusk.sgui.Group.call(this, parent, comName);
 	
-	this._invent = new dusk.items.Invent(1, [], 0xffffffff);
+	this._invent = new dusk.items.Invent(1, "true", 0xffffffff);
 	this.maxStack = 0xffffffff;
 	this.slot = 0;
 	
@@ -101,6 +101,7 @@ dusk.sgui.ItemSlot.prototype._itemSlotFrame = function() {
 
 dusk.sgui.ItemSlot.prototype._itemSlotAction = function(e) {
 	var h = this._getHand();
+	
 	if(h) {
 		if(h.getHand().countSlot(0) > 0) {
 			//Holding something
@@ -110,7 +111,7 @@ dusk.sgui.ItemSlot.prototype._itemSlotAction = function(e) {
 				h.getHand().sendToInventSlot(this._invent, this.slot, e.keyPress.shiftKey?1:0xffffffff);
 			}else if(this._invent.isValidAddition(h.getHand().getItemFromSlot(0))) {
 				//Swap them round
-				var temp = new dusk.items.Invent(1, []);
+				var temp = new dusk.items.Invent(1, "true");
 				this._invent.sendSlotToInvent(temp, this.slot, 0xffffffff);
 				h.getHand().sendToInventSlot(this._invent, this.slot, 0xffffffff);
 				temp.sendToInventSlot(h.getHand(), 0, 0xffffffff);

@@ -2,6 +2,8 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
+dusk.load.require("dusk.utils");
+
 dusk.load.provide("dusk.reversiblePromiseChain");
 dusk.load.provide("dusk.UserCancelError");
 
@@ -52,6 +54,7 @@ dusk.reversiblePromiseChain = function(promises, cancelOut, initialArg) {
 		}
 		
 		scope.queue = (function(promise) {
+			if(!Array.isArray(promise)) promise = [promise];
 			this.toAdd.push(promise);
 		}).bind(scope);
 		
@@ -59,7 +62,7 @@ dusk.reversiblePromiseChain = function(promises, cancelOut, initialArg) {
 			if(!this.inverse) {
 				this.p ++;
 				if(this.p > 0) {
-					this.promises[this.p - 1][2] = value;
+					this.promises[this.p - 1][2] = dusk.utils.clone(value);
 				}
 			}
 			
@@ -107,8 +110,6 @@ dusk.reversiblePromiseChain = function(promises, cancelOut, initialArg) {
 				return reject(value);
 			}
 			
-			console.warn(value);
-			
 			if(this.p < 0) {
 				if(cancelOut) {
 					reject(new Error("Cancelled"));
@@ -131,13 +132,13 @@ dusk.reversiblePromiseChain = function(promises, cancelOut, initialArg) {
 
 /** @class dusk.UserCancelError
  * 
- * @classdesc 
+ * @classdesc Exception representing that the user has cancelled an action.
  * 
  * @extends Error
  * @constructor
  * @since 0.0.21-alpha
  */
-dusk.UserCancelError = function (parent, comName) {
+dusk.UserCancelError = function(parent, comName) {
 	Error.call(this);
 	
 	this.name = "UserCancelError";

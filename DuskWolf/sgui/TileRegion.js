@@ -71,7 +71,8 @@ dusk.sgui.TileRegion = function (parent, comName) {
 	 * @private
 	 */
 	this._regionMaps = {};
-	/** An object containing an array of all entities in the region. How nice. Key is the region name.
+	/** An object containing an array of all entities in the region. How nice. Key is the region name. Value is an
+	 *  `[entity, tile]` pair.
 	 * @type object
 	 * @private
 	 */
@@ -299,7 +300,7 @@ dusk.sgui.TileRegion.prototype.clearRegion = function(name) {
 	this._updateTileColourCache();
 };
 
-dusk.sgui.TileRegion.prototype.addToRegion = function(name, x, y, px, py, weight, e, dist) {
+dusk.sgui.TileRegion.prototype.addToRegion = function(name, x, y, px, py, weight, e, dist, evenEnt) {
 	if(!(name in this._regions) || !this._regions[name]) {
 		this._regions[name] = [null];
 		this._regionMaps[name] = new Uint16Array(this.rows * this.cols);
@@ -308,7 +309,7 @@ dusk.sgui.TileRegion.prototype.addToRegion = function(name, x, y, px, py, weight
 	
 	this._regions[name].push([x, y, px, py, weight, e, dist]);
 	this._regionMaps[name][(y * this.cols)+x] = this._regions[name].length-1;
-	if(e) this._regionEnts[name].push(e);
+	if(evenEnt && e) this._regionEnts[name].push([e, this._regions[name].length-1]);
 	this._updateTileColourCache();
 };
 
@@ -342,6 +343,10 @@ dusk.sgui.TileRegion.prototype.getRegion = function(name) {
 	return this._regions[name];
 };
 
+dusk.sgui.TileRegion.prototype.entitiesInRegion = function(name) {
+	return this._regionEnts[name];
+};
+
 dusk.sgui.TileRegion.prototype.pathTo = function(name, x, y) {
 	var o = [];
 	var t = this.getFromRegion(name, x, y);
@@ -372,19 +377,23 @@ dusk.sgui.TileRegion.prototype.expandRegion = function(name, x, y, range, opts) 
 	var s = this.container.getScheme();
 	
 	var w = 0;
+	var o = this.container.getPrimaryEntityLayer().getEntitiesExactlyHere(
+		x*this.tileWidth(), y*this.tileHeight(), undefined, true
+	);
+	
+	var e = null;
+	if(o.length > 0) {
+		e = o[0];
+	}
 	
 	if(opts.includeFirst) {
-		var o = this.container.getPrimaryEntityLayer().getEntitiesExactlyHere(
-			x*this.tileWidth(), y*this.tileHeight(), undefined, true
-		);
-		
-		var e = null;
-		if(o.length > 0) {
-			e = o[0];
-		}
-		
 		w = this._entityWeight(e);
 	}
+	
+	if("rangeMap" in opts) range = opts.rangeMap.length -1;
+	
+	//if("notStartFrom" in opts && e && e.meetsTrigger(opts.notStartFrom)) return;
+	//Remember to ignore selector
 	
 	var t = s.getTile(x, y);
 	var cloud = [[x, y, -1, -1, w, e, 0]];
@@ -400,7 +409,7 @@ dusk.sgui.TileRegion.prototype.expandRegion = function(name, x, y, range, opts) 
 		if(c[4] == 0xffffffff) break;
 		
 		if(/*!this.isInRegion(name, c[0], c[1])*/ true) {
-			if(!("entBlock" in opts) || !c[5] || c[5].evalTrigger(opts.entBlock)) {
+			if(!("entBlock" in opts) || !c[5] || !c[5].evalTrigger(opts.entBlock)) {
 				if(!opts.los || this.checkLOS(name, x, y, c[0], c[1])) {
 					s.shiftTile(t, dusk.sgui.c.DIR_UP);
 					this._updateCloud(cloud, c, t, range, name);
@@ -418,8 +427,15 @@ dusk.sgui.TileRegion.prototype.expandRegion = function(name, x, y, range, opts) 
 					this._updateCloud(cloud, c, t, range, name);
 					
 					if(!this.isInRegion(name, c[0], c[1]) && (!opts.min || c[4] > opts.min)) {
-						if(!("minWeight" in opts) || c[4] >= opts.minWeight) {
-							this.addToRegion(name, c[0], c[1], c[2], c[3], c[4], c[5], c[6]);
+						if((!("minWeight" in opts) || c[4] >= opts.minWeight)
+						&& (!("rangeMap" in opts) || opts.rangeMap[c[4]])) {
+							if(!("entFilter" in opts) || !c[5]) {
+								this.addToRegion(name, c[0], c[1], c[2], c[3], c[4], c[5], c[6], true);
+							}else{
+								this.addToRegion(
+									name, c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[5].evalTrigger(opts.entFilter)
+								);
+							}
 							
 							if("forEach" in opts) {
 								for(var i = 0; i < opts.forEach.length; i ++) {

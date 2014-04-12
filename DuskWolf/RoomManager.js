@@ -7,49 +7,24 @@ dusk.load.require("dusk.EventDispatcher");
 dusk.load.provide("dusk.RoomManager");
 dusk.load.provide("dusk.editor");
 
-/*  @namespace dusk.rooms
- * @name dusk.rooms
+/**  @class dusk.RoomManager
  * 
- * @description This namespace contains rooms for the various game engines.
+ * @classdesc Manages rooms, which contain tilemap data and the entities in the room.
  * 
- * Essentially, rooms consists of a room in which entities roam about in.
+ * This is intended to be used with an instance of `{@link dusk.sgui.BasicMain}` and essentially serves as a storage 
+ *  for it's rooms. Both `{@link dusk.plat}` and `{@link dusk.quest}` have their own room managers for their own types
+ *  of rooms.
  * 
- * The main game area consists of four "layers".
- * 	The first layer is the schematic layer, 
- *   which describes how entities react to certain tiles in a general sense, for example, walls.
- * 	The second layer is the background layer, which is a tilemap (`{@link dusk.sgui.EditableTileMap}`)
- *   which describes what the backgroud is to look like.
- * 	The third layer is the entity layer, this is the layer on which the entities live and act.
- * 	The fourth layer is an "above the entities" layer, it describes what the foreground is to look like,
- *   and appears over the entities.
- * 
- * The schematic layer is a normal tilemap, which is invisible.
- *  Each tile on the map describes how entities should interact with it, as such:
- * 
- * - [0, 0] Air, the entity will go through this as normal, and nothing happens.
- * - [1, 0] Wall, the entity cannot enter this tile.
- * - [1, 0] - [1, 9] Marks, when the entity touches this (or the player is in it and presses up)
- *  and has the `{@link dusk.behave.MarkTrigger}` behaviour, `{@link dusk.entities.markTrigger}` will fire an event.
- * 
- * The background and foreground layer (named `back` and `over`) are normal, visible tilemaps.
- * 
- * Maps themselves are described using objects with `{@link dusk.rooms.createRoom}`.
- * 	The object must contain the following properties:
- * 
- * - `overSrc`, `backSrc`: The image for the respective layer, must be usable by a tilemap.
- * - `rows`, `cols`: The dimensons of the map.
- * - `back`, `over`, `scheme`: The actual tilemaps of the respective layer. Must be a valid tilemap map.
- * - `entities`: The entities in the map. It is an array,
- *  each element is an object containing `name` (the entity's name), `type` (the entity's type),
- *  `x` and `y` (the entities location).
- * 
+ * @param {?string} packageName The package that this room manager depends on; for generating rooms in the editor.
+ * @param {?string} managerPath The path to this object, for generating rooms in the editor.
+ * @constructor
  * @since 0.0.16-alpha
  */
 
 dusk.RoomManager = function(packageName, managerPath) {
-	/** All the rooms that have been created and added.
+	/** All the rooms that have been added.
 	 * 
-	 * This is an object containing objects. The key is the name of the room.
+	 * The key is the name of the room, and the value is the room data.
 	 * @type object
 	 * @private
 	 */
@@ -57,15 +32,26 @@ dusk.RoomManager = function(packageName, managerPath) {
 
 	/** An event dispatcher which fires when a room is loaded.
 	 * 
-	 * This is fired by `{@link dusk.rooms.setRoom}`, and has the properties `"room"`;
-	 *  the name of the room, and `"spawn"` the mark number of the spawn point.
+	 * This has the properties `"room"`; the name of the room, and `"spawn"` the mark number of the spawn point.
 	 * @type dusk.EventDispatcher
 	 */
 	this.roomLoaded = new dusk.EventDispatcher("dusk.RoomManager.roomLoaded");
 	
+	/** The BasicMain instance this manager is for.
+	 * 
+	 * You should use `{@link dusk.RoomManager#setBasicMain}` to set this, instead of setting it directly.
+	 * @type dusk.sgui.BasicMain
+	 */
 	this.basicMain = null;
 	
+	/** The name of the package that this room manager is from.
+	 * @type ?string
+	 */
 	this.packageName = packageName;
+	
+	/** Path to this object, from window. For example `"dusk.plat.rooms"` or so.
+	 * @type ?string
+	 */
 	this.managerPath = managerPath;
 };
 
@@ -87,9 +73,10 @@ dusk.RoomManager.prototype.getRoomData = function(name) {
 	return this._rooms[name];
 };
 
-/** Asks the room manager to set a room, with the "seek" entitiy at the mark specified.
+/** Asks the basic main to set a room, with the "seek" entitiy at the mark specified.
+ * 
  * @param {string} room The name of the room to load.
- * @param {integer} spawn The mark ID for the seek entity to appear at.
+ * @param {?integer} spawn The mark ID for the seek entity to appear at.
  */
 dusk.RoomManager.prototype.setRoom = function(room, spawn) {
 	if(!room) {
@@ -106,6 +93,9 @@ dusk.RoomManager.prototype.setRoom = function(room, spawn) {
 	this.roomLoaded.fire({"room":room, "spawn":spawn});
 };
 
+/** Sets the Basic Main instance this is for; this should be called instead of setting it directly.
+ * @param {dusk.sgui.BasicMain} bm The Basic Main instance.
+ */
 dusk.RoomManager.prototype.setBasicMain = function(bm) {
 	this.basicMain = bm;
 	bm.roomManager = this;

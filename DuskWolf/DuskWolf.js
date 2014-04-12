@@ -40,7 +40,6 @@ dusk.dataDir = "Data/";
  * This is set automatically.
  * @type string
  * @see dusk.sgui
- * @default "canvas"
  */
 dusk.elemPrefix = "";
 
@@ -87,21 +86,22 @@ if("register" in document) {
 				case "width":
 				case "height":
 					this.style[attrName] = toPx(newVal);
-					$("#"+this.id+"-canvas")[0].style[attrName] = toPx(newVal);
+					document.getElementById(this.id+"-canvas").style[attrName] = toPx(newVal);
 					break;
 			}
 		}
 	});
 }
 
-$(document).ready(function(e) {
+//We seem to be already loaded here
+//window.addEventListener("DOMContentLoaded", function(e) {
 	function toPx(a) {
 		if((""+a).slice(-2) != "px") return a+"px";
 		return ""+a;
 	}
 	
-	if($("swo-duskwolf").length) {
-		var elem = $("swo-duskwolf")[0];
+	if(document.getElementsByTagName("swo-duskwolf").length) {
+		var elem = document.getElementsByTagName("swo-duskwolf")[0];
 		if(elem.getAttribute("frameRate")) dusk.frameRate = elem.getAttribute("frameRate");
 		if(elem.getAttribute("data")) dusk.dataDir = elem.getAttribute("data");
 		if(elem.getAttribute("dev")) dusk.dev = true;
@@ -122,4 +122,4 @@ $(document).ready(function(e) {
 			dusk.load.import(elem.getAttribute("package"));
 		});
 	}
-});
+//});

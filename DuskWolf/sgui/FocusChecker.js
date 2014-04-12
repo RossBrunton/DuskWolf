@@ -174,19 +174,79 @@ dusk.sgui.FocusCheckerRect = function(parent, comName) {
 	 */
 	this.active = "#99ff99";
 	
-	this.src = this.inactiveImg;
+	/** The border colour when the component is not focused or active.
+	 * @type string
+	 * @default "#990000"
+	 * @since 0.0.21-alpha
+	 */
+	this.bInactive = "#990000";
+	/** The border colour when the component is focused, but not active.
+	 * @type string
+	 * @default "#990000"
+	 * @since 0.0.21-alpha
+	 */
+	this.bFocused = "#990000";
+	/** The border colour when the component is active.
+	 * @type string
+	 * @default "#009900"
+	 * @since 0.0.21-alpha
+	 */
+	this.bActive = "#009900";
+	
+	/** The border width when the component is not focused or active.
+	 * @type string
+	 * @default 0
+	 * @since 0.0.21-alpha
+	 */
+	this.bwInactive = 0;
+	/** The border width when the component is focused, but not active.
+	 * @type string
+	 * @default 0
+	 * @since 0.0.21-alpha
+	 */
+	this.bwFocused = 0;
+	/** The border width when the component is active.
+	 * @type string
+	 * @default 0
+	 * @since 0.0.21-alpha
+	 */
+	this.bwActive = 0;
 	
 	//Prop masks
 	this._registerPropMask("inactive", "inactive");
 	this._registerPropMask("focused", "focused");
 	this._registerPropMask("active", "active");
 	
-	//Listeners
-	this.onFocusChange.listen(function(e) {this.colour = this.focused;}, this, {"focus":true});
-	this.onFocusChange.listen(function(e) {this.colour = this.inactive;}, this, {"focus":false});
+	this._registerPropMask("bInactive", "bInactive");
+	this._registerPropMask("bFocused", "bFocused");
+	this._registerPropMask("bActive", "bActive");
 	
-	this.onActiveChange.listen(function(e) {this.colour = this.active;}, this, {"active":true});
-	this.onActiveChange.listen(function(e) {this.colour = this.focused;}, this, {"active":false});
+	this._registerPropMask("bwInactive", "bwInactive");
+	this._registerPropMask("bwFocused", "bwFocused");
+	this._registerPropMask("bwActive", "bwActive");
+	
+	//Listeners
+	this.onFocusChange.listen(function(e) {
+		this.colour = this.focused;
+		this.bColour = this.bFocused;
+		this.bWidth = this.bwFocused;
+	}, this, {"focus":true});
+	this.onFocusChange.listen(function(e) {
+		this.colour = this.inactive;
+		this.bColour = this.bInactive;
+		this.bWidth = this.bwInactive;
+	}, this, {"focus":false});
+	
+	this.onActiveChange.listen(function(e) {
+		this.colour = this.active;
+		this.bColour = this.bActive;
+		this.bWidth = this.bwActive
+	}, this, {"active":true});
+	this.onActiveChange.listen(function(e) {
+		this.colour = this.focused;
+		this.bColour = this.bFocused;
+		this.bWidth = this.bwFocused;
+	}, this, {"active":false});
 	
 	//Defaults
 	this.allowMouse = true;

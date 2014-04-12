@@ -30,6 +30,9 @@ dusk.load.provide("dusk.sgui.IContainer");
  * - {@link dusk.sgui.IContainer.getComponent}
  * - {@link dusk.sgui.IContainer.alterChildLayer}
  * - {@link dusk.sgui.IContainer.containerUpdateMouse}
+ * - {@link dusk.sgui.IContainer.containerMouseMove}
+ * - {@link dusk.sgui.IContainer.getTrueX}
+ * - {@link dusk.sgui.IContainer.getTrueY}
  * 
  * This class cannot be used on its own as a component.
  * 
@@ -156,6 +159,12 @@ dusk.sgui.IContainer.getContentsHeight = function(includeOffset) {};
  * @since 0.0.20-alpha
  */
 dusk.sgui.IContainer.containerUpdateMouse = function() {};
+
+/** Use this to fire the mouseMove event on it's children, please.
+ * 
+ * @since 0.0.21-alpha
+ */
+dusk.sgui.IContainer.containerMouseMove = function() {};
 
 /** Returns the actual X location, relative to the screen, that the component is at.
  * @param {string} name An identifier for the component.
