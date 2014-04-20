@@ -80,7 +80,7 @@ dusk.reversiblePromiseChain = function(promises, cancelOut, initialArg) {
 			
 			this.inverse = false;
 			
-			if(this.p >= this.promises.length) {
+			if(this.p >= this.promises.length || this.promises[this.p][0] == dusk.reversiblePromiseChain.STOP) {
 				return fulfill(value);
 			}
 			
@@ -127,6 +127,13 @@ dusk.reversiblePromiseChain = function(promises, cancelOut, initialArg) {
 		scope.next();
 	}));
 };
+
+/** Special function that when it is reached in a reversible promise chain will cause the chain to terminate instantly.
+ * 
+ * Calling this function has no effect.
+ * @static
+ */
+dusk.reversiblePromiseChain.STOP = function(){};
 
 // ----
 

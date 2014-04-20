@@ -53,9 +53,6 @@ dusk.sgui.FocusChecker = function(parent, comName) {
 	
 	this.onActiveChange.listen(function(e) {if(this.activeImg) this.src = this.activeImg;}, this, {"active":true});
 	this.onActiveChange.listen(function(e) {if(this.focusedImg) this.src = this.focusedImg;}, this, {"active":false});
-	
-	//Defaults
-	this.allowMouse = true;
 };
 dusk.sgui.FocusChecker.prototype = Object.create(dusk.sgui.Image.prototype);
 
@@ -131,9 +128,6 @@ dusk.sgui.FocusCheckerTile = function(parent, comName) {
 			this.tile = [this.tile[0], this.focusValues[0]];
 		}
 	}, this, {"active":false});
-	
-	//Defaults
-	this.allowMouse = true;
 };
 dusk.sgui.FocusCheckerTile.prototype = Object.create(dusk.sgui.Tile.prototype);
 
@@ -247,9 +241,6 @@ dusk.sgui.FocusCheckerRect = function(parent, comName) {
 		this.bColour = this.bFocused;
 		this.bWidth = this.bwFocused;
 	}, this, {"active":false});
-	
-	//Defaults
-	this.allowMouse = true;
 };
 dusk.sgui.FocusCheckerRect.prototype = Object.create(dusk.sgui.Rect.prototype);
 

@@ -5,6 +5,7 @@
 dusk.load.require("dusk.sgui.Component");
 dusk.load.require("dusk.data");
 dusk.load.require("dusk.utils");
+dusk.load.require(">dusk.Image");
 
 dusk.load.provide("dusk.sgui.TileMap");
 dusk.load.provide("dusk.sgui.TileMapWeights");
@@ -37,161 +38,158 @@ dusk.load.provide("dusk.sgui.TileMapWeights");
  * @constructor
  */
 dusk.sgui.TileMap = function (parent, comName) {
-	if(parent !== undefined){
-		dusk.sgui.Component.call(this, parent, comName);
-		
-		/** The width (for displaying) of a single tile if this tilemap is in `"DECIMAL"` mode.
-		 * @type integer
-		 * @default 32
-		 */
-		this.twidth = 32;
-		/** The height (for displaying) of a single tile if this tilemap is in `"DECIMAL"` mode.
-		 * @type integer
-		 * @default 32
-		 */
-		this.theight = 32;
-		
-		/** The width (for reading from the image) of a single tile if this tilemap is in `"DECIMAL"` mode.
-		 * @type integer
-		 * @default 16
-		 */
-		this.swidth = 16;
-		/** The height (for reading from the image) of a single tile if this tilemap is in `"DECIMAL"` mode.
-		 * @type integer
-		 * @default 16
-		 */
-		this.sheight = 16;
+	dusk.sgui.Component.call(this, parent, comName);
+	
+	/** The width (for displaying) of a single tile if this tilemap is in `"DECIMAL"` mode.
+	 * @type integer
+	 * @default 32
+	 */
+	this.twidth = 32;
+	/** The height (for displaying) of a single tile if this tilemap is in `"DECIMAL"` mode.
+	 * @type integer
+	 * @default 32
+	 */
+	this.theight = 32;
+	
+	/** The width (for reading from the image) of a single tile if this tilemap is in `"DECIMAL"` mode.
+	 * @type integer
+	 * @default 16
+	 */
+	this.swidth = 16;
+	/** The height (for reading from the image) of a single tile if this tilemap is in `"DECIMAL"` mode.
+	 * @type integer
+	 * @default 16
+	 */
+	this.sheight = 16;
 
-		
-		/** The number of rows in this TileMap.
-		 * @type integer
-		 * @default 50
-		 */
-		this.rows = 50;
-		/** The number of columns in this TileMap.
-		 * @type integer
-		 * @default 50
-		 */
-		this.cols = 50;
-		
-		/** The actual map to draw. Setting this will cause the map to update.
-		 * 
-		 * This can be set in two ways. Both ways require a string that describes the TileMap,
-		 *  this can be outputted from `{@link dusk.sgui.EditableTilemap#save}`,
-		 *  or as a whitespace seperated list of all the tile coordinates in order.
-		 * 
-		 * This can either be an object with optional properties `rows` and `cols` describing the dimensions,
-		 *  and a required property `map` being the string. Or the string itself can be set directly.
-		 * 
-		 * @type object|string
-		 */
-		this.map = null;
-		
-		/** Used internall ty store the set image src.
-		 * @type string
-		 * @private
-		 * @since 0.0.20-alpha
-		 */
-		this._src = "";
-		/** The path to the background image on which tiles are copied from.
-		 * @type string
-		 */
-		this.src = "";
-		/** The actual image object used to store the source image.
-		 * @type HTMLImageElement
-		 * @private
-		 */
-		this._img = null;
-		
-		/** An array of canvases that has the full drawn tilemap for each frame on it.
-		 *  This will be copied onto the real canvas when it's time to draw it.
-		 * @type array
-		 * @private
-		 */
-		this._all = [];
-		/** True if the current map has been drawn yet, else false.
-		 * @type boolean
-		 * @private
-		 */
-		this._drawn = false;
-		
-		/** An array of buffers used to store all the tiles.
-		 * @type array
-		 * @protected
-		 */
-		this._tileBuffer = [];
-		/** An array of all the tiles that the tilemap contains per frame,
-		 *  in order of where they appear on the screen (left to right, then up to down).
-		 * 
-		 * Each coordinate has two bytes (hence to entries in this array), `x` then `y`,
-		 *  and refers to the location on the origin image for the tile.
-		 * @type array
-		 * @protected
-		 */
-		this._tiles = [];
-		
-		/** The time left before changing frames.
-		 * @type integer
-		 * @private
-		 * @since 0.0.19-alpha
-		 */
-		this._frameRemaining = 0;
-		/** The delay between each animation frame, in frames.
-		 * @type integer
-		 * @private
-		 * @since 0.0.19-alpha
-		 */
-		this._frameDelay = 5;
-		/** The current frame the animation is on.
-		 * @type integer
-		 * @private
-		 * @since 0.0.19-alpha
-		 */
-		this._currentFrame = 0;
-		/** The total number of frames needed.
-		 * @type integer
-		 * @private
-		 * @since 0.0.19-alpha
-		 */
-		this._frames = 0;
-		/** Whether the tilemap is animating or not.
-		 * @type boolean
-		 * @default true
-		 * @since 0.0.19-alpha
-		 */
-		this.animating = true;
-		
-		/** If set, this is the weights of a given tile. This can be changed often, and incurs no performance problems.
-		 * @type ?dusk.sgui.TileMapWeights
-		 * @since 0.0.21-alpha
-		 */
-		this.weights = null;
-		
-		//Prop masks
-		this._registerPropMask("map", "map", true, 
-			["src", "swidth", "sheight", "theight", "twidth", "tsize"]
-		);
-		this._registerPropMask("src", "src");
-		this._registerPropMask("rows", "rows");
-		this._registerPropMask("cols", "cols");
-		this._registerPropMask("animated", "animated");
-		
-		this._registerPropMask("sheight", "sheight");
-		this._registerPropMask("swidth", "swidth");
-		
-		this._registerPropMask("theight", "theight");
-		this._registerPropMask("twidth", "twidth");
-		
-		//Listeners
-		this.prepareDraw.listen(this._tileMapDraw, this);
-		this.frame.listen(this._tileMapFrame, this);
-		
-		//Default values
-		this.clickPierce = true;
-		
-		//Render support
-		this.renderSupport |= dusk.sgui.Component.REND_OFFSET | dusk.sgui.Component.REND_SLICE;
-	}
+	
+	/** The number of rows in this TileMap.
+	 * @type integer
+	 * @default 50
+	 */
+	this.rows = 50;
+	/** The number of columns in this TileMap.
+	 * @type integer
+	 * @default 50
+	 */
+	this.cols = 50;
+	
+	/** The actual map to draw. Setting this will cause the map to update.
+	 * 
+	 * This can be set in two ways. Both ways require a string that describes the TileMap,
+	 *  this can be outputted from `{@link dusk.sgui.EditableTilemap#save}`,
+	 *  or as a whitespace seperated list of all the tile coordinates in order.
+	 * 
+	 * This can either be an object with optional properties `rows` and `cols` describing the dimensions,
+	 *  and a required property `map` being the string. Or the string itself can be set directly.
+	 * 
+	 * @type object|string
+	 */
+	this.map = null;
+	
+	/** Used internall ty store the set image src.
+	 * @type string
+	 * @private
+	 * @since 0.0.20-alpha
+	 */
+	this._src = "";
+	/** The path to the background image on which tiles are copied from.
+	 * @type string
+	 */
+	this.src = "";
+	/** The actual image object used to store the source image.
+	 * @type dusk.Image
+	 * @private
+	 */
+	this._img = null;
+	
+	/** An array of canvases that has the full drawn tilemap for each frame on it.
+	 *  This will be copied onto the real canvas when it's time to draw it.
+	 * @type array
+	 * @private
+	 */
+	this._all = [];
+	/** True if the current map has been drawn yet, else false.
+	 * @type boolean
+	 * @private
+	 */
+	this._drawn = false;
+	
+	/** An array of buffers used to store all the tiles.
+	 * @type array
+	 * @protected
+	 */
+	this._tileBuffer = [];
+	/** An array of all the tiles that the tilemap contains per frame,
+	 *  in order of where they appear on the screen (left to right, then up to down).
+	 * 
+	 * Each coordinate has two bytes (hence to entries in this array), `x` then `y`,
+	 *  and refers to the location on the origin image for the tile.
+	 * @type array
+	 * @protected
+	 */
+	this._tiles = [];
+	
+	/** The time left before changing frames.
+	 * @type integer
+	 * @private
+	 * @since 0.0.19-alpha
+	 */
+	this._frameRemaining = 0;
+	/** The delay between each animation frame, in frames.
+	 * @type integer
+	 * @private
+	 * @since 0.0.19-alpha
+	 */
+	this._frameDelay = 5;
+	/** The current frame the animation is on.
+	 * @type integer
+	 * @private
+	 * @since 0.0.19-alpha
+	 */
+	this._currentFrame = 0;
+	/** The total number of frames needed.
+	 * @type integer
+	 * @private
+	 * @since 0.0.19-alpha
+	 */
+	this._frames = 0;
+	/** Whether the tilemap is animating or not.
+	 * @type boolean
+	 * @default true
+	 * @since 0.0.19-alpha
+	 */
+	this.animating = true;
+	
+	/** If set, this is the weights of a given tile. This can be changed often, and incurs no performance problems.
+	 * @type ?dusk.sgui.TileMapWeights
+	 * @since 0.0.21-alpha
+	 */
+	this.weights = null;
+	
+	//Prop masks
+	this._registerPropMask("map", "map", true, 
+		["src", "swidth", "sheight", "theight", "twidth", "tsize"]
+	);
+	this._registerPropMask("src", "src");
+	this._registerPropMask("rows", "rows");
+	this._registerPropMask("cols", "cols");
+	this._registerPropMask("animated", "animated");
+	
+	this._registerPropMask("sheight", "sheight");
+	this._registerPropMask("swidth", "swidth");
+	
+	this._registerPropMask("theight", "theight");
+	this._registerPropMask("twidth", "twidth");
+	
+	//Listeners
+	this.prepareDraw.listen(this._tileMapDraw, this);
+	this.frame.listen(this._tileMapFrame, this);
+	
+	//Default values
+	this.augment.listen((function(e) {
+		this.mouse.clickPierce = true;
+	}).bind(this), {"augment":"mouse"});
 };
 dusk.sgui.TileMap.prototype = Object.create(dusk.sgui.Component.prototype);
 
@@ -273,8 +271,11 @@ Object.defineProperty(dusk.sgui.TileMap.prototype, "src", {
 	
 	set: function(value) {
 		if(value) {
-			this._img = dusk.data.grabImage(value);
+			this._img = new dusk.Image(value);
 			this._src = value;
+		}else{
+			this._img = null;
+			this._src = "";
 		}
 	}
 });
@@ -288,7 +289,7 @@ Object.defineProperty(dusk.sgui.TileMap.prototype, "src", {
 dusk.sgui.TileMap.prototype.drawAll = function() {
 	this._drawn = false;
 	
-	if(!this._img.complete) return false;
+	if(!this._img || !this._img.isReady()) return false;
 	
 	this._frames = this._framesNeeded();
 	this._currentFrame = 0;
@@ -301,7 +302,7 @@ dusk.sgui.TileMap.prototype.drawAll = function() {
 		for (var yi = 0; yi < this.rows; yi++) {
 			for (var xi = 0; xi < this.cols; xi++) {
 				if(this._tiles[f][i] !== undefined) {
-					this._all[f].getContext("2d").drawImage(this._img, 
+					this._img.paint(this._all[f].getContext("2d"), "", false,
 						this._tiles[f][i]*this.swidth, this._tiles[f][i+1]*this.sheight, this.swidth, this.sheight, 
 						xi*this.swidth, yi*this.sheight, this.swidth, this.sheight
 					);

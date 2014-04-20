@@ -23,7 +23,7 @@ dusk.load.provide("dusk.Inheritable");
  *   however are not normal JavaScript objects.
  * 
  * The base type, that all inheritables are linked to, is named `"root"`, and can be modified as any other type.
- * @param {string} name A name for the container; used for identifying it in debbuging.
+ * @param {string} name A unique name for the container; used for identifying it while saving.
  * @constructor
  * @since 0.0.17-alpha
  */
@@ -51,6 +51,9 @@ dusk.InheritableContainer = function(name) {
 	
 	//Create the root type
 	this.createNewType("root", {});
+	
+	//Add this to the list of containers
+	dusk.InheritableContainer._containers[name] = this;
 };
 
 /** Creates a new type, with the specified data and base type.
@@ -206,6 +209,22 @@ dusk.InheritableContainer.prototype.getAllNames = function() {
 	return out;
 };
 
+/** Object containing all the containers. Key is the container name, while the value is the container.
+ * @type object
+ * @private
+ * @since 0.0.21-alpha
+ */
+dusk.InheritableContainer._containers = {};
+
+/** Given a name, gets the container with that name.
+ * @param {string} name The name to look up.
+ * @return {dusk.InheritableContainer} The container with that name.
+ * @since 0.0.21-alpha
+ */
+dusk.InheritableContainer.getContainer = function(name) {
+	return dusk.InheritableContainer._containers[name];
+};
+
 Object.seal(dusk.InheritableContainer);
 Object.seal(dusk.InheritableContainer.prototype);
 
@@ -293,6 +312,37 @@ dusk.Inheritable.prototype.toString = function() {return "[Inheritable "+this.ty
  */
 dusk.Inheritable.prototype.copy = function() {
 	return new dusk.Inheritable(this.type, this.container, dusk.utils.clone(this._extraData));
+};
+
+/** Saves this to an object that can then be loaded with `{@link dusk.Inheritable#refLoad}`.
+ * 
+ * This requires `{@link dusk.save}` to be imported.
+ * @return {object} This inheritable, as an object.
+ * @since 0.0.21-alpha
+ */
+dusk.Inheritable.prototype.refSave = function() {
+	return [this.type, this.container.name, dusk.save.saveRef(this._extraData)];
+};
+
+/** Given a previously saved inventory (via `{@link dusk.Inheritable#refSave}`) will create a inheritable for this 
+ *  object.
+ * 
+ * This requires `{@link dusk.save}` to be imported.
+ * @param {object} data The saved data.
+ * @return {dusk.Inheritable} An inheritable from the saved data.
+ * @since 0.0.21-alpha
+ * @static
+ */
+dusk.Inheritable.refLoad = function(data) {
+	return new dusk.Inheritable(data[0], dusk.InheritableContainer.getContainer(data[1]), dusk.save.loadRef(data[2]));
+};
+
+/** Returns the name of the class for use in saving.
+ * @return {string} The string "dusk.Inheritable".
+ * @since 0.0.21-alpha
+ */
+dusk.Inheritable.prototype.refClass = dusk.Inheritable.refClass = function() {
+	return "dusk.Inheritable";
 };
 
 Object.seal(dusk.Inheritable);

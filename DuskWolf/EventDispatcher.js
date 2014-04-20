@@ -119,11 +119,19 @@ dusk.EventDispatcher.prototype.listen = function(callback, scope, propsYes, prop
 	if(scope) callback = callback.bind(scope);
 	
 	if(!this._free.length) {
-		this._listeners.push([callback, propsYes?propsYes:null, propsNo?propsNo:null]);
+		this._listeners.push([
+			callback,
+			propsYes?propsYes:null, propsYes?Object.keys(propsYes):[], 
+			propsNo?propsNo:null, propsNo?Object.keys(propsNo):[]
+		]);
 		return this._listeners.length-1;
 	}else{
 		var free = this._free.pop();
-		this._listeners[free] = [callback, propsYes?propsYes:null, propsNo?propsNo:null];
+		this._listeners[free] = [
+			callback,
+			propsYes?propsYes:null, propsYes?Object.keys(propsYes):[], 
+			propsNo?propsNo:null, propsNo?Object.keys(propsNo):[]
+		];
 		return free;
 	}
 };
@@ -148,11 +156,13 @@ dusk.EventDispatcher.prototype.fire = function(event) {
 			if(this._listeners[i] === null) continue;
 			
 			//Check propsYes
-			if(event && this._listeners[i][1] && !this._checkProps(event, this._listeners[i][1], true))
+			if(event && this._listeners[i][1]
+			&& !this._checkPropsPositive(event, this._listeners[i][1], this._listeners[i][2]))
 				continue;
 			
 			//Check propsNo
-			if(event && this._listeners[i][2] && !this._checkProps(event, this._listeners[i][2], false))
+			if(event && this._listeners[i][3]
+			&& !this._checkPropsNegative(event, this._listeners[i][3], this._listeners[i][4]))
 				continue;
 			
 			//Fire listener
@@ -179,11 +189,13 @@ dusk.EventDispatcher.prototype.fire = function(event) {
 			if(this._listeners[i] === null) continue;
 			
 			//Check propsYes
-			if(event && this._listeners[i][1] && !this._checkProps(event, this._listeners[i][1], true))
+			if(event && this._listeners[i][1]
+			&& !this._checkPropsPositive(event, this._listeners[i][1], this._listeners[i][2]))
 				continue;
 			
 			//Check propsNo
-			if(event && this._listeners[i][2] && !this._checkProps(event, this._listeners[i][2], false))
+			if(event && this._listeners[i][3]
+			&& !this._checkPropsNegative(event, this._listeners[i][3], this._listeners[i][4]))
 				continue;
 			
 			//Fire listener
@@ -212,10 +224,19 @@ dusk.EventDispatcher.prototype.fire = function(event) {
 	}
 };
 
-dusk.EventDispatcher.prototype._checkProps = function(event, props, positive) {
-	for(var p in props) {
-		if((!positive && event[p] === props[p])
-		|| (positive && event[p] !== props[p])) {
+dusk.EventDispatcher.prototype._checkPropsPositive = function(event, props, keys) {
+	for(var i = 0; i < keys.length; i ++) {
+		if(event[keys[i]] !== props[keys[i]]) {
+			return false;
+		}
+	}
+	
+	return true;
+};
+
+dusk.EventDispatcher.prototype._checkPropsNegative = function(event, props, keys) {
+	for(var i = 0; i < keys.length; i ++) {
+		if(event[keys[i]] === props[keys[i]]) {
 			return false;
 		}
 	}

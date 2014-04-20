@@ -4,6 +4,7 @@
 
 dusk.load.require("dusk.data");
 dusk.load.require("dusk.sgui.Component");
+dusk.load.require("dusk.Image");
 
 dusk.load.provide("dusk.sgui.Image");
 
@@ -27,11 +28,17 @@ dusk.load.provide("dusk.sgui.Image");
 dusk.sgui.Image = function(parent, comName) {
 	dusk.sgui.Component.call(this, parent, comName);
 
-	/** The current image, as a HTML img element object.
-	 * @type HTMLImageElement
+	/** The current image.
+	 * @type dusk.Image
 	 * @protected
 	 */
 	this._img = null;
+	/** Image options for the image.
+	 * 
+	 * @type string
+	 * @since 0.0.21-alpha
+	 */
+	this.imageTrans = "";
 	
 	/** Sets the image to draw, this should be a URL, potentially relative to `{@link dusk.dataDir}`.
 	 * @type string
@@ -41,28 +48,31 @@ dusk.sgui.Image = function(parent, comName) {
 	
 	//Prop masks
 	this._registerPropMask("src", "src");
+	this._registerPropMask("imageTrans", "imageTrans", true);
 	
 	//Listeners
 	this.prepareDraw.listen(this._imageDraw, this);
-	
-	//Render support
-	this.renderSupport |= dusk.sgui.Component.REND_OFFSET | dusk.sgui.Component.REND_SLICE;
 };
-dusk.sgui.Image.prototype = new dusk.sgui.Component();
-dusk.sgui.Image.constructor = dusk.sgui.Image;
-
-dusk.sgui.Image.prototype.className = "Image";
+dusk.sgui.Image.prototype = Object.create(dusk.sgui.Component.prototype);
 
 /** Used to draw the image.
  * @param {object} e A draw event.
  * @private
  */
 dusk.sgui.Image.prototype._imageDraw = function(e) {
-	if(this._img && this._img.complete && this._img.width && this._img.height){
-		var ratioX = (this._img.width / this.width);
-		var ratioY = (this._img.height / this.height);
-		e.c.drawImage(this._img, e.d.sourceX * ratioX, e.d.sourceY * ratioY, e.d.width * ratioX, e.d.height * ratioY,
+	if(this._img && this._img.isReady() && this._img.width() && this._img.height()){
+		/*var ratioX = (this._img.width() / this.width);
+		var ratioY = (this._img.height() / this.height);
+		
+		e.c.drawImage(this._img.asCanvas(this.imageTrans),
+			e.d.sourceX * ratioX, e.d.sourceY * ratioY, e.d.width * ratioX, e.d.height * ratioY,
 			e.d.destX, e.d.destY, e.d.width, e.d.height
+		);*/
+		
+		this._img.paintScaled(e.c, this.imageTrans, false,
+			e.d.sourceX, e.d.sourceY, e.d.width, e.d.height,
+			e.d.destX, e.d.destY, e.d.width, e.d.height,
+			this._img.width()/this.width, this._img.height()/this.height
 		);
 	}
 };
@@ -70,12 +80,16 @@ dusk.sgui.Image.prototype._imageDraw = function(e) {
 //src
 Object.defineProperty(dusk.sgui.Image.prototype, "src", {
 	get: function() {
+		if(!this._img) return "";
 		return this._img.src;
 	},
 	
 	set: function(value) {
-		if(value === undefined) {return;}
-		this._img = dusk.data.grabImage(value);
+		if(value === undefined) {
+			this._img = null;
+		}else{
+			this._img = new dusk.Image(value);
+		}
 	}
 });
 

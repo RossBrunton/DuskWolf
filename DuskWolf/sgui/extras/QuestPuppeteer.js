@@ -91,14 +91,15 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 					var e = e.component;
 					var sel = this._owner.getPrimaryEntityLayer().getEntitiesExactlyHere(e.x, e.y, e, true);
 					
-					if(!sel.length) return;
-					sel = sel[0];
+					if(!sel.length && !args.allowNone) return;
+					if(sel) sel = sel[0];
+					if(!sel) sel = null;
 					
 					if(region && !r.isInRegion(region, e.tileX(), e.tileY())) {
 						return;
 					}
 					
-					if(args.filter && !sel.evalTrigger(args.filter)) {
+					if(sel && args.filter && !sel.evalTrigger(args.filter)) {
 						return;
 					}
 					
@@ -112,6 +113,7 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 					e.eProp("gmMouseMove", false);
 					if(oldSeek) dusk.entities.seek = oldSeek;
 					e.action.unlisten(l);
+					e.cancel.unlisten(c);
 					
 					fulfill(passedArg);
 				}).bind(this));
@@ -122,6 +124,7 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 					e.eProp("gmMouseMove", false);
 					if(oldSeek) dusk.entities.seek = oldSeek;
 					e.cancel.unlisten(c);
+					e.action.unlisten(l);
 					reject(new dusk.UserCancelError());
 				});
 			}).bind(this));
@@ -131,8 +134,9 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 				var r = this._owner.getRegion();
 				var e = this._owner.getPrimaryEntityLayer();
 				
-				var x = args.x;
-				var y = args.y;
+				var x = args.x!==undefined?args.x:passedArg.x;
+				var y = args.y!==undefined?args.y:passedArg.y;
+				var range = args.range!==undefined?args.range:passedArg.range;
 				
 				if("Entity" in dusk.sgui && !passedArg.ignoreEntity && passedArg.entity) {
 					x = passedArg.entity.tileX();
@@ -150,12 +154,12 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 				r.clearRegion(args.region);
 				//console.profile("Region");
 				r._calls = 0;
-				r.expandRegion(args.region, x, y, args.range, args);
+				r.expandRegion(args.region, x, y, range, args);
 				//console.profileEnd("Region");
 				
 				passedArg.region = args.region;
 				passedArg.regionEntities = r.entitiesInRegion(args.region);
-				passedArg.range = args.range;
+				passedArg.range = range;
 				passedArg.x = x;
 				passedArg.y = y;
 				
@@ -236,8 +240,10 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 					
 					e.visible = false;
 					e.eProp("gmMouseMove", false);
+					e.eProp("grRecording", false);
 					if(oldSeek) dusk.entities.seek = oldSeek;
 					e.action.unlisten(l);
+					e.cancel.unlisten(c);
 					
 					if("colour" in args) {
 						r.uncolourRegion(region+"_path");
@@ -251,8 +257,10 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 					
 					e.visible = false;
 					e.eProp("gmMouseMove", false);
+					e.eProp("grRecording", false);
 					if(oldSeek) dusk.entities.seek = oldSeek;
 					e.cancel.unlisten(c);
+					e.action.unlisten(l);
 					
 					if("colour" in args) {
 						r.uncolourRegion(region+"_path");
@@ -320,6 +328,8 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 				
 				var options = args.options?args.options:passedArg.options;
 				
+				console.log(options);
+				
 				c.rows = options.length;
 				c.cols = 1;
 				c.populate(options);
@@ -342,6 +352,7 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 					
 					c.visible = false;
 					c.action.unlisten(l);
+					c.cancel.unlisten(can);
 					this._owner.becomeActive();
 					
 					if("listSelectCancel" in opt) {
@@ -352,9 +363,10 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 				}).bind(this));
 				
 				var can = c.cancel.listen((function(e) {
-					c.cancel.unlisten(can);
 					this._owner.becomeActive();
 					c.visible = false;
+					c.cancel.unlisten(can);
+					c.action.unlisten(l);
 					
 					reject(new dusk.UserCancelError());
 				}).bind(this));

@@ -230,7 +230,7 @@ dusk.controls.isButtonPressed = function(button) {
  */
 dusk.controls._keyPressed = function(e) {
 	for(var m in dusk.controls._mappings) {
-		if(dusk.controls._mappings[m][0] == e.which) {
+		if(dusk.controls._mappings[m][0] == e.keyCode) {
 			var toFire = {};
 			toFire.keyEvent = e;
 			toFire.type = dusk.controls.TYPE_KEY;
@@ -249,7 +249,7 @@ dusk.keyboard.keyPress.listen(dusk.controls._keyPressed, null);
  */
 dusk.controls._buttonPressed = function(e) {
 	for(var m in dusk.controls._mappings) {
-		if(dusk.controls._mappings[m][1] == e.which) {
+		if(dusk.controls._mappings[m][1] == e.keyCode) {
 			var toFire = {};
 			toFire.buttonEvent = e;
 			toFire.type = dusk.controls.TYPE_BUTTON;

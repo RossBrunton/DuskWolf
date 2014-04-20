@@ -30,14 +30,13 @@ dusk.sgui.ParticleField = function(parent, comName) {
 	//Prop masks
 	
 	//Default values
-	this.clickPierce = true;
+	this.augment.listen((function(e) {
+		this.mouse.clickPierce = true;
+	}).bind(this), {"augment":"mouse"});
 	
 	//Listeners
 	this.prepareDraw.listen(this._pfDraw, this);
 	this.frame.listen(this._pfFrame, this);
-	
-	//Render support
-	this.renderSupport |= dusk.sgui.Component.REND_OFFSET | dusk.sgui.Component.REND_SLICE;
 	
 	this.createField(1 << 16);
 };

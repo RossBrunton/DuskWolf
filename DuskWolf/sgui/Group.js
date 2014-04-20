@@ -79,14 +79,6 @@ dusk.sgui.Group = function(parent, comName) {
 	 */
 	this.focusVisible = false;
 	
-	/** If true, then you can roll over components that have their `{@link dusk.sgui.Component.allowMouse}` property
-	 *  set to true to focus them.
-	 * @type boolean
-	 * @default true
-	 * @since 0.0.20-alpha
-	 */
-	this.mouseFocus = true;
-	
 	/** This is the name of the currently focused component.
 	 * 
 	 * When set, this calls all the expected functions on `{@link dusk.sgui.Component}` as expected.
@@ -169,12 +161,15 @@ dusk.sgui.Group = function(parent, comName) {
 	this._registerPropMask("verScroll", "verScroll", undefined, ["children", "allChildren", "height"]);
 	this._registerPropMask("children", "__children", undefined, ["focusBehaviour"]);
 	this._registerPropMask("allChildren", "__allChildren", undefined, ["focusBehaviour", "children"]);
-	this._registerPropMask("mouseFocus", "mouseFocus", false);
+	this._registerPropMask("mouseFocus", "mouse.focus", false, ["mouse"]);
+	this._registerPropMask("mouse.focus", "mouse.focus", false, ["mouse"]);
 	
 	//Listeners
 	this.prepareDraw.listen(this._groupDraw.bind(this));
 	this.frame.listen(this._groupFrame.bind(this));
-	this.mouseMove.listen(this._mouseSelect.bind(this));
+	this.augment.listen((function(e) {
+		this.mouse.move.listen(this._mouseSelect.bind(this));
+	}).bind(this), undefined, {"augment":"mouse"});
 	
 	this.onActiveChange.listen(function(e){
 		if(this.focusBehaviour == dusk.sgui.Group.FOCUS_ALL) {
@@ -185,9 +180,6 @@ dusk.sgui.Group = function(parent, comName) {
 			this.getFocused().onActiveChange.fire(e);
 		}
 	}, this);
-	
-	//Render support
-	this.renderSupport |= dusk.sgui.Component.REND_OFFSET | dusk.sgui.Component.REND_SLICE;
 	
 	//Check interfaces
 	if(!dusk.utils.doesImplement(this, dusk.sgui.IContainer)) {
@@ -246,27 +238,29 @@ dusk.sgui.Group.prototype.containerKeypress = function(e) {
  */
 dusk.sgui.Group.prototype.containerMouseMove = function(e) {
 	for(var c = this._componentsArr.length-1; c >= 0; c --) {
-		this._componentsArr[c].mouseMove.fire();
+		if(this._componentsArr[c].mouse)
+			this._componentsArr[c].mouse.move.fire();
 	}
 };
 
 /** Container specific method of handling clicks.
  * 
- * In this case, it will call `{@link dusk.sgui.Component.doClick}` of the highest component the mouse is on, and
+ * In this case, it will call `{@link dusk.sgui.Component#mouse#doClick}` of the highest component the mouse is on, and
  *  and return that value. Failing that, it will return true.
  * 
  * @param {object} e The keypress event, must be a JQuery keypress event object.
  * @return {boolean} The return value of the focused component's keypress.
  */
 dusk.sgui.Group.prototype.containerClick = function(e) {
-	if(this.mouseFocus) {
+	if(this.mouse && this.mouse.allow) {
 		for(var i = this._drawOrder.length-1; i >= 0; i --) {
 			if(this._drawOrder[i] in this._components && this._components[this._drawOrder[i]].visible
-			&& !this._components[this._drawOrder[i]].clickPierce) {
+			&& this._components[this._drawOrder[i]].mouse && !this._components[this._drawOrder[i]].mouse.clickPierce) {
+				
 				var com = this._components[this._drawOrder[i]];
-				if(!(this._mouseX < com.x || this._mouseX > com.x + com.width
-				|| this._mouseY < com.y || this._mouseY > com.y + com.height)) {
-					return this._components[this._drawOrder[i]].doClick(e);
+				if(!(this.mouse.x < com.x || this.mouse.x > com.x + com.width
+				|| this.mouse.y < com.y || this.mouse.y > com.y + com.height)) {
+					return this._components[this._drawOrder[i]].mouse.doClick(e);
 				}
 			}
 		}
@@ -425,17 +419,22 @@ dusk.sgui.Group.prototype._groupDraw = function(e) {
 			data.width = com.width - data.sourceX;
 			data.height = com.height - data.sourceY;
 			
-			if(data.destX >= e.d.width + e.d.destX) continue;
-			if(data.destY >= e.d.height + e.d.destY) continue;
+			var skip = false;
 			
-			if(data.width <= 0 || data.height <= 0) continue;
+			if(data.destX >= e.d.width + e.d.destX) skip = true;
+			if(data.destY >= e.d.height + e.d.destY) skip = true;
 			
-			if(data.width + data.destX > e.d.width + e.d.destX) 
-				data.width = (e.d.destX + e.d.width) - data.destX;
-			if(data.height + data.destY > e.d.height + e.d.destY) 
-				data.height = (e.d.destY + e.d.height) - data.destY;
+			if(data.width <= 0 || data.height <= 0) skip = true;
 			
-			com.draw(data, e.c);
+			if(!skip) {
+				if(data.width + data.destX > e.d.width + e.d.destX) 
+					data.width = (e.d.destX + e.d.width) - data.destX;
+				if(data.height + data.destY > e.d.height + e.d.destY) 
+					data.height = (e.d.destY + e.d.height) - data.destY;
+				
+				com.draw(data, e.c);
+			}
+			
 			dusk.sgui.drawDataPool.free(data);
 		}
 	}
@@ -823,12 +822,10 @@ dusk.sgui.Group.prototype.forEach = function(func, scope) {
  * 
  * @since 0.0.20-alpha
  */
-dusk.sgui.Group.prototype.containerUpdateMouse = function() {
-	var x = this._mouseX;
-	var y = this._mouseY;
-	
+dusk.sgui.Group.prototype.containerUpdateMouse = function(x, y) {
 	for(var c = this._componentsArr.length-1; c >= 0; c --) {
 		var com = this._componentsArr[c];
+		if(!com.mouse) continue;
 		var destX = x;
 		var destY = y;
 		
@@ -844,7 +841,8 @@ dusk.sgui.Group.prototype.containerUpdateMouse = function() {
 		
 		destY += -com.y + this.yOffset - destYAdder;
 		
-		com.updateMouse(destX, destY);
+		com.mouse.update(destX, destY);
+		if("containerUpdateMouse" in com) com.containerUpdateMouse(destX, destY);
 	}
 };
 
@@ -853,12 +851,13 @@ dusk.sgui.Group.prototype.containerUpdateMouse = function() {
  * @since 0.0.21-alpha
  */
 dusk.sgui.Group.prototype._mouseSelect = function() {
-	if(this.mouseFocus) {
+	if(this.mouse.focus) {
 		for(var i = this._drawOrder.length-1; i >= 0; i --) {
-			if(this._drawOrder[i] in this._components && this._components[this._drawOrder[i]].allowMouse) {
+			if(this._drawOrder[i] in this._components
+			&& this._components[this._drawOrder[i]].mouse && this._components[this._drawOrder[i]].mouse.allow) {
 				var com = this._components[this._drawOrder[i]];
-				if(!(this._mouseX < com.x || this._mouseX > com.x + com.width
-				|| this._mouseY < com.y || this._mouseY > com.y + com.height)) {
+				if(!(this.mouse.x < com.x || this.mouse.x > com.x + com.width
+				|| this.mouse.y < com.y || this.mouse.y > com.y + com.height)) {
 					if(com != this.getFocused()) this.flow(this._drawOrder[i]);
 					break;
 				}

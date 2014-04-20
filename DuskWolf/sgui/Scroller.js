@@ -54,9 +54,6 @@ dusk.sgui.Scroller = function (parent, comName) {
 	//Listeners
 	this.frame.listen(this._sFrame, this);
 	this.dirPress.listen(this._sDir, this);
-	
-	//Defaults
-	this.allowMouse = true;
 };
 dusk.sgui.Scroller.prototype = Object.create(dusk.sgui.FocusCheckerTile.prototype);
 

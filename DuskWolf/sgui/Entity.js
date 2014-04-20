@@ -68,6 +68,8 @@ dusk.load.provide("dusk.entities.LightEntity");
  *  onto and execute the next animation action.
  * - `l`: Removes any lock, and then move onto and execute the next action.
  * - `x,y`: Where x and y are integers, sets the current tile to the tile specified.
+ * - `#+trans;`: Adds the transformation `trans` to this entity's image, replacing it if it already exists.
+ * - `#-trans;`: Removes the transformation `trans` from this entity's image.
  * 
  * The third element has the following possible keys:
  * 
@@ -80,7 +82,7 @@ dusk.load.provide("dusk.entities.LightEntity");
  * 
  * The difference is that only one animation can run at a time, yet more than one particle effect
  *  can also run. Also, while animations step through their action, particle effects run them all at
- *  once. The same animation events are used for particle effects, although only `$` and `*` should
+ *  once. The same animation events are used for particle effects, although only `$`, `*` and `t` should
  *  be used.
  * 
  * Additional "third element properties" can be set on particle effects:
@@ -438,9 +440,13 @@ dusk.sgui.Entity = function(parent, comName) {
 	
 	//Listeners
 	if(!this.isLight()) if(this.collisionMark) this.prepareDraw.listen(this._collisionDraw, this);
-	if(!this.isLight()) this.mouseMove.listen((function() {
-		this.behaviourFire("mouseMove", {"x":this._mouseX, "y":this._mouseY});
-	}).bind(this));
+	if(!this.isLight()) {
+		this.augment.listen((function(e) {
+			this.mouse.move.listen((function() {
+				this.behaviourFire("mouseMove", {"x":this.mouse.x, "y":this.mouse.y});
+			}).bind(this));
+		}).bind(this), {"augment":"mouse"});
+	}
 };
 dusk.sgui.Entity.prototype = Object.create(dusk.sgui.Tile.prototype);
 
@@ -956,9 +962,12 @@ dusk.sgui.Entity.prototype._aniAction = function(event, action) {
 		case "*":
 			var name = action.substr(1).split(" ")[0];
 			var data = dusk.utils.jsonParse(action.substr(name.length+1));
-			for(var p in data) {
+			var keys = Object.keys(data);
+			var p = "";
+			for(var i = 0; i < keys.length; i ++) {
+				p = keys[i];
 				if(Array.isArray(data[p])) {
-					data[p] = [this.evalTrigger(data[p][0]), this.meetsTrigger(data[p][1])];
+					data[p] = [this.evalTrigger(data[p][0]), this.evalTrigger(data[p][1])];
 				}else{
 					if(typeof data[p] == "string") data[p] = this.evalTrigger(data[p]);
 				}
@@ -980,6 +989,17 @@ dusk.sgui.Entity.prototype._aniAction = function(event, action) {
 		
 		case "t":
 			this.terminate();
+			if(cont) this._aniForward(event);
+			break;
+		
+		case "#":
+			this.imageTrans =
+				this.imageTrans.replace(RegExp(action.substr(2).split(":")[0].split(";")[0]+"(?:\:[^;]*)?\;"), "");
+			
+			if(action.charAt(1) == "+") {
+				this.imageTrans += action.substr(2);
+			}
+			
 			if(cont) this._aniForward(event);
 			break;
 		

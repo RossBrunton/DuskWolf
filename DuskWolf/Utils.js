@@ -443,4 +443,28 @@ dusk.utils.stringToData = function(str) {
 	}
 };
 
+/** Makes an AJAX GET request and returns a promise that fulfills with the response.
+ * @param {string} path The path to the resource.
+ * @param {string} type The type of the resource, this must be a valid value for an XMLHttpRequest's responseType value.
+ * @return {promise(*)} A promise that fullfills with the value, given by the type.
+ * @since 0.0.21-alpha
+ */
+dusk.utils.ajaxGet = function(path, type) {
+	return new Promise(function(fulfill, reject) {
+		var xhr = new XMLHttpRequest();
+		
+		xhr.onreadystatechange = function() {
+			if(xhr.readyState == 4 && xhr.status > 100 && xhr.status < 400) {
+				fulfill(xhr.response);
+			}else if(xhr.readyState == 4) {
+				reject(xhr.statusText);
+			}
+		}
+		
+		xhr.open("GET", path, true);
+		xhr.responseType = type;
+		xhr.send();
+	});
+};
+
 Object.seal(dusk.utils);

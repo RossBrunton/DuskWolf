@@ -42,9 +42,9 @@ dusk.save.DropboxSource.prototype.load = function(spec, identifier) {
 			"extensions":[".json"],
 			
 			"success": function(files) {
-				$.get(files[0].link, "", function(data, textStatus, jqXHR) {
-					fullfill(data);
-				}, "json")
+				dusk.utils.ajaxGet(files[0].link, "json").then(function(value) {
+					fullfill(value);
+				});
 			},
 			
 			"cancel": function() {reject(new Error("Load from Dropbox canceled."));},

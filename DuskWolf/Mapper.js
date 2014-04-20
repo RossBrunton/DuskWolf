@@ -26,7 +26,8 @@ dusk.Mapper = function(target) {
 	this._target = target;
 	
 	/** An object describing all the mappings.
-	 *  Keys are the property name, and the value is an array like `[to, type, depends]`.
+	 *  Keys are the property name, and the value is an array like `[to, type, depends, complex]`. Complex is true if
+	 *  the "to" value contains a ".".
 	 * @type object
 	 * @private
 	 */
@@ -41,7 +42,7 @@ dusk.Mapper = function(target) {
  * 	All the properties in this array will be set (if they exist in the JSON) before this one.
  */
 dusk.Mapper.prototype.map = function(from, to, depends) {
-	this._maps[from] = [to, depends];
+	this._maps[from] = [to, depends, to.indexOf(".") !== -1];
 };
 
 /** Adds new dependancies to an existing mask.
@@ -65,7 +66,18 @@ dusk.Mapper.prototype.addDepends = function(name, depends) {
  */
 dusk.Mapper.prototype.set = function(name, value) {
 	if(this._maps[name] !== undefined) {
-		this._target[this._maps[name][0]] = value;
+		if(this._maps[name][2]) {
+			var o = this._target;
+			var frags = this._maps[name][0].split(".");
+			var p = 0;
+			while(p < frags.length-1) {
+				o = o[frags[p]];
+				p ++;
+			}
+			o[frags[p]] = value;
+		}else{
+			this._target[this._maps[name][0]] = value;
+		}
 		return value;
 	}
 	

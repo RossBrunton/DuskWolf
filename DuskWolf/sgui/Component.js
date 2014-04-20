@@ -8,6 +8,7 @@ dusk.load.require(">dusk.keyboard");
 dusk.load.require(">dusk.controls");
 dusk.load.require("dusk.sgui");
 dusk.load.require("dusk.Mapper");
+dusk.load.require(">dusk.sgui.MouseAugment");
 
 dusk.load.provide("dusk.sgui.Component");
 dusk.load.provide("dusk.sgui.NullCom");
@@ -181,15 +182,6 @@ dusk.sgui.Component = function (parent, componentName) {
 	 * @since 0.0.17-alpha
 	 */
 	this.prepareDraw = new dusk.EventDispatcher("dusk.sgui.Component.prepareDraw");
-	/** Fired when the mouse is moved.
-	 * 
-	 * There is no event object.
-	 * @since 0.0.21-alpha
-	 */
-	this.mouseMove = new dusk.EventDispatcher("dusk.sgui.Component.mouseMove");
-	this.mouseMove.listen((function() {
-		if(dusk.utils.doesImplement(this, dusk.sgui.IContainer)) this.containerMouseMove();
-	}).bind(this));
 	
 	/** The supported ways in which this component can render itself.
 	 * 
@@ -215,51 +207,28 @@ dusk.sgui.Component = function (parent, componentName) {
 	 */
 	this.onDelete = new dusk.EventDispatcher("dusk.sgui.Component.onDelete");
 	
+	/** An event dispatcher that fires when an augment is added to this component.
+	 * 
+	 * The event object has a single property named `augment` which is the name of the augment added. At the moment
+	 *  only `"mouse"` can be added.
+	 * 
+	 * @type dusk.EventDispatcher
+	 * @since 0.0.21-alpha
+	 */
+	this.augment = new dusk.EventDispatcher("dusk.sgui.Component.augment");
+	
 	/** The component's "style", or an array of such values. Used for styling.
 	 * @type string|array
 	 * @default ""
 	 */
 	this.style = "";
 	
-	/** Current x location of the mouse, relative to this component.
-	 * @type integer
-	 * @protected
-	 * @since 0.0.20-alpha
-	 */
-	this._mouseX = 0;
-	/** Current y location of the mouse, relative to this component.
-	 * @type integer
-	 * @protected
-	 * @since 0.0.20-alpha
-	 */
-	this._mouseY = 0;
-	/** Whether focus should be changed to this component if the user rolls over it with the mouse, and the container
-	 *  allows it.
-	 * 
-	 * The default value of this varies on the type, things like buttons have it as true, other things have false.
-	 * @type boolean
-	 * @since 0.0.20-alpha
-	 */
-	this.allowMouse = false;
-	/** Whether clicking on this component will trigger its action.
-	 * 
-	 * @type boolean
-	 * @since 0.0.20-alpha
-	 * @default true
-	 */
-	this.mouseAction = true;
-	/** If true, then this component cannot be clicked, however it will not block click events to any component
-	 *  underneath it.
-	 * @type boolean
+	/** The mouse augment, for use if the mouse is enabled. This may be null if there is no mouse augment enabled on
+	 *  this component. Use `{@link dusk.sgui.Component#ensureMouse}` to add a mouse augment.
+	 * @type ?dusk.sgui.MouseAugment
 	 * @since 0.0.21-alpha
 	 */
-	this.clickPierce = false;
-	/** Fired when this component is clicked on.
-	 * 
-	 * The event object has at least a property `button`, which is the number of the button clicked.
-	 * @type dusk.EventDispatcher
-	 */
-	this.onClick = new dusk.EventDispatcher("dusk.sgui.Component.onClick", dusk.EventDispatcher.MODE_AND);
+	this.mouse = null;
 	
 	/** Whether the component can become focused, if false it cannot be flowed into. 
 	 * @type boolean
@@ -385,9 +354,13 @@ dusk.sgui.Component = function (parent, componentName) {
 	this._registerPropMask("layer", "__layer");
 	this._registerPropMask("extras", "__extras");
 	this._registerPropMask("type", "type");
-	this._registerPropMask("allowMouse", "allowMouse");
-	this._registerPropMask("mouseAction", "mouseAction");
-	this._registerPropMask("clickPierce", "clickPierce");
+	this._registerPropMask("mouse", "__mouse");
+	this._registerPropMask("allowMouse", "mouse.allow", undefined, ["mouse"]);
+	this._registerPropMask("mouse.allow", "mouse.allow", undefined, ["mouse"]);
+	this._registerPropMask("mouseAction", "mouse.action", undefined, ["mouse"]);
+	this._registerPropMask("mouse.action", "mouse.action", undefined, ["mouse"]);
+	this._registerPropMask("clickPierce", "mouse.clickPierce", undefined, ["mouse"]);
+	this._registerPropMask("mouse.clickPierce", "mouse.clickPierce", undefined, ["mouse"]);
 	this._registerPropMask("alsoFocus", "alsoFocus");
 	this._registerPropMask("actionFocus", "actionFocus");
 };
@@ -477,21 +450,21 @@ dusk.sgui.Component.prototype.doKeyPress = function (e) {
 	var dirReturn = this.keyPress.fire(eventObject);
 	if(dirReturn) {
 		//Directions
-		if(dusk.controls.checkKey("sgui_left", e.which)) {
+		if(dusk.controls.checkKey("sgui_left", e.keyCode)) {
 			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.c.DIR_LEFT, "e":e})) && !this._noFlow
 			&& this.leftFlow && this.container.flow(this.leftFlow)) return false;
-		}else if(dusk.controls.checkKey("sgui_up", e.which)) {
+		}else if(dusk.controls.checkKey("sgui_up", e.keyCode)) {
 			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.c.DIR_UP, "e":e})) && !this._noFlow
 			&& this.upFlow && this.container.flow(this.upFlow)) return false;
-		}else if(dusk.controls.checkKey("sgui_right", e.which)) {
+		}else if(dusk.controls.checkKey("sgui_right", e.keyCode)) {
 			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.c.DIR_RIGHT, "e":e})) && !this._noFlow
 			&& this.rightFlow && this.container.flow(this.rightFlow)) return false;
-		}else if(dusk.controls.checkKey("sgui_down", e.which)) {
+		}else if(dusk.controls.checkKey("sgui_down", e.keyCode)) {
 			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.c.DIR_DOWN, "e":e})) && !this._noFlow
 			&& this.downFlow && this.container.flow(this.downFlow)) return false;
-		}else if(dusk.controls.checkKey("sgui_action", e.which)) {
+		}else if(dusk.controls.checkKey("sgui_action", e.keyCode)) {
 			return this.action.fire({"keyPress":e, "component":this});
-		}else if(dusk.controls.checkKey("sgui_cancel", e.which)) {
+		}else if(dusk.controls.checkKey("sgui_cancel", e.keyCode)) {
 			return this.cancel.fire({"keyPress":e, "component":this});
 		}
 	}
@@ -499,27 +472,28 @@ dusk.sgui.Component.prototype.doKeyPress = function (e) {
 	return dirReturn;
 };
 
-/** Handles a mouse click. This will fire `{@link dusk.sgui.Component.onClick}`, and possibly fire the 
- *  `{@link dusk.sgui.Component.action}` handler.
+/** If there is no mouse augment on this component, adds one, otherwise does nothing.
  * 
- * If the component running this is a container 
- *  then its `{@link dusk.sgui.IContainer#containerClick}` function will be called.
- *	If that function returns true, then this shall return true without doing anything else.
- * 
- * @param {object} e The click event.
- * @return {boolean} Whether the parent container should run its own actions.
+ *  This will call the same function on it's container, if it has one, as well.
+ * @return {dusk.sgui.MouseAugment} The added or existing mouse augment.
+ * @since 0.0.21-alpha
  */
-dusk.sgui.Component.prototype.doClick = function (e) {
-	if(dusk.utils.doesImplement(this, dusk.sgui.IContainer) && !this.containerClick(e)){return false;}
+dusk.sgui.Component.prototype.ensureMouse = function() {
+	if(this.container)
+		this.container.ensureMouse();
 	
-	if(this.onClick.fire(e)) {
-		if(this.mouseAction) {
-			return this.action.fire({"click":e, "component":this});
-		}
+	if(!this.mouse) {
+		this.mouse = new dusk.sgui.MouseAugment(this);
+		this.augment.fire({"augment":"mouse"});
 	}
 	
-	return true;
+	return this.mouse;
 };
+Object.defineProperty(dusk.sgui.Component.prototype, "__mouse", {
+	set: function(value) {if(value) this.ensureMouse()},
+	
+	get: function() {return this.mouse != null;}
+});
 
 /** This maps a property from the JSON representation of the object (One from {@link #parseProps})
  *  to the JavaScript representation of the object.
@@ -830,21 +804,6 @@ Object.defineProperty(dusk.sgui.Component.prototype, "__extras", {
 	get: function() {return {};}
 });
 
-
-/** Updates the locatons of the mouse for this component.
- * 
- * If this is a container, `{@link dusk.sgui.IContainer.containerUpdateMouse}` is called.
- * @param {integer} x New x coordinate.
- * @param {integer} y New y coordinate.
- * @since 0.0.20-alpha
- */
-dusk.sgui.Component.prototype.updateMouse = function(x, y) {
-	this._mouseX = x;
-	this._mouseY = y;
-	
-	if("containerUpdateMouse" in this) this.containerUpdateMouse();
-};
-
 /** Makes this component the active one, by making all its parents make it active.
  * @param {?dusk.sgui.Component} child A child that wants to be made active.
  * @since 0.0.21-alpha
@@ -910,8 +869,7 @@ dusk.sgui.NullCom = function(parent, comName) {
 	dusk.sgui.Component.call(this, parent, comName);
 	this.visible = false;
 };
-dusk.sgui.NullCom.prototype = new dusk.sgui.Component();
-dusk.sgui.NullCom.constructor = dusk.sgui.NullCom;
+dusk.sgui.NullCom.prototype = Object.create(dusk.sgui.Component.prototype);
 
 dusk.sgui.NullCom.prototype.className = "NullCom";
 

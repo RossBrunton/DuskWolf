@@ -247,12 +247,12 @@ dusk.sgui.BasicMain.prototype._basicMainFrame = function(e) {
 	this.autoScroll();
 	
 	//Ask all entities to do something
-	if(this._active) {
+	//if(this._active) {
 		for(var i = 0; i < this._layers.length; i ++) {
 			if(this._layers[i].type == dusk.sgui.BasicMain.LAYER_ENTITIES) 
-				this.getComponent(this._layers[i].name).doFrame();
+				this.getComponent(this._layers[i].name).doFrame(this._active);
 		}
-	}
+	//}
 	
 	//Editing
 	if(dusk.editor.active) {
@@ -315,10 +315,10 @@ dusk.sgui.BasicMain.prototype.autoScroll = function() {
 	if(this.xOffset < 0) this.xOffset = 0;
 	if(this.yOffset < 0) this.yOffset = 0;
 	
-	if(oldX != this.xOffset || oldY != this.yOffset) {
+	if(oldX != this.xOffset || oldY != this.yOffset && this.mouse) {
 		//It counts, okay!
-		this.containerUpdateMouse();
-		this.mouseMove.fire();
+		this.containerUpdateMouse(this.mouse.x, this.mouse.y);
+		this.mouse.move.fire();
 	}
 };
 

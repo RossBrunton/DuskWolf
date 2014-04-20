@@ -25,6 +25,12 @@ dusk.load.provide("dusk.frameTicker");
  */
 dusk.frameTicker.onFrame = new dusk.EventDispatcher("dusk.frameTicker.onFrame");
 
-setInterval(dusk.frameTicker.onFrame.fire.bind(dusk.frameTicker.onFrame), 1000/dusk.frameRate);
+//setInterval(dusk.frameTicker.onFrame.fire.bind(dusk.frameTicker.onFrame), 1000/dusk.frameRate);
+
+dusk.frameTicker._do = function() {
+    dusk.frameTicker.onFrame.fire();
+    requestAnimationFrame(dusk.frameTicker._do);
+};
+requestAnimationFrame(dusk.frameTicker._do);
 
 Object.seal(dusk.frameTicker);

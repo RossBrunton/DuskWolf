@@ -41,12 +41,10 @@ dusk.keyboard.keyUp = new dusk.EventDispatcher("dusk.keyboard.keyUp");
 
 document.addEventListener("keydown", function(e){
 	if(!dusk.keyboard._keys[e.keyCode]) {
-		e.which = e.keyCode;
 		dusk.keyboard.keyPress.fire(e);
 	}
 });
 document.addEventListener("keyup", function(e){
-	e.which = e.keyCode;
 	dusk.keyboard.keyUp.fire(e);
 });
 

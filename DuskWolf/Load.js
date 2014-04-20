@@ -3,7 +3,7 @@
 "use strict";
 
 //Testing; remove this
-window.Promise = null;
+//window.Promise = null;
 
 if(!dusk) var dusk = {};
 if(!dusk.load) dusk.load = {};
@@ -94,7 +94,6 @@ dusk.load._init = function() {
  * @since 0.0.17-alpha
  */
 dusk.load._capability = function() {
-	if(!("$" in window)) return "JQuery not included!";
 	if(!("getContext" in document.createElement("canvas"))) return "Canvas not supported!";
 	
 	if(!(window.requestAnimationFrame
@@ -128,6 +127,10 @@ dusk.load._capability = function() {
 		var js = document.createElement("script");
 		js.src = "DuskWolf/lib/promise.js";
 		document.head.appendChild(js);
+	}else if(!("resolve" in Promise)) {
+		console.warn("Promise.resolve does not exist, using Promise.resolved.");
+		Promise.resolve = Promise.resolved;
+		Promise.reject = Promise.rejected;
 	}
 	
 	if (!("slice" in ArrayBuffer.prototype)) {
@@ -211,10 +214,19 @@ dusk.load.addDependency = function(file, provided, required, size) {
  *  used for generating dependancy information.
  * 
  * @param {string} name The namespace to add as a dependency.
+ * @return {*} An object described with the path given by name. This should be the imported package.
  * @since 0.0.15-alpha
  */
 dusk.load.require = function(name) {
-	//Do nothing
+	var o = window;
+	var p = 0;
+	var frags = name.split(".");
+	while(p < frags.length && frags[p] in o) {
+		o = o[frags[p]];
+		p ++;
+	}
+	
+	return o;
 };
 
 /** Imports a package.
@@ -269,20 +281,29 @@ dusk.load.importAll = function() {
  * @since 0.0.15-alpha
  */
 dusk.load.importList = function(path, callback, errorCallback) {
-	$.ajax({"async":true, "dataType":"JSON", "error":function(jqXHR, textStatus, errorThrown) {
-		console.error("Error getting import file, "+errorThrown);
-		if(errorCallback) errorCallback(errorThrown);
-	}, "success":function importSuccess(data, textStatus, jqXHR){
-		var relativePath = jqXHR.responseURL.split("/");
-		relativePath.splice(-1, 1);
-		relativePath = relativePath.join("/")+"/";
-		for(var i = data.length-1; i >= 0; i--) {
-			if(data[i][0].indexOf(":") === -1 && data[i][0][0] != "/") data[i][0] = relativePath + data[i][0];
-			dusk.load.addDependency(data[i][0], data[i][1], data[i][2], data[i][3]);
+	var xhr = new XMLHttpRequest();
+	
+	xhr.onreadystatechange = function() {
+		if(xhr.readyState == 4 && xhr.status > 100 && xhr.status < 400) {
+			var relativePath = path.split("/");
+			relativePath.splice(-1, 1);
+			relativePath = relativePath.join("/")+"/";
+			
+			var data = xhr.response;
+			for(var i = data.length-1; i >= 0; i--) {
+				if(data[i][0].indexOf(":") === -1 && data[i][0][0] != "/") data[i][0] = relativePath + data[i][0];
+				dusk.load.addDependency(data[i][0], data[i][1], data[i][2], data[i][3]);
+			}
+			if(callback) callback(data);
+		}else if(xhr.readyState == 4) {
+			console.error("Error getting import file, "+xhr.statusText);
+			if(errorCallback) errorCallback(xhr);
 		}
-		if(callback) callback(data);
-	}, "beforeSend":function(jqXHR, settings) {jqXHR.responseURL = path;},
-	"url":path});
+	}
+	
+	xhr.open("GET", path, true);
+	xhr.responseType = "json";
+	xhr.send();
 };
 
 /** Used internally to import a package, will fail if dependancies are not met.
@@ -294,7 +315,7 @@ dusk.load.importList = function(path, callback, errorCallback) {
  * @since 0.0.17-alpha
  */
 dusk.load._tryToImport = function(name, ignoreDefer) {
-	if(dusk.load._names[name][1] == 2) return true;
+	if(name in dusk.load._names && dusk.load._names[name][1] == 2) return true;
 	
 	if(name.charAt(0) != "@") {
 		if(dusk.load._names[name][1] != 0) return false;
@@ -462,7 +483,7 @@ dusk.load.provide("dusk.load");
  * This class is included with `{@link dusk.load}`, and thus is always available.
  * 
  * @param {class(...)} constructor The constructor for the object in the pool.
- * @param {function(*, args):*} onAlloc Called with the object and specified arguments every time the object is
+ * @param {function(*, *):*} onAlloc Called with the object and specified arguments every time the object is
  *  allocated. This should return the object to allocate.
  * @param {function(*):*} onFree Called when the object is freed; should return the object to return to the pool.
  * @constructor
@@ -475,11 +496,23 @@ dusk.Pool = function(constructor, onAlloc, onFree) {
 	
 	this._inPool = 0;
 	this._objects = [];
-	this.highestCount = 0;
+	this.inWild = 0;
 	this._mlWarning = false;
 };
 
+/** Allocates an object from this pool.
+ * @param {?*} args The first argument to the `onAlloc` function.
+ * @return {*} The object that was alocated, please return it later.
+ */
 dusk.Pool.prototype.alloc = function(args) {
+	this.inWild ++;
+	
+	if(this.inWild > 0xfff && !this._mlWarning) {
+		console.log("**** MEMORY LEAK WARNING ****");
+		console.log(this);
+		this._mlWarning = true;
+	}
+	
 	if(this._inPool == 0) {
 		var o = new this._constructor();
 		return this._onAlloc(o, args);
@@ -489,15 +522,13 @@ dusk.Pool.prototype.alloc = function(args) {
 	}
 };
 
+/** Frees a previously allocated object. 
+ * @param {*} object The allocated object.
+ */
 dusk.Pool.prototype.free = function(object) {
 	this._inPool ++;
-	if(this._inPool > this.highestCount) this.highestCount ++;
+	this.inWild --;
+	
 	object = this._onFree(object);
 	this._objects[this._inPool-1] = object;
-	
-	if(this._inPool > 0xffff && !this._mlWarning) {
-		console.log("**** MEMORY LEAK WARNING ****");
-		console.log(this);
-		this._mlWarning = true;
-	}
 };

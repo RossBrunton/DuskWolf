@@ -79,9 +79,6 @@ dusk.sgui.Checkbox = function (parent, comName) {
 		this.onCheck.fire({"checked":this.checked, "component":this});
 		return false;
 	}, this);
-	
-	//Defaults
-	this.allowMouse = true;
 };
 dusk.sgui.Checkbox.prototype = Object.create(dusk.sgui.FocusCheckerTile.prototype);
 

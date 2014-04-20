@@ -21,6 +21,8 @@ dusk.ver = "0.0.21-alpha";
 /** The frame rate, in frames per second.
  * 
  * If it exists, this is set the value of the DuskWolf element's "frameRate" property.
+ * 
+ * Currently unused, always the refresh rate of the monitor (60fps).
  * @type integer
  * @default 60
  */

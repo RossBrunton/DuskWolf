@@ -6,6 +6,7 @@ dusk.load.require("dusk.utils");
 dusk.load.require("dusk.Inheritable");
 dusk.load.require("dusk.InheritableContainer");
 dusk.load.require("dusk.parseTree");
+dusk.load.require(">dusk.EventDispatcher");
 
 dusk.load.provide("dusk.items");
 dusk.load.provide("dusk.items.Invent");
@@ -97,7 +98,6 @@ dusk.items.Invent = function(capacity, restriction, maxStack) {
 	 * @private
 	 */
 	this._items = [];
-	for(var i = 0; i < capacity; i ++) this._items[i] = null;
 	
 	/** The tree used for restrictions.
 	 * 
@@ -115,6 +115,13 @@ dusk.items.Invent = function(capacity, restriction, maxStack) {
 	 * @since 0.0.21-alpha
 	 */
 	this._restriction = this._tree.compile(restriction).toFunction();
+	/** The restriction, as unprocessed text.
+	 * 
+	 * @type string
+	 * @private
+	 * @since 0.0.21-alpha
+	 */
+	this._restrictionText = restriction;
 	/** Temporary storage for the item that is to be added for the parse tree.
 	 * 
 	 * @type ?dusk.Inheritable
@@ -128,6 +135,14 @@ dusk.items.Invent = function(capacity, restriction, maxStack) {
 	 * @type integer
 	 */
 	this.maxStack = maxStack>=0?maxStack:0xffffffff;
+	
+	/** This will be fired when the contents of this inventory change. There is no event object.
+	 * 
+	 * This event may be fired multiple times for the same inventory change.
+	 * @type dusk.EventDispatcher
+	 * @since 0.0.21-alpha
+	 */
+	this.contentsChanged = new dusk.EventDispatcher("dusk.items.Invent.contentsChanged");
 };
 
 /** Checks if the specified item can be added into the inventory.
@@ -167,8 +182,8 @@ dusk.items.Invent.prototype.isValidAddition = function(item) {
  * @return {boolean} Whether it can be added or not.
  */
 dusk.items.Invent.prototype.isValidAdditionToSlot = function(item, slot) {
-	if(!(slot in this._items)) return false;
-	if(this._items[slot] === null) return true;
+	if(slot >= this._capacity) return false;
+	if(!this._items[slot]) return true;
 	
 	if(typeof item == "string") {
 		if(this._items[slot] && this._items[slot][0].type === item
@@ -190,9 +205,10 @@ dusk.items.Invent.prototype.isValidAdditionToSlot = function(item, slot) {
  * @param {string|dusk.Inheritable} item An item from `{@link dusk.items.items}`,
  *  or a string type name, that should be added.
  * @param {integer=1} amount The number of items that should be added, defaults to `1` if not specified.
+ * @param {boolean=false} noFire If true, then the `itemsUpdated` event will not fire.
  * @return {integer} The number of items that are left after all possible items were added.
  */
-dusk.items.Invent.prototype.addItem = function(item, amount) {
+dusk.items.Invent.prototype.addItem = function(item, amount, noFire) {
 	if(isNaN(amount)) amount = 1;
 	if(amount == 0) return 0;
 	if(!(item instanceof dusk.Inheritable)) item = dusk.items.items.create(item);
@@ -203,25 +219,33 @@ dusk.items.Invent.prototype.addItem = function(item, amount) {
 	if(slot === -1) return amount;
 	
 	this.putItemIntoSlot(item.copy(), slot);
-	return this.addItem(item, amount-1);
+	var out = this.addItem(item, amount-1, true);
+	this.contentsChanged.fire();
+	return out;
 };
 
 /** Attempts to remove multiple copies of the specified item, if possible.
  * @param {string} type The type of item to be removed.
  * @param {integer=1} amount The number of items that should be removed, defaults to `1` if not specified.
+ * @param {boolean=false} noFire If true, then the `itemsUpdated` event will not fire.
  * @return {integer} The number of items that could not be removed, possibly because they do not exist.
  */
-dusk.items.Invent.prototype.removeItem = function(type, amount) {
+dusk.items.Invent.prototype.removeItem = function(type, amount, noFire) {
 	if(isNaN(amount)) amount = 1;
 	if(amount == 0) return 0;
 	
-	for(var i = 0; i < this._items.length; i ++) {
+	for(var i = 0; i < this._capacity; i ++) {
 		if(this._items[i] && this._items[i][0].type == type && this._items[i].length > 1) {
 			this._items[i].pop();
-			return this.removeItem(type, amount-1);
+			var out = this.removeItem(type, amount-1, true);
+			this.contentsChanged.fire();
+			return out;
 		}else if(this._items[i] && this._items[i][0].type == type && this._items[i].length == 1) {
 			this._items[i] = null;
-			return this.removeItem(type, amount-1);
+			if(i == this._items.length-1) this._items.length = this._items.length-1;
+			var out = this.removeItem(type, amount-1, true);
+			this.contentsChanged.fire();
+			return out;
 		}
 	}
 	
@@ -265,10 +289,14 @@ dusk.items.Invent.prototype.getAnyItem = function() {
 dusk.items.Invent.prototype.takeAnItem = function(type) {
 	for(var i = 0; i < this._items.length; i ++) {
 		if(this._items[i] && this._items[i][0].type == type && this._items[i].length > 1) {
-			return this._items[i].pop();
+			var out = this._items[i].pop();
+			this.contentsChanged.fire();
+			return out;
 		}else if(this._items[i] && this._items[i][0].type == type && this._items[i].length == 1) {
 			var hold = this._items[i][0];
 			this._items[i] = null;
+			if(i == this._items.length-1) this._items.length = this._items.length-1;
+			this.contentsChanged.fire();
 			return hold;
 		}
 	}
@@ -283,7 +311,7 @@ dusk.items.Invent.prototype.countItems = function() {
 	var count = 0;
 	
 	for(var i = 0; i < this._items.length; i ++) {
-		if(this._items[i] != null) {
+		if(this._items[i]) {
 			count += this._items[i].length;
 		}
 	}
@@ -298,7 +326,7 @@ dusk.items.Invent.prototype.countOccupiedSlots = function() {
 	var count = 0;
 	
 	for(var i = 0; i < this._items.length; i ++) {
-		if(this._items[i] != null) {
+		if(this._items[i]) {
 			count++;
 		}
 	}
@@ -334,12 +362,14 @@ dusk.items.Invent.prototype.sendToInvent = function(dest, type, howMany) {
 	if(howMany === undefined) howMany = 1;
 	for(var i = howMany; i > 0; i --) {
 		if(this.countItemsOfType(type) > 0 && dest.isValidAddition(this.getAnItem(type))) {
-			dest.addItem(this.takeAnItem(type));
+			dest.addItem(this.takeAnItem(type), true);
 		}else{
+			dest.contentsChanged.fire();
 			return i;
 		}
 	}
 	
+	dest.contentsChanged.fire();
 	return 0;
 };
 
@@ -365,10 +395,12 @@ dusk.items.Invent.prototype.sendToInventSlot = function(dest, slot, howMany) {
 		&& dest.isValidAdditionToSlot(this.getAnItem(type), slot)) {
 			dest.putItemIntoSlot(this.takeAnItem(type), slot);
 		}else{
+			dest.contentsChanged.fire();
 			return i;
 		}
 	}
 	
+	dest.contentsChanged.fire();
 	return 0;
 };
 
@@ -382,15 +414,17 @@ dusk.items.Invent.prototype.sendToInventSlot = function(dest, slot, howMany) {
  */
 dusk.items.Invent.prototype.sendSlotToInvent = function(dest, slot, howMany) {
 	if(howMany === undefined) howMany = 1;
-	if(!(slot in this._items)) return howMany;
+	if(slot >= this._capacity) return howMany;
 	for(var i = howMany; i > 0; i --) {
 		if(this.countSlot(slot) && dest.isValidAddition(this.getItemFromSlot(slot))) {
 			dest.addItem(this.takeItemFromSlot(slot));
 		}else{
+			dest.contentsChanged.fire();
 			return i;
 		}
 	}
 	
+	dest.contentsChanged.fire();
 	return 0;
 };
 
@@ -428,20 +462,22 @@ dusk.items.Invent.prototype.takeItemFromSlot = function(slot) {
 	
 	if(this._items[slot].length == 1) {
 		this._items[slot] = null;
+		if(slot == this._items.length-1) this._items.length = this._items.length-1;
 	}else{
 		this._items[slot].pop();
 	}
 	
+	this.contentsChanged.fire();
 	return toReturn;
 };
 
 /** Puts an item into the specified slot.
  * @param {integer} slot The slot to check for the item.
- * @param {string|dusk.Inheritable} item The item to add to this slot, or they type name.
+ * @param {string|dusk.Inheritable} item The item to add to this slot, or the type name.
  * @return {boolean} Whether the item was successfully added.
  */
 dusk.items.Invent.prototype.putItemIntoSlot = function(item, slot) {
-	if(!(slot in this._items)) return false;
+	if(slot >= this._capacity) return false;
 	if(!(item instanceof dusk.Inheritable)) item = dusk.items.items.create(item);
 	if(!this.isValidAddition(item)) return false;
 	if(!this.isValidAdditionToSlot(item, slot)) return false;
@@ -452,6 +488,7 @@ dusk.items.Invent.prototype.putItemIntoSlot = function(item, slot) {
 		this._items[slot] = [item];
 	}
 	
+	this.contentsChanged.fire();
 	return true;
 };
 
@@ -470,7 +507,7 @@ dusk.items.Invent.prototype.countSlot = function(slot) {
  */
 dusk.items.Invent.prototype.findSlot = function(type) {
 	for(var i = 0; i < this._items.length; i ++) {
-		if(this._items[i] !== null && this.isValidAdditionToSlot(type, i)) {
+		if(this._items[i] && this.isValidAdditionToSlot(type, i)) {
 			return i;
 		}
 	}
@@ -482,8 +519,8 @@ dusk.items.Invent.prototype.findSlot = function(type) {
  * @return {integer} The number of the slot, or -1 if it was not found.
  */
 dusk.items.Invent.prototype.findEmptySlot = function() {
-	for(var i = 0; i < this._items.length; i ++) {
-		if(this._items[i] === null) {
+	for(var i = 0; i < this._capacity; i ++) {
+		if(!this._items[i]) {
 			return i;
 		}
 	}
@@ -509,7 +546,7 @@ dusk.items.Invent.prototype.forEach = function(funct) {
  * @param {function(dusk.Inheritable, int):undefined} funct The function to call. Second argument is the slot.
  * @since 0.0.21-alpha
  */
-dusk.items.Invent.prototype.forEach = function(funct) {
+dusk.items.Invent.prototype.forEachSlot = function(funct) {
 	for(var i = 0; i < this._items.length; i ++) {
 		if(this._items[i]) {
 			funct(this._items[i][this._items[i].length-1], i);
@@ -517,18 +554,70 @@ dusk.items.Invent.prototype.forEach = function(funct) {
 	}
 };
 
+/** Saves this inventory to an object that can then be loaded with `{@link dusk.items.Invent#refLoad}`.
+ * 
+ * This requires `{@link dusk.save}` to be imported.
+ * @return {object} This inventory, as an object.
+ * @since 0.0.21-alpha
+ */
+dusk.items.Invent.prototype.refSave = function() {
+	var out = [];
+	
+	for(var i = 0; i < this._items.length; i ++) {
+		out[i] = [];
+		
+		if(this._items[i]) {
+			for(var j = 0; j < this._items[i].length; j ++) {
+				out[i][j] = dusk.save.saveRef(this._items[i][j]);
+			}
+		}
+	}
+	
+	return [out, this._capacity, this._restrictionText, this.maxStack];
+};
+
+/** Given a previously saved inventory (via `{@link dusk.items.Invent#refSave}`) will create a new inventory matching
+ *  the data that was saved.
+ * 
+ * This requires `{@link dusk.save}` to be imported.
+ * @param {object} data The saved data.
+ * @return {dusk.items.Invent} An inventory from the saved data.
+ * @since 0.0.21-alpha
+ * @static
+ */
+dusk.items.Invent.refLoad = function(data) {
+	var invent = new dusk.items.Invent(data[1], data[2], data[3]);
+	var items = data[0];
+	
+	for(var i = 0; i < items.length; i ++) {
+		for(var j = 0; j < items[i].length; j ++) {
+			invent.putItemIntoSlot(dusk.save.loadRef(items[i][j]), i);
+		}
+	}
+	
+	return invent;
+};
+
+/** Returns the name of the class for use in saving.
+ * @return {string} The string "dusk.items.Invent".
+ * @since 0.0.21-alpha
+ */
+dusk.items.Invent.prototype.refClass = dusk.items.Invent.refClass = function() {
+	return "dusk.items.Invent";
+};
+
 /** Returns a string representation of the inventory, and all it's items.
  * @return {string} A string representation of the inventory.
  */
 dusk.items.Invent.prototype.toString = function() {
 	var holdStr = "[inventory ";
-	for(var i = 0; i < this._items.length; i ++) {
+	for(var i = 0; i < this._capacity; i ++) {
 		if(this._items[i]) {
 			holdStr += this._items[i][0].type + ":" + this._items[i].length;
 		}else{
 			holdStr += "(null)";
 		}
-		if(i < this._items.length-1) holdStr += ", ";
+		if(i < this._capacity-1) holdStr += ", ";
 	}
 	return holdStr + "]";
 };

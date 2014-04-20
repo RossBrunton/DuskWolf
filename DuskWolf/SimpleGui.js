@@ -103,8 +103,7 @@ dusk.sgui._init = function() {
 	
 	//Listen for mouseclicks
 	dusk.sgui._getCanvas().addEventListener("click", function(e) {
-		e.button = e.which;
-		if(dusk.sgui.getActivePane()) dusk.sgui.getActivePane().doClick(e);
+		if(dusk.sgui.getActivePane() && dusk.sgui.getActivePane().mouse) dusk.sgui.getActivePane().mouse.doClick(e);
 	});
 	
 	//Listen for frame events
@@ -128,12 +127,19 @@ dusk.sgui._init = function() {
 		}
 		
 		for(var p = dusk.sgui._panes.length-1; p >= 0; p --){
-			dusk.sgui._panes[p].updateMouse(
-				dusk.sgui._mouseX - dusk.sgui._panes[p].x,
-				dusk.sgui._mouseY - dusk.sgui._panes[p].y
-			);
-			
-			if(dusk.sgui._mouseMoveQueued) dusk.sgui._panes[p].mouseMove.fire();
+			if(dusk.sgui._panes[p].mouse) {
+				dusk.sgui._panes[p].mouse.update(
+					dusk.sgui._mouseX - dusk.sgui._panes[p].x,
+					dusk.sgui._mouseY - dusk.sgui._panes[p].y
+				);
+				
+				dusk.sgui._panes[p].containerUpdateMouse(
+					dusk.sgui._mouseX - dusk.sgui._panes[p].x,
+					dusk.sgui._mouseY - dusk.sgui._panes[p].y
+				);
+				
+				if(dusk.sgui._mouseMoveQueued) dusk.sgui._panes[p].mouse.move.fire();
+			}
 		}
 		dusk.sgui._mouseMoveQueued = false;
 		
@@ -223,6 +229,22 @@ dusk.sgui._init = function() {
 	 * @since 0.0.21-alpha
 	 */
 	this._mouseMoveQueued = false;
+	
+	/** If this is true then the canvas won't be cleaned before every draw. If your components cover all the screen, 
+	 *  this is fine, but if they don't, then this will result in graphical oddities.
+	 * 
+	 *  Setting this true will give a bit of graphical performance.
+	 * @type boolean
+	 * @since 0.0.21-alpha
+	 */
+	this.noCleanCanvas = false;
+	/** If this is true then the cache canvas will not be used, and the drawing will occur right on the screen.
+	 * 
+	 * This setting probably shouldn't be turned on, but it should give a boost to performance.
+	 * @type boolean
+	 * @since 0.0.21-alpha
+	 */
+	this.noCacheCanvas = false;
 	
 	/** Object pool containing objects for `{@link dusk.sgui._draw}` and the draw handlers of containers.
 	 * 
@@ -348,9 +370,12 @@ dusk.sgui._draw = function() {
 	|| window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 	requestAnimationFrame(dusk.sgui._draw);
 	if(!dusk.started) return;
-
-	dusk.sgui._getCanvas().getContext("2d").clearRect(0, 0, dusk.sgui.width, dusk.sgui.height);
-	dusk.sgui._cacheCanvas.getContext("2d").clearRect(0, 0, dusk.sgui.width, dusk.sgui.height);
+	
+	if(!dusk.sgui.noCleanCanvas) {
+		dusk.sgui._getCanvas().getContext("2d").clearRect(0, 0, dusk.sgui.width, dusk.sgui.height);
+		if(!this.noCacheCanvas)
+			dusk.sgui._cacheCanvas.getContext("2d").clearRect(0, 0, dusk.sgui.width, dusk.sgui.height);
+	}
 	
 	//Draw panes
 	for(var c = 0; c < dusk.sgui._panes.length; c ++){
@@ -363,13 +388,20 @@ dusk.sgui._draw = function() {
 		data.width = dusk.sgui._panes[c].width;
 		data.height = dusk.sgui._panes[c].height;
 		
-		dusk.sgui._panes[c].draw(data, dusk.sgui._cacheCanvas.getContext("2d"));
+		if(this.noCacheCanvas) {
+			dusk.sgui._panes[c].draw(data, dusk.sgui._getCanvas().getContext("2d"));
+		}else{
+			dusk.sgui._panes[c].draw(data, dusk.sgui._cacheCanvas.getContext("2d"));
+		}
 		dusk.sgui.drawDataPool.free(data);
 	}
-
-	dusk.sgui._getCanvas().getContext("2d").drawImage(dusk.sgui._cacheCanvas,
-		0, 0, dusk.sgui.width, dusk.sgui.height
-	);	
+	
+	if(!this.noCacheCanvas) {
+		dusk.sgui._getCanvas().getContext("2d").drawImage(dusk.sgui._cacheCanvas,
+			0, 0, dusk.sgui.width, dusk.sgui.height
+		);
+	}
+	
 	dusk.sgui.onRender.fire({});
 
 	return true;

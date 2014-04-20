@@ -4,6 +4,7 @@
 
 dusk.load.require("dusk.sgui.Component");
 dusk.load.require(">dusk.data");
+dusk.load.require("dusk.Image");
 
 dusk.load.provide("dusk.sgui.Tile");
 
@@ -30,8 +31,8 @@ dusk.load.provide("dusk.sgui.Tile");
 dusk.sgui.Tile = function(parent, comName) {
 	dusk.sgui.Component.call(this, parent, comName);
 
-	/** The current source image, as a HTML img object.
-	 * @type HTMLImageElement
+	/** The current source image.
+	 * @type dusk.Image
 	 * @private
 	 */
 	this._img = null;
@@ -67,6 +68,12 @@ dusk.sgui.Tile = function(parent, comName) {
 	 * @type string
 	 */
 	this.src = "";
+	/** Image options for the origin image.
+	 * 
+	 * @type string
+	 * @since 0.0.21-alpha
+	 */
+	this.imageTrans = "";
 	
 	/** The current tile, represented as a string.
 	 * 
@@ -84,16 +91,13 @@ dusk.sgui.Tile = function(parent, comName) {
 	
 	//Prop masks
 	this._registerPropMask("src", "src", true);
+	this._registerPropMask("imageTrans", "imageTrans", true);
 	this._registerPropMask("tile", "tileStr", true);
-	this._registerPropMask("ssize", "ssize", true);
 	this._registerPropMask("swidth", "swidth", true);
 	this._registerPropMask("sheight", "sheight", true);
 	
 	//Listeners
 	this.prepareDraw.listen(this._tileDraw, this);
-	
-	//Render support
-	this.renderSupport |= dusk.sgui.Component.REND_OFFSET | dusk.sgui.Component.REND_SLICE;
 };
 dusk.sgui.Tile.prototype = Object.create(dusk.sgui.Component.prototype);
 
@@ -105,12 +109,18 @@ dusk.sgui.Tile.prototype.className = "Tile";
  * @private
  */
 dusk.sgui.Tile.prototype._tileDraw = function(e) {
-	if(this._img){
-		var hscale = this.swidth/this.width;
+	if(this._img.isReady()){
+		/*var hscale = this.swidth/this.width;
 		var vscale = this.sheight/this.height;
-		e.c.drawImage(this._img, this._tx * this.swidth + e.d.sourceX,
+		e.c.drawImage(this._img.asCanvas(this.imageTrans), this._tx * this.swidth + e.d.sourceX,
 			this._ty * this.sheight + e.d.sourceY, e.d.width*hscale, e.d.height*vscale,
 			e.d.destX, e.d.destY, e.d.width, e.d.height
+		);*/
+		
+		this._img.paintScaled(e.c, this.imageTrans, false,
+			this._tx * this.swidth + e.d.sourceX, this._ty * this.sheight + e.d.sourceY, e.d.width, e.d.height,
+			e.d.destX, e.d.destY, e.d.width, e.d.height,
+			this.swidth/this.width, this.sheight/this.height
 		);
 	}
 };
@@ -118,8 +128,11 @@ dusk.sgui.Tile.prototype._tileDraw = function(e) {
 //src
 Object.defineProperty(dusk.sgui.Tile.prototype, "src", {
 	set: function(value) {
-		if(value === undefined) {return;}
-		this._img = dusk.data.grabImage(value);
+		if(value === undefined) {
+			this._img = null;
+		}else{
+			this._img = new dusk.Image(value);
+		}
 	},
 
 	get: function() {

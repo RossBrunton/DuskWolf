@@ -179,7 +179,7 @@ dusk.behave.GridRecorder.prototype._gwStartMove = function(e) {
 	&& this._entity.container.container.getRegion().isInRegion(this._data("grregion"), e.targetX, e.targetY)) {
 		var moves = this._data("grmoves")
 		
-		if("dir" in e) {
+		if("dir" in e && moves.length) {
 			moves.push(e.dir);
 			
 			if((moves[moves.length-1] | moves[moves.length-2]) == (dusk.sgui.c.DIR_UP | dusk.sgui.c.DIR_DOWN))
@@ -189,7 +189,8 @@ dusk.behave.GridRecorder.prototype._gwStartMove = function(e) {
 				moves.splice(-2, 2);
 		}
 		
-		if(this._leftRegion || (this._data("grsnap") && moves.length > this._data("grrange")) || !("dir" in e)) {
+		if(this._leftRegion || (this._data("grsnap") && moves.length > this._data("grrange")) || !("dir" in e)
+		|| !moves.length) {
 			this._data("grmoves", 
 				this._entity.container.container.getRegion().pathTo(this._data("grregion"), e.targetX, e.targetY)
 			);
@@ -228,8 +229,7 @@ dusk.behave.GridMouse = function(entity) {
 	
 	this._data("gmMouseMove", true, true);
 	
-	this._entity.mouseAction = true;
-	
+	this.entityEvent.listen((function(e) {this._entity.ensureMouse()}).bind(this), undefined, {"name":"typeChange"});
 	this.entityEvent.listen(this._gmMouseMove.bind(this), undefined, {"name":"mouseMove"});
 };
 dusk.behave.GridMouse.prototype = Object.create(dusk.behave.Behave.prototype);

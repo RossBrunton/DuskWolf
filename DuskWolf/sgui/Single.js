@@ -63,19 +63,11 @@ dusk.sgui.Single = function(parent, comName) {
 	 */
 	this.yOffset = 0;
 	
-	/** If true, then you can roll over the component components that have their
-	 * `{@link dusk.sgui.Component.allowMouse}` property set to true to focus them.
-	 * @type boolean
-	 * @default true
-	 * @since 0.0.20-alpha
-	 */
-	this.mouseFocus = true;
-	
 	this.newComponent("blank", "NullCom");
 	
 	//Prop masks
 	this._registerPropMask("child", "__child", false);
-	this._registerPropMask("mouseFocus", "mouseFocus", false);
+	this._registerPropMask("mouse.focus", "mouse.focus", false, ["mouse"]);
 	
 	//Listeners
 	this.prepareDraw.listen(this._singleDraw, this);
@@ -85,9 +77,6 @@ dusk.sgui.Single = function(parent, comName) {
 	//Check interfaces
 	if(!dusk.utils.doesImplement(this, dusk.sgui.IContainer))
 		console.warn(this.toString()+" does not implement dusk.sgui.IContainer!");
-	
-	//Render support
-	this.renderSupport |= dusk.sgui.Component.REND_OFFSET | dusk.sgui.Component.REND_SLICE;
 };
 dusk.sgui.Single.prototype = new dusk.sgui.Component();
 dusk.sgui.Single.constructor = dusk.sgui.Group;
@@ -109,24 +98,26 @@ dusk.sgui.Single.prototype.containerKeypress = function(e) {
  * 
  * @since 0.0.21-alpha
  */
-dusk.sgui.Single.prototype.containerKeypress = function(e) {
-	this._component.mouseMove.fire();
+dusk.sgui.Single.prototype.containerMouseMove = function(e) {
+	if(this._component.mouse)
+		this._component.mouse.move.fire();
 };
 
 /** Container specific method of handling clicks.
  * 
- * In this case, it will call `{@link dusk.sgui.Component.doClick}` of the component if the mouse is on it, and
+ * In this case, it will call `{@link dusk.sgui.Component#mouse#doClick}` of the component if the mouse is on it, and
  *  and return that value. Failing that, it will return true.
  * 
- * @param {object} e The keypress event, must be a JQuery keypress event object.
+ * @param {object} e The click event.
  * @return {boolean} The return value of the focused component's keypress.
  */
 dusk.sgui.Single.prototype.containerClick = function(e) {
-	if(this.mouseFocus) {
+	if(this.mouse && this.mouse.focus) {
 		var com = this._component;
-		if(!(this._mouseX < com.x || this._mouseX > com.x + com.width
-		|| this._mouseY < com.y || this._mouseY > com.y + com.height)) {
-			return this._components[this._drawOrder[i]].doClick(e);
+		
+		if(com.mouse && !(this.mouse.x < com.x || this.mouse.x > com.x + com.width
+		|| this.mouse.y < com.y || this.mouse.y > com.y + com.height)) {
+			return this._components[this._drawOrder[i]].mouse.doClick(e);
 		}
 	}
 	
@@ -360,16 +351,17 @@ dusk.sgui.Single.prototype.getContentsHeight = function(includeOffset) {
 	}
 };
 
-/** Updates mouse location of all children.
+/** Updates mouse location of all children if this allows the mouse.
  * 
  * @since 0.0.20-alpha
  */
 dusk.sgui.Group.prototype.containerUpdateMouse = function() {
-	var x = this._mouseX;
-	var y = this._mouseY;
+	if(!this.mouse) return;
+	var x = this.mouse.x;
+	var y = this.mouse.y;
 	
 	var com = this._component;
-	if(!com) return;
+	if(!com || !com.mouse) return;
 	var destX = x;
 	var destY = y;
 	
@@ -385,7 +377,8 @@ dusk.sgui.Group.prototype.containerUpdateMouse = function() {
 	
 	destY += -com.y + this.yOffset - destYAdder;
 	
-	com.updateMouse(destX, destY);
+	com.mouse.update(destX, destY);
+	if("containerUpdateMouse" in com) com.containerUpdateMouse(destX, destY);
 };
 
 /** Returns the actual X location, relative to the screen, that the component is at.

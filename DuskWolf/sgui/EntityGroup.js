@@ -108,7 +108,7 @@ dusk.sgui.EntityGroup.constructor = dusk.sgui.EntityGroup;
 
 dusk.sgui.EntityGroup.prototype.className = "EntityGroup";
 
-dusk.sgui.EntityGroup.prototype.doFrame = function() {
+dusk.sgui.EntityGroup.prototype.doFrame = function(active) {
 	if(dusk.editor.active) {
 		//Editing
 		if(this._focused) {
@@ -125,11 +125,11 @@ dusk.sgui.EntityGroup.prototype.doFrame = function() {
 		}
 	}else{
 		//Call every entities' beforeMove function
-		for(var i = this._entities.length-1; i >= 0; i --) this._entities[i].beforeMove();
+		if(active) for(var i = this._entities.length-1; i >= 0; i --) this._entities[i].beforeMove();
 		
 		//Call every entities' moveAndCollide function
 		//for(var i = this._entities.length-1; i >= 0; i --) this._entities[i].moveAndCollide();
-		this.moveEverything();
+		if(active) this.moveEverything();
 		
 		//Call every entities' startFrame function
 		for(var i = this._entities.length-1; i >= 0; i --) this._entities[i].startFrame();

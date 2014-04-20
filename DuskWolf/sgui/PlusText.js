@@ -81,7 +81,6 @@ dusk.sgui.PlusText = function (parent, comName) {
 	
 	//Setup
 	this.focusBehaviour = dusk.sgui.Group.FOCUS_ALL;
-	this.allowMouse = true;
 };
 dusk.sgui.PlusText.prototype = Object.create(dusk.sgui.Group.prototype);
 

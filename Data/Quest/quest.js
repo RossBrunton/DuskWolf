@@ -18,13 +18,16 @@ dusk.load.provide("quest");
 
 dusk.onLoad.listen(function (e){dusk.quest.rooms.setRoom("quest.rooms.rooma", 0);});
 
+dusk.sgui.noCleanCanvas = true;
+dusk.sgui.noCacheCanvas = true;
+
 //Test
 dusk.sgui.getPane("menu").parseProps({
    "children":{
 		"back":{
 			"type":"FancyRect",
-			"width":100,
-			"height":200,
+			"width":0,
+			"height":0,
 			"x":50,
 			"y":50,
 			"back":"fancyRect/back.png",
@@ -54,8 +57,10 @@ dusk.sgui.getPane("menu").parseProps({
 				"type":"PlusText",
 				"plusType":"FocusCheckerRect",
 				"behind":true,
+				"mouse":true,
 				"label":{
-					"colour":"#cccccc"
+					"colour":"#cccccc",
+					"size":16
 				},
 				"plus":{
 					"width":150,
@@ -95,12 +100,12 @@ window.move = function(arg, qu) {
 window.aarg =
 	{"name":"attack", "region":"attackAM", "colour":"#990000", "los":true, "entFilter":"stat(faction, 1) = ENEMY"};
 window.targ = 
-	{"region":"r", "los":true, "range":5, "forEach":[aarg], "colour":"#000099", "entBlock":"stat(faction, 1) = ENEMY"};
+	{"region":"r", "los":true, "forEach":[aarg], "colour":"#000099", "entBlock":"stat(faction, 1) = ENEMY"};
 
 
 quest.go = function() {
 	return dusk.reversiblePromiseChain([
-		q.requestBoundPair("selectEntity", {"filter":"stat(faction, 1) = ALLY"}),
+		q.requestBoundPair("selectEntity", {"filter":"stat(faction, 1) = ALLY & stat(moved, 3) = false"}),
 		function(passedArg, queue) {
 			var ranges = passedArg.entity.stats.get("possibleRange", 2);
 			var rmap = [];
@@ -114,6 +119,7 @@ quest.go = function() {
 			aarg.rangeMap = rmap;
 			passedArg.aarg = aarg;
 			targ.forEach[0] = aarg;
+			passedArg.range = passedArg.entity.stats.get("move", 1);
 			
 			return passedArg;
 		},
@@ -124,6 +130,8 @@ quest.go = function() {
 		q.requestBoundPair("generateRegion", aarg),
 		function(pa) {
 			pa.options = [];
+			
+			pa.mover = pa.entity;
 			
 			console.log("Generate Options");
 			
@@ -167,7 +175,12 @@ quest.go = function() {
 			return pa;
 		},
 		q.requestBoundPair("selectListMenu", {"path":"menu:/menu"}),
-		q.requestBoundPair("uncolourRegion", {"regions":["attackAM"]})
+		q.requestBoundPair("uncolourRegion", {"regions":["attackAM"]}),
+		function(pa) {
+			pa.mover.stats.addBlock(3, "moved", {"moved":true});
+			
+			return pa;
+		}
 	], false)
 	.then(console.log.bind(console), console.error.bind(console))
 	.then(quest.go);
@@ -182,3 +195,6 @@ targ.forEach[0].weights.addWeight(1, 0, 100);
 
 dusk.startGame();
 quest.go();
+
+window.ss = new dusk.save.SaveSpec("ss", "ss");
+ss.add("dusk.stats", "stats", {});

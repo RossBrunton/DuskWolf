@@ -46,9 +46,6 @@ dusk.sgui.ControlConfig = function (parent, comName) {
 	this.keyPress.listen(this._ccKey, this);
 	this.prepareDraw.listen(this._ccDraw, this);
 	this.action.listen(function(e) {this.setting = !this.setting; this.locked = this.setting; return false;}, this);
-	
-	//Defaults
-	this.allowMouse = true;
 };
 dusk.sgui.ControlConfig.prototype = new dusk.sgui.Group();
 dusk.sgui.ControlConfig.constructor = dusk.sgui.ControlConfig;

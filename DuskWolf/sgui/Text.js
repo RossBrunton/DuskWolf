@@ -6,6 +6,7 @@ dusk.load.require("dusk.sgui.Component");
 dusk.load.require(">dusk.utils");
 dusk.load.require(">dusk.controls");
 dusk.load.require(">dusk.data");
+dusk.load.require(">dusk.Image");
 
 dusk.load.provide("dusk.sgui.Label");
 dusk.load.provide("dusk.sgui.TextBox");
@@ -171,7 +172,7 @@ dusk.sgui.Label = function(parent, comName) {
 	}, this, {"command":"/bcolour"});
 	
 	this._command.listen(function(e){
-		var img = dusk.data.grabImage(e.args[1]);
+		var img = new dusk.Image(e.args[1], e.args[2]);
 		
 		return [dusk.sgui.Label._EVENT_IMAGE, [img]];
 	}, this, {"command":"img"});
@@ -192,9 +193,6 @@ dusk.sgui.Label = function(parent, comName) {
 	
 	//Listeners
 	this.prepareDraw.listen(this._blDraw, this);
-	
-	//Render support
-	this.renderSupport |= dusk.sgui.Component.REND_OFFSET | dusk.sgui.Component.REND_SLICE;
 };
 dusk.sgui.Label.prototype = Object.create(dusk.sgui.Component.prototype);
 
@@ -282,7 +280,7 @@ dusk.sgui.Label.prototype._blDraw = function(e) {
 			this._updateCache();
 		}
 		
-		e.c.drawImage(this._cache, e.d.sourceX, e.d.sourceY, e.d.width, e.d.height,
+		e.c.drawImage(this._cache, e.d.sourceX, e.d.sourceY, e.d.width,  e.d.height,
 			e.d.destX, e.d.destY, e.d.width, e.d.height
 		);
 	}
@@ -372,17 +370,18 @@ dusk.sgui.Label.prototype._updateCache = function(widthOnly) {
 			
 			if(charData[0] == dusk.sgui.Label._EVENT_IMAGE) {
 				if(!charData[1][1]) {
-					charData[1][1] = (charData[1][0].width / charData[1][0].height) * this.size;
+					charData[1][1] = (charData[1][0].width() / charData[1][0].height()) * this.size;
 				}
 				
-				if(charData[1][0].complete) {
-					c.drawImage(charData[1][0], 0, 0, charData[1][0].width, charData[1][0].height,
+				if(charData[1][0].isReady()) {
+					charData[1][0].paint(c, "", false,
+						0, 0, charData[1][0].width(), charData[1][0].height(),
 						cursor, this.padding, charData[1][1], this.size
 					);
 					
 					cursor += charData[1][1];
 				}else{
-					dusk.data.imgLoad.listen(function(e) {this._updateCache();}, this, {"src":charData[1][0].src});
+					charData[1][0].loadPromise().then((function(e) {this._updateCache();}).bind(this));
 					
 					textBuffer += "\ufffd";
 				}
@@ -396,6 +395,7 @@ dusk.sgui.Label.prototype._updateCache = function(widthOnly) {
 	//And set the width
 	this._cachedWidth = cursor + this.padding;
 	if(isNaN(this._cachedWidth)) this._cachedWidth = this.padding << 1;
+	this._cachedWidth = ~~this._cachedWidth;
 	if(!widthOnly) this._sig = this._genSig();
 };
 
@@ -514,7 +514,6 @@ dusk.sgui.TextBox = function(parent, comName) {
 	}, this);
 	
 	//Defaults
-	this.allowMouse = true;
 	this.activeBorder = "#ff5555";
 	this.format = false;
 };

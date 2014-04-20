@@ -35,9 +35,6 @@ dusk.data._init = function() {
 	 * @since 0.0.19-alpha
 	 */
 	dusk.data.imgLoad = new dusk.EventDispatcher("dusk.data.imgLoad");
-	
-	//Enable/disable cache
-	$.ajaxSetup({"cache": !dusk.dev});
 };
 
 /** Returns a HTML image object with the specified path.

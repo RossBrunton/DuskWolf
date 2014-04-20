@@ -23,6 +23,9 @@ dusk.stats.LayeredStats = function(name, pack, layerNames) {
 	this.pack = pack;
 	
 	this._layers = [];
+	this._inventListeners = [];
+	this._caches = [];
+	
 	this.layerNames = layerNames?layerNames:[];
 	this._extras = {};
 	
@@ -46,8 +49,18 @@ dusk.stats.LayeredStats.prototype.addBlock = function(layer, name, block, copy) 
 	layer = this._lookupLayer(layer);
 	if(copy) block = dusk.utils.clone(block);
 	if(!this._layers[layer]) this._layers[layer] = {};
+	if(!this._inventListeners[layer]) this._inventListeners[layer] = {};
+	if(!this._caches[layer]) this._caches[layer] = {};
 	
 	this._layers[layer][name] = block;
+	
+	if("items" in dusk && block instanceof dusk.items.Invent) {
+		this._inventListeners[layer][name] = block.contentsChanged.listen((function() {
+			this.kick(layer);
+		}).bind(this))
+	}
+	
+	this.kick(layer);
 };
 
 dusk.stats.LayeredStats.prototype.getBlock = function(layer, name) {
@@ -62,15 +75,27 @@ dusk.stats.LayeredStats.prototype.removeBlock = function(layer, name) {
 	
 	var toReturn = this._layers[layer][name];
 	this._layers[layer][name] = undefined;
+	
+	if("items" in dusk && toReturn instanceof dusk.items.Invent) {
+		toReturn.contentsChanged.unlisten(this._inventListeners[layer][name]);
+	}
+	
+	this.kick(layer);
+	
 	return toReturn;
 };
 
 dusk.stats.LayeredStats.prototype.replaceBlock = function(layer, name, block, copy) {
+	this.removeBlock(layer, name);
+	this.addBlock(layer, name, block, copy);
+};
+
+dusk.stats.LayeredStats.prototype.kick = function(layer) {
 	layer = this._lookupLayer(layer);
-	if(copy) block = dusk.utils.clone(block);
-	if(!this._layers[layer]) this._layers[layer] = {};
 	
-	this._layers[layer][name] = block;
+	for(var i = layer; i < this._layers.length; i ++) {
+		this._caches[i] = {};
+	}
 };
 
 dusk.stats.LayeredStats.prototype.get = function(field, untilLayer) {
@@ -78,6 +103,8 @@ dusk.stats.LayeredStats.prototype.get = function(field, untilLayer) {
 	var min = -Infinity;
 	var value = null;
 	untilLayer = this._lookupLayer(untilLayer);
+	
+	if(untilLayer < this._caches.length && field in this._caches[untilLayer]) return this._caches[untilLayer][field];
 	
 	for(var i = 0; i < this._layers.length && i <= untilLayer; i ++) {
 		var list = [];
@@ -115,6 +142,8 @@ dusk.stats.LayeredStats.prototype.get = function(field, untilLayer) {
 		}
 	}
 	
+	if(!this._caches[untilLayer]) this._caches[untilLayer] = {};
+	this._caches[untilLayer][field] = value;
 	return value;
 };
 
@@ -175,6 +204,7 @@ dusk.stats.LayeredStats.prototype._toList = function(value, field) {
 			if(item.get("stats")) {
 				var block = dusk.utils.clone(item.get("stats"));
 				block.item = item;
+				block.slot = slot;
 				this.push(block);
 			}
 		}).bind(out));
@@ -249,6 +279,37 @@ dusk.stats.LayeredStats.prototype.setExtra = function(name, object) {
 	this._extras[name] = object;
 };
 
+dusk.stats.LayeredStats.prototype.refSave = function() {
+	var out = [];
+	
+	for(var i = 0; i < this._layers.length; i ++) {
+		out[i] = {};
+		
+		for(var b in this._layers[i]) {
+			out[i][b] = dusk.save.saveRef(this._layers[i][b]);
+		}
+	}
+	
+	return [out, this.name, this.pack, this.layerNames];
+};
+
+dusk.stats.LayeredStats.refLoad = function(data) {
+	var stats = new dusk.stats.LayeredStats(data[1], data[2], data[3]);
+	var layers = data[0];
+	
+	for(var i = 0; i < layers.length; i ++) {
+		for(var b in layers[i]) {
+			stats.addBlock(i, b, dusk.save.loadRef(layers[i][b]));
+		}
+	}
+	
+	return stats;
+};
+
+dusk.stats.LayeredStats.prototype.refClass = dusk.stats.LayeredStats.refClass = function() {
+	return "dusk.stats.LayeredStats";
+};
+
 dusk.stats.LayeredStats.prototype.toString = function() {
 	return "[LayeredStats "+this.name+"]";
 };
@@ -261,16 +322,16 @@ dusk.stats._init = function() {
 	this._stats = {};
 };
 
-dusk.stats.addStats = function(name, stats, noWarn) {
-	if(name in this._stats && !noWarn) {
-		console.warn("You are replacing the stats "+name+"! Be carefull!");
+dusk.stats.addStats = function(name, stats, replace) {
+	if(name in this._stats && !replace) {
+		return;
 	}
 	this._stats[name] = [stats, false];
 };
 
-dusk.stats.addStatsGenerator = function(name, stats, noWarn) {
-	if(name in this._stats && !noWarn) {
-		console.warn("You are replacing the stats generator "+name+"! Be carefull!");
+dusk.stats.addStatsGenerator = function(name, stats, replace) {
+	if(name in this._stats && !replace) {
+		return;
 	}
 	this._stats[name] = [stats, true];
 };
@@ -281,6 +342,36 @@ dusk.stats.getStats = function(name) {
 		return this._stats[name][0]();
 	}
 	return this._stats[name][0];
+};
+
+dusk.stats.save = function(type, arg) {
+	if(type != "stats") return {};
+	
+	var out = [];
+	
+	if(!("names" in arg)) {
+		for(var p in this._stats) {
+			if(!this._stats[p][1]) {
+				out.push([p, dusk.save.saveRef(this._stats[p][0])]);
+			}
+		}
+	}else{
+		for(var p in arg.names) {
+			if(!this._stats[p][1]) {
+				out.push([p, dusk.save.saveRef(this._stats[p][0])]);
+			}
+		}
+	}
+	
+	return out;
+};
+
+dusk.stats.load = function(data, type, arg) {
+	if(type != "stats") return;
+	
+	for(var i = 0; i < data.length; i ++) {
+		this._stats[data[i][0]] = dusk.save.loadRef(data[i][1]);
+	}
 };
 
 dusk.stats._init();

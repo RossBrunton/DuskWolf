@@ -94,11 +94,11 @@ dusk.sgui.EditableTileMap = function (parent, comName) {
 			var tile = this.getTile(this._cx, this._cy);
 			
 			dusk.sgui.TileMap.setAnimation(this.src, prompt(
-				"Enter a (whitespace seperated) animation for "+tile,
+				"Enter a (whitespace seperated) animation for "+tile[0]+","+tile[1],
 				dusk.sgui.TileMap.getAnimation(this.src, tile).join(" ")
 			).split(/\s+/));
 			
-			dusk.sgui.tileMap.tileData.free(tile);
+			dusk.sgui.TileMap.tileData.free(tile);
 			this.drawAll();
 		}
 	}, this, {"key":69});

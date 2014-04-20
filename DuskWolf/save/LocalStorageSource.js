@@ -82,7 +82,7 @@ dusk.save.ConsoleSource.prototype = Object.create(dusk.save.SaveSource.prototype
  * @return {Promise(boolean)} A promise that fullfills with true.
  */
 dusk.save.ConsoleSource.prototype.save = function(saveData, spec, identifier) {
-	dusk.save.ConsoleSource.data = saveData;
+	dusk.save.ConsoleSource.data = JSON.stringify(saveData.data);
 	console.log(">> Save >>");
 	console.log(saveData);
 	return Promise.resolve(true);
@@ -96,8 +96,7 @@ dusk.save.ConsoleSource.prototype.save = function(saveData, spec, identifier) {
  */
 dusk.save.ConsoleSource.prototype.load = function(spec, identifier) {
 	console.log("<< Load <<");
-	console.log(dusk.save.ConsoleSource.data);
-	return Promise.resolve(new dusk.save.SaveData(spec, dusk.save.ConsoleSource.data));
+	return Promise.resolve(new dusk.save.SaveData(spec, JSON.parse(dusk.save.ConsoleSource.data)));
 };
 
 /** Returns a string representation of this object.

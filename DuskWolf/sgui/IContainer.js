@@ -154,11 +154,12 @@ dusk.sgui.IContainer.getContentsWidth = function(includeOffset) {};
  */
 dusk.sgui.IContainer.getContentsHeight = function(includeOffset) {};
 
-/** Should call `{@link dusk.sgui.Component.updateMouse}` on it's children with the appropriate coordinates.
+/** Should call `{@link dusk.sgui.Component#mouse#update}` on it's children with the appropriate coordinates if 
+ *  mouse support is enabled on the mouse.
  * 
  * @since 0.0.20-alpha
  */
-dusk.sgui.IContainer.containerUpdateMouse = function() {};
+dusk.sgui.IContainer.containerUpdateMouse = function(x, y) {};
 
 /** Use this to fire the mouseMove event on it's children, please.
  * 
