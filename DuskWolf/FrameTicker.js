@@ -28,8 +28,11 @@ dusk.frameTicker.onFrame = new dusk.EventDispatcher("dusk.frameTicker.onFrame");
 //setInterval(dusk.frameTicker.onFrame.fire.bind(dusk.frameTicker.onFrame), 1000/dusk.frameRate);
 
 dusk.frameTicker._do = function() {
-    dusk.frameTicker.onFrame.fire();
     requestAnimationFrame(dusk.frameTicker._do);
+    
+    if("sgui" in dusk && dusk.sgui.highRate && dusk.sgui.framesTotal % 2 == 0) return;
+    
+    dusk.frameTicker.onFrame.fire();
 };
 requestAnimationFrame(dusk.frameTicker._do);
 

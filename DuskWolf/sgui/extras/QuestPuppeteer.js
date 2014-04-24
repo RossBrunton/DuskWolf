@@ -39,7 +39,6 @@ dusk.sgui.extras.QuestPuppeteer.prototype.ensureSelector = function() {
 };
 
 dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedArg, queue) {
-	console.log(type);
 	if(!passedArg) passedArg = {};
 	
 	switch(type) {
@@ -153,7 +152,6 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 				
 				r.clearRegion(args.region);
 				//console.profile("Region");
-				r._calls = 0;
 				r.expandRegion(args.region, x, y, range, args);
 				//console.profileEnd("Region");
 				
@@ -341,8 +339,6 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 				
 				var options = args.options?args.options:passedArg.options;
 				
-				console.log(options);
-				
 				c.rows = options.length;
 				c.cols = 1;
 				c.populate(options);
@@ -354,8 +350,6 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 				var l = c.action.listen((function(e) {
 					var s = c.getFocused();
 					var opt = options[s.comName.split(",")[1]];
-					
-					console.log("Selected: "+opt.listValue);
 					
 					if("listSelectFunction" in opt) {
 						queue(opt.listSelectFunction);

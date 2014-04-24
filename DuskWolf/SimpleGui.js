@@ -255,6 +255,35 @@ dusk.sgui._init = function() {
 	 */
 	this.drawDataPool = new dusk.Pool(Object);
 	
+	/** The current frame rate. Maybe some strange value for the first few frames.
+	 * @type float
+	 * @since 0.0.21-alpha
+	 */
+	this.frameRate = 0;
+	/** The timestamp of the last render event.
+	 * @type float
+	 * @since 0.0.21-alpha
+	 * @private
+	 */
+	this._lastFrame = 0;
+	/** True if the screen is running at higher than 90Hz.
+	 * @type boolean
+	 * @since 0.0.21-alpha
+	 */
+	this.highRate = false;
+	/** The number of frames that have elapsed, in total.
+	 * @type int
+	 * @since 0.0.21-alpha
+	 */
+	this.framesTotal = 0;
+	/** If five consecutive frames have a frame rate of higher than 60fps, then `{@link dusk.sgui.highRate}` is set to
+	 *  true. This is the current count.
+	 * @type int
+	 * @since 0.0.21-alpha
+	 * @private
+	 */
+	this._highFrames = 0;
+	
 	//Set up the cached canvas
 	this._cacheCanvas.height = this.height;
 	this._cacheCanvas.width = this.width;
@@ -365,11 +394,26 @@ dusk.sgui.getActivePane = function() {
  * @return {boolean} Whether any changes were made.
  * @private
  */
-dusk.sgui._draw = function() {
+dusk.sgui._draw = function(time) {
 	var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame 
 	|| window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 	requestAnimationFrame(dusk.sgui._draw);
-	if(!dusk.started) return;
+	if(!dusk.started || document.hidden) return;
+	
+	//Frame rate
+	dusk.sgui.frameRate = 1000 / (time - dusk.sgui._lastFrame);
+	dusk.sgui._lastFrame = time;
+	if(dusk.sgui.frameRate > 90) {
+		dusk.sgui._highFrames ++;
+		if(dusk.sgui._highFrames >= 5) {
+			dusk.sgui.highRate = true;
+		}
+	}else{
+		dusk.sgui._highFrames = 0;
+	}
+	dusk.sgui.framesTotal ++;
+	
+	if(dusk.sgui.highRate && dusk.sgui.framesTotal % 2 == 1) return false;
 	
 	if(!dusk.sgui.noCleanCanvas) {
 		dusk.sgui._getCanvas().getContext("2d").clearRect(0, 0, dusk.sgui.width, dusk.sgui.height);

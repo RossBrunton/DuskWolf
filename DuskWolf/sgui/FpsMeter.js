@@ -3,7 +3,6 @@
 "use strict";
 
 dusk.load.require("dusk.sgui.Label");
-dusk.load.require("dusk.performance");
 
 dusk.load.provide("dusk.sgui.FpsMeter");
 
@@ -32,8 +31,7 @@ dusk.sgui.FpsMeter.prototype = Object.create(dusk.sgui.Label.prototype);
  * @private
  */
 dusk.sgui.FpsMeter.prototype._fpsFrame = function(e) {
-	this.text = (Math.round(dusk.performance.frameRate*1000)/1000) + "fps / " 
-	+ (Math.round(dusk.performance.renderFrameRate*1000)/1000) + "Hz";
+	this.text = ~~(dusk.sgui.frameRate) + "fps";
 };
 
 Object.seal(dusk.sgui.FpsMeter);

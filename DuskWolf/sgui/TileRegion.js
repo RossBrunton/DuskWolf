@@ -408,18 +408,16 @@ dusk.sgui.TileRegion.prototype.expandRegion = function(name, x, y, range, opts) 
 	//if("notStartFrom" in opts && e && e.meetsTrigger(opts.notStartFrom)) return;
 	//Remember to ignore selector
 	
-	var t = s.getTile(x, y);
 	var cloud = [[x, y, -1, -1, w, e, 0]];
-	dusk.sgui.TileMap.tileData.free(t);
 	
 	this._regionOrigins[name] = cloud[0];
 	
+	if("weights" in opts) s.weights = opts.weights;
 	while(true) {
-		if("weights" in opts) s.weights = opts.weights;
 		var c = this._getMinFromCloud(cloud);
-		var t = s.getTile(c[0], c[1]);
-		
 		if(c[4] == 0xffffffff) break;
+		
+		var t = s.getTile(c[0], c[1]);
 		
 		if(/*!this.isInRegion(name, c[0], c[1])*/ true) {
 			if(!("entBlock" in opts) || !c[5] || !c[5].evalTrigger(opts.entBlock)) {

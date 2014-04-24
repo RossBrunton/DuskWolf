@@ -19,6 +19,9 @@ if(!dusk.load) dusk.load = {};
  *  This indicates that it should be downloaded AFTER the current package.
  *  This should be used to fix circular dependancies by marking the one that should be ran first with this.
  * 
+ * A dependency may start with the character "@". If so, then the dependency will be interpreted as the URL of a remote
+ *  resource.
+ * 
  * There exists a package `dusk.advancedLoad` that adds new functionality to this class.
  */
 
@@ -42,20 +45,50 @@ dusk.load._init = function() {
 	 * @since 0.0.12-alpha
 	 */
 	dusk.load._names = {};
-	 
-	/** The currently imported package which is running now, or ran last.
-	 * @type string
-	 * @private
-	 * @since 0.0.15-alpha
-	 */
-	dusk.load._current = "";
 	
-	/** An array of all the files and their dependancies that are waiting to be imported.
+	/** An object containing the files that can be imported. Key is the file path, first value is an array of the
+	 *  packages it provides, second is an array of packages it depends on, and third is a boolean saying whether the
+	 *  file has been added to the document head yet.
+	 * @type object
+	 * @private
+	 * @since 0.0.21-alpha
+	 */
+	dusk.load._files = {};
+	
+	/** If this is true, then the batching is happening. Packages are being imported, and when they are all done, the
+	 *  next batch of packages will be imported.
+	 * @type boolean
+	 * @private
+	 * @since 0.0.21-alpha
+	 */
+	dusk.load._batching = false;
+	
+	/** The number of packages that still need to be provided in the current batch. When this becomes zero, the next
+	 *  batch of packages will be imported.
+	 * 
+	 * The default is 1 since the package `dusk.load` will be provided later.
+	 * @type int
+	 * @private
+	 * @default 1
+	 * @since 0.0.21-alpha
+	 */
+	dusk.load._provideCount = 1;
+	
+	/** The set of all package names that need to be imported. This is all the packages that have not been imported, but
+	 *  have to be imported to satisfy a package that has been imported by `{@link dusk.load.import}`.
+	 * 
+	 * Packages are moved out of here and into `{@link dusk.load._batchSet}` when they are about to be imported.
 	 * @type array
 	 * @private
-	 * @since 0.0.17-alpha
+	 * @since 0.0.21-alpha
 	 */
-	dusk.load._currentlyImporting = [];
+	dusk.load._importSet = [];
+	/** The set of package names that are in the current "import batch" and will be added to the document head soon.
+	 * @type array
+	 * @private
+	 * @since 0.0.21-alpha
+	 */
+	dusk.load._batchSet = [];
 
 	/** An event dispatcher which is fired when a package is imported and then calls `{@link dusk.load.provide}`.
 	 * 
@@ -172,6 +205,7 @@ dusk.load._capability = function() {
  * @since 0.0.12-alpha
  */
 dusk.load.provide = function(name) {
+	//Create the object
 	var fragments = name.split(".");
 	window[fragments[0]] = window[fragments[0]] || {};
 	var obj = window;
@@ -182,15 +216,21 @@ dusk.load.provide = function(name) {
 		}
 	}
 	
+	//Set imported
 	if(name in dusk.load._names) {
 		dusk.load._names[name][1] = 2;
 	}
 	
+	//Fire Event
 	if(dusk.load.onProvide) {
 		setTimeout(dusk.load.onProvide.fire.bind(dusk.load.onProvide, {"package":name}), 1);
 	}
 	
-	dusk.load._repeat();
+	//And carry on providing
+	dusk.load._provideCount --;
+	if(!dusk.load._provideCount && this._batching) {
+		dusk.load._doBatchSet();
+	}
 };
 
 /** Adds a dependency.
@@ -210,6 +250,8 @@ dusk.load.addDependency = function(file, provided, required, size) {
 	for(var i = provided.length-1; i >= 0; i--) {
 		this._names[provided[i]] = [file, 0, required, size];
 	}
+	
+	this._files[file] = [provided, required, false];
 };
 
 /** Marks the current file as requiring the specified namespace as a dependency, 
@@ -239,27 +281,18 @@ dusk.load.require = function(name) {
  * The namespace will NOT be immediately available after this function call
  *  unless it has already been imported (in which case the call does nothing).
  * @param {string} name The package to import, as a string name.
- * @param {boolean=false} noStart If true then the function to actually import won't be called. Don't set this to true.
  * @since 0.0.15-alpha
  */
-dusk.load.import = function(name, noStart) {
-	if(this._currentlyImporting.indexOf(name) !== -1) return;
+dusk.load.import = function(name) {
+	dusk.load._addToImportSet(name);
 	
-	if(!(name in this._names) && name.charAt(0) != "@") {
-		console.error("Package "+name+" not found; could not be imported.");
-		return;
+	if(!dusk.load._batching) {
+		dusk.load._batching = true;
+		dusk.load._doBatchSet();
 	}
-	this._currentlyImporting.push(name);
-	if(name.charAt(0) != "@") {
-		for(var i = this._names[name][2].length-1; i >= 0; i --) {
-			dusk.load.import(this._names[name][2][i].replace(">", ""), true);
-		}
-	}
-	
-	if(!noStart) dusk.load._repeat();
 };
 
-/** Imports all packages, usefull for debugging or generating dependancy files.
+/** Imports all packages, usefull for debugging or something.
  * @since 0.0.15-alpha
  */
 dusk.load.importAll = function() {
@@ -309,71 +342,122 @@ dusk.load.importList = function(path, callback, errorCallback) {
 	xhr.send();
 };
 
-/** Used internally to import a package, will fail if dependancies are not met.
- * @param {string} name The name of the package to attempt to import.
- * @param {boolean} ignoreDefer In the case where no packages can be imported at the moment,
- *  this parameter can be set to true so that dependancies starting with ">" are ignored.
- * @return {boolean} True if the package and all of it's dependancies are imported.
+/** Given a package, if it has not been imported, it is added to `{@link dusk.load._importSet}` and this function is
+ *  called on all its dependancies.
+ * @param {string} pack The package to add to the import set.
  * @private
- * @since 0.0.17-alpha
+ * @since 0.0.21-alpha
  */
-dusk.load._tryToImport = function(name, ignoreDefer) {
-	if(name in dusk.load._names && dusk.load._names[name][1] == 2) return true;
-	
-	if(name.charAt(0) != "@") {
-		if(dusk.load._names[name][1] != 0) return false;
-		
-		for(var i = dusk.load._names[name][2].length-1; i >= 0; i --) {
-			if(!(dusk.load._names[name][2][i].replace(">", "") in dusk.load._names)) {
-				console.warn("Dependency "+dusk.load._names[name][2][i].replace(">", "")+" for "+name+" not found!");
-			}else if(!(dusk.load._names[name][2][i].charAt(0) === ">" && ignoreDefer)
-				  && dusk.load._names[dusk.load._names[name][2][i].replace(">", "")][1] < 2) {
-				// Dependencies not met yet
-				return false;
-			}
-		}
-		
-		console.log("Now importing: "+name);
-		dusk.load._current = name;
-		var js = document.createElement("script");
-		js.src = dusk.load._names[name][0];// + ((!("dev" in dusk) || dusk.dev)?"?_="+(new Date()).getTime():"");
-		js.setAttribute("data-package", name);
-		document.head.appendChild(js);
-		dusk.load._names[name][1] = 1;
-	}else{
-		console.log("Now importing from "+name.substring(1));
-		dusk.load._current = name;
-		var js = document.createElement("script");
-		js.src = name.substring(1);
-		document.head.appendChild(js);
-		dusk.load._names[name] = [name, 2, [], 0];
+dusk.load._addToImportSet = function(pack) {
+	if(this._importSet.indexOf(pack) !== -1) return;
+	if(!(pack in this._names)) {
+		console.error(pack + " required but not found.");
+		return;
 	}
+	if(this._names[pack][1] !== 0) return;
 	
-	return true;
+	this._importSet.push(pack);
+	var p = this._names[pack];
+	
+	for(var i = 0; i < p[2].length; i ++) {
+		if(p[2][i].charAt(0) == ">") {
+			dusk.load._addToImportSet(p[2][i].substring(1));
+		}else if(p[2][i].charAt(0) == "@") {
+			this._importSet.push(p[2][i]);
+		}else{
+			dusk.load._addToImportSet(p[2][i]);
+		}
+	}
 };
 
-/** This is called every 100ms or so. It checks if any packages are being imported, and attempts to import them.
+/** Looks through the import set, sees if any can be imported (have no unsatisfied dependancies), generates the batch
+ *  set, then calls `{@link dusk.load._doImportFile}` to import them.
  * @private
- * @since 0.0.12-alpha
+ * @since 0.0.21-alpha
  */
-dusk.load._repeat = function() {
-	if(dusk.load._currentlyImporting.length) {
-		for(var i = dusk.load._currentlyImporting.length-1; i >= 0; i --) {
-			if(dusk.load._tryToImport(dusk.load._currentlyImporting[i])) {
-				dusk.load._currentlyImporting.splice(i, 1);
-				return;
+dusk.load._doBatchSet = function() {
+	if(!this._importSet.length) {
+		this._batching = false;
+		return;
+	}
+	
+	this._batchSet = [];
+	
+	//Generate the batch set
+	for(var i = 0; i < this._importSet.length; i ++) {
+		if(this._importSet[i].charAt(0) == "@") {
+			this._batchSet.push(this._importSet[i]);
+			this._importSet.splice(i, 1);
+			i --;
+			continue;
+		}
+		
+		var now = this._names[this._importSet[i]];
+		
+		var okay = true;
+		for(var d = 0; d < now[2].length; d ++) {
+			if(now[2][d].charAt(0) == ">") {
+				//Okay
+			}else if(now[2][d].charAt(0) == "@") {
+				//Also Okay
+			}else if(this._names[now[2][d]][1] < 2) {
+				okay = false;
+				break;
 			}
 		}
 		
-		for(var i = dusk.load._currentlyImporting.length-1; i >= 0; i --) {
-			if(dusk.load._tryToImport(dusk.load._currentlyImporting[i], true)) {
-				dusk.load._currentlyImporting.splice(i, 1);
-				return;
-			}
+		if(okay) {
+			if(now[1] == 0) 
+				this._batchSet.push(this._importSet[i]);
+			this._importSet.splice(i, 1);
+			i --;
 		}
 	}
+	
+	//And then import them all
+	console.log("Importing: "+this._batchSet.join(", "));
+	
+	for(var i = 0; i < this._batchSet.length; i ++) {
+		if(this._batchSet[i].charAt(0) == "@") {
+			dusk.load._doImportFile(this._batchSet[i]);
+		}else{
+			dusk.load._doImportFile(this._names[this._batchSet[i]][0]);
+		}
+	}
+	
+	if(!this._provideCount) {
+		setTimeout(dusk.load._doBatchSet, 100);
+	}
 };
-setInterval(dusk.load._repeat, 1000);
+
+/** Adds the file to the HTML documents head in a script tag, actually importing the file.
+ * 
+ * `{@link dusk.load._provideCount}` is incremented by the amount of packages the file provides.
+ * @param {string} file The file to add. If it starts with "@" that character is stripped.
+ * @private
+ * @since 0.0.21-alpha
+ */
+dusk.load._doImportFile = function(file) {
+	if(file.charAt(0) == "@") file = file.substring(1);
+	
+	if(!(file in this._files)) {
+		this._files[file] = [[], [], false];
+	}
+	
+	var f = this._files[file];
+	
+	if(f[2]) return;
+	f[2] = true;
+	
+	this._provideCount += f[0].length;
+	for(var i = 0; i < f[0].length; i ++) {
+		dusk.load._names[f[0][i]][1] = 1;
+	}
+	
+	var js = document.createElement("script");
+	js.src = file;
+	document.head.appendChild(js);
+};
 
 /** Called every 100ms to check if dusk.EventDispatcher is imported; if so, initiates `{@link dusk.load.onProvide}`.
  * @private
@@ -387,12 +471,13 @@ dusk.load._checkIfHandleable = function() {
 };
 dusk.load._checkIfHandleable();
 
-/** Stops all currently importing packages.
+/** Stops all currently importing packages, but will not interrupt any currently running files.
  * @since 0.0.20-alpha
  */
 dusk.load.abort = function() {
-	dusk.load._currentlyImporting = [];
-	dusk.load._current = "";
+	dusk.load._batching = false;
+	dusk.load._importSet = [];
+	dusk.load._batchSet = [];
 };
 
 /** Checks if the specified package is imported.
@@ -416,11 +501,11 @@ dusk.load.isImported = function(name) {
 dusk.load._getBytes = function() {
 	var seen = [];
 	var sum = 0;
-	for(var i = dusk.load._currentlyImporting.length-1; i >= 0; i --) {
-		if(dusk.load._names[dusk.load._currentlyImporting[i]].length > 3
-		&& seen.indexOf(dusk.load._names[dusk.load._currentlyImporting[i]][0]) === -1) {
-			sum += dusk.load._names[dusk.load._currentlyImporting[i]][3];
-			seen[seen.length] = dusk.load._names[dusk.load._currentlyImporting[i]][0];
+	for(var i = dusk.load._importSet.length-1; i >= 0; i --) {
+		if(dusk.load._names[dusk.load._importSet[i]].length > 3
+		&& seen.indexOf(dusk.load._names[dusk.load._importSet[i]][0]) === -1) {
+			sum += dusk.load._names[dusk.load._importSet[i]][3];
+			seen[seen.length] = dusk.load._names[dusk.load._importSet[i]][0];
 		}
 	};
 	return ~~(sum/1024);
@@ -440,11 +525,11 @@ dusk.load._displayLoad = function() {
 		var textY = 0;
 		
 		canvas.getContext("2d").fillText(
-			"Hold on! Loading "+dusk.load._currentlyImporting.length+" files!", 5, textY+=15
+			"Hold on! Loading "+dusk.load._importSet.length+" files!", 5, textY+=15
 		);
-		canvas.getContext("2d").fillText(
+		/*canvas.getContext("2d").fillText(
 			"Now loading "+dusk.load._current+"!", 5, textY+=15
-		);
+		);*/
 		canvas.getContext("2d").fillText(
 			"That's about "+dusk.load._getBytes()+"KiB, excluding game data!", 5, textY+=15
 		);
@@ -488,16 +573,16 @@ dusk.load.provide("dusk.load");
  * This class is included with `{@link dusk.load}`, and thus is always available.
  * 
  * @param {class(...)} constructor The constructor for the object in the pool.
- * @param {function(*, *):*} onAlloc Called with the object and specified arguments every time the object is
+ * @param {?function(*, *):*} onAlloc Called with the object and specified arguments every time the object is
  *  allocated. This should return the object to allocate.
- * @param {function(*):*} onFree Called when the object is freed; should return the object to return to the pool.
+ * @param {?function(*):*} onFree Called when the object is freed; should return the object to return to the pool.
  * @constructor
  * @since 0.0.21-alpha
  */
 dusk.Pool = function(constructor, onAlloc, onFree) {
 	this._constructor = constructor;
-	this._onAlloc = onAlloc?onAlloc:function(o, args){return o;};
-	this._onFree = onFree?onFree:function(o) {return o;};
+	this._onAlloc = onAlloc?onAlloc:null;
+	this._onFree = onFree?onFree:null;
 	
 	this._inPool = 0;
 	this._objects = [];
@@ -520,10 +605,10 @@ dusk.Pool.prototype.alloc = function(args) {
 	
 	if(this._inPool == 0) {
 		var o = new this._constructor();
-		return this._onAlloc(o, args);
+		return this._onAlloc?this._onAlloc(o, args):o;
 	}else{
 		this._inPool --;
-		return this._onAlloc(this._objects[this._inPool], args);
+		return this._onAlloc?this._onAlloc(this._objects[this._inPool], args):this._objects[this._inPool];
 	}
 };
 
@@ -534,6 +619,6 @@ dusk.Pool.prototype.free = function(object) {
 	this._inPool ++;
 	this.inWild --;
 	
-	object = this._onFree(object);
+	if(this._onFree) object = this._onFree(object);
 	this._objects[this._inPool-1] = object;
 };
