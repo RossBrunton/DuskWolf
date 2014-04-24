@@ -18,10 +18,10 @@ dusk.load.provide("dusk.utils");
  */
 dusk.utils.clone = function(o) {
 	if(o == null || typeof(o) != 'object') return o;
-
-	var tmp = o.constructor(); 
+	
+	var tmp = o.constructor();
 	for(var p in o) {
-		if(typeof o[p] == "object" && Object.getPrototypeOf(o[p]) != Object.prototype && !Array.isArray(o[p])) {
+		if(!o[p] || (typeof o[p] == "object" && Object.getPrototypeOf(o[p]) != Object.prototype && !Array.isArray(o[p]))) {
 			tmp[p] = o[p];
 		}else if(Array.isArray(o[p])) {
 			tmp[p] = [];

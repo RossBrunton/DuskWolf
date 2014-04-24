@@ -28,7 +28,7 @@ dusk.load.provide("dusk.sgui.Checkbox");
  * As well as the top row, there is another row underneath it. The bottom row is used when the checkbox is the active
  *  component.
  * 
- * By default, a checkbox has a src of `"sgui/check.png"`, a width and height of 16, and a sprite size of 4.
+ * By default, a checkbox has a src of `"default/check.png"`, a width and height of 16, and a sprite size of 4.
  * 
  * @extends dusk.sgui.FocusCheckerTile
  * @constructor
@@ -59,7 +59,7 @@ dusk.sgui.Checkbox = function (parent, comName) {
 	this._radiobox = null;
 	
 	//Defaults
-	this.src = "sgui/check.png";
+	this.src = "default/check.png";
 	this.ssize = 4;
 	this.width = 16;
 	this.height = 16;

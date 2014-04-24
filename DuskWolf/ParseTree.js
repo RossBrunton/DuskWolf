@@ -84,52 +84,10 @@ dusk.parseTree.Compiler = function(operators, uoperators, consts, whitespace, no
 	this._ops = [];
 	
 	if(!noBuiltins) {
-		this._ops = [
-			[".", function(o, l, r) {
-				if(!isNaN(Number(l+"."+r))) {
-					return Number(l+"."+r);
-				}
-				if(l == undefined) return undefined;
-				if(typeof l == "object" && !(r in l) && "get" in l) return l.get(r);
-				return l[r];
-			}, false],
-			
-			["*", function(o, l, r) {return +l * +r;}, true],
-			["/", function(o, l, r) {return +l / +r;}, true],
-			["+", function(o, l, r) {return +l + +r;}, true],
-			["-", function(o, l, r) {
-				if(Array.isArray(l)) {
-					var out = [];
-					for(var i = 0; i < l.length; i ++) {
-						if(l[i] != r) out.push(l[i]);
-					}
-					return out;
-				}else{
-					return +l - +r;
-				}
-			}, true],
-			["^", function(o, l, r) {return "" + l +r;}, true],
-			["@", function(o, l, r) {return l.concat(r);}, true],
-			["in", function(o, l, r) {
-				if(Array.isArray(r)) {
-					return r.indexOf(l) !== -1;
-				}else{
-					return l in r;
-				}
-			}, true],
-			
-			["=", function(o, l, r) {return l == r || l && r == "true"}, true],
-			["!=", function(o, l, r) {return l != r}, true],
-			[">", function(o, l, r) {return l > r}, true],
-			["<", function(o, l, r) {return l < r}, true],
-			[">=", function(o, l, r) {return l >= r}, true],
-			["<=", function(o, l, r) {return l <= r}, true],
-			
-			["&", function(o, l, r) {return l && r}, true],
-			["|", function(o, l, r) {return l || r}, true],
-			
-			[",", function(o, l, r) {return [l].concat(r);}, true],
-		];
+		this._ops = [];
+		for(var i = 0; i < dusk.parseTree._defOps.length; i ++) {
+			this._ops.push(dusk.parseTree._defOps[i]);
+		}
 	}
 	
 	if(operators) {
@@ -146,21 +104,10 @@ dusk.parseTree.Compiler = function(operators, uoperators, consts, whitespace, no
 	this._uops = [];
 	
 	if(!noBuiltins) {
-		this._uops = [
-			["!", function(o, l) {return l === "false"?true:!l;}, true],
-			["+", function(o, l) {return +l;}, true],
-			["-", function(o, l) {return 0-l;}, true],
-			["sl", function(o, l) {return [l]}, true],
-			
-			["JSON", function(o, l) {
-				try {
-					return JSON.parse(l);
-				} catch(e) {
-					console.error(e);
-					return {};
-				}
-			}, true]
-		];
+		this._uops = [];
+		for(var i = 0; i < dusk.parseTree._defUops.length; i ++) {
+			this._uops.push(dusk.parseTree._defUops[i]);
+		}
 	}
 	
 	if(uoperators) {
@@ -177,12 +124,10 @@ dusk.parseTree.Compiler = function(operators, uoperators, consts, whitespace, no
 	this._nops = [];
 	
 	if(!noBuiltins) {
-		this._nops = [
-			["false", function(o) {return false;}, true],
-			["true", function(o) {return true;}, true],
-			["null", function(o) {return null;}, true],
-			["undefined", function(o) {return undefined;}, true],
-		];
+		this._nops = [];
+		for(var i = 0; i < dusk.parseTree._defNops.length; i ++) {
+			this._nops.push(dusk.parseTree._defNops[i]);
+		}
 	}
 	
 	if(consts) {
@@ -503,6 +448,94 @@ dusk.parseTree.Compiler.prototype._read = function(str, init, afterBracket) {
 
 Object.seal(dusk.parseTree.Compiler);
 Object.seal(dusk.parseTree.Compiler.prototype);
+
+// ----
+
+/** All the built in binary operators.
+ * @type array
+ * @private
+ * @since 0.0.21-alpha
+ */
+dusk.parseTree._defOps = [
+	[".", function(o, l, r) {
+		if(!isNaN(Number(l+"."+r))) {
+			return Number(l+"."+r);
+		}
+		if(l == undefined) return undefined;
+		if(typeof l == "object" && !(r in l) && "get" in l) return l.get(r);
+		return l[r];
+	}, false],
+	
+	["*", function(o, l, r) {return +l * +r;}, true],
+	["/", function(o, l, r) {return +l / +r;}, true],
+	["+", function(o, l, r) {return +l + +r;}, true],
+	["-", function(o, l, r) {
+		if(Array.isArray(l)) {
+			var out = [];
+			for(var i = 0; i < l.length; i ++) {
+				if(l[i] != r) out.push(l[i]);
+			}
+			return out;
+		}else{
+			return +l - +r;
+		}
+	}, true],
+	["^", function(o, l, r) {return "" + l +r;}, true],
+	["@", function(o, l, r) {return l.concat(r);}, true],
+	["in", function(o, l, r) {
+		if(Array.isArray(r)) {
+			return r.indexOf(l) !== -1;
+		}else{
+			return l in r;
+		}
+	}, true],
+	
+	["=", function(o, l, r) {return l == r || l && r == "true"}, true],
+	["!=", function(o, l, r) {return l != r}, true],
+	[">", function(o, l, r) {return l > r}, true],
+	["<", function(o, l, r) {return l < r}, true],
+	[">=", function(o, l, r) {return l >= r}, true],
+	["<=", function(o, l, r) {return l <= r}, true],
+	
+	["&", function(o, l, r) {return l && r}, true],
+	["|", function(o, l, r) {return l || r}, true],
+	
+	[",", function(o, l, r) {return [l].concat(r);}, true],
+];
+
+
+/** All the built in unary operators.
+ * @type array
+ * @private
+ * @since 0.0.21-alpha
+ */
+dusk.parseTree._defUops = [
+	["!", function(o, l) {return l === "false"?true:!l;}, true],
+	["+", function(o, l) {return +l;}, true],
+	["-", function(o, l) {return 0-l;}, true],
+	["sl", function(o, l) {return [l]}, true],
+	
+	["JSON", function(o, l) {
+		try {
+			return JSON.parse(l);
+		} catch(e) {
+			console.error(e);
+			return {};
+		}
+	}, true]
+];
+
+/** All the built in constant operators.
+ * @type array
+ * @private
+ * @since 0.0.21-alpha
+ */
+dusk.parseTree._defNops = [
+	["false", function(o) {return false;}, true],
+	["true", function(o) {return true;}, true],
+	["null", function(o) {return null;}, true],
+	["undefined", function(o) {return undefined;}, true],
+];
 
 // ----
 

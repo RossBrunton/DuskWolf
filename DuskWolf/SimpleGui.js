@@ -388,7 +388,7 @@ dusk.sgui._draw = function() {
 		data.width = dusk.sgui._panes[c].width;
 		data.height = dusk.sgui._panes[c].height;
 		
-		if(this.noCacheCanvas) {
+		if(dusk.sgui.noCacheCanvas) {
 			dusk.sgui._panes[c].draw(data, dusk.sgui._getCanvas().getContext("2d"));
 		}else{
 			dusk.sgui._panes[c].draw(data, dusk.sgui._cacheCanvas.getContext("2d"));
@@ -396,7 +396,7 @@ dusk.sgui._draw = function() {
 		dusk.sgui.drawDataPool.free(data);
 	}
 	
-	if(!this.noCacheCanvas) {
+	if(!dusk.sgui.noCacheCanvas) {
 		dusk.sgui._getCanvas().getContext("2d").drawImage(dusk.sgui._cacheCanvas,
 			0, 0, dusk.sgui.width, dusk.sgui.height
 		);

@@ -97,9 +97,6 @@ dusk.sgui.TileRegion = function (parent, comName) {
 	//Listeners
 	this.prepareDraw.listen(this._tileRegionDraw, this);
 	this.frame.listen(this._tileRegionFrame, this);
-	
-	window.hook = this;
-	this._max = 0;
 };
 dusk.sgui.TileRegion.prototype = Object.create(dusk.sgui.Component.prototype);
 
@@ -373,6 +370,21 @@ dusk.sgui.TileRegion.prototype.followPathFromRegion = function(path, origin, des
 	}
 };
 
+dusk.sgui.TileRegion.prototype.followPath = function(path, region) {
+	var o = [-1, -1];
+	var t = [this._regionOrigins[region][0], this._regionOrigins[region][1]];
+	var p = 0;
+	
+	while(p <= path.length) {
+		o[0] = t[0];
+		o[1] = t[1];
+		t = this._goDirection(t[0], t[1], path[p]);
+		p ++;
+	}
+	
+	return o;
+};
+
 dusk.sgui.TileRegion.prototype.expandRegion = function(name, x, y, range, opts) {
 	var s = this.container.getScheme();
 	
@@ -391,6 +403,7 @@ dusk.sgui.TileRegion.prototype.expandRegion = function(name, x, y, range, opts) 
 	}
 	
 	if("rangeMap" in opts) range = opts.rangeMap.length -1;
+	if(range < 0) return;
 	
 	//if("notStartFrom" in opts && e && e.meetsTrigger(opts.notStartFrom)) return;
 	//Remember to ignore selector
@@ -471,8 +484,6 @@ dusk.sgui.TileRegion.prototype._updateCloud = function(cloud, oldTile, newTile, 
 	this._calls ++;
 	var exists = this._isInCloud(cloud, oldTile, newTile);
 	if(exists && exists[4] == 0xffffffff) return;
-	
-	if(cloud.length > this._max) this._max = cloud.length;
 	
 	var e = null;
 	var w = 0;

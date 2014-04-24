@@ -189,6 +189,8 @@ dusk.load.provide = function(name) {
 	if(dusk.load.onProvide) {
 		setTimeout(dusk.load.onProvide.fire.bind(dusk.load.onProvide, {"package":name}), 1);
 	}
+	
+	dusk.load._repeat();
 };
 
 /** Adds a dependency.
@@ -237,9 +239,10 @@ dusk.load.require = function(name) {
  * The namespace will NOT be immediately available after this function call
  *  unless it has already been imported (in which case the call does nothing).
  * @param {string} name The package to import, as a string name.
+ * @param {boolean=false} noStart If true then the function to actually import won't be called. Don't set this to true.
  * @since 0.0.15-alpha
  */
-dusk.load.import = function(name) {
+dusk.load.import = function(name, noStart) {
 	if(this._currentlyImporting.indexOf(name) !== -1) return;
 	
 	if(!(name in this._names) && name.charAt(0) != "@") {
@@ -249,11 +252,11 @@ dusk.load.import = function(name) {
 	this._currentlyImporting.push(name);
 	if(name.charAt(0) != "@") {
 		for(var i = this._names[name][2].length-1; i >= 0; i --) {
-			dusk.load.import(this._names[name][2][i].replace(">", ""));
+			dusk.load.import(this._names[name][2][i].replace(">", ""), true);
 		}
 	}
 	
-	dusk.load._repeat();
+	if(!noStart) dusk.load._repeat();
 };
 
 /** Imports all packages, usefull for debugging or generating dependancy files.
@@ -324,14 +327,17 @@ dusk.load._tryToImport = function(name, ignoreDefer) {
 			if(!(dusk.load._names[name][2][i].replace(">", "") in dusk.load._names)) {
 				console.warn("Dependency "+dusk.load._names[name][2][i].replace(">", "")+" for "+name+" not found!");
 			}else if(!(dusk.load._names[name][2][i].charAt(0) === ">" && ignoreDefer)
-				&& dusk.load._names[dusk.load._names[name][2][i].replace(">", "")][1] < 2)
+				  && dusk.load._names[dusk.load._names[name][2][i].replace(">", "")][1] < 2) {
+				// Dependencies not met yet
 				return false;
+			}
 		}
-	
+		
 		console.log("Now importing: "+name);
 		dusk.load._current = name;
 		var js = document.createElement("script");
 		js.src = dusk.load._names[name][0];// + ((!("dev" in dusk) || dusk.dev)?"?_="+(new Date()).getTime():"");
+		js.setAttribute("data-package", name);
 		document.head.appendChild(js);
 		dusk.load._names[name][1] = 1;
 	}else{
@@ -365,10 +371,9 @@ dusk.load._repeat = function() {
 				return;
 			}
 		}
-		
-		setTimeout(dusk.load._repeat, 100);
 	}
 };
+setInterval(dusk.load._repeat, 1000);
 
 /** Called every 100ms to check if dusk.EventDispatcher is imported; if so, initiates `{@link dusk.load.onProvide}`.
  * @private
@@ -441,7 +446,7 @@ dusk.load._displayLoad = function() {
 			"Now loading "+dusk.load._current+"!", 5, textY+=15
 		);
 		canvas.getContext("2d").fillText(
-			"That's about "+dusk.load._getBytes()+"KiB, excluding image data!", 5, textY+=15
+			"That's about "+dusk.load._getBytes()+"KiB, excluding game data!", 5, textY+=15
 		);
 		
 		if("onLine" in navigator && !navigator.onLine) {

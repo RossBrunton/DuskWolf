@@ -225,17 +225,30 @@ dusk.sgui.extras.QuestPuppeteer.prototype.request = function(type, args, passedA
 				var l = this.selector.action.listen((function(e) {
 					var e = e.component;
 					
+					var x = e.tileX();
+					var y = e.tileY();
+					var fx = e.x;
+					var fy = e.y;
+					
+					if(type == "getTilePathInRange") {
+						var t = r.followPath(e.eProp("grmoves"), region);
+						x = t[0];
+						y = t[1];
+						fx = t[0] * r.tileWidth();
+						fy = t[1] * r.tileHeight();
+					}
+					
 					if(!args.allowEntity) {
-						var el = this._owner.getPrimaryEntityLayer().getEntitiesExactlyHere(e.x, e.y, e, true);
+						var el = this._owner.getPrimaryEntityLayer().getEntitiesExactlyHere(fx, fy, e, true);
 						if(el.length > 0 && (args.blockFirstEnt || el[0] != passedArg.entity)) {
 							return true;
 						}
 					}
 					
-					passedArg.x = e.tileX();
-					passedArg.y = e.tileY();
-					passedArg.fullX = e.x;
-					passedArg.fullY = e.y;
+					passedArg.x = x;
+					passedArg.y = y;
+					passedArg.fullX = fx;
+					passedArg.fullY = fy;
 					passedArg.path = e.eProp("grmoves").reverse();
 					
 					e.visible = false;
@@ -394,13 +407,17 @@ dusk.sgui.extras.QuestPuppeteer.prototype.requestBoundPair = function(type, args
 	return [this.request.bind(this, type, args), this.request.bind(this, type+"^-1", args)];
 };
 
+dusk.sgui.extras.QuestPuppeteer.prototype.getBasicMain = function() {
+	return this._owner;
+};
+
 //Create selector entity
 dusk.entities.types.createNewType("puppetSelect", {
 	"behaviours":{
 		"PlayerGridWalker":true, "GridWalker":true, "GridRecorder":true, "GridMouse":true
 	},
 	"data":{
-		"solid":false, "collides":false, "src":"sgui/selector32.png", "noSave":true, "gmMouseMove":false
+		"solid":false, "collides":false, "src":"default/selector32.png", "noSave":true, "gmMouseMove":false
 	},
 	"animation":[["true", "0,0|1,0|2,0|1,0", {}]]
 }, "quest");

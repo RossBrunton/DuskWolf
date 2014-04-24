@@ -132,7 +132,7 @@ dusk.sgui.EntityGroup.prototype.doFrame = function(active) {
 		if(active) this.moveEverything();
 		
 		//Call every entities' startFrame function
-		for(var i = this._entities.length-1; i >= 0; i --) this._entities[i].startFrame();
+		for(var i = this._entities.length-1; i >= 0; i --) this._entities[i].startFrame(active);
 	}
 };
 
@@ -206,6 +206,16 @@ dusk.sgui.EntityGroup.prototype._entityGroupAction = function(e) {
 
 dusk.sgui.EntityGroup.prototype.allEntities = function() {
 	return this._entities;
+};
+
+dusk.sgui.EntityGroup.prototype.filter = function(filter) {
+	var out = [];
+	
+	for(var c = this._entities.length-1; c >= 0; c --){
+		if(this._entities[c].evalTrigger(filter)) out.push(this._entities[c]);
+	}
+	
+	return out;
 };
 
 //Runs in O(n) time

@@ -196,7 +196,7 @@ dusk.sgui.addStyle("ItemSlot", {
 			"name":"select",
 			"width":32,
 			"height":32,
-			"src":"sgui/selector.png"
+			"src":"default/selector.png"
 		}
 	]
 });

@@ -18,7 +18,7 @@ dusk.load.provide("dusk.sgui.Image");
  * 
  * A width and height must be specified, otherwise the image will not draw.
  * 
- * This uses the theme key `img.src` (default "sgui/img.png") as the default image.
+ * This uses the theme key `img.src` (default "default/img.png") as the default image.
  * 
  * @param {dusk.sgui.IContainer} parent The container that this component is in.
  * @param {string} comName The name of the component.
@@ -42,9 +42,9 @@ dusk.sgui.Image = function(parent, comName) {
 	
 	/** Sets the image to draw, this should be a URL, potentially relative to `{@link dusk.dataDir}`.
 	 * @type string
-	 * @default "sgui/img.png"
+	 * @default "default/img.png"
 	 */
-	this.src = "sgui/img.png";
+	this.src = "default/img.png";
 	
 	//Prop masks
 	this._registerPropMask("src", "src");

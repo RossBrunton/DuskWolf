@@ -796,8 +796,8 @@ dusk.sgui.Entity.prototype.eProp = function(prop, set) {
 /** Called when a frame is ran. It fires the `frame` entity event, calls the animation funciton, and
  * decrements all cooldowns.
  */
-dusk.sgui.Entity.prototype.startFrame = function() {
-	this.behaviourFire("frame");
+dusk.sgui.Entity.prototype.startFrame = function(active) {
+	this.behaviourFire("frame", {"active":active});
 	
 	//Animation
 	this._frameCountdown--;

@@ -1,5 +1,5 @@
-Doc/*
-closure/*
+Doc/
+closure/
 DuskWolf.php
 *.u1conflict*
 change
@@ -12,4 +12,4 @@ DuskWolf/DWCompiled.js
 wiki
 *.mf
 tcheck.js
-Data/SMB/*
+Data/SMB/

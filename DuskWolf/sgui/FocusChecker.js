@@ -26,19 +26,19 @@ dusk.sgui.FocusChecker = function(parent, comName) {
 	
 	/** The path to the image to be displayed when the component is not focused or active.
 	 * @type string
-	 * @default "sgui/inactive.png"
+	 * @default "default/inactive.png"
 	 */
-	this.inactiveImg = "sgui/inactive.png";
+	this.inactiveImg = "default/inactive.png";
 	/** The path to the image to be displayed when the component is focused, but not active.
 	 * @type string
-	 * @default "sgui/focused.png"
+	 * @default "default/focused.png"
 	 */
-	this.focusedImg = "sgui/focused.png";
+	this.focusedImg = "default/focused.png";
 	/** The path to the image to be displayed when the component is active.
 	 * @type string
-	 * @default "sgui/active.png"
+	 * @default "default/active.png"
 	 */
-	this.activeImg = "sgui/active.png";
+	this.activeImg = "default/active.png";
 	
 	this.src = this.inactiveImg;
 	

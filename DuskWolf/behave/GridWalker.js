@@ -61,7 +61,7 @@ dusk.behave.GridWalker.prototype._gwFrame = function(e) {
 	var startMove = false;
 	var d = 0;
 	
-	if(!this._data("gwmoving")) {
+	if(!this._data("gwmoving") && e.active) {
 		if(this._data("gwmoves").length) {
 			startMove = true;
 			d = this._data("gwmoves").pop();
@@ -141,7 +141,7 @@ dusk.behave.GridWalker.prototype._gwFrame = function(e) {
 				"targetY":this._data("gwtargety")/this._entity.height}
 			);
 			
-			this._gwFrame();
+			this._gwFrame(e);
 		}
 	}
 };

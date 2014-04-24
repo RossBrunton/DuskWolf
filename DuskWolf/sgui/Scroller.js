@@ -22,8 +22,8 @@ dusk.load.provide("dusk.sgui.Scroller");
  *  a scrollbar would be expected. At the bottom or right side of its target.
  * 
  * By default, a horizontal scrollbar has both tile and not-tile dimensions of 32*16, a horizontal focus order,
- *  and a src of `sgui/scrollerHoz.png`. Vertical ones have dimensions of 16*32, a vertical focus order, and a src of 
- *  `sgui/ScrollerVer.png`.
+ *  and a src of `default/scrollerHoz.png`. Vertical ones have dimensions of 16*32, a vertical focus order, and a src of 
+ *  `default/ScrollerVer.png`.
  * 
  * @extends dusk.sgui.FocusCheckerTile
  * @since 0.0.19-alpha
@@ -56,8 +56,6 @@ dusk.sgui.Scroller = function (parent, comName) {
 	this.dirPress.listen(this._sDir, this);
 };
 dusk.sgui.Scroller.prototype = Object.create(dusk.sgui.FocusCheckerTile.prototype);
-
-dusk.sgui.Scroller.prototype.className = "Scroller";
 
 /** Called every frame to update the coordianates and check for input.
  * @param {object} e The event object.
@@ -122,7 +120,7 @@ dusk.sgui.addStyle("Scroller[orientation="+dusk.sgui.c.ORIENT_VER+"]", {
 	"focusOrient":dusk.sgui.c.ORIENT_HOR,
 	"swidth":16,
 	"sheight":32,
-	"src":"sgui/scrollerVer.png"
+	"src":"default/scrollerVer.png"
 });
 dusk.sgui.addStyle("Scroller[orientation="+dusk.sgui.c.ORIENT_HOR+"]", {
 	"height":16,
@@ -130,5 +128,5 @@ dusk.sgui.addStyle("Scroller[orientation="+dusk.sgui.c.ORIENT_HOR+"]", {
 	"focusOrient":dusk.sgui.c.ORIENT_VER,
 	"swidth":32,
 	"sheight":16,
-	"src":"sgui/scrollerHor.png"
+	"src":"default/scrollerHor.png"
 });

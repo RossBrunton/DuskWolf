@@ -10,6 +10,7 @@ dusk.load.require("dusk.sgui.extras.MatchedSize");
 dusk.load.require("dusk.items");
 dusk.load.require("dusk.save");
 dusk.load.require("dusk.save.ConsoleSource");
+dusk.load.require("dusk.TurnTicker");
 
 dusk.load.require("quest.ents");
 dusk.load.require("quest.rooms.rooma");
@@ -102,29 +103,47 @@ window.aarg =
 window.targ = 
 	{"region":"r", "los":true, "forEach":[aarg], "colour":"#000099", "entBlock":"stat(faction, 1) = ENEMY"};
 
+var turns = new dusk.TurnTicker();
 
-quest.go = function() {
+quest.allyTurnInner = function() {
 	return dusk.reversiblePromiseChain([
-		q.requestBoundPair("selectEntity", {"filter":"stat(faction, 1) = ALLY & stat(moved, 3) = false"}),
-		function(passedArg, queue) {
-			var ranges = passedArg.entity.stats.get("possibleRange", 2);
-			var rmap = [];
-			
-			for(var i = 0; i < ranges.length; i ++) {
-				for(var a = ranges[i][0]; a <= ranges[i][1]; a ++) {
-					rmap[a] = true;
+		q.requestBoundPair("selectEntity", 
+			{"allowNone":true, "filter":"stat(faction, 1) = ALLY & stat(moved, 3) = false"}
+		),
+		function(passedArg, qu) {
+			if(!passedArg.entity) {
+				qu(q.requestBoundPair("selectListMenu", {"path":"menu:/menu"}));
+				qu(dusk.reversiblePromiseChain.STOP);
+				
+				passedArg.options = [];
+				
+				passedArg.options.push({"text":"End", "listSelectValue":"test", "listSelectFunction":function(pa, qu) {
+					pa.endTurn = true;
+					return pa;
+				}});
+				passedArg.options.push({"text":"Cancel", "listSelectCancel":true});
+				
+				return passedArg;
+			}else{
+				var ranges = passedArg.entity.stats.get("possibleRange", 2);
+				var rmap = [];
+				
+				for(var i = 0; i < ranges.length; i ++) {
+					for(var a = ranges[i][0]; a <= ranges[i][1]; a ++) {
+						rmap[a] = true;
+					}
 				}
+				
+				aarg.rangeMap = rmap;
+				passedArg.aarg = aarg;
+				targ.forEach[0] = aarg;
+				passedArg.range = passedArg.entity.stats.get("move", 1);
+				
+				return passedArg;
 			}
-			
-			aarg.rangeMap = rmap;
-			passedArg.aarg = aarg;
-			targ.forEach[0] = aarg;
-			passedArg.range = passedArg.entity.stats.get("move", 1);
-			
-			return passedArg;
 		},
 		q.requestBoundPair("generateRegion", targ),
-		q.requestBoundPair("getTilePathInRange", {"colour":":sgui/arrows32.png"}),
+		q.requestBoundPair("getTilePathInRange", {"colour":":default/arrows32.png"}),
 		q.requestBoundPair("moveViaPath"),
 		q.requestBoundPair("uncolourRegion", {"regions":["attack", targ.region, targ.region+"_path"]}),
 		q.requestBoundPair("generateRegion", aarg),
@@ -182,9 +201,34 @@ quest.go = function() {
 			return pa;
 		}
 	], false)
-	.then(console.log.bind(console), console.error.bind(console))
-	.then(quest.go);
+//	.then(console.log.bind(console), console.error.bind(console))
+	.then(function(pa) {
+		if(!pa.endTurn) {
+			return quest.allyTurnInner();
+		}else{
+			return pa;
+		}
+	});
+};
+
+quest.allyTurn = function() {
+	return new Promise(function(oFulfill, oReject) {
+		quest.allyTurnInner()
+		.then(function(pa) {
+			var ents = q.getBasicMain().getPrimaryEntityLayer().filter("stat(moved, 3)");
+			
+			for(var i = 0; i < ents.length; i ++) {
+				ents[i].stats.removeBlock(3, "moved");
+			}
+			
+			oFulfill(true);
+		});
+	});
 }
+
+quest.enemyTurn = function() {
+	return Promise.resolve(true);
+};
 
 targ.weights = new dusk.sgui.TileMapWeights(2, 10);
 targ.weights.addWeight(1, 0, 100);
@@ -194,7 +238,11 @@ targ.forEach[0].weights = new dusk.sgui.TileMapWeights(2, 10);
 targ.forEach[0].weights.addWeight(1, 0, 100);
 
 dusk.startGame();
-quest.go();
+//quest.go();
+
+turns.register("ally", quest.allyTurn);
+turns.register("enemy", quest.enemyTurn);
+turns.start();
 
 window.ss = new dusk.save.SaveSpec("ss", "ss");
 ss.add("dusk.stats", "stats", {});

@@ -115,7 +115,7 @@ dusk.sgui.addStyle("ControlConfig>#key", {
 	"width":40
 });
 dusk.sgui.addStyle("ControlConfig>#button", {
-	"src":"sgui/buttons.png",
+	"src":"default/buttons.png",
 	"x":40,
 	"ssize":4,
 	"width":16,

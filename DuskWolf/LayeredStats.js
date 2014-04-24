@@ -35,6 +35,8 @@ dusk.stats.LayeredStats = function(name, pack, layerNames) {
 	this._field = null;
 	this._block = null;
 	
+	this.changed = new dusk.EventDispatcher("dusk.stats.LayeredStats.changed");
+	
 	this._tree = new dusk.parseTree.Compiler([], [], [
 		["X", (function(o) {return this._x;}).bind(this)],
 		["MAX", (function(o) {return this._max;}).bind(this)],
@@ -96,6 +98,8 @@ dusk.stats.LayeredStats.prototype.kick = function(layer) {
 	for(var i = layer; i < this._layers.length; i ++) {
 		this._caches[i] = {};
 	}
+	
+	this.changed.fire();
 };
 
 dusk.stats.LayeredStats.prototype.get = function(field, untilLayer) {
