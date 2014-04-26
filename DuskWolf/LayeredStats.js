@@ -4,6 +4,7 @@
 
 dusk.load.require("dusk.utils");
 dusk.load.require("dusk.parseTree");
+dusk.load.require(">dusk.Range");
 
 dusk.load.provide("dusk.stats");
 dusk.load.provide("dusk.stats.LayeredStats");
@@ -25,6 +26,7 @@ dusk.stats.LayeredStats = function(name, pack, layerNames) {
 	this._layers = [];
 	this._inventListeners = [];
 	this._caches = [];
+	this._ranges = [];
 	
 	this.layerNames = layerNames?layerNames:[];
 	this._extras = {};
@@ -53,6 +55,7 @@ dusk.stats.LayeredStats.prototype.addBlock = function(layer, name, block, copy) 
 	if(!this._layers[layer]) this._layers[layer] = {};
 	if(!this._inventListeners[layer]) this._inventListeners[layer] = {};
 	if(!this._caches[layer]) this._caches[layer] = {};
+	if(!this._ranges[layer]) this._ranges[layer] = {};
 	
 	this._layers[layer][name] = block;
 	
@@ -97,6 +100,14 @@ dusk.stats.LayeredStats.prototype.kick = function(layer) {
 	
 	for(var i = layer; i < this._layers.length; i ++) {
 		this._caches[i] = {};
+		
+		for(var p in this._ranges[i]) {
+			var r = this._ranges[i][p];
+			
+			r.min = this.get(p+"_min", i);
+			r.max = this.get(p+"_max", i);
+			r.value = this.get(p, i);
+		}
 	}
 	
 	this.changed.fire();
@@ -120,15 +131,15 @@ dusk.stats.LayeredStats.prototype.get = function(field, untilLayer) {
 				var d = list[j];
 				
 				if(field+"_max" in d && typeof d[field+"_max"] != "function")
-					if(d[field+"_max"] > max) max = d[field+"_max"];
+					if(d[field+"_max"] < max) max = d[field+"_max"];
 				if(field+"_min" in d && typeof d[field+"_max"] != "function")
-					if(d[field+"_min"] > max) max = d[field+"_min"];
+					if(d[field+"_min"] > min) min = d[field+"_min"];
 				if(field in d && typeof d[field] != "function") value = d[field];
 				
 				if(field+"_max" in d && typeof d[field+"_max"] == "function")
-					if(d[field+"_max"] > max) max = d[field+"_max"](this, field, value, min, max, d);
+					if(d[field+"_max"] < max) max = d[field+"_max"](this, field, value, min, max, d);
 				if(field+"_min" in d && typeof d[field+"_max"] == "function")
-					if(d[field+"_min"] > max) max = d[field+"_min"](this, field, value, min, max, d);
+					if(d[field+"_min"] > min) min = d[field+"_min"](this, field, value, min, max, d);
 				if(field in d && typeof d[field] == "function") value = d[field](this, field, value, min, max, d);
 			}
 		}
@@ -144,6 +155,9 @@ dusk.stats.LayeredStats.prototype.get = function(field, untilLayer) {
 				if(field+"_mod" in d) value = this._eval(d[field+"_mod"], field, value, min, max, d);
 			}
 		}
+		
+		if(max !== null && value !== null && isFinite(max) && value > max) value = max;
+		if(min !== null && value !== null && isFinite(min) && value < min) value = min;
 	}
 	
 	if(!this._caches[untilLayer]) this._caches[untilLayer] = {};
@@ -154,6 +168,22 @@ dusk.stats.LayeredStats.prototype.get = function(field, untilLayer) {
 dusk.stats.LayeredStats.prototype.geti = function(field, untilLayer) {
 	untilLayer = this._lookupLayer(untilLayer);
 	return ~~this.get(field, untilLayer);
+};
+
+dusk.stats.LayeredStats.prototype.getRange = function(field, untilLayer) {
+	untilLayer = this._lookupLayer(untilLayer);
+	if(!this._ranges[untilLayer]) this._ranges[untilLayer] = {};
+	
+	if(!this._ranges[untilLayer][field]) {
+		var r = new dusk.Range(
+			this.get(field+"_min", untilLayer), this.get(field+"_max", untilLayer), this.get(field, untilLayer)
+		);
+		
+		this._ranges[untilLayer][field] = r;
+		return r;
+	}else{
+		return this._ranges[untilLayer][field];
+	}
 };
 
 dusk.stats.LayeredStats.prototype.countInLayer = function(layer) {
@@ -235,7 +265,7 @@ dusk.stats.LayeredStats.prototype._lookupLayer = function(layer) {
 		if(this.layerNames[i] == layer) return i;
 	}
 	
-	if(!layer) return 0xffffffff;
+	if(!layer) return this._layers.length-1;
 	
 	console.log("Unknown layer "+layer);
 	return undefined;

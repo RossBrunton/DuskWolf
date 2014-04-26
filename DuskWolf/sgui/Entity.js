@@ -993,11 +993,15 @@ dusk.sgui.Entity.prototype._aniAction = function(event, action) {
 			break;
 		
 		case "#":
-			this.imageTrans =
-				this.imageTrans.replace(RegExp(action.substr(2).split(":")[0].split(";")[0]+"(?:\:[^;]*)?\;"), "");
+			for(var i = 0; i < this.imageTrans.length; i ++) {
+				if(this.imageTrans[i][0] == action.substr(2)) {
+					this.imageTrans.splice(i, 1);
+					i --;
+				}
+			}
 			
 			if(action.charAt(1) == "+") {
-				this.imageTrans += action.substr(2);
+				this.imageTrans.push(action.substr(2).split(":"));
 			}
 			
 			if(cont) this._aniForward(event);

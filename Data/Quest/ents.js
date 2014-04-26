@@ -31,7 +31,7 @@ dusk.entities.types.createNewType("hero", {
 dusk.entities.types.createNewType("questTest", {
 	"data":{"solid":false, "collides":false, "statsName":"ally", "statsLoadImage":true, "statsPutBack":true},
 	"animation":[["true", "1,2|2,2|1,2|3,2", {}]],
-	"particles":[["stat(moved, 3)", "#+mono;", {}], ["!stat(moved, 3)", "#-mono;", {}]],
+	"particles":[["stat(moved, 3)", "#+mono", {}], ["!stat(moved, 3)", "#-mono", {}]],
 	"behaviours":{"GridWalker":true, "StatLoader":true}
 }, "quest");
 
@@ -48,7 +48,7 @@ dusk.stats.addStatsGenerator("ally", function() {
 dusk.entities.types.createNewType("questEvil", {
 	"data":{"solid":false, "collides":false, "statsName":"evil", "statsLoadImage":true},
 	"animation":[["true", "1,3|2,3|1,3|3,3", {}]],
-	"particles":[["stat(moved, 3)", "#+mono;", {}], ["!stat(moved, 3)", "#-mono;", {}]],
+	"particles":[["stat(moved, 3)", "#+mono", {}], ["!stat(moved, 3)", "#-mono", {}]],
 	"behaviours":{"GridWalker":true, "StatLoader":true}
 }, "quest");
 

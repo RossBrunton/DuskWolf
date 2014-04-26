@@ -5,7 +5,6 @@
 dusk.load.require("dusk.sgui.Component");
 dusk.load.require(">dusk.utils");
 dusk.load.require(">dusk.controls");
-dusk.load.require(">dusk.data");
 dusk.load.require(">dusk.Image");
 
 dusk.load.provide("dusk.sgui.Label");

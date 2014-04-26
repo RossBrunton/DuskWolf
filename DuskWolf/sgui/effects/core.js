@@ -3,7 +3,6 @@
 "use strict";
 
 dusk.load.require("dusk.sgui.ParticleField");
-dusk.load.require("dusk.data");
 
 dusk.load.provide("dusk.sgui.effects.spread");
 dusk.load.provide("dusk.sgui.effects.spew");
@@ -15,11 +14,9 @@ dusk.sgui.effects.core.imageData = function(what, field) {
 	if(typeof what == "string") {
 		if(what.charAt(0) == "I") {
 			if(!(what.substr(1) in dusk.sgui.effects.core._images)) {
-				var img = dusk.data.grabImage(what.substr(1));
+				var img = (new dusk.Image(what.substr(1))).asCanvas();
 				
-				var c = dusk.utils.createCanvas(img.width, img.height).getContext("2d");
-				c.drawImage(what, 0, 0, img.width, img.height);
-				dusk.sgui.effects.core._images[what.substr(1)] = c.getImageData(0, 0, what.width, what.height);
+				dusk.sgui.effects.core._images[what.substr(1)] = img.getImageData(0, 0, img.width, img.height);
 				return dusk.sgui.effects.core._images[what.substr(1)];
 			}else{
 				return dusk.sgui.effects.core._images[what.substr(1)];

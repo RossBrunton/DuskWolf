@@ -2,7 +2,6 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-dusk.load.require("dusk.data");
 dusk.load.require("dusk.sgui.Component");
 dusk.load.require("dusk.Image");
 
@@ -35,10 +34,10 @@ dusk.sgui.Image = function(parent, comName) {
 	this._img = null;
 	/** Image options for the image.
 	 * 
-	 * @type string
+	 * @type array
 	 * @since 0.0.21-alpha
 	 */
-	this.imageTrans = "";
+	this.imageTrans = [];
 	
 	/** Sets the image to draw, this should be a URL, potentially relative to `{@link dusk.dataDir}`.
 	 * @type string

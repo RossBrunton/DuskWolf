@@ -21,7 +21,7 @@ dusk.Image = function(src, transform) {
 	this.src = dusk.utils.resolveRelative(frags[0], dusk.dataDir);
 	this.providedSrc = src;
 	
-	this.transform = transform?transform:"";
+	this.transform = transform?dusk.Image.parseTransString(transform):[];
 	if(frags.length > 1) this.transform += frags[1];
 	
 	this._proxy = null;
@@ -66,9 +66,9 @@ dusk.Image.prototype.loadPromise = function() {
 };
 
 dusk.Image.prototype.asCanvas = function(extraTrans, ignoreNormalTrans) {
-	if(this._proxy) return this._proxy.asCanvas(this.transform+extraTrans, true);
+	if(this._proxy) return this._proxy.asCanvas(this.transform.concat(extraTrans?extraTrans:[]), true);
 	
-	var opts = dusk.Image.parseTags((ignoreNormalTrans?"":this.transform) + extraTrans);
+	var opts = dusk.Image.parseTags((ignoreNormalTrans?[]:this.transform).concat(extraTrans?extraTrans:[]));
 	
 	if(!this._base) return null;
 	
@@ -105,7 +105,7 @@ dusk.Image.prototype.asCanvas = function(extraTrans, ignoreNormalTrans) {
 					break;
 				
 				default:
-					console.warn("Unknown tag "+opts.us.charAt(u));
+					//Ignore
 			}
 		}
 		ctx.putImageData(id, 0, 0);
@@ -116,10 +116,11 @@ dusk.Image.prototype.asCanvas = function(extraTrans, ignoreNormalTrans) {
 };
 
 dusk.Image.prototype.paint = function(ctx, extraTrans, ino, ox, oy, owidth, oheight, dx, dy, dwidth, dheight) {
-	if(this._proxy)
-		this._proxy.paint(ctx, this.transform+extraTrans, true, ox, oy, owidth, oheight, dx, dy, dwidth, dheight);
-	else
+	if(this._proxy) {
+		this._proxy.paint(ctx, this.transform.concat(extraTrans),true,ox,oy, owidth, oheight, dx, dy, dwidth, dheight);
+	}else{
 		ctx.drawImage(this.asCanvas(extraTrans, ino), ox, oy, owidth, oheight, dx, dy, dwidth, dheight);
+	}
 };
 
 dusk.Image.prototype.paintScaled = function
@@ -148,21 +149,26 @@ dusk.Image.prototype.height = function() {
 	return this._base.height;
 };
 
-dusk.Image.parseTags = function(str) {
+dusk.Image.parseTransString = function(str) {
+	var out = str.split(";");
+	for(var i = 0; i < out.length; i ++) {
+		out[i] = out[i].split(":");
+	}
+	return out;
+};
+
+dusk.Image.parseTags = function(trans) {
 	var out = {};
 	
-	var frags = str.split(";");
-	var p = frags.length-1;
+	var p = trans.length-1;
 	
 	while(p >= 0) {
-		var bits = frags[p].split(":");
-		
-		if(bits[0] == "mono") {
+		if(trans[p][0] == "mono") {
 			out.mono = true;
 		}
 		
-		if(bits[0] == "cor") {
-			out.cor = +bits[1];
+		if(trans[p][0] == "cor") {
+			out.cor = +trans[p][1];
 		}
 		
 		p --;
@@ -171,7 +177,7 @@ dusk.Image.parseTags = function(str) {
 	out.us = "";
 	
 	if("mono" in out) out.us += "m";
-	if("cor" in out) out.us += "#";
+	if("cor" in out) out.us += "#"+out.cor;
 	
 	return out;
 };

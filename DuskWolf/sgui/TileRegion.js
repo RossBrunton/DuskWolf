@@ -3,7 +3,6 @@
 "use strict";
 
 dusk.load.require("dusk.sgui.Component");
-dusk.load.require("dusk.data");
 dusk.load.require("dusk.utils");
 
 dusk.load.provide("dusk.sgui.TileRegion");
@@ -214,17 +213,18 @@ dusk.sgui.TileRegion.prototype._tileRegionDraw = function(e) {
 				this.tileWidth() - 2, this.tileHeight() - 2
 			);
 		}else{
-			var img = dusk.data.grabImage(c[2].substring(1));
-			if(img.complete) {
+			var img = new dusk.Image(c[2].substring(1));
+			if(img.isReady()) {
 				var hscale = 1//this.swidth/this.width;
 				var vscale = 1//this.sheight/this.height;
-				e.c.drawImage(img,
-					c[5] * this.tileWidth(),
-					c[6] * this.tileHeight(), 
+				img.paintScaled(e.c, [], false,
+					c[5] * this.tileWidth(), c[6] * this.tileHeight(), 
 					this.tileWidth()*hscale, this.tileWidth()*vscale,
+					
 					e.d.destX + ((c[0] * this.tileWidth()) - e.d.sourceX),
 					e.d.destY + ((c[1] * this.tileHeight()) - e.d.sourceY),
-					this.tileWidth(), this.tileHeight()
+					this.tileWidth(), this.tileHeight(),
+					1, 1
 				);
 			}
 		}

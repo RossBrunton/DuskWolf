@@ -3,7 +3,6 @@
 "use strict";
 
 dusk.load.require("dusk.sgui.Component");
-dusk.load.require("dusk.utils");
 
 dusk.load.provide("dusk.sgui.IContainer");
 

@@ -3,7 +3,6 @@
 "use strict";
 
 dusk.load.require("dusk.sgui.Component");
-dusk.load.require(">dusk.data");
 dusk.load.require("dusk.Image");
 
 dusk.load.provide("dusk.sgui.Tile");
@@ -70,10 +69,10 @@ dusk.sgui.Tile = function(parent, comName) {
 	this.src = "";
 	/** Image options for the origin image.
 	 * 
-	 * @type string
+	 * @type array
 	 * @since 0.0.21-alpha
 	 */
-	this.imageTrans = "";
+	this.imageTrans = [];
 	
 	/** The current tile, represented as a string.
 	 * 

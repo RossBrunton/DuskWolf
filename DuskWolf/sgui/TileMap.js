@@ -3,7 +3,6 @@
 "use strict";
 
 dusk.load.require("dusk.sgui.Component");
-dusk.load.require("dusk.data");
 dusk.load.require("dusk.utils");
 dusk.load.require(">dusk.Image");
 
@@ -298,15 +297,13 @@ dusk.sgui.TileMap.prototype.drawAll = function() {
 	for(var f = 0; f < this._frames; f ++) {
 		this._editAnimation(this._tiles[0], f);
 		var i = 0;
-		this._all[f].getContext("2d").clearRect(0, 0, this._all[f].width, this._all[f].height);
+		//this._all[f].getContext("2d").clearRect(0, 0, this._all[f].width, this._all[f].height);
 		for (var yi = 0; yi < this.rows; yi++) {
 			for (var xi = 0; xi < this.cols; xi++) {
-				if(this._tiles[f][i] !== undefined) {
-					this._img.paint(this._all[f].getContext("2d"), "", false,
-						this._tiles[f][i]*this.swidth, this._tiles[f][i+1]*this.sheight, this.swidth, this.sheight, 
-						xi*this.swidth, yi*this.sheight, this.swidth, this.sheight
-					);
-				}
+				this._img.paint(this._all[f].getContext("2d"), "", false,
+					this._tiles[f][i]*this.swidth, this._tiles[f][i+1]*this.sheight, this.swidth, this.sheight, 
+					xi*this.swidth, yi*this.sheight, this.swidth, this.sheight
+				);
 				i+=2;
 			}
 		}

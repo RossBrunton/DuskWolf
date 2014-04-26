@@ -4,6 +4,7 @@
 
 dusk.load.require("dusk.sgui.Rect");
 dusk.load.require("dusk.utils");
+dusk.load.require("dusk.Image");
 
 dusk.load.provide("dusk.sgui.FancyRect");
 
@@ -70,8 +71,8 @@ dusk.sgui.FancyRect.prototype._fancyRectDraw = function(e) {
 	e.c.translate(e.d.destX, e.d.destY);
 	
 	//Background
-	if(this._back && this._back.complete) {
-		e.c.fillStyle = e.c.createPattern(this._back, 'repeat');
+	if(this._back && this._back.isReady()) {
+		e.c.fillStyle = e.c.createPattern(this._back.asCanvas(), 'repeat');
 		
 		var n = dusk.utils.clone(e);
 		
@@ -84,38 +85,38 @@ dusk.sgui.FancyRect.prototype._fancyRectDraw = function(e) {
 	e.c.lineWidth = 0;
 	
 	//Edges
-	if(this._top && this._top.complete) {
-		e.c.fillStyle = e.c.createPattern(this._top, 'repeat-x');
+	if(this._top && this._top.isReady()) {
+		e.c.fillStyle = e.c.createPattern(this._top.asCanvas(), 'repeat-x');
 		
 		var n = dusk.utils.clone(e);
 		
 		n.d.destX = 0;
 		n.d.destY = 0;
-		n.d.height = this._top.height;
+		n.d.height = this._top.height();
 		
 		this._fill(n);
 	}
 	
-	if(this._left && this._left.complete) {
-		e.c.fillStyle = e.c.createPattern(this._left, 'repeat-y');
+	if(this._left && this._left.isReady()) {
+		e.c.fillStyle = e.c.createPattern(this._left.asCanvas(), 'repeat-y');
 		
 		var n = dusk.utils.clone(e);
 		
 		n.d.destX = 0;
 		n.d.destY = 0;
-		n.d.width = this._left.height;
+		n.d.width = this._left.height();
 		
 		this._fill(n);
 	}
 	
-	if(this._bottom && this._bottom.complete) {
-		e.c.fillStyle = e.c.createPattern(this._bottom, 'repeat-x');
+	if(this._bottom && this._bottom.isReady()) {
+		e.c.fillStyle = e.c.createPattern(this._bottom.asCanvas(), 'repeat-x');
 		
 		var n = dusk.utils.clone(e);
 		
 		n.d.destX = 0;
 		n.d.destY = 0;
-		n.d.height = this._bottom.height;
+		n.d.height = this._bottom.height();
 		
 		e.c.translate(0, e.d.height - n.d.height);
 		
@@ -123,14 +124,14 @@ dusk.sgui.FancyRect.prototype._fancyRectDraw = function(e) {
 		e.c.translate(0, - e.d.height + n.d.height);
 	}
 	
-	if(this._right && this._right.complete) {
-		e.c.fillStyle = e.c.createPattern(this._right, 'repeat-y');
+	if(this._right && this._right.isReady()) {
+		e.c.fillStyle = e.c.createPattern(this._right.asCanvas(), 'repeat-y');
 		
 		var n = dusk.utils.clone(e);
 		
 		n.d.destX = 0;
 		n.d.destY = 0;
-		n.d.width = this._right.width;
+		n.d.width = this._right.width();
 		
 		e.c.translate(e.d.width - n.d.width, 0);
 		this._fill(n);
@@ -138,32 +139,32 @@ dusk.sgui.FancyRect.prototype._fancyRectDraw = function(e) {
 	}
 	
 	//Corners
-	if(this._topLeft && this._topLeft.complete) {
-		e.c.drawImage(this._topLeft,
-			0, 0, this._topLeft.width, this._topLeft.height,
-			0, 0, this._topLeft.width, this._topLeft.height
+	if(this._topLeft && this._topLeft.isReady()) {
+		this._topLeft.paint(e.c, [], false,
+			0, 0, this._topLeft.width(), this._topLeft.height(),
+			0, 0, this._topLeft.width(), this._topLeft.height()
 		);
 	}
 	
-	if(this._topRight && this._topRight.complete) {
-		e.c.drawImage(this._topRight,
-			0, 0, this._topRight.width, this._topRight.height,
-			e.d.width - this._topRight.width, 0, this._topRight.width, this._topRight.height
+	if(this._topRight && this._topRight.isReady()) {
+		this._topRight.paint(e.c, [], false,
+			0, 0, this._topRight.width(), this._topRight.height(),
+			e.d.width - this._topRight.width(), 0, this._topRight.width(), this._topRight.height()
 		);
 	}
 	
-	if(this._bottomLeft && this._bottomLeft.complete) {
-		e.c.drawImage(this._bottomLeft,
-			0, 0, this._bottomLeft.width, this._bottomLeft.height,
-			0, e.d.height-this._bottomLeft.height, this._bottomLeft.width, this._bottomLeft.height
+	if(this._bottomLeft && this._bottomLeft.isReady()) {
+		this._bottomLeft.paint(e.c, [], false,
+			0, 0, this._bottomLeft.width(), this._bottomLeft.height(),
+			0, e.d.height-this._bottomLeft.height(), this._bottomLeft.width(), this._bottomLeft.height()
 		);
 	}
 	
-	if(this._bottomRight && this._bottomRight.complete) {
-		e.c.drawImage(this._bottomRight,
-			0, 0, this._bottomRight.width, this._bottomRight.height,
-			e.d.width - this._bottomRight.width, e.d.height - this._bottomRight.height,
-			this._bottomRight.width, this._bottomRight.height
+	if(this._bottomRight && this._bottomRight.isReady()) {
+		this._bottomRight.paint(e.c, [], false,
+			0, 0, this._bottomRight.width(), this._bottomRight.height(),
+			e.d.width - this._bottomRight.width(), e.d.height - this._bottomRight.height(),
+			this._bottomRight.width(), this._bottomRight.height()
 		);
 	}
 	
@@ -172,56 +173,56 @@ dusk.sgui.FancyRect.prototype._fancyRectDraw = function(e) {
 
 //back
 Object.defineProperty(dusk.sgui.FancyRect.prototype, "back", {
-	get: function() {return this._back?this._back.src:"";},
-	set: function(value) {this._back = value?dusk.data.grabImage(value):null;}
+	get: function() {return this._back?this._back.providedSrc:"";},
+	set: function(value) {this._back = value?new dusk.Image(value):null;}
 });
 
 //top
 Object.defineProperty(dusk.sgui.FancyRect.prototype, "top", {
-	get: function() {return this._top?this._top.src:"";},
-	set: function(value) {this._top = value?dusk.data.grabImage(value):null;}
+	get: function() {return this._top?this._top.providedSrc:"";},
+	set: function(value) {this._top = value?new dusk.Image(value):null;}
 });
 
 //bottom
 Object.defineProperty(dusk.sgui.FancyRect.prototype, "bottom", {
-	get: function() {return this._bottom?this._bottom.src:"";},
-	set: function(value) {this._bottom = value?dusk.data.grabImage(value):null;}
+	get: function() {return this._bottom?this._bottom.providedSrc:"";},
+	set: function(value) {this._bottom = value?new dusk.Image(value):null;}
 });
 
 //left
 Object.defineProperty(dusk.sgui.FancyRect.prototype, "left", {
-	get: function() {return this._left?this._left.src:"";},
-	set: function(value) {this._left = value?dusk.data.grabImage(value):null;}
+	get: function() {return this._left?this._left.providedSrc:"";},
+	set: function(value) {this._left = value?new dusk.Image(value):null;}
 });
 
 //right
 Object.defineProperty(dusk.sgui.FancyRect.prototype, "right", {
-	get: function() {return this._right?this._right.src:"";},
-	set: function(value) {this._right = value?dusk.data.grabImage(value):null;}
+	get: function() {return this._right?this._right.providedSrc:"";},
+	set: function(value) {this._right = value?new dusk.Image(value):null;}
 });
 
 //topLeft
 Object.defineProperty(dusk.sgui.FancyRect.prototype, "topLeft", {
-	get: function() {return this._topLeft?this._topLeft.src:"";},
-	set: function(value) {this._topLeft = value?dusk.data.grabImage(value):null;}
+	get: function() {return this._topLeft?this._topLeft.providedSrc:"";},
+	set: function(value) {this._topLeft = value?new dusk.Image(value):null;}
 });
 
 //topRight
 Object.defineProperty(dusk.sgui.FancyRect.prototype, "topRight", {
-	get: function() {return this._topRight?this._topRight.src:"";},
-	set: function(value) {this._topRight = value?dusk.data.grabImage(value):null;}
+	get: function() {return this._topRight?this._topRight.providedSrc:"";},
+	set: function(value) {this._topRight = value?new dusk.Image(value):null;}
 });
 
 //bottomLeft
 Object.defineProperty(dusk.sgui.FancyRect.prototype, "bottomLeft", {
-	get: function() {return this._bottomLeft?this._bottomLeft.src:"";},
-	set: function(value) {this._bottomLeft = value?dusk.data.grabImage(value):null;}
+	get: function() {return this._bottomLeft?this._bottomLeft.providedSrc:"";},
+	set: function(value) {this._bottomLeft = value?new dusk.Image(value):null;}
 });
 
 //bottomRight
 Object.defineProperty(dusk.sgui.FancyRect.prototype, "bottomRight", {
-	get: function() {return this._bottomRight?this._bottomRight.src:"";},
-	set: function(value) {this._bottomRight = value?dusk.data.grabImage(value):null;}
+	get: function() {return this._bottomRight?this._bottomRight.providedSrc:"";},
+	set: function(value) {this._bottomRight = value?new dusk.Image(value):null;}
 });
 
 Object.seal(dusk.sgui.FancyRect);

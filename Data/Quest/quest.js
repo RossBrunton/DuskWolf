@@ -11,6 +11,7 @@ dusk.load.require("dusk.items");
 dusk.load.require("dusk.save");
 dusk.load.require("dusk.save.ConsoleSource");
 dusk.load.require("dusk.TurnTicker");
+dusk.load.require("dusk.sgui.FpsMeter");
 
 dusk.load.require("quest.ents");
 dusk.load.require("quest.rooms.rooma");
@@ -85,6 +86,15 @@ dusk.sgui.getPane("menu").parseProps({
 	}
 });
 
+dusk.sgui.getPane("menu").parseProps({
+	"children":{
+		"meter":{
+			"type":"FpsMeter",
+			"xOrigin":dusk.sgui.Component.ORIGIN_MAX,
+			"yOrigin":dusk.sgui.Component.ORIGIN_MAX
+		}
+	}
+});
 
 window.q = dusk.quest.puppeteer;
 window.move = function(arg, qu) {
