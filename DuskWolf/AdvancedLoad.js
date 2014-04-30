@@ -8,6 +8,11 @@ dusk.load.provide("dusk.advancedLoad");
 
 //Takes dusk.load, and adds stuff to it
 
+/** Set by dusk.advancedLoad; it's the original function `{@link dusk.load.importList}`. This class replaces it with a
+ *  more sophisticated version.
+ * @type function(string, function(*), function(*))
+ * @private
+ */
 dusk.load._importListClassic = dusk.load.importList;
 
 dusk.load.importList = function(path, callback, errorCallback) {

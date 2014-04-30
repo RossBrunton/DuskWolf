@@ -223,7 +223,7 @@ document.onkeydown = function(e) {
 		&& document.activeElement.parentNode.id != dusk.elemPrefix
 	) return false;
 	
-	if([9, 13].indexOf(e.keyCode) !== -1) return false;
+	//if([9, 13].indexOf(e.keyCode) !== -1) return false; //Why is this here?
 };
 
 Object.seal(dusk.keyboard);

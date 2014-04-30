@@ -72,7 +72,13 @@ dusk.sgui.Label = function(parent, comName) {
 	 * @type HTMLCanvasElement
 	 * @private
 	 */
-	this._cache = null;
+	this._cache = dusk.utils.createCanvas(0, 0);
+	/** A canvas which is used to measure the width of text. Never actually displayed.
+	 * @type HTMLCanvasElement
+	 * @private
+	 * @since 0.0.21-alpha
+	 */
+	this._widthCache = dusk.utils.createCanvas(0, 0);
 	
 	/** The size of the text, in pixels.
 	 * @type integer
@@ -119,6 +125,17 @@ dusk.sgui.Label = function(parent, comName) {
 	 * @protected
 	 */
 	this._supressTextDisplay = false;
+	/** If true, this text will support multiple lines. If it is multiline, please set the height.
+	 * @type boolean
+	 * @since 0.0.21-alpha
+	 */
+	this.multiline = false;
+	/** Internal storage for the current size, used only if this is multiline.
+	 * @type int
+	 * @since 0.0.21-alpha
+	 * @private
+	 */
+	this._height = 0;
 	
 	//Formatting commands
 	/** This is fired when a formatting tag is detected. A listener, which uses the `propsYes` to listen for a specific
@@ -187,8 +204,9 @@ dusk.sgui.Label = function(parent, comName) {
 	this._registerPropMask("padding", "padding", true);
 	this._registerPropMask("size", "size", true);
 	this._registerPropMask("format", "format", true);
-	this._registerPropMask("width", "width", true, ["font", "text"]);
-	this._registerPropMask("height", "height", true, ["font", "text"]);
+	this._registerPropMask("width", "width", true, ["font", "text", "multiline"]);
+	this._registerPropMask("height", "height", true, ["font", "text", "multiline"]);
+	this._registerPropMask("multiline", "multiline");
 	
 	//Listeners
 	this.prepareDraw.listen(this._blDraw, this);
@@ -295,8 +313,12 @@ dusk.sgui.Label.prototype._updateCache = function(widthOnly) {
 	var textBuffer = "";
 	
 	//Create the cache
-	var cache = dusk.utils.createCanvas((widthOnly?0:this.width), this.height);
-	if(!widthOnly) this._cache = cache;
+	var cache = this._widthCache;
+	if(!widthOnly) {
+		cache = this._cache;
+		this._cache.width = this.width;
+		this._cache.height = this.height;
+	};
 	var c = cache.getContext("2d");
 	var font = this.font;
 	
@@ -305,25 +327,59 @@ dusk.sgui.Label.prototype._updateCache = function(widthOnly) {
 	c.fillStyle = this.colour;
 	c.strokeStyle = this.borderColour;
 	c.lineWidth = this.borderSize;
+	c.textBaseline = "middle";
 	
 	var useBorder = this.borderSize > 0;
 	
 	//Loop through each character in the text, cutting off the processed characters at the end of each loop
+	var drawBuff = (function() {
+		if(textBuffer !== "") {
+			if(!widthOnly) c.fillText(textBuffer, cursor, this.padding + (line * this.size) + (this.size>>1));
+			if(useBorder && !widthOnly)
+				c.strokeText(textBuffer, cursor, this.padding + (line * this.size) + (this.size >> 1));
+			
+			cursor += c.measureText(textBuffer).width;
+			textBuffer = "";
+		}
+	}).bind(this);
+	
 	var cursor = this.padding;
 	var charData = null;
+	var line = 0;
 	while(charData = this._nextChar(textHold)) {
 		if(charData[0] == null) {
 			//No formatting
-			textBuffer += charData[1];
+			if(charData[1] == "\n" && this.multiline) {
+				drawBuff();
+				line ++;
+				cursor = this.padding;
+			}else{
+				textBuffer += charData[1];
+			}
+			
+			if(this.multiline && c.measureText(textBuffer).width + this.padding > this.width) {
+				//Wrap previous word
+				var p = textBuffer.length-1;
+				var overflow = "";
+				while(!/\s/.test(textBuffer[p]) && p >= 0) {
+					overflow += textBuffer[p];
+					p --;
+				}
+				
+				if(textBuffer.length == overflow.length) {
+					//No words! D:
+					overflow = textBuffer[textBuffer.length - 1];
+				}
+				
+				textBuffer = textBuffer.substring(0, textBuffer.length - overflow.length);
+				drawBuff();
+				textBuffer = overflow.split("").reverse().join("");
+				line ++;
+				cursor = this.padding;
+			}
 		}else{
 			//Formatting, draw what text we have generated now, and then change the canvas to reflect formatting
-			if(textBuffer !== "") {
-				if(!widthOnly) c.fillText(textBuffer, cursor, this.padding + (this.size>>1));
-				if(useBorder && !widthOnly) c.strokeText(textBuffer, cursor, this.padding + (this.size >> 1));
-				
-				cursor += c.measureText(textBuffer).width;
-				textBuffer = "";
-			}
+			drawBuff();
 			
 			if(charData[0] == dusk.sgui.Label._EVENT_TERM) {
 				break;
@@ -375,7 +431,7 @@ dusk.sgui.Label.prototype._updateCache = function(widthOnly) {
 				if(charData[1][0].isReady()) {
 					charData[1][0].paint(c, "", false,
 						0, 0, charData[1][0].width(), charData[1][0].height(),
-						cursor, this.padding, charData[1][1], this.size
+						cursor, this.padding + line * this.size, charData[1][1], this.size
 					);
 					
 					cursor += charData[1][1];
@@ -415,10 +471,18 @@ Object.defineProperty(dusk.sgui.Label.prototype, "width", {
 //height
 Object.defineProperty(dusk.sgui.Label.prototype, "height", {
 	get: function() {
-		return this.size + (this.padding<<1);
+		if(this.multiline) {
+			return this._height;
+		}else{
+			return this.size + (this.padding<<1);
+		}
 	},
 	set: function(value) {
-		this.size = value - (this.padding<<1);
+		if(this.multiline) {
+			this._height = value;
+		}else{
+			this.size = value - (this.padding<<1);
+		}
 	}
 });
 
@@ -441,7 +505,7 @@ Object.defineProperty(dusk.sgui.Label.prototype, "text", {
  */
 dusk.sgui.Label.prototype._genSig = function() {
 	return this.size+"/"+this.font+"/"+this.colour+"/"+this.borderColour+"/"+this.padding+"/"+this.borderSize
-	+"/"+this.text+"/"+this.format;
+	+"/"+this.text+"/"+this.format+"/"+this.multiline;
 };
 
 /** Given text, checks if the next character is a formatting tag and processes it. If the string is empty, then a "TERM"
@@ -508,9 +572,17 @@ dusk.sgui.TextBox = function(parent, comName) {
 	this.prepareDraw.listen(this._boxDraw, this);
 	this.keyPress.listen(this._boxKey, this, {"ctrl":false});
 	this.onActiveChange.listen(this._activeChange, this);
-	this.frame.listen(function(e) {
-		if(this._active) this.text = document.getElementById(dusk.elemPrefix+"-input").value
-	}, this);
+	this.frame.listen((function(e) {
+		if(this._active) {
+			var e = document.getElementById(dusk.elemPrefix+"-input");
+			//I want no newlines
+			if(!this.multiline && e.value.indexOf("\n") !== -1) {
+				e.value = e.value.replace("\n", "");
+			} 
+			
+			this.text = e.value;
+		}
+	}).bind(this));
 	
 	//Defaults
 	this.activeBorder = "#ff5555";
@@ -555,7 +627,7 @@ dusk.sgui.TextBox.prototype._boxKey = function(e) {
 		return false;
 	}*/
 	
-	if(keyDat[0] == "ENTER") {
+	if(keyDat[0] == "ENTER" && !this.multiline) {
 		this.action.fire(e);
 		return false;
 	}
@@ -577,10 +649,18 @@ dusk.sgui.TextBox.prototype._activeChange = function(e) {
 		elem.value = this.text;
 		elem.style.padding = this.padding+"px";
 		elem.style.width = (this.width-(this.padding<<1))+"px";
-		elem.style.height = this.size+"px";
+		elem.style.height = (this.height-(this.padding<<1))+"px"; //this.size+"px";
 		elem.style.left = this.container.getTrueX(this.comName)+"px";
 		elem.style.top = this.container.getTrueY(this.comName)+"px";
 		elem.style.font = this.size + "px " + this.font;
+		elem.style.lineHeight = "100%";
+		elem.style.outline = "none";
+		elem.style.color = this.colour;
+		if(this.multiline) {
+			elem.style.whiteSpace = "normal";
+		}else{
+			elem.style.whiteSpace = "nowrap";
+		}
 		this._supressTextDisplay = true;
 	}else{
 		elem.style.visibility = "hidden";

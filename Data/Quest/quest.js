@@ -92,9 +92,32 @@ dusk.sgui.getPane("menu").parseProps({
 			"type":"FpsMeter",
 			"xOrigin":dusk.sgui.Component.ORIGIN_MAX,
 			"yOrigin":dusk.sgui.Component.ORIGIN_MAX
-		}
+		},
 	}
 });
+
+/*dusk.sgui.getPane("test").parseProps({
+	"active":true,
+	"focus":"text",
+	"children":{
+		"text":{
+			"type":"Grid",
+			"rows":1,
+			"cols":5,
+			"x":100,
+			"y":100,
+			"populate":{
+				"type":"TextBox",
+				"width":200,
+				"height":200,
+				"mouse":true,
+				"padding":5,
+				"multiline":true,
+				"format":true,
+			}
+		},
+	}
+});*/
 
 window.q = dusk.quest.puppeteer;
 window.move = function(arg, qu) {

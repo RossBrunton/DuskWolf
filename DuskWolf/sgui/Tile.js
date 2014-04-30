@@ -109,13 +109,6 @@ dusk.sgui.Tile.prototype.className = "Tile";
  */
 dusk.sgui.Tile.prototype._tileDraw = function(e) {
 	if(this._img.isReady()){
-		/*var hscale = this.swidth/this.width;
-		var vscale = this.sheight/this.height;
-		e.c.drawImage(this._img.asCanvas(this.imageTrans), this._tx * this.swidth + e.d.sourceX,
-			this._ty * this.sheight + e.d.sourceY, e.d.width*hscale, e.d.height*vscale,
-			e.d.destX, e.d.destY, e.d.width, e.d.height
-		);*/
-		
 		this._img.paintScaled(e.c, this.imageTrans, false,
 			this._tx * this.swidth + e.d.sourceX, this._ty * this.sheight + e.d.sourceY, e.d.width, e.d.height,
 			e.d.destX, e.d.destY, e.d.width, e.d.height,

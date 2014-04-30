@@ -107,9 +107,6 @@ dusk.sgui.TransitionManager = function(parent, comName) {
 			dusk.utils.jsonParse(prompt("Edit in transition.", "{}"));
 	}, this, {"key":73});
 	
-	//Render support
-	this.renderSupport |= dusk.sgui.Component.REND_OFFSET | dusk.sgui.Component.REND_SLICE;
-	
 	//Add to the MarkTrigger listener
 	this._mtId = dusk.entities.markTrigger.listen(this._tmMarkTrigger, this);
 	this.onDelete.listen(

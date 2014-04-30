@@ -123,6 +123,16 @@ dusk.Image.prototype.paint = function(ctx, extraTrans, ino, ox, oy, owidth, ohei
 	}
 };
 
+dusk.Image.prototype.paintFull = function(ctx, extraTrans, ino, dx, dy, dwidth, dheight) {
+	if(this._proxy) {
+		this._proxy.paint(
+			ctx, this.transform.concat(extraTrans),true, 0, 0, this.width(), this.height(), dx, dy, dwidth, dheight
+		);
+	}else{
+		ctx.drawImage(this.asCanvas(extraTrans, ino), 0, 0, this.width(), this.height(), dx, dy, dwidth, dheight);
+	}
+};
+
 dusk.Image.prototype.paintScaled = function
 	(ctx, extraTrans, ino, ox, oy, owidth, oheight, dx, dy, dwidth, dheight, sx, sy) {
 	

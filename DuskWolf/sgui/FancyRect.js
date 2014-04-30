@@ -45,6 +45,9 @@ dusk.sgui.FancyRect = function (parent, comName) {
 	this.bottomRight = "";
 	this.bottomLeft = "";
 	
+	this._cache = dusk.utils.createCanvas(0, 0);
+	this._cacheValue = "";
+	
 	//Prop masks
 	this._registerPropMask("back", "back", true);
 	this._registerPropMask("top", "top", true);
@@ -66,109 +69,91 @@ dusk.sgui.FancyRect.prototype = Object.create(dusk.sgui.Rect.prototype);
  * @private
  */
 dusk.sgui.FancyRect.prototype._fancyRectDraw = function(e) {
-	e.c.strokeStyle = this.bColour;
-	e.c.lineWidth = this.bWidth;
-	e.c.translate(e.d.destX, e.d.destY);
-	
-	//Background
-	if(this._back && this._back.isReady()) {
-		e.c.fillStyle = e.c.createPattern(this._back.asCanvas(), 'repeat');
+	if(this._cacheSig() != this._cacheValue) {
+		this._cacheValue = this._cacheSig();
+		this._cache.width = this.width;
+		this._cache.height = this.height;
+		var ctx = this._cache.getContext("2d");
 		
-		var n = dusk.utils.clone(e);
+		ctx.strokeStyle = this.bColour;
+		ctx.lineWidth = this.bWidth;
 		
-		n.d.destX = 0;
-		n.d.destY = 0;
+		//Background
+		if(this._back && this._back.isReady()) {
+			ctx.fillStyle = ctx.createPattern(this._back.asCanvas(), 'repeat');
+			
+			var n = dusk.utils.clone(e);
+			
+			n.d.destX = 0;
+			n.d.destY = 0;
+			n.c = ctx;
+			
+			this._fill(n);
+		}
 		
-		this._fill(n);
+		ctx.lineWidth = 0;
+		
+		//Edges
+		if(this._top && this._top.isReady()) {
+			ctx.fillStyle = ctx.createPattern(this._top.asCanvas(), 'repeat-x');
+			ctx.fillRect(0, 0, this.width, this._top.height());
+		}
+		
+		if(this._left && this._left.isReady()) {
+			ctx.fillStyle = ctx.createPattern(this._left.asCanvas(), 'repeat-y');
+			ctx.fillRect(0, 0, this._left.width(), this.height);
+		}
+		
+		if(this._bottom && this._bottom.isReady()) {
+			ctx.fillStyle = ctx.createPattern(this._bottom.asCanvas(), 'repeat-x');
+			
+			ctx.translate(0, this.height - this._bottom.height());
+			ctx.fillRect(0, 0, this.width, this._bottom.height());
+			ctx.translate(0, -(this.height - this._bottom.height()));
+		}
+		
+		if(this._right && this._right.isReady()) {
+			ctx.fillStyle = ctx.createPattern(this._right.asCanvas(), 'repeat-y');
+			
+			ctx.translate(this.width - this._right.width(), 0);
+			ctx.fillRect(0, 0, this._right.width(), this.height);
+			ctx.translate(-(this.width - this._right.width()), 0);
+		}
+		
+		//Corners
+		if(this._topLeft && this._topLeft.isReady()) {
+			this._topLeft.paintFull(ctx, [], false,
+				0, 0, this._topLeft.width(), this._topLeft.height()
+			);
+		}
+		
+		if(this._topRight && this._topRight.isReady()) {
+			this._topRight.paintFull(ctx, [], false,
+				this.width - this._topRight.width(), 0, this._topRight.width(), this._topRight.height()
+			);
+		}
+		
+		if(this._bottomLeft && this._bottomLeft.isReady()) {
+			this._bottomLeft.paintFull(ctx, [], false,
+				0, this.height-this._bottomLeft.height(), this._bottomLeft.width(), this._bottomLeft.height()
+			);
+		}
+		
+		if(this._bottomRight && this._bottomRight.isReady()) {
+			this._bottomRight.paintFull(ctx, [], false,
+				this.width - this._bottomRight.width(), this.height - this._bottomRight.height(),
+				this._bottomRight.width(), this._bottomRight.height()
+			);
+		}
 	}
 	
-	e.c.lineWidth = 0;
-	
-	//Edges
-	if(this._top && this._top.isReady()) {
-		e.c.fillStyle = e.c.createPattern(this._top.asCanvas(), 'repeat-x');
-		
-		var n = dusk.utils.clone(e);
-		
-		n.d.destX = 0;
-		n.d.destY = 0;
-		n.d.height = this._top.height();
-		
-		this._fill(n);
-	}
-	
-	if(this._left && this._left.isReady()) {
-		e.c.fillStyle = e.c.createPattern(this._left.asCanvas(), 'repeat-y');
-		
-		var n = dusk.utils.clone(e);
-		
-		n.d.destX = 0;
-		n.d.destY = 0;
-		n.d.width = this._left.height();
-		
-		this._fill(n);
-	}
-	
-	if(this._bottom && this._bottom.isReady()) {
-		e.c.fillStyle = e.c.createPattern(this._bottom.asCanvas(), 'repeat-x');
-		
-		var n = dusk.utils.clone(e);
-		
-		n.d.destX = 0;
-		n.d.destY = 0;
-		n.d.height = this._bottom.height();
-		
-		e.c.translate(0, e.d.height - n.d.height);
-		
-		this._fill(n);
-		e.c.translate(0, - e.d.height + n.d.height);
-	}
-	
-	if(this._right && this._right.isReady()) {
-		e.c.fillStyle = e.c.createPattern(this._right.asCanvas(), 'repeat-y');
-		
-		var n = dusk.utils.clone(e);
-		
-		n.d.destX = 0;
-		n.d.destY = 0;
-		n.d.width = this._right.width();
-		
-		e.c.translate(e.d.width - n.d.width, 0);
-		this._fill(n);
-		e.c.translate(- e.d.width + n.d.width, 0);
-	}
-	
-	//Corners
-	if(this._topLeft && this._topLeft.isReady()) {
-		this._topLeft.paint(e.c, [], false,
-			0, 0, this._topLeft.width(), this._topLeft.height(),
-			0, 0, this._topLeft.width(), this._topLeft.height()
-		);
-	}
-	
-	if(this._topRight && this._topRight.isReady()) {
-		this._topRight.paint(e.c, [], false,
-			0, 0, this._topRight.width(), this._topRight.height(),
-			e.d.width - this._topRight.width(), 0, this._topRight.width(), this._topRight.height()
-		);
-	}
-	
-	if(this._bottomLeft && this._bottomLeft.isReady()) {
-		this._bottomLeft.paint(e.c, [], false,
-			0, 0, this._bottomLeft.width(), this._bottomLeft.height(),
-			0, e.d.height-this._bottomLeft.height(), this._bottomLeft.width(), this._bottomLeft.height()
-		);
-	}
-	
-	if(this._bottomRight && this._bottomRight.isReady()) {
-		this._bottomRight.paint(e.c, [], false,
-			0, 0, this._bottomRight.width(), this._bottomRight.height(),
-			e.d.width - this._bottomRight.width(), e.d.height - this._bottomRight.height(),
-			this._bottomRight.width(), this._bottomRight.height()
-		);
-	}
-	
-	e.c.translate(-e.d.destX, -e.d.destY);
+	e.c.drawImage(this._cache, e.d.sourceX, e.d.sourceY, e.d.width,  e.d.height,
+		e.d.destX, e.d.destY, e.d.width, e.d.height
+	);
+};
+
+dusk.sgui.FancyRect.prototype._cacheSig = function() {
+	return this.x+","+this.y+","+this.height+","+this.width;
 };
 
 //back

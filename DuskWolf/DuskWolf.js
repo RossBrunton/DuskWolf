@@ -113,8 +113,8 @@ if("register" in document) {
 		if(!elem.style.height) elem.style.height = toPx(elem.getAttribute("height"));
 		
 		if(!elem.id) elem.id = "swo-duskwolf";
-		elem.innerHTML = "<input id='"+elem.id+"-input' type='text'\
-		style='position:absolute; visibility:hidden; background:transparent; border:none;'>";
+		elem.innerHTML = "<textarea id='"+elem.id+"-input' type='text'\
+		style='position:absolute;visibility:hidden;background:transparent;border:none;resize:none;overflow:hidden;'>";
 		elem.innerHTML += "<canvas id='"+elem.id+"-canvas' style='image-rendering: -webkit-optimize-contrast;'\
 		width='"+elem.getAttribute("width")+"' height='"+elem.getAttribute("height")+"'\
 		></canvas>";

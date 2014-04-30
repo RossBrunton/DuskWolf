@@ -60,14 +60,6 @@ dusk.sgui.Image.prototype = Object.create(dusk.sgui.Component.prototype);
  */
 dusk.sgui.Image.prototype._imageDraw = function(e) {
 	if(this._img && this._img.isReady() && this._img.width() && this._img.height()){
-		/*var ratioX = (this._img.width() / this.width);
-		var ratioY = (this._img.height() / this.height);
-		
-		e.c.drawImage(this._img.asCanvas(this.imageTrans),
-			e.d.sourceX * ratioX, e.d.sourceY * ratioY, e.d.width * ratioX, e.d.height * ratioY,
-			e.d.destX, e.d.destY, e.d.width, e.d.height
-		);*/
-		
 		this._img.paintScaled(e.c, this.imageTrans, false,
 			e.d.sourceX, e.d.sourceY, e.d.width, e.d.height,
 			e.d.destX, e.d.destY, e.d.width, e.d.height,
