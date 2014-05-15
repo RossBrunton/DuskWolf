@@ -55,6 +55,8 @@ dusk.sgui.EntityGroup = function (parent, comName) {
 	this._offsetY = 0;
 	this._showEntities = false;
 	
+	this._priorEntity = "";
+	
 	//Prop masks
 	this._registerPropMask("sheight", "sheight");
 	this._registerPropMask("swidth", "swidth");
@@ -103,15 +105,14 @@ dusk.sgui.EntityGroup = function (parent, comName) {
 	this.dirPress.listen(this._egUpAction, this, {"dir":dusk.sgui.c.DIR_UP});
 	this.dirPress.listen(this._egDownAction, this, {"dir":dusk.sgui.c.DIR_DOWN});
 };
-dusk.sgui.EntityGroup.prototype = new dusk.sgui.Group();
-dusk.sgui.EntityGroup.constructor = dusk.sgui.EntityGroup;
+dusk.sgui.EntityGroup.prototype = Object.create(dusk.sgui.Group.prototype);
 
 dusk.sgui.EntityGroup.prototype.className = "EntityGroup";
 
 dusk.sgui.EntityGroup.prototype.doFrame = function(active) {
 	if(dusk.editor.active) {
 		//Editing
-		if(this._focused) {
+		if(this.focused) {
 			dusk.sgui.EditableTileMap.globalEditX = this._cx;
 			dusk.sgui.EditableTileMap.globalEditY = this._cy;
 		}else{
@@ -119,11 +120,21 @@ dusk.sgui.EntityGroup.prototype.doFrame = function(active) {
 			this._cy = dusk.sgui.EditableTileMap.globalEditY;
 		}
 		
+		if(this.focus != "_noselectedentity") {
+			this._priorFocus = "_noselectedentity";
+			this.focus = "_noselectedentity";
+		}
+		
 		if(this._selectedEntity){
 			this._selectedEntity.x = (this._cx*this.twidth)+this._offsetX;
 			this._selectedEntity.y = (this._cy*this.theight)+this._offsetY;
 		}
 	}else{
+		if(this._priorFocus) {
+			this.focus = this._priorFocus;
+			this._priorFocus = "";
+		}
+		
 		//Call every entities' beforeMove function
 		if(active) for(var i = this._entities.length-1; i >= 0; i --) this._entities[i].beforeMove();
 		
@@ -138,7 +149,7 @@ dusk.sgui.EntityGroup.prototype.doFrame = function(active) {
 
 dusk.sgui.EntityGroup.prototype._entityGroupDraw = function(e) {
 	if(!dusk.editor.active) return;
-	if(!this._focused) return;
+	if(!this.focused) return;
 	
 	var width = this.twidth;
 	var height = this.theight;
@@ -155,8 +166,9 @@ dusk.sgui.EntityGroup.prototype._entityGroupDraw = function(e) {
 	if(!this._selectedEntity){
 		e.c.strokeStyle = "#00ffff";
 	}else{
-		e.c.strokeStyle = "#00ffff";
+		e.c.strokeStyle = "#ff00ff";
 	}
+	e.c.lineWidth = 1;
 	
 	e.c.strokeRect(e.d.destX - e.d.sourceX + xAt,
 		e.d.destY - e.d.sourceY + yAt, width, height
@@ -529,6 +541,7 @@ dusk.sgui.EntityGroup.prototype.saveBM = function(addDep) {
 
 dusk.sgui.EntityGroup.prototype.loadBM = function(ents) {
 	this.clear();
+	this.getComponent("_noselectedentity", "NullCom");
 	for(var i = ents.length-1; i >= 0; i --){
 		this.dropEntity(ents[i]);
 	}

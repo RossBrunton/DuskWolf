@@ -142,7 +142,7 @@ dusk.sgui.EditableTileMap.globalEditWidth = 1;
  * @private
  */
 dusk.sgui.EditableTileMap.prototype._editTileMapDraw = function(e) {
-	if(!this._focused || !dusk.editor.active) return;
+	if(!this.focused || !dusk.editor.active) return;
 	
 	if(-e.d.sourceX + (this._cx*this.tileWidth()) > e.d.width) return;
 	if(-e.d.sourceY + (this._cy*this.tileHeight()) > e.d.height) return;
@@ -182,7 +182,7 @@ dusk.sgui.EditableTileMap.prototype._editTileMapDraw = function(e) {
  */
 dusk.sgui.EditableTileMap.prototype._editTileMapFrame = function(e) {
 	if(this.globalCoords) {
-		if(this._focused && dusk.editor.active) {
+		if(this.focused && dusk.editor.active) {
 			dusk.sgui.EditableTileMap.globalEditX = this._cx;
 			dusk.sgui.EditableTileMap.globalEditY = this._cy;
 			dusk.sgui.EditableTileMap.globalEditWidth = this.frameWidth;
@@ -192,6 +192,20 @@ dusk.sgui.EditableTileMap.prototype._editTileMapFrame = function(e) {
 			this._cy = dusk.sgui.EditableTileMap.globalEditY;
 			this.frameWidth = dusk.sgui.EditableTileMap.globalEditWidth;
 			this.frameHeight = dusk.sgui.EditableTileMap.globalEditHeight;
+		}
+	}
+};
+
+/** Sets the entire frame to the current tile.
+ * @param {integer} xt The x of the tile to set.
+ * @param {integer} yt The y of the tile to set.
+ * @private
+ * @since 0.0.21-alpha
+ */
+dusk.sgui.EditableTileMap.prototype._set = function(xt, yt) {
+	for(var x = this.frameWidth-1; x >= 0; x --) {
+		for(var y = this.frameHeight-1; y >= 0; y --) {
+			this.setTile(this._cx+x, this._cy+y, xt, yt);
 		}
 	}
 };
@@ -250,11 +264,7 @@ dusk.sgui.EditableTileMap.prototype._etmUpAction = function(e) {
 	if(e.e.shiftKey) {
 		var current = this.getTile(this._cx, this._cy);
 		current[1] --;
-		for(var x = this.frameWidth-1; x >= 0; x --) {
-			for(var y = this.frameHeight-1; y >= 0; y --) {
-				this.setTile(this._cx+x, this._cy+y, current[0], current[1]);
-			}
-		}
+		this._set(current[0], current[1]);
 		dusk.sgui.TileMap.tileData.free(current);
 		this.drawAll();
 		return false;
@@ -288,11 +298,7 @@ dusk.sgui.EditableTileMap.prototype._etmDownAction = function(e) {
 	if(e.e.shiftKey) {
 		var current = this.getTile(this._cx, this._cy);
 		current[1] ++;
-		for(var x = this.frameWidth-1; x >= 0; x --) {
-			for(var y = this.frameHeight-1; y >= 0; y --) {
-				this.setTile(this._cx+x, this._cy+y, current[0], current[1]);
-			}
-		}
+		this._set(current[0], current[1]);
 		dusk.sgui.TileMap.tileData.free(current);
 		this.drawAll();
 		return false;
@@ -326,11 +332,7 @@ dusk.sgui.EditableTileMap.prototype._etmRightAction = function(e) {
 	if(e.e.shiftKey) {
 		var current = this.getTile(this._cx, this._cy);
 		current[0] ++;
-		for(var x = this.frameWidth-1; x >= 0; x --) {
-			for(var y = this.frameHeight-1; y >= 0; y --) {
-				this.setTile(this._cx+x, this._cy+y, current[0], current[1]);
-			}
-		}
+		this._set(current[0], current[1]);
 		dusk.sgui.TileMap.tileData.free(current);
 		this.drawAll();
 		return false;
@@ -364,11 +366,7 @@ dusk.sgui.EditableTileMap.prototype._etmLeftAction = function(e) {
 	if(e.e.shiftKey) {
 		var current = this.getTile(this._cx, this._cy);
 		current[0] --;
-		for(var x = this.frameWidth-1; x >= 0; x --) {
-			for(var y = this.frameHeight-1; y >= 0; y --) {
-				this.setTile(this._cx+x, this._cy+y, current[0], current[1]);
-			}
-		}
+		this._set(current[0], current[1]);
 		dusk.sgui.TileMap.tileData.free(current);
 		this.drawAll();
 		return false;
@@ -557,24 +555,6 @@ dusk.sgui.EditableTileMap.prototype.carveRight = function() {
  */
 dusk.sgui.EditableTileMap.prototype.save = function() {
 	return this.map.map;
-};
-
-/** Returns the map for `{@link dusk.sgui.BasicMain}` to save it.
- * 
- * @return {object} The current map.
- * @since 0.0.18-alpha
- */
-dusk.sgui.EditableTileMap.prototype.saveBM = function() {
-	return this.map;
-};
-
-/** Loads a map from an object. This is used by `{@link dusk.sgui.BasicMain}`.
- * 
- * @param {object} map The map to load, will be assigned to `{@link dusk.sgui.EditableTileMap#map}`.
- * @since 0.0.18-alpha
- */
-dusk.sgui.EditableTileMap.prototype.loadBM = function(map) {
-	this.map = map;
 };
 
 Object.seal(dusk.sgui.EditableTileMap);

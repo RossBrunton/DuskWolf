@@ -4,6 +4,7 @@
 
 dusk.load.require("dusk.behave.Behave");
 dusk.load.require("dusk.controls");
+dusk.load.require("dusk.options");
 
 dusk.load.provide("dusk.behave.GridRecorder");
 dusk.load.provide("dusk.behave.GridWalker");
@@ -235,7 +236,7 @@ dusk.behave.GridMouse = function(entity) {
 dusk.behave.GridMouse.prototype = Object.create(dusk.behave.Behave.prototype);
 
 dusk.behave.GridMouse.prototype._gmMouseMove = function(e) {
-	if(this._data("gmMouseMove")) {
+	if(this._data("gmMouseMove") && dusk.options.get("controls.mouseGrid") && this._entity.active) {
 		var destX = ~~((this._entity.x + e.x) / this._entity.width);
 		var destY = ~~((this._entity.y + e.y) / this._entity.height);
 		
@@ -255,5 +256,9 @@ dusk.behave.GridMouse.workshopData = {
 		
 	]
 };
+
+dusk.options.register("controls.mouseGrid", "boolean", true,
+	"Whether moving the mouse changes the location of grid selectors."
+);
 
 dusk.entities.registerBehaviour("GridMouse", dusk.behave.GridMouse);

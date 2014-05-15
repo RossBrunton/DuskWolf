@@ -49,9 +49,8 @@ dusk.elemPrefix = "";
  * 
  * If it exists, this is set the value of the DuskWolf element's "dev" property.
  * @type boolean
- * @default true
  */
-dusk.dev = true;
+dusk.dev = false;
 
 /** If true, then the game has been started (`{@link dusk.startGame}` has been called).
  * @type boolean
@@ -85,8 +84,8 @@ if("register" in document) {
 			}
 			
 			switch(attrName) {
-				case "width":
-				case "height":
+				case "data-width":
+				case "data-height":
 					this.style[attrName] = toPx(newVal);
 					document.getElementById(this.id+"-canvas").style[attrName] = toPx(newVal);
 					break;
@@ -104,24 +103,24 @@ if("register" in document) {
 	
 	if(document.getElementsByTagName("swo-duskwolf").length) {
 		var elem = document.getElementsByTagName("swo-duskwolf")[0];
-		if(elem.getAttribute("frameRate")) dusk.frameRate = elem.getAttribute("frameRate");
-		if(elem.getAttribute("data")) dusk.dataDir = elem.getAttribute("data");
-		if(elem.getAttribute("dev")) dusk.dev = true;
+		if(elem.getAttribute("data-frameRate")) dusk.frameRate = elem.getAttribute("data-frameRate");
+		if(elem.getAttribute("data-data")) dusk.dataDir = elem.getAttribute("data-data");
+		if(elem.getAttribute("data-dev") !== undefined) dusk.dev = true;
 		
 		elem.style.display = "block";
-		if(!elem.style.width) elem.style.width = toPx(elem.getAttribute("width"));
-		if(!elem.style.height) elem.style.height = toPx(elem.getAttribute("height"));
+		if(!elem.style.width) elem.style.width = toPx(elem.getAttribute("data-width"));
+		if(!elem.style.height) elem.style.height = toPx(elem.getAttribute("data-height"));
 		
 		if(!elem.id) elem.id = "swo-duskwolf";
 		elem.innerHTML = "<textarea id='"+elem.id+"-input' type='text'\
 		style='position:absolute;visibility:hidden;background:transparent;border:none;resize:none;overflow:hidden;'>";
 		elem.innerHTML += "<canvas id='"+elem.id+"-canvas' style='image-rendering: -webkit-optimize-contrast;'\
-		width='"+elem.getAttribute("width")+"' height='"+elem.getAttribute("height")+"'\
+		width='"+elem.getAttribute("data-width")+"' height='"+elem.getAttribute("data-height")+"'\
 		></canvas>";
 		dusk.elemPrefix = elem.id;
 		
-		dusk.load.importList(elem.getAttribute("deps")).then(function() {
-			dusk.load.import(elem.getAttribute("package"));
+		dusk.load.importList(elem.getAttribute("data-deps")).then(function() {
+			dusk.load.import(elem.getAttribute("data-package"));
 		});
 	}
 //});

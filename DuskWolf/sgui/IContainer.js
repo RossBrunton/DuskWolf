@@ -22,6 +22,7 @@ dusk.load.provide("dusk.sgui.IContainer");
  * List of methods required:
  * 
  * - {@link dusk.sgui.IContainer.containerKeypress}
+ * - {@link dusk.sgui.IContainer.containerButtonpress}
  * - {@link dusk.sgui.IContainer.containerClick}
  * - {@link dusk.sgui.IContainer.deleteComponent}
  * - {@link dusk.sgui.IContainer.deleteAllComponents}
@@ -53,6 +54,16 @@ dusk.sgui.IContainer = {};
  * @return {boolean} The return value of the focused component's keypress.
  */
 dusk.sgui.IContainer.containerKeypress = function(e) {};
+
+/** Container specific method of handling button presses.
+ * 
+ * This is a button equivilent to `{@link dusk.sgui.IContainer.containerKeypress}`.
+ * 
+ * @param {object} e The button press event.
+ * @return {boolean} The return value of the focused component's keypress.
+ * @since 0.0.21-alpha
+ */
+dusk.sgui.IContainer.containerButtonpress = function(e) {};
 
 /** Container specific method of handling clicks.
  * 

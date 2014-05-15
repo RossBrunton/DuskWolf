@@ -5,6 +5,7 @@
 dusk.load.require("dusk.sgui.Component");
 dusk.load.require("dusk.sgui.extras.Fade");
 dusk.load.require("dusk.utils");
+dusk.load.require(">dusk.options");
 
 dusk.load.provide("dusk.sgui.TransitionManager");
 
@@ -123,7 +124,7 @@ dusk.sgui.TransitionManager.prototype.loadBM = function(data, mark) {
 	this._transitions = data;
 	
 	//Pre-import all packages
-	if("out" in this._transitions) {
+	if("out" in this._transitions && dusk.options.get("net.prefetchRooms")) {
 		for(var i = 0; i < this._transitions.out.length; i ++) {
 			if("package" in this._transitions.out[i][3]) dusk.load.import(this._transitions.out[i][3].package);
 		}
@@ -279,7 +280,7 @@ dusk.sgui.TransitionManager.prototype._getLastTrigger = function() {
  */
 dusk.sgui.TransitionManager.prototype._tmFrame = function(e) {
 	if(!dusk.editor.active) return;
-	if(!this._focused) return;
+	if(!this.focused) return;
 	
 	this.x = this.container.xOffset;
 	this.y = this.container.yOffset+10;
@@ -291,7 +292,7 @@ dusk.sgui.TransitionManager.prototype._tmFrame = function(e) {
  */
 dusk.sgui.TransitionManager.prototype._tmDraw = function(e) {
 	if(!dusk.editor.active) return;
-	if(!this._focused) return;
+	if(!this.focused) return;
 	
 	var frags = this._tmPretty().split("\n");
 	var y = 50 + e.d.sourceY + e.d.destY;
@@ -335,6 +336,11 @@ dusk.sgui.TransitionManager.prototype._tmPretty = function() {
 	
 	return hold + "}";
 };
+
+//Add prefetch option
+dusk.options.register("net.prefetchRooms", "boolean", true, 
+	"Whether connecting rooms shound be automatically downloaded when a room is loaded."
+);
 
 Object.seal(dusk.sgui.TransitionManager);
 Object.seal(dusk.sgui.TransitionManager.prototype);

@@ -46,6 +46,9 @@ dusk.sgui.BasicMain = function(parent, comName) {
 	this.keyPress.listen(function(e) {
 		if(dusk.editor.active) this.createRoom(prompt("Enter a room to go to.", this.roomName), 0);
 	}, this, {"key":71});
+	this.augment.listen((function(e) {
+		this.mouse.focus = false;
+	}).bind(this), undefined, {"augment":"mouse"});
 	
 	//Directions
 	this.dirPress.listen(this._bmRightAction, this, {"dir":dusk.sgui.c.DIR_RIGHT});
@@ -130,11 +133,12 @@ Object.defineProperty(dusk.sgui.BasicMain.prototype, "layers", {
 		this.deleteAllComponents();
 		
 		var colour = 0;
+		var mapType = dusk.dev?"EditableTileMap":"TileMap";
 		
 		for(var i = 0; i < val.length; i ++) {
 			switch(val[i].type) {
 				case dusk.sgui.BasicMain.LAYER_TILEMAP:
-					this.getComponent(val[i].name, "EditableTileMap").parseProps(
+					this.getComponent(val[i].name, mapType).parseProps(
 					{"cursorColour":dusk.sgui.BasicMain._LAYER_COLOURS[colour++],
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
 						"twidth":dusk.entities.twidth, "theight":dusk.entities.theight,
@@ -144,7 +148,7 @@ Object.defineProperty(dusk.sgui.BasicMain.prototype, "layers", {
 					break;
 				
 				case dusk.sgui.BasicMain.LAYER_SCHEME:
-					this.getComponent(val[i].name, "EditableTileMap").parseProps(
+					this.getComponent(val[i].name, mapType).parseProps(
 					{"cursorColour":dusk.sgui.BasicMain._LAYER_COLOURS[colour++],
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
 						"twidth":dusk.entities.twidth, "theight":dusk.entities.theight,
@@ -152,7 +156,7 @@ Object.defineProperty(dusk.sgui.BasicMain.prototype, "layers", {
 					});
 					
 					if("weights" in val[i] && val[i].weights) 
-						this.getComponent(val[i].name, "EditableTileMap").weights = val[i].weights;
+						this.getComponent(val[i].name, mapType).weights = val[i].weights;
 					
 					break;
 				
@@ -247,10 +251,10 @@ dusk.sgui.BasicMain.prototype._basicMainFrame = function(e) {
 	this.autoScroll();
 	
 	//Ask all entities to do something
-	//if(this._active) {
+	//if(this.active) {
 		for(var i = 0; i < this._layers.length; i ++) {
 			if(this._layers[i].type == dusk.sgui.BasicMain.LAYER_ENTITIES) 
-				this.getComponent(this._layers[i].name).doFrame(this._active);
+				this.getComponent(this._layers[i].name).doFrame(this.active);
 		}
 	//}
 	
@@ -263,7 +267,10 @@ dusk.sgui.BasicMain.prototype._basicMainFrame = function(e) {
 			this.getComponent("editorLabel").text = "Editing: " + this.focus;
 			this.getComponent("editorLabel").x = this.xOffset + this.width/2 - this.getComponent("editorLabel").width/2;
 			this.getComponent("editorLabel").y = this.yOffset + 10;
+			this.getComponent("editorLabel").size = 14;
 			this.getComponent("editorLabel").colour = this.editorColour;
+			this.getComponent("editorLabel").borderColour = "#ffffff";
+			this.getComponent("editorLabel").borderSize = 3;
 		}
 	}else{
 		this.focusBehaviour = dusk.sgui.Group.FOCUS_ALL;

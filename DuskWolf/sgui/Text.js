@@ -334,9 +334,9 @@ dusk.sgui.Label.prototype._updateCache = function(widthOnly) {
 	//Loop through each character in the text, cutting off the processed characters at the end of each loop
 	var drawBuff = (function() {
 		if(textBuffer !== "") {
-			if(!widthOnly) c.fillText(textBuffer, cursor, this.padding + (line * this.size) + (this.size>>1));
 			if(useBorder && !widthOnly)
 				c.strokeText(textBuffer, cursor, this.padding + (line * this.size) + (this.size >> 1));
+			if(!widthOnly) c.fillText(textBuffer, cursor, this.padding + (line * this.size) + (this.size>>1));
 			
 			cursor += c.measureText(textBuffer).width;
 			textBuffer = "";
@@ -573,7 +573,7 @@ dusk.sgui.TextBox = function(parent, comName) {
 	this.keyPress.listen(this._boxKey, this, {"ctrl":false});
 	this.onActiveChange.listen(this._activeChange, this);
 	this.frame.listen((function(e) {
-		if(this._active) {
+		if(this.active) {
 			var e = document.getElementById(dusk.elemPrefix+"-input");
 			//I want no newlines
 			if(!this.multiline && e.value.indexOf("\n") !== -1) {
@@ -595,7 +595,7 @@ dusk.sgui.TextBox.prototype = Object.create(dusk.sgui.Label.prototype);
  * @private
  */
 dusk.sgui.TextBox.prototype._boxDraw = function(e) {
-	if(this._active) return;
+	if(this.active) return;
 	e.c.strokeStyle = this.border;
 	
 	e.c.strokeRect(e.d.destX, e.d.destY, e.d.width, e.d.height);

@@ -94,6 +94,18 @@ dusk.sgui.Single.prototype.containerKeypress = function(e) {
 	return this._component.doKeyPress(e);
 };
 
+/** Container specific method of handling buttonpresses.
+ * 
+ * In this case, it will call `{@link dusk.sgui.Component#doButtonPress}` of its component, and return that value.
+ * 
+ * @param {object} e The button press event.
+ * @return {boolean} The return value of the component's buttonpress.
+ * @since 0.0.21-alpha
+ */
+dusk.sgui.Single.prototype.containerButtonpress = function(e) {
+	return this._component.doButtonPress(e);
+};
+
 /** Fires the mouseMove event on its child.
  * 
  * @since 0.0.21-alpha

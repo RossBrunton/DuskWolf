@@ -32,8 +32,10 @@ dusk.sgui.MouseAugment = function(component) {
 	 */
 	this.y = 0;
 	
-	/** If true, then you can roll over components that have their `{@link dusk.sgui.Component.allowMouse}` property
+	/** If true, then you can roll over components that have their `{@link dusk.sgui.MouseAugment#allow}` property
 	 *  set to true to focus them.
+	 * 
+	 * This only makes sense for containers.
 	 * @type boolean
 	 * @default true
 	 * @since 0.0.20-alpha

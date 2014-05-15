@@ -9,6 +9,7 @@ dusk.load.require("dusk.EventDispatcher");
 dusk.load.require("dusk.controls");
 dusk.load.require("dusk");
 dusk.load.require("dusk.sgui.c");
+dusk.load.require("dusk.options");
 
 dusk.load.provide("dusk.sgui");
 dusk.load.provide("dusk.pause");
@@ -101,6 +102,11 @@ dusk.sgui._init = function() {
 		if(this.getActivePane()) this.getActivePane().doKeyPress(event);
 	}, this);
 	
+	//And button presses
+	dusk.controls.buttonPress.listen(function(event) {
+		if(this.getActivePane()) this.getActivePane().doButtonPress(event);
+	}, this);
+	
 	//Listen for mouseclicks
 	dusk.sgui._getCanvas().addEventListener("click", function(e) {
 		if(dusk.sgui.getActivePane() && dusk.sgui.getActivePane().mouse) dusk.sgui.getActivePane().mouse.doClick(e);
@@ -108,6 +114,10 @@ dusk.sgui._init = function() {
 	
 	//Listen for frame events
 	dusk.frameTicker.onFrame.listen(function(e) {
+		//Check if high rate overrided
+		if(dusk.options.get("graphics.highRate") !== "detect")
+			this.highRate = dusk.options.get("graphics.highRate") == "on";
+		
 		if(dusk.sgui.displayMode == dusk.sgui.MODE_FULL) {
 			//dusk.sgui.width = $("#"+dusk.elemPrefix).parent().width();
 			
@@ -302,12 +312,17 @@ dusk.sgui._init = function() {
 	});
 	
 	//Controls
-	dusk.controls.addControl("sgui_up", 38, "1-0.5");
-	dusk.controls.addControl("sgui_down", 40, "1+0.5");
-	dusk.controls.addControl("sgui_left", 37, "0+0.5");
-	dusk.controls.addControl("sgui_right", 39, "0-0.5");
+	dusk.controls.addControl("sgui_up", 38, "1-");
+	dusk.controls.addControl("sgui_down", 40, "1+");
+	dusk.controls.addControl("sgui_left", 37, "0-");
+	dusk.controls.addControl("sgui_right", 39, "0+");
 	dusk.controls.addControl("sgui_action", 65, 0);
 	dusk.controls.addControl("sgui_cancel", 27, 1);
+	
+	//Options
+	dusk.options.register("graphics.highRate", "selection", "detect", "Skip every other frame, for 120Hz displays.",
+		["on", "off", "detect"]
+	);
 	
 	dusk.sgui._draw();
 };
@@ -403,7 +418,7 @@ dusk.sgui._draw = function(time) {
 	//Frame rate
 	dusk.sgui.frameRate = 1000 / (time - dusk.sgui._lastFrame);
 	dusk.sgui._lastFrame = time;
-	if(dusk.sgui.frameRate > 90) {
+	if(dusk.sgui.frameRate > 90 && dusk.options.get("graphics.highRate") == "detect") {
 		dusk.sgui._highFrames ++;
 		if(dusk.sgui._highFrames >= 5) {
 			dusk.sgui.highRate = true;
@@ -602,7 +617,7 @@ Object.defineProperty(dusk.sgui, "width", {
     set:function(value) {
     	if(value == this.width) return;
     	
-    	dusk.sgui._getDuskwolf().setAttribute("width", value);
+    	dusk.sgui._getDuskwolf().setAttribute("data-width", value);
     	dusk.sgui._getCanvas().width = value;
     	this._cacheCanvas.width = this.width;
     },
@@ -617,7 +632,7 @@ Object.defineProperty(dusk.sgui, "height", {
 	set:function(value) {
 		if(value == this.height) return;
 		
-		dusk.sgui._getDuskwolf().setAttribute("height", value);
+		dusk.sgui._getDuskwolf().setAttribute("data-height", value);
 		dusk.sgui._getCanvas().height = value;
 		this._cacheCanvas.height = this.height;
 	},

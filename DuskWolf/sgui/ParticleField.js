@@ -98,20 +98,21 @@ dusk.sgui.ParticleField.prototype._pfFrame = function(e) {
 
 dusk.sgui.ParticleField.prototype._pfDraw = function(e) {
 	var c = null;
-	//if(this._highest > (10000 * 11)) var c = e.c.getImageData(e.d.destX, e.d.destY, e.d.width, e.d.height);
+	/*if(this._highest > (10000 * 11)) */var c = e.c.getImageData(e.d.destX, e.d.destY, e.d.width, e.d.height);
+	// Doesn't work with alpha (sets alpha of background, rather than of pixel)
 	
 	//if(this.stat) for(var i = c.data.length -1; i >= 0; i --) {
 	//	//c.data[i] = Math.random() * 256;
 	//	e.c.fillStyle = ("#"+~~(Math.random() * (1 >> 16))).toString("16");
 	//}
 	
-	for(var i = 0; i <= this._highest; i += 11) {
+	for(var i = this._highest; i >= 0; i -= 11) {
 		if((this._field[i+1] & 0x00ff) != 0) {
 			var translatedX = this._field[i+2] - e.d.sourceX;
 			var translatedY = this._field[i+3] - e.d.sourceY;
 			
 			if(this._field[i+2] >= e.d.sourceX && this._field[i+3] >= e.d.sourceY
-			&& this._field[i+2] <= e.d.width && this._field[i+3] <= e.d.height) {
+			&& this._field[i+2] < e.d.sourceX + e.d.width && this._field[i+3] < e.d.sourceY + e.d.height) {
 				if(c) {
 					var origin = (translatedX + (translatedY * e.d.width)) * 4;
 					c.data[origin] = this._field[i] >> 8;
@@ -121,7 +122,7 @@ dusk.sgui.ParticleField.prototype._pfDraw = function(e) {
 				}else{
 					e.c.fillStyle =
 					"rgba(" + (this._field[i] >> 8) + ", " + (this._field[i] & 0xff) + ", " +
-					(this._field[i+1] >> 8) + ", " + (this._field[i+1] & 0xff) * (1/256) + ")";
+					(this._field[i+1] >> 8) + ", " + ((this._field[i+1] & 0xff)/255) + ")";
 				
 					e.c.fillRect(translatedX, translatedY, 1, 1);
 				}

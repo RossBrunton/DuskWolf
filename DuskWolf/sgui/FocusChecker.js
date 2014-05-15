@@ -156,17 +156,17 @@ dusk.sgui.FocusCheckerRect = function(parent, comName) {
 	 * @type string
 	 * @default "#ff9999"
 	 */
-	this.inactive = "#ff9999";
+	this.inactiveFill = "#ff9999";
 	/** The colour when the component is focused, but not active.
 	 * @type string
 	 * @default "#ff9999"
 	 */
-	this.focused = "#ff9999";
+	this.focusedFill = "#ff9999";
 	/** The colour when the component is active.
 	 * @type string
 	 * @default "#99ff99"
 	 */
-	this.active = "#99ff99";
+	this.activeFill = "#99ff99";
 	
 	/** The border colour when the component is not focused or active.
 	 * @type string
@@ -207,9 +207,13 @@ dusk.sgui.FocusCheckerRect = function(parent, comName) {
 	this.bwActive = 0;
 	
 	//Prop masks
-	this._registerPropMask("inactive", "inactive");
-	this._registerPropMask("focused", "focused");
-	this._registerPropMask("active", "active");
+	this._registerPropMask("inactive", "inactiveFill");
+	this._registerPropMask("focused", "focusedFill");
+	this._registerPropMask("active", "activeFill");
+	
+	this._registerPropMask("inactiveFill", "inactiveFill");
+	this._registerPropMask("focusedFill", "focusedFill");
+	this._registerPropMask("activeFill", "activeFill");
 	
 	this._registerPropMask("bInactive", "bInactive");
 	this._registerPropMask("bFocused", "bFocused");
@@ -221,23 +225,23 @@ dusk.sgui.FocusCheckerRect = function(parent, comName) {
 	
 	//Listeners
 	this.onFocusChange.listen(function(e) {
-		this.colour = this.focused;
+		this.colour = this.focusedFill;
 		this.bColour = this.bFocused;
 		this.bWidth = this.bwFocused;
 	}, this, {"focus":true});
 	this.onFocusChange.listen(function(e) {
-		this.colour = this.inactive;
+		this.colour = this.inactiveFill;
 		this.bColour = this.bInactive;
 		this.bWidth = this.bwInactive;
 	}, this, {"focus":false});
 	
 	this.onActiveChange.listen(function(e) {
-		this.colour = this.active;
+		this.colour = this.activeFill;
 		this.bColour = this.bActive;
 		this.bWidth = this.bwActive
 	}, this, {"active":true});
 	this.onActiveChange.listen(function(e) {
-		this.colour = this.focused;
+		this.colour = this.focusedFill;
 		this.bColour = this.bFocused;
 		this.bWidth = this.bwFocused;
 	}, this, {"active":false});

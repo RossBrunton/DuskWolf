@@ -78,7 +78,7 @@ dusk.sgui.ItemSlot.prototype._itemSlotFrame = function() {
 		this._textChild.text = "";
 	}
 	
-	if(this._active) {
+	if(this.active) {
 		this._selectChild.visible = true;
 		var h = this._getHand();
 		if(h && h.getHand().getItemFromSlot(0)) {

@@ -228,13 +228,13 @@ Object.defineProperty(dusk.sgui.TileMap.prototype, "map", {
 		
 		var buffer = dusk.utils.stringToData(map.map);
 		this._tileBuffer[0] = buffer;
-		this._tiles[0] = new Uint8Array(this._tileBuffer[0]);
+		this._tiles[0] = new Uint8ClampedArray(this._tileBuffer[0]);
 		this._all[0] = dusk.utils.createCanvas((this.cols*singleW)+this.width, (this.rows*singleH)+this.height);
 		
 		if(this._frames > 1) {
 			for(var i = 1; i < this._frames; i ++) {
 				this._tileBuffer[i] = buffer.slice(0);
-				this._tiles[i] = new Uint8Array(this._tileBuffer[i]);
+				this._tiles[i] = new Uint8ClampedArray(this._tileBuffer[i]);
 				this._all[i] = dusk.utils.createCanvas((this.cols*singleW)+this.width, (this.rows*singleH)+this.height);
 			}
 		}
@@ -297,7 +297,7 @@ dusk.sgui.TileMap.prototype.drawAll = function() {
 	for(var f = 0; f < this._frames; f ++) {
 		this._editAnimation(this._tiles[0], f);
 		var i = 0;
-		//this._all[f].getContext("2d").clearRect(0, 0, this._all[f].width, this._all[f].height);
+		this._all[f].getContext("2d").clearRect(0, 0, this._all[f].width, this._all[f].height);
 		for (var yi = 0; yi < this.rows; yi++) {
 			for (var xi = 0; xi < this.cols; xi++) {
 				this._img.paint(this._all[f].getContext("2d"), "", false,
@@ -694,6 +694,26 @@ dusk.sgui.TileMap.prototype._framesNeeded = function(test) {
 	
 	if(valid == true) return test;
 	return this._framesNeeded(test+1);
+};
+
+
+
+/** Returns the map for `{@link dusk.sgui.BasicMain}` to save it.
+ * 
+ * @return {object} The current map.
+ * @since 0.0.18-alpha
+ */
+dusk.sgui.TileMap.prototype.saveBM = function() {
+	return this.map;
+};
+
+/** Loads a map from an object. This is used by `{@link dusk.sgui.BasicMain}`.
+ * 
+ * @param {object} map The map to load, will be assigned to `{@link dusk.sgui.EditableTileMap#map}`.
+ * @since 0.0.18-alpha
+ */
+dusk.sgui.TileMap.prototype.loadBM = function(map) {
+	this.map = map;
 };
 
 /** A pool containing the values returned by `{@link dusk.sgui.TileMap#getTile}` please return them here when you are

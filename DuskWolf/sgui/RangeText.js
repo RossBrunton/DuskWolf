@@ -92,7 +92,7 @@ dusk.sgui.RangeText.prototype._rangeChanged = function(e) {
  * @private
  */
 dusk.sgui.RangeText.prototype._changeValue = function(e) {
-	if(!this._active || !this._range) return true;
+	if(!this.active || !this._range) return true;
 	if(this.orientation == dusk.sgui.RangeText.ORIENT_HOR) {
 		if(e.dir == dusk.sgui.c.DIR_RIGHT) {
 			this._range.up();

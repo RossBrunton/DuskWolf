@@ -135,6 +135,13 @@ dusk.sgui.Component = function (parent, componentName) {
 	 * @since 0.0.17-alpha
 	 */
 	this.keyPress = new dusk.EventDispatcher("dusk.sgui.Component.keyPress", dusk.EventDispatcher.MODE_AND);
+	/** Fired when a button is pressed.
+	 * 
+	 * The event object has a single property, `button`. Which is the button that was pressed.
+	 * @type dusk.EventDispatcher
+	 * @since 0.0.21-alpha
+	 */
+	this.buttonPress = new dusk.EventDispatcher("dusk.sgui.Component.buttonPress", dusk.EventDispatcher.MODE_AND);
 	/** Fired when a directional key (up, down, left, right) is pressed.
 	 * 
 	 * The event object has two properties, `dir`, one of the constants `DIR_*` indicating a direction, 
@@ -244,29 +251,27 @@ dusk.sgui.Component = function (parent, componentName) {
 	/** Whether this component is focused or not.
 	 * @type boolean
 	 * @default false
-	 * @protected
 	 */
-	this._focused = false;
+	this.focused = false;
 	/** Whether this component is currently the active one.
 	 * @type boolean
 	 * @default false
-	 * @protected
 	 */
-	this._active = false;
+	this.active = false;
 	/** Fired whenever this component becomes focused, or looses focus.
 	 * 
 	 * The event object has a single property, `focus`, which is true if and only if the component is now focused.
 	 * @type dusk.EventDispatcher
 	 */
 	this.onFocusChange = new dusk.EventDispatcher("dusk.sgui.Component.onFocusChange");
-	this.onFocusChange.listen(function(e){this._focused = e.focus;}, this);
+	this.onFocusChange.listen(function(e){this.focused = e.focus;}, this);
 	/** Fired whenever this component becomes active, or stops being active.
 	 * 
 	 * The event object has a single property, `active`, which is true if and only if the component is now active.
 	 * @type dusk.EventDispatcher
 	 */
 	this.onActiveChange = new dusk.EventDispatcher("dusk.sgui.Component.onActiveChange");
-	this.onActiveChange.listen(function(e){this._active = e.active;}, this);
+	this.onActiveChange.listen(function(e){this.active = e.active;}, this);
 	
 	/** If this component becomes focused, then the components specified by these paths will also become focused.
 	 * 
@@ -422,7 +427,7 @@ dusk.sgui.Component.ORIGIN_MAX = 1;
  */
 dusk.sgui.Component.ORIGIN_MIDDLE = 2;
 
-/** This causes the component to handle a keypress, it should be called by ether its parent container or SimpleGui.
+/** This causes the component to handle a keypress, it should be called by either its parent container or SimpleGui.
  * 
  * If the component running this is a container 
  *  then its `{@link dusk.sgui.IContainer#containerKeypress}` function will be called.
@@ -465,6 +470,47 @@ dusk.sgui.Component.prototype.doKeyPress = function (e) {
 		}else if(dusk.controls.checkKey("sgui_action", e.keyCode)) {
 			return this.action.fire({"keyPress":e, "component":this});
 		}else if(dusk.controls.checkKey("sgui_cancel", e.keyCode)) {
+			return this.cancel.fire({"keyPress":e, "component":this});
+		}
+	}
+	
+	return dirReturn;
+};
+
+
+/** This causes the component to handle a buttonpress, it should be called by either its parent container or SimpleGui.
+ * 
+ * Button equivilent to `{@link dusk.sgui.Component.doKeyPress}`.
+ * 
+ * @param {object} e The button press object that should be ran.
+ * @return {boolean} Whether the parent container should run its own actions.
+ * @since 0.0.21-alpha
+ */
+dusk.sgui.Component.prototype.doButtonPress = function(e) {
+	if(dusk.utils.doesImplement(this, dusk.sgui.IContainer) && !this.containerButtonpress(e)){return false;}
+	
+	var eventObject = {"button":e.which};
+	
+	this._noFlow = false;
+	
+	var dirReturn = this.buttonPress.fire(eventObject);
+	if(dirReturn) {
+		//Directions
+		if(dusk.controls.checkButton("sgui_left", e.which)) {
+			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.c.DIR_LEFT, "e":e})) && !this._noFlow
+			&& this.leftFlow && this.container.flow(this.leftFlow)) return false;
+		}else if(dusk.controls.checkButton("sgui_up", e.which)) {
+			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.c.DIR_UP, "e":e})) && !this._noFlow
+			&& this.upFlow && this.container.flow(this.upFlow)) return false;
+		}else if(dusk.controls.checkButton("sgui_right", e.which)) {
+			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.c.DIR_RIGHT, "e":e})) && !this._noFlow
+			&& this.rightFlow && this.container.flow(this.rightFlow)) return false;
+		}else if(dusk.controls.checkButton("sgui_down", e.which)) {
+			if((dirReturn = this.dirPress.fire({"dir":dusk.sgui.c.DIR_DOWN, "e":e})) && !this._noFlow
+			&& this.downFlow && this.container.flow(this.downFlow)) return false;
+		}else if(dusk.controls.checkButton("sgui_action", e.which)) {
+			return this.action.fire({"keyPress":e, "component":this});
+		}else if(dusk.controls.checkButton("sgui_cancel", e.which)) {
 			return this.cancel.fire({"keyPress":e, "component":this});
 		}
 	}
@@ -613,7 +659,7 @@ dusk.sgui.Component.prototype.draw = function(d, c) {
 		c.strokeRect(d.destX, d.destY, d.width, d.height);
 	}
 	
-	if(this.activeBorder !== null && this._active) {
+	if(this.activeBorder !== null && this.active) {
 		c.strokeStyle = this.activeBorder;
 		c.strokeRect(d.destX+0.5, d.destY+0.5, d.width-1, d.height-1);
 	}

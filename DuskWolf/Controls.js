@@ -5,6 +5,7 @@
 dusk.load.require("dusk.keyboard");
 dusk.load.require("dusk.EventDispatcher");
 dusk.load.require("dusk.frameTicker");
+dusk.load.require("dusk.options");
 
 dusk.load.provide("dusk.controls");
 
@@ -58,6 +59,13 @@ dusk.controls._buttons = [];
  */
 dusk.controls._axes = [];
 
+/** An object with keys for each axis. If true, then the axis is tilted.
+ * @type object
+ * @private
+ * @since 0.0.21-alpha
+ */
+dusk.controls._axesTilted = [];
+
 /** A constant used when firing the `{@link dusk.controls.controlPressed}` event, indicating that a key was pressed.
  * @type integer
  * @constant
@@ -91,7 +99,8 @@ dusk.controls.controlPressed = new dusk.EventDispatcher("dusk.controls.controlPr
 
 /** Fired when a button on the gamepad is pressed.
  * 
- * The event object is a `buttonPress` event, which has only one property `which`; the ID of the button.
+ * The event object is a `buttonPress` event, which has only one property `which`; the ID of the button or string
+ *  description of axis.
  * @type dusk.EventDispatcher
  */
 dusk.controls.buttonPress = new dusk.EventDispatcher("dusk.controls.buttonPressed");
@@ -102,7 +111,11 @@ dusk.controls.buttonPress = new dusk.EventDispatcher("dusk.controls.buttonPresse
  */
 dusk.controls.buttonUp = new dusk.EventDispatcher("dusk.controls.buttonUp");
 
-
+//Add gamepad option
+dusk.options.register("controls.gamepad", "boolean", true, "Whether gamepads will be used.");
+dusk.options.register("controls.gamepadThreshold", "positiveFloat", 0.5,
+	"The angle that axis should be tilted to be treated as a button."
+);
 
 /** Adds a new control, with the specified default key/button presses.
  * 
@@ -180,18 +193,30 @@ dusk.controls.checkKey = function(name, key) {
  */
 dusk.controls.checkButton = function(name, button) {
 	if(!(name in dusk.controls._mappings) || button == null || button == undefined) return false;
-	if(typeof dusk.controls._mappings[name][1] == "string") {
+	
+	//Axis
+	if(typeof button == "string" && typeof dusk.controls._mappings[name][1] == "string") {
 		var axis = dusk.controls._mappings[name][1].split("+")[0].split("-")[0];
-		if(axis == button) {
+		if(axis == button.split("+")[0].split("-")[0]) {
 			if(dusk.controls._mappings[name][1].indexOf("+") !== -1) {
-				if(+dusk.controls._mappings[name][1].split("+")[1] < this._axes[axis]) return true;
+				if(dusk.controls._mappings[name][1].split("+")[1] == "" ){
+					if(+dusk.options.get("controls.gamepadThreshold") < this._axes[axis])
+						return true;
+				}else if(+dusk.controls._mappings[name][1].split("+")[1] < this._axes[axis])
+					return true;
 			}else if(dusk.controls._mappings[name][1].indexOf("-") !== -1) {
-				if(-dusk.controls._mappings[name][1].split("-")[1] > this._axes[axis]) return true;
+				if(dusk.controls._mappings[name][1].split("-")[1] == "" ){
+					if(-dusk.options.get("controls.gamepadThreshold") > this._axes[axis])
+						return true;
+				}else if(-dusk.controls._mappings[name][1].split("-")[1] > this._axes[axis])
+					return true;
 			}
 		}
 		
 		return false;
-	}	
+	}
+	
+	//Button
 	return dusk.controls._mappings[name][1] == button;
 };
 
@@ -271,7 +296,7 @@ dusk.controls._frame = function(e) {
 	if(document.hidden || document.webkitHidden || document.msHidden) return;
 	var navigatorGetGamepads = navigator.getGamepads || navigator.webkitGetGamepads || function(){return [null];};
 	var gamepad = navigatorGetGamepads.call(navigator)[0];
-	if(gamepad) {
+	if(gamepad && dusk.options.get("controls.gamepad")) {
 		for(var i = 0; i < gamepad.buttons.length-1; i ++) {
 			if(!dusk.controls._buttons[i] && gamepad.buttons[i]) {
 				dusk.controls.buttonPress.fire({"which":i});
@@ -284,6 +309,16 @@ dusk.controls._frame = function(e) {
 		
 		for(var i = 0; i < gamepad.axes.length-1; i ++) {
 			dusk.controls._axes[i] = gamepad.axes[i];
+			
+			if(gamepad.axes[i] > dusk.options.get("controls.gamepadThreshold")
+			|| gamepad.axes[i] < -dusk.options.get("controls.gamepadThreshold")) {
+				if(!dusk.controls._axesTilted[i]) {
+					dusk.controls._axesTilted[i] = true;
+					dusk.controls.buttonPress.fire({"which":i+(gamepad.axes[i] > 0?"+":"-")});
+				}
+			}else{
+				dusk.controls._axesTilted[i] = false;
+			}
 		}
 	}
 };

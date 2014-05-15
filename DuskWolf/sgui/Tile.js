@@ -120,7 +120,7 @@ dusk.sgui.Tile.prototype._tileDraw = function(e) {
 //src
 Object.defineProperty(dusk.sgui.Tile.prototype, "src", {
 	set: function(value) {
-		if(value === undefined) {
+		if(!value) {
 			this._img = null;
 		}else{
 			this._img = new dusk.Image(value);

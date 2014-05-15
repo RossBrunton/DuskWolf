@@ -20,9 +20,6 @@ dusk.load.provide("quest");
 
 dusk.onLoad.listen(function (e){dusk.quest.rooms.setRoom("quest.rooms.rooma", 0);});
 
-dusk.sgui.noCleanCanvas = true;
-dusk.sgui.noCacheCanvas = true;
-
 //Test
 dusk.sgui.getPane("menu").parseProps({
    "children":{

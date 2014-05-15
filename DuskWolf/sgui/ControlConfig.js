@@ -85,7 +85,7 @@ dusk.sgui.ControlConfig.prototype._ccFrame = function(e) {
 };
 
 dusk.sgui.ControlConfig.prototype._ccDraw = function(e) {
-	e.c.strokeStyle = this._active?this.borderActive:this.border;
+	e.c.strokeStyle = this.active?this.borderActive:this.border;
 	
 	e.c.strokeRect(e.d.destX, e.d.destY, e.d.width, e.d.height);
 };

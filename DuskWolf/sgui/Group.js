@@ -46,7 +46,7 @@ dusk.sgui.Group = function(parent, comName) {
 	 * @type string
 	 * @protected
 	 */
-	this._focusedCom = "";
+	this.focusedCom = "";
 	/** Used internally to store the current focus behaviour.
 	 * @type integer
 	 * @default FOCUS_ONE
@@ -231,6 +231,27 @@ dusk.sgui.Group.prototype.containerKeypress = function(e) {
 	return true;
 };
 
+/** Container specific method of handling buttonpresses.
+ * 
+ * In this case, it will call `{@link dusk.sgui.Component#doButtonPress}` of its focused component, and return that
+ *  value.
+ * 
+ * @param {object} e The button press event.
+ * @return {boolean} The return value of the focused component's buttonpress.
+ * @since 0.0.21-alpha
+ */
+dusk.sgui.Group.prototype.containerButtonpress = function(e) {
+	if(this.focusBehaviour == dusk.sgui.Group.FOCUS_ALL) {
+		var toReturn = true;
+		for(var c = this._componentsArr.length-1; c >= 0; c --) {
+			toReturn = this._componentsArr[c].doButtonPress(e) && toReturn;
+		}
+		return toReturn;
+	}
+	if(this.getFocused()) return this.getFocused().doButtonPress(e);
+	return true;
+};
+
 /** Fires the mouseMove event on all its children.
  * 
  * @return {boolean} The return value of the focused component's keypress.
@@ -290,8 +311,11 @@ dusk.sgui.Group.prototype._newComponent = function(com, type) {
 	this._componentsArr.push(this._components[com.toLowerCase()]);
 	this._drawOrder[this._drawOrder.length] = com.toLowerCase();
 	dusk.sgui.applyStyles(this._components[com.toLowerCase()]);
-	if(this.focusBehaviour == dusk.sgui.Group.FOCUS_ALL)
+	if(this.focusBehaviour == dusk.sgui.Group.FOCUS_ALL) {
 		this._components[com.toLowerCase()].onFocusChange.fire({"focus":true});
+		if(this.active)
+			this._components[com.toLowerCase()].onActiveChange.fire({"active":true});
+	}
 	
 	return this._components[com.toLowerCase()];
 };
@@ -490,7 +514,7 @@ dusk.sgui.Group.prototype.getComponent = function(com, type) {
  */
 dusk.sgui.Group.prototype.deleteComponent = function(com) {
 	if (this._components[com.toLowerCase()]){
-		if(this._focusedCom == com.toLowerCase()) this.focus = "";
+		if(this.focusedCom == com.toLowerCase()) this.focus = "";
 		this._components[com.toLowerCase()].onDelete.fire({"com":this._components[com.toLowerCase()]});
 		this._componentsArr.splice(this._componentsArr.indexOf(this._components[com.toLowerCase()]), 1);
 		this._components[com.toLowerCase()] = null;
@@ -515,7 +539,7 @@ dusk.sgui.Group.prototype.__defineSetter__("focus", function s_focus(value) {
 	if(value) this.flow(value);
 });
 dusk.sgui.Group.prototype.__defineGetter__("focus", function g_focus() {
-	return this._focusedCom;
+	return this.focusedCom;
 });
 
 /** Returns the currently focused component.
@@ -523,8 +547,8 @@ dusk.sgui.Group.prototype.__defineGetter__("focus", function g_focus() {
  * @return {?dusk.sgui.Component} The currently focused component or null if nothing is focused.
  */
 dusk.sgui.Group.prototype.getFocused = function() {
-	if(!(this._focusedCom in this._components)) return null;
-	return this._components[this._focusedCom];
+	if(!(this.focusedCom in this._components)) return null;
+	return this._components[this.focusedCom];
 };
 
 /** Sets the current focused component only if it exists,
@@ -535,31 +559,31 @@ dusk.sgui.Group.prototype.getFocused = function() {
  * @return {boolean} Whether the flow was successfull.
  */
 dusk.sgui.Group.prototype.flow = function(to) {
-	if(this._focusedCom !== "" && this._components[this._focusedCom]){
-		if(this._components[this._focusedCom].locked){return false;}
+	if(this.focusedCom !== "" && this._components[this.focusedCom]){
+		if(this._components[this.focusedCom].locked){return false;}
 		
-		if(this.focusBehaviour != dusk.sgui.Group.FOCUS_ALL && this._active)
-			this._components[this._focusedCom].onActiveChange.fire({"active":false});
+		if(this.focusBehaviour != dusk.sgui.Group.FOCUS_ALL && this.active)
+			this._components[this.focusedCom].onActiveChange.fire({"active":false});
 		if(this.focusBehaviour != dusk.sgui.Group.FOCUS_ALL)
-			this._components[this._focusedCom].onFocusChange.fire({"focus":false});
+			this._components[this.focusedCom].onFocusChange.fire({"focus":false});
 		
-		if(this.focusVisible) this._components[this._focusedCom].visible = false;
+		if(this.focusVisible) this._components[this.focusedCom].visible = false;
 	}
 	
 	if(this._components[to.toLowerCase()]){
-		this._focusedCom = to.toLowerCase();
+		this.focusedCom = to.toLowerCase();
 		if(this.focusBehaviour != dusk.sgui.Group.FOCUS_ALL)
-			this._components[this._focusedCom].onFocusChange.fire({"focus":true});
-		if(this.focusBehaviour != dusk.sgui.Group.FOCUS_ALL && this._active)
-			this._components[this._focusedCom].onActiveChange.fire({"active":true});
+			this._components[this.focusedCom].onFocusChange.fire({"focus":true});
+		if(this.focusBehaviour != dusk.sgui.Group.FOCUS_ALL && this.active)
+			this._components[this.focusedCom].onActiveChange.fire({"active":true});
 		
-		if(this.focusVisible) this._components[this._focusedCom].visible = true;
+		if(this.focusVisible) this._components[this.focusedCom].visible = true;
 		return true;
 	}
 	
 	console.warn(to+" was not found, couldn't set focus.");
 	
-	this._focusedCom = "";
+	this.focusedCom = "";
 };
 
 //focusBehaviour
@@ -571,8 +595,8 @@ Object.defineProperty(dusk.sgui.Group.prototype, "focusBehaviour", {
 		switch(this._focusBehaviour) {
 			case dusk.sgui.Group.FOCUS_ONE:
 				for(var c = this._componentsArr.length-1; c >= 0; c --) {
-					if(this._components[this._focusedCom] != this._componentsArr[c]) {
-						if(this._active)
+					if(this._components[this.focusedCom] != this._componentsArr[c]) {
+						if(this.active)
 							this._componentsArr[c].onActiveChange.fire({"active":false});
 						this._componentsArr[c].onFocusChange.fire({"focus":false});
 					}
@@ -581,10 +605,10 @@ Object.defineProperty(dusk.sgui.Group.prototype, "focusBehaviour", {
 				
 			case dusk.sgui.Group.FOCUS_ALL:
 				for(var c = this._componentsArr.length-1; c >= 0; c --) {
-					if(this._components[this._focusedCom] != this._componentsArr[c]) {
-						if(this._active)
-							this._componentsArr[c].onActiveChange.fire({"active":true});
+					if(this._components[this.focusedCom] != this._componentsArr[c]) {
 						this._componentsArr[c].onFocusChange.fire({"focus":true});
+						if(this.active)
+							this._componentsArr[c].onActiveChange.fire({"active":true});
 					}
 				}
 				break;
@@ -604,7 +628,7 @@ Object.defineProperty(dusk.sgui.Group.prototype, "focusVisible", {
 		
 		if(this._focusVisible) {
 			for(var c = this._componentsArr.length-1; c >= 0; c --) {
-				if(this._focusedCom != this._componentsArr[c].comName) {
+				if(this.focusedCom != this._componentsArr[c].comName) {
 					this._componentsArr[c].visible = false;
 				}else{
 					this._componentsArr[c].visible = true;

@@ -68,10 +68,10 @@ dusk.sgui.Scroller.prototype._sFrame = function(e) {
 	}
 	
 	if(this.orientation == dusk.sgui.c.ORIENT_HOR) {
-		if(dusk.controls.controlActive("sgui_left") && this._active) {
+		if(dusk.controls.controlActive("sgui_left") && this.active) {
 			this.target.horScroll.value -= this.target.horScroll.stepDown / dusk.frameRate;
 		}
-		if(dusk.controls.controlActive("sgui_right") && this._active) {
+		if(dusk.controls.controlActive("sgui_right") && this.active) {
 			this.target.horScroll.value += this.target.horScroll.stepUp / dusk.frameRate;
 		}
 		
@@ -79,10 +79,10 @@ dusk.sgui.Scroller.prototype._sFrame = function(e) {
 		this.y = this.target.y + this.target.height - this.height;
 		this.x = this.target.x +~~(((this.target.width - this.width) * this.target.horScroll.getFraction()));
 	}else{
-		if(dusk.controls.controlActive("sgui_up") && this._active) {
+		if(dusk.controls.controlActive("sgui_up") && this.active) {
 			this.target.verScroll.value -= this.target.verScroll.stepDown / dusk.frameRate;
 		}
-		if(dusk.controls.controlActive("sgui_down") && this._active) {
+		if(dusk.controls.controlActive("sgui_down") && this.active) {
 			this.target.verScroll.value += this.target.verScroll.stepUp / dusk.frameRate;
 		}
 		
@@ -97,7 +97,7 @@ dusk.sgui.Scroller.prototype._sFrame = function(e) {
  * @private
  */
 dusk.sgui.Scroller.prototype._sDir = function(e) {
-	if(!this._active) return true;
+	if(!this.active) return true;
 	if(this.orientation == dusk.sgui.c.ORIENT_HOR) {
 		if(e.dir == dusk.sgui.c.DIR_RIGHT || e.dir == dusk.sgui.c.DIR_LEFT) {
 			return false;
