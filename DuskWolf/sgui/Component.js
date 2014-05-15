@@ -9,6 +9,7 @@ dusk.load.require(">dusk.controls");
 dusk.load.require("dusk.sgui");
 dusk.load.require("dusk.Mapper");
 dusk.load.require(">dusk.sgui.MouseAugment");
+var Pool = dusk.load.require("dusk.Pool");
 
 dusk.load.provide("dusk.sgui.Component");
 dusk.load.provide("dusk.sgui.NullCom");
@@ -894,7 +895,7 @@ Object.defineProperty(dusk.sgui.Component.prototype, "type", {
  * @private
  * @since 0.0.21-alpha
  */
-dusk.sgui.Component._prepareDrawPool = new dusk.Pool(Object);
+dusk.sgui.Component._prepareDrawPool = new Pool(Object);
 
 Object.seal(dusk.sgui.Component);
 Object.seal(dusk.sgui.Component.prototype);

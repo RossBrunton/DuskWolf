@@ -1,15 +1,13 @@
 Doc/
-closure/
 DuskWolf.php
 *.u1conflict*
 change
 *~
 *.pyc
-jquery.js
-DuskWolf/DWCompiled.js
 .settings
 .project
-wiki
 *.mf
 tcheck.js
 Data/SMB/
+Data/deps.json
+DuskWolf/deps.json

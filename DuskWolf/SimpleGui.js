@@ -10,6 +10,7 @@ dusk.load.require("dusk.controls");
 dusk.load.require("dusk");
 dusk.load.require("dusk.sgui.c");
 dusk.load.require("dusk.options");
+var Pool = dusk.load.require("dusk.Pool");
 
 dusk.load.provide("dusk.sgui");
 dusk.load.provide("dusk.pause");
@@ -263,7 +264,7 @@ dusk.sgui._init = function() {
 	 * @type dusk.Pool<Object>
 	 * @since 0.0.21-alpha
 	 */
-	this.drawDataPool = new dusk.Pool(Object);
+	this.drawDataPool = new Pool(Object);
 	
 	/** The current frame rate. Maybe some strange value for the first few frames.
 	 * @type float

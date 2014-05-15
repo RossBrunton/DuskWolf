@@ -2,8 +2,6 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-dusk.load.provide("dusk.EventDispatcher");
-
 /** @class dusk.EventDispatcher
  * 
  * @classdesc An EventDispatcher essentially manages events.
@@ -262,3 +260,5 @@ dusk.EventDispatcher.prototype.toString = function() {
 
 Object.seal(dusk.EventDispatcher);
 Object.seal(dusk.EventDispatcher.prototype);
+
+dusk.load.provide("dusk.EventDispatcher", dusk.EventDispatcher);

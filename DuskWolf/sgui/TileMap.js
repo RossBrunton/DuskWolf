@@ -5,6 +5,7 @@
 dusk.load.require("dusk.sgui.Component");
 dusk.load.require("dusk.utils");
 dusk.load.require(">dusk.Image");
+var Pool = dusk.load.require("dusk.Pool");
 
 dusk.load.provide("dusk.sgui.TileMap");
 dusk.load.provide("dusk.sgui.TileMapWeights");
@@ -724,7 +725,7 @@ dusk.sgui.TileMap.prototype.loadBM = function(map) {
  * @type dusk.pool<Array>
  * @since 0.0.21-alpha
  */
-dusk.sgui.TileMap.tileData = new dusk.Pool(Uint8Array.bind(undefined, 5));
+dusk.sgui.TileMap.tileData = new Pool(Uint8Array.bind(undefined, 5));
 
 Object.seal(dusk.sgui.TileMap);
 Object.seal(dusk.sgui.TileMap.prototype);

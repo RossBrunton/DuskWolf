@@ -13,8 +13,8 @@ import posixpath
 import re
 import json
 
-reqPatt = re.compile("dusk\.load\.require\(\"(.*?)\"\)")
-provPatt = re.compile("dusk\.load\.provide\(\"(.*?)\"\)")
+reqPatt = re.compile("(?:dusk\.)?load\.require\(\"(.*?)\"(?:,.*)?\)")
+provPatt = re.compile("(?:dusk\.)?load\.provide\(\"(.*?)\"")
 data = []
 
 if len(sys.argv) > 1:
