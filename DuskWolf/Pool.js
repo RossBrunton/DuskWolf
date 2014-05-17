@@ -2,15 +2,13 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-dusk.load.provide("dusk.Pool", (function() {
+load.provide("dusk.Pool", (function() {
 	/** @class dusk.Pool
 	 * 
 	 * @classdesc Object pools, for static memory allocation.
 	 * 
 	 * Objects are taken from this pool when allocated, and returned when freed. This means that the object that is
 	 *  allocated is not a new one, but it cuts down on memory allocations and garbadge collection.
-	 * 
-	 * This class is included with `{@link dusk.load}`, and thus is always available.
 	 * 
 	 * @param {class(...)} constructor The constructor for the object in the pool.
 	 * @param {?function(*, *):*} onAlloc Called with the object and specified arguments every time the object is
@@ -62,6 +60,9 @@ dusk.load.provide("dusk.Pool", (function() {
 		if(this._onFree) object = this._onFree(object);
 		this._objects[this._inPool-1] = object;
 	};
+	
+	Object.seal(Pool);
+	Object.seal(Pool.prototype);
 
 	return Pool;
 })());

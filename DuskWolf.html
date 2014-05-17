@@ -24,7 +24,12 @@
 		</swo-duskwolf>
 		
 		<div>
-			<input id="editing" type="checkbox" onchange="dusk.editor.active = this.checked;"/>
+			<input id="editing" type="checkbox" onchange="
+				(function() {
+					var editor = load.require('dusk.editor');
+					editor.active = this.checked;
+				}).call(this);
+			"/>
 			<label for='editing'>Edit mode active</label>
 			
 			<div style='color:#999999'>

@@ -7,7 +7,7 @@ It is mainly designed for RPGs and platformers, but it should work for pretty mu
 Clone the repo to somewhere:
 > git clone https://github.com/RossBrunton/DuskWolf.git DuskWolf
 
-Enter that folder
+Enter that folder:
 > cd DuskWolf
 
 Generate the dependency files:
@@ -19,12 +19,12 @@ Start a HTTP server (or put all the files in web root or wherever):
 And then navigate to `127.0.0.1:8000` in a web browser.
 
 ## Documentation ##
-The code is documented using JSDoc 3.2.
+The code is documented using JSDoc 3.2, although at the moment it doesn't work very well.
 
 You can read it in the source code, which is what I do, or you can generate HTML documentation using:
 > make document
 
-Or, to view private members:
+Or, to document private members as well:
 > make documentPrivate
 
 ## Super Interesting Legal Stuff ##

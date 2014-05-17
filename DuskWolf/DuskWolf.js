@@ -2,15 +2,14 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-dusk.load.provide("dusk", (function() {
+load.provide("dusk", (function() {
 	var EventDispatcher = load.require("dusk.EventDispatcher");
-	load.require("dusk.advancedLoad");
 	
 	/** @namespace dusk
 	 * 
 	 * @description This is the "root" package for DuskWolf, and provides a few functions and configuration thingies.
 	 */
-	//var dusk; //Change when ready
+	var dusk = {};
 	
 	/** Version of the DW engine.
 	 *  Must contain at least one number, and numbers furthest to the left indicate newer versions.
@@ -64,10 +63,11 @@ dusk.load.provide("dusk", (function() {
 	 * @type dusk.EventDispatcher
 	 * @since 0.0.14-alpha
 	 */
-	dusk.onLoad = new dusk.EventDispatcher("dusk.onLoad");
+	dusk.onLoad = new EventDispatcher("dusk.onLoad");
 
 	/** Call this to start the game, and fire the dusk.onLoad EventDispatcher. */
 	dusk.startGame = function() {
+		if(dusk.started) return;
 		dusk.started = true;
 		dusk.onLoad.fire();
 	};
@@ -95,7 +95,7 @@ dusk.load.provide("dusk", (function() {
 	}
 
 	//We seem to be already loaded here
-	function toPx(a) {
+	var _toPx = function(a) {
 		if((""+a).slice(-2) != "px") return a+"px";
 		return ""+a;
 	}
@@ -107,8 +107,8 @@ dusk.load.provide("dusk", (function() {
 		if(elem.getAttribute("data-dev") !== undefined) dusk.dev = true;
 		
 		elem.style.display = "block";
-		if(!elem.style.width) elem.style.width = toPx(elem.getAttribute("data-width"));
-		if(!elem.style.height) elem.style.height = toPx(elem.getAttribute("data-height"));
+		if(!elem.style.width) elem.style.width = _toPx(elem.getAttribute("data-width"));
+		if(!elem.style.height) elem.style.height = _toPx(elem.getAttribute("data-height"));
 		
 		if(!elem.id) elem.id = "swo-duskwolf";
 		elem.innerHTML = "<textarea id='"+elem.id+"-input' type='text'\
@@ -118,8 +118,8 @@ dusk.load.provide("dusk", (function() {
 		></canvas>";
 		dusk.elemPrefix = elem.id;
 		
-		dusk.load.importList(elem.getAttribute("data-deps")).then(function() {
-			dusk.load.import(elem.getAttribute("data-package"));
+		load.importList(elem.getAttribute("data-deps")).then(function() {
+			load.import(elem.getAttribute("data-package"));
 		});
 	}
 	

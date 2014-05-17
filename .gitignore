@@ -11,3 +11,4 @@ tcheck.js
 Data/SMB/
 Data/deps.json
 DuskWolf/deps.json
+Tests/deps.json

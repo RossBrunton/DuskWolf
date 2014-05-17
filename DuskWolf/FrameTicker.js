@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-dusk.load.provide("dusk.frameTicker", (function() {
+load.provide("dusk.frameTicker", (function() {
     var dusk = load.require("dusk");
     var EventDispatcher = load.require("dusk.EventDispatcher");
     var sgui = load.suggest("dusk.sgui", function(p) {sgui = p});
@@ -39,6 +39,5 @@ dusk.load.provide("dusk.frameTicker", (function() {
     
     Object.seal(frameTicker);
     
-    dusk.frameTicker = frameTicker; //Legacy import code
     return frameTicker;
 })());

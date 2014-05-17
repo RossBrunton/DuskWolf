@@ -2,14 +2,13 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-dusk.load.require("dusk.behave.Behave");
-dusk.load.require("dusk.entities");
+load.provide("dusk.behave.MarkTrigger", (function() {
+	var entities = load.require("dusk.entities");
+	var Behave = load.require("dusk.behave.Behave");
+	var TileMap = load.require("dusk.sgui.TileMap");
 
-dusk.load.provide("dusk.behave.MarkTrigger");
-
-dusk.behave.MarkTrigger = function(entity) {
-	if(entity !== undefined){
-		dusk.behave.Behave.call(this, entity);
+	var MarkTrigger = function(entity) {
+		Behave.call(this, entity);
 		
 		this._markAt = "";
 		this._coolDown = 5;
@@ -25,50 +24,52 @@ dusk.behave.MarkTrigger = function(entity) {
 		if(t) dusk.sgui.TileMap.tileData.free(t);
 		
 		this.entityEvent.listen(this._markTriggerFrame, this, {"name":"frame"});
-	}
-};
-dusk.behave.MarkTrigger.prototype = Object.create(dusk.behave.Behave.prototype);
+	};
+	MarkTrigger.prototype = Object.create(Behave.prototype);
 
-dusk.behave.MarkTrigger.prototype._markTriggerFrame = function(name, e) {
-	if(this._coolDown) this._coolDown --;
-	
-	if(!this._entity.scheme) return;
-	
-	var t = this._entity.scheme.tilePointIn(
-		this._entity.x+(this._entity.prop("width")/2), this._entity.y+(this._entity.prop("height")/2)
-	);
-	
-	if(t[1] != 1) {
-		this._markAt = -1;
-	}
-	
-	if(t[1] == 1 && t[0] != this._markAt
-	) {
-		this._markAt = t[0];
+	MarkTrigger.prototype._markTriggerFrame = function(name, e) {
+		if(this._coolDown) this._coolDown --;
 		
-		if(!this._coolDown) {
-			dusk.entities.markTrigger.fire({
-				"up":false, "mark":this._markAt, "activator":this._entity.comName, "entity":this._entity,
-				"room":this._entity.path("../..").roomName
-			});
-			this._coolDown = 5;
+		if(!this._entity.scheme) return;
+		
+		var t = this._entity.scheme.tilePointIn(
+			this._entity.x+(this._entity.prop("width")/2), this._entity.y+(this._entity.prop("height")/2)
+		);
+		
+		if(t[1] != 1) {
+			this._markAt = -1;
 		}
-	}
-	
-	dusk.sgui.TileMap.tileData.free(t);
-};
-
-/** Workshop data used by `{@link dusk.sgui.EntityWorkshop}`.
- * @static
- */
-dusk.behave.MarkTrigger.workshopData = {
-	"help":"Will trigger marks on the scheme layer.",
-	"data":[
 		
-	]
-};
+		if(t[1] == 1 && t[0] != this._markAt
+		) {
+			this._markAt = t[0];
+			
+			if(!this._coolDown) {
+				entities.markTrigger.fire({
+					"up":false, "mark":this._markAt, "activator":this._entity.comName, "entity":this._entity,
+					"room":this._entity.path("../..").roomName
+				});
+				this._coolDown = 5;
+			}
+		}
+		
+		TileMap.tileData.free(t);
+	};
 
-Object.seal(dusk.behave.MarkTrigger);
-Object.seal(dusk.behave.MarkTrigger.prototype);
+	/** Workshop data used by `{@link dusk.sgui.EntityWorkshop}`.
+	 * @static
+	 */
+	MarkTrigger.workshopData = {
+		"help":"Will trigger marks on the scheme layer.",
+		"data":[
+			
+		]
+	};
 
-dusk.entities.registerBehaviour("MarkTrigger", dusk.behave.MarkTrigger);
+	Object.seal(MarkTrigger);
+	Object.seal(MarkTrigger.prototype);
+
+	entities.registerBehaviour("MarkTrigger", MarkTrigger);
+	
+	return MarkTrigger;
+})());
