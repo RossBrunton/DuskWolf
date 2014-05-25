@@ -59,12 +59,10 @@ load.provide("test.dusk.utils", (function() {
 		
 		test.start("dusk.utils.urlGet");
 		
-		window.history.replaceState({}, "", "?a=1&b=2&c=3");
-		
-		test.assertEqual(utils.urlGet("a"), "1");
-		test.assertEqual(utils.urlGet("b"), "2");
-		test.assertEqual(utils.urlGet("c"), "3");
-		test.assertEqual(utils.urlGet("d"), null);
+		test.assertEqual(utils.urlGet("a", "http://example.com/?a=1&b=2&c=3"), "1");
+		test.assertEqual(utils.urlGet("b", "http://example.com/?a=1&b=2&c=3"), "2");
+		test.assertEqual(utils.urlGet("c", "http://example.com/?a=1&b=2&c=3"), "3");
+		test.assertEqual(utils.urlGet("d", "http://example.com/?a=1&b=2&c=3"), null);
 		
 		
 		/*test.start("utils.isJson");

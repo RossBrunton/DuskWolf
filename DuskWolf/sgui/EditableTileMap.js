@@ -349,7 +349,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 			return false;
 		}
 		
-		if(keyboard.isKeyPressed(187) || dusk.keyboard.isKeyPressed(189)) {
+		if(keyboard.isKeyPressed(187) || keyboard.isKeyPressed(189)) {
 			this._noFlow = true;
 			return true;
 		}

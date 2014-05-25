@@ -21,7 +21,7 @@ load.provide("dusk.behave.MarkTrigger", (function() {
 			this._markAt = t[0];
 		}
 		
-		if(t) dusk.sgui.TileMap.tileData.free(t);
+		if(t) TileMap.tileData.free(t);
 		
 		this.entityEvent.listen(this._markTriggerFrame, this, {"name":"frame"});
 	};

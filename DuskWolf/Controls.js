@@ -4,6 +4,7 @@
 
 load.provide("dusk.controls", (function() {
 	var keyboard = load.require("dusk.keyboard");
+	var gamepad = load.require("dusk.gamepad");
 	var EventDispatcher = load.require("dusk.EventDispatcher");
 	var frameTicker = load.require("dusk.frameTicker");
 	var options = load.require("dusk.options");
@@ -11,24 +12,11 @@ load.provide("dusk.controls", (function() {
 	/** @namespace dusk.controls
 	 * @name dusk.controls
 	 * 
-	 * @description Provides a simple way to describe changeable control schemes and implement game controllers.
+	 * @description Provides a simple way to describe changeable control schemes.
 	 * 
-	 * How control mapping works is that code registers the name of a "control", and a default key/button,
-	 *  and then either gets an event when the control is pressed, or checks button/key presses against it.
-	 *	This allows the input mapped to a control to change.
-	 * 
-	 * This module supports gamepads, which are automatically detected and set up.
-	 *	Gamepads consist of buttons, and axes.
-	 *	Buttons are essentially numbered from 0 to however many buttons there are on the controller,
-	 *   and this is the number used to describe them on controls.
-	 *
-	 * Axes, however, are more complicated.
-	 *	Like buttons, axes are numbered, however they also have an intensity from `0.0` to `1.0`,
-	 *   and so they are represented using strings like `"0+0.5` or `"2-0.2"` wherever a button is expected.
-	 *	The first example means that for the control to be active,
-	 *   stick 0 must be halfway or more to it's maximum positive (right or down) value.
-	 * 	The second example means that for the control to be active,
-	 *   stick 2 must be 20% or more to it's maximum negative (up or left) value.
+	 * How control mapping works is that code registers the name of a "control", and a default key/button and then
+	 *  either gets an event when the control is pressed, or checks button/key presses against it. This allows the input
+	 *  mapped to a control to change.
 	 * 
 	 * @extends save.ISavable
 	 * @since 0.0.15-alpha
@@ -43,29 +31,7 @@ load.provide("dusk.controls", (function() {
 	 * @private
 	 */
 	var _mappings = {};
-
-	/** The currently pressed buttons.
-	 * 
-	 * The index is the ID of the button, and the value is a boolean describing whether the button is pressed or not.
-	 * @type array
-	 * @private
-	 */
-	var _buttons = [];
-	/** The current state of all the axises.
-	 * 
-	 * The index is the axis ID, and the value is a number from -1.0 to 1.0 indicating the intensity of the stick.
-	 * @type array
-	 * @private
-	 */
-	var _axes = [];
-
-	/** An object with keys for each axis. If true, then the axis is tilted.
-	 * @type object
-	 * @private
-	 * @since 0.0.21-alpha
-	 */
-	var _axesTilted = [];
-
+	
 	/** A constant used when firing the `{@link dusk.controls.controlPressed}` event, indicating that a key was pressed.
 	 * @type integer
 	 * @constant
@@ -86,7 +52,7 @@ load.provide("dusk.controls", (function() {
 	 * @value 2
 	 */
 	controls.TYPE_AXIS = 2;
-
+	
 	/** Fired when a key or button control has been activated, axes are not supported.
 	 * 
 	 * The event object contains three properties.
@@ -97,26 +63,6 @@ load.provide("dusk.controls", (function() {
 	 * @type EventDispatcher
 	 */
 	controls.controlPressed = new EventDispatcher("controls.controlPressed");
-
-	/** Fired when a button on the gamepad is pressed.
-	 * 
-	 * The event object is a `buttonPress` event, which has only one property `which`; the ID of the button or string
-	 *  description of axis.
-	 * @type EventDispatcher
-	 */
-	controls.buttonPress = new EventDispatcher("controls.buttonPressed");
-	/** Fired when a button on the gamepad is released.
-	 * 
-	 * The event object is a `buttonPress` event, which has only one property `which`; the ID of the button.
-	 * @type EventDispatcher
-	 */
-	controls.buttonUp = new EventDispatcher("controls.buttonUp");
-
-	//Add gamepad option
-	options.register("controls.gamepad", "boolean", true, "Whether gamepads will be used.");
-	options.register("controls.gamepadThreshold", "positiveFloat", 0.5,
-		"The angle that axis should be tilted to be treated as a button."
-	);
 
 	/** Adds a new control, with the specified default key/button presses.
 	 * 
@@ -152,7 +98,7 @@ load.provide("dusk.controls", (function() {
 	 * @param {integer} key The key to set the control to, as a keycode.
 	 */
 	controls.mapKey = function(name, key) {
-		if(!(name in controls._mappings)) return;
+		if(!(name in _mappings)) return;
 		_mappings[name][0] = key;
 	};
 
@@ -162,7 +108,7 @@ load.provide("dusk.controls", (function() {
 	 * @param {integer|string} button The button ID, or the axis description to register to the control.
 	 */
 	controls.mapButton = function(name, button) {
-		if(!(name in controls._mappings)) return;
+		if(!(name in _mappings)) return;
 		_mappings[name][1] = button;
 	};
 
@@ -185,6 +131,7 @@ load.provide("dusk.controls", (function() {
 	 */
 	controls.checkKey = function(name, key) {
 		if(!(name in _mappings) || key == null || key == undefined) return false;
+		
 		return _mappings[name][0] == key;
 	};
 
@@ -196,29 +143,6 @@ load.provide("dusk.controls", (function() {
 	controls.checkButton = function(name, button) {
 		if(!(name in _mappings) || button == null || button == undefined) return false;
 		
-		//Axis
-		if(typeof button == "string" && typeof _mappings[name][1] == "string") {
-			var axis = _mappings[name][1].split("+")[0].split("-")[0];
-			if(axis == button.split("+")[0].split("-")[0]) {
-				if(_mappings[name][1].indexOf("+") !== -1) {
-					if(_mappings[name][1].split("+")[1] == "" ){
-						if(+options.get("controls.gamepadThreshold") < _axes[axis])
-							return true;
-					}else if(+_mappings[name][1].split("+")[1] < _axes[axis])
-						return true;
-				}else if(_mappings[name][1].indexOf("-") !== -1) {
-					if(_mappings[name][1].split("-")[1] == "" ){
-						if(-options.get("controls.gamepadThreshold") > _axes[axis])
-							return true;
-					}else if(-_mappings[name][1].split("-")[1] > _axes[axis])
-						return true;
-				}
-			}
-			
-			return false;
-		}
-		
-		//Button
 		return _mappings[name][1] == button;
 	};
 
@@ -228,29 +152,10 @@ load.provide("dusk.controls", (function() {
 	 */
 	controls.controlActive = function(name) {
 		if(!(name in _mappings)) return false;
-		return keyboard.isKeyPressed(_mappings[name][0])
-		|| controls.isButtonPressed(_mappings[name][1]);
-	};
-
-	/** Checks if a button is pressed, or an axis is tilted.
-	 * @param {integer|string} button The button/axis to check, as a button ID or an axis description.
-	 * @return {boolean} Whether said button/axis is pressed/tilted.
-	 */
-	controls.isButtonPressed = function(button) {
-		if(typeof button == "string") {
-			var axis = button.split("+")[0].split("-")[0];
-			if(button.indexOf("+") !== -1) {
-				if(+button.split("+")[1] < _axes[axis]) return true;
-			}else if(button.indexOf("-") !== -1) {
-				if(-button.split("-")[1] > _axes[axis]) return true;
-			}
-			
-			return false;
-		}
 		
-		return _buttons[button];
+		return keyboard.isKeyPressed(_mappings[name][0]) || gamepad.isButtonPressed(_mappings[name][1]);
 	};
-
+	
 	/** Used internally to handle the `{@link keyboard.keyPress}` event.
 	 *	This will check to see if a control is fired from the keypress.
 	 * @param {object} e The keyPress event object.
@@ -267,9 +172,11 @@ load.provide("dusk.controls", (function() {
 				controls.controlPressed.fire(toFire);
 			}
 		}
+		
+		return true;
 	};
 	keyboard.keyPress.listen(_keyPressed);
-
+	
 	/** Used internally to handle the `{@link dusk.controls.buttonPress}` event.
 	 * 	This will check to see if a button, and only a button, control is fired.
 	 * @param {object} e The buttonPress event object.
@@ -277,7 +184,7 @@ load.provide("dusk.controls", (function() {
 	 */
 	var _buttonPressed = function(e) {
 		for(var m in _mappings) {
-			if(_mappings[m][1] == e.keyCode) {
+			if(_mappings[m][1] == e.which) {
 				var toFire = {};
 				toFire.buttonEvent = e;
 				toFire.type = controls.TYPE_BUTTON;
@@ -287,46 +194,8 @@ load.provide("dusk.controls", (function() {
 			}
 		}
 	};
-	controls.buttonPress.listen(_buttonPressed);
-
-	/** Registered on `{@link dusk.frameTicker.onFrame}`.
-	 * 	This checks to see if gamepad buttons or pressed, or if axises are tilted,
-	 *   and fires the relative events, and updates the relative variables.
-	 * @param {object} e The event object.
-	 * @private
-	 */
-	var _frame = function(e) {
-		if(document.hidden || document.webkitHidden || document.msHidden) return;
-		var navigatorGetGamepads = navigator.getGamepads || navigator.webkitGetGamepads || function(){return [null];};
-		var gamepad = navigatorGetGamepads.call(navigator)[0];
-		if(gamepad && options.get("controls.gamepad")) {
-			for(var i = 0; i < gamepad.buttons.length-1; i ++) {
-				if(!_buttons[i] && gamepad.buttons[i]) {
-					controls.buttonPress.fire({"which":i});
-				}else if(_buttons[i] && !gamepad.buttons[i]) {
-					controls.buttonUp.fire({"which":i});
-				}
-				
-				_buttons[i] = gamepad.buttons[i] > 0.2;
-			}
-			
-			for(var i = 0; i < gamepad.axes.length-1; i ++) {
-				_axes[i] = gamepad.axes[i];
-				
-				if(gamepad.axes[i] > options.get("controls.gamepadThreshold")
-				|| gamepad.axes[i] < -options.get("controls.gamepadThreshold")) {
-					if(!_axesTilted[i]) {
-						_axesTilted[i] = true;
-						controls.buttonPress.fire({"which":i+(gamepad.axes[i] > 0?"+":"-")});
-					}
-				}else{
-					_axesTilted[i] = false;
-				}
-			}
-		}
-	};
-	frameTicker.onFrame.listen(_frame);
-
+	gamepad.buttonPress.listen(_buttonPressed);
+	
 	/** Saves the bindings to a save source.
 	 * 
 	 * Type can only be `"bindings"`, everything else is ignored. The argument is an array of what controls should have
@@ -356,7 +225,7 @@ load.provide("dusk.controls", (function() {
 			return out;
 		}
 	};
-
+	
 	/** Restores data that was saved via `{@link dusk.controls.save}`.
 	 * 
 	 * @param {object} data The data that was saved.

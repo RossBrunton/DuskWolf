@@ -124,12 +124,16 @@ load.provide("dusk.utils", (function() {
 
 	/** Retrieves a HTTP get var (the ?name=value part of the URL).
 	 * @param {string} name The name of the var to get.
+	 * @param {?string} url The URL to parse, defaults to the current URL.
 	 * @return {?string} The value of the requested var.
 	 * 
 	 * @since 0.0.12-alpha
 	 */
-	utils.urlGet = function(name) {
-		var vars = window.location.search.substring(1).split("&");
+	utils.urlGet = function(name, url) {
+		if(url) url = new URL(url);
+		if(!url) url = window.location;
+		
+		var vars = url.search.substring(1).split("&");
 		for(var i = vars.length-1; i >= 0; i--) {
 			var pair = vars[i].split("=");
 			if(pair[0] == name) return decodeURIComponent(pair[1]);

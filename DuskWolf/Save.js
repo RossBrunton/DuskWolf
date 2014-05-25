@@ -385,7 +385,7 @@ load.provide("dusk.save", (function() {
 			this.data.meta.saved = new Date();
 			this.data.meta.spec = spec.name;
 			this.data.meta.ver = dusk.ver;
-			this.data.meta.refs = dusk.save._refs;
+			this.data.meta.refs = save._refs;
 		}else if(!("meta" in this.data)) {
 			throw new save.SaveIntegrityError();
 		}

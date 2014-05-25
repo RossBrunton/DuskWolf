@@ -22,8 +22,8 @@ load.provide("dusk.sgui.ItemHand", (function() {
 	ItemHand.prototype = Object.create(Group.prototype);
 
 	ItemHand.prototype.setHand = function(invent) {
-		if(!(invent instanceof dusk.items.Invent)) {
-			invent = new dusk.items.Invent(1, invent, this.maxStack);
+		if(!(invent instanceof items.Invent)) {
+			invent = new items.Invent(1, invent, this.maxStack);
 		}
 		
 		this._hand.sendAllToInvent(invent);

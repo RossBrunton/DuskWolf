@@ -3,8 +3,8 @@
 "use strict";
 
 load.provide("test.dusk.Controls", (function() {
-	var test = dusk.load.require("test");
-	var controls = dusk.load.require("dusk.controls");
+	var test = load.require("test");
+	var controls = load.require("dusk.controls");
 	
 	test.registerTestFunction(function(window) {
 		test.package = "test.dusk.Controls";

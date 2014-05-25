@@ -40,56 +40,78 @@ load.provide("test", (function() {
 	 * @since 0.0.21-alpha
 	 */
 	var _tests = [];
-
+	
 	/** Loads a dependancy file that contains only tests. This will be used with `{@link test.testAll}`
 	 * to run all the tests.
 	 * @param {string} url The url of the file.
+	 * @return {Promise()} A promise that fullfills when downloading is complete.
 	 */
 	test.loadTests = function(url) {
-		load.importList(url).then(function(data, textStatus, url) {
+		return load.importList(url).then(function(data, textStatus, url) {
+			var importl = [];
+			
 			for(var i = data.length-1; i >= 0; i--) {
-				load.import(data[i][1][0]);
+				importl.push(new Promise(function(f, r) {
+					load.import(data[i][1][0], f);
+				}));
 			}
+			
+			return Promise.all(importl);
 		});
 	};
-
+	
 	/** Registers a function as a test; it will be called when tests are ran.
 	 * @param {function():undefined} test The test function.
 	 */
 	test.registerTestFunction = function(test) {
 		_tests.push(test);
 	};
-
+	
 	/** Calls all testing functions; running all tests. 
 	 * @since 0.0.21-alpha
 	 */
 	test.testAll = function() {
 		for(var i = _tests.length-1; i >= 0; i --){
-			_tests[i](window);
+			try {
+				_tests[i](window);
+			}catch (e) {
+				console.error(e);
+				test.fail(e.message);
+			}
 		}
 	};
-
-
+	
+	/** Calls `{@link test.loadTests}` followed by `{@link test.testAll}`.
+	 * 
+	 * @param {string} url The url of the deps file for the tests.
+	 * @since 0.0.21-alpha
+	 */
+	test.loadAndTestAll = function(url) {
+		test.loadTests(url).then(test.testAll);
+	}
+	
 	/** Starts running a test, it is assumed it passes unless it explictly fails.
 	 * @param {string} name The name of the test.
 	 */
 	test.start = function(name) {
 		if(!(this.package in this.results)) this.results[this.package] = {};
+		
+		console.log("Running test \""+name+"\" of "+this.package);
 		this.results[this.package][name] = true;
 		_current = name;
 	};
-
+	
 	/** Fails a test, with the given reason.
 	 * @param {string} reason The reason for failure.
 	 */
 	test.fail = function(reason) {
 		this.results[this.package][_current] = false;
 		
-		console.warn("***** Test '"+_current+"' of "+this.package+" failed!");
-		console.warn(reason);
+		console.error("***** Test '"+_current+"' of "+this.package+" failed!");
+		console.error(reason);
 		if(this.debug) debugger;
 	};
-
+	
 	/** Fails the test if the assertion that the arguments are equal fails.
 	 * @param {*} a The first object.
 	 * @param {*} b The second object.
@@ -99,7 +121,7 @@ load.provide("test", (function() {
 			test.fail("Assertion "+a+" = "+b+" failed.");
 		}
 	};
-
+	
 	/** Fails the test if the assertion that the arguments are not equal fails.
 	 * @param {*} a The first object.
 	 * @param {*} b The second object.
@@ -109,7 +131,7 @@ load.provide("test", (function() {
 			test.fail("Assertion "+a+" != "+b+" failed.");
 		}
 	};
-
+	
 	/** Fails the test if the assertion that the argument is not null or undefined fails.
 	 * @param {*} a The object to check.
 	 */
@@ -118,7 +140,7 @@ load.provide("test", (function() {
 			test.fail("Assertion "+a+" exists failed.");
 		}
 	};
-
+	
 	/** Fails the test if the assertion that the argument is not null or undefined fails.
 	 * @param {*} a The object to check.
 	 * @since 0.0.21-alpha
@@ -128,7 +150,7 @@ load.provide("test", (function() {
 			test.fail("Assertion "+a+" does not exist failed.");
 		}
 	};
-
+	
 	/** Fails the test if the assertion that the argument is true fails.
 	 * @param {*} a The object to check.
 	 */
@@ -137,7 +159,7 @@ load.provide("test", (function() {
 			test.fail("Assertion "+a+" is true failed.");
 		}
 	};
-
+	
 	/** Fails the test if the assertion that the argument is false fails.
 	 * @param {*} a The object to check.
 	 */
@@ -146,7 +168,7 @@ load.provide("test", (function() {
 			test.fail("Assertion "+a+" is false failed.");
 		}
 	};
-
+	
 	/** Returns true if the two arguments are equal, this works intuitivley, and compares the elements
 	 *  for objects and arrays.
 	 * @param {*} a The first object.

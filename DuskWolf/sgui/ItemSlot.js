@@ -9,6 +9,7 @@ load.provide("dusk.sgui.ItemSlot", (function() {
 	var Image = load.require("dusk.sgui.Image");
 	var Label = load.require("dusk.sgui.Label");
 	var Tile = load.require("dusk.sgui.Tile");
+	var ItemHand = load.require("dusk.sgui.ItemHand");
 
 	var ItemSlot = function (parent, comName) {
 		Group.call(this, parent, comName);
@@ -105,7 +106,7 @@ load.provide("dusk.sgui.ItemSlot", (function() {
 					h.getHand().sendToInventSlot(this._invent, this.slot, e.keyPress.shiftKey?1:0xffffffff);
 				}else if(this._invent.isValidAddition(h.getHand().getItemFromSlot(0))) {
 					//Swap them round
-					var temp = new dusk.items.Invent(1, "true");
+					var temp = new items.Invent(1, "true");
 					this._invent.sendSlotToInvent(temp, this.slot, 0xffffffff);
 					h.getHand().sendToInventSlot(this._invent, this.slot, 0xffffffff);
 					temp.sendToInventSlot(h.getHand(), 0, 0xffffffff);
@@ -127,7 +128,7 @@ load.provide("dusk.sgui.ItemSlot", (function() {
 	ItemSlot.prototype._getHand = function() {
 		var c = this;
 		while(c = c.path("..")) {
-			if(c instanceof dusk.sgui.ItemHand && !c.supressHand) {
+			if(c instanceof ItemHand && !c.supressHand) {
 				return c;
 			}
 		}

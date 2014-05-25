@@ -8,6 +8,7 @@ load.provide("dusk.sgui", (function() {
 	var frameTicker = load.require("dusk.frameTicker");
 	var EventDispatcher = load.require("dusk.EventDispatcher");
 	var controls = load.require("dusk.controls");
+	var gamepad = load.require("dusk.gamepad");
 	var dusk = load.require("dusk");
 	var c = load.require("dusk.sgui.c");
 	var options = load.require("dusk.options");
@@ -544,12 +545,14 @@ load.provide("dusk.sgui", (function() {
 	
 	//Listen for keypresses
 	keyboard.keyPress.listen(function(event) {
-		if(sgui.getActivePane()) sgui.getActivePane().doKeyPress(event);
+		if(sgui.getActivePane()) return sgui.getActivePane().doKeyPress(event);
+		return true;
 	});
 	
 	//And button presses
-	controls.buttonPress.listen(function(event) {
-		if(sgui.getActivePane()) sgui.getActivePane().doButtonPress(event);
+	gamepad.buttonPress.listen(function(event) {
+		if(sgui.getActivePane()) return sgui.getActivePane().doButtonPress(event);
+		return true;
 	});
 	
 	//Listen for mouseclicks
@@ -679,7 +682,7 @@ load.provide("dusk.pause", (function() {
 	/** Pauses the game. 
 	 */
 	pause.pause = function() {
-		if(!dusk.pause.allow) return;
+		if(!pause.allow) return;
 		if(!_previous) _previous = sgui.getActivePane().comName;
 		sgui.setActivePane("paused");
 		sgui.getPane("paused").visible = true;

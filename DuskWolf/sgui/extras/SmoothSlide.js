@@ -28,7 +28,7 @@ load.provide("dusk.sgui.extras.SmoothSlide", (function() {
 		 * @type integer
 		 * @default dusk.sgui.Component#DIR_UP
 		 */
-		this.dir = dusk.sgui.c.DIR_UP;
+		this.dir = c.DIR_UP;
 		/** The range used internally to move the component.
 		 * @type dusk.Range
 		 * @private

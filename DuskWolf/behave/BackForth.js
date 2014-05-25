@@ -5,6 +5,7 @@
 load.provide("dusk.behave.BackForth", (function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.behave.Behave");
+	var c = load.require("dusk.sgui.c");
 	
 	/** @class dusk.behave.BackForth
 	 * @memberof dusk.behave
@@ -50,10 +51,10 @@ load.provide("dusk.behave.BackForth", (function() {
 	 * @private
 	 */
 	BackForth.prototype._bfCollide = function(e) {
-		if(e.dir == dusk.sgui.c.DIR_LEFT) {
+		if(e.dir == c.DIR_LEFT) {
 			this._data("headingLeft", false);
 		}
-		if(e.dir == dusk.sgui.c.DIR_RIGHT) {
+		if(e.dir == c.DIR_RIGHT) {
 			this._data("headingLeft", true);
 		}
 	};

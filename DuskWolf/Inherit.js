@@ -338,7 +338,7 @@ load.provide("dusk.Inheritable", (function(){
 	 * @static
 	 */
 	Inheritable.refLoad = function(data) {
-		return new dusk.Inheritable(data[0], InheritableContainer.getContainer(data[1]), save.loadRef(data[2]));
+		return new Inheritable(data[0], InheritableContainer.getContainer(data[1]), save.loadRef(data[2]));
 	};
 
 	/** Returns the name of the class for use in saving.

@@ -4,6 +4,7 @@
 
 load.provide("dusk", (function() {
 	var EventDispatcher = load.require("dusk.EventDispatcher");
+	var utils = load.require("dusk.utils");
 	
 	/** @namespace dusk
 	 * 
@@ -68,6 +69,7 @@ load.provide("dusk", (function() {
 	/** Call this to start the game, and fire the dusk.onLoad EventDispatcher. */
 	dusk.startGame = function() {
 		if(dusk.started) return;
+		_elem.focus();
 		dusk.started = true;
 		dusk.onLoad.fire();
 	};
@@ -100,28 +102,45 @@ load.provide("dusk", (function() {
 		return ""+a;
 	}
 	
+	var _elem;
 	if(document.getElementsByTagName("swo-duskwolf").length) {
-		var elem = document.getElementsByTagName("swo-duskwolf")[0];
-		if(elem.getAttribute("data-frameRate")) dusk.frameRate = elem.getAttribute("data-frameRate");
-		if(elem.getAttribute("data-data")) dusk.dataDir = elem.getAttribute("data-data");
-		if(elem.getAttribute("data-dev") !== undefined) dusk.dev = true;
+		_elem = document.getElementsByTagName("swo-duskwolf")[0];
+		if(_elem.getAttribute("data-frameRate")) dusk.frameRate = _elem.getAttribute("data-frameRate");
+		if(_elem.getAttribute("data-data")) dusk.dataDir = _elem.getAttribute("data-data");
+		if(_elem.getAttribute("data-dev") !== undefined) dusk.dev = true;
 		
-		elem.style.display = "block";
-		if(!elem.style.width) elem.style.width = _toPx(elem.getAttribute("data-width"));
-		if(!elem.style.height) elem.style.height = _toPx(elem.getAttribute("data-height"));
+		_elem.style.display = "block";
+		if(!_elem.style.width) _elem.style.width = _toPx(_elem.getAttribute("data-width"));
+		if(!_elem.style.height) _elem.style.height = _toPx(_elem.getAttribute("data-height"));
 		
-		if(!elem.id) elem.id = "swo-duskwolf";
-		elem.innerHTML = "<textarea id='"+elem.id+"-input' type='text'\
+		_elem.tabIndex = 0;
+		
+		if(!_elem.id) _elem.id = "swo-duskwolf";
+		_elem.innerHTML = "<textarea id='"+_elem.id+"-input' type='text'\
 		style='position:absolute;visibility:hidden;background:transparent;border:none;resize:none;overflow:hidden;'>";
-		elem.innerHTML += "<canvas id='"+elem.id+"-canvas' style='image-rendering: -webkit-optimize-contrast;'\
-		width='"+elem.getAttribute("data-width")+"' height='"+elem.getAttribute("data-height")+"'\
+		_elem.innerHTML += "<canvas id='"+_elem.id+"-canvas' style='image-rendering: -webkit-optimize-contrast;'\
+		width='"+_elem.getAttribute("data-width")+"' height='"+_elem.getAttribute("data-height")+"'\
 		></canvas>";
-		dusk.elemPrefix = elem.id;
+		dusk.elemPrefix = _elem.id;
 		
-		load.importList(elem.getAttribute("data-deps")).then(function() {
-			load.import(elem.getAttribute("data-package"));
+		var pack = _elem.getAttribute("data-package");
+		if(_elem.getAttribute("data-url-override") !== undefined && utils.urlGet("dwpack")) {
+			pack = utils.urlGet("dwpack");
+			console.log("Using alternate package "+pack);
+		}
+		
+		load.importList(_elem.getAttribute("data-deps")).then(function() {
+			load.import(pack);
 		});
 	}
+	
+	/** Returns the DuskWolf element.
+	 * @return dusk.HTMLDuskWolfElement
+	 * @since 0.0.21-alpha
+	 */
+	dusk.getElement = function() {
+		return document.getElementsByTagName("swo-duskwolf")[0];
+	};
 	
 	return dusk;
 })());

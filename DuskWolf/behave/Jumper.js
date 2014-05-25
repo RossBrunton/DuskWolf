@@ -30,11 +30,11 @@ load.provide("dusk.behave.Jumper", (function() {
 
 	Jumper.prototype._jumpFrame = function(e) {
 		if(this._controlActive("jump")) {
-			if(this._jumpReleased && ((this._entity.touchers(dusk.sgui.c.DIR_DOWN).length && skills.hasSkill("jump"))
+			if(this._jumpReleased && ((this._entity.touchers(c.DIR_DOWN).length && skills.hasSkill("jump"))
 			|| (this._jumps == 0 && skills.hasSkill("dubjump"))
 			|| skills.hasSkill("infinijump"))) {
 				this._entity.applyDy("control_jump", -15, 15, 1, 0);
-				if(!this._entity.touchers(dusk.sgui.c.DIR_DOWN).length) {
+				if(!this._entity.touchers(c.DIR_DOWN).length) {
 					this._jumps ++;
 					this._entity.performAnimation("airjump");
 				}else{

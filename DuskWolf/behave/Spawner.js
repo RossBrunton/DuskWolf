@@ -6,6 +6,7 @@ load.provide("dusk.behave.Spawner", (function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.behave.Behave");
 	var LightEntity = load.require("dusk.entities.LightEntity");
+	var EntityGroup = load.suggest("dusk.EntityGroup", function(p) {EntityGroup = p});
 
 	/** @class dusk.behave.Spawner
 	 * @memberof dusk.behave
@@ -117,7 +118,7 @@ load.provide("dusk.behave.Spawner", (function() {
 	 * @param {?string} dirOverride The direction to spawn; if omitted, then this is determined by the data.
 	 */
 	Spawner.prototype.spawn = function(name, dirOverride) {
-		if(!("EntityGroup" in dusk.sgui && this._entity.container instanceof dusk.sgui.EntityGroup))
+		if(!(EntityGroup && this._entity.container instanceof EntityGroup))
 			return;
 		
 		//Get spawn data
@@ -167,7 +168,7 @@ load.provide("dusk.behave.Spawner", (function() {
 			ent.y = this._entity.y;
 			
 			ent.type = this._resolve(dir, spawn.type);
-			var light = new dusk.entities.LightEntity(ent.type);
+			var light = new LightEntity(ent.type);
 			
 			if(!("horOffset" in spawn)) spawn.horOffset = 0;
 			if(!("verOffset" in spawn)) spawn.verOffset = 0;

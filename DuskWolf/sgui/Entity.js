@@ -1238,9 +1238,9 @@ load.provide("dusk.entities.LightEntity", (function() {
 		set: function(type) {
 			// Get data
 			this._type = type;
-			this.behaviourData = dusk.utils.clone(dusk.entities.types.getAll(type).data);
-			this._animationData = dusk.utils.clone(dusk.entities.types.getAll(type).animation);
-			this._particleData = dusk.utils.clone(dusk.entities.types.getAll(type).particles);
+			this.behaviourData = utils.clone(dusk.entities.types.getAll(type).data);
+			this._animationData = utils.clone(dusk.entities.types.getAll(type).animation);
+			this._particleData = utils.clone(dusk.entities.types.getAll(type).particles);
 			
 			//Set up animation
 			this._currentAni = -1;
@@ -1265,7 +1265,7 @@ load.provide("dusk.entities.LightEntity", (function() {
 			} else this.collisionOffsetY = 0;
 			
 			//Behaviours
-			var beh = dusk.entities.types.getAll(type).behaviours;
+			var beh = entities.types.getAll(type).behaviours;
 			for(var b in beh) {
 				if(beh[b]) this.addBehaviour(b, true);
 			}

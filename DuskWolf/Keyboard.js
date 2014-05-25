@@ -5,6 +5,7 @@
 load.provide("dusk.keyboard", (function() {
 	var EventDispatcher = load.require("dusk.EventDispatcher");
 	var dusk = load.require("dusk");
+	var sgui = load.suggest("dusk.sgui", function(p) {sgui = p});
 	
 	/** @namespace dusk.keyboard
 	 * @name dusk.keyboard
@@ -29,7 +30,7 @@ load.provide("dusk.keyboard", (function() {
 	 * @type dusk.EventDispatcher
 	 * @since 0.0.14-alpha
 	 */
-	keyboard.keyPress = new EventDispatcher("dusk.keyboard.keyPress");
+	keyboard.keyPress = new EventDispatcher("dusk.keyboard.keyPress", EventDispatcher.MODE_AND);
 
 	/** An event dispatcher which fires when a key is released after being pressed.
 	 * 
@@ -40,12 +41,17 @@ load.provide("dusk.keyboard", (function() {
 	 */
 	keyboard.keyUp = new EventDispatcher("dusk.keyboard.keyUp");
 
-	document.addEventListener("keydown", function(e){
+	dusk.getElement().addEventListener("keydown", function(e){
 		if(!_keys[e.keyCode]) {
-			keyboard.keyPress.fire(e);
+			if(!keyboard.keyPress.fire(e)) e.preventDefault();
 		}
+		
+		//Block keys from moving page
+		if([37, 38, 39, 40, 9, 13, 32].indexOf(e.keyCode) !== -1) e.preventDefault();
+		
+		//if([9, 13].indexOf(e.keyCode) !== -1) return false; //Why is this here?
 	});
-	document.addEventListener("keyup", function(e){
+	dusk.getElement().addEventListener("keyup", function(e){
 		keyboard.keyUp.fire(e);
 	});
 
@@ -171,8 +177,8 @@ load.provide("dusk.keyboard", (function() {
 	};
 
 	
-	keyboard.keyPress.listen(function(e) {_keys[e.keyCode] = true;});
-	keyboard.keyUp.listen(function(e) {_keys[e.keyCode] = false;});
+	keyboard.keyPress.listen(function(e) {_keys[e.keyCode] = true; return true;});
+	keyboard.keyUp.listen(function(e) {_keys[e.keyCode] = false; return true;});
 
 	/** Checks if a key is currently pressed or not.
 	 * 
@@ -200,15 +206,6 @@ load.provide("dusk.keyboard", (function() {
 		if(!(code in _codes)) return ["UNKNOWN", false, ""+code];
 		
 		return _codes[code];
-	};
-
-	//Block keys from moving page
-	document.onkeydown = function(e) {
-		if([37, 38, 39, 40, 9, 13, 32].indexOf(e.keyCode) !== -1
-			&& document.activeElement.parentNode.id != dusk.elemPrefix
-		) return false;
-		
-		//if([9, 13].indexOf(e.keyCode) !== -1) return false; //Why is this here?
 	};
 
 	Object.seal(keyboard);

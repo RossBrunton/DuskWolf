@@ -193,6 +193,7 @@ load.provide("dusk.EventDispatcher", (function() {
 					
 					case 3: //PASS
 						majorRet = ret;
+						event = majorRet;
 						break;
 					
 					case 4: //LAST

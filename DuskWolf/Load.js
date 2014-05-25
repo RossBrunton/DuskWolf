@@ -247,9 +247,14 @@ window.load = (function() {
 	 */
 	load.addDependency = function(file, provided, required, size) {
 		if(!size) size = 0;
+		
 		for(var i = provided.length-1; i >= 0; i--) {
-			if(!_names[provided[i]])
+			if(!_names[provided[i]]
+			|| (_names[provided[i]][1] == 0 && provided.length > _files[_names[provided[i]][0]][0].length)
+			|| (_names[provided[i]][1] == 0 && size < _names[provided[i]][3])
+			){
 				_names[provided[i]] = [file, 0, required, size, undefined, []];
+			}
 		}
 		
 		_files[file] = [provided, required, false];
@@ -505,7 +510,7 @@ window.load = (function() {
 		//And then import them all
 		console.log("Importing: "+_batchSet.join(", "));
 		
-		for(var i = 0; i < _batchSet.length; i ++) {
+		for(var i = _batchSet.length-1; i >= 0; i --) {
 			if(_batchSet[i].charAt(0) == "@") {
 				_doImportFile(_batchSet[i]);
 			}else{
@@ -601,15 +606,21 @@ window.load = (function() {
 			);
 			var textY = 0;
 			
-			canvas.getContext("2d").fillText(
-				"Hold on! Loading "+_importSet.length+" files!", 5, textY+=15
-			);
-			/*canvas.getContext("2d").fillText(
-				"Now loading "+_current+"!", 5, textY+=15
-			);*/
-			canvas.getContext("2d").fillText(
-				"That's about "+_getBytes()+"KiB, excluding game data!", 5, textY+=15
-			);
+			if(_importSet.length > 0) {
+				canvas.getContext("2d").fillText(
+					"Hold on! Loading "+_importSet.length+" files!", 5, textY+=15
+				);
+				/*canvas.getContext("2d").fillText(
+					"Now loading "+_current+"!", 5, textY+=15
+				);*/
+				canvas.getContext("2d").fillText(
+					"That's about "+_getBytes()+"KiB, excluding game data!", 5, textY+=15
+				);
+			}else{
+				canvas.getContext("2d").fillText(
+					"Everything has imported, but DuskWolf hasn't been started yet.", 5, textY+=15
+				);
+			}
 			
 			if("onLine" in navigator && !navigator.onLine) {
 				canvas.getContext("2d").fillText(
