@@ -24,7 +24,7 @@ load.provide("dusk.behave.Gravity", (function() {
 		this._data("gravity", 2, true);
 		this._data("terminal", 7, true);
 		
-		this.entityEvent.listen(this._gravFrame, this, {"name":"frame"});
+		this.entityEvent.listen(this._gravFrame.bind(this), "frame");
 	};
 	Gravity.prototype = Object.create(Behave.prototype);
 

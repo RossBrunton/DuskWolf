@@ -91,26 +91,26 @@ load.provide("dusk.sgui.TransitionManager", (function() {
 		this.height = 1;
 		
 		//Listeners
-		this.prepareDraw.listen(this._tmDraw, this);
-		this.frame.listen(this._tmFrame, this);
-		this.keyPress.listen(function(e) {
+		this.prepareDraw.listen(this._tmDraw.bind(this));
+		this.frame.listen(this._tmFrame.bind(this));
+		this.keyPress.listen((function(e) {
 			if(editor.active) this.add(
 				prompt("Please enter a trigger criteria.", this._getLastTrigger()),
 				+prompt("Please enter a mark to trigger."),
 				confirm("Does up need to be pressed?"),
 				utils.jsonParse(prompt("Please enter a JSON describing the room.", '{"package":"", "mark":0}'))
 			);
-		}, this, {"key":65});
-		this.keyPress.listen(function(e) {
+		}).bind(this), 65);
+		this.keyPress.listen((function(e) {
 			if(editor.active) this.remove(prompt("Enter a transition to remove.", 0));
-		}, this, {"key":82});
-		this.keyPress.listen(function(e) {
+		}).bind(this), 82);
+		this.keyPress.listen((function(e) {
 			if(editor.active) this._transitions.in =
 				utils.jsonParse(prompt("Edit in transition.", "{}"));
-		}, this, {"key":73});
+		}).bind(this), 73);
 		
 		//Add to the MarkTrigger listener
-		this._mtId = entities.markTrigger.listen(this._tmMarkTrigger, this);
+		this._mtId = entities.markTrigger.listen(this._tmMarkTrigger.bind(this));
 		this.onDelete.listen(
 			(function(e) {entities.markTrigger.unlisten(this._mtId);}).bind(this)
 		);
@@ -135,7 +135,7 @@ load.provide("dusk.sgui.TransitionManager", (function() {
 		if(!("in" in this._transitions) || !this._transitions.in.supressFade) {
 			this.container.addExtra("Fade", "tm_fadein", {"on":true, "from":0.0, "to":1.0, "duration":20});
 			this.wait();
-			this.container.getExtra("tm_fadein").onDelete.listen(function(e) {this.endWait();}, this);
+			this.container.getExtra("tm_fadein").onDelete.listen((function(e) {this.endWait();}).bind(this));
 		}
 		
 		//Custom in transition
@@ -240,7 +240,7 @@ load.provide("dusk.sgui.TransitionManager", (function() {
 					load.import(this._current.package);
 					if(!load.isImported(this._current.package)) {
 						this.wait();
-						load.onProvide.listen(function(e) {this.endWait();}, this, {"package":this._current.package});
+						load.onProvide.listen(this.endWait.bind(this), this._current.package);
 					}
 				}
 				
@@ -248,7 +248,7 @@ load.provide("dusk.sgui.TransitionManager", (function() {
 				if(!this._current.supressFade) {
 					this.container.addExtra("Fade", "tm_fadeout", {"on":true, "from":1.0, "to":0.0, "duration":20});
 					this.wait();
-					this.container.getExtra("tm_fadeout").onDelete.listen(function(e) {this.endWait();}, this);
+					this.container.getExtra("tm_fadeout").onDelete.listen((function(e) {this.endWait();}).bind(this));
 				}
 				
 				//Custom functions
@@ -268,7 +268,7 @@ load.provide("dusk.sgui.TransitionManager", (function() {
 	 * @private
 	 */
 	TransitionManager.prototype._getLastTrigger = function() {
-		if(!("out" in this._transitions)) return "";
+		if(!("out" in this._transitions) || !this._transitions.out.length) return "";
 		
 		return this._transitions.out[this._transitions.out.length-1][0];
 	};

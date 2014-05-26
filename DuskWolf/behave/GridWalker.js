@@ -12,11 +12,11 @@ load.provide("dusk.behave.PlayerGridWalker", (function() {
 		
 		this._data("playerControl", true, true);
 		
-		this.entityEvent.listen(function(e) {
+		this.entityEvent.listen((function(e) {
 			if(this._data("playerControl")) {
 				return controls.controlActive("entity_"+e.control);
 			}
-		}, this, {"name":"controlActive"});
+		}).bind(this), "controlActive");
 		
 		controls.addControl("entity_left", 37, "0-0.5");
 		controls.addControl("entity_right", 39, "0+0.5");
@@ -58,7 +58,7 @@ load.provide("dusk.behave.GridWalker", (function() {
 		this._data("gwfacing", c.DIR_DOWN, true);
 		this._data("gwmoves", [], true);
 		
-		this.entityEvent.listen(this._gwFrame, this, {"name":"frame"});
+		this.entityEvent.listen(this._gwFrame.bind(this), "frame");
 	};
 	GridWalker.prototype = Object.create(Behave.prototype);
 
@@ -181,8 +181,8 @@ load.provide("dusk.behave.GridRecorder", (function() {
 		
 		this._leftRegion = false;
 		
-		this.entityEvent.listen(this._gwStartMove.bind(this), undefined, {"name":"gwStartMove"});
-		this.entityEvent.listen(this._gwStopMove.bind(this), undefined, {"name":"gwStopMove"});
+		this.entityEvent.listen(this._gwStartMove.bind(this), "gwStartMove");
+		this.entityEvent.listen(this._gwStopMove.bind(this), "gwStopMove");
 	};
 	GridRecorder.prototype = Object.create(Behave.prototype);
 
@@ -248,8 +248,8 @@ load.provide("dusk.behave.GridMouse", (function() {
 		
 		this._data("gmMouseMove", true, true);
 		
-		this.entityEvent.listen((function(e){this._entity.ensureMouse()}).bind(this), undefined, {"name":"typeChange"});
-		this.entityEvent.listen(this._gmMouseMove.bind(this), undefined, {"name":"mouseMove"});
+		this.entityEvent.listen((function(e){this._entity.ensureMouse()}).bind(this), "typeChange");
+		this.entityEvent.listen(this._gmMouseMove.bind(this), "mouseMove");
 	};
 	GridMouse.prototype = Object.create(Behave.prototype);
 

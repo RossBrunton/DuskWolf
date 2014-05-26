@@ -15,16 +15,16 @@ load.provide("dusk.behave.Jumper", (function() {
 		this._jumping = 0;
 		this._jumpReleased = false;
 		
-		this.entityEvent.listen(this._jumpFrame, this, {"name":"frame"});
+		this.entityEvent.listen(this._jumpFrame.bind(this), "frame");
 		
-		this.entityEvent.listen(function(e) {
+		this.entityEvent.listen((function(e) {
 			this._jumps = 0;
 			this._jumping = 0;
-		}, this, {"name":"collide", "dir":c.DIR_DOWN});
+		}).bind(this), "collide", {"dir":c.DIR_DOWN});
 		
-		this.entityEvent.listen(function(e) {
+		this.entityEvent.listen((function(e) {
 			this._jumping = 0;
-		}, this, {"name":"collide", "dir":c.DIR_UP});
+		}).bind(this), "collide", {"dir":c.DIR_UP});
 	};
 	Jumper.prototype = Object.create(Behave.prototype);
 

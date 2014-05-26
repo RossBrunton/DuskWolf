@@ -24,8 +24,8 @@ load.provide("dusk.behave.Pickup", (function() {
 		this._data("pickupBy", "", true);
 		this._data("pickupName", "", true);
 		
-		this.entityEvent.listen(this._pickCollided, this, {"name":"collidedInto"});
-		this.entityEvent.listen(this._pickLoad, this, {"name":"typeChange"});
+		this.entityEvent.listen(this._pickCollided.bind(this), "collidedInto");
+		this.entityEvent.listen(this._pickLoad.bind(this), "typeChange");
 	};
 	Pickup.prototype = Object.create(Behave.prototype);
 

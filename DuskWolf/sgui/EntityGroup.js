@@ -70,19 +70,19 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 		
 		//Listeners
 		for(var i = 48; i <= 57; i++) {
-			this.keyPress.listen(this._numberDrop, this, {"key":i});
+			this.keyPress.listen(this._numberDrop.bind(this), i);
 		}
-		this.keyPress.listen(this._keyDel, this, {"key":46});
-		this.keyPress.listen(function(e) {
+		this.keyPress.listen(this._keyDel.bind(this), 46);
+		this.keyPress.listen((function(e) {
 			if(editor.active && confirm("Clear all entities?")) this.clear();
-		}, this, {"key":67});
-		this.keyPress.listen(function(e) {
+		}).bind(this), 67);
+		this.keyPress.listen((function(e) {
 			if(editor.active) editor.editNext = prompt("Enter name for next entity.");
-		}, this, {"key":78});
-		this.keyPress.listen(function(e) {
+		}).bind(this), 78);
+		this.keyPress.listen((function(e) {
 			if(editor.active) this._showEntities = !this._showEntities;
-		}, this, {"key":69});
-		this.keyPress.listen(function(e) {
+		}).bind(this), 69);
+		this.keyPress.listen((function(e) {
 			if(editor.active) {
 				load.import("dusk.sgui.EntityWorkshop");
 				
@@ -99,15 +99,15 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 					});
 				}
 			}
-		}, this, {"key":87});
-		this.prepareDraw.listen(this._entityGroupDraw, this);
-		this.action.listen(this._entityGroupAction, this);
+		}).bind(this), 87);
+		this.prepareDraw.listen(this._entityGroupDraw.bind(this));
+		this.action.listen(this._entityGroupAction.bind(this));
 		
 		//Directions
-		this.dirPress.listen(this._egRightAction, this, {"dir":c.DIR_RIGHT});
-		this.dirPress.listen(this._egLeftAction, this, {"dir":c.DIR_LEFT});
-		this.dirPress.listen(this._egUpAction, this, {"dir":c.DIR_UP});
-		this.dirPress.listen(this._egDownAction, this, {"dir":c.DIR_DOWN});
+		this.dirPress.listen(this._egRightAction.bind(this), c.DIR_RIGHT);
+		this.dirPress.listen(this._egLeftAction.bind(this), c.DIR_LEFT);
+		this.dirPress.listen(this._egUpAction.bind(this), c.DIR_UP);
+		this.dirPress.listen(this._egDownAction.bind(this), c.DIR_DOWN);
 	};
 	EntityGroup.prototype = Object.create(Group.prototype);
 	

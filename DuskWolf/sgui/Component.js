@@ -153,8 +153,9 @@ load.provide("dusk.sgui.Component", (function() {
 		 * @type dusk.EventDispatcher
 		 * @since 0.0.17-alpha
 		 */
-		this.dirPress = new EventDispatcher("dusk.sgui.Component.dirPress", EventDispatcher.MODE_AND);
-		this.dirPress.listen(function(e){return true;}, this);
+		this.dirPress = new EventDispatcher(
+			"dusk.sgui.Component.dirPress", EventDispatcher.MODE_AND, EventDispatcher.FILTER_MULTI
+		);
 		/** An event dispatcher that is fired once per frame.
 		 * 
 		 * The event object has no properties.
@@ -256,14 +257,14 @@ load.provide("dusk.sgui.Component", (function() {
 		 * @type dusk.EventDispatcher
 		 */
 		this.onFocusChange = new EventDispatcher("dusk.sgui.Component.onFocusChange");
-		this.onFocusChange.listen(function(e){this.focused = e.focus;}, this);
+		this.onFocusChange.listen((function(e){this.focused = e.focus;}).bind(this));
 		/** Fired whenever this component becomes active, or stops being active.
 		 * 
 		 * The event object has a single property, `active`, which is true if and only if the component is now active.
 		 * @type dusk.EventDispatcher
 		 */
 		this.onActiveChange = new EventDispatcher("dusk.sgui.Component.onActiveChange");
-		this.onActiveChange.listen(function(e){this.active = e.active;}, this);
+		this.onActiveChange.listen((function(e){this.active = e.active;}).bind(this));
 		
 		/** If this component becomes focused, then the components specified by these paths will also become focused.
 		 * 
@@ -279,7 +280,7 @@ load.provide("dusk.sgui.Component", (function() {
 					}
 				}
 			}
-		}).bind(this), undefined, {"focus":true});
+		}).bind(this), true);
 		
 		/** If this component's action fires, then the components specified by these paths will become focused.
 		 * 
@@ -387,27 +388,27 @@ load.provide("dusk.sgui.Component", (function() {
 	 * @param {object} e The JQuery keypress object that should be ran.
 	 * @return {boolean} Whether the parent container should run its own actions.
 	 */
-	Component.prototype.doKeyPress = function (e) {
+	Component.prototype.doKeyPress = function(e) {
 		if(utils.doesImplement(this, IContainer) && !this.containerKeypress(e)){return false;}
 		
 		var eventObject = {"key":e.keyCode, "shift":e.shiftKey, "ctrl":e.ctrlKey, "meta":e.metaKey, "jquery":e};
 		
 		this._noFlow = false;
 		
-		var dirReturn = this.keyPress.fire(eventObject);
+		var dirReturn = this.keyPress.fire(eventObject, eventObject.key);
 		if(dirReturn) {
 			//Directions
 			if(controls.checkKey("sgui_left", e.keyCode)) {
-				if((dirReturn = this.dirPress.fire({"dir":c.DIR_LEFT, "e":e})) && !this._noFlow
+				if((dirReturn = this.dirPress.fire({"dir":c.DIR_LEFT, "e":e}, c.DIR_LEFT)) && !this._noFlow
 				&& this.leftFlow && this.container.flow(this.leftFlow)) return false;
 			}else if(controls.checkKey("sgui_up", e.keyCode)) {
-				if((dirReturn = this.dirPress.fire({"dir":c.DIR_UP, "e":e})) && !this._noFlow
+				if((dirReturn = this.dirPress.fire({"dir":c.DIR_UP, "e":e}, c.DIR_UP)) && !this._noFlow
 				&& this.upFlow && this.container.flow(this.upFlow)) return false;
 			}else if(controls.checkKey("sgui_right", e.keyCode)) {
-				if((dirReturn = this.dirPress.fire({"dir":c.DIR_RIGHT, "e":e})) && !this._noFlow
+				if((dirReturn = this.dirPress.fire({"dir":c.DIR_RIGHT, "e":e}, c.DIR_RIGHT)) && !this._noFlow
 				&& this.rightFlow && this.container.flow(this.rightFlow)) return false;
 			}else if(controls.checkKey("sgui_down", e.keyCode)) {
-				if((dirReturn = this.dirPress.fire({"dir":c.DIR_DOWN, "e":e})) && !this._noFlow
+				if((dirReturn = this.dirPress.fire({"dir":c.DIR_DOWN, "e":e}, c.DIR_DOWN)) && !this._noFlow
 				&& this.downFlow && this.container.flow(this.downFlow)) return false;
 			}else if(controls.checkKey("sgui_action", e.keyCode)) {
 				return this.action.fire({"keyPress":e, "component":this});
@@ -435,20 +436,20 @@ load.provide("dusk.sgui.Component", (function() {
 		
 		this._noFlow = false;
 		
-		var dirReturn = this.buttonPress.fire(eventObject);
+		var dirReturn = this.buttonPress.fire(eventObject, eventObject.button);
 		if(dirReturn) {
 			//Directions
 			if(controls.checkButton("sgui_left", e.which)) {
-				if((dirReturn = this.dirPress.fire({"dir":c.DIR_LEFT, "e":e})) && !this._noFlow
+				if((dirReturn = this.dirPress.fire({"dir":c.DIR_LEFT, "e":e}, c.DIR_LEFT)) && !this._noFlow
 				&& this.leftFlow && this.container.flow(this.leftFlow)) return false;
 			}else if(controls.checkButton("sgui_up", e.which)) {
-				if((dirReturn = this.dirPress.fire({"dir":c.DIR_UP, "e":e})) && !this._noFlow
+				if((dirReturn = this.dirPress.fire({"dir":c.DIR_UP, "e":e}, c.DIR_UP)) && !this._noFlow
 				&& this.upFlow && this.container.flow(this.upFlow)) return false;
 			}else if(controls.checkButton("sgui_right", e.which)) {
-				if((dirReturn = this.dirPress.fire({"dir":c.DIR_RIGHT, "e":e})) && !this._noFlow
+				if((dirReturn = this.dirPress.fire({"dir":c.DIR_RIGHT, "e":e}, c.DIR_RIGHT)) && !this._noFlow
 				&& this.rightFlow && this.container.flow(this.rightFlow)) return false;
 			}else if(controls.checkButton("sgui_down", e.which)) {
-				if((dirReturn = this.dirPress.fire({"dir":c.DIR_DOWN, "e":e})) && !this._noFlow
+				if((dirReturn = this.dirPress.fire({"dir":c.DIR_DOWN, "e":e}, c.DIR_DOWN)) && !this._noFlow
 				&& this.downFlow && this.container.flow(this.downFlow)) return false;
 			}else if(controls.checkButton("sgui_action", e.which)) {
 				return this.action.fire({"keyPress":e, "component":this});
@@ -472,7 +473,7 @@ load.provide("dusk.sgui.Component", (function() {
 		
 		if(!this.mouse) {
 			this.mouse = new MouseAugment(this);
-			this.augment.fire({"augment":"mouse"});
+			this.augment.fire({"augment":"mouse"}, "mouse");
 		}
 		
 		return this.mouse;

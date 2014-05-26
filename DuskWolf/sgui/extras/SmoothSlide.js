@@ -41,9 +41,9 @@ load.provide("dusk.sgui.extras.SmoothSlide", (function() {
 		this._decreasing = false;
 		
 		//Listeners
-		this._tick.listen(this._ssOnTick, this);
-		this._onStart.listen(this._ssOnStart, this);
-		this._onEnd.listen(this._ssOnEnd, this);
+		this._tick.listen(this._ssOnTick.bind(this));
+		this._onStart.listen(this._ssOnStart.bind(this));
+		this._onEnd.listen(this._ssOnEnd.bind(this));
 		
 		//Prop masks
 		this._props.map("by", "by");

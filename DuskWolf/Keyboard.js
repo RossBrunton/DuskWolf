@@ -22,7 +22,7 @@ load.provide("dusk.keyboard", (function() {
 	 * @private
 	 */
 	var _keys = {};
-
+	
 	/** An event dispatcher which fires when a key is pressed.
 	 * 
 	 * The event object is a JQuery `keydown` event.
@@ -31,7 +31,7 @@ load.provide("dusk.keyboard", (function() {
 	 * @since 0.0.14-alpha
 	 */
 	keyboard.keyPress = new EventDispatcher("dusk.keyboard.keyPress", EventDispatcher.MODE_AND);
-
+	
 	/** An event dispatcher which fires when a key is released after being pressed.
 	 * 
 	 * The event object is a JQuery `keyup` event.
@@ -40,10 +40,10 @@ load.provide("dusk.keyboard", (function() {
 	 * @since 0.0.14-alpha
 	 */
 	keyboard.keyUp = new EventDispatcher("dusk.keyboard.keyUp");
-
+	
 	dusk.getElement().addEventListener("keydown", function(e){
 		if(!_keys[e.keyCode]) {
-			if(!keyboard.keyPress.fire(e)) e.preventDefault();
+			if(!keyboard.keyPress.fire(e, e.keyCode)) e.preventDefault();
 		}
 		
 		//Block keys from moving page
@@ -52,9 +52,9 @@ load.provide("dusk.keyboard", (function() {
 		//if([9, 13].indexOf(e.keyCode) !== -1) return false; //Why is this here?
 	});
 	dusk.getElement().addEventListener("keyup", function(e){
-		keyboard.keyUp.fire(e);
+		keyboard.keyUp.fire(e, e.keyCode);
 	});
-
+	
 	/** An object describing the properties of keys relative to their keycodes.
 	 * 
 	 * Each property in this object is a three element array, the first being the "name" of the key, 
@@ -175,11 +175,10 @@ load.provide("dusk.keyboard", (function() {
 		"221":["]", true, "]"],
 		"222":["'", true, "'"],
 	};
-
 	
 	keyboard.keyPress.listen(function(e) {_keys[e.keyCode] = true; return true;});
 	keyboard.keyUp.listen(function(e) {_keys[e.keyCode] = false; return true;});
-
+	
 	/** Checks if a key is currently pressed or not.
 	 * 
 	 * @param {integer} code A keycode to check.
@@ -190,7 +189,7 @@ load.provide("dusk.keyboard", (function() {
 		
 		return _keys[code];
 	};
-
+	
 	/** Given a keycode, this returns information about that key.
 	 * 
 	 * It returns an array; the first element is the name of the key,
@@ -207,7 +206,7 @@ load.provide("dusk.keyboard", (function() {
 		
 		return _codes[code];
 	};
-
+	
 	Object.seal(keyboard);
 	
 	return keyboard;

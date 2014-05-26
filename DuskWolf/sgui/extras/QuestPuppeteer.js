@@ -322,7 +322,7 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 								passedArg.entity.entityEvent.unlisten(l);
 								fulfill(passedArg);
 							}
-						}).bind(this), undefined, {"name":"gwStopMove"});
+						}).bind(this), "gwStopMove");
 					}else{
 						fulfill(passedArg);
 					}

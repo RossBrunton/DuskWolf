@@ -441,13 +441,13 @@ load.provide("dusk.sgui.Entity", (function() {
 		if(!this.isLight()) this._registerPropMask("entType", "entType");
 		
 		//Listeners
-		if(!this.isLight()) if(this.collisionMark) this.prepareDraw.listen(this._collisionDraw, this);
+		if(!this.isLight()) if(this.collisionMark) this.prepareDraw.listen(this._collisionDraw.bind(this));
 		if(!this.isLight()) {
 			this.augment.listen((function(e) {
 				this.mouse.move.listen((function() {
 					this.behaviourFire("mouseMove", {"x":this.mouse.x, "y":this.mouse.y});
 				}).bind(this));
-			}).bind(this), {"augment":"mouse"});
+			}).bind(this), "mouse");
 		}
 	};
 	Entity.prototype = Object.create(Tile.prototype);
@@ -716,10 +716,10 @@ load.provide("dusk.sgui.Entity", (function() {
 	Entity.prototype.behaviourFire = function(event, data) {
 		if(!data) data = {};
 		data.name = event;
-		this.entityEvent.fire(data);
+		this.entityEvent.fire(data, event);
 		var keys = Object.keys(this._behaviours);
 		for(var b = keys.length-1; b >= 0; b --) {
-			this._behaviours[keys[b]].entityEvent.fire(data);
+			this._behaviours[keys[b]].entityEvent.fire(data, event);
 		}
 	};
 
@@ -735,10 +735,10 @@ load.provide("dusk.sgui.Entity", (function() {
 		var output = [];
 		if(!data) data = {};
 		data.name = event;
-		output[0] = this.entityEvent.fire(data);
+		output[0] = this.entityEvent.fire(data, event);
 		var keys = Object.keys(this._behaviours);
 		for(var b = keys.length-1; b >= 0; b --) {
-			output.push(this._behaviours[keys[b]].entityEvent.fire(data));
+			output.push(this._behaviours[keys[b]].entityEvent.fire(data, event));
 		}
 		
 		return output;

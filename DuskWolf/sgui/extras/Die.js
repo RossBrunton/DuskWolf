@@ -23,7 +23,7 @@ load.provide("dusk.sgui.extras.Die", (function() {
 		Effect.call(this, owner, name);
 		
 		//Listeners
-		this._onStart.listen(function(e){this._owner.deleted = true;}, this);
+		this._onStart.listen(function(e){this._owner.deleted = true;}.bind(this));
 	};
 	Die.prototype = Object.create(Effect.prototype);
 

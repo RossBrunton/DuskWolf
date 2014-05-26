@@ -10,8 +10,8 @@ load.provide("dusk.behave.Persist", (function() {
 	var Persist = function(entity) {
 		Behave.call(this, entity);
 		
-		this.entityEvent.listen(this._persistFrame, this, {"name":"frame"});
-		this.entityEvent.listen(this._persistLoad, this, {"name":"typeChange"});
+		this.entityEvent.listen(this._persistFrame.bind(this), "frame");
+		this.entityEvent.listen(this._persistLoad.bind(this), "typeChange");
 	};
 	Persist.prototype = Object.create(Behave.prototype);
 

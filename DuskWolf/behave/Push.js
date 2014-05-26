@@ -24,7 +24,7 @@ load.provide("dusk.behave.Push", (function() {
 		
 		this._data("pspeed", 1, true);
 		
-		this.entityEvent.listen(this._pCollided, this, {"name":"collidedInto"});
+		this.entityEvent.listen(this._pCollided.bind(this), "collidedInto");
 	};
 	Push.prototype = Object.create(Behave.prototype);
 

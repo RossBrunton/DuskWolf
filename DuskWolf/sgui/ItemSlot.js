@@ -30,8 +30,8 @@ load.provide("dusk.sgui.ItemSlot", (function() {
 		this._registerPropMask("invent", "__invent", undefined, ["maxStack"]);
 		
 		//Listeners
-		this.frame.listen(this._itemSlotFrame, this);
-		this.action.listen(this._itemSlotAction, this);
+		this.frame.listen(this._itemSlotFrame.bind(this));
+		this.action.listen(this._itemSlotAction.bind(this));
 	};
 	ItemSlot.prototype = Object.create(Group.prototype);
 

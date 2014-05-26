@@ -85,7 +85,7 @@ load.provide("dusk.behave.Spawner", (function() {
 		this._data("spawns", {}, true);
 		this._data("_spawn_cooldowns", {}, true);
 		
-		this.entityEvent.listen(this._spFrame, this, {"name":"frame"});
+		this.entityEvent.listen(this._spFrame.bind(this), "frame");
 	};
 	Spawner.prototype = Object.create(Behave.prototype);
 

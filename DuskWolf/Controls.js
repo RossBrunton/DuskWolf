@@ -169,7 +169,7 @@ load.provide("dusk.controls", (function() {
 				toFire.type = controls.TYPE_KEY;
 				toFire.control = m;
 				
-				controls.controlPressed.fire(toFire);
+				controls.controlPressed.fire(toFire, m);
 			}
 		}
 		
@@ -190,7 +190,7 @@ load.provide("dusk.controls", (function() {
 				toFire.type = controls.TYPE_BUTTON;
 				toFire.control = m;
 				
-				controls.controlPressed.fire(toFire);
+				controls.controlPressed.fire(toFire, m);
 			}
 		}
 	};

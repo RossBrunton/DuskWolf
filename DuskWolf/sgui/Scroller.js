@@ -54,8 +54,8 @@ load.provide("dusk.sgui.Scroller", (function() {
 		this._registerPropMask("target", "target");
 		
 		//Listeners
-		this.frame.listen(this._sFrame, this);
-		this.dirPress.listen(this._sDir, this);
+		this.frame.listen(this._sFrame.bind(this));
+		this.dirPress.listen(this._sDir.bind(this));
 	};
 	Scroller.prototype = Object.create(FocusCheckerTile.prototype);
 

@@ -27,8 +27,8 @@ load.provide("dusk.behave.HitDam", (function() {
 		this._data("damage", 1, true);
 		this._data("damages", "", true);
 		
-		this.entityEvent.listen(this._hdCollide, this, {"name":"collide"});
-		this.entityEvent.listen(this._hdCollide, this, {"name":"collidedInto"});
+		this.entityEvent.listen(this._hdCollide.bind(this), "collide");
+		this.entityEvent.listen(this._hdCollide.bind(this), "collidedInto");
 	};
 	HitDam.prototype = Object.create(Behave.prototype);
 

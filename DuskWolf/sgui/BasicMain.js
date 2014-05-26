@@ -45,19 +45,19 @@ load.provide("dusk.sgui.BasicMain", (function() {
 		
 		//Listeners
 		this.frame.listen(this._basicMainFrame.bind(this));
-		this.keyPress.listen(this.save, this, {"key":83});
-		this.keyPress.listen(function(e) {
+		this.keyPress.listen(this.save.bind(this), 83);
+		this.keyPress.listen((function(e) {
 			if(editor.active) this.createRoom(prompt("Enter a room to go to.", this.roomName), 0);
-		}, this, {"key":71});
+		}).bind(this), 71);
 		this.augment.listen((function(e) {
 			this.mouse.focus = false;
-		}).bind(this), undefined, {"augment":"mouse"});
+		}).bind(this), "mouse");
 		
 		//Directions
-		this.dirPress.listen(this._bmRightAction, this, {"dir":c.DIR_RIGHT});
-		this.dirPress.listen(this._bmLeftAction, this, {"dir":c.DIR_LEFT});
-		this.dirPress.listen(this._bmUpAction, this, {"dir":c.DIR_UP});
-		this.dirPress.listen(this._bmDownAction, this, {"dir":c.DIR_DOWN});
+		this.dirPress.listen(this._bmRightAction.bind(this), c.DIR_RIGHT);
+		this.dirPress.listen(this._bmLeftAction.bind(this), c.DIR_LEFT);
+		this.dirPress.listen(this._bmUpAction.bind(this), c.DIR_UP);
+		this.dirPress.listen(this._bmDownAction.bind(this), c.DIR_DOWN);
 	};
 	BasicMain.prototype = Object.create(Group.prototype);
 

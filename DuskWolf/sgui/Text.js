@@ -153,46 +153,46 @@ load.provide("dusk.sgui.Label", (function() {
 		 * @protected
 		 */
 		this._command = new EventDispatcher("dusk.sgui.Label._command", EventDispatcher.MODE_LAST);
-		this._command.listen(function(e){return [null, ""];}, this);
-		this._command.listen(function(e){return [null, "["];}, this, {"command":"["});
-		this._command.listen(function(e){return [Label._EVENT_BOLD, ""];}, this, {"command":"b"});
-		this._command.listen(function(e){return [Label._EVENT_DEBOLD, ""];}, this, {"command":"/b"});
-		this._command.listen(function(e){return [Label._EVENT_ITALIC, ""];}, this, {"command":"i"});
-		this._command.listen(function(e){return [Label._EVENT_DEITALIC, ""];}, this, {"command":"/i"});
+		this._command.listen((function(e){return [null, ""];}).bind(this));
+		this._command.listen((function(e){return [null, "["];}).bind(this), "[");
+		this._command.listen((function(e){return [Label._EVENT_BOLD, ""];}).bind(this),"b");
+		this._command.listen((function(e){return [Label._EVENT_DEBOLD, ""];}).bind(this), "/b");
+		this._command.listen((function(e){return [Label._EVENT_ITALIC, ""];}).bind(this), "i");
+		this._command.listen((function(e){return [Label._EVENT_DEITALIC,""];}).bind(this), "/i");
 		
-		this._command.listen(function(e){
+		this._command.listen((function(e){
 			return [Label._EVENT_COLOUR, e.args[1]];
-		}, this, {"command":"colour"});
-		this._command.listen(function(e){
+		}).bind(this), "colour");
+		this._command.listen((function(e){
 			return [Label._EVENT_COLOUR, this.colour];
-		}, this, {"command":"/colour"});
+		}).bind(this), "/colour");
 		
-		this._command.listen(function(e){
+		this._command.listen((function(e){
 			return [Label._EVENT_FONT, e.args[1]];
-		}, this, {"command":"font"});
-		this._command.listen(function(e){
+		}).bind(this), "font");
+		this._command.listen((function(e){
 			return [Label._EVENT_FONT, this.font];
-		}, this, {"command":"/font"});
+		}).bind(this), "/font");
 		
-		this._command.listen(function(e){
+		this._command.listen((function(e){
 			return [Label._EVENT_BSIZE, e.args[1]];
-		}, this, {"command":"bsize"});
-		this._command.listen(function(e){
+		}).bind(this), "bsize");
+		this._command.listen((function(e){
 			return [Label._EVENT_BSIZE, this.borderSize];
-		}, this, {"command":"/bsize"});
+		}).bind(this), "/bsize");
 		
-		this._command.listen(function(e){
+		this._command.listen((function(e){
 			return [Label._EVENT_BCOLOUR, e.args[1]];
-		}, this, {"command":"bcolour"});
-		this._command.listen(function(e){
+		}).bind(this), "bcolour");
+		this._command.listen((function(e){
 			return [Label._EVENT_BCOLOUR, this.borderColour];
-		}, this, {"command":"/bcolour"});
+		}).bind(this), "/bcolour");
 		
-		this._command.listen(function(e){
+		this._command.listen((function(e){
 			var img = new Image(e.args[1], e.args[2]);
 			
 			return [Label._EVENT_IMAGE, [img]];
-		}, this, {"command":"img"});
+		}).bind(this), "img");
 		
 		//Prop masks
 		this._registerPropMask("text", "text", true);
@@ -210,7 +210,7 @@ load.provide("dusk.sgui.Label", (function() {
 		this._registerPropMask("multiline", "multiline");
 		
 		//Listeners
-		this.prepareDraw.listen(this._blDraw, this);
+		this.prepareDraw.listen(this._blDraw.bind(this));
 	};
 	Label.prototype = Object.create(Component.prototype);
 
@@ -524,7 +524,7 @@ load.provide("dusk.sgui.Label", (function() {
 			var commandStr = text.match(/^\[([^\]]*?)\]/i);
 			var commands = commandStr[1].split(/\s/);
 			
-			return this._command.fire({"command":commands[0].toLowerCase(), "args":commands})
+			return this._command.fire({"command":commands[0].toLowerCase(), "args":commands}, commands[0].toLowerCase())
 				.concat([commandStr[0].length]);
 		}else{
 			return [null, text.charAt(0), 1];
@@ -581,9 +581,9 @@ load.provide("dusk.sgui.TextBox", (function() {
 		this._registerPropMask("border", "border", true);
 		
 		//Listeners
-		this.prepareDraw.listen(this._boxDraw, this);
-		this.keyPress.listen(this._boxKey, this, {"ctrl":false});
-		this.onActiveChange.listen(this._activeChange, this);
+		this.prepareDraw.listen(this._boxDraw.bind(this));
+		this.keyPress.listen(this._boxKey.bind(this), undefined, {"ctrl":false});
+		this.onActiveChange.listen(this._activeChange.bind(this));
 		this.frame.listen((function(e) {
 			if(this.active) {
 				var e = document.getElementById(dusk.elemPrefix+"-input");

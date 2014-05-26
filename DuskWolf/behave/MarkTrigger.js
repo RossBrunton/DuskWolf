@@ -23,7 +23,7 @@ load.provide("dusk.behave.MarkTrigger", (function() {
 		
 		if(t) TileMap.tileData.free(t);
 		
-		this.entityEvent.listen(this._markTriggerFrame, this, {"name":"frame"});
+		this.entityEvent.listen(this._markTriggerFrame.bind(this), "frame");
 	};
 	MarkTrigger.prototype = Object.create(Behave.prototype);
 
@@ -48,7 +48,7 @@ load.provide("dusk.behave.MarkTrigger", (function() {
 				entities.markTrigger.fire({
 					"up":false, "mark":this._markAt, "activator":this._entity.comName, "entity":this._entity,
 					"room":this._entity.path("../..").roomName
-				});
+				}, this._markAt);
 				this._coolDown = 5;
 			}
 		}

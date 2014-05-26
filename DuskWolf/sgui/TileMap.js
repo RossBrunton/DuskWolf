@@ -184,13 +184,13 @@ load.provide("dusk.sgui.TileMap", (function() {
 		this._registerPropMask("twidth", "twidth");
 		
 		//Listeners
-		this.prepareDraw.listen(this._tileMapDraw, this);
-		this.frame.listen(this._tileMapFrame, this);
+		this.prepareDraw.listen(this._tileMapDraw.bind(this));
+		this.frame.listen(this._tileMapFrame.bind(this));
 		
 		//Default values
 		this.augment.listen((function(e) {
 			this.mouse.clickPierce = true;
-		}).bind(this), {"augment":"mouse"});
+		}).bind(this), "mouse");
 	};
 	TileMap.prototype = Object.create(Component.prototype);
 

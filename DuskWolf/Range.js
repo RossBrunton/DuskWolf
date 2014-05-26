@@ -67,7 +67,7 @@ load.provide("dusk.Range", (function() {
 			if(value > this.max) value = this.max;
 			if(this._value == value) return;
 			this._value = value;
-			this._value = this.onChange.fire({"value":this._value}).value;
+			this._value = this.onChange.fire({"value":this._value}, value).value;
 		}
 	});
 

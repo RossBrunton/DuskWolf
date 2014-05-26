@@ -55,7 +55,7 @@ load.provide("dusk.sgui.Rect", (function() {
 		this._registerPropMask("radius", "radius", true);
 		
 		//Listeners
-		this.prepareDraw.listen(this._rectDraw, this);
+		this.prepareDraw.listen(this._rectDraw.bind(this));
 	};
 	Rect.prototype = Object.create(Component.prototype);
 

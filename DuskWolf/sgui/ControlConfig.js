@@ -42,10 +42,12 @@ load.provide("dusk.sgui.ControlConfig", (function() {
 		this._registerPropMask("control", "control");
 		
 		//Listeners
-		this.frame.listen(this._ccFrame, this);
-		this.keyPress.listen(this._ccKey, this);
-		this.prepareDraw.listen(this._ccDraw, this);
-		this.action.listen(function(e) {this.setting = !this.setting; this.locked = this.setting; return false;}, this);
+		this.frame.listen(this._ccFrame.bind(this));
+		this.keyPress.listen(this._ccKey.bind(this));
+		this.prepareDraw.listen(this._ccDraw.bind(this));
+		this.action.listen(
+			(function(e) {this.setting = !this.setting; this.locked = this.setting; return false;}).bind(this)
+		);
 	};
 	ControlConfig.prototype = Object.create(Group.prototype);
 

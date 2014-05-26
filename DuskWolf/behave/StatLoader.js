@@ -22,8 +22,8 @@ load.provide("dusk.behave.StatLoader", (function() {
 		this._data("statsPutBack", false, true);
 		this._data("statsLoadImage", false, true);
 		
-		this.entityEvent.listen(this._slLoad.bind(this), undefined, {"name":"typeChange"});
-		this.entityEvent.listen(this._slSaveBM.bind(this), undefined, {"name":"saveBM"});
+		this.entityEvent.listen(this._slLoad.bind(this), "typeChange");
+		this.entityEvent.listen(this._slSaveBM.bind(this), "saveBM");
 	};
 	StatLoader.prototype = Object.create(Behave.prototype);
 

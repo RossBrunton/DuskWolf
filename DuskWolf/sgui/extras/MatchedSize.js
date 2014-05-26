@@ -28,7 +28,7 @@ load.provide("dusk.sgui.extras.MatchedSize", (function() {
 		this.paddingRight = 0;
 		
 		this._matchFrameId = this._owner.frame.listen(this._matchFrame.bind(this));
-		this.onDelete.listen(this._matchDeleted, this);
+		this.onDelete.listen(this._matchDeleted.bind(this));
 		
 		//Prop masks
 		this._props.map("base", "base");

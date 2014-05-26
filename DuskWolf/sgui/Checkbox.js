@@ -73,11 +73,11 @@ load.provide("dusk.sgui.Checkbox", (function() {
 		this._registerPropMask("checked", "checked");
 		
 		//Listeners
-		this.action.listen(function(e) {
+		this.action.listen((function(e) {
 			this.checked = !this.checked;
-			this.onCheck.fire({"checked":this.checked, "component":this});
+			this.onCheck.fire({"checked":this.checked, "component":this}, this.checked);
 			return false;
-		}, this);
+		}).bind(this), undefined);
 	};
 	Checkbox.prototype = Object.create(FocusCheckerTile.prototype);
 

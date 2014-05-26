@@ -270,7 +270,7 @@ load.provide("example.plat", (function() {
 		if(sgui.path("hud:/coinCount")) sgui.path("hud:/coinCount").text = ""+Pickup.count("coin");
 	}, this);
 
-	dusk.onLoad.listen(function (e){dplat.rooms.setRoom("example.plat.rooms.exhall", 0);}, this);
+	dusk.onLoad.listen(function (e){dplat.rooms.setRoom("example.plat.rooms.exhall", 0);}.bind(this));
 
 	dusk.startGame();
 	

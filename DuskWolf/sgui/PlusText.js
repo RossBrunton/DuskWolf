@@ -78,7 +78,7 @@ load.provide("dusk.sgui.PlusText", (function() {
 		this._registerPropMask("plusType", "plusType");
 		
 		//Listeners
-		this.frame.listen(this._ptFrame, this);
+		this.frame.listen(this._ptFrame.bind(this));
 		
 		//Setup
 		this.focusBehaviour = Group.FOCUS_ALL;

@@ -96,7 +96,7 @@ load.provide("dusk.sgui.Tile", (function() {
 		this._registerPropMask("sheight", "sheight", true);
 		
 		//Listeners
-		this.prepareDraw.listen(this._tileDraw, this);
+		this.prepareDraw.listen(this._tileDraw.bind(this));
 	};
 	Tile.prototype = Object.create(Component.prototype);
 

@@ -84,15 +84,15 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 		this._registerPropMask("frameHeight", "frameHeight");
 		
 		//Listeners
-		this.prepareDraw.listen(this._editTileMapDraw, this);
-		this.frame.listen(this._editTileMapFrame, this);
-		this.keyPress.listen(function(e) {
+		this.prepareDraw.listen(this._editTileMapDraw.bind(this));
+		this.frame.listen(this._editTileMapFrame.bind(this));
+		this.keyPress.listen((function(e) {
 			if(editor.active) {
 				this.src = prompt("Please enter an image path.", this.src);
 				this.drawAll();
 			}
-		}, this, {"key":73});
-		this.keyPress.listen(function(e) {
+		}).bind(this), 73);
+		this.keyPress.listen((function(e) {
 			if(editor.active) {
 				var tile = this.getTile(this._cx, this._cy);
 				
@@ -104,16 +104,16 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 				TileMap.tileData.free(tile);
 				this.drawAll();
 			}
-		}, this, {"key":69});
+		}).bind(this), 69);
 		
-		this.keyPress.listen(this._copy.bind(this), undefined, {"key":67});
-		this.keyPress.listen(this._paste.bind(this), undefined, {"key":80});
+		this.keyPress.listen(this._copy.bind(this), 67);
+		this.keyPress.listen(this._paste.bind(this), 80);
 		
 		//Directions
-		this.dirPress.listen(this._etmRightAction, this, {"dir":c.DIR_RIGHT});
-		this.dirPress.listen(this._etmLeftAction, this, {"dir":c.DIR_LEFT});
-		this.dirPress.listen(this._etmUpAction, this, {"dir":c.DIR_UP});
-		this.dirPress.listen(this._etmDownAction, this, {"dir":c.DIR_DOWN});
+		this.dirPress.listen(this._etmRightAction.bind(this), c.DIR_RIGHT);
+		this.dirPress.listen(this._etmLeftAction.bind(this), c.DIR_LEFT);
+		this.dirPress.listen(this._etmUpAction.bind(this), c.DIR_UP);
+		this.dirPress.listen(this._etmDownAction.bind(this), c.DIR_DOWN);
 	};
 	EditableTileMap.prototype = Object.create(TileMap.prototype);
 
@@ -300,7 +300,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 			var current = this.getTile(this._cx, this._cy);
 			current[1] ++;
 			this._set(current[0], current[1]);
-			sgui.TileMap.tileData.free(current);
+			TileMap.tileData.free(current);
 			this.drawAll();
 			return false;
 		}
@@ -315,7 +315,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 			return false;
 		}
 		
-		if(dkeyboard.isKeyPressed(187) || keyboard.isKeyPressed(189)) {
+		if(keyboard.isKeyPressed(187) || keyboard.isKeyPressed(189)) {
 			this._noFlow = true;
 			return true;
 		}
@@ -368,7 +368,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 			var current = this.getTile(this._cx, this._cy);
 			current[0] --;
 			this._set(current[0], current[1]);
-			sgui.TileMap.tileData.free(current);
+			TileMap.tileData.free(current);
 			this.drawAll();
 			return false;
 		}

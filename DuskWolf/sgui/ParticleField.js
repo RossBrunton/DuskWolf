@@ -33,11 +33,11 @@ load.provide("dusk.sgui.ParticleField", (function() {
 		//Default values
 		this.augment.listen((function(e) {
 			this.mouse.clickPierce = true;
-		}).bind(this), {"augment":"mouse"});
+		}).bind(this), "mouse");
 		
 		//Listeners
-		this.prepareDraw.listen(this._pfDraw, this);
-		this.frame.listen(this._pfFrame, this);
+		this.prepareDraw.listen(this._pfDraw.bind(this));
+		this.frame.listen(this._pfFrame.bind(this));
 		
 		this.createField(1 << 16);
 	};

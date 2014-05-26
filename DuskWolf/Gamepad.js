@@ -111,9 +111,9 @@ load.provide("dusk.gamepad", (function() {
 		if(gp && options.get("gamepad.enable")) {
 			for(var i = 0; i < gp.buttons.length-1; i ++) {
 				if(!_buttons[i] && gp.buttons[i]) {
-					gamepad.buttonPress.fire({"which":i, "axis":false});
+					gamepad.buttonPress.fire({"which":i, "axis":false}, i);
 				}else if(_buttons[i] && !gp.buttons[i]) {
-					gamepad.buttonUp.fire({"which":i, "axis":false});
+					gamepad.buttonUp.fire({"which":i, "axis":false}, i);
 				}
 				
 				_buttons[i] = gp.buttons[i] > 0.2;
@@ -122,15 +122,17 @@ load.provide("dusk.gamepad", (function() {
 			for(var i = 0; i < gp.axes.length-1; i ++) {
 				_axes[i] = gp.axes[i];
 				
+				var button = i+(gp.axes[i] > 0?"+":"-");
+				
 				if(gp.axes[i] > options.get("gamepad.threshold")
 				|| gp.axes[i] < -options.get("gamepad.threshold")) {
 					if(!_axesTilted[i]) {
 						_axesTilted[i] = true;
-						gamepad.buttonPress.fire({"which":i+(gp.axes[i] > 0?"+":"-"), "axis":true});
+						gamepad.buttonPress.fire({"which":button, "axis":true}, button);
 					}
 				}else{
 					_axesTilted[i] = false;
-					gamepad.buttonUp.fire({"which":i+(gp.axes[i] > 0?"+":"-"), "axis":true});
+					gamepad.buttonUp.fire({"which":button, "axis":true}, button);
 				}
 			}
 		}

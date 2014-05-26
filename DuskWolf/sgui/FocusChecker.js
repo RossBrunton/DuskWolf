@@ -44,11 +44,11 @@ load.provide("dusk.sgui.FocusChecker", (function() {
 		this._registerPropMask("activeImg", "activeImg");
 		
 		//Listeners
-		this.onFocusChange.listen(function(e) {if(this.focusedImg) this.src = this.focusedImg;}, this, {"focus":true});
-		this.onFocusChange.listen(function(e) {if(this.inactiveImg) this.src=this.inactiveImg;}, this, {"focus":false});
+		this.onFocusChange.listen((function(e) {if(this.focusedImg) this.src = this.focusedImg;}).bind(this), true);
+		this.onFocusChange.listen((function(e) {if(this.inactiveImg) this.src=this.inactiveImg;}).bind(this), false);
 		
-		this.onActiveChange.listen(function(e) {if(this.activeImg) this.src = this.activeImg;}, this, {"active":true});
-		this.onActiveChange.listen(function(e) {if(this.focusedImg) this.src=this.focusedImg;}, this, {"active":false});
+		this.onActiveChange.listen((function(e) {if(this.activeImg) this.src = this.activeImg;}).bind(this), true);
+		this.onActiveChange.listen((function(e) {if(this.focusedImg) this.src=this.focusedImg;}).bind(this), false);
 	};
 	FocusChecker.prototype = Object.create(Image.prototype);
 
@@ -100,37 +100,37 @@ load.provide("dusk.sgui.FocusCheckerTile", (function() {
 		this._registerPropMask("focusValues", "focusValues");
 		
 		//Listeners
-		this.onFocusChange.listen(function(e) {
+		this.onFocusChange.listen((function(e) {
 			if(this.focusOrient == c.ORIENT_HOR) {
 				this.tile = [this.focusValues[1], this.tile[1]];
 			}else{
 				this.tile = [this.tile[0], this.focusValues[1]];
 			}
-		}, this, {"focus":true});
+		}).bind(this), true);
 		
-		this.onFocusChange.listen(function(e) {
+		this.onFocusChange.listen((function(e) {
 			if(this.focusOrient == c.ORIENT_HOR) {
 				this.tile = [this.focusValues[0], this.tile[1]];
 			}else{
 				this.tile = [this.tile[0], this.focusValues[0]];
 			}
-		}, this, {"focus":false});
+		}).bind(this), false);
 		
-		this.onActiveChange.listen(function(e) {
+		this.onActiveChange.listen((function(e) {
 			if(this.focusOrient == c.ORIENT_HOR) {
 				this.tile = [this.focusValues[2], this.tile[1]];
 			}else{
 				this.tile = [this.tile[0], this.focusValues[2]];
 			}
-		}, this, {"active":true});
+		}).bind(this), true);
 		
-		this.onActiveChange.listen(function(e) {
+		this.onActiveChange.listen((function(e) {
 			if(this.focusOrient == c.ORIENT_HOR) {
 				this.tile = [this.focusValues[0], this.tile[1]];
 			}else{
 				this.tile = [this.tile[0], this.focusValues[0]];
 			}
-		}, this, {"active":false});
+		}).bind(this), false);
 	};
 	FocusCheckerTile.prototype = Object.create(Tile.prototype);
 
@@ -232,27 +232,27 @@ load.provide("dusk.sgui.FocusCheckerRect", (function() {
 		this._registerPropMask("bwActive", "bwActive");
 		
 		//Listeners
-		this.onFocusChange.listen(function(e) {
+		this.onFocusChange.listen((function(e) {
 			this.colour = this.focusedFill;
 			this.bColour = this.bFocused;
 			this.bWidth = this.bwFocused;
-		}, this, {"focus":true});
-		this.onFocusChange.listen(function(e) {
+		}).bind(this), true);
+		this.onFocusChange.listen((function(e) {
 			this.colour = this.inactiveFill;
 			this.bColour = this.bInactive;
 			this.bWidth = this.bwInactive;
-		}, this, {"focus":false});
+		}).bind(this), false);
 		
-		this.onActiveChange.listen(function(e) {
+		this.onActiveChange.listen((function(e) {
 			this.colour = this.activeFill;
 			this.bColour = this.bActive;
 			this.bWidth = this.bwActive
-		}, this, {"active":true});
-		this.onActiveChange.listen(function(e) {
+		}).bind(this), true);
+		this.onActiveChange.listen((function(e) {
 			this.colour = this.focusedFill;
 			this.bColour = this.bFocused;
 			this.bWidth = this.bwFocused;
-		}, this, {"active":false});
+		}).bind(this), false);
 	};
 	FocusCheckerRect.prototype = Object.create(Rect.prototype);
 

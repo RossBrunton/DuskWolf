@@ -21,7 +21,7 @@ load.provide("dusk.behave.HealthRestore", (function() {
 		
 		this._data("pickupHealth", 1, true);
 		
-		this.entityEvent.listen(this._healthPickup, this, {"name":"pickup"});
+		this.entityEvent.listen(this._healthPickup.bind(this), "pickup");
 	};
 	HealthRestore.prototype = Object.create(Behave.prototype);
 

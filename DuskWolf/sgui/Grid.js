@@ -85,7 +85,7 @@ load.provide("dusk.sgui.Grid", (function() {
 		this._registerPropMask("populate", "__populate", undefined,["rows", "cols", "hspacing", "vspacing", "globals"]);
 		
 		//Listeners
-		this.dirPress.listen(this._gridDirAction, this);
+		this.dirPress.listen(this._gridDirAction.bind(this));
 	};
 	Grid.prototype = Object.create(Group.prototype);
 
@@ -112,10 +112,10 @@ load.provide("dusk.sgui.Grid", (function() {
 		}
 		
 		//Add them
-		child = this._populationEvent.fire({"action":"before", "child":child}).child;
+		child = this._populationEvent.fire({"action":"before", "child":child}, "before").child;
 		
 		if(this.rows <= 0 || this.cols <= 0) {
-			this._populationEvent.fire({"action":"complete", "child":child});
+			this._populationEvent.fire({"action":"complete", "child":child}, "complete");
 			return;
 		}
 		
@@ -138,7 +138,7 @@ load.provide("dusk.sgui.Grid", (function() {
 				
 				com = this._populationEvent.fire({"action":"create", "current":child[p], "child":child, "component":com,
 					"globals":this.globals
-				}).component;
+				}, "create").component;
 				if(this.globals !== null) com.parseProps(utils.clone(this.globals));
 				com.parseProps(utils.clone(child[p]));
 				com.parseProps({"y":ypoint, "x":xpoint});
@@ -153,7 +153,7 @@ load.provide("dusk.sgui.Grid", (function() {
 		
 		this.flow("0,0");
 		
-		this._populationEvent.fire({"action":"complete", "child":child});
+		this._populationEvent.fire({"action":"complete", "child":child}, "complete");
 	};
 	Object.defineProperty(Grid.prototype, "__populate", {
 		set: function(value) {this.populate(value);},

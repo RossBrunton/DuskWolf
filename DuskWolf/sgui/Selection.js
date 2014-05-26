@@ -17,7 +17,7 @@ load.provide("dusk.sgui.Selection", (function() {
 		this._registerPropMask("orientation", "orientation");
 		
 		//Listeners
-		this._populationEvent.listen(function(e) {
+		this._populationEvent.listen((function(e) {
 			if(this.orientation == c.ORIENT_HOR) {
 				this.rows = 1;
 				this.cols = this.options;
@@ -27,10 +27,10 @@ load.provide("dusk.sgui.Selection", (function() {
 			}
 			
 			return e;
-		}, this, {"action":"before"});
+		}).bind(this), "before");
 		
-		this._populationEvent.listen(this._update, this, {"action":"complete"});
-		this.dirPress.listen(this._update, this);
+		this._populationEvent.listen(this._update.bind(this), "complete");
+		this.dirPress.listen(this._update.bind(this));
 	};
 	Selection.prototype = Object.create(Grid.prototype);
 

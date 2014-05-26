@@ -47,9 +47,9 @@ load.provide("dusk.sgui.extras.Flash", (function() {
 		this._decreasing = false;
 		
 		//Listeners
-		this._tick.listen(this._flsOnTick, this);
-		this._onStart.listen(this._flsOnStart, this);
-		this._onEnd.listen(this._flsOnEnd, this);
+		this._tick.listen(this._flsOnTick.bind(this));
+		this._onStart.listen(this._flsOnStart.bind(this));
+		this._onEnd.listen(this._flsOnEnd.bind(this));
 		
 		//Prop masks
 		this._props.map("min", "min");

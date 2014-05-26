@@ -57,7 +57,7 @@ load.provide("dusk.sgui.RangeText", (function() {
 		this._registerPropMask("orientation", "orientation");
 		
 		//Listeners
-		this.dirPress.listen(this._changeValue, this);
+		this.dirPress.listen(this._changeValue.bind(this));
 	};
 	RangeText.prototype = Object.create(Label.prototype);
 

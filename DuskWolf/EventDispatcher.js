@@ -9,6 +9,9 @@ load.provide("dusk.EventDispatcher", (function() {
 	 * 
 	 * Code registeres a "listen" function in the dispatcher that is called when the event is fired.
 	 * 
+	 * If a filter value is fired with the event, and the listener has a not-undefined value, they must satisfy one
+	 *  another given by the dispatcher's `filterType`.
+	 * 
 	 * More finely tuned event handling is also available, in the form of "propsYes" and "propsNo".
 	 * 
 	 * If the listener has a `propsYes` object registered
@@ -19,10 +22,11 @@ load.provide("dusk.EventDispatcher", (function() {
 	 * 
 	 * @param {string} name A name for the event dispatcher; used for identifying it in debbuging.
 	 * @param {integer=dusk.EventDispatcher.MODE_NONE} mode The current behaviour used for managing return values.
+	 * @param {integer=dusk.EventDispatcher.FILTER_EQUALS} filterType The current filter type.
 	 * @since 0.0.14-alpha
 	 * @constructor
 	 */
-	var EventDispatcher = function(name, mode) {
+	var EventDispatcher = function(name, mode, filterType) {
 		/** All the listeners; each element is an array in the form `[callback, propsYes, propsNo, scope]`.
 		 * @type array
 		 * @private
@@ -39,14 +43,23 @@ load.provide("dusk.EventDispatcher", (function() {
 		 * 
 		 * This must be a number equal to one of the MODE_* constants.
 		 *
-		 * This will determine the return value of `{@link dusk.EventDispatcher.fire}`, and what the listeners should return.
+		 * This will determine the return value of `{@link dusk.EventDispatcher.fire}`, and what the listeners should 
+		 *  return.
 		 * @type integer
-		 * @private
 		 */
 		this.mode = (mode === undefined)?EventDispatcher.MODE_NONE:mode;
+		
+		/** The filter type of the EventDispatcher
+		 * 
+		 * This must be an integer equal to one of the FILTER_* constants.
+		 * 
+		 * @type integer
+		 * @since 0.0.21-alpha
+		 */
+		this.filterType = (filterType === undefined)?EventDispatcher.FILTER_EQUALS:filterType;
 	};
 
-	/** The default mode, this will cause the fire method to return nothing.
+	/** The default return mode, this will cause the fire method to return nothing.
 	 * 
 	 * @type integer
 	 * @constant
@@ -86,6 +99,29 @@ load.provide("dusk.EventDispatcher", (function() {
 	 * @value 4
 	 */
 	EventDispatcher.MODE_LAST = 4;
+	
+	
+	/** For a listener to fire, the value of the listener's filter must equal that of the fired event.
+	 * 
+	 * @type integer
+	 * @constant
+	 * @value 0
+	 * @since 0.0.21-alpha
+	 */
+	EventDispatcher.FILTER_EQUALS = 0;
+	
+	/** For a listener to fire, the value of the listener's filter bitwise and the value of the fired filter must be
+	 *  greater than one.
+	 * 
+	 * Basically, a bitmask of a number of options, at least one must be common to both the listener and the event.
+	 * 
+	 * @type integer
+	 * @constant
+	 * @value 1
+	 * @since 0.0.21-alpha
+	 */
+	EventDispatcher.FILTER_MULTI = 1;
+	
 
 	/** Registers a listener for the event;
 	 *   this function will be called if an event is fired
@@ -94,24 +130,22 @@ load.provide("dusk.EventDispatcher", (function() {
 	 * @param {function(object):*} callback The function that will be called when an event is fired.
 	 *  It will be given a single argument; the event object.
 	 *  If you want the function to run in a scope, then you should bind it with `bind`.
-	 * @param {*} scope Depreciated, do not use.
+	 * @param {*} filter If defined, this must be correct with regards to the EventDispatcher's `filterType` property.
 	 * @param {?object} propsYes The listener will only fire if every property of this object
 	 *  is equal to the same named property in the event object.
 	 * @param {?object} propsNo The listener will only fire if every property of this object
 	 *  is not equal to the same named property in the event object.
 	 * @return {integer} A unique ID for the listener, call this when it should be deleted. 
 	 */
-	EventDispatcher.prototype.listen = function(callback, scope, propsYes, propsNo) {
+	EventDispatcher.prototype.listen = function(callback, filter, propsYes, propsNo) {
 		if(!callback) {
 			console.error("EventDispatcher "+this.toString()+" did not recieve a valid function.");
 			console.log(scope);
 			return;
 		}
 		
-		if(scope) callback = callback.bind(scope);
-		
 		this._listeners.push([
-			callback,
+			callback, filter,
 			propsYes?propsYes:null, propsYes?Object.keys(propsYes):[], 
 			propsNo?propsNo:null, propsNo?Object.keys(propsNo):[]
 		]);
@@ -130,24 +164,38 @@ load.provide("dusk.EventDispatcher", (function() {
 	/** Fires an event; triggering all the listeners that apply.
 	 * 
 	 * @param {?object} event The event object to fire, and pass to all listeners. This may be undefined.
+	 * @param {?*} filter The filter that listeners must adhere to.
+	 * @param {?dusk.Pool} pool If defined, then the event object will be returned to this pool when the firing is
+	 *  finished.
 	 */
-	EventDispatcher.prototype.fire = function(event) {
+	EventDispatcher.prototype.fire = function(event, filter, pool) {
 		if(this.mode == 0) {
 			for(var i = 0; i < this._listeners.length; i ++) {
 				if(this._listeners[i] === null) continue;
 				
+				var l = this._listeners[i];
+				
+				//Check filter
+				if(filter !== undefined && l[1] !== undefined) {
+					if(this.filterType == EventDispatcher.FILTER_EQUALS && filter != l[1]) {
+						continue;
+					}else if(this.filterType == EventDispatcher.FILTER_MULTI && (filter & l[1]) == 0){
+						continue;
+					}
+				}
+				
 				//Check propsYes
-				if(event && this._listeners[i][1]
-				&& !_checkPropsPositive(event, this._listeners[i][1], this._listeners[i][2]))
+				if(event && l[2]
+				&& !_checkPropsPositive(event, l[2], l[3]))
 					continue;
 				
 				//Check propsNo
-				if(event && this._listeners[i][3]
-				&& !_checkPropsNegative(event, this._listeners[i][3], this._listeners[i][4]))
+				if(event && l[4]
+				&& !_checkPropsNegative(event, l[4], l[5]))
 					continue;
 				
 				//Fire listener
-				this._listeners[i][0](event);
+				l[0](event);
 			}
 		}else{
 			var majorRet = null;
@@ -169,18 +217,29 @@ load.provide("dusk.EventDispatcher", (function() {
 			for(var i = 0; i < this._listeners.length; i ++) {
 				if(this._listeners[i] === null) continue;
 				
+				var l = this._listeners[i];
+				
+				//Check filter
+				if(filter !== undefined && l[1]) {
+					if(this.filterType == EventDispatcher.FILTER_EQUALS && filter != l[1]) {
+						continue;
+					}else if(this.filterType == EventDispatcher.FILTER_MULTI && (filter & l[1]) == 0){
+						continue;
+					}
+				}
+				
 				//Check propsYes
-				if(event && this._listeners[i][1]
-				&& !_checkPropsPositive(event, this._listeners[i][1], this._listeners[i][2]))
+				if(event && l[2]
+				&& !_checkPropsPositive(event, l[2], l[3]))
 					continue;
 				
 				//Check propsNo
-				if(event && this._listeners[i][3]
-				&& !_checkPropsNegative(event, this._listeners[i][3], this._listeners[i][4]))
+				if(event && l[4]
+				&& !_checkPropsNegative(event, l[4], l[5]))
 					continue;
 				
 				//Fire listener
-				var ret = this._listeners[i][0](event);
+				var ret = l[0](event);
 			
 				switch(this.mode) {
 					case 1: //AND
@@ -202,8 +261,11 @@ load.provide("dusk.EventDispatcher", (function() {
 				}
 			}
 			
+			if(pool) pool.free(event);
 			return majorRet;
 		}
+		
+		if(pool) pool.free(event);
 	};
 
 	var _checkPropsPositive = function(event, props, keys) {

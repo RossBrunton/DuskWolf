@@ -105,7 +105,7 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 		
 		//Listeners
 		this._effectFrameId = this._owner.frame.listen(this._effectFrame.bind(this));
-		this.onDelete.listen(this._effDeleted, this);
+		this.onDelete.listen(this._effDeleted.bind(this));
 		
 		//Prop masks
 		this._props.map("on", "__on");
@@ -225,7 +225,7 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 		}
 		
 		if(trigger[0] instanceof EventDispatcher) {
-			trigger[0].listen(this._startEvent, this);
+			trigger[0].listen(this._startEvent.bind(this));
 		}else if(trigger[0] instanceof Range) {
 			this._rangeTriggers.push(trigger);
 		}else if(trigger === true) {

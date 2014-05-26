@@ -223,7 +223,7 @@ window.load = (function() {
 		
 		//Fire Event
 		if(load.onProvide) {
-			setTimeout(load.onProvide.fire.bind(load.onProvide, {"package":name}), 1);
+			setTimeout(load.onProvide.fire.bind(load.onProvide, {"package":name}, name), 1);
 		}
 		
 		//And carry on providing

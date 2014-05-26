@@ -97,8 +97,8 @@ load.provide("dusk.sgui.TileRegion", (function() {
 		this._registerPropMask("twidth", "twidth");
 		
 		//Listeners
-		this.prepareDraw.listen(this._tileRegionDraw, this);
-		this.frame.listen(this._tileRegionFrame, this);
+		this.prepareDraw.listen(this._tileRegionDraw.bind(this));
+		this.frame.listen(this._tileRegionFrame.bind(this));
 	};
 	TileRegion.prototype = Object.create(Component.prototype);
 

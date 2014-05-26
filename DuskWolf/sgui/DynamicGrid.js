@@ -62,7 +62,7 @@ load.provide("dusk.sgui.DynamicGrid", (function() {
 		this.cols = 1;
 		
 		//Listeners
-		this._populationEvent.listen(function(e) {
+		this._populationEvent.listen((function(e) {
 			this._pop = e.child;
 			
 			if(this.orientation == c.ORIENT_HOR && this.range) {
@@ -72,7 +72,7 @@ load.provide("dusk.sgui.DynamicGrid", (function() {
 			}
 			
 			return e;
-		}, this, {"action":"before"});
+		}).bind(this), "before");
 		
 		//Prop masks
 		this._registerPropMask("range", "range");

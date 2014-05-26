@@ -27,8 +27,8 @@ load.provide("dusk.behave.BackForth", (function() {
 		this._data("hspeed", 5, true);
 		this._data("backforthif", "", true);
 		
-		this.entityEvent.listen(this._bfCollide, this, {"name":"collide"});
-		this.entityEvent.listen(this._bfFrame, this, {"name":"beforeMove"});
+		this.entityEvent.listen(this._bfCollide.bind(this), "collide");
+		this.entityEvent.listen(this._bfFrame.bind(this), "beforeMove");
 	};
 	BackForth.prototype = Object.create(Behave.prototype);
 

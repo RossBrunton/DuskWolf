@@ -23,7 +23,7 @@ load.provide("dusk.behave.Volatile", (function() {
 		
 		this._data("killedBy", "", true);
 		
-		this.entityEvent.listen(this._vCollide, this, {"name":"collide"});
+		this.entityEvent.listen(this._vCollide.bind(this), "collide");
 	};
 	Volatile.prototype = Object.create(Behave.prototype);
 

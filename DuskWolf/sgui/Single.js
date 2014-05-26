@@ -72,9 +72,9 @@ load.provide("dusk.sgui.Single", (function() {
 		this._registerPropMask("mouse.focus", "mouse.focus", false, ["mouse"]);
 		
 		//Listeners
-		this.prepareDraw.listen(this._singleDraw, this);
-		this.frame.listen(this._singleFrame, this);
-		this.onActiveChange.listen(function(e){this._component.onActiveChange.fire(e);}, this);
+		this.prepareDraw.listen(this._singleDraw.bind(this));
+		this.frame.listen(this._singleFrame.bind(this));
+		this.onActiveChange.listen((function(e){this._component.onActiveChange.fire(e);}).bind(this));
 		
 		//Check interfaces
 		if(!utils.doesImplement(this, IContainer))
@@ -150,7 +150,7 @@ load.provide("dusk.sgui.Single", (function() {
 		if(!sgui.getType(type)){console.warn(type + " is not a valid component type."); type = "NullCom";}
 		
 		this._component = new (sgui.getType(type))(this, com.toLowerCase());
-		this._component.onFocusChange.fire({"focus":true});
+		this._component.onFocusChange.fire({"focus":true}, true);
 		sgui.applyStyles(this._component);
 		
 		return this._component;

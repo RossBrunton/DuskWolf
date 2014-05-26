@@ -48,9 +48,9 @@ load.provide("dusk.sgui.extras.Fade", (function() {
 		this._decreasing = false;
 		
 		//Listeners
-		this._tick.listen(this._fdeOnTick, this);
-		this._onStart.listen(this._fdeOnStart, this);
-		this._onEnd.listen(this._fdeOnEnd, this);
+		this._tick.listen(this._fdeOnTick.bind(this));
+		this._onStart.listen(this._fdeOnStart.bind(this));
+		this._onEnd.listen(this._fdeOnEnd.bind(this));
 		
 		//Prop masks
 		this._props.map("from", "from");

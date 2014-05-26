@@ -23,7 +23,7 @@ load.provide("dusk.sgui.FpsMeter", (function() {
 		Label.call(this, parent, comName);
 		
 		//Listeners
-		this.frame.listen(this._fpsFrame, this);
+		this.frame.listen(this._fpsFrame.bind(this));
 	};
 	FpsMeter.prototype = Object.create(Label.prototype);
 

@@ -225,11 +225,11 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 		});
 		this.focus = "top";
 		
-		this.path("top/savebutton").action.listen(function(e) {this.saveEntity();}, this);
-		this.path("top/loadbutton").action.listen(function(e) {
+		this.path("top/savebutton").action.listen((function(e) {this.saveEntity();}).bind(this));
+		this.path("top/loadbutton").action.listen((function(e) {
 			console.log("Loading "+this.path("top/name").text);
 			this.loadEntity(this.path("top/name").text);
-		}, this);
+		}).bind(this));
 		
 		//Build the list of behaviours
 		var behaviours = entities.getAllBehaviours();
@@ -245,7 +245,7 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 		this.path("bodies/behaviours/list").rows = Math.ceil(l.length/this.path("bodies/behaviours/list").cols);
 		this.path("bodies/behaviours/list").populate(l);
 		this.path("bodies/behaviours/list").forEach(function(c) {
-			c.path("plus").onCheck.listen(this._behaviourChecked, this);
+			c.path("plus").onCheck.listen(this._behaviourChecked.bind(this));
 		}, this);
 		
 		this._updateData();
@@ -253,15 +253,15 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 		//Prop masks
 		
 		//Listeners
-		this.frame.listen(this._ewFrame, this);
-		this.keyPress.listen(this._ewKey, this);
-		this.prepareDraw.listen(this._ewDraw, this);
-		this.keyPress.listen(function(e) {
+		this.frame.listen((this._ewFrame).bind(this));
+		this.keyPress.listen((this._ewKey).bind(this));
+		this.prepareDraw.listen((this._ewDraw).bind(this));
+		this.keyPress.listen((function(e) {
 			if(editor.active) {
 				sgui.setActivePane("plat");
 				this.visible = false;
 			}
-		}, this, {"key":27});
+		}).bind(this), 27);
 	};
 	EntityWorkshop.prototype = Object.create(Group.prototype);
 

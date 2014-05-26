@@ -12,11 +12,11 @@ load.provide("dusk.behave.PlayerControl", (function() {
 		
 		this._data("playerControl", true, true);
 		
-		this.entityEvent.listen(function(e) {
+		this.entityEvent.listen((function(e) {
 			if(this._data("playerControl")) {
 				return controls.controlActive("entity_"+e.control);
 			}
-		}, this, {"name":"controlActive"});
+		}).bind(this), "controlActive");
 	};
 	PlayerControl.prototype = Object.create(Behave.prototype);
 
@@ -53,7 +53,7 @@ load.provide("dusk.behave.LeftRightControl", (function() {
 		this._data("haccel", 2, true);
 		this._data("hspeed", 7, true);
 		
-		this.entityEvent.listen(this._lrControlFrame, this, {"name":"frame"});
+		this.entityEvent.listen(this._lrControlFrame.bind(this), "frame");
 	};
 	LeftRightControl.prototype = Object.create(Behave.prototype);
 

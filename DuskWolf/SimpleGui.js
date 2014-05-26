@@ -288,14 +288,14 @@ load.provide("dusk.sgui", (function() {
 	 */
 	sgui.setActivePane = function(to) {
 		if(sgui.getActivePane()) {
-			sgui.getActivePane().onActiveChange.fire({"active":false});
-			sgui.getActivePane().onFocusChange.fire({"focus":true});
+			sgui.getActivePane().onActiveChange.fire({"active":false}, false);
+			sgui.getActivePane().onFocusChange.fire({"focus":true}, true);
 		}
 		
 		sgui.getPane(to);
 		_activePane = to.toLowerCase();
-		sgui.getActivePane().onActiveChange.fire({"active":true});
-		sgui.getActivePane().onFocusChange.fire({"focus":true});
+		sgui.getActivePane().onActiveChange.fire({"active":true}, true);
+		sgui.getActivePane().onFocusChange.fire({"focus":true}, true);
 	};
 
 	/** Returns the currently active pane.
@@ -545,7 +545,7 @@ load.provide("dusk.sgui", (function() {
 	
 	//Listen for keypresses
 	keyboard.keyPress.listen(function(event) {
-		if(sgui.getActivePane()) return sgui.getActivePane().doKeyPress(event);
+		if(sgui.getActivePane()) return sgui.getActivePane().doKeyPress(event, event.keyCode);
 		return true;
 	});
 	
@@ -715,7 +715,7 @@ load.provide("dusk.pause", (function() {
 	
 	//Bind controls
 	controls.addControl("pause", 13, 9);
-	controls.controlPressed.listen(pause.toggle, undefined, {"control":"pause"});
+	controls.controlPressed.listen(pause.toggle, "pause");
 	
 	Object.seal(pause);
 	

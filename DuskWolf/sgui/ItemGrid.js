@@ -23,8 +23,8 @@ load.provide("dusk.sgui.ItemGrid", (function() {
 		this._addNewPropDepends("populate", "invent");
 		
 		//Listeners
-		this._populationEvent.listen(this._igBefore, this, {"action":"before"});
-		this._populationEvent.listen(this._igCreate, this, {"action":"create"});
+		this._populationEvent.listen(this._igBefore.bind(this), "before");
+		this._populationEvent.listen(this._igCreate.bind(this), "create");
 	};
 	ItemGrid.prototype = Object.create(Grid.prototype);
 

@@ -14,9 +14,9 @@ load.provide("dusk.behave.Killable", (function() {
 		this._data("mercyTime", 30, true);
 		this._data("currentMercy", 0, true);
 		
-		this.entityEvent.listen(this._killableTakeDamage, this, {"name":"takeDamage"});
-		this.entityEvent.listen(this._killableHeal, this, {"name":"heal"});
-		this.entityEvent.listen(this._killableFrame, this, {"name":"frame"});
+		this.entityEvent.listen(this._killableTakeDamage.bind(this), "takeDamage");
+		this.entityEvent.listen(this._killableHeal.bind(this), "heal");
+		this.entityEvent.listen(this._killableFrame.bind(this), "frame");
 	};
 	Killable.prototype = Object.create(Behave.prototype);
 

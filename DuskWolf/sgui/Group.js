@@ -175,18 +175,18 @@ load.provide("dusk.sgui.Group", (function() {
 		}else{
 			this.augment.listen((function(e) {
 				this.mouse.move.listen(this._mouseSelect.bind(this));
-			}).bind(this), undefined, {"augment":"mouse"});
+			}).bind(this), "mouse");
 		}
 		
-		this.onActiveChange.listen(function(e){
+		this.onActiveChange.listen((function(e){
 			if(this.focusBehaviour == Group.FOCUS_ALL) {
 				for(var c = this._componentsArr.length-1; c >= 0; c --) {
-					this._componentsArr[c].onActiveChange.fire(e);
+					this._componentsArr[c].onActiveChange.fire(e, e.active);
 				}
 			}else if(this.getFocused()) {
-				this.getFocused().onActiveChange.fire(e);
+				this.getFocused().onActiveChange.fire(e, e.active);
 			}
-		}, this);
+		}).bind(this));
 		
 		//Check interfaces
 		if(!utils.doesImplement(this, IContainer)) {
@@ -317,9 +317,9 @@ load.provide("dusk.sgui.Group", (function() {
 		this._drawOrder[this._drawOrder.length] = com.toLowerCase();
 		sgui.applyStyles(this._components[com.toLowerCase()]);
 		if(this.focusBehaviour == Group.FOCUS_ALL) {
-			this._components[com.toLowerCase()].onFocusChange.fire({"focus":true});
+			this._components[com.toLowerCase()].onFocusChange.fire({"focus":true}, true);
 			if(this.active)
-				this._components[com.toLowerCase()].onActiveChange.fire({"active":true});
+				this._components[com.toLowerCase()].onActiveChange.fire({"active":true}, true);
 		}
 		
 		return this._components[com.toLowerCase()];
@@ -554,9 +554,9 @@ load.provide("dusk.sgui.Group", (function() {
 			if(this._components[this.focusedCom].locked){return false;}
 			
 			if(this.focusBehaviour != Group.FOCUS_ALL && this.active)
-				this._components[this.focusedCom].onActiveChange.fire({"active":false});
+				this._components[this.focusedCom].onActiveChange.fire({"active":false}, false);
 			if(this.focusBehaviour != Group.FOCUS_ALL)
-				this._components[this.focusedCom].onFocusChange.fire({"focus":false});
+				this._components[this.focusedCom].onFocusChange.fire({"focus":false}, false);
 			
 			if(this.focusVisible) this._components[this.focusedCom].visible = false;
 		}
@@ -564,9 +564,9 @@ load.provide("dusk.sgui.Group", (function() {
 		if(this._components[to.toLowerCase()]){
 			this.focusedCom = to.toLowerCase();
 			if(this.focusBehaviour != Group.FOCUS_ALL)
-				this._components[this.focusedCom].onFocusChange.fire({"focus":true});
+				this._components[this.focusedCom].onFocusChange.fire({"focus":true}, true);
 			if(this.focusBehaviour != Group.FOCUS_ALL && this.active)
-				this._components[this.focusedCom].onActiveChange.fire({"active":true});
+				this._components[this.focusedCom].onActiveChange.fire({"active":true}, true);
 			
 			if(this.focusVisible) this._components[this.focusedCom].visible = true;
 			return true;
@@ -587,9 +587,8 @@ load.provide("dusk.sgui.Group", (function() {
 				case Group.FOCUS_ONE:
 					for(var c = this._componentsArr.length-1; c >= 0; c --) {
 						if(this._components[this.focusedCom] != this._componentsArr[c]) {
-							if(this.active)
-								this._componentsArr[c].onActiveChange.fire({"active":false});
-							this._componentsArr[c].onFocusChange.fire({"focus":false});
+							if(this.active) this._componentsArr[c].onActiveChange.fire({"active":false}, false);
+							this._componentsArr[c].onFocusChange.fire({"focus":false}, false);
 						}
 					}
 					break;
@@ -597,9 +596,8 @@ load.provide("dusk.sgui.Group", (function() {
 				case Group.FOCUS_ALL:
 					for(var c = this._componentsArr.length-1; c >= 0; c --) {
 						if(this._components[this.focusedCom] != this._componentsArr[c]) {
-							this._componentsArr[c].onFocusChange.fire({"focus":true});
-							if(this.active)
-								this._componentsArr[c].onActiveChange.fire({"active":true});
+							this._componentsArr[c].onFocusChange.fire({"focus":true}, true);
+							if(this.active) this._componentsArr[c].onActiveChange.fire({"active":true}, true);
 						}
 					}
 					break;

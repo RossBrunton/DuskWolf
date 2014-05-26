@@ -24,7 +24,7 @@ load.provide("dusk.behave.Fall", (function() {
 		
 		this._data("fallSpeed", 1, true);
 		
-		this.entityEvent.listen(this._fallFall, this, {"name":"collidedInto", "dir":c.DIR_UP});
+		this.entityEvent.listen(this._fallFall.bind(this), "collidedInto", {"dir":c.DIR_UP});
 	};
 	Fall.prototype = Object.create(Behave.prototype);
 
