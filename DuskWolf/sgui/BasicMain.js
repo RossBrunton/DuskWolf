@@ -10,7 +10,7 @@ load.provide("dusk.sgui.BasicMain", (function() {
 	var EntityGroup = load.require("dusk.sgui.EntityGroup");
 	var ParticleField = load.require("dusk.sgui.ParticleField");
 	var TransitionManager = load.require("dusk.sgui.TransitionManager");
-	var TileRegion = load.require("dusk.sgui.TileRegion");
+	var TileRegionGenerator = load.require("dusk.sgui.TileRegionGenerator");
 	var Label = load.require("dusk.sgui.Label");
 	var editor = load.require("dusk.editor");
 	var RoomManager = load.require("dusk.RoomManager");
@@ -159,7 +159,7 @@ load.provide("dusk.sgui.BasicMain", (function() {
 						break;
 					
 					case BasicMain.LAYER_REGION:
-						this.getComponent(val[i].name, "TileRegion").parseProps(
+						this.getComponent(val[i].name, "TileRegionGenerator").parseProps(
 						{
 							"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
 							"twidth":entities.twidth, "theight":entities.theight,
@@ -339,7 +339,7 @@ load.provide("dusk.sgui.BasicMain", (function() {
 				if(this.getComponent(this._layers[i].name) instanceof EntityGroup) {
 					this.getComponent(this._layers[i].name).adjustAll(0, entities.theight);
 				}
-				if(this.getComponent(this._layers[i].name) instanceof TileRegion) {
+				if(this.getComponent(this._layers[i].name) instanceof TileRegionGenerator) {
 					this.getComponent(this._layers[i].name).rows ++;
 				}
 			}
@@ -356,7 +356,7 @@ load.provide("dusk.sgui.BasicMain", (function() {
 				if(this.getComponent(this._layers[i].name) instanceof EntityGroup) {
 					this.getComponent(this._layers[i].name).adjustAll(0, -entities.theight);
 				}
-				if(this.getComponent(this._layers[i].name) instanceof TileRegion) {
+				if(this.getComponent(this._layers[i].name) instanceof TileRegionGenerator) {
 					this.getComponent(this._layers[i].name).rows --;
 				}
 			}
@@ -375,7 +375,7 @@ load.provide("dusk.sgui.BasicMain", (function() {
 				if(this.getComponent(this._layers[i].name) instanceof TileMap) {
 					this.getComponent(this._layers[i].name).graftBottom();
 				}
-				if(this.getComponent(this._layers[i].name) instanceof TileRegion) {
+				if(this.getComponent(this._layers[i].name) instanceof TileRegionGenerator) {
 					this.getComponent(this._layers[i].name).rows ++;
 				}
 			}
@@ -388,7 +388,7 @@ load.provide("dusk.sgui.BasicMain", (function() {
 				if(this.getComponent(this._layers[i].name) instanceof TileMap) {
 					this.getComponent(this._layers[i].name).carveBottom();
 				}
-				if(this.getComponent(this._layers[i].name) instanceof TileRegion) {
+				if(this.getComponent(this._layers[i].name) instanceof TileRegionGenerator) {
 					this.getComponent(this._layers[i].name).rows --;
 				}
 			}
@@ -409,7 +409,7 @@ load.provide("dusk.sgui.BasicMain", (function() {
 				if(this.getComponent(this._layers[i].name) instanceof EntityGroup) {
 					this.getComponent(this._layers[i].name).adjustAll(entities.twidth, 0);
 				}
-				if(this.getComponent(this._layers[i].name) instanceof TileRegion) {
+				if(this.getComponent(this._layers[i].name) instanceof TileRegionGenerator) {
 					this.getComponent(this._layers[i].name).cols ++;
 				}
 			}
@@ -425,7 +425,7 @@ load.provide("dusk.sgui.BasicMain", (function() {
 				if(this.getComponent(this._layers[i].name) instanceof EntityGroup) {
 					this.getComponent(this._layers[i].name).adjustAll(-entities.twidth, 0);
 				}
-				if(this.getComponent(this._layers[i].name) instanceof TileRegion) {
+				if(this.getComponent(this._layers[i].name) instanceof TileRegionGenerator) {
 					this.getComponent(this._layers[i].name).cols --;
 				}
 			}
@@ -443,7 +443,7 @@ load.provide("dusk.sgui.BasicMain", (function() {
 				if(this.getComponent(this._layers[i].name) instanceof TileMap) {
 					this.getComponent(this._layers[i].name).graftRight();
 				}
-				if(this.getComponent(this._layers[i].name) instanceof TileRegion) {
+				if(this.getComponent(this._layers[i].name) instanceof TileRegionGenerator) {
 					this.getComponent(this._layers[i].name).cols ++;
 				}
 			}
@@ -456,7 +456,7 @@ load.provide("dusk.sgui.BasicMain", (function() {
 				if(this.getComponent(this._layers[i].name) instanceof TileMap) {
 					this.getComponent(this._layers[i].name).carveRight();
 				}
-				if(this.getComponent(this._layers[i].name) instanceof TileRegion) {
+				if(this.getComponent(this._layers[i].name) instanceof TileRegionGenerator) {
 					this.getComponent(this._layers[i].name).cols --;
 				}
 			}

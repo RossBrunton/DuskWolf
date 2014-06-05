@@ -136,9 +136,11 @@ load.provide("quest", (function() {
 	}
 
 	window.aarg =
-		{"name":"attack", "region":"attackAM", "colour":"#990000", "los":true, "entFilter":"stat(faction, 1) = ENEMY"};
+		{"name":"attack", "colour":"#990000", "los":true, "entFilter":"stat(faction, 1) = ENEMY"};
 	window.targ = 
-		{"region":"r", "los":true, "forEach":[aarg], "colour":"#000099", "entBlock":"stat(faction, 1) = ENEMY"};
+		{"region":"r", "los":true, "forEach":[aarg], "colour":"#000099", "entBlock":"stat(faction, 1) = ENEMY",
+			"name":"move"
+		};
 
 	var _turns = new TurnTicker();
 
@@ -180,9 +182,9 @@ load.provide("quest", (function() {
 				}
 			},
 			q.requestBoundPair("generateRegion", targ),
-			q.requestBoundPair("getTilePathInRange", {"colour":":default/arrows32.png"}),
+			q.requestBoundPair("getTilePathInRange", {"colour":":default/arrows32.png", "destName":"path", "regionToUse":"move"}),
 			q.requestBoundPair("moveViaPath"),
-			q.requestBoundPair("uncolourRegion", {"regions":["attack", targ.region, targ.region+"_path"]}),
+			q.requestBoundPair("uncolourRegion", {"regionsToUncolour":["move", "path"]}),
 			q.requestBoundPair("generateRegion", aarg),
 			function(pa) {
 				pa.options = [];
@@ -192,9 +194,9 @@ load.provide("quest", (function() {
 				console.log("Generate Options");
 				
 				//Attack option
-				if(pa.regionEntities.length) {
+				if(pa.regions["attack"].entities().length) {
 					pa.options.push({"text":"Attack!", "listValue":"attack", "listSelectFunction":function(pa, qu) {
-						qu(q.requestBoundPair("selectEntity", {"filter":"stat(faction, 1) = ENEMY", "region":"attackAM"}));
+						qu(q.requestBoundPair("selectEntity", {"filter":"stat(faction, 1) = ENEMY", "regionToUse":"attack"}));
 						qu(function(pa) {
 							console.log(pa.entity);
 							pa.entity.terminate();
@@ -231,7 +233,7 @@ load.provide("quest", (function() {
 				return pa;
 			},
 			q.requestBoundPair("selectListMenu", {"path":"menu:/menu"}),
-			q.requestBoundPair("uncolourRegion", {"regions":["attackAM"]}),
+			q.requestBoundPair("uncolourRegion", {"regionsToUncolour":["attack"]}),
 			function(pa) {
 				pa.mover.stats.addBlock(3, "moved", {"moved":true});
 				
@@ -240,7 +242,9 @@ load.provide("quest", (function() {
 		], false)
 	//	.then(console.log.bind(console), console.error.bind(console))
 		.then(function(pa) {
-			if(!pa.endTurn) {
+			if(!pa.endTurn || !dquest.getBasicMain().getPrimaryEntityLayer().filter(
+				"stat(faction, 1) = ALLY & stat(moved, 3) = false").length
+			) {
 				return quest.allyTurnInner();
 			}else{
 				return pa;

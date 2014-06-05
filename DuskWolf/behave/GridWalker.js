@@ -54,7 +54,7 @@ load.provide("dusk.behave.GridWalker", (function() {
 		this._data("gwmoving", false, true);
 		this._data("gwtargetx", 0, true);
 		this._data("gwtargety", 0, true);
-		this._data("gwregion", "", true);
+		this._data("gwregion", null, true);
 		this._data("gwfacing", c.DIR_DOWN, true);
 		this._data("gwmoves", [], true);
 		
@@ -93,8 +93,7 @@ load.provide("dusk.behave.GridWalker", (function() {
 			this._entity.scheme.shiftTile(newT, d);
 			
 			if(((oldT[2] != newT[2] || oldT[3] != newT[3]) && !newT[5]) || !this._data("collides")) {
-				if(this._data("gwregion") == ""
-				|| this._entity.container.container.getRegion().isInRegion(this._data("gwregion"), newT[2], newT[3])) {
+				if(this._data("gwregion") == null || this._data("gwregion").isIn(newT[2], newT[3])) {
 					this._entity.behaviourFire("gwStartMove", {"dir":d, "targetX":newT[2], "targetY":newT[3]});
 					this._data("gwmoving", true);
 					this._data("gwfacing", d);
@@ -175,8 +174,8 @@ load.provide("dusk.behave.GridRecorder", (function() {
 		this._data("grmoves", [], true);
 		this._data("grrecording", false, true);
 		this._data("grrange", 0, true);
-		this._data("grregion", "", true);
-		this._data("grregionto", "", true);
+		this._data("grregion", null, true);
+		this._data("grregionto", null, true);
 		this._data("grsnap", false, true);
 		
 		this._leftRegion = false;
@@ -188,8 +187,8 @@ load.provide("dusk.behave.GridRecorder", (function() {
 
 	GridRecorder.prototype._gwStartMove = function(e) {
 		if(this._data("grrecording")
-		&& this._entity.container.container.getRegion().isInRegion(this._data("grregion"), e.targetX, e.targetY)) {
-			var moves = this._data("grmoves")
+		&& this._data("grregion").isIn(e.targetX, e.targetY)) {
+			var moves = this._data("grmoves");
 			
 			if("dir" in e && moves.length) {
 				moves.push(e.dir);
@@ -204,7 +203,7 @@ load.provide("dusk.behave.GridRecorder", (function() {
 			if(this._leftRegion || (this._data("grsnap") && moves.length > this._data("grrange")) || !("dir" in e)
 			|| !moves.length) {
 				this._data("grmoves", 
-					this._entity.container.container.getRegion().pathTo(this._data("grregion"), e.targetX, e.targetY)
+					this._data("grregion").pathTo(e.targetX, e.targetY)
 				);
 				this._leftRegion = false;
 			}
@@ -214,13 +213,10 @@ load.provide("dusk.behave.GridRecorder", (function() {
 	};
 
 	GridRecorder.prototype._gwStopMove = function(e) {
-		if(this._data("grrecording")
-		&& this._entity.container.container.getRegion().isInRegion(this._data("grregion"), e.targetX, e.targetY)) {
+		if(this._data("grrecording") && this._data("grregion").isIn(e.targetX, e.targetY)) {
 			if(this._data("grregionto")) {
-				this._entity.container.container.getRegion().clearRegion(this._data("grregionto"));
-				this._entity.container.container.getRegion().followPathFromRegion(
-					this._data("grmoves"), this._data("grregion"), this._data("grregionto")
-				);
+				this._data("grregionto").clear();
+				this._data("grregion").followPathInto(this._data("grmoves"), this._data("grregionto"));
 			}
 		}
 	};
@@ -258,8 +254,7 @@ load.provide("dusk.behave.GridMouse", (function() {
 			var destX = ~~((this._entity.x + e.x) / this._entity.width);
 			var destY = ~~((this._entity.y + e.y) / this._entity.height);
 			
-			if(this._data("gwregion") == ""
-			|| this._entity.container.container.getRegion().isInRegion(this._data("gwregion"), destX, destY)) {
+			if(this._data("gwregion") == null || this._data("gwregion").isIn(destX, destY)) {
 				this._entity.behaviourFire("gwStartMove", {"targetX":destX, "targetY":destY});
 				this._entity.x = destX * this._entity.width;
 				this._entity.y = destY * this._entity.height;

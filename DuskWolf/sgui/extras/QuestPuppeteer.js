@@ -9,6 +9,7 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 	var quest = load.require(">dusk.quest", function(p) {quest = p});
 	var utils = load.require("dusk.utils");
 	var entities = load.require("dusk.entities");
+	var TileRegion = load.require("dusk.sgui.TileRegion");
 
 	/* @class dusk.sgui.extras.DynamicWidth
 	 * 
@@ -71,7 +72,8 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 					var oldSeek = entities.seek;
 					this.ensureSelector();
 					
-					var region = args.region?args.region:passedArg.region;
+					if(!passedArg.regions) passedArg.regions = {};
+					var region = passedArg.regions[args.regionToUse];
 					var range = args.range?args.range:passedArg.range;
 					var x = args.x?args.x:passedArg.x;
 					var y = args.y?args.y:passedArg.y;
@@ -95,7 +97,7 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 						if(sel) sel = sel[0];
 						if(!sel) sel = null;
 						
-						if(region && !r.isInRegion(region, e.tileX(), e.tileY())) {
+						if(region && !region.isIn(e.tileX(), e.tileY())) {
 							return;
 						}
 						
@@ -143,30 +145,28 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 						y = passedArg.entity.tileY();
 					}
 					
-					if("forEach" in args) {
+					/*if("forEach" in args) {
 						for(var i = 0; i < args.forEach.length; i ++) {
 							var e = args.forEach[i];
 							
 							r.clearRegion(e.name);
 						}
-					}
+					}*/
 					
-					r.clearRegion(args.region);
-					//console.profile("Region");
-					r.expandRegion(args.region, x, y, range, args);
-					//console.profileEnd("Region");
-					
-					passedArg.region = args.region;
-					passedArg.regionEntities = r.entitiesInRegion(args.region);
-					passedArg.range = range;
-					passedArg.x = x;
-					passedArg.y = y;
-					
-					fulfill(passedArg);
+					console.profile("Region");
+					r.generateRegion(x, y, range, args).then(function(region) {
+						passedArg.regions[args.name] = region;
+						passedArg.range = range;
+						passedArg.x = x;
+						passedArg.y = y;
+						
+						fulfill(passedArg);
+					});
+					console.profileEnd("Region");
 				}).bind(this));
 			
 			case "generateRegion^-1":
-				this._owner.getRegion().clearRegion(args.region);
+				/*this._owner.getRegion().clearRegion(args.region);
 				
 				if("forEach" in args) {
 					for(var i = 0; i < args.forEach.length; i ++) {
@@ -174,7 +174,10 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 						
 						this._owner.getRegion().clearRegion(e.name);
 					}
-				}
+				}*/
+				// :D
+				
+				this._owner.getRegion().uncolourRegion(passedArg.regions[args.name]);
 				
 				return Promise.reject(new UserCancelError());
 			
@@ -186,7 +189,7 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 					var oldSeek = entities.seek;
 					this.ensureSelector();
 					
-					var region = args.region?args.region:passedArg.region;
+					var region = passedArg.regions[args.regionToUse];
 					var range = args.range !== undefined?args.range:passedArg.range;
 					if(args.setCoord) args.x = passedArg.x;
 					if(args.setCoord) args.y = passedArg.y;
@@ -196,10 +199,12 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 					}
 					this.selector.eProp("grregion", region);
 					
+					var destRegion = new TileRegion(this._owner.getScheme(), r);
+					
 					if(type == "getTilePathInRange") {
 						this.selector.eProp("grrecording", true);
 						this.selector.eProp("grrange", range);
-						this.selector.eProp("grregionto", region+"_path");
+						this.selector.eProp("grregionto", destRegion);
 						this.selector.eProp("grsnap", true);
 						this.selector.eProp("grmoves", []);
 						
@@ -211,9 +216,9 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 					if(args.y !== undefined) this.selector.y = args.y * this.selector.height;
 					
 					if(type == "getTilePathInRange") {
-						r.clearRegion(region+"_path");
+						//r.clearRegion(region+"_path");
 						if("colour" in args) {
-							r.colourRegion(region+"_path", args.colour);
+							r.colourRegion(destRegion, args.colour);
 						}
 					}
 					
@@ -230,7 +235,7 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 						var fy = e.y;
 						
 						if(type == "getTilePathInRange") {
-							var t = r.followPath(e.eProp("grmoves"), region);
+							var t = region.followPath(e.eProp("grmoves"));
 							x = t[0];
 							y = t[1];
 							fx = t[0] * r.tileWidth();
@@ -248,6 +253,7 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 						passedArg.y = y;
 						passedArg.fullX = fx;
 						passedArg.fullY = fy;
+						passedArg.regions[args.destName] = destRegion;
 						passedArg.path = e.eProp("grmoves").reverse();
 						
 						e.visible = false;
@@ -257,9 +263,9 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 						e.action.unlisten(l);
 						e.cancel.unlisten(c);
 						
-						if("colour" in args) {
-							r.uncolourRegion(region+"_path");
-						}
+						//if("colour" in args) {
+						//	r.uncolourRegion(region+"_path");
+						//}
 						
 						fulfill(passedArg);
 					}).bind(this));
@@ -269,40 +275,45 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 						
 						e.visible = false;
 						e.eProp("gmMouseMove", false);
-						e.eProp("grRecording", false);
+						e.eProp("grrecording", false);
 						if(oldSeek) entities.seek = oldSeek;
 						e.cancel.unlisten(c);
 						e.action.unlisten(l);
+						r.uncolourRegion(destRegion);
 						
-						if("colour" in args) {
-							r.uncolourRegion(region+"_path");
-						}
+						//if("colour" in args) {
+						//	r.uncolourRegion(region+"_path");
+						//}
 						
 						reject(new UserCancelError());
 					});
 				}).bind(this));
 			
 			case "getTilePathInRange^-1":
-				var region = args.region?args.region:passedArg.region;
-				this._owner.getRegion().clearRegion(region+"_path");
+				this.selector.eProp("grrecording", false);
+				this._owner.getRegion().uncolourRegion(passedArg.regions[args.destName]);
 			case "getTileInRange^1":
 				return Promise.resolve(true);
 			
 			case "uncolourRegion":
 				var r = this._owner.getRegion();
 				passedArg.oldColours = {};
-				for(var i = 0; i < args.regions.length; i ++) {
-					if(r.getRegionColour(args.regions[i])) {
-						passedArg.oldColours[args.regions[i]] = r.getRegionColour(args.regions[i]);
-					}
-					r.uncolourRegion(args.regions[i]);
-				} 
+				
+				for(var i = 0; i < args.regionsToUncolour.length; i ++) {
+					passedArg.oldColours[args.regionsToUncolour[i]] =
+						r.getRegionColour(passedArg.regions[args.regionsToUncolour[i]]);
+					r.uncolourRegion(passedArg.regions[args.regionsToUncolour[i]]);
+				}
+				
 				return Promise.resolve(passedArg);
 			
 			case "uncolourRegion^-1":
 				var r = this._owner.getRegion();
-				for(var p in passedArg.oldColours) {
-					r.colourRegion(p, passedArg.oldColours[p]);
+				
+				for(var i = 0; i < args.regionsToUncolour.length; i ++) {
+					r.colourRegion(passedArg.regions[args.regionsToUncolour[i]],
+						passedArg.oldColours[args.regionsToUncolour[i]]
+					);
 				}
 				
 				return Promise.reject(new UserCancelError());
@@ -412,7 +423,8 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 			"PlayerGridWalker":true, "GridWalker":true, "GridRecorder":true, "GridMouse":true
 		},
 		"data":{
-			"solid":false, "collides":false, "src":"default/selector32.png", "noSave":true, "gmMouseMove":false
+			"solid":false, "collides":false, "src":"default/selector32.png", "noSave":true, "noRegion":true,
+			"gmMouseMove":false
 		},
 		"animation":[["true", "0,0|1,0|2,0|1,0", {}]]
 	}, "quest");

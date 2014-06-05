@@ -3,24 +3,395 @@
 "use strict";
 
 load.provide("dusk.sgui.TileRegion", (function() {
+	var EventDispatcher = load.require("dusk.EventDispatcher");
+	var c = load.require("dusk.sgui.c");
+	var TileMap = load.require("dusk.sgui.TileMap");
+	
+	var TileRegion = function(tileMap, generator, parent) {
+		this._tileMap = tileMap;
+		this._tiles = [null];
+		this._entities = [];
+		this._map = new Uint16Array(tileMap.rows * tileMap.cols);
+		this._originX = 0;
+		this._originY = 0;
+		this._childRegions = {};
+		this._generator = generator;
+		this._parent = parent;
+		
+		this.onChange = new EventDispatcher("dusk.sgui.TileRegion.onChange");
+	};
+	
+	TileRegion.prototype.setOrigin = function(x, y) {
+		this._originX = x;
+		this._originY = y;
+	};
+	
+	TileRegion.prototype.clear = function() {
+		this._tiles = [null];
+		this._entities = [];
+		this._map = new Uint16Array(this._tileMap.rows * this._tileMap.cols);
+		this._childRegions = {};
+		
+		this.onChange.fire();
+	};
+	
+	TileRegion.prototype.add = function(x, y, px, py, weight, e, dist, evenEnt, childObj) {
+		this._tiles.push([x, y, px, py, weight, e, dist, childObj]);
+		this._map[(y * this._tileMap.cols)+x] = this._tiles.length-1;
+		if(evenEnt && e) this._entities.push([e, this._tiles.length-1]);
+		
+		this.onChange.fire();
+	};
+	
+	TileRegion.prototype.insert = function(region) {
+		for(var i = 1; i < this._tiles.length; i ++) {
+			region.add(this._tiles[i][0], this._tiles[i][1],
+				this._tiles[i][2], this._tiles[i][3], this._tiles[i][4],
+				this._tiles[i][5], this._tiles[i][3], this._tiles[i][6],
+				true, this._tiles[i][7]
+			);
+		}
+	};
+
+	TileRegion.prototype.get = function(x, y) {
+		return this._tiles[this._map[(y * this._tileMap.cols) + x]];
+	};
+
+	TileRegion.prototype.getAll = function(x, y) {
+		var out = [];
+		
+		for(var i = 0; i < this._tiles.length; i ++) {
+			if(this._tiles[i] && this._tiles[i][0] == x && this._tiles[i][1] == y) {
+				out.push(this._tiles[i]);
+			}
+		}
+		
+		return out;
+	};
+	
+	TileRegion.prototype.getEvery = function() {
+		return this._tiles;
+	};
+	
+	TileRegion.prototype.getChild = function(child) {
+		return this._childRegions[child];
+	};
+	
+	TileRegion.prototype.lookup = function(id) {
+		return this._tiles[id];
+	};
+
+	TileRegion.prototype.isIn = function(x, y) {
+		return this._map[(y * this._tileMap.cols) + x] != 0;
+	};
+	
+	TileRegion.prototype.entities = function() {
+		return this._entities;
+	};
+	
+	TileRegion.prototype.pathTo = function(x, y) {
+		var o = [];
+		var t = this.get(x, y);
+		
+		while(t && t[2] >= 0) {
+			o.push(_resolveDirection(t[2], t[3], t[0], t[1]));
+			t = this.get(t[2], t[3]);
+		}
+		
+		return o.reverse();
+	};
+	
+	TileRegion.prototype.followPath = function(path) {
+		var o = [-1, -1];
+		var t = [this._originX, this._originY];
+		var p = 0;
+		
+		while(p <= path.length) {
+			o[0] = t[0];
+			o[1] = t[1];
+			t = _goDirection(t[0], t[1], path[p]);
+			p ++;
+		}
+		
+		return o;
+	};
+	
+	TileRegion.prototype.followPathInto = function(path, dest) {
+		var o = [-1, -1];
+		var t = [this._originX, this._originY];
+		var p = 0;
+		
+		while(p <= path.length) {
+			dest.add(t[0], t[1], o[0], o[1], undefined, undefined, p, undefined);
+			o[0] = t[0];
+			o[1] = t[1];
+			t = _goDirection(t[0], t[1], path[p]);
+			p ++;
+		}
+	};
+	
+	TileRegion.prototype.expandRegion = function(x, y, range, opts) {
+		var s = this._tileMap;
+		
+		var w = 0;
+		var o = this._tileMap.container.getPrimaryEntityLayer().getEntitiesExactlyHere(
+			x*this._tileMap.tileWidth(), y*this._tileMap.tileHeight(), undefined, true
+		);
+		
+		var e = null;
+		if(o.length > 0) {
+			e = o[0];
+		}
+		
+		if(opts.includeFirst) {
+			w = this._entityWeight(e);
+		}
+		
+		if("rangeMap" in opts) range = opts.rangeMap.length -1;
+		if(range < 0) return;
+		
+		//if("notStartFrom" in opts && e && e.meetsTrigger(opts.notStartFrom)) return;
+		//Remember to ignore selector
+		
+		var cloud = [[x, y, -1, -1, w, e, 0, {}]];
+		
+		this.setOrigin(x, y);
+		
+		if("weights" in opts) s.weights = opts.weights;
+		while(true) {
+			var cl = _getMinFromCloud(cloud);
+			if(cl[4] == 0xffffffff) break;
+			
+			var t = s.getTile(cl[0], cl[1]);
+			
+			if(/*!this.isInRegion(name, c[0], c[1])*/ true) {
+				if(!("entBlock" in opts) || !cl[5] || !cl[5].evalTrigger(opts.entBlock)) {
+					if(!opts.los || this.checkLOS(x, y, cl[0], cl[1])) {
+						s.shiftTile(t, c.DIR_UP);
+						this._updateCloud(cloud, cl, t, range, name);
+						s.shiftTile(t, c.DIR_DOWN);
+					
+						s.shiftTile(t, c.DIR_RIGHT);
+						this._updateCloud(cloud, cl, t, range, name);
+						s.shiftTile(t, c.DIR_LEFT);
+					
+						s.shiftTile(t, c.DIR_DOWN);
+						this._updateCloud(cloud, cl, t, range, name);
+						s.shiftTile(t, c.DIR_UP);
+					
+						s.shiftTile(t, c.DIR_LEFT);
+						this._updateCloud(cloud, cl, t, range, name);
+						
+						if(!this.isIn(cl[0], cl[1]) && (!opts.min || cl[4] > opts.min)) {
+							if((!("minWeight" in opts) || cl[4] >= opts.minWeight)
+							&& (!("rangeMap" in opts) || opts.rangeMap[cl[4]])) {
+								
+								if("forEach" in opts) {
+									for(var i = 0; i < opts.forEach.length; i ++) {
+										var e = opts.forEach[i];
+										
+										cl[7][e.name] = new TileRegion(this._tileMap, this._generator, this);
+										cl[7][e.name].expandRegion(cl[0], cl[1], e.range, e);
+										if(!(e.name in this._childRegions))
+											this._childRegions[e.name] = 
+												new TileRegion(this._tileMap, this._generator, this);
+										cl[7][e.name].insert(this._childRegions[e.name]);
+									}
+								}
+								
+								if(!("entFilter" in opts) || !cl[5]) {
+									this.add(cl[0], cl[1], cl[2], cl[3], cl[4], cl[5], cl[6], true, cl[7]);
+								}else{
+									this.add(
+										cl[0], cl[1], cl[2], cl[3], cl[4], cl[5], cl[6],
+										cl[5].evalTrigger(opts.entFilter), cl[7]
+									);
+								}
+							}
+						}
+					}
+				}
+				
+				cl[4] = 0xffffffff;
+			}
+			
+			TileMap.tileData.free(t);
+		}
+		
+		if(opts.forEach) {
+			for(var i = 0; i < opts.forEach.length; i ++) {
+				var e = opts.forEach[i];
+				
+				if(e.colour) {
+					this._generator.colourRegion(this, e.colour, e.name);
+				}
+			}
+		}
+		
+		if(opts.colour && !this._parent) {
+			this._generator.colourRegion(this, opts.colour);
+		}
+	};
+	
+	var _isInCloud = function(cloud, c, tile) {
+		if(c[0] == tile[2] && c[1] == tile[3]) return c;
+		
+		for(var i = 0; i < cloud.length; i ++) {
+			if(cloud[i][0] == tile[2] && cloud[i][1] == tile[3]) return cloud[i];
+		}
+		
+		return null;
+	};
+	
+	TileRegion.prototype._updateCloud = function(cloud, oldTile, newTile, range) {
+		var exists = _isInCloud(cloud, oldTile, newTile);
+		if(exists && exists[4] == 0xffffffff) return;
+		
+		var e = null;
+		var w = 0;
+		
+		if(!exists) {
+			var o = this._tileMap.container.getPrimaryEntityLayer().getEntitiesExactlyHere(
+				newTile[2]*this._tileMap.tileWidth(), newTile[3]*this._tileMap.tileHeight(), undefined, true
+			);
+			
+			var i = 0;
+			while(i < o.length) {
+				if(!o[i].eProp("noRegion")) {
+					e = o[0];
+					w = _entityWeight(e);
+					break;
+				}
+				
+				i ++;
+			}
+		}else{
+			if(exists[5]) {
+				e = exists[5];
+				w = _entityWeight(e);
+			}
+		}
+		
+		if(oldTile[4] + newTile[4] + w > range) return;
+		
+		if(exists) {
+			if(oldTile[4] + newTile[4] + w < exists[4]) {
+				exists[2] = oldTile[0];
+				exists[3] = oldTile[1];
+				exists[4] = oldTile[4] + newTile[4] + w;
+				exists[6] = oldTile[6] + 1;
+			}
+		}else{
+			cloud.push(
+				[newTile[2], newTile[3], oldTile[0], oldTile[1], oldTile[4]+newTile[4]+w, e, oldTile[6]+1, {}]
+			);
+		}
+	};
+	
+	var _entityWeight = function(e) {
+		if(!e || !e.eProp("regionWeight")) {
+			return 0;
+		}
+		
+		return e.eProp("regionWeight");
+	};
+	
+	var _getMinFromCloud = function(cloud) {
+		var min = 0;
+		for(var i = 1; i < cloud.length; i ++) {
+			if(cloud[i][4] < cloud[min][4]) {
+				min = i;
+			}
+		}
+		
+		var toRet = cloud[min];
+		return toRet;
+	};
+	
+	TileRegion.prototype.checkLOS = function(xa, ya, xb, yb) {
+		function abs(a) {return a > 0 ? a : -a;}
+
+		var dx = abs(xb - xa);
+		var dy = abs(yb - ya);
+		
+		var sx = -1;
+		var sy = -1;
+		
+		if(xa < xb) sx = 1;
+		if(ya < yb) sy = 1;
+		
+		var err = dx - dy;
+		
+		var s = this._tileMap;
+		while(true) {
+			var t = s.getTile(xa, ya);
+			if(t[5]) {
+				TileMap.tileData.free(t);
+				return false;
+			}
+			TileMap.tileData.free(t);
+			
+			if(xa == xb && ya == yb) break;
+			
+			var e2 = 2 * err;
+			
+			if(e2 > -dy) { 
+				err -= dy;
+				xa += sx;
+			}
+			if(e2 < dx){
+				err += dx;
+				ya += sy;
+			}
+		}
+		
+		return true;
+	};
+	
+	//a is D of b
+	var _resolveDirection = function(xa, ya, xb, yb) {
+		if(xa == xb + 1) return c.DIR_LEFT;
+		if(xa == xb - 1) return c.DIR_RIGHT;
+		if(ya == yb + 1) return c.DIR_UP;
+		if(ya == yb - 1) return c.DIR_DOWN;
+	};
+	
+	var _goDirection = function(x, y, dir) {
+		switch(dir) {
+			case c.DIR_LEFT: return [x-1, y];
+			case c.DIR_RIGHT: return [x+1, y];
+			case c.DIR_UP: return [x, y-1];
+			case c.DIR_DOWN: return [x, y+1];
+		}
+	};
+	
+	Object.seal(TileRegion);
+	Object.seal(TileRegion.prototype);
+	
+	return TileRegion;
+})());
+
+load.provide("dusk.sgui.TileRegionGenerator", (function() {
 	var Component = load.require("dusk.sgui.Component");
 	var TileMap = load.require("dusk.sgui.TileMap");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
 	var utils = load.require("dusk.utils");
 	var Image = load.require("dusk.Image");
+	var TileRegion = load.require("dusk.sgui.TileRegion");
 
-	/** @class dusk.sgui.TileRegion
+	/** @class dusk.sgui.TileRegionGenerator
 	 * 
 	 * @classdesc A tile region serves to group tiles, and can colour them.
 	 * 
-	 * Generally, a region represents a grid of identical sized tiles. Each tile can be in a number of regions, and contain
-	 *  basic pathing information on how to get from a "starting point". Regions can also have all the tiles in them
-	 *  coloured, as well.
+	 * Generally, a region represents a grid of identical sized tiles. Each tile can be in a number of regions, and
+	 * contain basic pathing information on how to get from a "starting point". Regions can also have all the tiles in 
+	 * them coloured, as well.
 	 * 
-	 * Tiles can be added to regions individually, but it is more usefull to use `{@link dusk.sgui.TileRegion#expandRegion}`
-	 *  to create a region that, essentially, says "Every tile that is n tiles away from a given tile". If you use
-	 *  `expandRegion`, you get paths to and from the "origin" tile for free.
+	 * Tiles can be added to regions individually, but it is more usefull to use
+	 *  `{@link dusk.sgui.TileRegionGenerator#expandRegion}` to create a region that, essentially, says "Every tile
+	 *  that is n tiles away from a given tile". If you use `expandRegion`, you get paths to and from the "origin" tile
+	 *  for free.
 	 * 
 	 * @extends dusk.sgui.Component
 	 * @param {?dusk.sgui.Component} parent The container that this component is in.
@@ -28,7 +399,7 @@ load.provide("dusk.sgui.TileRegion", (function() {
 	 * @constructor
 	 * @since 0.0.21-alpha
 	 */
-	var TileRegion = function (parent, comName) {
+	var TileRegionGenerator = function (parent, comName) {
 		Component.call(this, parent, comName);
 		
 		/** The width of a single tile.
@@ -42,12 +413,12 @@ load.provide("dusk.sgui.TileRegion", (function() {
 		 */
 		this.theight = 32;
 		
-		/** The number of rows in this TileRegion.
+		/** The number of rows in this TileRegionGenerator.
 		 * @type integer
 		 * @default 50
 		 */
 		this.rows = 50;
-		/** The number of columns in this TileRegion.
+		/** The number of columns in this TileRegionGenerator.
 		 * @type integer
 		 * @default 50
 		 */
@@ -61,13 +432,13 @@ load.provide("dusk.sgui.TileRegion", (function() {
 		 */
 		this._regions = {};
 		/** The original tile in a region. Key is the region name, and the value is a shortcut to the origin tile in 
-		 *  `{@link dusk.sgui.TileRegion#_regions}`.
+		 *  `{@link dusk.sgui.TileRegionGenerator#_regions}`.
 		 * @type object
 		 * @private
 		 */
 		this._regionOrigins = {};
 		/** An object containing arrays for fast lookups. Key is region name, the value is a Uint16Array. The value
-		 *  `(y * cols) + x` is the index of the tile at that location in `{@link dusk.sgui.TileRegion#_regions}` or 0
+		 *  `(y * cols) + x` is the index of the tile at that location in `{@link dusk.sgui.TileRegionGenerator#_regions}` or 0
 		 *  (the tile is not in the region).
 		 * @type object
 		 * @private
@@ -100,12 +471,12 @@ load.provide("dusk.sgui.TileRegion", (function() {
 		this.prepareDraw.listen(this._tileRegionDraw.bind(this));
 		this.frame.listen(this._tileRegionFrame.bind(this));
 	};
-	TileRegion.prototype = Object.create(Component.prototype);
+	TileRegionGenerator.prototype = Object.create(Component.prototype);
 
 	/** Returns the location of the source tile on the origin image
 	 *  (as in, the one that was drawn to here) that the specified coordinate is in.
 	 * 
-	 * Please return the output to `{@link dusk.sgui.TileRegion.tileData}` when you are done.
+	 * Please return the output to `{@link dusk.sgui.TileRegionGenerator.tileData}` when you are done.
 	 * @param {integer} x The x coordinate to look in.
 	 * @param {integer} y The y coordinate to look in.
 	 * @param {boolean=false} exactX If true
@@ -114,7 +485,7 @@ load.provide("dusk.sgui.TileRegion", (function() {
 	 *  then the specified y coordinate must exactly match the y coordinate of a tile on this map.
 	 * @return {?array} An `[x,y]` array specifying the tile that is here, or `null`, if there is no tile here.
 	 */
-	TileRegion.prototype.tilePointIn = function(x, y, exactX, exactY) {
+	TileRegionGenerator.prototype.tilePointIn = function(x, y, exactX, exactY) {
 		var xpt = x/this.twidth;
 		var ypt = y/this.theight;
 		
@@ -133,11 +504,11 @@ load.provide("dusk.sgui.TileRegion", (function() {
 	 * @param {object} e A `frame` event object.
 	 * @private
 	 */
-	TileRegion.prototype._tileRegionFrame = function(e) {
+	TileRegionGenerator.prototype._tileRegionFrame = function(e) {
 		
 	};
 
-	TileRegion.prototype._updateTileColourCache = function() {
+	TileRegionGenerator.prototype._updateTileColourCache = function() {
 		this._needsCacheUpdating = true;
 	};
 
@@ -145,7 +516,7 @@ load.provide("dusk.sgui.TileRegion", (function() {
 	 * @param {object} e A `prepareDraw` event object.
 	 * @private
 	 */
-	TileRegion.prototype._tileRegionDraw = function(e) {
+	TileRegionGenerator.prototype._tileRegionDraw = function(e) {
 		//Update the colour cache if needed
 		if(this._needsCacheUpdating) {
 			this._cachedTileColours = [];
@@ -153,7 +524,7 @@ load.provide("dusk.sgui.TileRegion", (function() {
 			//Loop through all regions
 			for(var i = 0; i < this._tagColours.length; i ++) {
 				var t = this._tagColours[i];
-				var r = this.getRegion(t[0]);
+				var r = t[0].getEvery();
 				
 				if(r) {
 					//Loop through every tile (r is region, t is pair [regionName, regionColour])
@@ -165,7 +536,7 @@ load.provide("dusk.sgui.TileRegion", (function() {
 						//Arrows go over the top of everything
 						if(t[1].charAt(0) != ":") {
 							for(var k = 0; k < this._cachedTileColours.length; k ++) {
-								if(this._cachedTileColours[k][0] == r[j][0] && this._cachedTileColours[k][1] == r[j][1]) {
+								if(this._cachedTileColours[k][0] == r[j][0]&&this._cachedTileColours[k][1] == r[j][1]) {
 									set = true;
 									this._cachedTileColours[k][2] = t[1];
 									add = k;
@@ -248,9 +619,9 @@ load.provide("dusk.sgui.TileRegion", (function() {
 			);*/
 		}
 	};
-
-	TileRegion.prototype._arrowSide = function(now, region, x, y) {
-		var rel = this.getAllFromRegion(region, x, y);
+	
+	TileRegionGenerator.prototype._arrowSide = function(now, region, x, y) {
+		var rel = region.getAll(x, y);
 		
 		if(!rel.length) return false;
 		
@@ -261,8 +632,8 @@ load.provide("dusk.sgui.TileRegion", (function() {
 		
 		return false;
 	};
-
-	TileRegion.prototype._getArrow = function(init, left, right, up, down) {
+	
+	TileRegionGenerator.prototype._getArrow = function(init, left, right, up, down) {
 		if(up && down && left && right) return [1, 0];
 		if(!up && !down && !left && !right) return [0, 0];
 		
@@ -291,317 +662,20 @@ load.provide("dusk.sgui.TileRegion", (function() {
 			if(down) return [3, 2];
 		}
 	};
-
-	TileRegion.prototype.clearRegion = function(name) {
-		this._regions[name] = undefined;
-		this._regionMaps[name] = undefined;
-		this._regionEnts[name] = undefined;
+	
+	TileRegionGenerator.prototype.generateRegion = function(x, y, range, opts) {
+		var region = new TileRegion(this.container.getScheme(), this);
 		
-		this._updateTileColourCache();
-	};
-
-	TileRegion.prototype.addToRegion = function(name, x, y, px, py, weight, e, dist, evenEnt) {
-		if(!(name in this._regions) || !this._regions[name]) {
-			this._regions[name] = [null];
-			this._regionMaps[name] = new Uint16Array(this.rows * this.cols);
-			this._regionEnts[name] = [];
-		}
-		
-		this._regions[name].push([x, y, px, py, weight, e, dist]);
-		this._regionMaps[name][(y * this.cols)+x] = this._regions[name].length-1;
-		if(evenEnt && e) this._regionEnts[name].push([e, this._regions[name].length-1]);
-		this._updateTileColourCache();
-	};
-
-	TileRegion.prototype.getFromRegion = function(name, x, y) {
-		if(!(name in this._regions) || !this._regions[name]) this._regions[name] = [];
-		
-		return this._regions[name][this._regionMaps[name][(y * this.cols) + x]];
-	};
-
-	TileRegion.prototype.getAllFromRegion = function(name, x, y) {
-		if(!(name in this._regions) || !this._regions[name]) this._regions[name] = [];
-		
-		var out = [];
-		
-		for(var i = 0; i < this._regions[name].length; i ++) {
-			if(this._regions[name][i] && this._regions[name][i][0] == x && this._regions[name][i][1] == y) {
-				out.push(this._regions[name][i]);
-			}
-		}
-		
-		return out;
-	};
-
-	TileRegion.prototype.isInRegion = function(name, x, y) {
-		if(!(name in this._regions) || !this._regions[name]) return false;
-		
-		return this._regionMaps[name][(y * this.cols) + x] != 0;
-	};
-
-	TileRegion.prototype.getRegion = function(name) {
-		return this._regions[name];
-	};
-
-	TileRegion.prototype.entitiesInRegion = function(name) {
-		return this._regionEnts[name];
-	};
-
-	TileRegion.prototype.pathTo = function(name, x, y) {
-		var o = [];
-		var t = this.getFromRegion(name, x, y);
-		
-		while(t && t[2] >= 0) {
-			o.push(this._resolveDirection(t[2], t[3], t[0], t[1]));
-			t = this.getFromRegion(name, t[2], t[3]);
-		}
-		
-		return o.reverse();
-	};
-
-	TileRegion.prototype.followPathFromRegion = function(path, origin, dest) {
-		var o = [-1, -1];
-		var t = [this._regionOrigins[origin][0], this._regionOrigins[origin][1]];
-		var p = 0;
-		
-		while(p <= path.length) {
-			this.addToRegion(dest, t[0], t[1], o[0], o[1], undefined, undefined, p);
-			o[0] = t[0];
-			o[1] = t[1];
-			t = this._goDirection(t[0], t[1], path[p]);
-			p ++;
-		}
-	};
-
-	TileRegion.prototype.followPath = function(path, region) {
-		var o = [-1, -1];
-		var t = [this._regionOrigins[region][0], this._regionOrigins[region][1]];
-		var p = 0;
-		
-		while(p <= path.length) {
-			o[0] = t[0];
-			o[1] = t[1];
-			t = this._goDirection(t[0], t[1], path[p]);
-			p ++;
-		}
-		
-		return o;
-	};
-
-	TileRegion.prototype.expandRegion = function(name, x, y, range, opts) {
-		var s = this.container.getScheme();
-		
-		var w = 0;
-		var o = this.container.getPrimaryEntityLayer().getEntitiesExactlyHere(
-			x*this.tileWidth(), y*this.tileHeight(), undefined, true
-		);
-		
-		var e = null;
-		if(o.length > 0) {
-			e = o[0];
-		}
-		
-		if(opts.includeFirst) {
-			w = this._entityWeight(e);
-		}
-		
-		if("rangeMap" in opts) range = opts.rangeMap.length -1;
-		if(range < 0) return;
-		
-		//if("notStartFrom" in opts && e && e.meetsTrigger(opts.notStartFrom)) return;
-		//Remember to ignore selector
-		
-		var cloud = [[x, y, -1, -1, w, e, 0]];
-		
-		this._regionOrigins[name] = cloud[0];
-		
-		if("weights" in opts) s.weights = opts.weights;
-		while(true) {
-			var cl = this._getMinFromCloud(cloud);
-			if(cl[4] == 0xffffffff) break;
+		return new Promise(function(fulfill, reject) {
+			region.expandRegion(x, y, range, opts);
 			
-			var t = s.getTile(cl[0], cl[1]);
-			
-			if(/*!this.isInRegion(name, c[0], c[1])*/ true) {
-				if(!("entBlock" in opts) || !cl[5] || !cl[5].evalTrigger(opts.entBlock)) {
-					if(!opts.los || this.checkLOS(name, x, y, cl[0], cl[1])) {
-						s.shiftTile(t, c.DIR_UP);
-						this._updateCloud(cloud, cl, t, range, name);
-						s.shiftTile(t, c.DIR_DOWN);
-					
-						s.shiftTile(t, c.DIR_RIGHT);
-						this._updateCloud(cloud, cl, t, range, name);
-						s.shiftTile(t, c.DIR_LEFT);
-					
-						s.shiftTile(t, c.DIR_DOWN);
-						this._updateCloud(cloud, cl, t, range, name);
-						s.shiftTile(t, c.DIR_UP);
-					
-						s.shiftTile(t, c.DIR_LEFT);
-						this._updateCloud(cloud, cl, t, range, name);
-						
-						if(!this.isInRegion(name, cl[0], cl[1]) && (!opts.min || cl[4] > opts.min)) {
-							if((!("minWeight" in opts) || cl[4] >= opts.minWeight)
-							&& (!("rangeMap" in opts) || opts.rangeMap[cl[4]])) {
-								if(!("entFilter" in opts) || !cl[5]) {
-									this.addToRegion(name, cl[0], cl[1], cl[2], cl[3], cl[4], cl[5], cl[6], true);
-								}else{
-									this.addToRegion(
-										name, cl[0], cl[1], cl[2], cl[3], cl[4], cl[5], cl[6],
-										cl[5].evalTrigger(opts.entFilter)
-									);
-								}
-								
-								if("forEach" in opts) {
-									for(var i = 0; i < opts.forEach.length; i ++) {
-										var e = opts.forEach[i];
-										this.expandRegion(e.name, cl[0], cl[1], e.range, e);
-									}
-								}
-							}
-						}
-					}
-				}
-				
-				cl[4] = 0xffffffff;
-			}
-			
-			TileMap.tileData.free(t);
-		}
-		
-		if(opts.colour) this.colourRegion(name, opts.colour);
-	};
-
-	TileRegion.prototype._isInCloud = function(cloud, c, tile) {
-		if(c[0] == tile[2] && c[1] == tile[3]) return c;
-		
-		for(var i = 0; i < cloud.length; i ++) {
-			if(cloud[i][0] == tile[2] && cloud[i][1] == tile[3]) return cloud[i];
-		}
-		
-		return null;
-	};
-
-	TileRegion.prototype._updateCloud = function(cloud, oldTile, newTile, range, region) {
-		this._calls ++;
-		var exists = this._isInCloud(cloud, oldTile, newTile);
-		if(exists && exists[4] == 0xffffffff) return;
-		
-		var e = null;
-		var w = 0;
-		
-		if(!exists) {
-			var o = this.container.getPrimaryEntityLayer().getEntitiesExactlyHere(
-				newTile[2]*this.tileWidth(), newTile[3]*this.tileHeight(), undefined, true
-			);
-			
-			if(o.length > 0) {
-				e = o[0];
-				w = this._entityWeight(e);
-			}
-		}else{
-			if(exists[5]) {
-				e = exists[5];
-				w = this._entityWeight(e);
-			}
-		}
-		
-		if(oldTile[4] + newTile[4] + w > range) return;
-		
-		if(exists) {
-			if(oldTile[4] + newTile[4] + w < exists[4]) {
-				exists[2] = oldTile[0];
-				exists[3] = oldTile[1];
-				exists[4] = oldTile[4] + newTile[4] + w;
-				exists[6] = oldTile[6] + 1;
-			}
-		}else{
-			cloud.push(
-				[newTile[2], newTile[3], oldTile[0], oldTile[1], oldTile[4]+newTile[4]+w, e, oldTile[6]+1]
-			);
-		}
-	};
-
-	TileRegion.prototype._entityWeight = function(e) {
-		if(!e || !e.eProp("regionWeight")) {
-			return 0;
-		}
-		
-		return e.eProp("regionWeight");
-	};
-
-	TileRegion.prototype._getMinFromCloud = function(cloud, pop) {
-		var min = 0;
-		for(var i = 1; i < cloud.length; i ++) {
-			if(cloud[i][4] < cloud[min][4]) {
-				min = i;
-			}
-		}
-		
-		var toRet = cloud[min];
-		return toRet;
-	};
-
-	TileRegion.prototype.checkLOS = function(name, xa, ya, xb, yb) {
-		function abs(a) {return a > 0 ? a : -a;}
-
-		var dx = abs(xb - xa);
-		var dy = abs(yb - ya);
-		
-		var sx = -1;
-		var sy = -1;
-		
-		if(xa < xb) sx = 1;
-		if(ya < yb) sy = 1;
-		
-		var err = dx - dy;
-		
-		var s = this.container.getScheme();
-		while(true) {
-			var t = s.getTile(xa, ya);
-			if(t[5]) {
-				TileMap.tileData.free(t);
-				return false;
-			}
-			TileMap.tileData.free(t);
-			
-			if(xa == xb && ya == yb) break;
-			
-			var e2 = 2 * err;
-			
-			if(e2 > -dy) { 
-				err -= dy;
-				xa += sx;
-			}
-			if(e2 < dx){
-				err += dx;
-				ya += sy;
-			}
-		}
-		
-		return true;
-	};
-
-	//a is D of b
-	TileRegion.prototype._resolveDirection = function(xa, ya, xb, yb) {
-		if(xa == xb + 1) return c.DIR_LEFT;
-		if(xa == xb - 1) return c.DIR_RIGHT;
-		if(ya == yb + 1) return c.DIR_UP;
-		if(ya == yb - 1) return c.DIR_DOWN;
-	};
-
-	TileRegion.prototype._goDirection = function(x, y, dir) {
-		switch(dir) {
-			case c.DIR_LEFT: return [x-1, y];
-			case c.DIR_RIGHT: return [x+1, y];
-			case c.DIR_UP: return [x, y-1];
-			case c.DIR_DOWN: return [x, y+1];
-		}
+			fulfill(region);
+		});
 	};
 
 
-	TileRegion.prototype.colourRegion = function(name, colour) {
-		for(var i = 0; i < this._tagColours.length; i ++) {
+	TileRegionGenerator.prototype.colourRegion = function(region, colour, path) {
+		/*for(var i = 0; i < this._tagColours.length; i ++) {
 			if(this._tagColours[i][0] == name) {
 				this._tagColours[i][1] = colour;
 				this._updateTileColourCache();
@@ -610,12 +684,23 @@ load.provide("dusk.sgui.TileRegion", (function() {
 		}
 		
 		this._tagColours.push([name, colour]);
+		this._updateTileColourCache();*/
+		
+		var parent = region;
+		if(path) {
+			var frags = path.split(".");
+			for(var p = 0; p < frags.length; p ++) {
+				region = region.getChild(frags[p]);
+			}
+		}
+		
+		this._tagColours.push([region, colour, region.onChange.listen(this._updateTileColourCache.bind(this)), parent]);
 		this._updateTileColourCache();
 	};
 
-	TileRegion.prototype.getRegionColour = function(name) {
+	TileRegionGenerator.prototype.getRegionColour = function(region) {
 		for(var i = 0; i < this._tagColours.length; i ++) {
-			if(this._tagColours[i][0] == name) {
+			if(this._tagColours[i][0] == region) {
 				return this._tagColours[i][1];
 			}
 		}
@@ -623,55 +708,60 @@ load.provide("dusk.sgui.TileRegion", (function() {
 		return null;
 	};
 
-	TileRegion.prototype.uncolourRegion = function(name) {
+	TileRegionGenerator.prototype.uncolourRegion = function(region, noChildren) {
 		for(var i = 0; i < this._tagColours.length; i ++) {
-			if(this._tagColours[i][0] == name) {
+			if(this._tagColours[i][0] == region) {
+				this._tagColours[i][0].onChange.unlisten(this._tagColours[i][2]);
 				this._tagColours.splice(i, 1);
+				i --;
+			}else if(!noChildren && this._tagColours[i][3] == region) {
+				this._tagColours[i][0].onChange.unlisten(this._tagColours[i][2]);
+				this._tagColours.splice(i, 1);
+				i --;
 			}
 		}
 		this._updateTileColourCache();
 	};
-
-
-
+	
+	
 	/** Returns the width of a single tile.
 	 * @return {integer} The width of a tile.
 	 */
-	TileRegion.prototype.tileWidth = function() {
+	TileRegionGenerator.prototype.tileWidth = function() {
 		return this.twidth;
 	};
 
 	/** Returns the height of a single tile.
 	 * @return {integer} The height of a tile.
 	 */
-	TileRegion.prototype.tileHeight = function() {
+	TileRegionGenerator.prototype.tileHeight = function() {
 		return this.theight;
 	};
 
 	/** Returns the number of visible columns.
 	 * @return {integer} The number of visible columns.
 	 */
-	TileRegion.prototype.visibleCols = function() {
+	TileRegionGenerator.prototype.visibleCols = function() {
 		return Math.floor(this.width/this.tileWidth());
 	};
 
 	/** Returns the number of visible rows.
 	 * @return {integer} The number of visible columns.
 	 */
-	TileRegion.prototype.visibleRows = function() {
+	TileRegionGenerator.prototype.visibleRows = function() {
 		return Math.floor(this.height/this.tileHeight());
 	};
 
 	//width
-	Object.defineProperty(TileRegion.prototype, "width", {
+	Object.defineProperty(TileRegionGenerator.prototype, "width", {
 		get: function() {return this.cols*this.twidth;},
-		set: function(value) {if(value > 0) console.warn("TileRegion setting width is not supported.");}
+		set: function(value) {if(value > 0) console.warn("TileRegionGenerator setting width is not supported.");}
 	});
 
 	//height
-	Object.defineProperty(TileRegion.prototype, "height", {
+	Object.defineProperty(TileRegionGenerator.prototype, "height", {
 		get: function() {return this.rows*this.theight;},
-		set: function(value) {if(value > 0) console.warn("TileRegion setting height is not supported.");}
+		set: function(value) {if(value > 0) console.warn("TileRegionGenerator setting height is not supported.");}
 	});
 
 	/** Returns the map for `{@link dusk.sgui.BasicMain}` to save it.
@@ -679,7 +769,7 @@ load.provide("dusk.sgui.TileRegion", (function() {
 	 * @return {object} The current map.
 	 * @since 0.0.18-alpha
 	 */
-	TileRegion.prototype.saveBM = function() {
+	TileRegionGenerator.prototype.saveBM = function() {
 		return {"rows":this.rows, "cols":this.cols};
 	};
 
@@ -688,15 +778,15 @@ load.provide("dusk.sgui.TileRegion", (function() {
 	 * @param {object} map The map to load, will be assigned to `{@link dusk.sgui.EditableTileMap#map}`.
 	 * @since 0.0.18-alpha
 	 */
-	TileRegion.prototype.loadBM = function(data) {
+	TileRegionGenerator.prototype.loadBM = function(data) {
 		this.rows = data.rows;
 		this.cols = data.cols;
 	};
 
-	Object.seal(TileRegion);
-	Object.seal(TileRegion.prototype);
+	Object.seal(TileRegionGenerator);
+	Object.seal(TileRegionGenerator.prototype);
 
-	sgui.registerType("TileRegion", TileRegion);
+	sgui.registerType("TileRegionGenerator", TileRegionGenerator);
 	
-	return TileRegion;
+	return TileRegionGenerator;
 })());
