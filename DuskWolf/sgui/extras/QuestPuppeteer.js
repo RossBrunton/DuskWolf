@@ -153,7 +153,7 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 						}
 					}*/
 					
-					console.profile("Region");
+					//console.profile("Region");
 					r.generateRegion(x, y, range, args).then(function(region) {
 						passedArg.regions[args.name] = region;
 						passedArg.range = range;
@@ -162,7 +162,7 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 						
 						fulfill(passedArg);
 					});
-					console.profileEnd("Region");
+					//console.profileEnd("Region");
 				}).bind(this));
 			
 			case "generateRegion^-1":

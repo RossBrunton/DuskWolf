@@ -60,6 +60,13 @@ load.provide("dusk.sgui.Grid", (function() {
 		 */
 		this.globals = null;
 		
+		/** If true, then old components in the grid will be reused when populating.
+		 * @type boolean
+		 * @since 0.0.21-alpha
+		 * @default true
+		 */
+		this.recycle = true;
+		
 		/** This event handler is fired during three stages of the population proccess; when it starts,
 		 *  when a component is created, and when it finishes.
 		 * 
@@ -82,7 +89,10 @@ load.provide("dusk.sgui.Grid", (function() {
 		this._registerPropMask("rows", "rows");
 		this._registerPropMask("cols", "cols");
 		this._registerPropMask("globals", "globals");
-		this._registerPropMask("populate", "__populate", undefined,["rows", "cols", "hspacing", "vspacing", "globals"]);
+		this._registerPropMask("recycle", "recycle");
+		this._registerPropMask("populate", "__populate", undefined,["rows", "cols", "hspacing", "vspacing", "globals",
+			"recycle"]
+		);
 		
 		//Listeners
 		this.dirPress.listen(this._gridDirAction.bind(this));
@@ -106,13 +116,20 @@ load.provide("dusk.sgui.Grid", (function() {
 		if(child === undefined) return;
 		if(!Array.isArray(child)) child = [child];
 		
-		//Delete all the existing ones
-		for(var x in this._components){
-			this.deleteComponent(x);
-		}
-		
-		//Add them
+		//Fire before event
 		child = this._populationEvent.fire({"action":"before", "child":child}, "before").child;
+		
+		//Delete all the existing ones, or all the out of range one
+		if(!this.recycle) {
+			for(var x in this._components){
+				this.deleteComponent(x);
+			}
+		}else{
+			for(var x in this._components){
+				if(x.split(",")[0] > this.cols-1 || x.split(",")[1] > this.rows-1)
+					this.deleteComponent(x);
+			}
+		}
 		
 		if(this.rows <= 0 || this.cols <= 0) {
 			this._populationEvent.fire({"action":"complete", "child":child}, "complete");
@@ -139,6 +156,7 @@ load.provide("dusk.sgui.Grid", (function() {
 				com = this._populationEvent.fire({"action":"create", "current":child[p], "child":child, "component":com,
 					"globals":this.globals
 				}, "create").component;
+				
 				if(this.globals !== null) com.parseProps(utils.clone(this.globals));
 				com.parseProps(utils.clone(child[p]));
 				com.parseProps({"y":ypoint, "x":xpoint});

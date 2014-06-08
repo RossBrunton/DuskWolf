@@ -7,6 +7,10 @@ load.provide("quest", (function() {
 	load.require("dusk.sgui.FocusChecker");
 	load.require("dusk.sgui.extras.MatchedSize");
 	load.require("dusk.sgui.FpsMeter");
+	load.require("dusk.sgui.Feed");
+	
+	load.require("dusk.sgui.extras.Die");
+	load.require("dusk.sgui.extras.Fade");
 	
 	var dusk = load.require("dusk");
 	var items = load.require("dusk.items");
@@ -98,6 +102,43 @@ load.provide("quest", (function() {
 			},
 		}
 	});
+	
+	sgui.getPane("actionFeed").parseProps({
+		"width":-2,
+		"children":{
+			"feed":{
+				"type":"Feed",
+				"xOrigin":c.ORIGIN_MAX,
+				"x":-5,
+				"y":5,
+				"globals":{
+					"size":16,
+					"borderColour":"#ffffff",
+					"borderSize":3,
+					"type":"Label",
+					"colour":"#000000",
+					"extras":{
+						"fade":{
+							"type":"Fade",
+							"delay":60,
+							"on":true,
+							"then":"die",
+							"from":1.0,
+							"to":0.0,
+							"duration":30
+						},
+						"die":{
+							"type":"Die"
+						}
+					}
+				},
+				"append":[
+					{"text":"Started!"}
+				]
+			}
+		}
+	});
+	var feed = sgui.getPane("actionFeed").getComponent("feed");
 
 	/*dusk.sgui.getPane("test").parseProps({
 		"active":true,
@@ -191,14 +232,12 @@ load.provide("quest", (function() {
 				
 				pa.mover = pa.entity;
 				
-				console.log("Generate Options");
-				
 				//Attack option
 				if(pa.regions["attack"].entities().length) {
 					pa.options.push({"text":"Attack!", "listValue":"attack", "listSelectFunction":function(pa, qu) {
 						qu(q.requestBoundPair("selectEntity", {"filter":"stat(faction, 1) = ENEMY", "regionToUse":"attack"}));
 						qu(function(pa) {
-							console.log(pa.entity);
+							feed.append({"text":"You killed them!"});
 							pa.entity.terminate();
 							
 							return pa;
@@ -242,7 +281,7 @@ load.provide("quest", (function() {
 		], false)
 	//	.then(console.log.bind(console), console.error.bind(console))
 		.then(function(pa) {
-			if(!pa.endTurn || !dquest.getBasicMain().getPrimaryEntityLayer().filter(
+			if(!pa.endTurn || !q.getBasicMain().getPrimaryEntityLayer().filter(
 				"stat(faction, 1) = ALLY & stat(moved, 3) = false").length
 			) {
 				return quest.allyTurnInner();
@@ -253,6 +292,7 @@ load.provide("quest", (function() {
 	};
 
 	quest.allyTurn = function() {
+		feed.append({"text":"Player Phase", "colour":"#000099"});
 		return new Promise(function(oFulfill, oReject) {
 			quest.allyTurnInner()
 			.then(function(pa) {
@@ -268,7 +308,10 @@ load.provide("quest", (function() {
 	}
 
 	quest.enemyTurn = function() {
-		return Promise.resolve(true);
+		feed.append({"text":"Enemy Phase", "colour":"#990000"});
+		return new Promise(function(fulfill) {
+			setTimeout(fulfill, 500);
+		});
 	};
 
 	targ.weights = new TileMapWeights(2, 10);

@@ -128,7 +128,7 @@ load.provide("dusk.sgui.IContainer", (function() {
 
 	/** Alters the layer that the specified component is on.
 	 * 
-	 * It is assumed that components on a higher layer will be drawn first.
+	 * It is assumed that components on a higher layer will be drawn later.
 	 * 
 	 * The alter must be an expression that says how to alter the layer, and be in one of the following forms.
 	 * 
