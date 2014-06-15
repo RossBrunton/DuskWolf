@@ -5,6 +5,10 @@
 //Testing; remove this
 //window.Promise = null;
 
+if("load" in window) {
+	console.warn("window.load already exists! It will be clobbered. Carefull.");
+}
+
 window.load = (function() {
 	/** @namespace load
 	 * @description This namespace provides the functions required to import files and resolve dependancies.
@@ -250,7 +254,8 @@ window.load = (function() {
 		
 		for(var i = provided.length-1; i >= 0; i--) {
 			if(!_names[provided[i]]
-			|| (_names[provided[i]][1] == 0 && provided.length > _files[_names[provided[i]][0]][0].length)
+			|| (_names[provided[i]][1] == 0 &&
+				(!(_names[provided[i]][0] in _files) || provided.length > _files[_names[provided[i]][0]][0].length))
 			|| (_names[provided[i]][1] == 0 && size < _names[provided[i]][3])
 			){
 				_names[provided[i]] = [file, 0, required, size, undefined, []];

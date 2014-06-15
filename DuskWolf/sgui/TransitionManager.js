@@ -3,6 +3,7 @@
 "use strict";
 
 load.provide("dusk.sgui.TransitionManager", (function() {
+	var load = window.load.require("load");
 	var Component = load.require("dusk.sgui.Component");
 	var sgui = load.require("dusk.sgui");
 	var options = load.require("dusk.options");
