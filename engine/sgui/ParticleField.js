@@ -4,7 +4,7 @@
 
 load.provide("dusk.sgui.ParticleField", (function() {
 	var Component = load.require("dusk.sgui.Component");
-	var core = load.require("dusk.sgui.effects.core");
+	var core = load.require("dusk.sgui.particleEffects.core");
 	var sgui = load.require("dusk.sgui");
 	
 	/** @class dusk.sgui.ParticleField

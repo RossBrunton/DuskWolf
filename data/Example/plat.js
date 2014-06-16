@@ -22,7 +22,7 @@ load.provide("example.plat", (function() {
 	load.require("dusk.sgui.ControlConfig");
 	load.require("dusk.sgui.Label");
 	load.require("dusk.sgui.Image");
-	load.require("dusk.sgui.effects.spread");
+	load.require("dusk.sgui.particleEffects.spread");
 	load.require("dusk.sgui.FpsMeter");
 	load.require("dusk.sgui.PlusText");
 	load.require("dusk.sgui.EntityWorkshop");

@@ -113,9 +113,9 @@ I'm going to list them all here.
 - {@link dusk.sgui.TileRegion}
 - {@link dusk.sgui.TransitionManager}
 
-**{@link dusk.sgui.effects}**
+**{@link dusk.sgui.particleEffects}**
 
-- {@link dusk.sgui.effects.core}
+- {@link dusk.sgui.particleEffects.core}
 
 **{@link dusk.sgui.extras}**
 

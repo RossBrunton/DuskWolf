@@ -35,7 +35,7 @@ load.provide("dusk", (function() {
 	 * @type string
 	 * @defualt "Data/"
 	 */
-	dusk.dataDir = "Data/";
+	dusk.dataDir = "data/";
 
 	/** The id of the DuskWolf element, used for referencing it's children.
 	 * 

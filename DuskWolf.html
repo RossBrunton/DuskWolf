@@ -3,9 +3,9 @@
 	<head>
 		<title>DuskWolf</title>
 		<script src='tcheck.js'></script>
-		<script src='DuskWolf/Load.js'></script>
+		<script src='engine/Load.js'></script>
 		<script>
-			load.importList("DuskWolf/deps.json", function() {
+			load.importList("engine/deps.json", function() {
 				load.import("dusk");
 			});
 		</script>
@@ -14,7 +14,7 @@
 	<body style='margin:0px;padding:0px'>
 		<noscript>You need to enable JavaScript!</noscript>
 		<swo-duskwolf data-width='768' data-height='480' data-dev data-framerate='60' data-package='quest'
-		data-deps='Data/deps.json' data-url-override
+		data-deps='data/deps.json' data-url-override
 			style='/*background-color:#5C94FC*/'>
 			Sorry, for whatever reason DuskWolf isn't working! D:
 		</swo-duskwolf>

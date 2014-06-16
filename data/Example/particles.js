@@ -10,8 +10,8 @@ load.provide("example.particles", (function() {
 	load.require("dusk.sgui.ParticleField");
 	load.require("dusk.sgui.Pane");
 	var frameTicker = load.require("dusk.frameTicker");
-	load.require("dusk.sgui.effects.spread");
-	load.require("dusk.sgui.effects.spew");
+	load.require("dusk.sgui.particleEffects.spread");
+	load.require("dusk.sgui.particleEffects.spew");
 	
 	sgui.getPane("particles").parseProps({
 		//"yOffset":50,
