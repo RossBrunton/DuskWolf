@@ -3,7 +3,6 @@
 "use strict";
 
 load.provide("dusk.sgui.Group", (function() {
-	var IContainer = load.require("dusk.sgui.IContainer");
 	var Component = load.require("dusk.sgui.Component");
 	var utils = load.require("dusk.utils");
 	var c = load.require("dusk.sgui.c");
@@ -18,7 +17,6 @@ load.provide("dusk.sgui.Group", (function() {
 	 * The number of components that can be focused depends on the `{@link #focusBehaviour}` property,
 	 *  focused components will be the only ones that receive keypresses.
 	 * 
-	 * @extends dusk.sgui.IContainer
 	 * @extends dusk.sgui.Component
 	 * @param {?dusk.sgui.Component} parent The container that this component is in.
 	 * @param {string} componentName The name of the component.
@@ -167,14 +165,14 @@ load.provide("dusk.sgui.Group", (function() {
 		this._registerPropMask("mouse.focus", "mouse.focus", false, ["mouse"]);
 		
 		//Listeners
-		this.prepareDraw.listen(this._groupDraw.bind(this));
-		this.frame.listen(this._groupFrame.bind(this));
+		this.prepareDraw.listen(_groupDraw.bind(this));
+		this.frame.listen(_groupFrame.bind(this));
 		
 		if(this.mouse) {
-			this.mouse.move.listen(this._mouseSelect.bind(this));
+			this.mouse.move.listen(_mouseSelect.bind(this));
 		}else{
 			this.augment.listen((function(e) {
-				this.mouse.move.listen(this._mouseSelect.bind(this));
+				this.mouse.move.listen(_mouseSelect.bind(this));
 			}).bind(this), "mouse");
 		}
 		
@@ -187,14 +185,9 @@ load.provide("dusk.sgui.Group", (function() {
 				this.getFocused().onActiveChange.fire(e, e.active);
 			}
 		}).bind(this));
-		
-		//Check interfaces
-		if(!utils.doesImplement(this, IContainer)) {
-			console.warn(this.toString()+" does not implement dusk.sgui.IContainer!");
-		}
 	};
 	Group.prototype = Object.create(Component.prototype);
-
+	
 	/** A mode that indicates that only one component can be active.
 	 * 
 	 * This means that only the currently focused component will get the keypresses and such.
@@ -204,7 +197,7 @@ load.provide("dusk.sgui.Group", (function() {
 	 * @value 0
 	 */
 	Group.FOCUS_ONE = 0;
-
+	
 	/** A mode that indicates that all the components are active.
 	 * 
 	 * This means that all the components will recieve keypress events and stuff.
@@ -216,47 +209,48 @@ load.provide("dusk.sgui.Group", (function() {
 	 * @value 1
 	 */
 	Group.FOCUS_ALL = 1;
-
-	/** Container specific method of handling keypresses.
+	
+	/** Override of `{@link dusk.sgui.Component.doKeyPress}`. Calls the doKeyPress of all focused children, and if they
+	 *  all return true, then calls doKeyPress of Component with itself.
 	 * 
-	 * In this case, it will call `{@link dusk.sgui.Component.keypress}` of its focused component, and return that value.
-	 * 
-	 * @param {object} e The keypress event, must be a JQuery keypress event object.
-	 * @return {boolean} The return value of the focused component's keypress.
+	 * @param {object} e The keypress event.
+	 * @return {boolean} True if the event should bubble, else false.
 	 */
-	Group.prototype.containerKeypress = function(e) {
+	Group.prototype.doKeyPress = function(e) {
 		if(this.focusBehaviour == Group.FOCUS_ALL) {
 			var toReturn = true;
 			for(var c = this._componentsArr.length-1; c >= 0; c --) {
 				toReturn = this._componentsArr[c].doKeyPress(e) && toReturn;
 			}
-			return toReturn;
+			if(!toReturn) return false;
+		}else{
+			if(this.getFocused() && !this.getFocused().doKeyPress(e)) return false;
 		}
-		if(this.getFocused()) return this.getFocused().doKeyPress(e);
-		return true;
+		
+		return Component.prototype.doKeyPress.call(this, e);
 	};
-
-	/** Container specific method of handling buttonpresses.
+	
+	/** Override of `{@link dusk.sgui.Component.doButtonPress}`. Calls the doButtonPress of all focused children, and if
+	 * they all return true, then calls doButtonPress of Component with itself.
 	 * 
-	 * In this case, it will call `{@link dusk.sgui.Component#doButtonPress}` of its focused component, and return that
-	 *  value.
-	 * 
-	 * @param {object} e The button press event.
-	 * @return {boolean} The return value of the focused component's buttonpress.
+	 * @param {object} e The buttonpress event.
+	 * @return {boolean} True if the event should bubble.
 	 * @since 0.0.21-alpha
 	 */
-	Group.prototype.containerButtonpress = function(e) {
+	Group.prototype.doButtonPress = function(e) {
 		if(this.focusBehaviour == Group.FOCUS_ALL) {
 			var toReturn = true;
 			for(var c = this._componentsArr.length-1; c >= 0; c --) {
 				toReturn = this._componentsArr[c].doButtonPress(e) && toReturn;
 			}
-			return toReturn;
+			if(!toReturn) return false;
+		}else{
+			if(this.getFocused() && !this.getFocused().doButtonPress(e)) return false;
 		}
-		if(this.getFocused()) return this.getFocused().doButtonPress(e);
-		return true;
+		
+		return Component.prototype.doButtonPress.call(this, e);
 	};
-
+	
 	/** Fires the mouseMove event on all its children.
 	 * 
 	 * @return {boolean} The return value of the focused component's keypress.
@@ -268,7 +262,7 @@ load.provide("dusk.sgui.Group", (function() {
 				this._componentsArr[c].mouse.move.fire();
 		}
 	};
-
+	
 	/** Container specific method of handling clicks.
 	 * 
 	 * In this case, it will call `{@link dusk.sgui.Component#mouse#doClick}` of the highest component the mouse is on, and
@@ -324,7 +318,7 @@ load.provide("dusk.sgui.Group", (function() {
 		
 		return this._components[com.toLowerCase()];
 	};
-
+	
 	/** Modifies this component's children using JSON data.
 	 *	See `{@link dusk.sgui.Component.parseProps}` for a basic description on how JSON properties work.
 	 * 
@@ -382,7 +376,7 @@ load.provide("dusk.sgui.Group", (function() {
 			return hold;
 		}
 	});
-
+	
 	/** Similar to `{@link dusk.sgui.Group.modifyChildren}`
 	 *   only it modifies the properties of all the children instead of one.
 	 * 
@@ -402,13 +396,13 @@ load.provide("dusk.sgui.Group", (function() {
 		
 		get: function() {return {};}
 	});
-
+	
 	/** Draws all of the children in the order described by `{@link dusk.sgui.Group._drawOrder}`.
 	 * 
 	 * @param {object} e An event from `{@link dusk.sgui.Component#_prepareDraw}`
 	 * @private
 	 */
-	Group.prototype._groupDraw = function(e) {
+	var _groupDraw = function(e) {
 		//Assume all children can support all rendering options
 		for(var i = 0; i < this._drawOrder.length; i++) {
 			if(this._drawOrder[i] in this._components) {
@@ -468,17 +462,17 @@ load.provide("dusk.sgui.Group", (function() {
 			}
 		}
 	};
-
+	
 	/** Calls the `{@link dusk.sgui.Component.frame}` method of all components.
 	 * 
 	 * @private
 	 */
-	Group.prototype._groupFrame = function(e) {
+	var _groupFrame = function(e) {
 		for(var c = this._componentsArr.length-1; c >= 0; c --){
 			this._componentsArr[c].frame.fire(e);
 		}
 	};
-
+	
 	/** Returns a component in this group.
 	 * 
 	 * If `type` is not undefined, then the component will be created of that type if it exists.
@@ -494,7 +488,7 @@ load.provide("dusk.sgui.Group", (function() {
 		
 		return type?this._newComponent(com, type):null;
 	};
-
+	
 	/** Deletes a component in this group.
 	 * 
 	 * This will not remove any references to it elsewhere
@@ -513,7 +507,7 @@ load.provide("dusk.sgui.Group", (function() {
 			return true;
 		}
 	};
-
+	
 	/** Deletes all the components in this group.
 	 * 
 	 * @see dusk.sgui.Group#deleteComponent
@@ -524,7 +518,7 @@ load.provide("dusk.sgui.Group", (function() {
 			this.deleteComponent(this._componentsArr[c].comName);
 		}
 	};
-
+	
 	//focus
 	Group.prototype.__defineSetter__("focus", function s_focus(value) {
 		if(value) this.flow(value);
@@ -532,7 +526,7 @@ load.provide("dusk.sgui.Group", (function() {
 	Group.prototype.__defineGetter__("focus", function g_focus() {
 		return this.focusedCom;
 	});
-
+	
 	/** Returns the currently focused component.
 	 * 
 	 * @return {?dusk.sgui.Component} The currently focused component or null if nothing is focused.
@@ -541,7 +535,7 @@ load.provide("dusk.sgui.Group", (function() {
 		if(!(this.focusedCom in this._components)) return null;
 		return this._components[this.focusedCom];
 	};
-
+	
 	/** Sets the current focused component only if it exists,
 	 *   the current focus's `{@link dusk.sgui.Component.locked}` property is false
 	 *   and the new component's `{@link dusk.sgui.Component.enabled}` property is true.
@@ -576,7 +570,7 @@ load.provide("dusk.sgui.Group", (function() {
 		
 		this.focusedCom = "";
 	};
-
+	
 	//focusBehaviour
 	Object.defineProperty(Group.prototype, "focusBehaviour", {
 		set: function(value) {
@@ -608,7 +602,7 @@ load.provide("dusk.sgui.Group", (function() {
 			return this._focusBehaviour;
 		}
 	});
-
+	
 	//focusVisible
 	Object.defineProperty(Group.prototype, "focusVisible", {
 		set: function(value) {
@@ -630,10 +624,15 @@ load.provide("dusk.sgui.Group", (function() {
 			return this._focusVisible;
 		}
 	});
-
+	
 	/** Alters the layer components are on; higher layers are drawn later, appearing on top of others.
 	 * 
-	 * See {@link dusk.sgui.IContainer.alterLayer} for a description of the value for `alter`.
+	 * The alter must be an expression that says how to alter the layer, and be in one of the following forms.
+	 * 
+	 * - `"+"` Raises the component to the top, making it on top of all other components.
+	 * - `"-"` Lowers the component below all the others, meaning that it will appear below them.
+	 * - `"+com"` Raises it just above the component named "com" (which must exist).
+	 * - `"-com"` Lowers it just below the component named "com" (which must exist).
 	 * 
 	 * @param {string} com The name of the component to alter the layer of.
 	 * @param {string} alter The alteration to make.
@@ -678,7 +677,7 @@ load.provide("dusk.sgui.Group", (function() {
 			}
 		}
 	};
-
+	
 	//Please note that to set the width to -2, all the parent's must have either an explicit width, or a width of -2
 	// otherwise Chrome will explode.
 	//Width
@@ -701,7 +700,7 @@ load.provide("dusk.sgui.Group", (function() {
 			this._width = value;
 		}
 	});
-
+	
 	//Height
 	Object.defineProperty(Group.prototype, "height", {
 		get: function() {
@@ -722,7 +721,7 @@ load.provide("dusk.sgui.Group", (function() {
 			this._height = value;
 		}
 	});
-
+	
 	/** Returns the smallest width which has all the components fully drawn inside.
 	 * 
 	 * @param {boolean} includeOffset If true, then the offset is taken into account, and removed from the figure.
@@ -738,7 +737,7 @@ load.provide("dusk.sgui.Group", (function() {
 		
 		return max - (includeOffset?this.xOffset:0);
 	};
-
+	
 	/** Returns the smallest height which has all the components fully drawn inside.
 	 * 
 	 * @param {boolean} includeOffset If true, then the offset is taken into account, and removed from the figure.
@@ -754,14 +753,14 @@ load.provide("dusk.sgui.Group", (function() {
 		
 		return max - (includeOffset?this.yOffset:0);
 	};
-
+	
 	//horScroll
 	Object.defineProperty(Group.prototype, "horScroll", {
 		set: function(value) {
 			if(this._horScroll) this._horScroll.onChange.unlisten(this._horChangedId);
 			this._horScroll = value;
 			if(this._horScroll) {
-				this._horChangedId = this._horScroll.onChange.listen(this._horChanged.bind(this));
+				this._horChangedId = this._horScroll.onChange.listen(_horChanged.bind(this));
 				this._horChanged({});
 			}
 		},
@@ -770,14 +769,14 @@ load.provide("dusk.sgui.Group", (function() {
 			return this._horScroll;
 		}
 	});
-
+	
 	/** Used to manage the changing of horizontal scrolling.
 	 * @param {object} e The event object.
 	 * @return {object} The event object, unchanged.
 	 * @private
 	 * @since 0.0.19-alpha
 	 */
-	Group.prototype._horChanged = function(e) {
+	var _horChanged = function(e) {
 		if(this.getContentsWidth() < this.width) {
 			this.xOffset = 0;
 			return;
@@ -786,14 +785,14 @@ load.provide("dusk.sgui.Group", (function() {
 		
 		return e;
 	};
-
+	
 	//verScroll
 	Object.defineProperty(Group.prototype, "verScroll", {
 		set: function(value) {
 			if(this._verScroll) this._verScroll.onChange.unlisten(this._verChangedId);
 			this._verScroll = value;
 			if(this._verScroll) {
-				this._horChangedId = this._verScroll.onChange.listen(this._verChanged.bind(this));
+				this._verChangedId = this._verScroll.onChange.listen(_verChanged.bind(this));
 				this._verChanged({});
 			}
 		},
@@ -802,14 +801,14 @@ load.provide("dusk.sgui.Group", (function() {
 			return this._verScroll;
 		}
 	});
-
+	
 	/** Used to manage the changing of vertical scrolling.
 	 * @param {object} e The event object.
 	 * @return {object} The event object, unchanged.
 	 * @private
 	 * @since 0.0.19-alpha
 	 */
-	Group.prototype._verChanged = function(e) {
+	var _verChanged = function(e) {
 		if(this.getContentsHeight() < this.height) {
 			this.yOffset = 0;
 			return;
@@ -817,7 +816,7 @@ load.provide("dusk.sgui.Group", (function() {
 		this.yOffset = ~~(this._verScroll.getFraction() * (this.getContentsHeight() - this.height));
 		return e;
 	};
-
+	
 	/** Calls the function once for each component.
 	 * 
 	 * @param {function(dusk.sgui.Component):undefined} funct The function to call. Will be given the current component as
@@ -830,7 +829,7 @@ load.provide("dusk.sgui.Group", (function() {
 			func.call(scope, this._componentsArr[c]);
 		}
 	};
-
+	
 	/** Updates mouse location of all children.
 	 * 
 	 * @since 0.0.20-alpha
@@ -858,12 +857,12 @@ load.provide("dusk.sgui.Group", (function() {
 			if("containerUpdateMouse" in com) com.containerUpdateMouse(destX, destY);
 		}
 	};
-
+	
 	/** Handles mouse selection of components, if enabled.
 	 * 
 	 * @since 0.0.21-alpha
 	 */
-	Group.prototype._mouseSelect = function() {
+	var _mouseSelect = function() {
 		if(this.mouse.focus) {
 			for(var i = this._drawOrder.length-1; i >= 0; i --) {
 				if(this._drawOrder[i] in this._components
@@ -878,7 +877,7 @@ load.provide("dusk.sgui.Group", (function() {
 			}
 		}
 	}
-
+	
 	/** Returns the actual X location, relative to the screen, that the component is at.
 	 * @param {string} name The component to find X for.
 	 * @return {integer} The X value, relative to the screen.
@@ -893,7 +892,7 @@ load.provide("dusk.sgui.Group", (function() {
 		
 		return this.container.getTrueX(this.comName) + com.x - this.xOffset + destXAdder;
 	};
-
+	
 	/** Returns the actual Y location, relative to the screen, that the component is at.
 	 * @param {string} name The component to find X for.
 	 * @return {integer} The Y value, relative to the screen.
@@ -908,10 +907,10 @@ load.provide("dusk.sgui.Group", (function() {
 		
 		return this.container.getTrueY(this.comName) + com.y - this.yOffset + destYAdder;
 	};
-
+	
 	Object.seal(Group);
 	Object.seal(Group.prototype);
-
+	
 	sgui.registerType("Group", Group);
 	
 	return Group;

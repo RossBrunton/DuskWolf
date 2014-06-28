@@ -11,7 +11,7 @@ load.provide("dusk.sgui.Component", (function() {
 	var Mapper = load.require("dusk.Mapper");
 	var MouseAugment = load.require("dusk.sgui.MouseAugment");
 	var Pool = load.require("dusk.Pool");
-	var IContainer = load.require(">dusk.sgui.IContainer", function(p) {IContainer = p});
+	var Group = load.suggest("dusk.sgui.Group", function(p) {Group = p});
 	var c = load.require("dusk.sgui.c");
 	var Pane = load.suggest("dusk.sgui.Pane", function(p) {Pane = p});
 	
@@ -25,7 +25,7 @@ load.provide("dusk.sgui.Component", (function() {
 	 * 
 	 * More information about how this class works is in the documentation for `{@link dusk.sgui}`.
 	 * 
-	 * @param {?dusk.sgui.IContainer} parent The container that this component is in.
+	 * @param {?dusk.sgui.Group} parent The container that this component is in.
 	 * @param {string} componentName The name of the component.
 	 * @see {@link dusk.sgui}
 	 * @constructor
@@ -369,18 +369,14 @@ load.provide("dusk.sgui.Component", (function() {
 		this._registerPropMask("alsoFocus", "alsoFocus");
 		this._registerPropMask("actionFocus", "actionFocus");
 	};
-
+	
 	/** This causes the component to handle a keypress, it should be called by either its parent container or SimpleGui.
-	 * 
-	 * If the component running this is a container 
-	 *  then its `{@link dusk.sgui.IContainer#containerKeypress}` function will be called.
-	 *	If that function returns true, then this shall return true without doing anything else.
 	 * 
 	 * This function will first check the key to see if it is a direction or the action key,
 	 *  if it is ether the action handlers or the "directionAction"s are called. 
 	 *  Otherwise it looks for a keyhandler.
 	 *  If all of the action handlers or keyhandlers returns true, then this function will return true.
-	 *
+	 * 
 	 * This function returns true if either at least one keyHandler (including action and direction) returns true, 
 	 *  or the control flows into another component.
 	 *	If this returns false, then the event must not be ran by its container.
@@ -389,8 +385,6 @@ load.provide("dusk.sgui.Component", (function() {
 	 * @return {boolean} Whether the parent container should run its own actions.
 	 */
 	Component.prototype.doKeyPress = function(e) {
-		if(utils.doesImplement(this, IContainer) && !this.containerKeypress(e)){return false;}
-		
 		var eventObject = {"key":e.keyCode, "shift":e.shiftKey, "ctrl":e.ctrlKey, "meta":e.metaKey, "jquery":e};
 		
 		this._noFlow = false;
@@ -419,8 +413,8 @@ load.provide("dusk.sgui.Component", (function() {
 		
 		return dirReturn;
 	};
-
-
+	
+	
 	/** This causes the component to handle a buttonpress, it should be called by either its parent container or SimpleGui.
 	 * 
 	 * Button equivilent to `{@link dusk.sgui.Component.doKeyPress}`.
@@ -430,8 +424,6 @@ load.provide("dusk.sgui.Component", (function() {
 	 * @since 0.0.21-alpha
 	 */
 	Component.prototype.doButtonPress = function(e) {
-		if(utils.doesImplement(this, IContainer) && !this.containerButtonpress(e)){return false;}
-		
 		var eventObject = {"button":e.which};
 		
 		this._noFlow = false;
@@ -460,7 +452,7 @@ load.provide("dusk.sgui.Component", (function() {
 		
 		return dirReturn;
 	};
-
+	
 	/** If there is no mouse augment on this component, adds one, otherwise does nothing.
 	 * 
 	 *  This will call the same function on it's container, if it has one, as well.
@@ -483,7 +475,7 @@ load.provide("dusk.sgui.Component", (function() {
 		
 		get: function() {return this.mouse != null;}
 	});
-
+	
 	/** This maps a property from the JSON representation of the object (One from {@link #parseProps})
 	 *  to the JavaScript representation of the object.
 	 * 	If the property `name` exists in the JSON properties, then `mask` will be assigned its value.
@@ -498,7 +490,7 @@ load.provide("dusk.sgui.Component", (function() {
 	Component.prototype._registerPropMask = function(name, mask, redraw, depends) {
 		this._props.map(name, mask, depends);
 	};
-
+	
 	/** Adds new dependancies to an existing property mask.
 	 * 
 	 * @param {string} name The property to add dependencies of.
@@ -509,7 +501,7 @@ load.provide("dusk.sgui.Component", (function() {
 	Component.prototype._addNewPropDepends = function(name, depends) {
 		this._props.addDepends(name, depends);
 	};
-
+	
 	/** Given an object, this function sets the properties of this object in relation to the properties of the object.
 	 * 
 	 * This is used to describe the component using JSON, for quicker efficiency.
@@ -526,7 +518,7 @@ load.provide("dusk.sgui.Component", (function() {
 	Component.prototype.parseProps = function(props) {
 		this._props.massSet(props);
 	};
-
+	
 	/** Returns or sets a single property of the component.
 	 *	See `{@link dusk.sgui.Component#parseProps}` for details on how properties work.
 	 * 
@@ -542,7 +534,7 @@ load.provide("dusk.sgui.Component", (function() {
 		
 		return this._props.set(name, value);
 	};
-
+	
 	/** "Bundles up" the component into a simple object.
 	 * 
 	 * This loops through all the registered propHandlers and sets them on an object.
@@ -553,9 +545,8 @@ load.provide("dusk.sgui.Component", (function() {
 	Component.prototype.bundle = function() {
 		return this._props.massGet();
 	};
-
-
-
+	
+	
 	//deleted
 	Object.defineProperty(Component.prototype, "deleted", {
 		set: function (value) {
@@ -569,9 +560,8 @@ load.provide("dusk.sgui.Component", (function() {
 			return this._deleted;
 		}
 	});
-
-
-
+	
+	
 	/** Requests the component to draw itself onto the specified 2D canvas context.
 	 * 
 	 * You should use `{@link dusk.sgui.Component#_prepareDraw}` instead of overriding this.
@@ -609,9 +599,9 @@ load.provide("dusk.sgui.Component", (function() {
 		
 		if(oldAlpha >= 0) c.globalAlpha = oldAlpha;
 	};
-
+	
 	/** Alters the layer this is on.
-	 *	This calls `{@link dusk.sgui.IContainer#alterChildLayer}` of its container.
+	 *	This calls `{@link dusk.sgui.Group#alterChildLayer}` of its container.
 	 * 
 	 * This can be set in the JSON representation using the property `"layer"`
 	 * 
@@ -628,8 +618,8 @@ load.provide("dusk.sgui.Component", (function() {
 		
 		get: function() {return "";}
 	});
-
-
+	
+	
 	/** Resolves a path relative to the current component, or null, if it doesn't exist.
 	 * 
 	 * See `{@link dusk.sgui}` for a description on how paths work.
@@ -664,7 +654,7 @@ load.provide("dusk.sgui.Component", (function() {
 				return this.container.path(path);
 			
 			default:
-				if(utils.doesImplement(this, IContainer)){
+				if(Group && this instanceof Group){
 					if(!path.length) return this.getComponent(p);
 					if(this.getComponent(p)) {
 						return this.getComponent(p).path(path);
@@ -677,7 +667,7 @@ load.provide("dusk.sgui.Component", (function() {
 				return null;
 		}
 	};
-
+	
 	/** Returns the full path of this component.
 	 * 
 	 * This should be able to be given to `{@link dusk.sgui.path}` and will point to this component.
@@ -685,14 +675,12 @@ load.provide("dusk.sgui.Component", (function() {
 	 * @since 0.0.17-alpha
 	 */
 	Component.prototype.fullPath = function() {
-		if(Pane && this instanceof Pane) return this.comName+":/";
+		if(Pane && this instanceof Pane) return this.comName+":";
 		
-		if(utils.doesImplement(this, IContainer)) return this.container.fullPath() + this.comName+"/";
-		
-		return this.container.fullPath() + this.comName;
+		return this.container.fullPath() + "/" + this.comName;
 	};
-
-
+	
+	
 	/** Adds the specified extra to this component.
 	 * @param {string} type The class name of the extra to add.
 	 * @param {string} name The name to give the extra.
@@ -703,7 +691,7 @@ load.provide("dusk.sgui.Component", (function() {
 		this._extras[name] = new (sgui.getExtra(type))(this, name);
 		this._extras[name].parseProps(data);
 	};
-
+	
 	/** Removes a previously added extra from this component, if it exists.
 	 * @param {string} name The name of the extra to remove.
 	 * @return {boolean} Whether the extra exists and was removed.
@@ -718,7 +706,7 @@ load.provide("dusk.sgui.Component", (function() {
 		
 		return false;
 	};
-
+	
 	/** Modifies an extra, if it exists.
 	 * 	If it does not exist, it will be attempted to be created with the type specified by the "type" property
 	 *  or it will fail and do nothing with a warning.
@@ -735,7 +723,7 @@ load.provide("dusk.sgui.Component", (function() {
 			console.warn("Tried to modify "+name+", but it does not exist and has no type.");
 		}
 	};
-
+	
 	/** Returns the extra with the specified name, or null.
 	 * @param {string} name The name of the extra to get.
 	 * @return {?dusk.sgui.extras.Extra} The extra.
@@ -745,7 +733,7 @@ load.provide("dusk.sgui.Component", (function() {
 		if(name in this._extras) return this._extras[name];
 		return null;
 	};
-
+	
 	/** Returns the extra with the specified type or null.
 	 * @param {string} type The name of the type of extra to get.
 	 * @return {?dusk.sgui.extras.Extra} The first extra found of that type, or null.
@@ -758,7 +746,7 @@ load.provide("dusk.sgui.Component", (function() {
 		
 		return null;
 	};
-
+	
 	/** Returns the extra with the specified type, if it doesn't exist, it checks if the parent has it, and so on.
 	 * @param {string} type The name of the type of extra to get.
 	 * @return {?dusk.sgui.extras.Extra} The first extra found of that type, or null.
@@ -769,7 +757,7 @@ load.provide("dusk.sgui.Component", (function() {
 		if(this.container) return this.container.getExtraByTypeFromParents(type);
 		return null;
 	};
-
+	
 	/** Modifies multiple extras. The argument is an object. Keys are the name of the extra to edit/create,
 	 * 	and the value is either an object describing properties of the extra, or false to explictly delete the extra.
 	 * 
@@ -792,7 +780,7 @@ load.provide("dusk.sgui.Component", (function() {
 		
 		get: function() {return {};}
 	});
-
+	
 	/** Makes this component the active one, by making all its parents make it active.
 	 * @param {?dusk.sgui.Component} child A child that wants to be made active.
 	 * @since 0.0.21-alpha
@@ -802,7 +790,7 @@ load.provide("dusk.sgui.Component", (function() {
 		
 		this.container.becomeActive(this);
 	};
-
+	
 	/** Returns a string representation of the component. 
 	 * 
 	 * @return {string} A string representation of this component.
@@ -810,8 +798,8 @@ load.provide("dusk.sgui.Component", (function() {
 	Component.prototype.toString = function() {
 		return "[sgui "+sgui.getTypeName(this)+" "+this.comName+"]";
 	};
-
-
+	
+	
 	//type
 	Object.defineProperty(Component.prototype, "type", {
 		set: function(value) {
@@ -831,14 +819,14 @@ load.provide("dusk.sgui.Component", (function() {
 			return sgui.getTypeName(this);
 		}
 	});
-
+	
 	/** Pool of event objects for `{@link dusk.sgui.Component#prepareDraw}`.
 	 * @type dusk.Pool<Object>
 	 * @private
 	 * @since 0.0.21-alpha
 	 */
 	var _prepareDrawPool = new Pool(Object);
-
+	
 	Object.seal(Component);
 	Object.seal(Component.prototype);
 	
@@ -864,17 +852,17 @@ load.provide("dusk.sgui.NullCom", (function() {
 		this.visible = false;
 	};
 	NullCom.prototype = Object.create(Component.prototype);
-
+	
 	/** A NullComponent bundles up as an empty object.
 	 * 
 	 * @return {object} An empty object.
 	 * @since 0.0.19-alpha
 	 */
 	NullCom.prototype.bundle = function() {return {};}
-
+	
 	Object.seal(NullCom);
 	Object.seal(NullCom.prototype);
-
+	
 	sgui.registerType("NullCom", NullCom);
 	
 	return NullCom;

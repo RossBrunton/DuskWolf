@@ -19,9 +19,9 @@ load.provide("dusk.sgui", (function() {
 	 * 
 	 * @description This module contains a SimpleGui system, allowing for canvas UIs.
 	 * 
-	 * Generally, everything in the Simple GUI system is a subclass of `{@link sgui.Component}.
-	 * 	All components are in a parent component that implements `{@link sgui.IContainer}`,
-	 *   until you get to the top, which are containers of type `{@link sgui.Pane}`.
+	 * Generally, everything in the Simple GUI system is a subclass of `{@link dusk.sgui.Component}.
+	 * 	All components are in a parent component that subclasses `{@link dusk.sgui.Group}`,
+	 *   until you get to the top, which are containers of type `{@link dusk.sgui.Pane}`.
 	 * 	Components are things that are displayed, such as images or text,
 	 *   each has a draw function that lets them draw directly to a canvas, rotated and offseted already for them.
 	 * 

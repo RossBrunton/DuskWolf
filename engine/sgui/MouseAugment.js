@@ -5,7 +5,7 @@
 load.provide("dusk.sgui.MouseAugment", (function() {
 	var utils = load.require("dusk.utils");
 	var EventDispatcher = load.require("dusk.EventDispatcher");
-	var IContainer = load.require("dusk.sgui.IContainer");
+	var Group = load.suggest("dusk.sgui.Group", function(p) {Group = p});
 	
 	/** @class dusk.sgui.MouseAugment
 	 * 
@@ -84,7 +84,7 @@ load.provide("dusk.sgui.MouseAugment", (function() {
 		 * @type dusk.EventDispatcher
 		 */
 		this.onClick = new EventDispatcher("dusk.sgui.MouseAugment.onClick", EventDispatcher.MODE_AND);
-
+		
 		
 		/** Fired when the mouse is moved.
 		 * 
@@ -92,23 +92,25 @@ load.provide("dusk.sgui.MouseAugment", (function() {
 		 * @since 0.0.21-alpha
 		 */
 		this.move = new EventDispatcher("dusk.sgui.MouseAugment.move");
-		this.move.listen((function() {
-			if(utils.doesImplement(this._component, IContainer)) this._component.containerMouseMove();
-		}).bind(this));
+		if(Group && this._component instanceof Group) {
+			this.move.listen((function() {
+				this._component.containerMouseMove();
+			}).bind(this));
+		}
 	};
-
+	
 	/** Handles a mouse click. This will fire `{@link dusk.sgui.MouseAugment.onClick}`, and possibly fire the 
 	 *  `{@link dusk.sgui.MouseAugment.action}` handler.
 	 * 
-	 * If the component running this is a container 
-	 *  then its `{@link dusk.sgui.IContainer#containerClick}` function will be called.
+	 * If the component running this is a group 
+	 *  then its `{@link dusk.sgui.Group#containerClick}` function will be called.
 	 *	If that function returns true, then this shall return true without doing anything else.
 	 * 
 	 * @param {object} e The click event.
 	 * @return {boolean} Whether the parent container should run its own actions.
 	 */
 	MouseAugment.prototype.doClick = function(e) {
-		if(utils.doesImplement(this._component, IContainer) && !this._component.containerClick(e))
+		if(this._component instanceof Group && !this._component.containerClick(e))
 			return false;
 		
 		if(this.onClick.fire(e)) {
@@ -119,10 +121,9 @@ load.provide("dusk.sgui.MouseAugment", (function() {
 		
 		return true;
 	};
-
+	
 	/** Updates the locatons of the mouse for this component.
 	 * 
-	 * If this is a container, `{@link dusk.sgui.IContainer.containerUpdateMouse}` is called.
 	 * @param {integer} x New x coordinate.
 	 * @param {integer} y New y coordinate.
 	 * @since 0.0.20-alpha
@@ -131,7 +132,7 @@ load.provide("dusk.sgui.MouseAugment", (function() {
 		this.x = x;
 		this.y = y;
 	};
-
+	
 	/** Returns a string representation of the component. 
 	 * 
 	 * @return {string} A string representation of this component.
@@ -139,7 +140,7 @@ load.provide("dusk.sgui.MouseAugment", (function() {
 	MouseAugment.prototype.toString = function() {
 		return "[MouseAugment for "+this._component+"]";
 	};
-
+	
 	Object.seal(MouseAugment);
 	Object.seal(MouseAugment.prototype);
 	
