@@ -43,11 +43,16 @@ load.provide("dusk.keyboard", (function() {
 	
 	dusk.getElement().addEventListener("keydown", function(e){
 		if(!_keys[e.keyCode]) {
-			if(!keyboard.keyPress.fire(e, e.keyCode)) e.preventDefault();
+			if(!keyboard.keyPress.fire(e, e.keyCode)) false;//e.preventDefault(); //Seems to stop text input
 		}
 		
 		//Block keys from moving page
-		if([37, 38, 39, 40, 9, 13, 32].indexOf(e.keyCode) !== -1) e.preventDefault();
+		if(dusk.getElementTextarea() == document.activeElement) {
+			//If the textarea is active
+		}else{
+			//If the canvas is active
+			if([37, 38, 39, 40, 9, 13, 32].indexOf(e.keyCode) !== -1) e.preventDefault();
+		}
 		
 		//if([9, 13].indexOf(e.keyCode) !== -1) return false; //Why is this here?
 	});

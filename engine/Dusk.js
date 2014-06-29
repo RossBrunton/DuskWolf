@@ -142,5 +142,20 @@ load.provide("dusk", (function() {
 		return document.getElementsByTagName("swo-duskwolf")[0];
 	};
 	
+	/** Returns the DuskWolf element's canvas.
+	 * @return HTMLCanvasElement
+	 * @since 0.0.21-alpha
+	 */
+	dusk.getElementCanvas = function() {
+		return document.getElementsByTagName("swo-duskwolf")[0].getElementsByTagName("canvas")[0];
+	};
+	
+	/** Returns the DuskWolf element's textarea.
+	 * @return HTLMTextareaElement
+	 * @since 0.0.21-alpha
+	 */
+	dusk.getElementTextarea = function() {
+		return document.getElementsByTagName("swo-duskwolf")[0].getElementsByTagName("textarea")[0];
+	};
 	return dusk;
 })());

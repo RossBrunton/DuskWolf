@@ -71,14 +71,22 @@ load.provide("dusk.Range", (function() {
 		}
 	});
 
-	/** Increases the value by `{@link dusk.Range#stepUp}`. */
+	/** Increases the value by `{@link dusk.Range#stepUp}`.
+	 * @return {boolean} Whether the value changed.
+	 */
 	Range.prototype.up = function() {
+		var old = this.value;
 		this.value += this.stepUp;
+		return old != this.value;
 	};
 
-	/** Decreases the value by `{@link dusk.Range#stepDown}`. */
+	/** Decreases the value by `{@link dusk.Range#stepDown}`. 
+	 * @return {boolean} Whether the value changed.
+	 */
 	Range.prototype.down = function() {
+		var old = this.value;
 		this.value -= this.stepDown;
+		return old != this.value;
 	};
 
 	/** Sets the amount that `{@link dusk.Range#up}` will change to a fraction of the possible range.

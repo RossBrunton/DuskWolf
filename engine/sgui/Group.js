@@ -761,7 +761,7 @@ load.provide("dusk.sgui.Group", (function() {
 			this._horScroll = value;
 			if(this._horScroll) {
 				this._horChangedId = this._horScroll.onChange.listen(_horChanged.bind(this));
-				this._horChanged({});
+				_horChanged.call(this, {});
 			}
 		},
 		
@@ -793,7 +793,7 @@ load.provide("dusk.sgui.Group", (function() {
 			this._verScroll = value;
 			if(this._verScroll) {
 				this._verChangedId = this._verScroll.onChange.listen(_verChanged.bind(this));
-				this._verChanged({});
+				_verChanged.call(this, {});
 			}
 		},
 		
