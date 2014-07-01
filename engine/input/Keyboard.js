@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.keyboard", (function() {
+load.provide("dusk.input.keyboard", (function() {
 	var EventDispatcher = load.require("dusk.EventDispatcher");
 	var dusk = load.require("dusk");
 	var sgui = load.suggest("dusk.sgui", function(p) {sgui = p});
@@ -30,7 +30,7 @@ load.provide("dusk.keyboard", (function() {
 	 * @type dusk.EventDispatcher
 	 * @since 0.0.14-alpha
 	 */
-	keyboard.keyPress = new EventDispatcher("dusk.keyboard.keyPress", EventDispatcher.MODE_AND);
+	keyboard.keyPress = new EventDispatcher("dusk.input.keyboard.keyPress", EventDispatcher.MODE_AND);
 	
 	/** An event dispatcher which fires when a key is released after being pressed.
 	 * 
@@ -39,7 +39,7 @@ load.provide("dusk.keyboard", (function() {
 	 * @type dusk.EventDispatcher
 	 * @since 0.0.14-alpha
 	 */
-	keyboard.keyUp = new EventDispatcher("dusk.keyboard.keyUp");
+	keyboard.keyUp = new EventDispatcher("dusk.input.keyboard.keyUp");
 	
 	dusk.getElement().addEventListener("keydown", function(e){
 		if(!_keys[e.keyCode]) {
@@ -210,6 +210,21 @@ load.provide("dusk.keyboard", (function() {
 		if(!(code in _codes)) return ["UNKNOWN", false, ""+code];
 		
 		return _codes[code];
+	};
+	
+	/** Given a name of the key, this returns the keycode.
+	 * 
+	 * If none can be found, returns -1.
+	 * 
+	 * @param {integer} code A keycode to look up.
+	 * @return {array} Information on that key.
+	 */
+	keyboard.findCode = function(name) {
+		for(var k in _codes) {
+			if(_codes[k][0] == name || _codes[k][2] == name) return +k;
+		}
+		
+		return -1;
 	};
 	
 	Object.seal(keyboard);

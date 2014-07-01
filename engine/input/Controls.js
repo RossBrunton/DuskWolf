@@ -2,15 +2,16 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.controls", (function() {
-	var keyboard = load.require("dusk.keyboard");
-	var gamepad = load.require("dusk.gamepad");
+load.provide("dusk.input.controls", (function() {
+	var keyboard = load.require("dusk.input.keyboard");
+	var gamepad = load.require("dusk.input.gamepad");
 	var EventDispatcher = load.require("dusk.EventDispatcher");
 	var frameTicker = load.require("dusk.frameTicker");
 	var options = load.require("dusk.options");
+	var interaction = load.require("dusk.input.interaction");
 	
-	/** @namespace dusk.controls
-	 * @name dusk.controls
+	/** @namespace dusk.input.controls
+	 * @name dusk.input.controls
 	 * 
 	 * @description Provides a simple way to describe changeable control schemes.
 	 * 
@@ -22,7 +23,7 @@ load.provide("dusk.controls", (function() {
 	 * @since 0.0.15-alpha
 	 */
 	var controls = {};
-
+	
 	/** The mappings of controls to their respective key or button.
 	 * 
 	 * The key of this object is the name of the control, and the value is a two element array.
@@ -32,20 +33,20 @@ load.provide("dusk.controls", (function() {
 	 */
 	var _mappings = {};
 	
-	/** A constant used when firing the `{@link dusk.controls.controlPressed}` event, indicating that a key was pressed.
+	/** A constant used when firing the `{@link dusk.input.controls.controlPressed}` event, indicating that a key was pressed.
 	 * @type integer
 	 * @constant
 	 * @value 0
 	 */
 	controls.TYPE_KEY = 0;
-	/** A constant used when firing the `{@link dusk.controls.controlPressed}` event,
+	/** A constant used when firing the `{@link dusk.input.controls.controlPressed}` event,
 	 *   indicating that a controller button was pressed.
 	 * @type integer
 	 * @constant
 	 * @value 1
 	 */
 	controls.TYPE_BUTTON = 1;
-	/** A constant used when firing the `{@link dusk.controls.controlPressed}` event, indicating that an axis was
+	/** A constant used when firing the `{@link dusk.input.controls.controlPressed}` event, indicating that an axis was
 	 *  triggered.
 	 * @type integer
 	 * @constant
@@ -53,7 +54,7 @@ load.provide("dusk.controls", (function() {
 	 */
 	controls.TYPE_AXIS = 2;
 	
-	/** Fired when a key or button control has been activated, axes are not supported.
+	/** Fired when a key or button control has been activated.
 	 * 
 	 * The event object contains three properties.
 	 *  `type`; one of the `TYPE_*` constants indicating what was pressed;
@@ -62,25 +63,33 @@ load.provide("dusk.controls", (function() {
 	 *   This is either a keyPress or buttonPress event.
 	 * @type EventDispatcher
 	 */
-	controls.controlPressed = new EventDispatcher("controls.controlPressed");
-
+	controls.controlPressed = new EventDispatcher("dusk.input.controls.controlPressed");
+	
 	/** Adds a new control, with the specified default key/button presses.
 	 * 
 	 * If the control is already registered, this does nothing.
 	 * @param {string} name The name of the controll to add.
-	 * @param {?integer} defaultKey The default key to fire this control on, as a keycode.
-	 * @param {?integer|string} defaultButton The default button to fire this control on,
-	 *  either a button ID, or a axis description.
+	 * @param {?integer|string} defaultKey The default key to fire this control on, as a keycode or name.
+	 * @param {?integer|string} defaultButton The default button to fire this control on, either a button ID, or a
+	 *  axis description.
+	 * @return {string} The name of the control that was just added.
 	 */
 	controls.addControl = function(name, defaultKey, defaultButton) {
-		if(name in _mappings) return;
+		if(name in _mappings) return name;
+		
+		if(typeof defaultKey == "string") {
+			defaultKey = keyboard.findCode(defaultKey);
+			if(defaultKey == -1) console.error("Invalid key name for "+defaultKey);
+		}
 		
 		_mappings[name] = [
 			defaultKey===undefined?null:defaultKey,
 			defaultButton===undefined?null:defaultButton
 		];
+		
+		return name;
 	};
-
+	
 	/** Returns the buttons control mappings assigned to that control.
 	 * 
 	 * Returns an array of the form `[key, button]`.
@@ -92,16 +101,22 @@ load.provide("dusk.controls", (function() {
 		if(!(name in _mappings)) return null;
 		return _mappings[name];
 	};
-
+	
 	/** Registers a key to a control; when that key is pressed, the control will fire.
 	 * @param {string} name The name of the control to add the key to.
-	 * @param {integer} key The key to set the control to, as a keycode.
+	 * @param {integer|string} key The key to set the control to, as a keycode or name.
 	 */
 	controls.mapKey = function(name, key) {
 		if(!(name in _mappings)) return;
+		
+		if(typeof key == "string") {
+			key = keyboard.findCode(key);
+			if(key == -1) console.error("Invalid key name for "+name);
+		}
+		
 		_mappings[name][0] = key;
 	};
-
+	
 	/** Registers a button or axis to a control; 
 	 *   when that button is pressed, or the axis is greater than the threshold, the control will fire.
 	 * @param {string} name The name of the control to add the button/axis to.
@@ -111,7 +126,7 @@ load.provide("dusk.controls", (function() {
 		if(!(name in _mappings)) return;
 		_mappings[name][1] = button;
 	};
-
+	
 	/** Checks if a button or a key matches the specified control.
 	 * 
 	 * If either of the specified values match the control, then this will be true.
@@ -123,7 +138,7 @@ load.provide("dusk.controls", (function() {
 	controls.check = function(name, key, button) {
 		return controls.checkKey(name, key) || controls.checkButton(name, button);
 	};
-
+	
 	/** Checks if a key matches the specified control.
 	 * @param {string} name The control to check.
 	 * @param {integer} key The keycode to check.
@@ -134,7 +149,7 @@ load.provide("dusk.controls", (function() {
 		
 		return _mappings[name][0] == key;
 	};
-
+	
 	/** Checks if a button or axis description matches the specified control.
 	 * @param {string} name The control to check.
 	 * @param {integer|string} button The axis or button to check.
@@ -145,7 +160,7 @@ load.provide("dusk.controls", (function() {
 		
 		return _mappings[name][1] == button;
 	};
-
+	
 	/** Given the name of a control, returns whether the control is currently active.
 	 * @param {string} name The name of the control to check.
 	 * @return {boolean} Whether the control is active.
@@ -177,7 +192,7 @@ load.provide("dusk.controls", (function() {
 	};
 	keyboard.keyPress.listen(_keyPressed);
 	
-	/** Used internally to handle the `{@link dusk.controls.buttonPress}` event.
+	/** Used internally to handle the `{@link dusk.input.controls.buttonPress}` event.
 	 * 	This will check to see if a button, and only a button, control is fired.
 	 * @param {object} e The buttonPress event object.
 	 * @private
@@ -195,6 +210,27 @@ load.provide("dusk.controls", (function() {
 		}
 	};
 	gamepad.buttonPress.listen(_buttonPressed);
+	
+	/** Given an event from `{@link dusk.input.interaction.on}` it will check if it matches a control, and return an
+	 *  array of all controls that match.
+	 * 
+	 * @param {object} e The event object.
+	 * @return {array} All controls that match this event.
+	 * @since 0.0.21-alpha
+	 */
+	controls.interactionControl = function(inter) {
+		var out = [];
+		for(var m in _mappings) {
+			if(inter.type == interaction.KEY_DOWN) {
+				if(inter.which == _mappings[m][0]) out.push(m);
+			}
+			
+			if(inter.type == interaction.BUTTON_DOWN) {
+				if(inter.which == _mappings[m][1]) out.push(m);
+			}
+		}
+		return out;
+	};
 	
 	/** Saves the bindings to a save source.
 	 * 
@@ -226,7 +262,7 @@ load.provide("dusk.controls", (function() {
 		}
 	};
 	
-	/** Restores data that was saved via `{@link dusk.controls.save}`.
+	/** Restores data that was saved via `{@link dusk.input.controls.save}`.
 	 * 
 	 * @param {object} data The data that was saved.
 	 * @param {string} type The type of data that was saved.

@@ -10,6 +10,7 @@ load.provide("dusk.sgui.Entity", (function() {
 	var entities = load.require("dusk.entities");
 	var c = load.require("dusk.sgui.c");
 	var sgui = load.require("dusk.sgui");
+	var interaction = load.require("dusk.input.interaction");
 	
 	/**  Creates a new Entity.
 	 * 
@@ -444,9 +445,10 @@ load.provide("dusk.sgui.Entity", (function() {
 		if(!this.isLight()) if(this.collisionMark) this.prepareDraw.listen(this._collisionDraw.bind(this));
 		if(!this.isLight()) {
 			this.augment.listen((function(e) {
-				this.mouse.move.listen((function() {
+				this.onInteract.listen((function() {
 					this.behaviourFire("mouseMove", {"x":this.mouse.x, "y":this.mouse.y});
-				}).bind(this));
+					return true;
+				}).bind(this), interaction.MOUSE_MOVE);
 			}).bind(this), "mouse");
 		}
 	};

@@ -5,7 +5,7 @@
 load.provide("dusk.sgui.Scroller", (function() {
 	var FocusCheckerTile = load.require("dusk.sgui.FocusCheckerTile");
 	var sgui = load.require("dusk.sgui");
-	var controls = load.require("dusk.controls");
+	var controls = load.require("dusk.input.controls");
 	var c = load.require("dusk.sgui.c");
 	var Range = load.require("dusk.Range");
 

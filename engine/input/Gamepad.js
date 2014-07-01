@@ -2,13 +2,13 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.gamepad", (function() {
+load.provide("dusk.input.gamepad", (function() {
 	var EventDispatcher = load.require("dusk.EventDispatcher");
 	var frameTicker = load.require("dusk.frameTicker");
 	var options = load.require("dusk.options");
 	
-	/** @namespace dusk.gamepad
-	 * @name dusk.gamepad
+	/** @namespace dusk.input.gamepad
+	 * @name dusk.input.gamepad
 	 * 
 	 * @description Provides an interface for game controllers.
 	 * 
@@ -131,8 +131,10 @@ load.provide("dusk.gamepad", (function() {
 						gamepad.buttonPress.fire({"which":button, "axis":true}, button);
 					}
 				}else{
-					_axesTilted[i] = false;
-					gamepad.buttonUp.fire({"which":button, "axis":true}, button);
+					if(_axesTilted[i]) {
+						_axesTilted[i] = false;
+						gamepad.buttonUp.fire({"which":button, "axis":true}, button);
+					}
 				}
 			}
 		}

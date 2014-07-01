@@ -7,6 +7,7 @@ load.provide("dusk.sgui.Group", (function() {
 	var utils = load.require("dusk.utils");
 	var c = load.require("dusk.sgui.c");
 	var sgui = load.require(">dusk.sgui", function(p) {sgui = p});
+	var interaction = load.require("dusk.input.interaction");
 	
 	/** @class dusk.sgui.Group
 	 * 
@@ -167,14 +168,7 @@ load.provide("dusk.sgui.Group", (function() {
 		//Listeners
 		this.prepareDraw.listen(_groupDraw.bind(this));
 		this.frame.listen(_groupFrame.bind(this));
-		
-		if(this.mouse) {
-			this.mouse.move.listen(_mouseSelect.bind(this));
-		}else{
-			this.augment.listen((function(e) {
-				this.mouse.move.listen(_mouseSelect.bind(this));
-			}).bind(this), "mouse");
-		}
+		this.onInteract.listen(_mouseSelect.bind(this), interaction.MOUSE_MOVE);
 		
 		this.onActiveChange.listen((function(e){
 			if(this.focusBehaviour == Group.FOCUS_ALL) {
@@ -210,72 +204,64 @@ load.provide("dusk.sgui.Group", (function() {
 	 */
 	Group.FOCUS_ALL = 1;
 	
-	/** Override of `{@link dusk.sgui.Component.doKeyPress}`. Calls the doKeyPress of all focused children, and if they
-	 *  all return true, then calls doKeyPress of Component with itself.
+	/** Override of `{@link dusk.sgui.Component.interact}`. Calls the interact method of all focused children, and if
+	 *  they all return true, then calls interact of Component with itself.
 	 * 
-	 * @param {object} e The keypress event.
+	 * @param {object} e The interaction event.
 	 * @return {boolean} True if the event should bubble, else false.
 	 */
-	Group.prototype.doKeyPress = function(e) {
+	Group.prototype.interact = function(e) {
+		// Calling this twice, I need to think up a better way, blegh
+		Component.prototype.interact.call(this, e, true);
+		
 		if(this.focusBehaviour == Group.FOCUS_ALL) {
 			var toReturn = true;
 			for(var c = this._componentsArr.length-1; c >= 0; c --) {
-				toReturn = this._componentsArr[c].doKeyPress(e) && toReturn;
+				toReturn = this._componentsArr[c].interact(e) && toReturn;
 			}
 			if(!toReturn) return false;
 		}else{
-			if(this.getFocused() && !this.getFocused().doKeyPress(e)) return false;
+			if(this.getFocused() && !this.getFocused().interact(e)) return false;
 		}
 		
-		return Component.prototype.doKeyPress.call(this, e);
+		return Component.prototype.interact.call(this, e);
 	};
 	
-	/** Override of `{@link dusk.sgui.Component.doButtonPress}`. Calls the doButtonPress of all focused children, and if
-	 * they all return true, then calls doButtonPress of Component with itself.
+	/** Override of `{@link dusk.sgui.Component.control}`. Calls the control method of all focused children, and if
+	 *  they all return true, then calls control of Component with itself.
 	 * 
-	 * @param {object} e The buttonpress event.
-	 * @return {boolean} True if the event should bubble.
-	 * @since 0.0.21-alpha
+	 * @param {object} e The interaction event.
+	 * @param {array} controls All controls that match this event.
+	 * @return {boolean} True if the event should bubble, else false.
 	 */
-	Group.prototype.doButtonPress = function(e) {
+	Group.prototype.control = function(e, controls) {
 		if(this.focusBehaviour == Group.FOCUS_ALL) {
 			var toReturn = true;
 			for(var c = this._componentsArr.length-1; c >= 0; c --) {
-				toReturn = this._componentsArr[c].doButtonPress(e) && toReturn;
+				toReturn = this._componentsArr[c].control(e, controls) && toReturn;
 			}
 			if(!toReturn) return false;
 		}else{
-			if(this.getFocused() && !this.getFocused().doButtonPress(e)) return false;
+			if(this.getFocused() && !this.getFocused().control(e, controls)) return false;
 		}
 		
-		return Component.prototype.doButtonPress.call(this, e);
-	};
-	
-	/** Fires the mouseMove event on all its children.
-	 * 
-	 * @return {boolean} The return value of the focused component's keypress.
-	 * @since 0.0.21-alpha
-	 */
-	Group.prototype.containerMouseMove = function(e) {
-		for(var c = this._componentsArr.length-1; c >= 0; c --) {
-			if(this._componentsArr[c].mouse)
-				this._componentsArr[c].mouse.move.fire();
-		}
+		return Component.prototype.control.call(this, e, controls);
 	};
 	
 	/** Container specific method of handling clicks.
 	 * 
-	 * In this case, it will call `{@link dusk.sgui.Component#mouse#doClick}` of the highest component the mouse is on, and
+	 * In this case, it will call `{@link dusk.sgui.Component#mouse#doClick}` of the highest component the mouse is on,
 	 *  and return that value. Failing that, it will return true.
 	 * 
-	 * @param {object} e The keypress event, must be a JQuery keypress event object.
+	 * @param {object} e The interaction event.
 	 * @return {boolean} The return value of the focused component's keypress.
 	 */
 	Group.prototype.containerClick = function(e) {
 		if(this.mouse && this.mouse.allow) {
 			for(var i = this._drawOrder.length-1; i >= 0; i --) {
 				if(this._drawOrder[i] in this._components && this._components[this._drawOrder[i]].visible
-				&& this._components[this._drawOrder[i]].mouse && !this._components[this._drawOrder[i]].mouse.clickPierce) {
+				&& this._components[this._drawOrder[i]].mouse
+				&& !this._components[this._drawOrder[i]].mouse.clickPierce) {
 					
 					var com = this._components[this._drawOrder[i]];
 					if(!(this.mouse.x < com.x || this.mouse.x > com.x + com.width
@@ -830,40 +816,12 @@ load.provide("dusk.sgui.Group", (function() {
 		}
 	};
 	
-	/** Updates mouse location of all children.
-	 * 
-	 * @since 0.0.20-alpha
-	 */
-	Group.prototype.containerUpdateMouse = function(x, y) {
-		for(var c = this._componentsArr.length-1; c >= 0; c --) {
-			var com = this._componentsArr[c];
-			if(!com.mouse) continue;
-			var destX = x;
-			var destY = y;
-			
-			var destXAdder = 0;
-			if(com.xOrigin == c.ORIGIN_MAX) destXAdder = this.width - com.width;
-			if(com.xOrigin == c.ORIGIN_MIDDLE) destXAdder = (this.width - com.width)>>1;
-			
-			var destYAdder = 0;
-			if(com.yOrigin == c.ORIGIN_MAX) destYAdder = this.height - com.height;
-			if(com.yOrigin == c.ORIGIN_MIDDLE) destYAdder = (this.height - com.height)>>1;
-			
-			destX += -com.x + this.xOffset - destXAdder;
-			
-			destY += -com.y + this.yOffset - destYAdder;
-			
-			com.mouse.update(destX, destY);
-			if("containerUpdateMouse" in com) com.containerUpdateMouse(destX, destY);
-		}
-	};
-	
 	/** Handles mouse selection of components, if enabled.
 	 * 
 	 * @since 0.0.21-alpha
 	 */
 	var _mouseSelect = function() {
-		if(this.mouse.focus) {
+		if(this.mouse && this.mouse.focus) {
 			for(var i = this._drawOrder.length-1; i >= 0; i --) {
 				if(this._drawOrder[i] in this._components
 				&& this._components[this._drawOrder[i]].mouse && this._components[this._drawOrder[i]].mouse.allow) {
@@ -876,6 +834,8 @@ load.provide("dusk.sgui.Group", (function() {
 				}
 			}
 		}
+		
+		return true;
 	}
 	
 	/** Returns the actual X location, relative to the screen, that the component is at.

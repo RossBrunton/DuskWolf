@@ -84,19 +84,6 @@ load.provide("dusk.sgui.MouseAugment", (function() {
 		 * @type dusk.EventDispatcher
 		 */
 		this.onClick = new EventDispatcher("dusk.sgui.MouseAugment.onClick", EventDispatcher.MODE_AND);
-		
-		
-		/** Fired when the mouse is moved.
-		 * 
-		 * There is no event object.
-		 * @since 0.0.21-alpha
-		 */
-		this.move = new EventDispatcher("dusk.sgui.MouseAugment.move");
-		if(Group && this._component instanceof Group) {
-			this.move.listen((function() {
-				this._component.containerMouseMove();
-			}).bind(this));
-		}
 	};
 	
 	/** Handles a mouse click. This will fire `{@link dusk.sgui.MouseAugment.onClick}`, and possibly fire the 

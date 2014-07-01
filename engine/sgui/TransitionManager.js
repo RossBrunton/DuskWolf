@@ -11,6 +11,7 @@ load.provide("dusk.sgui.TransitionManager", (function() {
 	var editor = load.require("dusk.editor");
 	var entities = load.require("dusk.entities");
 	var Fade = load.require("dusk.sgui.extras.Fade");
+	var controls = load.require("dusk.input.controls");
 
 	/** @class dusk.sgui.TransitionManager
 	 * 
@@ -94,21 +95,23 @@ load.provide("dusk.sgui.TransitionManager", (function() {
 		//Listeners
 		this.prepareDraw.listen(this._tmDraw.bind(this));
 		this.frame.listen(this._tmFrame.bind(this));
-		this.keyPress.listen((function(e) {
+		this.onControl.listen((function(e) {
 			if(editor.active) this.add(
 				prompt("Please enter a trigger criteria.", this._getLastTrigger()),
 				+prompt("Please enter a mark to trigger."),
 				confirm("Does up need to be pressed?"),
 				utils.jsonParse(prompt("Please enter a JSON describing the room.", '{"package":"", "mark":0}'))
 			);
-		}).bind(this), 65);
-		this.keyPress.listen((function(e) {
+		}).bind(this), controls.addControl("transitions_add", "A"));
+		
+		this.onControl.listen((function(e) {
 			if(editor.active) this.remove(prompt("Enter a transition to remove.", 0));
-		}).bind(this), 82);
-		this.keyPress.listen((function(e) {
+		}).bind(this), controls.addControl("transitions_remove", "R"));
+		
+		this.onControl.listen((function(e) {
 			if(editor.active) this._transitions.in =
 				utils.jsonParse(prompt("Edit in transition.", "{}"));
-		}).bind(this), 73);
+		}).bind(this), controls.addControl("transitions_in", "I"));
 		
 		//Add to the MarkTrigger listener
 		this._mtId = entities.markTrigger.listen(this._tmMarkTrigger.bind(this));

@@ -7,7 +7,8 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
 	var editor = load.require("dusk.editor");
-	var keyboard = load.require("dusk.keyboard");
+	var keyboard = load.require("dusk.input.keyboard");
+	var controls = load.require("dusk.input.controls");
 
 	/** Creates a new Editable TileMap.
 	 * 
@@ -86,13 +87,15 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 		//Listeners
 		this.prepareDraw.listen(this._editTileMapDraw.bind(this));
 		this.frame.listen(this._editTileMapFrame.bind(this));
-		this.keyPress.listen((function(e) {
+		
+		this.onControl.listen((function(e) {
 			if(editor.active) {
 				this.src = prompt("Please enter an image path.", this.src);
 				this.drawAll();
 			}
-		}).bind(this), 73);
-		this.keyPress.listen((function(e) {
+		}).bind(this), controls.addControl("editabletm_path", "I"));
+		
+		this.onControl.listen((function(e) {
 			if(editor.active) {
 				var tile = this.getTile(this._cx, this._cy);
 				
@@ -104,10 +107,10 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 				TileMap.tileData.free(tile);
 				this.drawAll();
 			}
-		}).bind(this), 69);
+		}).bind(this), controls.addControl("editabletm_animation", "E"));
 		
-		this.keyPress.listen(this._copy.bind(this), 67);
-		this.keyPress.listen(this._paste.bind(this), 80);
+		this.onControl.listen(this._copy.bind(this), controls.addControl("editabletm_copy", "C"));
+		this.onControl.listen(this._paste.bind(this), controls.addControl("editabletm_paste", "P"));
 		
 		//Directions
 		this.dirPress.listen(this._etmRightAction.bind(this), c.DIR_RIGHT);
@@ -217,7 +220,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 	 * @since 0.0.21-alpha
 	 */
 	EditableTileMap.prototype._copy = function(e) {
-		if(e.ctrlKey || !editor.active) return true;
+		if(e.ctrl || !editor.active) return true;
 		
 		this._clipboard = [];
 		
@@ -241,7 +244,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 	 * @since 0.0.21-alpha
 	 */
 	EditableTileMap.prototype._paste = function(e) {
-		if(e.ctrlKey || !editor.active) return true;
+		if(e.ctrl || !editor.active) return true;
 		
 		var p = 0;
 		for(var x = this.frameWidth-1; x >= 0; x --) {
@@ -261,8 +264,8 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 	 * @private
 	 */
 	EditableTileMap.prototype._etmUpAction = function(e) {
-		if(e.e.ctrlKey || !editor.active) return true;
-		if(e.e.shiftKey) {
+		if(e.e.ctrl || !editor.active) return true;
+		if(e.e.shift) {
 			var current = this.getTile(this._cx, this._cy);
 			current[1] --;
 			this._set(current[0], current[1]);
@@ -295,8 +298,8 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 	 * @private
 	 */
 	EditableTileMap.prototype._etmDownAction = function(e) {
-		if(e.e.ctrlKey || !editor.active) return true;
-		if(e.e.shiftKey) {
+		if(e.e.ctrl || !editor.active) return true;
+		if(e.e.shift) {
 			var current = this.getTile(this._cx, this._cy);
 			current[1] ++;
 			this._set(current[0], current[1]);
@@ -329,8 +332,8 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 	 * @private
 	 */
 	EditableTileMap.prototype._etmRightAction = function(e) {
-		if(e.e.ctrlKey || !editor.active) return true;
-		if(e.e.shiftKey) {
+		if(e.e.ctrl || !editor.active) return true;
+		if(e.e.shift) {
 			var current = this.getTile(this._cx, this._cy);
 			current[0] ++;
 			this._set(current[0], current[1]);
@@ -363,8 +366,8 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 	 * @private
 	 */
 	EditableTileMap.prototype._etmLeftAction = function(e) {
-		if(e.e.ctrlKey || !editor.active) return true;
-		if(e.e.shiftKey) {
+		if(e.e.ctrl || !editor.active) return true;
+		if(e.e.shift) {
 			var current = this.getTile(this._cx, this._cy);
 			current[0] --;
 			this._set(current[0], current[1]);

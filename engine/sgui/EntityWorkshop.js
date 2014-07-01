@@ -8,6 +8,7 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 	var c = load.require("dusk.sgui.c");
 	var utils = load.require("dusk.utils");
 	var editor = load.require("dusk.editor");
+	var controls = load.require("dusk.input.controls");
 	
 	load.require("dusk.sgui.Tile");
 	load.require("dusk.sgui.Label");
@@ -254,17 +255,15 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 		
 		//Listeners
 		this.frame.listen((this._ewFrame).bind(this));
-		this.keyPress.listen((this._ewKey).bind(this));
-		this.prepareDraw.listen((this._ewDraw).bind(this));
-		this.keyPress.listen((function(e) {
+		this.onControl.listen((function(e) {
 			if(editor.active) {
 				sgui.setActivePane("plat");
 				this.visible = false;
 			}
-		}).bind(this), 27);
+		}).bind(this), controls.addControl("workshop_close", "ESC"));
 	};
 	EntityWorkshop.prototype = Object.create(Group.prototype);
-
+	
 	EntityWorkshop.coreWorkshopData = [
 		["img", "string", "Path to this entities source image.", "no default"],
 		["collisionWidth", "integer", "Width of this entity's collision rectange.", "height"],
@@ -277,7 +276,7 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 		["headingLeft", "boolean", "If true, then the entity heads left by default.", "false"],
 		["headingUp", "boolean", "If true, then the entity heads up by default.", "false"],
 	];
-
+	
 	EntityWorkshop.prototype._ewFrame = function(e) {
 		if(this.path("bodies/behaviours/list").getFocused()
 		&& entities.getBehaviour(this.path("bodies/behaviours/list").getFocused().text)) {
@@ -314,15 +313,7 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 			}
 		}
 	};
-
-	EntityWorkshop.prototype._ewDraw = function(e) {
-		
-	};
-
-	EntityWorkshop.prototype._ewKey = function(e) {
-		return false;
-	};
-
+	
 	EntityWorkshop.prototype._behaviourChecked = function(e) {
 		if(e.component.path("..").text == "---") return;
 		if(e.checked) {
@@ -333,7 +324,7 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 		
 		this._updateData();
 	};
-
+	
 	EntityWorkshop.prototype.loadEntity = function(name) {
 		this._loading = true;
 		if(!entities.types.isValidType(name)) {
@@ -358,7 +349,7 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 		this._updateData();
 		this._loading = false;
 	};
-
+	
 	EntityWorkshop.prototype.saveEntity = function() {
 		var ent = utils.clone(this._workingWith);
 		
@@ -410,7 +401,7 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 		
 		entities.types.setRaw(this.path("top/name").text, ent, this.path("top/extends").text);
 	};
-
+	
 	EntityWorkshop.prototype._updateData = function() {
 		if(!("data" in this._workingWith)) this._workingWith.data = {};
 		var l = [];
@@ -447,15 +438,15 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 		while(l.length % this.path("bodies/data/list").cols) l.push({"text":"---"});
 		this.path("bodies/data/list").populate(l);
 	};
-
+	
 	EntityWorkshop.prototype._deFormatData = function(str) {
 		var frags = str.split(": ");
 		return [frags[0].charAt(0), frags[0].substr(2), frags[1]];
 	}
-
+	
 	Object.seal(EntityWorkshop);
 	Object.seal(EntityWorkshop.prototype);
-
+	
 	sgui.registerType("EntityWorkshop", EntityWorkshop);
 	
 	return EntityWorkshop;

@@ -6,10 +6,11 @@ load.provide("dusk.sgui.ControlConfig", (function() {
 	var Group = load.require("dusk.sgui.Group");
 	var Tile = load.require("dusk.sgui.Tile");
 	var Label = load.require("dusk.sgui.Label");
-	var controls = load.require("dusk.controls");
-	var keyboard = load.require("dusk.keyboard");
+	var controls = load.require("dusk.input.controls");
+	var keyboard = load.require("dusk.input.keyboard");
 	var sgui = load.require("dusk.sgui");
-
+	var interaction = load.require("dusk.input.interaction");
+	
 	/** Creates a new ControlConfig component.
 	 * 
 	 * @param {dusk.sgui.Component} parent The container that this component is in.
@@ -17,7 +18,7 @@ load.provide("dusk.sgui.ControlConfig", (function() {
 	 * 
 	 * @class dusk.sgui.ControlConfig
 	 * 
-	 * @classdesc A control config allows the user to configure a control (as used by `{@link dusk.controls}`).
+	 * @classdesc A control config allows the user to configure a control (as used by `{@link dusk.input.controls}`).
 	 * 
 	 * 
 	 * 
@@ -43,14 +44,14 @@ load.provide("dusk.sgui.ControlConfig", (function() {
 		
 		//Listeners
 		this.frame.listen(this._ccFrame.bind(this));
-		this.keyPress.listen(this._ccKey.bind(this));
+		this.onInteract.listen(this._ccKey.bind(this), interaction.KEY_DOWN);
 		this.prepareDraw.listen(this._ccDraw.bind(this));
 		this.action.listen(
 			(function(e) {this.setting = !this.setting; this.locked = this.setting; return false;}).bind(this)
 		);
 	};
 	ControlConfig.prototype = Object.create(Group.prototype);
-
+	
 	ControlConfig.prototype._ccFrame = function(e) {
 		var control = controls.lookupControl(this.control);
 		
@@ -82,32 +83,32 @@ load.provide("dusk.sgui.ControlConfig", (function() {
 			this._buttonChild.tile = [0,0];
 		}
 	};
-
+	
 	ControlConfig.prototype._ccDraw = function(e) {
 		e.c.strokeStyle = this.active?this.borderActive:this.border;
 		
 		e.c.strokeRect(e.d.destX, e.d.destY, e.d.width, e.d.height);
 	};
-
+	
 	ControlConfig.prototype._ccKey = function(e) {
-		if(controls.checkKey("sgui_action", e.key)) return true;
+		if(controls.checkKey("sgui_action", e.which)) return true;
 		if(!this.control) return true;
 		if(!this.setting) {
-			if(controls.checkKey("sgui_up", e.key)) return true;
-			if(controls.checkKey("sgui_down", e.key)) return true;
-			if(controls.checkKey("sgui_left", e.key)) return true;
-			if(controls.checkKey("sgui_right", e.key)) return true;
+			if(controls.checkKey("sgui_up", e.which)) return true;
+			if(controls.checkKey("sgui_down", e.which)) return true;
+			if(controls.checkKey("sgui_left", e.which)) return true;
+			if(controls.checkKey("sgui_right", e.which)) return true;
 		}
 		
-		controls.mapKey(this.control, e.key);
+		controls.mapKey(this.control, e.which);
 		this.setting = false;
 		this.locked = false;
 		return false;
 	};
-
+	
 	Object.seal(ControlConfig);
 	Object.seal(ControlConfig.prototype);
-
+	
 	sgui.registerType("ControlConfig", ControlConfig);
 	
 	sgui.addStyle("ControlConfig>#key", {

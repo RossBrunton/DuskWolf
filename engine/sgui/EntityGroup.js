@@ -11,6 +11,8 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 	var entities = load.require("dusk.entities");
 	var c = load.require("dusk.sgui.c");
 	var EntityWorkshop = load.suggest("dusk.sgui.EntityWorkshop", function(p) {EntityWorkshop = p});
+	var interaction = load.require("dusk.input.interaction");
+	var controls = load.require("dusk.input.controls");
 	
 	/** @class dusk.sgui.EntityGroup
 	 * 
@@ -70,19 +72,24 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 		
 		//Listeners
 		for(var i = 48; i <= 57; i++) {
-			this.keyPress.listen(this._numberDrop.bind(this), i);
+			this.onInteract.listen(this._numberDrop.bind(this), (i << 16) | interaction.KEY_DOWN);
 		}
-		this.keyPress.listen(this._keyDel.bind(this), 46);
-		this.keyPress.listen((function(e) {
+		
+		this.onControl.listen(this._keyDel.bind(this), controls.addControl("entitygroup_del", "DEL"));
+		
+		this.onControl.listen((function(e) {
 			if(editor.active && confirm("Clear all entities?")) this.clear();
-		}).bind(this), 67);
-		this.keyPress.listen((function(e) {
+		}).bind(this), controls.addControl("entitygroup_clear", "C"));
+		
+		this.onControl.listen((function(e) {
 			if(editor.active) editor.editNext = prompt("Enter name for next entity.");
-		}).bind(this), 78);
-		this.keyPress.listen((function(e) {
+		}).bind(this), controls.addControl("entitygroup_name", "N"));
+		
+		this.onControl.listen((function(e) {
 			if(editor.active) this._showEntities = !this._showEntities;
-		}).bind(this), 69);
-		this.keyPress.listen((function(e) {
+		}).bind(this), controls.addControl("entitygroup_show", "E"));
+		
+		this.onControl.listen((function(e) {
 			if(editor.active) {
 				load.import("dusk.sgui.EntityWorkshop");
 				
@@ -99,7 +106,8 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 					});
 				}
 			}
-		}).bind(this), 87);
+		}).bind(this), controls.addControl("entitygroup_workshop", "W"));
+		
 		this.prepareDraw.listen(this._entityGroupDraw.bind(this));
 		this.action.listen(this._entityGroupAction.bind(this));
 		
@@ -594,8 +602,8 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 
 	EntityGroup.prototype._egUpAction = function(e) {
 		if(!editor.active) return true;
-		if(e.e.ctrlKey) return true;
-		if(e.e.shiftKey) {
+		if(e.e.ctrl) return true;
+		if(e.e.shift) {
 			if(this._offsetY) this._offsetY --;
 			return false;
 		}
@@ -605,8 +613,8 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 
 	EntityGroup.prototype._egDownAction = function(e) {
 		if(!editor.active) return true;
-		if(e.e.ctrlKey) return true;
-		if(e.e.shiftKey) {
+		if(e.e.ctrl) return true;
+		if(e.e.shift) {
 			if(this._offsetY < this.theight) this._offsetY ++;
 			return false;
 		}
@@ -616,8 +624,8 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 
 	EntityGroup.prototype._egLeftAction = function(e) {
 		if(!editor.active) return true;
-		if(e.e.ctrlKey) return true;
-		if(e.e.shiftKey) {
+		if(e.e.ctrl) return true;
+		if(e.e.shift) {
 			if(this._offsetX) this._offsetX --;
 			return false;
 		}
@@ -627,8 +635,8 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 
 	EntityGroup.prototype._egRightAction = function(e) {
 		if(!editor.active) return true;
-		if(e.e.ctrlKey) return true;
-		if(e.e.shiftKey) {
+		if(e.e.ctrl) return true;
+		if(e.e.shift) {
 			if(this._offsetX < this.twidth) this._offsetX ++;
 			return false;
 		}
@@ -640,12 +648,12 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 		if(!editor.active) return true;
 		
 		if(e.shift) {
-			editor.editDroppers[e.key-48] = prompt("Enter a type for dropper #"+(e.key-48));
+			editor.editDroppers[e.which-48] = prompt("Enter a type for dropper #"+(e.which-48));
 			return;
 		}
 		
-		if(!editor.editDroppers[e.key-48]) {
-			console.warn("Dropper "+(e.key-48)+" not yet set.");
+		if(!editor.editDroppers[e.which-48]) {
+			console.warn("Dropper "+(e.which-48)+" not yet set.");
 			return;
 		}
 		

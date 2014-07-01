@@ -109,7 +109,6 @@ load.provide("dusk.EventDispatcher", (function() {
 	 * @since 0.0.21-alpha
 	 */
 	EventDispatcher.FILTER_EQUALS = 0;
-	
 	/** For a listener to fire, the value of the listener's filter bitwise and the value of the fired filter must be
 	 *  greater than one.
 	 * 
@@ -121,6 +120,14 @@ load.provide("dusk.EventDispatcher", (function() {
 	 * @since 0.0.21-alpha
 	 */
 	EventDispatcher.FILTER_MULTI = 1;
+	/** For a listener to fire, the value of the listener's filter must be in the array that the listener fires.
+	 * 
+	 * @type integer
+	 * @constant
+	 * @value 2
+	 * @since 0.0.21-alpha
+	 */
+	EventDispatcher.FILTER_ISIN = 2;
 	
 
 	/** Registers a listener for the event;
@@ -181,6 +188,8 @@ load.provide("dusk.EventDispatcher", (function() {
 						continue;
 					}else if(this.filterType == EventDispatcher.FILTER_MULTI && (filter & l[1]) == 0){
 						continue;
+					}else if(this.filterType == EventDispatcher.FILTER_ISIN && filter.indexOf(l[1]) === -1) {
+						continue
 					}
 				}
 				
@@ -225,6 +234,8 @@ load.provide("dusk.EventDispatcher", (function() {
 						continue;
 					}else if(this.filterType == EventDispatcher.FILTER_MULTI && (filter & l[1]) == 0){
 						continue;
+					}else if(this.filterType == EventDispatcher.FILTER_ISIN && filter.indexOf(l[1]) === -1) {
+						continue
 					}
 				}
 				

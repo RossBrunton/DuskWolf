@@ -32,7 +32,7 @@ load.provide("example.plat", (function() {
 	var dusk = load.require("dusk");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
-	var controls = load.require("dusk.controls");
+	var controls = load.require("dusk.input.controls");
 	var frameTicker = load.require("dusk.frameTicker");
 	var Range = load.require("dusk.Range");
 

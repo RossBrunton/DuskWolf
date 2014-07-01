@@ -5,7 +5,7 @@
 load.provide("dusk.behave.PlayerGridWalker", (function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.behave.Behave");
-	var controls = load.require("dusk.controls");
+	var controls = load.require("dusk.input.controls");
 	
 	var PlayerGridWalker = function(entity) {
 		Behave.call(this, entity);
@@ -251,8 +251,8 @@ load.provide("dusk.behave.GridMouse", (function() {
 
 	GridMouse.prototype._gmMouseMove = function(e) {
 		if(this._data("gmMouseMove") && options.get("controls.mouseGrid") && this._entity.active) {
-			var destX = ~~((this._entity.x + e.x) / this._entity.width);
-			var destY = ~~((this._entity.y + e.y) / this._entity.height);
+			var destX = ~~((this._entity.x + this._entity.mouse.x) / this._entity.width);
+			var destY = ~~((this._entity.y + this._entity.mouse.y) / this._entity.height);
 			
 			if(this._data("gwregion") == null || this._data("gwregion").isIn(destX, destY)) {
 				this._entity.behaviourFire("gwStartMove", {"targetX":destX, "targetY":destY});

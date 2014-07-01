@@ -5,8 +5,8 @@
 load.provide("dusk.sgui.Component", (function() {
 	var utils = load.require("dusk.utils");
 	var EventDispatcher = load.require("dusk.EventDispatcher");
-	var keyboard = load.require("dusk.keyboard");
-	var controls = load.require("dusk.controls");
+	var keyboard = load.require("dusk.input.keyboard");
+	var controls = load.require("dusk.input.controls");
 	var sgui = load.require("dusk.sgui");
 	var Mapper = load.require("dusk.Mapper");
 	var MouseAugment = load.require("dusk.sgui.MouseAugment");
@@ -14,6 +14,7 @@ load.provide("dusk.sgui.Component", (function() {
 	var Group = load.suggest("dusk.sgui.Group", function(p) {Group = p});
 	var c = load.require("dusk.sgui.c");
 	var Pane = load.suggest("dusk.sgui.Pane", function(p) {Pane = p});
+	var interaction = load.require("dusk.input.interaction");
 	
 	/** @class dusk.sgui.Component
 	 * 
@@ -129,21 +130,6 @@ load.provide("dusk.sgui.Component", (function() {
 		 */
 		this._noFlow = false;
 		
-		/** Fired when a key is pressed.
-		 * 
-		 * The event object has five properties; `key`, the keycode of the key pressed; 
-		 *  `ctrl`, `shift` and `meta` are modifier keys; and `jquery`, the original JQuery event.
-		 * @type dusk.EventDispatcher
-		 * @since 0.0.17-alpha
-		 */
-		this.keyPress = new EventDispatcher("dusk.sgui.Component.keyPress", EventDispatcher.MODE_AND);
-		/** Fired when a button is pressed.
-		 * 
-		 * The event object has a single property, `button`. Which is the button that was pressed.
-		 * @type dusk.EventDispatcher
-		 * @since 0.0.21-alpha
-		 */
-		this.buttonPress = new EventDispatcher("dusk.sgui.Component.buttonPress", EventDispatcher.MODE_AND);
 		/** Fired when a directional key (up, down, left, right) is pressed.
 		 * 
 		 * The event object has two properties, `dir`, one of the constants `DIR_*` indicating a direction, 
@@ -155,6 +141,22 @@ load.provide("dusk.sgui.Component", (function() {
 		 */
 		this.dirPress = new EventDispatcher(
 			"dusk.sgui.Component.dirPress", EventDispatcher.MODE_AND, EventDispatcher.FILTER_MULTI
+		);
+		/** Fired when an interaction event is fired.
+		 * 
+		 * All listeners must return true if you want it to bubble up to its parent.
+		 * @type dusk.EventDispatcher
+		 * @since 0.0.21-alpha
+		 */
+		this.onInteract = new EventDispatcher("dusk.sgui.Component.onInteract", EventDispatcher.MODE_AND);
+		/** Fired when a control event is fired.
+		 * 
+		 * All listeners must return true if you want it to bubble up to its parent.
+		 * @type dusk.EventDispatcher
+		 * @since 0.0.21-alpha
+		 */
+		this.onControl = new EventDispatcher(
+			"dusk.sgui.Component.onControl", EventDispatcher.MODE_AND, EventDispatcher.FILTER_ISIN
 		);
 		/** An event dispatcher that is fired once per frame.
 		 * 
@@ -370,43 +372,89 @@ load.provide("dusk.sgui.Component", (function() {
 		this._registerPropMask("actionFocus", "actionFocus");
 	};
 	
-	/** This causes the component to handle a keypress, it should be called by either its parent container or SimpleGui.
+	
+	/** This causes the component to handle an interaction, it should be called by either its parent container or
+	 *  SimpleGui.
 	 * 
-	 * This function will first check the key to see if it is a direction or the action key,
-	 *  if it is ether the action handlers or the "directionAction"s are called. 
-	 *  Otherwise it looks for a keyhandler.
-	 *  If all of the action handlers or keyhandlers returns true, then this function will return true.
+	 * This function will first check the interaction to see if it is bound to the direction or the action control, if
+	 *  it is ether the action handlers or the "directionAction"s are called. Otherwise it looks for a keyhandler. If
+	 *  all of the action handlers or keyhandlers returns true, then this function will return true.
 	 * 
-	 * This function returns true if either at least one keyHandler (including action and direction) returns true, 
-	 *  or the control flows into another component.
-	 *	If this returns false, then the event must not be ran by its container.
+	 * This function returns true if either at least one keyHandler (including action and direction) returns true, or 
+	 *  the control flows into another component. If this returns false, then the event must not be ran by its 
+	 *  container.
 	 * 
-	 * @param {object} e The JQuery keypress object that should be ran.
+	 * @param {object} e The interaction event.
+	 * @param {boolean} nofire If true then the event listeners for interactions, dir presses, action and cancel won't
+	 *  be fired and this returns false.
 	 * @return {boolean} Whether the parent container should run its own actions.
 	 */
-	Component.prototype.doKeyPress = function(e) {
-		var eventObject = {"key":e.keyCode, "shift":e.shiftKey, "ctrl":e.ctrlKey, "meta":e.metaKey, "jquery":e};
-		
+	Component.prototype.interact = function(e, nofire) {
 		this._noFlow = false;
 		
-		var dirReturn = this.keyPress.fire(eventObject, eventObject.key);
+		// If it is a mouse move, update the coordinates
+		if(this.mouse && e.type == interaction.MOUSE_MOVE) {
+			var destX = 0;
+			var destY = 0;
+			
+			var destXAdder = 0;
+			var destYAdder = 0;
+			
+			if(this.container) {
+				destX = this.container.mouse.x;
+				destY = this.container.mouse.y;
+				
+				if(this.xOrigin == c.ORIGIN_MAX) destXAdder = this.container.width - this.width;
+				if(this.xOrigin == c.ORIGIN_MIDDLE) destXAdder = (this.container.width - this.width)>>1;
+				
+				if(this.yOrigin == c.ORIGIN_MAX) destYAdder = this.container.height - this.height;
+				if(this.yOrigin == c.ORIGIN_MIDDLE) destYAdder = (this.container.height - this.height)>>1;
+				
+				destX += -this.x + this.container.xOffset - destXAdder;
+				destY += -this.y + this.container.yOffset - destYAdder;
+			}else{
+				destX = e.x;
+				destY = e.y;
+				
+				if(this.xOrigin == c.ORIGIN_MAX) destXAdder = sgui.width - this.width;
+				if(this.xOrigin == c.ORIGIN_MIDDLE) destXAdder = (sgui.width - this.width)>>1;
+				
+				if(this.yOrigin == c.ORIGIN_MAX) destYAdder = sgui.height - this.height;
+				if(this.yOrigin == c.ORIGIN_MIDDLE) destYAdder = (sgui.height - this.height)>>1;
+				
+				destX += -this.x - destXAdder;
+				destY += -this.y - destYAdder;
+			}
+			
+			this.mouse.update(destX, destY);
+		}
+		
+		if(nofire) return false;
+		
+		var dirReturn = this.onInteract.fire(e, e.filter);
+		
 		if(dirReturn) {
-			//Directions
-			if(controls.checkKey("sgui_left", e.keyCode)) {
+			// Directions
+			var cons = controls.interactionControl(e);
+			if(cons.indexOf("sgui_left") !== -1) {
 				if((dirReturn = this.dirPress.fire({"dir":c.DIR_LEFT, "e":e}, c.DIR_LEFT)) && !this._noFlow
 				&& this.leftFlow && this.container.flow(this.leftFlow)) return false;
-			}else if(controls.checkKey("sgui_up", e.keyCode)) {
+			
+			}else if(cons.indexOf("sgui_up") !== -1) {
 				if((dirReturn = this.dirPress.fire({"dir":c.DIR_UP, "e":e}, c.DIR_UP)) && !this._noFlow
 				&& this.upFlow && this.container.flow(this.upFlow)) return false;
-			}else if(controls.checkKey("sgui_right", e.keyCode)) {
+			
+			}else if(cons.indexOf("sgui_right") !== -1) {
 				if((dirReturn = this.dirPress.fire({"dir":c.DIR_RIGHT, "e":e}, c.DIR_RIGHT)) && !this._noFlow
 				&& this.rightFlow && this.container.flow(this.rightFlow)) return false;
-			}else if(controls.checkKey("sgui_down", e.keyCode)) {
+			
+			}else if(cons.indexOf("sgui_down") !== -1) {
 				if((dirReturn = this.dirPress.fire({"dir":c.DIR_DOWN, "e":e}, c.DIR_DOWN)) && !this._noFlow
 				&& this.downFlow && this.container.flow(this.downFlow)) return false;
-			}else if(controls.checkKey("sgui_action", e.keyCode)) {
+			
+			}else if(cons.indexOf("sgui_action") !== -1) {
 				return this.action.fire({"keyPress":e, "component":this});
-			}else if(controls.checkKey("sgui_cancel", e.keyCode)) {
+			}else if(cons.indexOf("sgui_cancel") !== -1) {
 				return this.cancel.fire({"keyPress":e, "component":this});
 			}
 		}
@@ -414,44 +462,23 @@ load.provide("dusk.sgui.Component", (function() {
 		return dirReturn;
 	};
 	
-	
-	/** This causes the component to handle a buttonpress, it should be called by either its parent container or SimpleGui.
+	/** This causes the component to handle a control event, it should be called by either its parent container or
+	 *  SimpleGui.
 	 * 
-	 * Button equivilent to `{@link dusk.sgui.Component.doKeyPress}`.
+	 * This function returns true if either at least one keyHandler (including action and direction) returns true, or 
+	 *  the control flows into another component. If this returns false, then the event must not be ran by its 
+	 *  container.
 	 * 
-	 * @param {object} e The button press object that should be ran.
+	 * @param {object} e An interaction event.
+	 * @param {array} controls The controls that match this event.
 	 * @return {boolean} Whether the parent container should run its own actions.
-	 * @since 0.0.21-alpha
 	 */
-	Component.prototype.doButtonPress = function(e) {
-		var eventObject = {"button":e.which};
-		
-		this._noFlow = false;
-		
-		var dirReturn = this.buttonPress.fire(eventObject, eventObject.button);
-		if(dirReturn) {
-			//Directions
-			if(controls.checkButton("sgui_left", e.which)) {
-				if((dirReturn = this.dirPress.fire({"dir":c.DIR_LEFT, "e":e}, c.DIR_LEFT)) && !this._noFlow
-				&& this.leftFlow && this.container.flow(this.leftFlow)) return false;
-			}else if(controls.checkButton("sgui_up", e.which)) {
-				if((dirReturn = this.dirPress.fire({"dir":c.DIR_UP, "e":e}, c.DIR_UP)) && !this._noFlow
-				&& this.upFlow && this.container.flow(this.upFlow)) return false;
-			}else if(controls.checkButton("sgui_right", e.which)) {
-				if((dirReturn = this.dirPress.fire({"dir":c.DIR_RIGHT, "e":e}, c.DIR_RIGHT)) && !this._noFlow
-				&& this.rightFlow && this.container.flow(this.rightFlow)) return false;
-			}else if(controls.checkButton("sgui_down", e.which)) {
-				if((dirReturn = this.dirPress.fire({"dir":c.DIR_DOWN, "e":e}, c.DIR_DOWN)) && !this._noFlow
-				&& this.downFlow && this.container.flow(this.downFlow)) return false;
-			}else if(controls.checkButton("sgui_action", e.which)) {
-				return this.action.fire({"keyPress":e, "component":this});
-			}else if(controls.checkButton("sgui_cancel", e.which)) {
-				return this.cancel.fire({"keyPress":e, "component":this});
-			}
-		}
+	Component.prototype.control = function(e, controls) {
+		var dirReturn = this.onControl.fire(e, controls);
 		
 		return dirReturn;
 	};
+	
 	
 	/** If there is no mouse augment on this component, adds one, otherwise does nothing.
 	 * 

@@ -637,9 +637,10 @@ load.provide("dusk.sgui.TextBox", (function() {
 	var Label = load.require("dusk.sgui.Label");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
-	var controls = load.require("dusk.controls");
+	var controls = load.require("dusk.input.controls");
 	var dusk = load.require("dusk");
-	var keyboard = load.require("dusk.keyboard");
+	var keyboard = load.require("dusk.input.keyboard");
+	var interaction = load.require("dusk.input.interaction");
 	
 	/** @class dusk.sgui.TextBox
 	 * 
@@ -678,7 +679,7 @@ load.provide("dusk.sgui.TextBox", (function() {
 		
 		//Listeners
 		this.prepareDraw.listen(_draw.bind(this));
-		this.keyPress.listen(_key.bind(this), undefined, {"ctrl":false});
+		this.onInteract.listen(_key.bind(this), interaction.KEY_DOWN, {"ctrl":false});
 		this.onActiveChange.listen(_activeChange.bind(this));
 		this.frame.listen((function(e) {
 			if(this.active) {

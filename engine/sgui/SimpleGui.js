@@ -4,15 +4,15 @@
 
 load.provide("dusk.sgui", (function() {
 	var Pane = load.require(">dusk.sgui.Pane", function(p){Pane = p});
-	var keyboard = load.require("dusk.keyboard");
+	var keyboard = load.require("dusk.input.keyboard");
 	var frameTicker = load.require("dusk.frameTicker");
 	var EventDispatcher = load.require("dusk.EventDispatcher");
-	var controls = load.require("dusk.controls");
-	var gamepad = load.require("dusk.gamepad");
+	var controls = load.require("dusk.input.controls");
 	var dusk = load.require("dusk");
 	var c = load.require("dusk.sgui.c");
 	var options = load.require("dusk.options");
 	var Pool = load.require("dusk.Pool");
+	var interaction = load.require("dusk.input.interaction");
 	
 	/** @namespace dusk.sgui
 	 * @name dusk.sgui
@@ -42,7 +42,7 @@ load.provide("dusk.sgui", (function() {
 	 * 
 	 * Components can also be "focused", focused components will be made active when the container it is in becomes active.
 	 * 	Focus is generally changed by the arrow keys (only active components can handle key events, remember),
-	 *   though this can be remapped using `{@link dusk.controls}`.
+	 *   though this can be remapped using `{@link dusk.input.controls}`.
 	 * 	If a direction key is pressed, a function like `{@link sgui.Component.upAction}` returns true,
 	 *   and a variable like `{@link upFlow}` is not empty, focus changes to the named element in this one's container.
 	 *	The arrow keys can be overriden by using the controls "sgui_up", "sgui_down", "sgui_left" and "sgui_right".
@@ -85,13 +85,13 @@ load.provide("dusk.sgui", (function() {
 	 * `{@link dusk.sgui.Component.mouseAction}` is true, then clicking on the component will fire its
 	 * `{@link dusk.sgui.Component.action}` event.
 	 * 
-	 * This namespace registers the following controls for `{@link dusk.controls}`:
+	 * This namespace registers the following controls for `{@link dusk.input.controls}`:
 	 * 
 	 * - `dusk_up`, `dusk_down`, `dusk_left` and `dusk_right` are the controls used to change the active component,
 	 *   these are the arrow keys or first stick by default.
 	 * - `dusk_action` is used to trigger the "action" event on a component, this is by default the `a` key, or button 0.
 	 */
-	var sgui = {}; //Change when ready
+	var sgui = {};
 	
 	/** A display mode that represents that the canvas will not change it's size at all.
 	 * @type integer
@@ -543,21 +543,16 @@ load.provide("dusk.sgui", (function() {
 		}
 	});
 	
-	//Listen for keypresses
-	keyboard.keyPress.listen(function(event) {
-		if(sgui.getActivePane()) return sgui.getActivePane().doKeyPress(event, event.keyCode);
-		return true;
-	});
-	
-	//And button presses
-	gamepad.buttonPress.listen(function(event) {
-		if(sgui.getActivePane()) return sgui.getActivePane().doButtonPress(event);
-		return true;
-	});
-	
-	//Listen for mouseclicks
-	_getCanvas().addEventListener("click", function(e) {
-		if(sgui.getActivePane() && sgui.getActivePane().mouse) sgui.getActivePane().mouse.doClick(e);
+	// Listen for interaction events
+	interaction.on.listen(function(e) {
+		if(sgui.getActivePane()) sgui.getActivePane().interact(e);
+		
+		var a = controls.interactionControl(e);
+		if(a.length && sgui.getActivePane()) sgui.getActivePane().control(e, a);
+		
+		if(e.type == interaction.MOUSE_CLICK) {
+			if(sgui.getActivePane() && sgui.getActivePane().mouse) sgui.getActivePane().mouse.doClick(e);
+		}
 	});
 	
 	//Listen for frame events
@@ -585,23 +580,6 @@ load.provide("dusk.sgui", (function() {
 		}
 		
 		for(var p = _panes.length-1; p >= 0; p --){
-			if(_panes[p].mouse) {
-				_panes[p].mouse.update(
-					_mouseX - _panes[p].x,
-					_mouseY - _panes[p].y
-				);
-				
-				_panes[p].containerUpdateMouse(
-					_mouseX - _panes[p].x,
-					_mouseY - _panes[p].y
-				);
-				
-				if(_mouseMoveQueued) _panes[p].mouse.move.fire();
-			}
-		}
-		_mouseMoveQueued = false;
-		
-		for(var p = _panes.length-1; p >= 0; p --){
 			_panes[p].frame.fire();
 		}
 	});
@@ -615,13 +593,6 @@ load.provide("dusk.sgui", (function() {
 	_cacheCanvas.getContext("2d").webkitImageSmoothingEnabled = false;
 	_cacheCanvas.getContext("2d").imageSmoothingEnabled = false;
 	_cacheCanvas.getContext("2d").textBaseline = "middle";
-	
-	//Listen for canvas mouse movements
-	_getCanvas().addEventListener("mousemove", function(e){
-		_mouseX = e.clientX - _getCanvas().getBoundingClientRect().left;
-		_mouseY = e.clientY - _getCanvas().getBoundingClientRect().top;
-		_mouseMoveQueued = true;
-	});
 	
 	//Controls
 	controls.addControl("sgui_up", 38, "1-");
@@ -650,7 +621,7 @@ load.provide("dusk.sgui", (function() {
 
 
 load.provide("dusk.pause", (function() {
-	var controls = load.require("dusk.controls");
+	var controls = load.require("dusk.input.controls");
 	var sgui = load.require("dusk.sgui");
 	
 	/** @namespace dusk.pause

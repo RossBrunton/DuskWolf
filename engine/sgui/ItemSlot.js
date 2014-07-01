@@ -103,7 +103,7 @@ load.provide("dusk.sgui.ItemSlot", (function() {
 				if(this._invent.isValidAddition(h.getHand().getItemFromSlot(0))
 				&& this._invent.isValidAdditionToSlot(h.getHand().getItemFromSlot(0), this.slot)) {
 					//Can add the item
-					h.getHand().sendToInventSlot(this._invent, this.slot, e.keyPress.shiftKey?1:0xffffffff);
+					h.getHand().sendToInventSlot(this._invent, this.slot, e.shift?1:0xffffffff);
 				}else if(this._invent.isValidAddition(h.getHand().getItemFromSlot(0))) {
 					//Swap them round
 					var temp = new items.Invent(1, "true");
@@ -116,7 +116,7 @@ load.provide("dusk.sgui.ItemSlot", (function() {
 				//Not holding anything
 				if(h.getHand().isValidAddition(this._invent.getItemFromSlot(this.slot))) {
 					this._invent.sendSlotToInvent(h.getHand(), this.slot,
-						e.keyPress.shiftKey?(this._invent.countSlot(this.slot)>>1):0xffffffff
+						e.shift?(this._invent.countSlot(this.slot)>>1):0xffffffff
 					);
 				}else{
 					//..?

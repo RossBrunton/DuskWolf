@@ -4,7 +4,7 @@
 
 load.provide("test.dusk.Controls", (function() {
 	var test = load.require("test");
-	var controls = load.require("dusk.controls");
+	var controls = load.require("dusk.input.controls");
 	
 	test.registerTestFunction("test.dusk.Controls", function(tester) {
 		tester.start("Registering New Control");

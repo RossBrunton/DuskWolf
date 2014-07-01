@@ -17,7 +17,8 @@ load.provide("dusk.sgui.BasicMain", (function() {
 	var c = load.require("dusk.sgui.c");
 	var entities = load.require("dusk.entities");
 	var dusk = load.require("dusk");
-	var keyboard = load.require("dusk.keyboard");
+	var keyboard = load.require("dusk.input.keyboard");
+	var controls = load.require("dusk.input.controls");
 	
 	var BasicMain = function(parent, comName) {
 		Group.call(this, parent, comName);
@@ -45,10 +46,11 @@ load.provide("dusk.sgui.BasicMain", (function() {
 		
 		//Listeners
 		this.frame.listen(this._basicMainFrame.bind(this));
-		this.keyPress.listen(this.save.bind(this), 83);
-		this.keyPress.listen((function(e) {
+		this.onControl.listen(this.save.bind(this), controls.addControl("basicmain_save", "S"));
+		this.onControl.listen((function(e) {
 			if(editor.active) this.createRoom(prompt("Enter a room to go to.", this.roomName), 0);
-		}).bind(this), 71);
+		}).bind(this), controls.addControl("basicmain_goto", "G"));
+		
 		this.augment.listen((function(e) {
 			this.mouse.focus = false;
 		}).bind(this), "mouse");
@@ -60,16 +62,16 @@ load.provide("dusk.sgui.BasicMain", (function() {
 		this.dirPress.listen(this._bmDownAction.bind(this), c.DIR_DOWN);
 	};
 	BasicMain.prototype = Object.create(Group.prototype);
-
+	
 	BasicMain.LAYER_TILEMAP = 0x01;
 	BasicMain.LAYER_SCHEME = 0x02;
 	BasicMain.LAYER_ENTITIES = 0x04;
 	BasicMain.LAYER_PARTICLES = 0x08;
 	BasicMain.LAYER_TRANSITIONS = 0x10;
 	BasicMain.LAYER_REGION = 0x20;
-
+	
 	var _LAYER_COLOURS = ["#ff0000", "#00ff00", "#0000ff"];
-
+	
 	BasicMain.prototype.createRoom = function(name, spawn) {
 		var room = null;
 		if(this.roomManager) room = this.roomManager.getRoomData(name);
@@ -117,7 +119,7 @@ load.provide("dusk.sgui.BasicMain", (function() {
 		
 		this.autoScroll();
 	};
-
+	
 	//layers
 	Object.defineProperty(BasicMain.prototype, "layers", {
 		get: function() {
@@ -206,7 +208,7 @@ load.provide("dusk.sgui.BasicMain", (function() {
 			});
 		}
 	});
-
+	
 	BasicMain.prototype.getFirstLayerOfType = function(type) {
 		for(var i = 0; i < this._layers.length; i ++) {
 			if((this._layers[i].type & type) > 0) return this.getComponent(this._layers[i].name);
@@ -214,7 +216,7 @@ load.provide("dusk.sgui.BasicMain", (function() {
 		
 		return null;
 	};
-
+	
 	BasicMain.prototype.getAllLayersOfType = function(type) {
 		var out = [];
 		for(var i = 0; i < this._layers.length; i ++) {
@@ -223,28 +225,28 @@ load.provide("dusk.sgui.BasicMain", (function() {
 		
 		return out;
 	};
-
+	
 	BasicMain.prototype.getPrimaryEntityLayer = function() {
 		return this.getComponent(this._primaryEntityGroup);
 	};
-
+	
 	BasicMain.prototype.getTransitionManager = function() {
 		return this.getAllLayersOfType(BasicMain.LAYER_TRANSITIONS)[0];
 	};
-
+	
 	BasicMain.prototype.getScheme = function() {
 		return this.getAllLayersOfType(BasicMain.LAYER_SCHEME)[0];
 	};
-
+	
 	BasicMain.prototype.getRegion = function() {
 		return this.getAllLayersOfType(BasicMain.LAYER_REGION)[0];
 	};
-
+	
 	BasicMain.prototype.getSeek = function() {
 		if(!this.getComponent(this._primaryEntityGroup)) return null;
 		return this.getComponent(this._primaryEntityGroup).getComponent(entities.seek);
 	};
-
+	
 	BasicMain.prototype._basicMainFrame = function(e) {
 		//Center the player
 		this.autoScroll();
@@ -280,7 +282,7 @@ load.provide("dusk.sgui.BasicMain", (function() {
 			}
 		}
 	};
-
+	
 	BasicMain.prototype.autoScroll = function() {
 		// Centre the player
 		var seekCoords = [];
@@ -323,11 +325,11 @@ load.provide("dusk.sgui.BasicMain", (function() {
 		
 		if((oldX != this.xOffset || oldY != this.yOffset) && this.mouse) {
 			//It counts, okay!
-			this.containerUpdateMouse(this.mouse.x, this.mouse.y);
-			this.mouse.move.fire();
+			//this.containerUpdateMouse(this.mouse.x, this.mouse.y);
+			//this.mouse.move.fire();
 		}
 	};
-
+	
 	BasicMain.prototype._bmUpAction = function(e) {
 		if(!editor.active) return true;
 		if(keyboard.isKeyPressed(187)) {
@@ -366,7 +368,7 @@ load.provide("dusk.sgui.BasicMain", (function() {
 		
 		return true;
 	};
-
+	
 	BasicMain.prototype._bmDownAction = function(e) {
 		if(!editor.active) return true;
 		if(keyboard.isKeyPressed(187)) {
@@ -397,7 +399,7 @@ load.provide("dusk.sgui.BasicMain", (function() {
 		
 		return true;
 	};
-
+	
 	BasicMain.prototype._bmLeftAction = function(e) {
 		if(!editor.active) return true;
 		if(keyboard.isKeyPressed(187)) {
@@ -434,7 +436,7 @@ load.provide("dusk.sgui.BasicMain", (function() {
 		
 		return true;
 	};
-
+	
 	BasicMain.prototype._bmRightAction = function(e) {
 		if(!editor.active) return true;
 		if(keyboard.isKeyPressed(187)) {
@@ -465,7 +467,7 @@ load.provide("dusk.sgui.BasicMain", (function() {
 		
 		return true;
 	};
-
+	
 	BasicMain.prototype.save = function(e, returnRoom) {
 		if(!editor.active) return true;
 		
@@ -512,10 +514,10 @@ load.provide("dusk.sgui.BasicMain", (function() {
 		if(returnRoom) return out;
 		return false;
 	};
-
+	
 	Object.seal(BasicMain);
 	Object.seal(BasicMain.prototype);
-
+	
 	sgui.registerType("BasicMain", BasicMain);
 	
 	return BasicMain;
@@ -524,7 +526,7 @@ load.provide("dusk.sgui.BasicMain", (function() {
 
 load.provide("dusk.sgui.IBasicMainLayer", (function() {
 	var IBasicMainLayer = function() {};
-
+	
 	IBasicMainLayer.saveBM = function() {};
 	IBasicMainLayer.loadBM = function() {};
 	

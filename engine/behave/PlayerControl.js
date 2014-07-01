@@ -5,7 +5,7 @@
 load.provide("dusk.behave.PlayerControl", (function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.behave.Behave");
-	var controls = load.require("dusk.controls");
+	var controls = load.require("dusk.input.controls");
 	
 	var PlayerControl = function(entity) {
 		Behave.call(this, entity);
