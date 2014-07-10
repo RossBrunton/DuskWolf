@@ -7,7 +7,7 @@ load.provide("dusk.sgui.PlusText", (function() {
 	var sgui = load.require("dusk.sgui");
 	var Label = load.require("dusk.sgui.Label");
 	var c = load.require("dusk.sgui.c");
-
+	
 	/** Makes your own, brand new PlusText component.
 	 * 
 	 * @param {dusk.sgui.Component} parent The container that this component is in.
@@ -67,6 +67,12 @@ load.provide("dusk.sgui.PlusText", (function() {
 		 * @default NullCom
 		 */
 		this.plusType = "NullCom";
+		/** If true, then a click on this event will automatically go to the plus component.
+		 * @type boolean
+		 * @default true
+		 * @since 0.0.21-alpha
+		 */
+		this.plusProxy = true;
 		
 		//Prop masks
 		this._registerPropMask("text", "text");
@@ -76,20 +82,21 @@ load.provide("dusk.sgui.PlusText", (function() {
 		this._registerPropMask("behind", "behind");
 		this._registerPropMask("onLeft", "onLeft");
 		this._registerPropMask("plusType", "plusType");
+		this._registerPropMask("plusProxy", "plusProxy");
 		
 		//Listeners
-		this.frame.listen(this._ptFrame.bind(this));
+		this.frame.listen(_frame.bind(this));
 		
 		//Setup
 		this.focusBehaviour = Group.FOCUS_ALL;
 	};
 	PlusText.prototype = Object.create(Group.prototype);
-
+	
 	/** Called every frame, to update the location and widths.
 	 * @param {object} e The event object.
 	 * @private
 	 */
-	PlusText.prototype._ptFrame = function(e) {
+	var _frame = function(e) {
 		this.getComponent("label").width = this.width - this.getComponent("plus").width - this.spacing;
 		
 		if(this.onLeft) {
@@ -101,10 +108,18 @@ load.provide("dusk.sgui.PlusText", (function() {
 		}
 		
 		if(this.behind) {
-			this.getComponent("label").width = -1;
+			if(!this.getComponent("label").multiline) {
+				this.getComponent("label").width = -1;
+			}else{
+				this.getComponent("label").width = this.width - this.spacing;
+			}
+			
 			this.getComponent("plus").x = 0;
 			this.getComponent("label").xOrigin = c.ORIGIN_MIDDLE;
 			this.getComponent("label").x = 0;
+			
+			this.getComponent("plus").width = this.width;
+			this.getComponent("plus").height = this.height;
 		}
 		
 		this.getComponent("label").text = this.text;
@@ -112,13 +127,32 @@ load.provide("dusk.sgui.PlusText", (function() {
 		if(!this.height) this.height = this.getComponent("plus").height;
 		this.getComponent("label").height = this.height;
 	};
-
+	
+	/** Override to enable `{@link dusk.sgui.PlusText.plusProxy}`.
+	 * 
+	 * @param {object} e The interaction event.
+	 * @return {boolean} The return value of the focused component's keypress.
+	 */
+	PlusText.prototype.containerClick = function(e) {
+		if(this.mouse && this.mouse.allow) {
+			if(!this.plusProxy) return Group.prototype.containerClick.call(this, e);
+			
+			if(this.getComponent("plus").visible && this.getComponent("plus").mouse
+			&& !this.getComponent("plus").mouse.clickPierce) {
+				
+				return this.getComponent("plus").mouse.doClick(e);
+			}
+		}
+		
+		return true;
+	};
+	
 	//Plus
 	Object.defineProperty(PlusText.prototype, "plus", {
 		get: function() {return this.getComponent("plus").bundle();},
 		set: function(value) {this.getComponent("plus").parseProps(value);}
 	});
-
+	
 	//Label
 	Object.defineProperty(PlusText.prototype, "label", {
 		get: function() {return this.getComponent("label").bundle();},
@@ -128,7 +162,7 @@ load.provide("dusk.sgui.PlusText", (function() {
 			this.getComponent("plus").alterLayer("-label");
 		}
 	});
-
+	
 	//plusType
 	Object.defineProperty(PlusText.prototype, "plusType", {
 		get: function() {return this.getComponent("plus").type;},
@@ -138,10 +172,10 @@ load.provide("dusk.sgui.PlusText", (function() {
 			this.getComponent("plus").alterLayer("-label");
 		}
 	});
-
+	
 	Object.seal(PlusText);
 	Object.seal(PlusText.prototype);
-
+	
 	sgui.registerType("PlusText", PlusText);
 	
 	return PlusText;

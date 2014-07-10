@@ -1,4 +1,4 @@
 #!/bin/bash
 echo "Documenting!";
-jsdoc DuskWolf Tools/docIndex.md -c Tools/jsdoc.conf.json -d Doc -r $*;
+jsdoc DuskWolf tools/docIndex.md -c tools/jsdoc.conf.json -d Doc -r $*;
 echo "Documenting finished, have a nice day!"

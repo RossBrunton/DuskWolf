@@ -6,7 +6,7 @@ load.provide("dusk.sgui.FpsMeter", (function() {
 	var Label = load.require("dusk.sgui.Label");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
-
+	
 	/** Creates a new FpsMeter component.
 	 * 
 	 * @param {dusk.sgui.Component} parent The container that this component is in.
@@ -22,22 +22,42 @@ load.provide("dusk.sgui.FpsMeter", (function() {
 	var FpsMeter = function (parent, comName) {
 		Label.call(this, parent, comName);
 		
+		this._count = 0;
+		this._readings = new Uint8Array(30);
+		
 		//Listeners
-		this.frame.listen(this._fpsFrame.bind(this));
+		this.frame.listen(_frame.bind(this));
 	};
 	FpsMeter.prototype = Object.create(Label.prototype);
-
+	
 	/** Called every frame, and sets the text to the frame rate.
 	 * @param {object} e The event object.
 	 * @private
 	 */
-	FpsMeter.prototype._fpsFrame = function(e) {
-		this.text = ~~(sgui.frameRate) + "fps";
+	var _frame = function(e) {
+		this._readings[this._count] = ~~(sgui.frameRate);
+		this._count ++;
+		
+		if(this._count == 30) {
+			var fps = (
+				this._readings[0]
+				+ this._readings[5]
+				+ this._readings[10]
+				+ this._readings[15]
+				+ this._readings[20]
+				+ this._readings[25]
+				+ this._readings[29]
+				+ this._readings[18]
+			) >> 3
+			
+			this.text =  fps + "fps";
+			this._count = 0;
+		}
 	};
-
+	
 	Object.seal(FpsMeter);
 	Object.seal(FpsMeter.prototype);
-
+	
 	sgui.registerType("FpsMeter", FpsMeter);
 	
 	return FpsMeter;

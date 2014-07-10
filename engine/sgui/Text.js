@@ -395,10 +395,12 @@ load.provide("dusk.sgui.Label", (function() {
 	/** Updates the cache.
 	 * @param {boolean} widthOnly Will only update the width, rather than drawing the text. This function must be called
 	 * with this argument first, unless you know that the width has not changed.
+	 * @param {?string} text The text to use, defaults to the contents of this text field.
+	 * @return {integer} If this is multiline, the number of lines, else the width.
 	 * @private
 	 */
-	Label.prototype._updateCache = function(widthOnly) {
-		var textHold = this._text;
+	Label.prototype._updateCache = function(widthOnly, text) {
+		var textHold = text !== undefined?text:this._text;
 		var textBuffer = "";
 		
 		//Create the cache
@@ -425,6 +427,7 @@ load.provide("dusk.sgui.Label", (function() {
 			if(textBuffer !== "") {
 				if(useBorder && !widthOnly)
 					c.strokeText(textBuffer, cursor, this.padding + (line * this.size) + (this.size >> 1));
+				
 				if(!widthOnly) c.fillText(textBuffer, cursor, this.padding + (line * this.size) + (this.size>>1));
 				
 				cursor += c.measureText(textBuffer).width;
@@ -517,7 +520,7 @@ load.provide("dusk.sgui.Label", (function() {
 						charData[1][1] = (charData[1][0].width() / charData[1][0].height()) * this.size;
 					}
 					
-					if(charData[1][0].isReady()) {
+					if(charData[1][0].isReady() && !widthOnly) {
 						charData[1][0].paint(c, "", false,
 							0, 0, charData[1][0].width(), charData[1][0].height(),
 							cursor, this.padding + line * this.size, charData[1][1], this.size
@@ -541,6 +544,23 @@ load.provide("dusk.sgui.Label", (function() {
 		if(isNaN(this._cachedWidth)) this._cachedWidth = this.padding << 1;
 		this._cachedWidth = ~~this._cachedWidth;
 		if(!widthOnly) this._sig = this._genSig();
+		
+		if(!this.multiline) {
+			return this._cachedWidth;
+		}else{
+			return line +1;
+		}
+	};
+	
+	/** Counts the number of lines (if it is a multiline text field) that the given text takes up.
+	 * @param {string} Text the text to measure.
+	 * @return {integer} The lines the text takes up.
+	 * @since 0.0.21-alpha
+	 */
+	Label.prototype.countLines = function(text) {
+		if(!this.multiline) return 1;
+		
+		return this._updateCache(true, text);
 	};
 	
 	//width

@@ -152,9 +152,26 @@ load.provide("dusk.sgui.FancyRect", (function() {
 			e.d.destX, e.d.destY, e.d.width, e.d.height
 		);
 	};
+	
+	/** Checks if all images are ready.
+	 * @return {boolean} False if an image isn't ready.
+	 * @protected
+	 */
+	FancyRect.prototype._everythingReady = function() {
+		return (!this._back || this._back.isReady()) &&
+			(!this._top || this._top.isReady()) &&
+			(!this._bottom || this._bottom.isReady()) &&
+			(!this._left || this._left.isReady()) &&
+			(!this._right || this._right.isReady()) &&
+			(!this._topLeft || this._topLeft.isReady()) &&
+			(!this._topRight || this._topRight.isReady()) &&
+			(!this._bottomLeft || this._bottomLeft.isReady()) &&
+			(!this._bottomRight || this._bottomRight.isReady());
+			
+	}
 
 	FancyRect.prototype._cacheSig = function() {
-		return this.x+","+this.y+","+this.height+","+this.width;
+		return this.x+","+this.y+","+this.height+","+this.width+","+this._everythingReady();
 	};
 
 	//back

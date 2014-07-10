@@ -57,7 +57,7 @@ load.provide("dusk.sgui.extras.Fade", (function() {
 		this._props.map("to", "to");
 	};
 	Fade.prototype = Object.create(Effect.prototype);
-
+	
 	/** Used internally to start the effect.
 	 * @private
 	 */
@@ -72,7 +72,7 @@ load.provide("dusk.sgui.extras.Fade", (function() {
 			this._decreasing = false;
 		}
 	};
-
+	
 	/** Used internally to do a single tick of the effect.
 	 * @private
 	 */
@@ -84,18 +84,18 @@ load.provide("dusk.sgui.extras.Fade", (function() {
 		}
 		this._owner.alpha = this._range.value;
 	};
-
+	
 	/** Used internally once the effect has ended to set the end alpha correctly.
 	 * @private
 	 */
 	Fade.prototype._fdeOnEnd = function(e) {
 		this._owner.alpha = this.to;
 	};
-
-
+	
+	
 	Object.seal(Fade);
 	Object.seal(Fade.prototype);
-
+	
 	sgui.registerExtra("Fade", Fade);
 	
 	return Fade;

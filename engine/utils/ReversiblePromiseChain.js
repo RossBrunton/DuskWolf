@@ -12,7 +12,7 @@ load.provide("dusk.reversiblePromiseChain", (function() {
 	 * @description This is a namespace containing only one function.
 	 * @since 0.0.21-alpha
 	 */
-
+	
 	/** Creates a promise that is a chain of promises that if any reject, a previous one in the sequence is used.
 	 * 
 	 * This consists of an array of functions. Each function should return a promise or not (think functions that can be 
@@ -107,11 +107,15 @@ load.provide("dusk.reversiblePromiseChain", (function() {
 				
 				if(!(value instanceof UserCancelError)) {
 					return reject(value);
+				}else if(!value) {
+					console.warn("Undefined cancel value, opening debugger.");
+					debugger;
+					return reject(value);
 				}
 				
 				if(this.p < 0) {
 					if(cancelOut) {
-						reject(new Error("Cancelled"));
+						return reject(new UserCancelError());
 					}else{
 						this.p = 0;
 						return this.next(initialArg);
@@ -126,8 +130,9 @@ load.provide("dusk.reversiblePromiseChain", (function() {
 			scope.next();
 		}));
 	};
-
-	/** Special function that when it is reached in a reversible promise chain will cause the chain to terminate instantly.
+	
+	/** Special function that when it is reached in a reversible promise chain will cause the chain to terminate
+	 *  instantly.
 	 * 
 	 * Calling this function has no effect.
 	 * @static

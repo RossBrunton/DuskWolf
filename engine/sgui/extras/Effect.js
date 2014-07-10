@@ -42,6 +42,11 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 		 * @type integer
 		 */
 		this.delay = 0;
+		/** If true, then the effect won't be deleted once it's finished.
+		 * @type boolean
+		 * @since 0.0.21-alpha
+		 */
+		this.noDelete = false;
 		
 		/** The state of the effect, from 0 to 3, higher numbers indicate later states.
 		 * 
@@ -104,24 +109,25 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 		this._onEnd = new EventDispatcher("dusk.sgui.extras.Effect._onEnd");
 		
 		//Listeners
-		this._effectFrameId = this._owner.frame.listen(this._effectFrame.bind(this));
-		this.onDelete.listen(this._effDeleted.bind(this));
+		this._effectFrameId = this._owner.frame.listen(_frame.bind(this));
+		this.onDelete.listen(_deleted.bind(this));
 		
 		//Prop masks
 		this._props.map("on", "__on");
 		this._props.map("then", "then");
 		this._props.map("delay", "delay");
 		this._props.map("duration", "duration");
+		this._props.map("noDelete", "noDelete");
 	};
 	Effect.prototype = Object.create(Extra.prototype);
-
+	
 	/** Starts the effect if it has not already been started. */
 	Effect.prototype.start = function() {
 		if(this._state > 0) return;
 		this._state = 1;
 		this._left = this.delay;
 	};
-
+	
 	/** Added to listener triggers, will call `{@link dusk.sgui.extras.Effect#start}`.
 	 * @param {object} e The event object.
 	 * @private
@@ -129,7 +135,7 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 	Effect.prototype._startEvent = function(e) {
 		this.start();
 	};
-
+	
 	/** Ends the effect, will be called automatically when it ends. */
 	Effect.prototype.end = function() {
 		this._state = 3;
@@ -150,22 +156,26 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 			}
 		}
 		
-		this._owner.removeExtra(this.name);
+		if(this.noDelete) {
+			this._state = 0;
+		}else{
+			this._owner.removeExtra(this.name);
+		}
 	};
-
+	
 	/** Added to the `{@link dusk.sgui.extras.Extra#_onDelete}` listener; removes the frame listener from it's owner.
 	 * @param {object} e The event object.
 	 * @private
 	 */
-	Effect.prototype._effDeleted = function(e) {
+	var _deleted = function(e) {
 		this._owner.frame.unlisten(this._effectFrameId);
 	};
-
+	
 	/** Called every frame by it's owner, this does effect stuff.
 	 * @param {object} e The event object.
 	 * @private
 	 */
-	Effect.prototype._effectFrame = function(e) {
+	var _frame = function(e) {
 		if(this._autoTrigger) {
 			this.start();
 		}
@@ -199,7 +209,7 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 			this.end();
 		}
 	};
-
+	
 	/** Adds a new "trigger" to the effect, indicating a condition in which it should start.
 	 * 
 	 * A single trigger is an array, how the trigger works depends on what type the first element is.
@@ -241,7 +251,7 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 			return undefined;
 		}
 	});
-
+	
 	Object.seal(Effect);
 	Object.seal(Effect.prototype);
 	
