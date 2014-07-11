@@ -19,13 +19,8 @@ Start a HTTP server (or put all the files in web root or wherever):
 And then navigate to `127.0.0.1:8000` in a web browser.
 
 ## Documentation ##
-The code is documented using JSDoc 3.2, although at the moment it doesn't work very well.
-
-You can read it in the source code, which is what I do, or you can generate HTML documentation using:
-> make document
-
-Or, to document private members as well:
-> make documentPrivate
+The code is documented using tags and stuff, but I've not found a documentation generator I'm happy with. Just read the
+ comments in the code.
 
 ## Super Interesting Legal Stuff ##
 This is licensed under the MIT License, see COPYING.txt for details.

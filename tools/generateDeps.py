@@ -2,8 +2,9 @@
 
 # Generates a dependancy file
 
-# > generateDeps.py [path] [indent]
+# > generateDeps.py [path] [obj] [indent]
 # Path is the path to (recursivley) generate dependancies for, defaults to the current directory
+# Obj will be merged with the dependancies, and any properties on it will be present in the exported file.
 # Indent is the amount to indent (an integer) for pretty printing,
 #  if not specified then the file will be compressed as much as possible
 
@@ -36,7 +37,11 @@ for root, dirs, files in os.walk("."):
 				data[-1][1].sort()
 				data[-1][2].sort()
 
-if len(sys.argv) > 2:
-	print json.dumps(data, indent=int(sys.argv[2]))
+export = {"version":1, "packages":data}
+if len(sys.argv) >= 3:
+	export.update(json.loads(sys.argv[2]))
+
+if len(sys.argv) > 3:
+	print json.dumps(export, indent=int(sys.argv[3]))
 else:
-	print json.dumps(data, separators=(',', ':'))
+	print json.dumps(export, separators=(',', ':'))

@@ -269,7 +269,14 @@ def importList(path, callback=None, errorCallback=None):
         relativePath = os.path.split(path)[0]
         
         data = json.load(file(path))
-        for p in data:
+        
+        try:
+            data["version"]
+        except TypeError:
+            #Convert into new format
+            data = {"version":0, "packages":data}
+        
+        for p in data["packages"]:
             if "://" not in p[0] and not os.path.isabs(p[0]):
                 p[0] = os.path.join(relativePath, p[0]);
                 

@@ -5,7 +5,6 @@
 load.provide("dusk.sgui.Component", (function() {
 	var utils = load.require("dusk.utils");
 	var EventDispatcher = load.require("dusk.EventDispatcher");
-	var keyboard = load.require("dusk.input.keyboard");
 	var controls = load.require("dusk.input.controls");
 	var sgui = load.require("dusk.sgui");
 	var Mapper = load.require("dusk.Mapper");
@@ -16,15 +15,13 @@ load.provide("dusk.sgui.Component", (function() {
 	var Pane = load.suggest("dusk.sgui.Pane", function(p) {Pane = p});
 	var interaction = load.require("dusk.input.interaction");
 	
-	/** @class dusk.sgui.Component
+	/** A component is a single "thing" that exists in the SimpleGui system. Everything in the Simple GUI system that
+	 *  wants to be displayed should have this in its prototype chain.
 	 * 
-	 * @classdesc A component is a single "thing" that exists in the SimpleGui system.
-	 *  Everything in the Simple GUI system must have this (or a subclass of this) as a base class.
+	 * This class doesn't actually display anything itself, classes that inherit from it do. The properties for this
+	 *  apply to all components.
 	 * 
-	 * This class doesn't actually display anything itself, classes that inherit from it do.
-	 * 	The properties for this apply to all components.
-	 * 
-	 * More information about how this class works is in the documentation for `{@link dusk.sgui}`.
+	 * More information about how this class works is in the documentation for `dusk.sgui`.
 	 * 
 	 * @param {?dusk.sgui.Group} parent The container that this component is in.
 	 * @param {string} componentName The name of the component.
@@ -101,7 +98,7 @@ load.provide("dusk.sgui.Component", (function() {
 		 * @since 0.0.18-alpha
 		 */
 		this.activeBorder = null;
-
+		
 		/** The name of the group's component that will be focused when the left key is pressed
 		 *  and `{@link dusk.sgui.Component.leftDirection}` returns true.
 		 * @type string
@@ -854,9 +851,6 @@ load.provide("dusk.sgui.Component", (function() {
 	 */
 	var _prepareDrawPool = new Pool(Object);
 	
-	Object.seal(Component);
-	Object.seal(Component.prototype);
-	
 	return Component;
 })());
 
@@ -886,9 +880,6 @@ load.provide("dusk.sgui.NullCom", (function() {
 	 * @since 0.0.19-alpha
 	 */
 	NullCom.prototype.bundle = function() {return {};}
-	
-	Object.seal(NullCom);
-	Object.seal(NullCom.prototype);
 	
 	sgui.registerType("NullCom", NullCom);
 	
