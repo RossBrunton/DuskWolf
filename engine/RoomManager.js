@@ -5,9 +5,7 @@
 load.provide("dusk.RoomManager", (function() {
 	var EventDispatcher = load.require("dusk.EventDispatcher");
 	
-	/** @class dusk.RoomManager
-	 * 
-	 * @classdesc Manages rooms, which contain tilemap data and the entities in the room.
+	/** Manages rooms, which contain tilemap data and the entities in the room.
 	 * 
 	 * This is intended to be used with an instance of `{@link dusk.sgui.BasicMain}` and essentially serves as a storage 
 	 *  for it's rooms. Both `{@link dusk.plat}` and `{@link dusk.quest}` have their own room managers for their own types
@@ -51,7 +49,7 @@ load.provide("dusk.RoomManager", (function() {
 		 */
 		this.managerPath = managerPath;
 	};
-
+	
 	/** Stores a room.
 	 * 
 	 * @param {string} name The name of the room.
@@ -60,7 +58,7 @@ load.provide("dusk.RoomManager", (function() {
 	RoomManager.prototype.createRoom = function(name, data) {
 		this._rooms[name] = data;
 	};
-
+	
 	/** Returns a room stored under the specified name.
 	 * 
 	 * @param {string} name The name to look up.
@@ -69,11 +67,13 @@ load.provide("dusk.RoomManager", (function() {
 	RoomManager.prototype.getRoomData = function(name) {
 		return this._rooms[name];
 	};
-
+	
 	/** Asks the basic main to set a room, with the "seek" entitiy at the mark specified.
 	 * 
 	 * @param {string} room The name of the room to load.
 	 * @param {?integer} spawn The mark ID for the seek entity to appear at.
+	 * @return {promise(object)} A promise that fulfills when the room has finished loading. The value is an object
+	 *  containing `room` and `spawn`.
 	 */
 	RoomManager.prototype.setRoom = function(room, spawn) {
 		if(!room) {
@@ -86,10 +86,12 @@ load.provide("dusk.RoomManager", (function() {
 		}
 		console.log("Setting room "+room);
 		
-		this.basicMain.createRoom(room, spawn);
-		this.roomLoaded.fire({"room":room, "spawn":spawn});
+		return this.basicMain.createRoom(room, spawn).then((function(e) {
+			this.roomLoaded.fire({"room":room, "spawn":spawn}, room);
+			return {"room":room, "spawn":spawn};
+		}).bind(this));
 	};
-
+	
 	/** Sets the Basic Main instance this is for; this should be called instead of setting it directly.
 	 * @param {dusk.sgui.BasicMain} bm The Basic Main instance.
 	 */
@@ -97,25 +99,19 @@ load.provide("dusk.RoomManager", (function() {
 		this.basicMain = bm;
 		bm.roomManager = this;
 	};
-
-	Object.seal(RoomManager);
-	Object.seal(RoomManager.prototype);
 	
 	return RoomManager;
 })());
 
 load.provide("dusk.editor", (function() {
-	/** @namespace dusk.editor
-	 * @name dusk.editor
-	 * 
-	 * @description Provides configuration variables for level editing using `{@link dusk.sgui.BasicMain}`.
+	/** Provides configuration variables for level editing using `{@link dusk.sgui.BasicMain}`.
 	 * 
 	 * It is expected that HTML buttons and simple scripts on such (or just the console) would edit the properties of this.
 	 * 
 	 * @since 0.0.16-alpha
 	 */
 	var editor = {};
-
+	
 	/** Whether the editor is active.
 	 * 
 	 * If true, then entities will stop running, and the editing components gain focus.
@@ -124,7 +120,7 @@ load.provide("dusk.editor", (function() {
 	 * @default false
 	 */
 	editor.active = false;
-
+	
 	/** The names of the entity types that the number keys will drop if editing is enabled
 	 *  and the `{@link dusk.sgui.EntityGroup}` has focus.
 	 * 
@@ -133,7 +129,7 @@ load.provide("dusk.editor", (function() {
 	 * @type array
 	 */
 	editor.editDroppers = [];
-
+	
 	/** The name of the next entity that will be dropped.
 	 * 
 	 * Once that Entity is dropped, then this will be reset to `""`.
@@ -142,8 +138,6 @@ load.provide("dusk.editor", (function() {
 	 * @type string
 	 */
 	editor.editNext = "";
-
-	Object.seal(editor);
 	
 	return editor;
 })());

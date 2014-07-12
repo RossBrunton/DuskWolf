@@ -156,20 +156,20 @@ load.provide("test.dusk.utils", (function() {
 		tester.assertFalse(utils.arrayEqual([1, 2, 3], [1, 2, 5]));
 		
 		
-		tester.start("dusk.utils.arrayUnion");
+		tester.start("dusk.utils.arrayIntersect");
 		
 		tester.assertEqual(
-			utils.arrayUnion([], []),
+			utils.arrayIntersect([], []),
 			[]
 		);
 		
 		tester.assertEqual(
-			utils.arrayUnion([1, 2], [2]),
+			utils.arrayIntersect([1, 2], [2]),
 			[2]
 		);
 		
 		tester.assertEqual(
-			utils.arrayUnion([1, 2, 3], [2, 3]).sort(function(a,b){return a-b}),
+			utils.arrayIntersect([1, 2, 3], [2, 3]).sort(function(a,b){return a-b}),
 			[2, 3]
 		);
 		

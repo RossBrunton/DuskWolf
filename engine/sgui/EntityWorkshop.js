@@ -399,7 +399,7 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 		
 		console.log(JSON.stringify(ent));
 		
-		entities.types.setRaw(this.path("top/name").text, ent, this.path("top/extends").text);
+		entities.types.createNewType(this.path("top/name").text, ent, this.path("top/extends").text);
 	};
 	
 	EntityWorkshop.prototype._updateData = function() {

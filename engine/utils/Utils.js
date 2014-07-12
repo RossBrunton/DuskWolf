@@ -3,16 +3,13 @@
 "use strict";
 
 load.provide("dusk.utils", (function() {
-	/** @namespace dusk.utils
-	 * 
-	 * @description This namespace contains general functions
-	 *  for manipulating data, nothing specific to any other namespace.
+	/** This namespace contains general functions for manipulating data, nothing specific to any other namespace.
 	 */
 	var utils = {};
 	
-	/** Makes a simple copy of the parameter object, and returns it.
-	 *   This will only work for simple objects, and not anything with prototypes and such like.
-	 *   Anything which isn't a basic object will have it's reference copied, rather than it's value.
+	/** Makes a simple copy of the parameter object, and returns it. This will only work for simple objects, and not
+	 *  anything with prototypes and such like. Anything which isn't a basic object will have its reference copied,
+	 *  rather than its value.
 	 * @param {*} o The source object to copy.
 	 * @return {object} A copy of the source object.
 	 */
@@ -37,9 +34,9 @@ load.provide("dusk.utils", (function() {
 
 		return tmp;
 	};
-
-	/** Makes a simple copy of the array.
-	 *   Anything which isn't a basic object will have it's reference copied, rather than it's value.
+	
+	/** Makes a simple copy of the array. Anything which isn't a basic object will have it's reference copied, rather
+	 *  than its value.
 	 * @param {array} a The source array to copy.
 	 * @return {array} A copy of the source object.
 	 */
@@ -50,7 +47,7 @@ load.provide("dusk.utils", (function() {
 		}
 		return out;
 	};
-
+	
 	/** Merges two objects together, combining their properties.
 	 * 
 	 * Note that b takes priority, so if a and b both have the same property, b's will be set.
@@ -74,11 +71,11 @@ load.provide("dusk.utils", (function() {
 		
 		return a;
 	};
-
+	
 	/** Returns whether an object implements a specified interface.
 	 * 
-	 * The interface is an object where the enumerable property names 
-	 *  with any value equivalent to true represent functions.
+	 * The interface is an object where the enumerable property names with any value equivalent to true represent
+	 *  functions.
 	 * 
 	 * Arrays of string names of all the functions are accepted and preferable.
 	 * 
@@ -105,7 +102,7 @@ load.provide("dusk.utils", (function() {
 		}
 		return true;
 	};
-
+	
 	/** Creates a new canvas with a specified height and width.
 	 * 
 	 * @param {integer} width The width of the canvas.
@@ -121,7 +118,7 @@ load.provide("dusk.utils", (function() {
 		hold.getContext("2d").textBaseline = "middle";
 		return hold;
 	};
-
+	
 	/** Retrieves a HTTP get var (the ?name=value part of the URL).
 	 * @param {string} name The name of the var to get.
 	 * @param {?string} url The URL to parse, defaults to the current URL.
@@ -141,10 +138,9 @@ load.provide("dusk.utils", (function() {
 		
 		return null;
 	};
-
-	/** Returns if the object can be parsed as a JSON string.
-	 *   If it returns true, then it can be assumed that `JSON.parse` will not throw any error
-	 *   when trying to parse the string.
+	
+	/** Returns if the object can be parsed as a JSON string. If it returns true, then it can be assumed that
+	 *  `JSON.parse` will not throw any error when trying to parse the string.
 	 * @param {string} str The string to test.
 	 * @return {boolean} Whether the string is a valid JSON string.
 	 */
@@ -155,7 +151,7 @@ load.provide("dusk.utils", (function() {
 			.replace(/(?:^|:|,)(?:\s*\[)+/g, '')
 		);
 	}; Doesn't work */
-
+	
 	/** Strips anything that looks like a comment from a JSON string.
 	 * 
 	 * If, after removing the comment, the string is valid JSON, then it will be parsed, else this will return null.
@@ -170,13 +166,13 @@ load.provide("dusk.utils", (function() {
 		/*if(dusk.utils.isJson(json))*/ return JSON.parse(json);
 		return null;
 	};
-
-	/** Takes two version strings, and returns whether the first is higher than the second (1),
-	 *  they are the same (0) or the later is (-1).
+	
+	/** Takes two version strings, and returns whether the first is higher than the second (1), they are the same (0)
+	 *  or the later is (-1).
 	 * 
-	 * It looks for the first integer it can find in each argument, and if one is higher returns the relevent value.
-	 *  If both numbers are the same, then the next number is searched and checked.
-	 *  If all the numbers are the same, returns 0. Non-numerical characters are ignored.
+	 * It looks for the first integer it can find in each argument, and if one is higher returns the relevent value. If
+	 *  both numbers are the same, then the next number is searched and checked. If all the numbers are the same,
+	 *  returns 0. Non-numerical characters are ignored.
 	 * 
 	 * @param {string} a The first version string.
 	 * @param {string} b The second version string.
@@ -205,7 +201,7 @@ load.provide("dusk.utils", (function() {
 			if(ca === "" || cb === "") return 0;
 		}
 	};
-
+	
 	/** Given a base and a "." seperated list of object names, resolves that object.
 	 * 
 	 * For example, `utils(a, "b.c")` would be the same as `a.b.c`.
@@ -229,7 +225,7 @@ load.provide("dusk.utils", (function() {
 		
 		return now;
 	};
-
+	
 	/** Resolves a relative URL into an absolute one.
 	 * 
 	 * If the URL provided is relative, then the base URL will be prepended to it.
@@ -242,7 +238,7 @@ load.provide("dusk.utils", (function() {
 		if(url.indexOf(":") === -1 && url[0] != "/") url = base+url;
 		return url;
 	};
-
+	
 	/** Returns whether two arrays are equal (have the same elements at the same indexes).
 	 * 
 	 * @param {array} a The first array.
@@ -258,14 +254,14 @@ load.provide("dusk.utils", (function() {
 		
 		return true;
 	};
-
+	
 	/** Returns a new array containing all that occur at least once in a and b in no order.
 	 * 
 	 * @param {array} a The first array.
 	 * @param {array} b The second array.
 	 * @return {array} The union of both arrays.
 	 */
-	utils.arrayUnion = function(a, b) {
+	utils.arrayIntersect = function(a, b) {
 		var out = [];
 		
 		for(var i = a.length-1; i >= 0; i --) {
@@ -274,24 +270,25 @@ load.provide("dusk.utils", (function() {
 		
 		return out;
 	};
-
+	
 	/** A conversion type that converts the data to and from a hexadecimal string.
 	 * @type string
 	 * @constant
 	 * @value "0x"
 	 */
 	utils.SD_HEX = "0x";
-
-	/** A conversion type that does simple compression that is optimised if 
-	 *   the array buffer has sequential repeating elements in it.
+	
+	/** A conversion type that does simple compression that is optimised if the arraybuffer has sequential
+	 *  repeating elements in it.
 	 * 
-	 * It optimises based on patterns; if it sees the same sequence of two bytes (16 bits), then it will compress them down.
+	 * It optimises based on patterns; if it sees the same sequence of two bytes (16 bits), then it will compress them
+	 *  down.
 	 * @type string
 	 * @constant
 	 * @value "BC16"
 	 */
 	utils.SD_BC16 = "BC16";
-
+	
 	/** Converts a byte buffer to a string.
 	 * 
 	 * What this string looks like depends on the compression function.
@@ -394,7 +391,7 @@ load.provide("dusk.utils", (function() {
 		
 		return out;
 	};
-
+	
 	/** Converts a string to an arraybuffer, provided the string was converted using `{@link dusk.utils.dataToString}`.
 	 *  The method is autodetected.
 	 * 
@@ -448,10 +445,11 @@ load.provide("dusk.utils", (function() {
 			return output;
 		}
 	};
-
+	
 	/** Makes an AJAX GET request and returns a promise that fulfills with the response.
 	 * @param {string} path The path to the resource.
-	 * @param {string} type The type of the resource, this must be a valid value for an XMLHttpRequest's responseType value.
+	 * @param {string} type The type of the resource, this must be a valid value for an XMLHttpRequest's responseType
+	 *  value.
 	 * @return {promise(*)} A promise that fullfills with the value, given by the type.
 	 * @since 0.0.21-alpha
 	 */
@@ -472,8 +470,6 @@ load.provide("dusk.utils", (function() {
 			xhr.send();
 		});
 	};
-
-	Object.seal(utils);
 	
 	return utils;
 })());

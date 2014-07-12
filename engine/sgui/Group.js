@@ -169,6 +169,7 @@ load.provide("dusk.sgui.Group", (function() {
 		this.prepareDraw.listen(_groupDraw.bind(this));
 		this.frame.listen(_groupFrame.bind(this));
 		this.onInteract.listen(_mouseSelect.bind(this), interaction.MOUSE_MOVE);
+		this.onDelete.listen((function(e) {this.deleteAllComponents();}).bind(this));
 		
 		this.onActiveChange.listen((function(e){
 			if(this.focusBehaviour == Group.FOCUS_ALL) {

@@ -7,19 +7,10 @@ load.provide("dusk.behave.Behave", (function() {
 	var EventDispatcher = load.require("dusk.EventDispatcher");
 	var entities = load.require("dusk.entities");
 	
-	/** @namespace dusk.behave
+	/** A behaviour of an entity.
 	 * 
-	 * @description This is the namespace with all the Entity behaviours in it.
-	 * 
-	 * See `{@link dusk.behave.Behave}` for a description on what a behviour is.
-	 */
-
-	/** @class dusk.behave.Behave
-	 * 
-	 * @classdesc A behaviour of an entity.
-	 * 
-	 * Objects of this class, and it's subclasses, are "attached" to `{@link dusk.sgui.Entity}` instances and essentially
-	 * provide details on how the entity should act.
+	 * Objects of this class, and it's subclasses, are "attached" to `{@link dusk.sgui.Entity}` instances and
+	 *  essentially provide details on how the entity should act.
 	 * 
 	 * This class is the base class of these behaviours, but does nothing on it's own.
 	 * 
@@ -46,7 +37,7 @@ load.provide("dusk.behave.Behave", (function() {
 		 */
 		this.entityEvent = new EventDispatcher("dusk.behave.Behave.entityEvent", EventDispatcher.MODE_LAST);
 	};
-
+	
 	/** This accesses or sets behaviour data of the entity.
 	 * 
 	 * Behaviour data is data that is used by a behaviours, and is shared between all of them. It is also saved and loaded
@@ -66,7 +57,7 @@ load.provide("dusk.behave.Behave", (function() {
 		
 		return this._entity.behaviourData[name];
 	};
-
+	
 	/** Returns true if the specified control is active.
 	 * 
 	 * Entities should listen for the "controlActive" event, whose object has the property "control"; the name of the
@@ -89,9 +80,6 @@ load.provide("dusk.behave.Behave", (function() {
 		
 		return false;
 	};
-
-	Object.seal(Behave);
-	Object.seal(Behave.prototype);
 	
 	return Behave;
 })());

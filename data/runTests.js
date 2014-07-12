@@ -5,5 +5,6 @@
 load.provide("runTests", (function() {
 	var test = load.require("test");
 	
+	test.debug = true;
 	test.loadAndTestAll("tests/deps.json");
 })());

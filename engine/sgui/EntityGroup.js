@@ -14,12 +14,7 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 	var interaction = load.require("dusk.input.interaction");
 	var controls = load.require("dusk.input.controls");
 	
-	/** @class dusk.sgui.EntityGroup
-	 * 
-	 * @param {?dusk.sgui.IContainer} parent The container that this component is in.
-	 * @param {string} componentName The name of the component.
-	 * 
-	 * @classdesc An entity group is a group that stores `{@link dusk.sgui.Entity}` and provides the ability to move them 
+	/** An entity group is a group that stores `{@link dusk.sgui.Entity}` and provides the ability to move them 
 	 * and have them collide with each other.
 	 * 
 	 * This component, when active and `{@link dusk.editor#active}` is true, will allow the user to edit the entities by 
@@ -28,6 +23,8 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 	 * 
 	 * Entities should be added using `{@link dusk.sgui.EntityGroup#dropEntity}` function.
 	 * 
+	 * @param {?dusk.sgui.IContainer} parent The container that this component is in.
+	 * @param {string} componentName The name of the component.
 	 * @extends dusk.sgui.Group
 	 * @constructor
 	 */
@@ -156,7 +153,7 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 			for(var i = this._entities.length-1; i >= 0; i --) this._entities[i].startFrame(active);
 		}
 	};
-
+	
 	EntityGroup.prototype._entityGroupDraw = function(e) {
 		if(!editor.active) return;
 		if(!this.focused) return;
@@ -211,10 +208,17 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 					out += " | ";
 				}
 			}
+			
 			e.c.fillText(out, x, y);
+			
+			if(this._selectedEntity) {
+				y += 20;
+				e.c.fillText("SELECTED: "+this._selectedEntity.comName, x, y);
+			}
+			
 		}
 	};
-
+	
 	EntityGroup.prototype._entityGroupAction = function(e) {
 		if(!editor.active) return;
 		
@@ -225,11 +229,11 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 			this._selectedEntity = null;
 		}
 	};
-
+	
 	EntityGroup.prototype.allEntities = function() {
 		return this._entities;
 	};
-
+	
 	EntityGroup.prototype.filter = function(filter) {
 		var out = [];
 		
@@ -239,7 +243,7 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 		
 		return out;
 	};
-
+	
 	//Runs in O(n) time
 	EntityGroup.prototype.getEntitiesHere = function(x, y, ignore, onlyOne) {
 		var out = [];
@@ -254,7 +258,7 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 
 		return out; 
 	};
-
+	
 	EntityGroup.prototype.getEntitiesExactlyHere = function(x, y, ignore, onlyOne) {
 		var out = [];
 		for(var c = this._entities.length-1; c >= 0; c --){
@@ -267,7 +271,7 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 		
 		return out; 
 	};
-
+	
 	/*dusk.sgui.EntityGroup.prototype.getCollisions = function(x1, y1, x2, y2, ignore, onlyOne) {
 		var out = [];
 		for(var c = this._entities.length-1; c >= 0; c --){
@@ -293,7 +297,7 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 		
 		return out; 
 	};*/
-
+	
 	//Runs in O(n^2) time
 	EntityGroup.prototype.moveEverything = function() {
 		var solid = [1, 0].toString();
@@ -303,7 +307,7 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 			this._singleMoveAndCollide(this._entities[e], false);
 		}
 	};
-
+	
 	EntityGroup.prototype._singleMoveAndCollide = function(ent, noMove) {
 		if(!noMove && !ent.getDx() && !ent.getDy()) return;
 		
@@ -439,7 +443,7 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 			ent.y = destY;
 		}
 	};
-
+	
 	EntityGroup.prototype.resolveCollision = function(now, testee, dir, oppDir) {
 		if(testee.eProp("solid"))
 			now.behaviourFire("collide", {"dir":dir, "target":testee});
@@ -457,7 +461,7 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 		}
 		return false;
 	};
-
+	
 	//Runs in O(1) time
 	EntityGroup.prototype.dropEntity = function(entity, takeFocus) {
 		if(!("name" in entity)) {
@@ -531,7 +535,7 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 		
 		return dropped; 
 	};
-
+	
 	EntityGroup.prototype.saveBM = function(addDep) {
 		var list = [];
 		for(var i = this._entities.length-1; i >= 0; i --){
@@ -548,7 +552,7 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 		
 		return list;
 	};
-
+	
 	EntityGroup.prototype.loadBM = function(ents) {
 		this.clear();
 		this.getComponent("_noselectedentity", "NullCom");
@@ -556,7 +560,7 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 			this.dropEntity(ents[i]);
 		}
 	};
-
+	
 	Object.defineProperty(EntityGroup.prototype, "scheme", {
 		get: function() {
 			return this._scheme;
@@ -569,14 +573,14 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 			}
 		}
 	});
-
+	
 	EntityGroup.prototype.adjustAll = function(dx, dy) {
 		for(var i = this._entities.length-1; i >= 0; i --){
 			this._entities[i].x += dx;
 			this._entities[i].y += dy;
 		}
 	};
-
+	
 	EntityGroup.prototype.clear = function() {
 		for(var c = this._componentsArr.length-1; c >= 0; c --) {
 			if(this._componentsArr[c].comName != "blank") {
@@ -590,7 +594,7 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 		this._ettb = [];
 		this._ebtt = [];
 	};
-
+	
 	EntityGroup.prototype._entityDeleted = function(e) {
 		for(var i = this._entities.length-1; i >= 0; i --) {
 			if(this._entities[i].comName == e.com.comName) {
@@ -599,7 +603,7 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 			}
 		}
 	};
-
+	
 	EntityGroup.prototype._egUpAction = function(e) {
 		if(!editor.active) return true;
 		if(e.e.ctrl) return true;
@@ -610,7 +614,7 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 		
 		this._cy --;
 	};
-
+	
 	EntityGroup.prototype._egDownAction = function(e) {
 		if(!editor.active) return true;
 		if(e.e.ctrl) return true;
@@ -621,7 +625,7 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 		
 		this._cy ++;
 	};
-
+	
 	EntityGroup.prototype._egLeftAction = function(e) {
 		if(!editor.active) return true;
 		if(e.e.ctrl) return true;
@@ -632,7 +636,7 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 		
 		this._cx --;
 	};
-
+	
 	EntityGroup.prototype._egRightAction = function(e) {
 		if(!editor.active) return true;
 		if(e.e.ctrl) return true;
@@ -643,7 +647,7 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 		
 		this._cx ++;
 	};
-
+	
 	EntityGroup.prototype._numberDrop = function(e) {
 		if(!editor.active) return true;
 		
@@ -671,7 +675,7 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 		
 		return false;
 	};
-
+	
 	EntityGroup.prototype._keyDel = function(e) {
 		if(!editor.active || !this._selectedEntity) return true;
 		
@@ -685,10 +689,7 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 		
 		return false;
 	};
-
-	Object.seal(EntityGroup);
-	Object.seal(EntityGroup.prototype);
-
+	
 	sgui.registerType("EntityGroup", EntityGroup);
 	
 	return EntityGroup;

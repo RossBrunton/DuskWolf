@@ -12,15 +12,8 @@ load.provide("dusk.sgui.Entity", (function() {
 	var sgui = load.require("dusk.sgui");
 	var interaction = load.require("dusk.input.interaction");
 	
-	/**  Creates a new Entity.
-	 * 
-	 * @param {dusk.sgui.Component} parent The container that this component is in.
-	 * @param {string} comName The name of the component.
-	 * 
-	 * @class dusk.sgui.Entity
-	 * 
-	 * @classdesc An entity is a component that has "behaviours" and can do certain activites, possibly
-	 *  in response to another entity, or user input.
+	/** An entity is a component that has "behaviours" and can do certain activites, possibly in response to another
+	 *  entity or user input.
 	 * 
 	 * In a nutshell, it is a normal tile with a movement system, an animation system, a collision
 	 *  system and a behaviour system added onto it.
@@ -56,19 +49,19 @@ load.provide("dusk.sgui.Entity", (function() {
 	 * - `$var=value`: Sets an animation variable to the specified value. This can be used for evaling
 	 *  triggers using the `$` operator.
 	 * - `+time`: Waits `time` frames before moving onto the next action.
-	 * - `?trigger?yes?no`: Evaluates the trigger and skips forward `yes` actions if it is true, and 
-	 * `no` actions if it is false, and executes that action.
-	 * - `>animation`: Switches the current animation to the one with the name `animation`, and executes
-	 *  the first action.
-	 * - `!event`: Fires the behaviour event `event` and then moves onto the next animation action and
-	 *  executes it.
-	 * - `/event`: If this animation event is blocking some other event `event`, then this will
-	 *  terminate that event, and cause the block to be removed.
+	 * - `?trigger?yes?no`: Evaluates the trigger and skips forward `yes` actions if it is true, and `no` actions if it
+	 *  is false, and executes that action.
+	 * - `>animation`: Switches the current animation to the one with the name `animation`, and executes the first
+	 *  action.
+	 * - `!event`: Fires the behaviour event `event` and then moves onto the next animation action and executes it.
+	 * - `/event`: If this animation event is blocking some other event `event`, then this will terminate that event,
+	 *  and cause the block to be removed. This also releases a lock.
+	 * - `\event`: Same as `/event` but does not release the lock.
 	 * - `*pname data`: Does the particle effect named `pname` with the data `data`. Data should be a 
 	 *  json string, and each of it's keys will be fed through `{@link dusk.sgui.Entity#evalTrigger}`.
 	 *  The next event is executed.
-	 * - `L`: Locks the current animation, so it can't change until the lock is released, and then move 
-	 *  onto and execute the next animation action.
+	 * - `L`: Locks the current animation, so it can't change until the lock is released, and then move onto and execute
+	 *  the next animation action.
 	 * - `l`: Removes any lock, and then move onto and execute the next action.
 	 * - `x,y`: Where x and y are integers, sets the current tile to the tile specified.
 	 * - `#+trans;`: Adds the transformation `trans` to this entity's image, replacing it if it already exists.
@@ -124,8 +117,7 @@ load.provide("dusk.sgui.Entity", (function() {
 	 * - `headingUp`: A boolean, which is true if the entity is "heading up".
 	 * - `controlsOn`: An array of controls that are always on.
 	 * - `img`: A string, the path to the source image.
-	 * - `collisionWidth`,`collisionHeight`,`collisionOffsetX`,`collisionOffsetY`: Mapping to the
-	 *  respective properties.
+	 * - `collisionWidth`,`collisionHeight`,`collisionOffsetX`,`collisionOffsetY`: Mapping to the respective properties.
 	 * 
 	 * Behaviours may also fire and listen to events between themselves and their entity. Events are
 	 *  fired using `{@link dusk.sgui.Entity#behaviourFire}` and listened to on each behaviour's
@@ -136,26 +128,26 @@ load.provide("dusk.sgui.Entity", (function() {
 	 * 
 	 * There are some "built in" events:
 	 * 
-	 * - `typeChange`: Called when the entity has just finished changing types to the current one.
-	 *  Event object is empty.
+	 * - `typeChange`: Called when the entity has just finished changing types to the current one. Event object is
+	 *  empty.
 	 * - `beforeMove`: Called just before the collisions are to be resolved, the event object is empty.
-	 * - `frame`: Called once per frame, after the collisions are resolved, and before the entities are
-	 *  drawn. Event object is empty.
-	 * - `animation`: Called when an animation event is fired using `!`. The event object has one
-	 *  property, `given`, which is the bit after the `!` character.
-	 * - `terminate`: Called when the entity is about to be terminated, the listener should return true
-	 *  if they don't want the entity to terminate. The event object has no properties.
-	 * - `collide`: Fired by `{@link dusk.sgui.EntityGroup}` when this entity collides into another
-	 *  entity or a wall. The event object has two properties; `dir` a dusk.sgui.c.DIR_* constant
-	 *  representing the side that collided, and `target`, the entity that it collided into, or the
-	 *  string `"wall"`.
-	 * - `collidedInto`: Fired by `{@link dusk.sgui.EntityGroup}` when this is collided into by another
-	 *  entity. The event object has two properties; `dir` a dusk.sgui.c.DIR_* constant representing the
-	 *  side that collided, and `target`, the entity that collided into this one.
-	 * - `controlActive`: Fired by all behaviours when they want to check a control is active. A
-	 *  listener should return true if they want to declare that the control is active. This has one
-	 *  property, `control`, the name of the control. If the entity data has an array `controlsOn` that
-	 *  contains the control name, then this event is not fired, and the control is assumed on.
+	 * - `frame`: Called once per frame, after the collisions are resolved, and before the entities are drawn.
+	 *  Event object is empty.
+	 * - `animation`: Called when an animation event is fired using `!`. The event object has one property, `given`,
+	 *  which is the bit after the `!` character.
+	 * - `terminate`: Called when the entity is about to be terminated, the listener should return true if they don't
+	 *  want the entity to terminate. The event object has no properties.
+	 * - `delete`: Called when the entity is deleted.
+	 * - `collide`: Fired by `{@link dusk.sgui.EntityGroup}` when this entity collides into another entity or a wall.
+	 *  The event object has two properties; `dir` a dusk.sgui.c.DIR_* constant representing the side that collided, and
+	 *  `target`, the entity that it collided into, or the string `"wall"`.
+	 * - `collidedInto`: Fired by `{@link dusk.sgui.EntityGroup}` when this is collided into by another entity. The
+	 *  event object has two properties; `dir` a dusk.sgui.c.DIR_* constant representing the side that collided, and
+	 *  `target`, the entity that collided into this one.
+	 * - `controlActive`: Fired by all behaviours when they want to check a control is active. A listener should return
+	 *  true if they want to declare that the control is active. This has one property, `control`, the name of the
+	 *  control. If the entity data has an array `controlsOn` that contains the control name, then this event is not
+	 *  fired, and the control is assumed on.
 	 * 
 	 * There are "triggers", which are essentially strings that evaluate into a constant value
 	 *  according to rules. They are used in animation and particle effects, as the first element of
@@ -165,7 +157,8 @@ load.provide("dusk.sgui.Entity", (function() {
 	 * They are essentially fed to a parse tree from `{@link dusk.parseTree}`, and support the following
 	 *  operators, low to high priority, in addition to the basic ones:
 	 * 
-	 * - `on event`: True iff this trigger is being evaluated because of the animation event `event`.
+	 * - `on event`: True iff this trigger is being evaluated because of the animation event `event`. This will cause a
+	 *  lock to be set on the current animation if it's in that context.
 	 * - `#dx`: The entity's horizontal speed.
 	 * - `#dy`: The entity's vertical speed.
 	 * - `#tb`: The number of entities touching the bottom of this.
@@ -178,6 +171,8 @@ load.provide("dusk.sgui.Entity", (function() {
 	 * - `:var`: The value of the entity data property `var`.
 	 * 
 	 * @extends dusk.sgui.Tile
+	 * @param {dusk.sgui.Component} parent The container that this component is in.
+	 * @param {string} comName The name of the component.
 	 * @constructor
 	 */
 	var Entity = function(parent, comName) {
@@ -450,6 +445,10 @@ load.provide("dusk.sgui.Entity", (function() {
 					return true;
 				}).bind(this), interaction.MOUSE_MOVE);
 			}).bind(this), "mouse");
+			
+			this.onDelete.listen((function(e) {
+				this.behaviourFire("delete", e);
+			}).bind(this));
 		}
 	};
 	Entity.prototype = Object.create(Tile.prototype);
@@ -760,6 +759,16 @@ load.provide("dusk.sgui.Entity", (function() {
 		}
 		this._behaviours[name] = new (entities.getBehaviour(name))(this);
 	};
+	
+	/** Returns a behaviour from this entity.
+	 * @param {string} name The name of the behaviour to get.
+	 * @return {?dusk.behave.Behave} The behaviour that was added, or null if it hasn't got it.
+	 */
+	Entity.prototype.getBehaviour = function(name) {
+		if(!(name in this._behaviours)) return null;
+		
+		return this._behaviours[name];
+	};
 
 	/** Sets an entity data property to the value, or returns it if no value is specified.
 	 * @param {string} prop The name of the property to set or get.
@@ -885,6 +894,11 @@ load.provide("dusk.sgui.Entity", (function() {
 					this._setNewAni(i, event);
 				}
 				
+				if(this._eventTriggeredMark) {
+					//Lock animation if triggered by event
+					this._aniLock = true;
+				}
+				
 				if(this._frameCountdown <= 0) this._frameCountdown = this.frameDelay+1;
 				return this._eventTriggeredMark;
 			}
@@ -954,11 +968,20 @@ load.provide("dusk.sgui.Entity", (function() {
 				if(cont) this._aniForward(event);
 				break;
 			
+			case "\\":
 			case "/":
 				if(action.substr(1) in this._aniWaits) {
 					this._aniWaits[action.substr(1)]();
 				}
-				if(cont) this._aniForward(event);
+				
+				if(action.charAt(0) == "/") {
+					this._aniLock = false;
+					//if(cont) this._aniForward(event);
+					if(cont) this.performAnimation(undefined, true);
+				}else {
+					if(cont) this._aniForward(event);
+				}
+				
 				break;
 			
 			case "*":
@@ -981,7 +1004,8 @@ load.provide("dusk.sgui.Entity", (function() {
 			
 			case "l":
 				this._aniLock = false;
-				if(cont) this._aniForward(event);
+				//if(cont) this._aniForward(event);
+				if(cont) this.performAnimation(undefined, true);
 				break;
 			
 			case "L":
@@ -1129,12 +1153,17 @@ load.provide("dusk.sgui.Entity", (function() {
 	 * 
 	 * This should be used if you want the entity to animate it's death, otherwise, if you just want it
 	 *  gone without any effects, set it's `{@link dusk.sgui.Component#deleted}` property to true.
+	 * @return {promise()} A promise that fulfills when the entity is deleted.
 	 */
 	Entity.prototype.terminate = function() {
-		this.terminated = true;
-		if(this.behaviourFireWithReturn("terminate", {}).indexOf(true) === -1) {
-			this.animationWait("terminate", (function() {this.deleted = true;}).bind(this));
-		}
+		return new Promise((function(f, r) {
+			this.terminated = true;
+			if(this.behaviourFireWithReturn("terminate", {}).indexOf(true) === -1) {
+				this.animationWait("terminate", (function() {
+					this.deleted = true;
+				}).bind(this));
+			}
+		}).bind(this));
 	};
 
 	/** Fires an animation event, listened to with the trigger `on name`. If this doesn't specifically

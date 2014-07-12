@@ -110,6 +110,13 @@ window.load = (function() {
 	 */
 	var _depFiles = {};
 	
+	/** An array of all uncaught exceptions that have happened.
+	 * @type boolean
+	 * @private
+	 * @since 0.0.21-alpha
+	 */
+	var _uncaughtErrors = [];
+	
 	/** An event dispatcher which is fired when a package is imported and then calls `{@link load.provide}`.
 	 * 
 	 * The event will be fired after the script is ran; so you can be sure that the module has been initiated.
@@ -488,7 +495,7 @@ window.load = (function() {
 	var _addToImportSet = function(pack) {
 		if(_importSet.indexOf(pack) !== -1) return;
 		if(!(pack in _names)) {
-			console.error(pack + " required but not found.");
+			throw new load.DependencyError(pack + " required but not found.");
 			return;
 		}
 		if(_names[pack][1] !== 0) return;
@@ -562,9 +569,8 @@ window.load = (function() {
 		
 		//Check for errors
 		if(_batchSet.length == 0 && !trace) {
-			console.warn("Dependency problem!");
 			_doBatchSet(true);
-			return;
+			throw new load.DependencyError("Dependency issue; see console for details");
 		}else if(_batchSet.length == 0) {
 			return;
 		}
@@ -612,6 +618,9 @@ window.load = (function() {
 		var js = document.createElement("script");
 		js.src = file;
 		js.async = true;
+		js.addEventListener("error", function(e) {
+			throw new load.ImportError(file+" failed to import.");
+		});
 		document.head.appendChild(js);
 	};
 	
@@ -636,6 +645,39 @@ window.load = (function() {
 		
 		return false;
 	};
+	
+	/** Returns an array of errors; each element is a pair `[error object, errorEvent]`. `errorEvent` is an event object
+	 *  from the `onError` handler.
+	 * @return {array} All uncaught errors that have happened.
+	 * @since 0.0.21-alpha
+	 */
+	load.getErrors = function() {
+		return _uncaughtErrors;
+	};
+	
+	/** An error raised if there is dependancy problems.
+	 * @param {string} message The message that this error should display.
+	 * @since 0.0.21-alpha
+	 * @constructor
+	 * @extends Error
+	 */
+	load.DependencyError = function(message) {
+		this.message = message;
+		this.name = "DependencyError";
+	};
+	load.DependencyError.prototype = Object.create(Error.prototype);
+	
+	/** An error raised if there is a problem importing a package (such as it not being found).
+	 * @param {string} message The message that this error should display.
+	 * @since 0.0.21-alpha
+	 * @constructor
+	 * @extends Error
+	 */
+	load.ImportError = function(message) {
+		this.message = message;
+		this.name = "ImportError";
+	};
+	load.ImportError.prototype = Object.create(Error.prototype);
 	
 	/** Returns the total size of files that are being downloaded, if the deps file has this information.
 	 * @return {integer} The total download remaining, in kilobytes.
@@ -668,7 +710,18 @@ window.load = (function() {
 			);
 			var textY = 0;
 			
-			if(_importSet.length > 0) {
+			if(_uncaughtErrors.length) {
+				canvas.getContext("2d").fillStyle = "#990000";
+				
+				canvas.getContext("2d").fillText(
+					_uncaughtErrors[0][0].name+": " + _uncaughtErrors[0][0].message, 5, textY += 15
+				);
+				
+				canvas.getContext("2d").fillText(
+					"At " + _uncaughtErrors[0][1].lineno + ":" + _uncaughtErrors[0][1].colno
+					+" in "+ _uncaughtErrors[0][1].filename, 5, textY += 15
+				);
+			}else if(_importSet.length > 0) {
 				canvas.getContext("2d").fillText(
 					"Hold on! Loading "+_importSet.length+" files!", 5, textY+=15
 				);
@@ -708,7 +761,11 @@ window.load = (function() {
 		load.onProvide = new EventDispatcher("dusk.load.onProvide");
 	});
 	
-	Object.seal(load);
+	window.addEventListener("error", function(e) {
+		if(!e.error) return;
+		_uncaughtErrors.push([e.error, e]);
+		load.abort();
+	});
 	
 	return load;
 })();

@@ -106,6 +106,12 @@ load.provide("dusk.sgui.SayBox", (function() {
 		 */
 		this._reject = null;
 		
+		/** Whether this text box will set itself as active whenever something is said.
+		 * @type boolean
+		 * @default true
+		 */
+		this.autoActive = true;
+		
 		// Listeners
 		this.frame.listen(_frame.bind(this));
 		this.action.listen(_action.bind(this));
@@ -113,6 +119,7 @@ load.provide("dusk.sgui.SayBox", (function() {
 		
 		// Prop masks
 		this._registerPropMask("delay", "delay");
+		this._registerPropMask("autoActive", "autoActive");
 	};
 	SayBox.prototype = Object.create(Group.prototype);
 	
@@ -211,6 +218,8 @@ load.provide("dusk.sgui.SayBox", (function() {
 	 * @return {Promise(*)} A promise that fulfills or rejects based on the users interaction to the saybox.
 	 */
 	SayBox.prototype.say = function(left, body, right, options, pass) {
+		if(this.autoActive && !this.active) this.becomeActive();
+		
 		return new Promise((function(fulfill, reject) {
 			if("sayVars" in pass) {
 				for(var v in pass.sayVars) {
@@ -268,7 +277,8 @@ load.provide("dusk.sgui.SayBox", (function() {
 	SayBox.prototype.sayBoundPair = function(left, body, right, options, pass) {
 		return [
 			this.sayBound(left, body, right, options, pass),
-			function(pa) {return Promise.resolve();}
+			function(pa) {return Promise.resolve();},
+			"Saybox: "+left+": "+body.substring(0, 30)+"..."
 		];
 	};
 	

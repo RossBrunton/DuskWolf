@@ -13,6 +13,7 @@ load.provide("dusk.sgui", (function() {
 	var options = load.require("dusk.options");
 	var Pool = load.require("dusk.Pool");
 	var interaction = load.require("dusk.input.interaction");
+	var UserCancelError = load.suggest("dusk.UserCancelError", function(p) {UserCancelError = p});
 	
 	/** @namespace dusk.sgui
 	 * @name dusk.sgui
@@ -297,7 +298,23 @@ load.provide("dusk.sgui", (function() {
 		sgui.getActivePane().onActiveChange.fire({"active":true}, true);
 		sgui.getActivePane().onFocusChange.fire({"focus":true}, true);
 	};
-
+	
+	/** For reversible promise chains, sets the active pane and provides an inverse.
+	 * @param {string} to The name of the pane to set active.
+	 * @return {array} An array for a reversible promise chain.
+	 * @since 0.0.21-alpha
+	 */
+	sgui.rpcSetActivePane = function(to) {
+		return [function(passedArg, queue) {
+			passedArg.sguiPreActivePane = sgui.getActivePane().comName;
+			sgui.setActivePane(to);
+			return passedArg;
+		}, function(passedArg) {
+			sgui.setActivePane(passedArg.sguiPreActivePane);
+			return Promise.reject(new UserCancelError());
+		}, "Sgui set active pane to "+to]
+	};
+	
 	/** Returns the currently active pane.
 	 * @return {dusk.sgui.Pane} The currently active pane.
 	 */
@@ -305,7 +322,7 @@ load.provide("dusk.sgui", (function() {
 		if(_activePane === "") return null;
 		return sgui.getPane(_activePane);
 	};
-
+	
 	/** Draws all the panes onto the main canvas specified, and fires the onRender event.
 	 * 
 	 * This will be called whenever `requestAnimationFrame` tells it to, which should be 60 frames a second.
@@ -367,7 +384,7 @@ load.provide("dusk.sgui", (function() {
 
 		return true;
 	};
-
+	
 	/** Resolves a path.
 	 * 
 	 * The path from this function must contain a colon, all text to the left of the colon will be the pane to path from
@@ -384,7 +401,7 @@ load.provide("dusk.sgui", (function() {
 		path = path.substr(pane.length+1);
 		return this.getPane(pane).path(path);
 	};
-
+	
 	/** A pattern used to select styles.
 	 * @type RegExp
 	 * @private
@@ -392,7 +409,7 @@ load.provide("dusk.sgui", (function() {
 	 */
 	var _stylePattern =
 	 /(?:([^\.#\[]+))?(?:\.([^#\.\[]+))?(?:#([^\.\#\[]+))?(?:\[([^\=\~\|\^\*\$]+)([\~\|\^\*\$])?=([^\]]+)\])?/gi;
-
+	
 	/** Adds a new style.
 	 * 
 	 * The properties will be the ones assigned, and is an object.
@@ -408,7 +425,7 @@ load.provide("dusk.sgui", (function() {
 			_styleData[selector][0].push(_stylePattern.exec(fragments[i]));
 		}
 	};
-
+	
 	/** Get all style rules that match a specified component.
 	 * 
 	 * Each is in the form `[selector, props]`, where props is an object.
@@ -442,7 +459,7 @@ load.provide("dusk.sgui", (function() {
 		
 		return matchedStyles;
 	};
-
+	
 	/** Apply all styles to the specified component that match it.
 	 * @param {dusk.sgui.Component} com The component to apply styles to.
 	 * @since 0.0.17-alpha
@@ -454,7 +471,7 @@ load.provide("dusk.sgui", (function() {
 			com.parseProps(styles[i]);
 		}
 	};
-
+	
 	/** Adds a new type that can be added by specifying it's type. The component must be registered before use.
 	 * @param {string} name The name of the added type.
 	 * @param {class(dusk.sgui.Component, string) extends dusk.sgui.Component} type The type to add.
@@ -463,7 +480,7 @@ load.provide("dusk.sgui", (function() {
 	sgui.registerType = function(name, type) {
 		_types[name] = type;
 	};
-
+	
 	/** Returns a constructor for the specified component, 
 	 *  provided it has been registered beforehand with {@link dusk.sgui.registerType}.
 	 * @param {string} name The name of the type to look up.
@@ -475,7 +492,7 @@ load.provide("dusk.sgui", (function() {
 		if(!(name in _types)) return null;
 		return _types[name];
 	};
-
+	
 	/** Given a component, this returns the name it's constructor was registered as.
 	 * 
 	 * @param {dusk.sgui.Component} com The component to look up.
@@ -491,7 +508,7 @@ load.provide("dusk.sgui", (function() {
 		
 		return null;
 	};
-
+	
 	/** Adds a new extra that can be accessed using `{@link dusk.sgui.getExtra}`.
 	 * @param {string} name The name of the added extra.
 	 * @param {class(dusk.sgui.Component, string) extends dusk.sgui.extras.Extra} extra The extra to add.
@@ -500,7 +517,7 @@ load.provide("dusk.sgui", (function() {
 	sgui.registerExtra = function(name, extra) {
 		_extras[name] = extra;
 	};
-
+	
 	/** Returns a constructor for the specified extra,
 	 *  provided it has been registered beforehand with `{@link dusk.sgui.registerExtra}`.
 	 * @param {string} name The name of the extra to look up.
@@ -512,7 +529,7 @@ load.provide("dusk.sgui", (function() {
 		if(!(name in _extras)) return null;
 		return _extras[name];
 	};
-
+	
 	//width
 	Object.defineProperty(sgui, "width", {
 		set:function(value) {
@@ -527,7 +544,7 @@ load.provide("dusk.sgui", (function() {
 			return _getCanvas().width;
 		}
 	});
-
+	
 	//height
 	Object.defineProperty(sgui, "height", {
 		set:function(value) {

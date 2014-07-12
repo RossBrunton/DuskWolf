@@ -3,9 +3,7 @@
 "use strict";
 
 load.provide("dusk.EventDispatcher", (function() {
-	/** @class dusk.EventDispatcher
-	 * 
-	 * @classdesc An EventDispatcher essentially manages events.
+	/** An EventDispatcher essentially manages events.
 	 * 
 	 * Code registeres a "listen" function in the dispatcher that is called when the event is fired.
 	 * 
@@ -130,13 +128,12 @@ load.provide("dusk.EventDispatcher", (function() {
 	EventDispatcher.FILTER_ISIN = 2;
 	
 
-	/** Registers a listener for the event;
-	 *   this function will be called if an event is fired
-	 *   and the properties match up as described in the class description are correct.
+	/** Registers a listener for the event; this function will be called if an event is fired and the properties match
+	 *  up as described in the class description are correct.
 	 * 
-	 * @param {function(object):*} callback The function that will be called when an event is fired.
-	 *  It will be given a single argument; the event object.
-	 *  If you want the function to run in a scope, then you should bind it with `bind`.
+	 * @param {function(object):*} callback The function that will be called when an event is fired. It will be given a
+	 *  single argument; the event object. If you want the function to run in a scope, then you should bind it with
+	 *  `bind`.
 	 * @param {*} filter If defined, this must be correct with regards to the EventDispatcher's `filterType` property.
 	 * @param {?object} propsYes The listener will only fire if every property of this object
 	 *  is equal to the same named property in the event object.
@@ -145,10 +142,8 @@ load.provide("dusk.EventDispatcher", (function() {
 	 * @return {integer} A unique ID for the listener, call this when it should be deleted. 
 	 */
 	EventDispatcher.prototype.listen = function(callback, filter, propsYes, propsNo) {
-		if(!callback) {
-			console.error("EventDispatcher "+this.toString()+" did not recieve a valid function.");
-			console.log(scope);
-			return;
+		if(!callback || typeof callback != "function") {
+			throw new TypeError("EventDispatcher "+this.name+" did not get a valid function.");
 		}
 		
 		this._listeners.push([

@@ -18,6 +18,9 @@ load.provide("dusk.sgui.TileRegion", (function() {
 		this._generator = generator;
 		this._parent = parent;
 		
+		this.colour = "";
+		this.name = "";
+		
 		this.onChange = new EventDispatcher("dusk.sgui.TileRegion.onChange");
 	};
 	
@@ -191,10 +194,16 @@ load.provide("dusk.sgui.TileRegion", (function() {
 										var e = opts.forEach[i];
 										
 										cl[7][e.name] = new TileRegion(this._tileMap, this._generator, this);
+										cl[7][e.name].colour = e.colour;
+										cl[7][e.name].name = e.name;
 										cl[7][e.name].expandRegion(cl[0], cl[1], e.range, e);
+										
 										if(!(e.name in this._childRegions))
 											this._childRegions[e.name] = 
 												new TileRegion(this._tileMap, this._generator, this);
+											this._childRegions[e.name].colour = e.colour;
+											this._childRegions[e.name].name = e.name;
+										
 										cl[7][e.name].insert(this._childRegions[e.name]);
 									}
 								}
@@ -222,15 +231,13 @@ load.provide("dusk.sgui.TileRegion", (function() {
 			for(var i = 0; i < opts.forEach.length; i ++) {
 				var e = opts.forEach[i];
 				
-				if(e.colour) {
-					this._generator.colourRegion(this, e.colour, e.name);
-				}
+				//if(e.colour) {
+				//	this._generator.colourRegion(this, e.colour, e.name);
+				//}
 			}
 		}
 		
-		if(opts.colour && !this._parent) {
-			this._generator.colourRegion(this, opts.colour);
-		}
+		this.colour = opts.colour;
 	};
 	
 	var _isInCloud = function(cloud, c, tile) {
@@ -523,7 +530,7 @@ load.provide("dusk.sgui.TileRegionGenerator", (function() {
 			
 			//Loop through all regions
 			for(var i = 0; i < this._tagColours.length; i ++) {
-				var t = this._tagColours[i];
+				var t = [this._tagColours[i][0], this._tagColours[i][0].colour];
 				var r = t[0].getEvery();
 				
 				if(r) {
@@ -665,6 +672,7 @@ load.provide("dusk.sgui.TileRegionGenerator", (function() {
 	
 	TileRegionGenerator.prototype.generateRegion = function(x, y, range, opts) {
 		var region = new TileRegion(this.container.getScheme(), this);
+		if("name" in opts) region.name = opts.name;
 		
 		return new Promise(function(fulfill, reject) {
 			region.expandRegion(x, y, range, opts);
@@ -674,17 +682,9 @@ load.provide("dusk.sgui.TileRegionGenerator", (function() {
 	};
 
 
-	TileRegionGenerator.prototype.colourRegion = function(region, colour, path) {
-		/*for(var i = 0; i < this._tagColours.length; i ++) {
-			if(this._tagColours[i][0] == name) {
-				this._tagColours[i][1] = colour;
-				this._updateTileColourCache();
-				return;
-			}
-		}
-		
-		this._tagColours.push([name, colour]);
-		this._updateTileColourCache();*/
+	TileRegionGenerator.prototype.colourRegion = function(region, path) {
+		var fullpath = region.name + "." + path;
+		if(!path) fullpath = region.name;
 		
 		var parent = region;
 		if(path) {
@@ -694,33 +694,32 @@ load.provide("dusk.sgui.TileRegionGenerator", (function() {
 			}
 		}
 		
-		this._tagColours.push([region, colour, region.onChange.listen(this._updateTileColourCache.bind(this)), parent]);
+		this._tagColours.push([region, fullpath, region.onChange.listen(this._updateTileColourCache.bind(this)), parent]);
+		this._updateTileColourCache();
+	};
+	
+	TileRegionGenerator.prototype.uncolourRegion = function(region, path) {
+		var fullpath = region.name + "." + path;
+		if(!path) fullpath = region.name;
+		
+		for(var i = 0; i < this._tagColours.length; i ++) {
+			if(this._tagColours[i][1] == fullpath) {
+				this._tagColours[i][0].onChange.unlisten(this._tagColours[i][2]);
+				this._tagColours.splice(i, 1);
+				i --;
+			}
+		}
 		this._updateTileColourCache();
 	};
 
 	TileRegionGenerator.prototype.getRegionColour = function(region) {
 		for(var i = 0; i < this._tagColours.length; i ++) {
 			if(this._tagColours[i][0] == region) {
-				return this._tagColours[i][1];
+				return this._tagColours[i][0].colour;
 			}
 		}
 		
 		return null;
-	};
-
-	TileRegionGenerator.prototype.uncolourRegion = function(region, noChildren) {
-		for(var i = 0; i < this._tagColours.length; i ++) {
-			if(this._tagColours[i][0] == region) {
-				this._tagColours[i][0].onChange.unlisten(this._tagColours[i][2]);
-				this._tagColours.splice(i, 1);
-				i --;
-			}else if(!noChildren && this._tagColours[i][3] == region) {
-				this._tagColours[i][0].onChange.unlisten(this._tagColours[i][2]);
-				this._tagColours.splice(i, 1);
-				i --;
-			}
-		}
-		this._updateTileColourCache();
 	};
 	
 	

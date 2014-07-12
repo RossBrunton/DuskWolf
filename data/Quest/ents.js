@@ -7,6 +7,7 @@ load.provide("quest.ents", (function() {
 	load.require("dusk.behave.Persist");
 	load.require("dusk.behave.MarkTrigger");
 	load.require("dusk.behave.StatLoader");
+	load.require("dusk.behave.Scriptable");
 	var items = load.require("dusk.items");
 	var stats = load.require("dusk.stats");
 	
@@ -30,9 +31,12 @@ load.provide("quest.ents", (function() {
 
 	entities.types.createNewType("questTest", {
 		"data":{"solid":false, "collides":false, "statsName":"ally", "statsLoadImage":true, "statsPutBack":true},
-		"animation":[["true", "1,2|2,2|1,2|3,2", {}]],
+		"animation":[
+			["true", "1,2|2,2|1,2|3,2", {}],
+			["on panic", "2,2|3,2|2,2|3,2|2,2|/panic", {}]
+		],
 		"particles":[["stat(moved, 3)", "#+mono", {}], ["!stat(moved, 3)", "#-mono", {}]],
-		"behaviours":{"GridWalker":true, "StatLoader":true}
+		"behaviours":{"GridWalker":true, "StatLoader":true, "Scriptable":true}
 	}, "quest");
 
 	stats.addStatsGenerator("ally", function() {

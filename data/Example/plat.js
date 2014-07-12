@@ -38,6 +38,9 @@ load.provide("example.plat", (function() {
 
 	load.require("example.plat.rooms.exhall");
 	
+	var reversiblePromiseChain = load.require("dusk.reversiblePromiseChain");
+	var Scriptable = load.require("dusk.behave.Scriptable");
+	
 	var plat = {};
 	
 	entities.twidth = 32;
@@ -86,7 +89,7 @@ load.provide("example.plat", (function() {
 	entities.types.createNewType("player", {
 		"behaviours":{
 			"Persist":true, "PlayerControl":true, "Jumper":true, "MarkTrigger":true, "Killable":true,
-			"Gravity":true, "LeftRightControl":true, "Spawner":true
+			"Gravity":true, "LeftRightControl":true, "Spawner":true, "Scriptable":true,
 		},
 		"data":{
 			"hp":5, "maxHp":5, "collisionOffsetX":10, "collisionWidth":22, "collisionOffsetY":3, "hspeed":5,
@@ -270,7 +273,14 @@ load.provide("example.plat", (function() {
 		if(sgui.path("hud:/coinCount")) sgui.path("hud:/coinCount").text = ""+Pickup.count("coin");
 	}, this);
 
-	dusk.onLoad.listen(function (e){dplat.rooms.setRoom("example.plat.rooms.exhall", 0);}.bind(this));
+	
+	dusk.onLoad.listen(function (e){
+		dplat.rooms.setRoom("example.plat.rooms.exhall", 0).then(
+		reversiblePromiseChain([
+			Scriptable.requestBoundPair("hero", "rawInput", {"inputs":[[30, "right"], [30, "left", "jump"]]}),
+		], false, {})
+		.then(console.log.bind(console), console.error.bind(console)));
+	});
 
 	dusk.startGame();
 	

@@ -200,6 +200,8 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 					this.selector.eProp("grregion", region);
 					
 					var destRegion = new TileRegion(this._owner.getScheme(), r);
+					destRegion.colour = args.colour;
+					destRegion.name = args.destName;
 					
 					if(type == "getTilePathInRange") {
 						this.selector.eProp("grrecording", true);
@@ -217,8 +219,22 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 					
 					if(type == "getTilePathInRange") {
 						//r.clearRegion(region+"_path");
+						if("colourChildrenUnder" in args) {
+							for(var i = 0; i < args.colourChildrenUnder.length; i ++) {
+								r.colourRegion(region, args.colourChildrenUnder[i]);
+							}
+						}
+						
+						r.colourRegion(region);
+						
+						if("colourChildrenOver" in args) {
+							for(var i = 0; i < args.colourChildrenOver.length; i ++) {
+								r.colourRegion(region, args.colourChildrenOver[i]);
+							}
+						}
+						
 						if("colour" in args) {
-							r.colourRegion(destRegion, args.colour);
+							r.colourRegion(destRegion);
 						}
 					}
 					
@@ -295,14 +311,36 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 			case "getTileInRange^1":
 				return Promise.resolve(true);
 			
+			case "colourRegion":
+				var r = this._owner.getRegion();
+				
+				for(var i = 0; i < args.regionsToColour.length; i ++) {
+					var frags = args.regionsToColour[i].split(".");
+					
+					r.colourRegion(passedArg.regions[frags[0]], frags.slice(1).join("."));
+				}
+				
+				return Promise.resolve(passedArg);
+			
+			case "colourRegion^-1":
+				var r = this._owner.getRegion();
+				
+				for(var i = 0; i < args.regionsToColour; i ++) {
+					var frags = args.regionsToColour[i].split(".");
+					
+					r.uncolourRegion(passedArg.regions[frags[1]], frags.slice(1));
+				}
+				
+				return Promise.reject(new UserCancelError());
+			
+			
 			case "uncolourRegion":
 				var r = this._owner.getRegion();
-				passedArg.oldColours = {};
 				
 				for(var i = 0; i < args.regionsToUncolour.length; i ++) {
-					passedArg.oldColours[args.regionsToUncolour[i]] =
-						r.getRegionColour(passedArg.regions[args.regionsToUncolour[i]]);
-					r.uncolourRegion(passedArg.regions[args.regionsToUncolour[i]]);
+					var frags = args.regionsToUncolour[i].split(".");
+					
+					r.uncolourRegion(passedArg.regions[frags[0]], frags.slice(1).join("."));
 				}
 				
 				return Promise.resolve(passedArg);
@@ -311,9 +349,9 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 				var r = this._owner.getRegion();
 				
 				for(var i = 0; i < args.regionsToUncolour.length; i ++) {
-					r.colourRegion(passedArg.regions[args.regionsToUncolour[i]],
-						passedArg.oldColours[args.regionsToUncolour[i]]
-					);
+					var frags = args.regionsToUncolour[i].split(".");
+					
+					r.colourRegion(passedArg.regions[frags[0]], frags.slice(1).join("."));
 				}
 				
 				return Promise.reject(new UserCancelError());
@@ -401,7 +439,7 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 				
 			default:
 				console.error("QuestPuppeteer tried to do `"+type+"` but it doesn't know how.");
-				return Promise.reject(new Error("QuestPuppeteer tried to do `"+type+"` but it doesn't know how."));
+				return Promise.reject(new TypeError("QuestPuppeteer tried to do `"+type+"` but it doesn't know how."));
 		}
 	};
 
@@ -409,8 +447,8 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 		return this.request.bind(this, type, args);
 	};
 
-	QuestPuppeteer.prototype.requestBoundPair = function(type, args, trans) {
-		return [this.request.bind(this, type, args), this.request.bind(this, type+"^-1", args)];
+	QuestPuppeteer.prototype.requestBoundPair = function(type, args) {
+		return [this.request.bind(this, type, args), this.request.bind(this, type+"^-1", args), type];
 	};
 
 	QuestPuppeteer.prototype.getBasicMain = function() {

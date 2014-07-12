@@ -190,7 +190,7 @@ load.provide("quest", (function() {
 			q.requestBoundPair("selectEntity", 
 				{"allowNone":true, "filter":"stat(faction, 1) = ALLY & stat(moved, 3) = false"}
 			),
-			function(passedArg, qu) {
+			[function(passedArg, qu) {
 				if(!passedArg.entity) {
 					qu(q.requestBoundPair("selectListMenu", {"path":"menu:/menu"}));
 					qu(reversiblePromiseChain.STOP);
@@ -221,13 +221,16 @@ load.provide("quest", (function() {
 					
 					return passedArg;
 				}
-			},
+			}, undefined, "Handle Entity Selection"],
 			q.requestBoundPair("generateRegion", targ),
-			q.requestBoundPair("getTilePathInRange", {"colour":":default/arrows32.png", "destName":"path", "regionToUse":"move"}),
+			q.requestBoundPair("getTilePathInRange", {"colour":":default/arrows32.png", "colourChildrenUnder":["attack"],
+				"destName":"path", "regionToUse":"move"
+			}),
 			q.requestBoundPair("moveViaPath"),
-			q.requestBoundPair("uncolourRegion", {"regionsToUncolour":["move", "path"]}),
+			q.requestBoundPair("uncolourRegion", {"regionsToUncolour":["move", "move.attack", "path"]}),
 			q.requestBoundPair("generateRegion", aarg),
-			function(pa) {
+			q.requestBoundPair("colourRegion", {"regionsToColour":["attack"]}),
+			[function(pa) {
 				pa.options = [];
 				
 				pa.mover = pa.entity;
@@ -236,12 +239,12 @@ load.provide("quest", (function() {
 				if(pa.regions["attack"].entities().length) {
 					pa.options.push({"text":"Attack!", "listValue":"attack", "listSelectFunction":function(pa, qu) {
 						qu(q.requestBoundPair("selectEntity", {"filter":"stat(faction, 1) = ENEMY", "regionToUse":"attack"}));
-						qu(function(pa) {
+						qu([function(pa) {
 							feed.append({"text":"You killed them!"});
 							pa.entity.terminate();
 							
 							return pa;
-						});
+						}, undefined, "Kill entity"]);
 						
 						return pa;
 					}});
@@ -249,7 +252,7 @@ load.provide("quest", (function() {
 				
 				//Items option
 				pa.options.push({"text":"Items", "listValue":"items", "listSelectFunction":function(pa, qu) {
-					qu(function(pa) {
+					qu([function(pa) {
 						pa.options = [];
 						var i = pa.entity.stats.getBlock(2, "weapons");
 						i.forEach(function(item, slot) {
@@ -257,7 +260,7 @@ load.provide("quest", (function() {
 						});
 						
 						return pa;
-					});
+					}, undefined, "Generate weapons list"]);
 					qu(q.requestBoundPair("selectListMenu", {"path":"menu:/menu"}));
 					
 					return pa;
@@ -270,14 +273,14 @@ load.provide("quest", (function() {
 				pa.options.push({"text":"Cancel", "listSelectCancel":true});
 				
 				return pa;
-			},
+			}, undefined, "After move menu"],
 			q.requestBoundPair("selectListMenu", {"path":"menu:/menu"}),
 			q.requestBoundPair("uncolourRegion", {"regionsToUncolour":["attack"]}),
-			function(pa) {
+			[function(pa) {
 				pa.mover.stats.addBlock(3, "moved", {"moved":true});
 				
 				return pa;
-			}
+			}, undefined, "Add moved block"]
 		], false)
 	//	.then(console.log.bind(console), console.error.bind(console))
 		.then(function(pa) {

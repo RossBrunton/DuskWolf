@@ -48,7 +48,13 @@ load.provide("dusk.sgui.BasicMain", (function() {
 		this.frame.listen(this._basicMainFrame.bind(this));
 		this.onControl.listen(this.save.bind(this), controls.addControl("basicmain_save", "S"));
 		this.onControl.listen((function(e) {
-			if(editor.active) this.createRoom(prompt("Enter a room to go to.", this.roomName), 0);
+			if(editor.active) {
+				if(!e.shift) {
+					this.createRoom(prompt("Enter a room to go to.", this.roomName), 0);
+				}else{
+					this.roomManager.setRoom(prompt("Enter a room to go to via the room manager.", this.roomName), 0);
+				}
+			}
 		}).bind(this), controls.addControl("basicmain_goto", "G"));
 		
 		this.augment.listen((function(e) {
@@ -73,51 +79,55 @@ load.provide("dusk.sgui.BasicMain", (function() {
 	var _LAYER_COLOURS = ["#ff0000", "#00ff00", "#0000ff"];
 	
 	BasicMain.prototype.createRoom = function(name, spawn) {
-		var room = null;
-		if(this.roomManager) room = this.roomManager.getRoomData(name);
-		
-		if(!room) {
-			console.error("Room "+name+" does not exist.");
-			return;
-		}
-		
-		this.roomName = name;
-		
-		//Yes.
-		this.layers = this.layers;
-		
-		for(var i = 0; i < room.length; i ++) {
-			this.getComponent(this._layers[i].name).loadBM(room[i], spawn);
-		}
-		
-		var entLayers = this.getAllLayersOfType(BasicMain.LAYER_ENTITIES);
-		for(var i = entLayers.length-1; i >= 0; i --) {
-			entLayers[i].scheme = this.getFirstLayerOfType(BasicMain.LAYER_SCHEME);
-			entLayers[i].particles = this.getFirstLayerOfType(BasicMain.LAYER_PARTICLES);
-			entLayers[i].width = this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).width;
-			entLayers[i].height = this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).height;
-		}
-		
-		var pLayers = this.getAllLayersOfType(BasicMain.LAYER_PARTICLES);
-		for(var i = pLayers.length-1; i >= 0; i --) {
-			pLayers[i].width = this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).width;
-			pLayers[i].height = this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).height;
-		}
-		
-		var crd = this.getFirstLayerOfType(BasicMain.LAYER_SCHEME).lookTile(spawn, 1);
-		if(crd && entities.seek){
-			var playerData = {};
-			playerData.name = entities.seek;
-			playerData.type = entities.seekType;
-			playerData.x = crd[0]*entities.twidth;
-			playerData.y = crd[1]*entities.theight;
-		
-			this.getComponent(this._primaryEntityGroup).dropEntity(playerData, true);
-		}
-		
-		this.flow(this.getPrimaryEntityLayer().comName);
-		
-		this.autoScroll();
+		return new Promise((function(fulfill, reject) {
+			var room = null;
+			if(this.roomManager) room = this.roomManager.getRoomData(name);
+			
+			if(!room) {
+				console.error("Room "+name+" does not exist.");
+				return;
+			}
+			
+			this.roomName = name;
+			
+			//Yes.
+			this.layers = this.layers;
+			
+			for(var i = 0; i < room.length; i ++) {
+				this.getComponent(this._layers[i].name).loadBM(room[i], spawn);
+			}
+			
+			var entLayers = this.getAllLayersOfType(BasicMain.LAYER_ENTITIES);
+			for(var i = entLayers.length-1; i >= 0; i --) {
+				entLayers[i].scheme = this.getFirstLayerOfType(BasicMain.LAYER_SCHEME);
+				entLayers[i].particles = this.getFirstLayerOfType(BasicMain.LAYER_PARTICLES);
+				entLayers[i].width = this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).width;
+				entLayers[i].height = this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).height;
+			}
+			
+			var pLayers = this.getAllLayersOfType(BasicMain.LAYER_PARTICLES);
+			for(var i = pLayers.length-1; i >= 0; i --) {
+				pLayers[i].width = this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).width;
+				pLayers[i].height = this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).height;
+			}
+			
+			var crd = this.getFirstLayerOfType(BasicMain.LAYER_SCHEME).lookTile(spawn, 1);
+			if(crd && entities.seek){
+				var playerData = {};
+				playerData.name = entities.seek;
+				playerData.type = entities.seekType;
+				playerData.x = crd[0]*entities.twidth;
+				playerData.y = crd[1]*entities.theight;
+			
+				this.getComponent(this._primaryEntityGroup).dropEntity(playerData, true);
+			}
+			
+			this.flow(this.getPrimaryEntityLayer().comName);
+			
+			this.autoScroll();
+			
+			fulfill({"name":name});
+		}).bind(this));
 	};
 	
 	//layers
