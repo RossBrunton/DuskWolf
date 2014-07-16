@@ -99,7 +99,7 @@ load.provide("dusk.save.ConsoleSource", (function() {
 	 */
 	ConsoleSource.prototype.load = function(spec, identifier) {
 		console.log("<< Load <<");
-		return Promise.resolve(new save.SaveData(spec, JSON.parse(save.ConsoleSource.data)));
+		return Promise.resolve(new save.SaveData(spec, JSON.parse(ConsoleSource.data)));
 	};
 
 	/** Returns a string representation of this object.

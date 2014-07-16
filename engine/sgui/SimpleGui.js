@@ -244,6 +244,20 @@ load.provide("dusk.sgui", (function() {
 	 */
 	var _highFrames = 0;
 	
+	/** The context for the main canvas.
+	 * @type CanvasRenderingContext2D
+	 * @since 0.0.21-alpha
+	 * @private
+	 */
+	var _ctx = document.getElementById(dusk.elemPrefix+"-canvas").getContext("2d");
+	
+	/** The context for the cache canvas.
+	 * @type CanvasRenderingContext2D
+	 * @since 0.0.21-alpha
+	 * @private
+	 */
+	var _cacheCtx = _cacheCanvas.getContext("2d");
+	
 	/** Returns the canvas element that sgui is using.
 	 * 
 	 * @return {HTMLCanvasElement} The canvas.
@@ -352,9 +366,9 @@ load.provide("dusk.sgui", (function() {
 		if(sgui.highRate && sgui.framesTotal % 2 == 1) return false;
 		
 		if(!sgui.noCleanCanvas) {
-			_getCanvas().getContext("2d").clearRect(0, 0, sgui.width, sgui.height);
+			_ctx.clearRect(0, 0, sgui.width, sgui.height);
 			if(!sgui.noCacheCanvas)
-				_cacheCanvas.getContext("2d").clearRect(0, 0, sgui.width, sgui.height);
+				_cacheCtx.clearRect(0, 0, sgui.width, sgui.height);
 		}
 		
 		//Draw panes
@@ -369,15 +383,15 @@ load.provide("dusk.sgui", (function() {
 			data.height = _panes[c].height;
 			
 			if(sgui.noCacheCanvas) {
-				_panes[c].draw(data, _getCanvas().getContext("2d"));
+				_panes[c].draw(data, _ctx);
 			}else{
-				_panes[c].draw(data, _cacheCanvas.getContext("2d"));
+				_panes[c].draw(data, _cacheCtx);
 			}
 			sgui.drawDataPool.free(data);
 		}
 		
 		if(!sgui.noCacheCanvas) {
-			_getCanvas().getContext("2d").drawImage(_cacheCanvas, 0, 0, sgui.width, sgui.height);
+			_ctx.drawImage(_cacheCanvas, 0, 0, sgui.width, sgui.height);
 		}
 		
 		sgui.onRender.fire({});
@@ -606,10 +620,10 @@ load.provide("dusk.sgui", (function() {
 	_cacheCanvas.width = sgui.width;
 	_cacheCanvas.style.imageRendering = "-webkit-optimize-contrast";
 	
-	_cacheCanvas.getContext("2d").mozImageSmoothingEnabled = false;
-	_cacheCanvas.getContext("2d").webkitImageSmoothingEnabled = false;
-	_cacheCanvas.getContext("2d").imageSmoothingEnabled = false;
-	_cacheCanvas.getContext("2d").textBaseline = "middle";
+	_cacheCtx.mozImageSmoothingEnabled = false;
+	_cacheCtx.webkitImageSmoothingEnabled = false;
+	_cacheCtx.imageSmoothingEnabled = false;
+	_cacheCtx.textBaseline = "middle";
 	
 	//Controls
 	controls.addControl("sgui_up", 38, "1-");

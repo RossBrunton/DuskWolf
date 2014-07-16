@@ -24,15 +24,16 @@ load.provide("dusk.behave.Fall", (function() {
 		
 		this._data("fallSpeed", 1, true);
 		
-		this.entityEvent.listen(this._fallFall.bind(this), "collidedInto", {"dir":c.DIR_UP});
+		this.entityEvent.listen(_fall.bind(this), "collidedInto");
 	};
 	Fall.prototype = Object.create(Behave.prototype);
-
+	
 	/** Used to manage collisions internally.
 	 * @param {object} e A "collidedInto" event dispatched from `{@link dusk.behave.Behave.entityEvent}`.
 	 * @private
 	 */
-	Fall.prototype._fallFall = function(name, e) {
+	var _fall = function(e) {
+		if(e.dir !== c.DIR_UP) return;
 		//this._entity.performMotion(0, this._entity.eProp("fallSpeed"));
 		this._entity.applyDy("fall_fall", 1/*this._data("fallSpeed")*/);
 	};
@@ -46,10 +47,7 @@ load.provide("dusk.behave.Fall", (function() {
 			["fallSpeed", "integer", "The speed to fall."]
 		]
 	};
-
-	Object.seal(Fall);
-	Object.seal(Fall.prototype);
-
+	
 	entities.registerBehaviour("Fall", Fall);
 	
 	return Fall;

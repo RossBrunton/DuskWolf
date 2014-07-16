@@ -17,6 +17,7 @@ load.provide("example.plat", (function() {
 	load.require("dusk.behave.Gravity");
 	var Pickup = load.require("dusk.behave.Pickup");
 	load.require("dusk.behave.HealthRestore");
+	var InteractableTarget = load.require("dusk.behave.InteractableTarget");
 		
 	load.require("dusk.sgui.DynamicGrid");
 	load.require("dusk.sgui.ControlConfig");
@@ -89,7 +90,7 @@ load.provide("example.plat", (function() {
 	entities.types.createNewType("player", {
 		"behaviours":{
 			"Persist":true, "PlayerControl":true, "Jumper":true, "MarkTrigger":true, "Killable":true,
-			"Gravity":true, "LeftRightControl":true, "Spawner":true, "Scriptable":true,
+			"Gravity":true, "LeftRightControl":true, "Spawner":true, "Scriptable":true, "InteractableHost":true
 		},
 		"data":{
 			"hp":5, "maxHp":5, "collisionOffsetX":10, "collisionWidth":22, "collisionOffsetY":3, "hspeed":5,
@@ -112,7 +113,7 @@ load.provide("example.plat", (function() {
 
 	entities.types.createNewType("bad", {
 		"behaviours":{"HitDam":true},
-		"data":{"gravity":0, "damage":1, "types":["electric", "fire"], "src":"psrc/techBad.png"},
+		"data":{"gravity":0, "damage":1, "types":["electric", "fire"], "src":"pimg/techBad.png"},
 		"animation":[["", "0,0|1,0|+30", {}]]
 	}, "plat");
 
@@ -134,12 +135,12 @@ load.provide("example.plat", (function() {
 	}, "plat");
 
 	entities.types.createNewType("block", {"behaviours":{}, "data":{"anchor":true, "gravity":0}}, "plat");
-	entities.types.createNewType("fall", {"behaviours":{"Fall":true}, 
-		"data":{"gravity":0, "fallSpeed":3, "src":"pimg/techFallBlock.png"},
+	entities.types.createNewType("fall", {"behaviours":{"Fall":true, "InteractableTarget":true}, 
+		"data":{"gravity":0, "fallSpeed":3, "src":"pimg/techFallBlock.png", "interactType":"Falli"},
 		"animation":[["", "0,0", {}], ["#dy>0 & #tb=0", "1,0", {}]]
 	}, "plat");
 	entities.types.createNewType("push", {"behaviours":{"Push":true},
-		"data":{"gravity":0, "src":"psrc/techFreeMove.png"}
+		"data":{"gravity":0, "src":"pimg/techFreeMove.png"}
 	}, "plat");
 
 	entities.types.createNewType("slash", {"behaviours":{"HitDam":true},

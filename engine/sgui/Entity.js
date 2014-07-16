@@ -452,7 +452,7 @@ load.provide("dusk.sgui.Entity", (function() {
 		}
 	};
 	Entity.prototype = Object.create(Tile.prototype);
-
+	
 	//Basic getters and setters
 	//schemePath
 	Object.defineProperty(Entity.prototype, "schemePath", {
@@ -464,7 +464,7 @@ load.provide("dusk.sgui.Entity", (function() {
 			if(value) this.scheme = this.path(value);
 		}
 	});
-
+	
 	//particlesPath
 	Object.defineProperty(Entity.prototype, "particlesPath", {
 		get: function() {
@@ -475,7 +475,7 @@ load.provide("dusk.sgui.Entity", (function() {
 			if(value) this.particles = this.path(value);
 		}
 	});
-
+	
 	//entType
 	Object.defineProperty(Entity.prototype, "entType", {
 		get: function() {
@@ -535,9 +535,9 @@ load.provide("dusk.sgui.Entity", (function() {
 			this.behaviourFire("typeChange");
 		}
 	});
-
-
-
+	
+	
+	
 	//Velocity
 	/** Returns the horizontal speed of this entity.
 	 * @return {integer} The entity's dx value.
@@ -555,7 +555,7 @@ load.provide("dusk.sgui.Entity", (function() {
 		}
 		return dx;
 	};
-
+	
 	/** Returns the vertical speed of this entity.
 	 * @return {integer} The entity's dx value.
 	 */
@@ -572,7 +572,7 @@ load.provide("dusk.sgui.Entity", (function() {
 		}
 		return dy;
 	};
-
+	
 	/** Applys a horizontal speed and acceleration to the entity.
 	 * @param {string} name The name of the source of this dx, used to change it later.
 	 * @param {integer} value The initial value for the speed.
@@ -593,7 +593,7 @@ load.provide("dusk.sgui.Entity", (function() {
 		if(this.getDx() < 0) this.eProp("lastMoveLeft", true);
 		if(this.getDx() > 0) this.eProp("lastMoveLeft", false);
 	};
-
+	
 	/** Applys a vertical speed and acceleration to the entity.
 	 * @param {string} name The name of the source of this dy, used to change it later.
 	 * @param {integer} value The initial value for the speed.
@@ -614,7 +614,7 @@ load.provide("dusk.sgui.Entity", (function() {
 		if(this.getDy() < 0) this.eProp("lastMoveUp", true);
 		if(this.getDy() > 0) this.eProp("lastMoveUp", false);
 	};
-
+	
 	/** Applies a multiplication factor onto the dx. This multiplies the dx value by some value, and can
 	 *  be used to stop motion if the factor is 0.
 	 * @param {string} name The name of the mult, so it can be referred to later.
@@ -629,7 +629,7 @@ load.provide("dusk.sgui.Entity", (function() {
 		if(factor == 1.0) delete this._dxMults[name];
 		else this._dxMults[name] = [factor, duration, ignores];
 	};
-
+	
 	/** Applies a multiplication factor onto the dy. This multiplies the dy value by some value, and can
 	 *  be used to stop motion if the factor is 0.
 	 * @param {string} name The name of the mult, so it can be referred to later.
@@ -644,7 +644,7 @@ load.provide("dusk.sgui.Entity", (function() {
 		if(factor == 1.0) delete this._dyMults[name];
 		else this._dyMults[name] = [factor, duration, ignores];
 	};
-
+	
 	/** Called before all entities are moved by `{@link dusk.sgui.EntityGroup}`, and causes all the 
 	 *  speeds of this entity to accelerate or decelerate if needed.
 	 * 
@@ -706,8 +706,8 @@ load.provide("dusk.sgui.Entity", (function() {
 		//Fire beforeMove event
 		this.behaviourFire("beforeMove");
 	};
-
-
+	
+	
 	//Behaviours
 	/** Fires a behaviour event to all of the behaviours on this entity.
 	 * @param {string} event The name of the event, will be set as the `name` property on the event
@@ -723,7 +723,7 @@ load.provide("dusk.sgui.Entity", (function() {
 			this._behaviours[keys[b]].entityEvent.fire(data, event);
 		}
 	};
-
+	
 	/** Fires a behaviour event to all of the behaviours on this entity.
 	 * 
 	 * This returns an array of the return values of all events.
@@ -744,7 +744,7 @@ load.provide("dusk.sgui.Entity", (function() {
 		
 		return output;
 	};
-
+	
 	/** Adds a new behaviour to this entity.
 	 * @param {string} name The name of the behaviour to add.
 	 * @param {boolean=false} reInit If the behaviour already exists and this is true, it will be
@@ -769,7 +769,7 @@ load.provide("dusk.sgui.Entity", (function() {
 		
 		return this._behaviours[name];
 	};
-
+	
 	/** Sets an entity data property to the value, or returns it if no value is specified.
 	 * @param {string} prop The name of the property to set or get.
 	 * @param {?*} set The value to set the property, if no value is provided, then nothing will be set.
@@ -801,8 +801,9 @@ load.provide("dusk.sgui.Entity", (function() {
 			return this.behaviourData[prop];
 		}
 	};
-
-
+	
+	
+	
 	//Animation
 	/** Called when a frame is ran. It fires the `frame` entity event, calls the animation funciton, and
 	 * decrements all cooldowns.
@@ -822,7 +823,7 @@ load.provide("dusk.sgui.Entity", (function() {
 		
 		this.performAnimation(null, this._frameCountdown <= 0);
 	};
-
+	
 	/** Performs an animation or particle effect. This is called at least once per frame and once per
 	 *  animation event, and looks through all possible animations and particle effects.
 	 * 
@@ -904,7 +905,7 @@ load.provide("dusk.sgui.Entity", (function() {
 			}
 		}
 	};
-
+	
 	/** Starts a new animation with the specified ID.
 	 * @param {integer} id The index of the new animation.
 	 * @param {?string} event The event that triggered this animation, if any.
@@ -922,7 +923,7 @@ load.provide("dusk.sgui.Entity", (function() {
 		
 		this._aniAction(event);
 	};
-
+	
 	/** Does a single action for an animation. If none is specified, it will run the next one in the
 	 *  current animation, and skip to the next action if needed. Otherwise, it will run the provided
 	 *  one.
@@ -1037,7 +1038,7 @@ load.provide("dusk.sgui.Entity", (function() {
 				if(!this.isLight()) this.tileStr = action;
 		}
 	};
-
+	
 	/** Moves the animation pointer forward (looping if needed), and then does that action.
 	 * @param {?string} event The event that provoked this.
 	 * @param {integer=1} by The number of actions to skip past.
@@ -1047,9 +1048,9 @@ load.provide("dusk.sgui.Entity", (function() {
 		this._aniPointer = (this._aniPointer + by) % this._animationData[this._currentAni][1].length;
 		this._aniAction(event);
 	};
-
-
-
+	
+	
+	
 	//Triggers
 	/** Alias to `{@link dusk.sgui.Entity#evalTrigger}`.
 	 * @param {*} trigger The trigger.
@@ -1086,9 +1087,9 @@ load.provide("dusk.sgui.Entity", (function() {
 		
 		return e;
 	};
-
-
-
+	
+	
+	
 	//Touchers
 	/** Returns an array of either `{@link dusk.sgui.Entity}` instances or the string `"wall"` which are
 	 *  touching this entity on the specified side.
@@ -1099,7 +1100,21 @@ load.provide("dusk.sgui.Entity", (function() {
 		if(!(dir in this._touchers)) {console.warn("Unknown dir "+dir+" for touching!"); return [];}
 		return this._touchers[dir];
 	};
-
+	
+	/** Returns an array of either `Entity` instances or the string `"wall"` which are touching this entity on any side.
+	 * @return {array} The things touching this entity.
+	 */
+	Entity.prototype.allTouchers = function(dir) {
+		var out = [];
+		
+		out = this.touchers(c.DIR_UP);
+		out = utils.arrayUnion(out, this.touchers(c.DIR_DOWN));
+		out = utils.arrayUnion(out, this.touchers(c.DIR_LEFT));
+		out = utils.arrayUnion(out, this.touchers(c.DIR_RIGHT));
+		
+		return out;
+	};
+	
 	/** Called by `{@link dusk.sgui.EntityGroup}` to indicate that the specified entity is touching it.
 	 * @param {integer} dir The side it is touching this, one of the `dusk.sgui.c.DIR_*` constants.
 	 * @param {dusk.sgui.Entity|string} entity The entity touching this, or the string `"wall"`.
@@ -1107,9 +1122,9 @@ load.provide("dusk.sgui.Entity", (function() {
 	Entity.prototype.addToucher = function(dir, entity) {
 		this._touchers[dir].push(entity);
 	};
-
-
-
+	
+	
+	
 	/*dusk.sgui.Entity.prototype.teather = function(target, dir) {
 		this._teatherClients[this._teatherClients.length] = [target, dir];
 		target.receiveTeather(this, dir);
@@ -1130,9 +1145,9 @@ load.provide("dusk.sgui.Entity", (function() {
 	dusk.sgui.Entity.prototype.teatherClients = function() {
 		return this._teatherClients;
 	};*/
-
-
-
+	
+	
+	
 	//Misc
 	/** Registered with the draw handler to draw a rectangle around this entity's hitbox.
 	 * @param {object} e An event from `{@link dusk.sgui.Component#prepareDraw}`.
@@ -1145,7 +1160,7 @@ load.provide("dusk.sgui.Entity", (function() {
 			this.collisionWidth - this.collisionOffsetX, this.collisionHeight - this.collisionOffsetY
 		);
 	};
-
+	
 	/** This terminates the entity, which is a way to "gracefully delete" it. First, a behaviour event
 	 *  `terminate` is fired, if none of the listeners to that return true, 
 	 *  `{@link dusk.sgui.Entity#animationWait}` is called with a `terminate` event with the callback 
@@ -1165,7 +1180,7 @@ load.provide("dusk.sgui.Entity", (function() {
 			}
 		}).bind(this));
 	};
-
+	
 	/** Fires an animation event, listened to with the trigger `on name`. If this doesn't specifically
 	 *  target any animation, the function is called with no arguments, otherwise, the function will be
 	 *  called when the animation action `/name` is ran.
@@ -1180,7 +1195,7 @@ load.provide("dusk.sgui.Entity", (function() {
 			this._aniWaits[name] = funct;
 		}
 	};
-
+	
 	/** Returns if this is a light entity rather than an sgui entity.
 	 * @return {boolean} True if this is an instance of `{@link dusk.entities.Entity}`, false if it is
 	 *  an instance of `{@link dusk.sgui.Entity}`.
@@ -1188,10 +1203,7 @@ load.provide("dusk.sgui.Entity", (function() {
 	Entity.prototype.isLight = function() {
 		return false;
 	};
-
-	Object.seal(Entity);
-	Object.seal(Entity.prototype);
-
+	
 	sgui.registerType("Entity", Entity);
 	return Entity;
 })());
@@ -1222,13 +1234,13 @@ load.provide("dusk.entities.LightEntity", (function() {
 		this.entType = type;
 		this.deleted = false;
 	};
-
+	
 	for(var p in Entity.prototype) {
 		if(Entity.prototype.hasOwnProperty(p)
 		&& ["className", "schemePath", "particlesPath", "entType"].indexOf(p) === -1)
 			LightEntity.prototype[p] = Entity.prototype[p];
 	}
-
+	
 	/** Returns if this is a light entity rather than an sgui entity.
 	 * @return {boolean} True if this is an instance of `{@link dusk.entities.LightEntity}`, false if it
 	 *  is an instance of `{@link dusk.sgui.Entity}`.
@@ -1236,7 +1248,7 @@ load.provide("dusk.entities.LightEntity", (function() {
 	LightEntity.prototype.isLight = function() {
 		return true;
 	};
-
+	
 	//Basic getters and setters, I see no way to copy these from the original
 	//schemePath
 	Object.defineProperty(LightEntity.prototype, "schemePath", {
@@ -1248,7 +1260,7 @@ load.provide("dusk.entities.LightEntity", (function() {
 			if(value) this.scheme = this.path(value);
 		}
 	});
-
+	
 	//particlesPath
 	Object.defineProperty(LightEntity.prototype, "particlesPath", {
 		get: function() {
@@ -1259,7 +1271,7 @@ load.provide("dusk.entities.LightEntity", (function() {
 			if(value) this.particles = this.path(value);
 		}
 	});
-
+	
 	//entType
 	Object.defineProperty(LightEntity.prototype, "entType", {
 		get: function() {
@@ -1305,9 +1317,6 @@ load.provide("dusk.entities.LightEntity", (function() {
 			this.behaviourFire("typeChange");
 		}
 	});
-	
-	Object.seal(LightEntity);
-	Object.seal(LightEntity.prototype);
 	
 	return LightEntity;
 })());

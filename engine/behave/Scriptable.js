@@ -55,7 +55,7 @@ load.provide("dusk.behave.Scriptable", (function() {
 					passedArg.initialY = this._entity.y;
 					//passedArg.initialFacing = this._data("gwfacing");
 					
-					this._data("gwmoves", moves);
+					this._data("gwmoves", moves.reverse());
 				}).bind(this));
 			
 			case "gridWalk^-1":

@@ -56,7 +56,7 @@ load.provide("dusk.EventDispatcher", (function() {
 		 */
 		this.filterType = (filterType === undefined)?EventDispatcher.FILTER_EQUALS:filterType;
 	};
-
+	
 	/** The default return mode, this will cause the fire method to return nothing.
 	 * 
 	 * @type integer
@@ -64,7 +64,7 @@ load.provide("dusk.EventDispatcher", (function() {
 	 * @value 0
 	 */
 	EventDispatcher.MODE_NONE = 0;
-
+	
 	/** The "and" mode, this will cause the fire method to return true only if all the listeners return true.
 	 * 
 	 * @type integer
@@ -72,7 +72,7 @@ load.provide("dusk.EventDispatcher", (function() {
 	 * @value 1
 	 */
 	EventDispatcher.MODE_AND = 1;
-
+	
 	/** The "or" mode, this will cause the fire method to return true only if at least one of the listeners return true.
 	 * 
 	 * @type integer
@@ -80,7 +80,7 @@ load.provide("dusk.EventDispatcher", (function() {
 	 * @value 2
 	 */
 	EventDispatcher.MODE_OR = 2;
-
+	
 	/** The "pass" mode, this will take the event object returned by a listener
 	 *   and then pass it to the next one and so on then finaly return that value.
 	 * 
@@ -89,7 +89,7 @@ load.provide("dusk.EventDispatcher", (function() {
 	 * @value 3
 	 */
 	EventDispatcher.MODE_PASS = 3;
-
+	
 	/** The "last" mode, this will return the last non-undefined result returned by a listener.
 	 * 
 	 * @type integer
@@ -127,7 +127,7 @@ load.provide("dusk.EventDispatcher", (function() {
 	 */
 	EventDispatcher.FILTER_ISIN = 2;
 	
-
+	
 	/** Registers a listener for the event; this function will be called if an event is fired and the properties match
 	 *  up as described in the class description are correct.
 	 * 
@@ -146,10 +146,10 @@ load.provide("dusk.EventDispatcher", (function() {
 			throw new TypeError("EventDispatcher "+this.name+" did not get a valid function.");
 		}
 		
+		if(propsYes || propsNo) console.error("PropsYes or propsNo in use");
+		
 		this._listeners.push([
-			callback, filter,
-			propsYes?propsYes:null, propsYes?Object.keys(propsYes):[], 
-			propsNo?propsNo:null, propsNo?Object.keys(propsNo):[]
+			callback, filter
 		]);
 		return this._listeners.length-1;
 	};
@@ -167,10 +167,18 @@ load.provide("dusk.EventDispatcher", (function() {
 	 * 
 	 * @param {?object} event The event object to fire, and pass to all listeners. This may be undefined.
 	 * @param {?*} filter The filter that listeners must adhere to.
-	 * @param {?dusk.Pool} pool If defined, then the event object will be returned to this pool when the firing is
-	 *  finished.
 	 */
-	EventDispatcher.prototype.fire = function(event, filter, pool) {
+	EventDispatcher.prototype.fire = function(event, filter) {
+		if(this.filterType == EventDispatcher.FILTER_EQUALS) {
+			return this._fireString(event, ""+filter);
+		}else if(this.filterType == EventDispatcher.FILTER_MULTI) {
+			return this._fireInt(event, filter);
+		}else if(this.filterType == EventDispatcher.FILTER_ISIN) {
+			return this._fireArray(event, filter);
+		}
+	};
+	
+	EventDispatcher.prototype._fireString = function(event, filter) {
 		if(this.mode == 0) {
 			for(var i = 0; i < this._listeners.length; i ++) {
 				if(this._listeners[i] === null) continue;
@@ -178,25 +186,9 @@ load.provide("dusk.EventDispatcher", (function() {
 				var l = this._listeners[i];
 				
 				//Check filter
-				if(filter !== undefined && l[1] !== undefined) {
-					if(this.filterType == EventDispatcher.FILTER_EQUALS && filter != l[1]) {
-						continue;
-					}else if(this.filterType == EventDispatcher.FILTER_MULTI && (filter & l[1]) == 0){
-						continue;
-					}else if(this.filterType == EventDispatcher.FILTER_ISIN && filter.indexOf(l[1]) === -1) {
-						continue
-					}
+				if(l[1] && filter != l[1]) {
+					continue;
 				}
-				
-				//Check propsYes
-				if(event && l[2]
-				&& !_checkPropsPositive(event, l[2], l[3]))
-					continue;
-				
-				//Check propsNo
-				if(event && l[4]
-				&& !_checkPropsNegative(event, l[4], l[5]))
-					continue;
 				
 				//Fire listener
 				l[0](event);
@@ -224,25 +216,9 @@ load.provide("dusk.EventDispatcher", (function() {
 				var l = this._listeners[i];
 				
 				//Check filter
-				if(filter !== undefined && l[1]) {
-					if(this.filterType == EventDispatcher.FILTER_EQUALS && filter != l[1]) {
-						continue;
-					}else if(this.filterType == EventDispatcher.FILTER_MULTI && (filter & l[1]) == 0){
-						continue;
-					}else if(this.filterType == EventDispatcher.FILTER_ISIN && filter.indexOf(l[1]) === -1) {
-						continue
-					}
+				if(l[1] && filter != l[1]) {
+					continue;
 				}
-				
-				//Check propsYes
-				if(event && l[2]
-				&& !_checkPropsPositive(event, l[2], l[3]))
-					continue;
-				
-				//Check propsNo
-				if(event && l[4]
-				&& !_checkPropsNegative(event, l[4], l[5]))
-					continue;
 				
 				//Fire listener
 				var ret = l[0](event);
@@ -267,33 +243,148 @@ load.provide("dusk.EventDispatcher", (function() {
 				}
 			}
 			
-			if(pool) pool.free(event);
 			return majorRet;
 		}
-		
-		if(pool) pool.free(event);
-	};
-
-	var _checkPropsPositive = function(event, props, keys) {
-		for(var i = 0; i < keys.length; i ++) {
-			if(event[keys[i]] !== props[keys[i]]) {
-				return false;
+	}
+	
+	EventDispatcher.prototype._fireInt = function(event, filter) {
+		if(this.mode == 0) {
+			for(var i = 0; i < this._listeners.length; i ++) {
+				if(this._listeners[i] === null) continue;
+				
+				var l = this._listeners[i];
+				
+				//Check filter
+				if(l[1] !== undefined && !(filter & l[1])) {
+					continue;
+				}
+				
+				//Fire listener
+				l[0](event);
 			}
-		}
-		
-		return true;
-	};
-
-	var _checkPropsNegative = function(event, props, keys) {
-		for(var i = 0; i < keys.length; i ++) {
-			if(event[keys[i]] === props[keys[i]]) {
-				return false;
+		}else{
+			var majorRet = null;
+			
+			switch(this.mode) {
+				case 1: //AND
+					majorRet = true;
+					break;
+				
+				case 2: //OR
+					majorRet = false;
+					break;
+				
+				case 3: //PASS
+					majorRet = event;
+					break;
 			}
+			
+			for(var i = 0; i < this._listeners.length; i ++) {
+				if(this._listeners[i] === null) continue;
+				
+				var l = this._listeners[i];
+				
+				//Check filter
+				if(l[1] !== undefined && !(filter & l[1])) {
+					continue;
+				}
+				
+				//Fire listener
+				var ret = l[0](event);
+			
+				switch(this.mode) {
+					case 1: //AND
+						majorRet = majorRet&&ret;
+						break;
+					
+					case 2: //OR
+						majorRet = majorRet||ret;
+						break;
+					
+					case 3: //PASS
+						majorRet = ret;
+						event = majorRet;
+						break;
+					
+					case 4: //LAST
+						majorRet = ret===undefined?majorRet:ret;
+						break;
+				}
+			}
+			
+			return majorRet;
 		}
-		
-		return true;
-	};
-
+	}
+	
+	EventDispatcher.prototype._fireArray = function(event, filter) {
+		if(this.mode == 0) {
+			for(var i = 0; i < this._listeners.length; i ++) {
+				if(this._listeners[i] === null) continue;
+				
+				var l = this._listeners[i];
+				
+				//Check filter
+				if(l[1] && l[1].indexOf(filter) === -1) {
+					continue;
+				}
+				
+				//Fire listener
+				l[0](event);
+			}
+		}else{
+			var majorRet = null;
+			
+			switch(this.mode) {
+				case 1: //AND
+					majorRet = true;
+					break;
+				
+				case 2: //OR
+					majorRet = false;
+					break;
+				
+				case 3: //PASS
+					majorRet = event;
+					break;
+			}
+			
+			for(var i = 0; i < this._listeners.length; i ++) {
+				if(this._listeners[i] === null) continue;
+				
+				var l = this._listeners[i];
+				
+				//Check filter
+				if(l[1] && l[1].indexOf(filter) === -1) {
+					continue;
+				}
+				
+				//Fire listener
+				var ret = l[0](event);
+			
+				switch(this.mode) {
+					case 1: //AND
+						majorRet = majorRet&&ret;
+						break;
+					
+					case 2: //OR
+						majorRet = majorRet||ret;
+						break;
+					
+					case 3: //PASS
+						majorRet = ret;
+						event = majorRet;
+						break;
+					
+					case 4: //LAST
+						majorRet = ret===undefined?majorRet:ret;
+						break;
+				}
+			}
+			
+			return majorRet;
+		}
+	}
+	
 	/** Returns whether this EventDispatcher has any listeners or not.
 	 * 
 	 * @return {boolean} Whether any listeners are registered.
@@ -301,7 +392,7 @@ load.provide("dusk.EventDispatcher", (function() {
 	EventDispatcher.prototype.hasListeners = function() {
 		return this._listeners.length > 0;
 	};
-
+	
 	/** Returns a string representation of the EventDispatcher.
 	 * 
 	 * @return {string} A representation of the EventDispatcher.
@@ -309,9 +400,6 @@ load.provide("dusk.EventDispatcher", (function() {
 	EventDispatcher.prototype.toString = function() {
 		return "[EventDispatcher "+this._name+"]";
 	};
-
-	Object.seal(EventDispatcher);
-	Object.seal(EventDispatcher.prototype);
 	
 	return EventDispatcher;
 })());

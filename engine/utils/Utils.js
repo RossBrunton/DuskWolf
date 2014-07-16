@@ -259,13 +259,33 @@ load.provide("dusk.utils", (function() {
 	 * 
 	 * @param {array} a The first array.
 	 * @param {array} b The second array.
-	 * @return {array} The union of both arrays.
+	 * @return {array} The intersection of both arrays.
 	 */
 	utils.arrayIntersect = function(a, b) {
 		var out = [];
 		
 		for(var i = a.length-1; i >= 0; i --) {
 			if(b.indexOf(a[i]) != -1) out[out.length] = a[i];
+		}
+		
+		return out;
+	};
+	
+	/** Returns a new array containing all that occur at least once in a or b in no order.
+	 * 
+	 * @param {array} a The first array.
+	 * @param {array} b The second array.
+	 * @return {array} The union of both arrays.
+	 */
+	utils.arrayUnion = function(a, b) {
+		var out = [];
+		
+		for(var i = a.length-1; i >= 0; i --) {
+			if(out.indexOf(a[i]) === -1) out[out.length] = a[i];
+		}
+		
+		for(var i = b.length-1; i >= 0; i --) {
+			if(out.indexOf(b[i]) === -1) out[out.length] = b[i];
 		}
 		
 		return out;

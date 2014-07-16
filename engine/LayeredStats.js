@@ -12,21 +12,21 @@ load.provide("dusk.stats", (function() {
 	var stats = {};
 	
 	var _stats = {};
-
+	
 	stats.addStats = function(name, stats, replace) {
 		if(name in _stats && !replace) {
 			return;
 		}
 		_stats[name] = [stats, false];
 	};
-
+	
 	stats.addStatsGenerator = function(name, stats, replace) {
 		if(name in _stats && !replace) {
 			return;
 		}
 		_stats[name] = [stats, true];
 	};
-
+	
 	stats.getStats = function(name) {
 		if(!_stats[name]) return null;
 		if(_stats[name][1]) {
@@ -34,7 +34,7 @@ load.provide("dusk.stats", (function() {
 		}
 		return _stats[name][0];
 	};
-
+	
 	stats.save = function(type, arg) {
 		if(type != "stats") return {};
 		
@@ -56,7 +56,7 @@ load.provide("dusk.stats", (function() {
 		
 		return out;
 	};
-
+	
 	stats.load = function(data, type, arg) {
 		if(type != "stats") return;
 		
@@ -104,7 +104,7 @@ load.provide("dusk.stats", (function() {
 			["block", (function(o) {return this._block;}).bind(this)]
 		]);
 	};
-
+	
 	stats.LayeredStats.prototype.addBlock = function(layer, name, block, copy) {
 		layer = this._lookupLayer(layer);
 		if(copy) block = utils.clone(block);
@@ -123,13 +123,13 @@ load.provide("dusk.stats", (function() {
 		
 		this.kick(layer);
 	};
-
+	
 	stats.LayeredStats.prototype.getBlock = function(layer, name) {
 		layer = this._lookupLayer(layer);
 		
 		return this._layers[layer][name];
 	};
-
+	
 	stats.LayeredStats.prototype.removeBlock = function(layer, name) {
 		layer = this._lookupLayer(layer);
 		if(!this._layers[layer]) return undefined;
@@ -145,12 +145,12 @@ load.provide("dusk.stats", (function() {
 		
 		return toReturn;
 	};
-
+	
 	stats.LayeredStats.prototype.replaceBlock = function(layer, name, block, copy) {
 		this.removeBlock(layer, name);
 		this.addBlock(layer, name, block, copy);
 	};
-
+	
 	stats.LayeredStats.prototype.kick = function(layer) {
 		layer = this._lookupLayer(layer);
 		
@@ -168,7 +168,7 @@ load.provide("dusk.stats", (function() {
 		
 		this.changed.fire();
 	};
-
+	
 	stats.LayeredStats.prototype.get = function(field, untilLayer) {
 		var max = Infinity;
 		var min = -Infinity;
@@ -220,12 +220,12 @@ load.provide("dusk.stats", (function() {
 		this._caches[untilLayer][field] = value;
 		return value;
 	};
-
+	
 	stats.LayeredStats.prototype.geti = function(field, untilLayer) {
 		untilLayer = this._lookupLayer(untilLayer);
 		return ~~this.get(field, untilLayer);
 	};
-
+	
 	stats.LayeredStats.prototype.getRange = function(field, untilLayer) {
 		untilLayer = this._lookupLayer(untilLayer);
 		if(!this._ranges[untilLayer]) this._ranges[untilLayer] = {};
@@ -241,12 +241,12 @@ load.provide("dusk.stats", (function() {
 			return this._ranges[untilLayer][field];
 		}
 	};
-
+	
 	stats.LayeredStats.prototype.countInLayer = function(layer) {
 		layer = this._lookupLayer(layer);
 		return Object.keys(this._layers[layer]).length;
 	};
-
+	
 	stats.LayeredStats.prototype.getMaxInLayer = function(field, layer) {
 		var max = undefined;
 		layer = this._lookupLayer(layer);
@@ -266,7 +266,7 @@ load.provide("dusk.stats", (function() {
 		
 		return max;
 	};
-
+	
 	stats.LayeredStats.prototype.getMinInLayer = function(layer, field) {
 		var min = undefined;
 		layer = this._lookupLayer(layer);
@@ -286,7 +286,7 @@ load.provide("dusk.stats", (function() {
 		
 		return min;
 	};
-
+	
 	stats.LayeredStats.prototype._toList = function(value, field) {
 		if(items && value instanceof items.Invent) {
 			var out = [];
@@ -303,7 +303,7 @@ load.provide("dusk.stats", (function() {
 			return [this._getRelevant(value, field)];
 		}
 	};
-
+	
 	stats.LayeredStats.prototype._eval = function(expr, field, value, min, max, block) {
 		this._x = value;
 		this._min = min;
@@ -313,7 +313,7 @@ load.provide("dusk.stats", (function() {
 		
 		return this._tree.compile(expr).eval();
 	};
-
+	
 	stats.LayeredStats.prototype._lookupLayer = function(layer) {
 		if(!isNaN(layer)) return layer;
 		
@@ -326,7 +326,7 @@ load.provide("dusk.stats", (function() {
 		console.log("Unknown layer "+layer);
 		return undefined;
 	};
-
+	
 	stats.LayeredStats.prototype.tickDown = function(field) {
 		for(var i = 0; i < this._layers.length; i ++) {
 			for(var p in this._layers[i]) {
@@ -340,7 +340,7 @@ load.provide("dusk.stats", (function() {
 			}
 		}
 	}
-
+	
 	stats.LayeredStats.prototype._getRelevant = function(object, field) {
 		var out = {};
 		
@@ -359,16 +359,16 @@ load.provide("dusk.stats", (function() {
 		
 		return out;
 	};
-
+	
 	stats.LayeredStats.prototype.getExtra = function(name) {
 		if(!(name in this._extras)) return null;
 		return this._extras[name];
 	};
-
+	
 	stats.LayeredStats.prototype.setExtra = function(name, object) {
 		this._extras[name] = object;
 	};
-
+	
 	stats.LayeredStats.prototype.refSave = function() {
 		var out = [];
 		
@@ -382,8 +382,8 @@ load.provide("dusk.stats", (function() {
 		
 		return [out, this.name, this.pack, this.layerNames];
 	};
-
-	stats.LayeredStats.refLoad = function(data) {
+	
+	stats.refLoad = function(data) {
 		var stats = new stats.LayeredStats(data[1], data[2], data[3]);
 		var layers = data[0];
 		
@@ -395,16 +395,14 @@ load.provide("dusk.stats", (function() {
 		
 		return stats;
 	};
-
+	
 	stats.LayeredStats.prototype.refClass = stats.LayeredStats.refClass = function() {
-		return "dusk.stats.LayeredStats";
+		return "dusk.stats";
 	};
-
+	
 	stats.LayeredStats.prototype.toString = function() {
 		return "[LayeredStats "+this.name+"]";
 	};
-	
-	Object.seal(stats);
 	
 	return stats;
 })());

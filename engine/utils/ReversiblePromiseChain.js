@@ -5,6 +5,7 @@
 load.provide("dusk.reversiblePromiseChain", (function() {
 	var utils = load.require("dusk.utils");
 	var UserCancelError = load.require(">dusk.UserCancelError", function(p) {UserCancelError = p});
+	var dusk = load.require("dusk");
 	
 	/** Creates a promise that is a chain of promises that if any reject, a previous one in the sequence is used.
 	 * 
@@ -176,7 +177,7 @@ load.provide("dusk.reversiblePromiseChain", (function() {
 	/** If this is true, then the promise chain will log whenever it does something.
 	 * @static
 	 */
-	reversiblePromiseChain.verbose = true;
+	reversiblePromiseChain.verbose = dusk.dev;
 	
 	return reversiblePromiseChain;
 })());
