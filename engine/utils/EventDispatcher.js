@@ -170,7 +170,7 @@ load.provide("dusk.EventDispatcher", (function() {
 	 */
 	EventDispatcher.prototype.fire = function(event, filter) {
 		if(this.filterType == EventDispatcher.FILTER_EQUALS) {
-			return this._fireString(event, ""+filter);
+			return this._fireString(event, filter);
 		}else if(this.filterType == EventDispatcher.FILTER_MULTI) {
 			return this._fireInt(event, filter);
 		}else if(this.filterType == EventDispatcher.FILTER_ISIN) {
@@ -186,7 +186,7 @@ load.provide("dusk.EventDispatcher", (function() {
 				var l = this._listeners[i];
 				
 				//Check filter
-				if(l[1] && filter != l[1]) {
+				if(l[1] !== undefined && filter != l[1]) {
 					continue;
 				}
 				
@@ -216,7 +216,7 @@ load.provide("dusk.EventDispatcher", (function() {
 				var l = this._listeners[i];
 				
 				//Check filter
-				if(l[1] && filter != l[1]) {
+				if(l[1] !== undefined && filter != l[1]) {
 					continue;
 				}
 				

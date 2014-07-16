@@ -58,42 +58,6 @@ load.provide("test.dusk.EventDispatcher", (function() {
 		tester.assertEqual(hold, 3);
 		or.unlisten(b);
 		
-		tester.start("Positive Property Filtering");
-		
-		hold = 0;
-		a = none.listen(function(o) {hold = o.value}, undefined, {"exec":true});
-		none.fire({"value":3, "exec":true});
-		tester.assertEqual(hold, 3);
-		none.fire({"value":4, "exec":false});
-		tester.assertEqual(hold, 3);
-		none.unlisten(a);
-		
-		hold = 0;
-		b = or.listen(function(o) {hold = o.value}, undefined, {"exec":true});
-		or.fire({"value":3, "exec":true});
-		tester.assertEqual(hold, 3);
-		or.fire({"value":4, "exec":false});
-		tester.assertEqual(hold, 3);
-		or.unlisten(b);
-		
-		tester.start("Negative Property Filtering");
-		
-		hold = 0;
-		a = none.listen(function(o) {hold = o.value}, undefined, {}, {"exec":true});
-		none.fire({"value":3, "exec":false});
-		tester.assertEqual(hold, 3);
-		none.fire({"value":4, "exec":true});
-		tester.assertEqual(hold, 3);
-		none.unlisten(a);
-		
-		hold = 0;
-		b = or.listen(function(o) {hold = o.value}, undefined, {}, {"exec":true});
-		or.fire({"value":3, "exec":false});
-		tester.assertEqual(hold, 3);
-		or.fire({"value":4, "exec":true});
-		tester.assertEqual(hold, 3);
-		or.unlisten(b);
-		
 		tester.start("Return Values");
 		
 		var t = function() {return true;}
