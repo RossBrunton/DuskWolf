@@ -644,9 +644,6 @@ load.provide("dusk.sgui.Label", (function() {
 		}
 	};
 	
-	Object.seal(Label);
-	Object.seal(Label.prototype);
-	
 	sgui.registerType("Label", Label);
 	
 	return Label;
@@ -699,7 +696,7 @@ load.provide("dusk.sgui.TextBox", (function() {
 		
 		//Listeners
 		this.prepareDraw.listen(_draw.bind(this));
-		this.onInteract.listen(_key.bind(this), interaction.KEY_DOWN, {"ctrl":false});
+		this.onInteract.listen(_key.bind(this), interaction.KEY_DOWN);
 		this.onActiveChange.listen(_activeChange.bind(this));
 		this.frame.listen((function(e) {
 			if(this.active) {
@@ -750,6 +747,7 @@ load.provide("dusk.sgui.TextBox", (function() {
 	 * @private
 	 */
 	var _key = function(e) {
+		if(e.ctrl) return true;
 		var keyDat = keyboard.lookupCode(e.key);
 		var textElement = document.getElementById(dusk.elemPrefix+"-input");
 		
@@ -810,9 +808,6 @@ load.provide("dusk.sgui.TextBox", (function() {
 			this._supressTextDisplay = false;
 		}
 	}
-	
-	Object.seal(TextBox);
-	Object.seal(TextBox.prototype);
 	
 	sgui.registerType("TextBox", TextBox);
 	
@@ -957,9 +952,6 @@ load.provide("dusk.sgui.NumberBox", (function() {
 		
 		return true;
 	};
-	
-	Object.seal(NumberBox);
-	Object.seal(NumberBox.prototype);
 	
 	sgui.registerType("NumberBox", NumberBox);
 	
