@@ -28,6 +28,13 @@ load.provide("dusk.IContainer", (function() {
 	 */
 	IContainer.set = function(key, value) {};
 	
+	/** Remove the named element. Should return `true` on success, or `false` on failure. This should also return
+	 *  `false` if the object is not in this container.
+	 * @param {*} key The key to remove, can be any type.
+	 * @return {boolean} Whether removing was successfull.
+	 */
+	IContainer.remove = function(key) {};
+	
 	/** Should return the number of elements in this container.
 	 * @return {int} The number of elements in this container.
 	 */
@@ -48,6 +55,12 @@ load.provide("dusk.IContainer", (function() {
 	 * @return {*} Whether the object can be stored in this container.
 	 */
 	IContainer.valid = function(element) {};
+	
+	/** Return true if the provided object is in this container.
+	 * @param {*} element The object to test if it is in this container.
+	 * @return {boolean} Whether the specified object is in this container.
+	 */
+	IContainer.contains = function(element) {};
 	
 	return Object.keys(IContainer);
 })());
@@ -82,6 +95,17 @@ load.provide("dusk.containerUtils", (function() {
 						return true;
 					}
 				},
+				"remove":function(key) {
+					if(key > 0 && key < container.length-1) {
+						container[key] = undefined;
+						return true;
+					}else if(key > 0 && key == container.length-1) {
+						container.length --;
+						return true;
+					}else{
+						return false;
+					}
+				},
 				"length":function() {return container.length},
 				"iterate":function() {
 					var i = -1;
@@ -97,6 +121,7 @@ load.provide("dusk.containerUtils", (function() {
 					};
 				},
 				"valid":function() {return true;},
+				"contains":function(element) {return container.indexOf() !== -1},
 				"toString":function() {return "[IContainer wrapped "+container+"]";},
 				"implementsIContainer": true
 			};
@@ -105,6 +130,7 @@ load.provide("dusk.containerUtils", (function() {
 		return {
 			"get":function(key) {return container[key];},
 			"set":function(key, value) {container[key] = value; return true;},
+			"remove":function(key) {if(container[key]) {delete container[key]; return true;}else{return false;}},
 			"length":function() {return Object.keys(container).length},
 			"iterate":function() {
 				var i = -1;
@@ -121,6 +147,12 @@ load.provide("dusk.containerUtils", (function() {
 				};
 			},
 			"valid":function() {return true;},
+			"contains":function(element) {
+				for(var p in container) {
+					if(container[p] === element) return true; 
+				}
+				return false;
+			},
 			"toString":function() {return "[IContainer wrapped "+container+"]";},
 			"implementsIContainer": true
 		};
@@ -129,7 +161,7 @@ load.provide("dusk.containerUtils", (function() {
 	/** For each element in the container, it calls the callback once. The function will be provided with three
 	 *  arguments. The first is the value of the element, the second is the key of the element (if available), and the
 	 *  third is the container being used. The third element may be either an IContainer, an object or an array.
-	 * @param {object|array|IContainer} container The object iterate.
+	 * @param {object|array|IContainer} container The object to iterate.
 	 * @param {function(*, ?*, array|object|IContainer)} callback The function to call for each element.
 	 * @param {*} thisArg Will be the "this" value of the function called.
 	 */
@@ -146,6 +178,65 @@ load.provide("dusk.containerUtils", (function() {
 			for(var p in container) {
 				callback.call(thisArg, container[p], p, container);
 			}
+		}
+	};
+	
+	/** Takes an IContainer, array or object and returns an object obtained by iterating through the container and
+	 *  setting each property.
+	 * 
+	 * If the parameter is an object and does not implement IContainer, it's returned exactly. If it's an IContainer it
+	 *  must supply keys; any entry without a key will be skipped.
+	 * @param {object|array|IContainer} container The container to create an object from.
+	 * @return {object} An object with all the objects being those in the container.
+	 */
+	containerUtils.toObject = function(container) {
+		if(container.implementsIContainer) {
+			var iterator = container.iterate();
+			var out = {};
+			
+			for(var e = iterator.next(); !e.done; e = iterator.next()) {
+				if(e.key) {
+					out[e.key] = e.value;
+				}
+			}
+			
+			return out;
+		}else if(Array.isArray(container)) {
+			var out = {};
+			for(var i = 0; i < container.length; i ++) {
+				out[i] = container[i];
+			}
+			return out;
+		}else{
+			return container;
+		}
+	};
+	
+	/** Takes an IContainer, object or array and returns an array containing the properties of the container.
+	 * 
+	 * Arrays are returned exactly.
+	 * @param {object|array|IContainer} container The container to create an object from.
+	 * @return {object} An object with all the objects being those in the container.
+	 */
+	containerUtils.toArray = function(container) {
+		if(container.implementsIContainer) {
+			var iterator = container.iterate();
+			var out = [];
+			
+			for(var e = iterator.next(); !e.done; e = iterator.next()) {
+				out.push(e.value);
+			}
+			
+			return out;
+		}else if(Array.isArray(container)) {
+			return container;
+		}else{
+			var out = [];
+			for(var p in container) {
+				if(container.hasOwnProperty(p))
+					out.push(container[p]);
+			}
+			return out;
 		}
 	};
 	
