@@ -14,7 +14,7 @@ load.provide("quest", (function() {
 	
 	var dusk = load.require("dusk");
 	var items = load.require("dusk.items");
-	var save = load.require("dusk.save");
+	var SaveSpec = load.require("dusk.save.SaveSpec");
 	var ConsoleSource = load.require("dusk.save.ConsoleSource");
 	var TurnTicker = load.require("dusk.TurnTicker");
 	var c = load.require("dusk.sgui.c");
@@ -331,7 +331,7 @@ load.provide("quest", (function() {
 	_turns.register("enemy", quest.enemyTurn);
 	_turns.start();
 
-	window.ss = new save.SaveSpec("ss", "ss");
+	window.ss = new SaveSpec("ss", "ss");
 	ss.add("dusk.stats", "stats", {});
 	
 	return quest;

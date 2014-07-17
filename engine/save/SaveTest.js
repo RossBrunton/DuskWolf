@@ -9,28 +9,28 @@ load.provide("dusk.save.SaveTest", (function() {
 	
 	saveTest.value = {};
 	
-	saveTest.save = function(type, args) {
+	saveTest.save = function(type, args, ref) {
 		var out = {};
 		
 		if(type == "selective") {
 			for(var p = 0; p < args.values.length; p ++) {
-				out[p] = save.saveRef(saveTest.value[args.values[p]]);
+				out[p] = ref(saveTest.value[args.values[p]]);
 			}
 			
 			return out;
 		}else{
 			for(var p in saveTest.value) {
-				out[p] = save.saveRef(saveTest.value[p]);
+				out[p] = ref(saveTest.value[p]);
 			}
 		}
 		
 		return out;
 	};
 	
-	saveTest.load = function(data, type, args) {
+	saveTest.load = function(data, type, args, unref) {
 		//if(type == "selective") {
 			for(var p in data) {
-				saveTest.value[p] = save.loadRef(data[p]);
+				saveTest.value[p] = unref(data[p]);
 			}
 		//}else{
 		//	saveTest.value = data;
@@ -47,12 +47,12 @@ load.provide("dusk.save.SaveTestInstance", (function() {
 		this.value = value;
 	};
 	
-	SaveTestInstance.refLoad = function(data) {
-		return new SaveTestInstance(value);
+	SaveTestInstance.refLoad = function(data, unref) {
+		return new SaveTestInstance(unref(data));
 	};
 	
-	SaveTestInstance.prototype.refSave = function() {
-		return this.value;
+	SaveTestInstance.prototype.refSave = function(ref) {
+		return ref(this.value);
 	};
 	
 	SaveTestInstance.prototype.refClass = function() {

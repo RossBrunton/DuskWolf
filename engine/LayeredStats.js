@@ -35,7 +35,7 @@ load.provide("dusk.stats", (function() {
 		return _stats[name][0];
 	};
 	
-	stats.save = function(type, arg) {
+	stats.save = function(type, arg, ref) {
 		if(type != "stats") return {};
 		
 		var out = [];
@@ -43,13 +43,13 @@ load.provide("dusk.stats", (function() {
 		if(!("names" in arg)) {
 			for(var p in this._stats) {
 				if(!_stats[p][1]) {
-					out.push([p, save.saveRef(_stats[p][0])]);
+					out.push([p, ref(_stats[p][0])]);
 				}
 			}
 		}else{
 			for(var p in arg.names) {
 				if(!_stats[p][1]) {
-					out.push([p, save.saveRef(_stats[p][0])]);
+					out.push([p, ref(_stats[p][0])]);
 				}
 			}
 		}
@@ -57,11 +57,11 @@ load.provide("dusk.stats", (function() {
 		return out;
 	};
 	
-	stats.load = function(data, type, arg) {
+	stats.load = function(data, type, arg, unref) {
 		if(type != "stats") return;
 		
 		for(var i = 0; i < data.length; i ++) {
-			_stats[data[i][0]] = save.loadRef(data[i][1]);
+			_stats[data[i][0]] = unref(data[i][1]);
 		}
 	};
 	
@@ -369,27 +369,27 @@ load.provide("dusk.stats", (function() {
 		this._extras[name] = object;
 	};
 	
-	stats.LayeredStats.prototype.refSave = function() {
+	stats.LayeredStats.prototype.refSave = function(ref) {
 		var out = [];
 		
 		for(var i = 0; i < this._layers.length; i ++) {
 			out[i] = {};
 			
 			for(var b in this._layers[i]) {
-				out[i][b] = save.saveRef(this._layers[i][b]);
+				out[i][b] = ref(this._layers[i][b]);
 			}
 		}
 		
 		return [out, this.name, this.pack, this.layerNames];
 	};
 	
-	stats.refLoad = function(data) {
+	stats.refLoad = function(data, unref) {
 		var stats = new stats.LayeredStats(data[1], data[2], data[3]);
 		var layers = data[0];
 		
 		for(var i = 0; i < layers.length; i ++) {
 			for(var b in layers[i]) {
-				stats.addBlock(i, b, save.loadRef(layers[i][b]));
+				stats.addBlock(i, b, unref(layers[i][b]));
 			}
 		}
 		

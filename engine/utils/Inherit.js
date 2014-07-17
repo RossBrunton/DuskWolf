@@ -300,21 +300,19 @@ load.provide("dusk.Inheritable", (function(){
 	 * @return {object} This inheritable, as an object.
 	 * @since 0.0.21-alpha
 	 */
-	Inheritable.prototype.refSave = function() {
-		return [this.type, this.container.name, save.saveRef(this._extraData)];
+	Inheritable.prototype.refSave = function(ref) {
+		return [this.type, this.container.name, ref(this._extraData)];
 	};
 	
 	/** Given a previously saved inventory (via `{@link dusk.Inheritable#refSave}`) will create a inheritable for this 
 	 *  object.
-	 * 
-	 * This requires `{@link dusk.save}` to be imported.
 	 * @param {object} data The saved data.
 	 * @return {dusk.Inheritable} An inheritable from the saved data.
 	 * @since 0.0.21-alpha
 	 * @static
 	 */
-	Inheritable.refLoad = function(data) {
-		return new Inheritable(data[0], InheritableContainer.getContainer(data[1]), save.loadRef(data[2]));
+	Inheritable.refLoad = function(data, unref) {
+		return new Inheritable(data[0], InheritableContainer.getContainer(data[1]), unref(data[2]));
 	};
 	
 	/** Returns the name of the class for use in saving.

@@ -539,7 +539,7 @@ load.provide("dusk.items", (function() {
 	 * @return {object} This inventory, as an object.
 	 * @since 0.0.21-alpha
 	 */
-	items.Invent.prototype.refSave = function() {
+	items.Invent.prototype.refSave = function(ref) {
 		var out = [];
 		
 		for(var i = 0; i < this._items.length; i ++) {
@@ -547,7 +547,7 @@ load.provide("dusk.items", (function() {
 			
 			if(this._items[i]) {
 				for(var j = 0; j < this._items[i].length; j ++) {
-					out[i][j] = save.saveRef(this._items[i][j]);
+					out[i][j] = ref(this._items[i][j]);
 				}
 			}
 		}
