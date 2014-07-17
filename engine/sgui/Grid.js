@@ -8,22 +8,26 @@ load.provide("dusk.sgui.Grid", (function() {
 	var c = load.require("dusk.sgui.c");
 	var EventDispatcher = load.require("dusk.EventDispatcher");
 	var utils = load.require("dusk.utils");
-
-	/** @class dusk.sgui.Grid
+	
+	/** A grid is a group of similar components arranged in a grid.
 	 * 
-	 * @classdesc A grid is a group of similar components arranged in a grid.
+	 * A population is created using the `populate` method  with an object representation containing a type name.
+	 *  This will then create numerous copies of that component, in a grid of dimensions `rows` by `cols` with the same
+	 *  data.
 	 * 
-	 * A population is created using the `{@link dusk.sgui.Grid.populate}` method
-	 *   with an object representation containing a type name.
-	 *  This will then create numerous copies of that component,
-	 *   in a grid of dimensions `{@link dusk.sgui.Grid.rows}` by `{@link dusk.sgui.Grid.cols}` with the same data.
+	 * Components are named in the form `"x,y"`, where x and y are the coordinates of the component; the second one to
+	 *  the right of the first row will be `"1,0"` for example. This class will, provided the event bubbles from it's
+	 *  children, manage focus changing between elements.
 	 * 
-	 * Components are named in the form `"x,y"`, where x and y are the coordinates of the component;
-	 *  the second one to the right of the first row will be `"1,0"` for example.
-	 *  This class will, provided the event bubbles from it's children, manage focus changing between elements.
+	 * Properties in the `globals` object will be applied to all children in the grid when they are added.
+	 * 
+	 * If the child to add is an array, then it will alternate between all the elements in the array as children in
+	 *  order. If `multiple` is true, then it will loop round when it reaches the end of the array and start again.
+	 *  If `multiple` is false, then it will stop; this makes groups a really usefull way of populating a group of
+	 *  elements dynamically. 
 	 * 
 	 * @extends dusk.sgui.Group
-	 * @param {?dusk.sgui.Component} parent The container that this component is in.
+	 * @param {?dusk.sgui.Group} parent The container that this component is in.
 	 * @param {string} componentName The name of the component.
 	 * @constructor
 	 */
@@ -66,6 +70,12 @@ load.provide("dusk.sgui.Grid", (function() {
 		 * @default true
 		 */
 		this.recycle = true;
+		/** If false, then each component description while populating will only be used once.
+		 * @type boolean
+		 * @since 0.0.21-alpha
+		 * @default true
+		 */
+		this.multiple = true;
 		
 		/** This event handler is fired during three stages of the population proccess; when it starts,
 		 *  when a component is created, and when it finishes.
@@ -90,15 +100,16 @@ load.provide("dusk.sgui.Grid", (function() {
 		this._registerPropMask("cols", "cols");
 		this._registerPropMask("globals", "globals");
 		this._registerPropMask("recycle", "recycle");
+		this._registerPropMask("multiple", "multiple");
 		this._registerPropMask("populate", "__populate", undefined,["rows", "cols", "hspacing", "vspacing", "globals",
-			"recycle"]
+			"recycle", "multiple"]
 		);
 		
 		//Listeners
 		this.dirPress.listen(this._gridDirAction.bind(this));
 	};
 	Grid.prototype = Object.create(Group.prototype);
-
+	
 	/** Creates a new population of the specified component.
 	 * 
 	 * This will erase all components in this group, and create new ones of the type `value.type`,
@@ -140,10 +151,14 @@ load.provide("dusk.sgui.Grid", (function() {
 		var xpoint = 0;
 		var ypoint = 0;
 		var ypointMax = 0;
-		for(var hy = 0; hy < this.rows; hy++){
+		
+		outer:for(var hy = 0; hy < this.rows; hy++){
 			for(var hx = 0; hx < this.cols; hx++){
+				if((p + 1) >= child.length && !this.multiple) break outer;
+				
 				p = (p + 1) % child.length;
 				
+				// Generate the component
 				var com = null;
 				if(!("type" in child[p]) && this.globals !== null && "type" in this.globals) {
 					com = this.getComponent(hx + "," + hy, this.globals.type);
@@ -153,14 +168,17 @@ load.provide("dusk.sgui.Grid", (function() {
 					console.warn("Grid tried to populate element with no type.");
 				}
 				
+				// Fire the event
 				com = this._populationEvent.fire({"action":"create", "current":child[p], "child":child, "component":com,
 					"globals":this.globals
 				}, "create").component;
 				
+				// Give the component properties
 				if(this.globals !== null) com.parseProps(utils.clone(this.globals));
 				com.parseProps(utils.clone(child[p]));
 				com.parseProps({"y":ypoint, "x":xpoint});
 				
+				// Set the location of the component
 				xpoint += com.width+this.hspacing;
 				if(com.height + this.vspacing > ypointMax) ypointMax = com.height + this.vspacing;
 			}
@@ -177,7 +195,7 @@ load.provide("dusk.sgui.Grid", (function() {
 		set: function(value) {this.populate(value);},
 		get: function() {return undefined;}
 	});
-
+	
 	/** Updates the location of all the components, arranging them back into a grid if, for example,
 	 *  they have been moved or the spacing between them has changed.
 	 */
@@ -189,7 +207,7 @@ load.provide("dusk.sgui.Grid", (function() {
 			}
 		}
 	};
-
+	
 	/** Changes the focused component in a grid-y way.
 	 * @return {boolean} Whether there was a component to flow into, `false` if so, else `true`.
 	 * @protected
@@ -204,7 +222,7 @@ load.provide("dusk.sgui.Grid", (function() {
 		
 		return true;
 	};
-
+	
 	/** Returns a component that is next to a component in a specified direction.
 	 * @param {string} name The component name that should be checked.
 	 * @param {integer} dir A constant like `DIR_*` from `{@link dusk.sgui.Component}` that indicates the direction.
@@ -233,10 +251,7 @@ load.provide("dusk.sgui.Grid", (function() {
 				return null;
 		}
 	};
-
-	Object.seal(Grid);
-	Object.seal(Grid.prototype);
-
+	
 	sgui.registerType("Grid", Grid);
 	
 	return Grid;

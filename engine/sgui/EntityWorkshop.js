@@ -173,6 +173,7 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 								"cols":4,
 								"hspacing":5,
 								"vspacing":10,
+								"multiple":false,
 								"globals":{
 									"type":"PlusText",
 									"plusType":"Checkbox",
@@ -201,6 +202,7 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 								"cols":2,
 								"hspacing":5,
 								"vspacing":10,
+								"multiple":false,
 								"globals":{
 									"type":"PlusText",
 									"plusType":"TextBox",
@@ -241,7 +243,7 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 			}
 		}
 		
-		while(l.length % this.path("bodies/behaviours/list").cols) l.push({"text":"---"});
+		//while(l.length % this.path("bodies/behaviours/list").cols) l.push({"text":"---"});
 		
 		this.path("bodies/behaviours/list").rows = Math.ceil(l.length/this.path("bodies/behaviours/list").cols);
 		this.path("bodies/behaviours/list").populate(l);
@@ -435,7 +437,7 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 		}
 		
 		this.path("bodies/data/list").rows = Math.ceil(l.length/this.path("bodies/data/list").cols);
-		while(l.length % this.path("bodies/data/list").cols) l.push({"text":"---"});
+		//while(l.length % this.path("bodies/data/list").cols) l.push({"text":"---"});
 		this.path("bodies/data/list").populate(l);
 	};
 	
