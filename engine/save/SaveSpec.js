@@ -96,11 +96,13 @@ load.provide("dusk.save.SaveSpec", (function() {
 	 *  used to save them.
 	 * 
 	 * @param {dusk.save.SaveData} saveData The data to load from.
+	 * @return {Promise(boolean)} A promise that resolves to true when everything is finished loading.
 	 */
 	SaveSpec.prototype.load = function(saveData) {
 		var refs = saveData.meta().refs;
 		var loaded = [];
 		var loadRef = _loadRef.bind(refs, loaded);
+		var out = [];
 		
 		for(var p in saveData.data) {
 			if(p != "meta") {
@@ -116,7 +118,9 @@ load.provide("dusk.save.SaveSpec", (function() {
 							throw new save.SaveIntegrityError();
 						
 						// And actually load the thing
-						ob.load(saveData.data[p][i][2], saveData.data[p][i][0], saveData.data[p][i][1], loadRef);
+						out.push(
+							ob.load(saveData.data[p][i][2], saveData.data[p][i][0], saveData.data[p][i][1], loadRef)
+						);
 					}
 				}else{
 					console.error("Tried to load into "+this._toSave[i][0]+", but it doesn't exist!");
@@ -124,6 +128,8 @@ load.provide("dusk.save.SaveSpec", (function() {
 				}
 			}
 		}
+		
+		return Promise.all(out);
 	};
 	
 	/** Returns a string representation of this object.

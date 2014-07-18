@@ -44,14 +44,13 @@ load.provide("dusk.save", (function() {
 	 * @return {Promise(boolean)} A promise that fullfills the constant true, or rejects if load fails.
 	 */
 	save.load = function(spec, source, identifier) {
-		return new Promise(function(fullfill, reject) {
-			return source.load(spec, identifier).then(function(saveData) {
-				if(saveData) {
-					spec.load(saveData);
-					fullfill(true);
-				}
-			});
-		});
+		return source.load(spec, identifier).then(function(saveData) {
+			if(saveData) {
+				return spec.load(saveData)
+			}else{
+				return Promise.reject(new Error("No save data available."));
+			}
+		}).then(function(v) {return true;});
 	};
 	
 	
@@ -126,6 +125,8 @@ load.provide("dusk.save", (function() {
 	 * @param {function(integer|array):*} unref A function that takes in a reference saved with the ref function on
 	 *  saving, and returns the object that was saved.
 	 * @param {*} data The data that was previously saved.
+	 * @return {?promise(*)} A promise that resolves when the data is loaded, if undefined is returned, it will be
+	 *  considered loaded.
 	 */
 	save.IRefSavable.refLoad = function(data, unref) {};
 	
