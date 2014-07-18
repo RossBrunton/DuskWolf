@@ -2,8 +2,6 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.require("dusk.utils");
-
 load.provide("dusk.save", (function() {
 	var load = window.load.require("load");
 	var utils = load.require("dusk.utils");
@@ -55,160 +53,6 @@ load.provide("dusk.save", (function() {
 			});
 		});
 	};
-	
-	
-	/** Creates a new save source, which is unable to save and load.
-	 * 
-	 * @class dusk.save.SaveSource
-	 * 
-	 * @classdesc Base class for objects that wish to save and load save data from a specific source.
-	 * 
-	 * Inheriters must replace the `save` and `load` functions with their own versions, and not call the versions on
-	 *  this class.
-	 * 
-	 * SaveSources can "support" identifiers or not. Generally, if identifiers are supported then attempting to load
-	 *  with identifier `n` will always load the last save data that was saved using identifier `n`. If they are not
-	 *  supported, then identifiers may be provided to give a hint to what the data should be saved as.
-	 * 
-	 * @constructor
-	 * @since 0.0.21-alpha
-	 */
-	save.SaveSource = function() {
-		
-	};
-	
-	/** Given a save data, saves it to this source.
-	 * 
-	 * @param {dusk.save.SaveData} saveData The save data to save.
-	 * @param {dusk.save.SaveSpec} spec The spec that was used to save this data.
-	 * @param {?string} identifier An identifier for saving.
-	 * @return {Promise(boolean)} A promise that fullfills with the value true when saving is complete.
-	 */
-	save.SaveSource.prototype.save = function(saveData, spec, identifier) {
-		console.warn("Save Source "+this+" doesn't support saving.");
-		return Promise.reject(Error("Save Source "+this+" doesn't support saving."));
-	};
-	
-	/** Similar to `{@link dusk.save.SaveSource#save}`, only this is called in cases where saving should be done without
-	 *  interrupting the user. By default, this calls the normal save function.
-	 * 
-	 * @param {dusk.save.SaveData} saveData The save data to save.
-	 * @param {dusk.save.SaveSpec} spec The spec that was used to save this data.
-	 * @param {?string} identifier An identifier for saving.
-	 * @return {Promise(boolean)} A promise that fullfills with the value true when saving is complete.
-	 */
-	save.SaveSource.prototype.autoSave = function(saveData, spec, identifier) {
-		return this.save(saveData, spec, identifier);
-	};
-	
-	/** Loads save data from this source.
-	 * 
-	 * @param {dusk.save.SaveSpec} spec The spec to be used to load this data.
-	 * @param {?string} identifier An identifier for loading from.
-	 * @return {Promise(dusk.save.SaveData)} A promise that fullfills with the save data when it has been loaded.
-	 */
-	save.SaveSource.prototype.load = function(spec, identifier) {
-		console.warn("Save Source "+this+" doesn't support loading.");
-		return Promise.reject(Error("Save Source "+this+" doesn't support loading."));
-	};
-	
-	/** Returns a string representation of this object.
-	 * @return {string} A string representation of this object.
-	 */
-	save.SaveSource.prototype.toString = function() {
-		return "[SaveSource]";
-	};
-	
-	/** True if this source supports identifiers, as in, loading and saving with the same identifiers load and save the
-	 *  same data. This is on the prototye of the source.
-	 * 
-	 * @type boolean
-	 * @default true
-	 * @static
-	 */
-	save.SaveSource.prototype.identifierSupport = true;
-	
-	
-	/** Represents save data. Either data loaded or data that has been saved.
-	 * 
-	 * It contains a `{@link dusk.save.SaveData#data}` property, which is the object that should be saved and loaded. The 
-	 *  keys of this object are the class or namespace name of the thing that saved them, and the value contains both the
-	 *  actual data and parameters. The `data` object is the object that should actually be saved and loaded.
-	 * 
-	 * A `meta` property is available on the data, and also via the `{@link dusk.save.SaveData#meta}` method. This is an
-	 *  object containing the following values:
-	 * 
-	 * - `saved`: The date on which the data was saved or loaded.
-	 * - `name`: The name of the specification that saved this data.
-	 * - `ver`: The version of DuskWolf that saved the data.
-	 * 
-	 * The constructor accepts initial data, which should almost always be data that was loaded from the source.
-	 *  This can be either a string or an object. If it is an object, the `data` property is set to it. If it is a string,
-	 *  it is parsed as if it was created by `{@link dusk.save.SaveData#toDataUrl}`, and then set to `data`.
-	 * 
-	 * @param {dusk.save.SaveSpec} spec The specification thihs data is using.
-	 * @param {?object|string} initial Any initial data that this save data should use.
-	 * @constructor
-	 * @since 0.0.21-alpha
-	 */
-	save.SaveData = function(spec, initial) {
-		/** The spec that this data is using.
-		 * @type {dusk.save.SaveSpec}
-		 */
-		this.spec = spec;
-		
-		if(typeof initial == "string") {
-			if(initial.indexOf(",") !== -1) initial = initial.split(",")[1];
-			try{
-				initial = JSON.parse(atob(initial));
-			}catch(e){
-				throw new save.SaveIntegrityError();
-			}
-		}
-		
-		/** The actual save data, as a basic, simple, object.
-		 * @type {object}
-		 */
-		this.data = initial?initial:{};
-		
-		if(!initial) {
-			this.data.meta = {};
-			this.data.meta.saved = new Date();
-			this.data.meta.spec = spec.name;
-			this.data.meta.ver = dusk.ver;
-			this.data.meta.refs = save._refs;
-		}else if(!("meta" in this.data)) {
-			throw new save.SaveIntegrityError();
-		}
-	};
-	
-	/** Returns the meta object of this save data.
-	 * @return {object} The meta property of the save data.
-	 */
-	save.SaveData.prototype.meta = function() {
-		return this.data.meta;
-	};
-	
-	/** Converts the save data to a data URL.
-	 * @return {string} The save data.
-	 */
-	save.SaveData.prototype.toDataUrl = function() {
-		return "data:application/json;base64,"+btoa(JSON.stringify(this.data));
-	};
-	
-	/** Returns a string representation of this object.
-	 * @return {string} A string representation of this object.
-	 */
-	save.SaveData.prototype.toString = function() {
-		return "[SaveData "+this.spec.name+"]";
-	};
-	
-	/** Save reference.
-	 * @return {object} This SaveData's save data.
-	 */
-	save.SaveData.prototype.refSave = function() {
-		// Not implemented yet
-	}
 	
 	
 	/** @class dusk.save.ISavable
@@ -340,4 +184,4 @@ load.provide("dusk.save", (function() {
 	save.SaveIntegrityError.prototype = Object.create(Error.prototype);
 	
 	return save;
-})(), {"alsoSeal":["SaveIntegrityError", "SaveSource", "SaveData", "ISavable", "IRefSavable"]});
+})(), {"alsoSeal":["SaveIntegrityError", "ISavable", "IRefSavable", "IRefSavableInstance"]});

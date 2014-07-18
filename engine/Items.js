@@ -564,13 +564,13 @@ load.provide("dusk.items", (function() {
 	 * @since 0.0.21-alpha
 	 * @static
 	 */
-	items.Invent.refLoad = function(data) {
+	items.Invent.refLoad = function(data, unref) {
 		var invent = new items.Invent(data[1], data[2], data[3]);
 		var items = data[0];
 		
 		for(var i = 0; i < items.length; i ++) {
 			for(var j = 0; j < items[i].length; j ++) {
-				invent.putItemIntoSlot(save.loadRef(items[i][j]), i);
+				invent.putItemIntoSlot(unref(items[i][j]), i);
 			}
 		}
 		

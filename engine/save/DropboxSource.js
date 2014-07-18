@@ -4,16 +4,19 @@
 
 load.provide("dusk.save.DropboxSource", (function() {
 	var save = load.require("dusk.save");
+	var SaveSource = load.require("dusk.save.SaveSource");
+	var SaveData = load.require("dusk.save.SaveData");
+	var LocalStorageSource = load.require("dusk.save.LocalStorageSource");
 	var utils = load.require("dusk.utils");
 	load.require("@https://www.dropbox.com/static/api/2/dropins.js");
-
+	
 	var DropboxSource = function(appKey) {
 		this.appKey = appKey;
 	};
-	DropboxSource.prototype = Object.create(save.SaveSource.prototype);
-
+	DropboxSource.prototype = Object.create(SaveSource.prototype);
+	
 	DropboxSource.prototype.save = function(saveData, spec, identifier) {
-		return new Promise(function(fullfill, reject) {
+		return new Promise((function(fullfill, reject) {
 			Dropbox.appKey = this.appKey;
 			
 			saveData.meta().identifier = identifier;
@@ -26,15 +29,15 @@ load.provide("dusk.save.DropboxSource", (function() {
 				"cancel": function(){reject(new Error("User canceled"));},
 				"error": function(){reject(new Error("Unknown error"));}
 			});
-		});
+		}).bind(this));
 	};
-
+	
 	DropboxSource.prototype.autoSave = function(saveData, spec, identifier) {
-		return (new save.LocalStorageSource()).save(saveData, spec, "dropboxAutosave_"+identifier);
+		return (new LocalStorageSource()).save(saveData, spec, "dropboxAutosave_"+identifier);
 	};
-
+	
 	DropboxSource.prototype.load = function(spec, identifier) {
-		return new Promise(function(fullfill, reject) {
+		return new Promise((function(fullfill, reject) {
 			Dropbox.appKey = this.appKey;
 			
 			Dropbox.choose({
@@ -43,22 +46,20 @@ load.provide("dusk.save.DropboxSource", (function() {
 				
 				"success": function(files) {
 					utils.ajaxGet(files[0].link, "json").then(function(value) {
-						fullfill(value);
+						fullfill(new SaveData(spec, value));
 					});
 				},
 				
 				"cancel": function() {reject(new Error("Load from Dropbox canceled."));},
 			});
-		});
+		}).bind(this));
 	};
-
+	
 	DropboxSource.prototype.toString = function() {
 		return "[DropboxSource]";
 	};
-
+	
 	DropboxSource.prototype.supportsIdentifier = false;
-
-	Object.seal(DropboxSource);
 	
 	return DropboxSource;
 })());

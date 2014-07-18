@@ -5,6 +5,8 @@
 load.provide("dusk.save.SaveSpec", (function() {
 	var load = window.load.require("load");
 	var utils = load.require("dusk.utils");
+	var save = load.require("dusk.save");
+	var SaveData = load.require("dusk.save.SaveData");
 	
 	/** Specifies what to save.
 	 * 
@@ -58,7 +60,7 @@ load.provide("dusk.save.SaveSpec", (function() {
 	 * @return {dusk.save.SaveData} The data that was saved.
 	 */
 	SaveSpec.prototype.save = function() {
-		var saveData = new save.SaveData(this);
+		var saveData = new SaveData(this);
 		var refs = [];
 		var saveRef = _saveRef.bind(refs);
 		
