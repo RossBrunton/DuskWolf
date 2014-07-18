@@ -96,7 +96,9 @@ load.provide("dusk.behave.InteractableHost", (function() {
 			}
 			
 			if(active) {
-				touchers[i].behaviourFire("interactedWith", {"up":true, "interacter":this._entity});
+				if(touchers[i] !== "wall") {
+					touchers[i].behaviourFire("interactedWith", {"up":true, "interacter":this._entity});
+				}
 			}
 		}
 		
