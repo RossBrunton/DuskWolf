@@ -18,6 +18,8 @@ load.provide("dusk.save.SaveSpec", (function() {
 	 * @param {string} name A name for the specification.
 	 * @param {?string} prettyName A pretty name (for displaying to the user) of this specification. If omited, this
 	 *  will be the same as `name`.
+	 * @implements dusk.save.refSavable
+	 * @implements dusk.save.refSavableInstance
 	 * @constructor
 	 * @since 0.0.21-alpha
 	 */
@@ -130,6 +132,36 @@ load.provide("dusk.save.SaveSpec", (function() {
 	SaveSpec.prototype.toString = function() {
 		return "[SaveSpec "+name+"]";
 	};
+	
+	/** Save reference to this save spec.
+	 * @param {function(*):array|integer} ref Ref function.
+	 * @return {object} This SaveData's save data.
+	 */
+	SaveSpec.prototype.refSave = function(ref) {
+		return [this.name, this.prettyName, this._toSave];
+	}
+	
+	/** Get package for loading.
+	 * @return {string} This package.
+	 */
+	SaveSpec.prototype.refClass = function() {
+		return "dusk.save.SaveSpec";
+	}
+	
+	/** Load reference.
+	 * @param {object} data Saved data.
+	 * @param {function(array|integer):*} unref Unref function.
+	 * @return {object} This SaveData's save data.
+	 */
+	SaveSpec.refLoad = function(data, unref) {
+		var ss = new SaveSpec(data[0], data[1]);
+		
+		for(var i = 0; i < data[2].length; i ++) {
+			ss.add(data[2][i][0], data[2][i][1], data[2][i][2]); 
+		}
+		
+		return ss;
+	}
 	
 	
 	/** Saves a reference to the object. If the object already exists, a previously used reference will be returned.

@@ -25,6 +25,8 @@ load.provide("dusk.save.SaveData", (function() {
 	 * 
 	 * @param {dusk.save.SaveSpec} spec The specification thihs data is using.
 	 * @param {?object|string} initial Any initial data that this save data should use.
+	 * @implements dusk.save.refSavable
+	 * @implements dusk.save.refSavableInstance
 	 * @constructor
 	 * @since 0.0.21-alpha
 	 */
@@ -81,10 +83,27 @@ load.provide("dusk.save.SaveData", (function() {
 	};
 	
 	/** Save reference.
+	 * @param {function(*):array|integer} ref Ref function.
 	 * @return {object} This SaveData's save data.
 	 */
-	SaveData.prototype.refSave = function() {
-		// Not implemented yet
+	SaveData.prototype.refSave = function(ref) {
+		return [ref(this.spec), this.data];
+	}
+	
+	/** Get package for loading.
+	 * @return {string} This package.
+	 */
+	SaveData.prototype.refClass = function() {
+		return "dusk.save.SaveData";
+	}
+	
+	/** Load reference.
+	 * @param {object} data Saved data.
+	 * @param {function(array|integer):*} unref Unref function.
+	 * @return {object} This SaveData's save data.
+	 */
+	SaveData.refLoad = function(data, unref) {
+		return new SaveData(data[0], data[1]);
 	}
 	
 	return SaveData;
