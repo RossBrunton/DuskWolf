@@ -240,5 +240,71 @@ load.provide("dusk.containerUtils", (function() {
 		}
 	};
 	
+	/** Takes in an object, a package (which must not be sealed yet) and a validation function and implements
+	 *  `IContainer` on that object so you don't have to.
+	 * 
+	 * It adds all the methods of `IContainer` to the package which operate on the object. For example, calling
+	 *  `get("key")` on the package would get the key on the object.
+	 * 
+	 * @param {object} pack The package to implement.
+	 * @param {object} object The object to forward the methods to.
+	 * @param {?function(*):boolean} validate The (optional) value to set as the `valid` function.
+	 * @param {?function(string, *):boolean} onSet A function called just before the value is set. If this returns
+	 *  false, then the object will not be set.
+	 */
+	containerUtils.implementIContainer = function(pack, object, validate, onSet) {
+		if(!validate) validate = function(ob) {return true;}
+		
+		pack.get = function(name) {
+			return object[name];
+		};
+		
+		pack.set = function(name, value) {
+			if(!pack.valid(value)) return false;
+			if(onSet && !onSet(name, value)) return false;
+			object[name] = value;
+			return true;
+		};
+		
+		pack.remove = function(name) {
+			if(name in object) {
+				delete object[name];
+				return true;
+			}else{
+				return false;
+			}
+		};
+		
+		pack.length = function() {
+			return Object.keys(object).length;
+		};
+		
+		pack.iterate = function() {
+			var i = -1;
+			var keys = Object.keys(object);
+			
+			return {
+				"next":function(){
+					i ++;
+					if(i < keys.length){
+						return {"done":false, "value":object[keys[i]], "key":keys[i]};
+					}else{
+						return {"done":true};
+					}
+				}
+			};
+		};
+		
+		pack.valid = validate;
+		
+		pack.contains = function(value) {
+			for(var p in object) {
+				if(object[p] == value) return true;
+			}
+			
+			return false;
+		};
+	};
+	
 	return containerUtils;
 })());
