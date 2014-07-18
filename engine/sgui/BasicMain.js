@@ -46,7 +46,7 @@ load.provide("dusk.sgui.BasicMain", (function() {
 		
 		//Listeners
 		this.frame.listen(this._basicMainFrame.bind(this));
-		this.onControl.listen(this.save.bind(this), controls.addControl("basicmain_save", "S"));
+		this.onControl.listen(this.saveRoomToConsole.bind(this), controls.addControl("basicmain_save", "S"));
 		this.onControl.listen((function(e) {
 			if(editor.active) {
 				if(!e.shift) {
@@ -478,7 +478,7 @@ load.provide("dusk.sgui.BasicMain", (function() {
 		return true;
 	};
 	
-	BasicMain.prototype.save = function(e, returnRoom) {
+	BasicMain.prototype.saveRoomToConsole = function(e, returnRoom) {
 		if(!editor.active) return true;
 		
 		if(e === undefined || typeof e == "object") e = prompt("Please enter a package name.", this.roomName);
@@ -524,9 +524,6 @@ load.provide("dusk.sgui.BasicMain", (function() {
 		if(returnRoom) return out;
 		return false;
 	};
-	
-	Object.seal(BasicMain);
-	Object.seal(BasicMain.prototype);
 	
 	sgui.registerType("BasicMain", BasicMain);
 	
