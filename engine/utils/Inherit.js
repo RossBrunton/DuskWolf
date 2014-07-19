@@ -215,16 +215,20 @@ load.provide("dusk.Inheritable", (function(){
 	var utils = load.require("dusk.utils");
 	var InheritableContainer = load.require("dusk.InheritableContainer");
 	var save = load.suggest("dusk.save", function(p) {save = p});
+	var containerUtils = load.require("dusk.containerUtils");
 	
 	/** Inheritables are created by instances of `dusk.InheritableContainer` and generally serve to provide dynamic
 	 *  access to a type.
 	 * 
-	 * They can also contain their own, personal, data which is not linked to the type data in the container.
+	 * They can also contain their own "extra" data which is not linked to the type data in the container. All of the
+	 *  IContainer methods except `get` work only on the "extra data". `get` will first check if the key is in the extra
+	 *  data, and then looks to the container for the property.
 	 * 
 	 * @param {string} type The type to create the Inheritable of. Must be a valid type in the container.
 	 * @param {dusk.InheritableContainer} container The container this is "connected to".
 	 * @param {?object} extraData Any data that is unique to this specific instance of the type.
 	 * @constructor
+	 * @implements dusk.IContainer
 	 * @since 0.0.17-alpha
 	 */
 	var Inheritable = function(type, container, extraData) {
@@ -247,6 +251,8 @@ load.provide("dusk.Inheritable", (function(){
 			this.type = "root";
 		}
 	};
+	
+	containerUtils.implementIContainer(Inheritable.prototype, "_extraData");
 
 	/** Returns the value specified by the supplied key name.
 	 * 
@@ -259,17 +265,6 @@ load.provide("dusk.Inheritable", (function(){
 		if(key in this._extraData) return this._extraData[key];
 		
 		return this.container.get(this.type, key);
-	};
-	
-	/** Sets a specified value of this inheritable's extra data, unique to it.
-	 * 
-	 * @param {string} key The name to set the value to.
-	 * @param {*} value The value to set.
-	 * @return The value that was set.
-	 */
-	Inheritable.prototype.set = function(key, value) {
-		this._extraData[key] = value;
-		return value;
 	};
 	
 	/** Gets the unique data that this inheritable has, this will not necessarily be the same as the type data.
