@@ -257,6 +257,8 @@ load.provide("dusk.containerUtils", (function() {
 		var stringMode = typeof object == "string";
 		if(!validate) validate = function(ob) {return true;}
 		
+		pack.implementsIContainer = true;
+		
 		pack.get = function(name) {
 			if(stringMode) {
 				return this[object][name];
@@ -303,34 +305,20 @@ load.provide("dusk.containerUtils", (function() {
 			var keys = [];
 			if(stringMode) {
 				keys = Object.keys(this[object]);
-				var obj = this[object];
-				
-				return {
-					"next":function(){
-						i ++;
-						if(i < keys.length){
-							return {"done":false, "value":obj[keys[i]], "key":keys[i]};
-						}else{
-							return {"done":true};
-						}
-					}
-				};
 			}else{
 				keys = Object.keys(object);
-				
-				return {
-					"next":function(){
+			}
+			
+			return {
+					"next":(function(){
 						i ++;
 						if(i < keys.length){
-							return {"done":false, "value":object[keys[i]], "key":keys[i]};
+							return {"done":false, "value":this.get(keys[i]), "key":keys[i]};
 						}else{
 							return {"done":true};
 						}
-					}
+					}).bind(this)
 				};
-			}
-			
-			
 		};
 		
 		pack.valid = validate;
