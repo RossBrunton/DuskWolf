@@ -8,17 +8,17 @@ load.provide("dusk.sgui.Group", (function() {
 	var c = load.require("dusk.sgui.c");
 	var sgui = load.require(">dusk.sgui", function(p) {sgui = p});
 	var interaction = load.require("dusk.input.interaction");
+	var containerUtils = load.require("dusk.containerUtils");
 	
-	/** @class dusk.sgui.Group
-	 * 
-	 * @classdesc A group contains multiple components, and manages things like keyboard events and drawing.
+	/** A group contains multiple components, and manages things like keyboard events and drawing.
 	 * 
 	 * Components have names, which are used to reference them, these names are strings and are not case sensitive.
 	 * 
-	 * The number of components that can be focused depends on the `{@link #focusBehaviour}` property,
+	 * The number of components that can be focused depends on the `focusBehaviour` property,
 	 *  focused components will be the only ones that receive keypresses.
 	 * 
 	 * @extends dusk.sgui.Component
+	 * @implements dusk.IContainer
 	 * @param {?dusk.sgui.Component} parent The container that this component is in.
 	 * @param {string} componentName The name of the component.
 	 * @constructor
@@ -205,6 +205,8 @@ load.provide("dusk.sgui.Group", (function() {
 	 */
 	Group.FOCUS_ALL = 1;
 	
+	containerUtils.implementIContainer(Group.prototype, "_components");
+	
 	/** Override of `{@link dusk.sgui.Component.interact}`. Calls the interact method of all focused children, and if
 	 *  they all return true, then calls interact of Component with itself.
 	 * 
@@ -307,49 +309,56 @@ load.provide("dusk.sgui.Group", (function() {
 	};
 	
 	/** Modifies this component's children using JSON data.
-	 *	See `{@link dusk.sgui.Component.parseProps}` for a basic description on how JSON properties work.
+	 *	See `dusk.sgui.Component.parseProps` for a basic description on how JSON properties work.
 	 * 
-	 * `data` is either a single component description, an array of component description or an object
-	 *   with the keys being component names, and the value being their data.
-	 * 	Each component must have a `name` property, stating the name of the component they are modifying.
-	 *   This is the key when describing multiple components using an object.
+	 * `data` is either a single component description, an array of component description or an object with the keys
+	 *  being component names, and the value being their data. Each component must have a `name` property, stating the
+	 *  name of the component they are modifying. This is the key when describing multiple components using an object.
 	 *	It may also have a `type` property, which will be used in case the component does not exist to set its type.
 	 * 	If the component does not exist and `type` is omitted, then a warning is raised, and that object is skipped.
 	 * 
 	 * This may be used in the JSON representation with the property `children`.
 	 * 
 	 * @param {object|array} data Information about components, as described above.
+	 * @return {boolean} True if modification was successfull for all components.
 	 */
 	Group.prototype.modifyComponent = function(data) {
+		var success = true;
 		if(Array.isArray(data)) {
 			for (var i = 0; i < data.length; i++) {
-				if(("name" in data[i]) && this.getComponent(data[i].name.toLowerCase(), data[i].type)) {
-					this.getComponent(data[i].name.toLowerCase()).parseProps(data[i]);
-					sgui.applyStyles(this.getComponent(data[i].name.toLowerCase()));
+				if(("name" in data[i]) && this.get(data[i].name.toLowerCase(), data[i].type)) {
+					this.get(data[i].name.toLowerCase()).parseProps(data[i]);
+					sgui.applyStyles(this.get(data[i].name.toLowerCase()));
 				}else if(data[i].name){
 					console.warn(data[i].name + " has not been given a type and does not exist, ignoring.");
+					success = false;
 				}else{
 					console.warn("A component has no name in "+this.comName+", cannot create or edit.");
+					success = false;
 				}
 			}
 		}else{
 			if("name" in data && typeof data.name == "string") {
-				if(this.getComponent(data.name.toLowerCase(), data.type)) {
-					return this.getComponent(data.name.toLowerCase()).parseProps(data);
-					sgui.applyStyles(this.getComponent(data.name.toLowerCase()));
+				if(this.get(data.name.toLowerCase(), data.type)) {
+					return this.get(data.name.toLowerCase()).parseProps(data);
+					sgui.applyStyles(this.get(data.name.toLowerCase()));
 				}
 				console.warn(data.name + " has not been given a type and does not exist, ignoring.");
+				return false;
 			}else{
 				for(var p in data) {
-					if(this.getComponent(p.toLowerCase(), data[p].type)) {
-						this.getComponent(p.toLowerCase()).parseProps(data[p]);
-						sgui.applyStyles(this.getComponent(p.toLowerCase()));
+					if(this.get(p.toLowerCase(), data[p].type)) {
+						this.get(p.toLowerCase()).parseProps(data[p]);
+						sgui.applyStyles(this.get(p.toLowerCase()));
 					}else{
 						console.warn(p + " has not been given a type and does not exist, ignoring.");
+						success = false;
 					}
 				}
 			}
 		}
+		
+		return success;
 	};
 	Object.defineProperty(Group.prototype, "__children", {
 		set: function(value) {this.modifyComponent(value);},
@@ -466,14 +475,42 @@ load.provide("dusk.sgui.Group", (function() {
 	 * 
 	 * @param {string} com The name of the component to get.
 	 * @param {?string} type The type of component to create.
-	 * @return {?dusk.sgui.Component} The component, or null if it doesn't exist and `type` is undefined.
+	 * @return {?dusk.sgui.Component} The component, or undefined if it doesn't exist and `type` is undefined.
+	 * @since 0.0.21-alpha
 	 */
-	Group.prototype.getComponent = function(com, type) {
+	Group.prototype.get = function(com, type) {
 		if (this._components[com.toLowerCase()]) {
 			return this._components[com.toLowerCase()];
 		}
 		
-		return type?this._newComponent(com, type):null;
+		return type?this._newComponent(com, type):undefined;
+	};
+	/** Depreciated alias for `get`.
+	 * 
+	 * @param {string} com The name of the component to get.
+	 * @param {?string} type The type of component to create.
+	 * @return {?dusk.sgui.Component} The component, or undefined if it doesn't exist and `type` is undefined.
+	 * @depreciated
+	 */
+	Group.prototype.getComponent = function(com, type) {
+		return this.get(com, type);
+	};
+	
+	/** Sets a component in this group from either a component or raw JSON data.
+	 * 
+	 * @param {string} name The name of the component to set.
+	 * @param {object|dusk.sgui.Component} data The component data.
+	 * @return {boolean} True if set successfully.
+	 * @since 0.0.21-alpha
+	 */
+	Group.prototype.set = function(name, data) {
+		if(data instanceof Component) {
+			this._components[name.toLowerCase()] = data;
+			return true;
+		}
+		
+		data.name = name;
+		return this.modifyComponent(data);
 	};
 	
 	/** Deletes a component in this group.
@@ -483,8 +520,9 @@ load.provide("dusk.sgui.Group", (function() {
 	 * 
 	 * @param {string} com The name of the component to delete.
 	 * @return {boolean} If the delete was successful, this will return false if the component doesn't exist.
+	 * @since 0.0.21-alpha
 	 */
-	Group.prototype.deleteComponent = function(com) {
+	Group.prototype.remove = function(com) {
 		if (this._components[com.toLowerCase()]){
 			if(this.focusedCom == com.toLowerCase()) this.focus = "";
 			this._components[com.toLowerCase()].onDelete.fire({"com":this._components[com.toLowerCase()]});
@@ -494,17 +532,36 @@ load.provide("dusk.sgui.Group", (function() {
 			return true;
 		}
 	};
+	/** Depreciated alias for `remove`.
+	 * 
+	 * @param {string} com The name of the component to delete.
+	 * @return {boolean} If the delete was successful, this will return false if the component doesn't exist.
+	 * @depreciated
+	 */
+	Group.prototype.deleteComponent = function(com) {
+		return this.remove(com);
+	};
 	
 	/** Deletes all the components in this group.
 	 * 
-	 * @see dusk.sgui.Group#deleteComponent
-	 * @since 0.0.18-alpha
+	 * @since 0.0.21-alpha
 	 */
-	Group.prototype.deleteAllComponents = function(com) {
+	Group.prototype.empty = function() {
 		for(var c = this._componentsArr.length-1; c >= 0; c --) {
 			this.deleteComponent(this._componentsArr[c].comName);
 		}
 	};
+	/** Depreciated alias of `empty`.
+	 * 
+	 * @since 0.0.18-alpha
+	 */
+	Group.prototype.deleteAllComponents = function() {
+		for(var c = this._componentsArr.length-1; c >= 0; c --) {
+			this.deleteComponent(this._componentsArr[c].comName);
+		}
+	};
+	
+	
 	
 	//focus
 	Group.prototype.__defineSetter__("focus", function s_focus(value) {
@@ -612,6 +669,8 @@ load.provide("dusk.sgui.Group", (function() {
 		}
 	});
 	
+	
+	
 	/** Alters the layer components are on; higher layers are drawn later, appearing on top of others.
 	 * 
 	 * The alter must be an expression that says how to alter the layer, and be in one of the following forms.
@@ -630,11 +689,11 @@ load.provide("dusk.sgui.Group", (function() {
 		var frags = [alter.charAt(0), alter.substr(1)];
 		var dropped = false;
 		
-		if(frags[1] !== "" && !this.getComponent(frags[1])) {
+		if(frags[1] !== "" && !this.get(frags[1])) {
 			console.warn("Tried to alter layer based on an invalid component "+frags[1]+".");
 			return;
 		}
-		if(!this.getComponent(com)) {
+		if(!this.get(com)) {
 			console.warn("Tried to reorder non-existant component "+com+".");
 			return;
 		}
@@ -664,6 +723,8 @@ load.provide("dusk.sgui.Group", (function() {
 			}
 		}
 	};
+	
+	
 	
 	//Please note that to set the width to -2, all the parent's must have either an explicit width, or a width of -2
 	// otherwise Chrome will explode.
@@ -741,6 +802,8 @@ load.provide("dusk.sgui.Group", (function() {
 		return max - (includeOffset?this.yOffset:0);
 	};
 	
+	
+	
 	//horScroll
 	Object.defineProperty(Group.prototype, "horScroll", {
 		set: function(value) {
@@ -804,10 +867,12 @@ load.provide("dusk.sgui.Group", (function() {
 		return e;
 	};
 	
+	
+	
 	/** Calls the function once for each component.
 	 * 
-	 * @param {function(dusk.sgui.Component):undefined} funct The function to call. Will be given the current component as
-	 *  an argument.
+	 * @param {function(dusk.sgui.Component):undefined} funct The function to call. Will be given the current component
+	 *  as an argument.
 	 * @param {*} scope The scope in which to call the function.
 	 * @since 0.0.20-alpha
 	 */
@@ -816,6 +881,8 @@ load.provide("dusk.sgui.Group", (function() {
 			func.call(scope, this._componentsArr[c]);
 		}
 	};
+	
+	
 	
 	/** Handles mouse selection of components, if enabled.
 	 * 
@@ -868,9 +935,6 @@ load.provide("dusk.sgui.Group", (function() {
 		
 		return this.container.getTrueY(this.comName) + com.y - this.yOffset + destYAdder;
 	};
-	
-	Object.seal(Group);
-	Object.seal(Group.prototype);
 	
 	sgui.registerType("Group", Group);
 	
