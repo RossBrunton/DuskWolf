@@ -247,28 +247,43 @@ load.provide("dusk.containerUtils", (function() {
 	 *  `get("key")` on the package would get the key on the object.
 	 * 
 	 * @param {object} pack The package to implement.
-	 * @param {object} object The object to forward the methods to.
+	 * @param {object|string} object The object to forward the methods to. If it is a string, then `this[object]` will
+	 *  be set rather than `object`.
 	 * @param {?function(*):boolean} validate The (optional) value to set as the `valid` function.
 	 * @param {?function(string, *):boolean} onSet A function called just before the value is set. If this returns
 	 *  false, then the object will not be set.
 	 */
 	containerUtils.implementIContainer = function(pack, object, validate, onSet) {
+		var stringMode = typeof object == "string";
 		if(!validate) validate = function(ob) {return true;}
 		
 		pack.get = function(name) {
-			return object[name];
+			if(stringMode) {
+				return this[object][name];
+			}else{
+				return object[name];
+			}
 		};
 		
 		pack.set = function(name, value) {
 			if(!pack.valid(value)) return false;
 			if(onSet && !onSet(name, value)) return false;
-			object[name] = value;
+			
+			if(stringMode) {
+				this[object][name] = value;
+			}else{
+				object[name] = value;
+			}
 			return true;
 		};
 		
 		pack.remove = function(name) {
 			if(name in object) {
-				delete object[name];
+				if(stringMode) {
+					delete this[object][name];
+				}else{
+					delete object[name];
+				}
 				return true;
 			}else{
 				return false;
@@ -276,30 +291,59 @@ load.provide("dusk.containerUtils", (function() {
 		};
 		
 		pack.length = function() {
-			return Object.keys(object).length;
+			if(stringMode) {
+				return Object.keys(this[object]).length;
+			}else{
+				return Object.keys(object).length;
+			}
 		};
 		
 		pack.iterate = function() {
 			var i = -1;
-			var keys = Object.keys(object);
-			
-			return {
-				"next":function(){
-					i ++;
-					if(i < keys.length){
-						return {"done":false, "value":object[keys[i]], "key":keys[i]};
-					}else{
-						return {"done":true};
+			var keys = [];
+			if(stringMode) {
+				keys = Object.keys(this[object]);
+				var obj = this[object];
+				
+				return {
+					"next":function(){
+						i ++;
+						if(i < keys.length){
+							return {"done":false, "value":obj[keys[i]], "key":keys[i]};
+						}else{
+							return {"done":true};
+						}
 					}
-				}
-			};
+				};
+			}else{
+				keys = Object.keys(object);
+				
+				return {
+					"next":function(){
+						i ++;
+						if(i < keys.length){
+							return {"done":false, "value":object[keys[i]], "key":keys[i]};
+						}else{
+							return {"done":true};
+						}
+					}
+				};
+			}
+			
+			
 		};
 		
 		pack.valid = validate;
 		
 		pack.contains = function(value) {
-			for(var p in object) {
-				if(object[p] == value) return true;
+			if(stringMode) {
+				for(var p in this[object]) {
+					if(this[object][p] == value) return true;
+				}
+			}else{
+				for(var p in object) {
+					if(object[p] == value) return true;
+				}
 			}
 			
 			return false;
