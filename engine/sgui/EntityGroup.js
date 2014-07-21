@@ -88,9 +88,7 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 		
 		this.onControl.listen((function(e) {
 			if(editor.active) {
-				load.import("dusk.sgui.EntityWorkshop");
-				
-				if(EntityWorkshop) {
+				load.import("dusk.sgui.EntityWorkshop").then(function(ew) {
 					sgui.getPane("workshop").parseProps({
 						"focus":"ew",
 						"children":{
@@ -101,7 +99,7 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 						},
 						"active":true,
 					});
-				}
+				});
 			}
 		}).bind(this), controls.addControl("entitygroup_workshop", "W"));
 		

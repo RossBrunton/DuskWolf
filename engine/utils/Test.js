@@ -42,9 +42,7 @@ load.provide("test", (function() {
 			var importl = [];
 			
 			for(var i = data.packages.length-1; i >= 0; i--) {
-				importl.push(new Promise(function(f, r) {
-					load.import(data.packages[i][1][0], f);
-				}));
+				importl.push(load.import(data.packages[i][1][0]));
 			}
 			
 			return Promise.all(importl);

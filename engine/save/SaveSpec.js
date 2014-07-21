@@ -68,7 +68,7 @@ load.provide("dusk.save.SaveSpec", (function() {
 		
 		for(var i = this._toSave.length-1; i >= 0; i --) {
 			// Get the package
-			var ob = load.import(this._toSave[i][0]);
+			var ob = load.getPackage(this._toSave[i][0]);
 			
 			if(ob) {
 				// Create the "slot" to save into if it doesn't exist
@@ -107,7 +107,7 @@ load.provide("dusk.save.SaveSpec", (function() {
 		for(var p in saveData.data) {
 			if(p != "meta") {
 				// Get package
-				var ob = load.import(p);
+				var ob = load.getPackage(p);
 				
 				if(ob) {
 					if(!Array.isArray(saveData.data[p])) throw new save.SaveIntegrityError();
@@ -233,7 +233,7 @@ load.provide("dusk.save.SaveSpec", (function() {
 			if(ref[0] >= this.length) throw new save.SaveIntegrityError();
 			
 			// Import package
-			var o = load.import(ref[1]);
+			var o = load.getPackage(ref[1]);
 			//if(!utils.doesImplement(o, save.IRefSavable)) throw new save.SaveIntegrityError();
 			
 			// And actually load
