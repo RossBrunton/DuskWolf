@@ -3,6 +3,7 @@
 "use strict";
 
 load.provide("dusk.RoomManager", (function() {
+	var load = window.load.require("load");
 	var EventDispatcher = load.require("dusk.EventDispatcher");
 	
 	/** Manages rooms, which contain tilemap data and the entities in the room.
@@ -62,10 +63,17 @@ load.provide("dusk.RoomManager", (function() {
 	/** Returns a room stored under the specified name.
 	 * 
 	 * @param {string} name The name to look up.
-	 * @return {object} The stored room with that name.
+	 * @return {promise(object)} A promise that resolves to the given room.
 	 */
 	RoomManager.prototype.getRoomData = function(name) {
-		return this._rooms[name];
+		if(name in this._rooms) {
+			return Promise.resolve(this._rooms[name]);
+		}else{
+			return load.import(name).then((function(p) {
+				this._rooms[name] = p;
+				return p;
+			}).bind(this));
+		}
 	};
 	
 	/** Asks the basic main to set a room, with the "seek" entitiy at the mark specified.

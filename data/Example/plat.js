@@ -275,12 +275,12 @@ load.provide("example.plat", (function() {
 	}, this);
 
 	
-	dusk.onLoad.listen(function (e){
-		dplat.rooms.setRoom("example.plat.rooms.exhall", 0).then(
+	dusk.onLoad.listen(function (e) {
 		reversiblePromiseChain([
+			dplat.rooms.setRoom.bind(dplat.rooms, "example.plat.rooms.exhall", 0),
 			Scriptable.requestBoundPair("hero", "rawInput", {"inputs":[[30, "right"], [30, "left", "jump"]]}),
 		], false, {})
-		.then(console.log.bind(console), console.error.bind(console)));
+		.then(console.log.bind(console), console.error.bind(console));
 	});
 
 	dusk.startGame();

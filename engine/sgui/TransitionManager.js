@@ -12,7 +12,7 @@ load.provide("dusk.sgui.TransitionManager", (function() {
 	var entities = load.require("dusk.entities");
 	var Fade = load.require("dusk.sgui.extras.Fade");
 	var controls = load.require("dusk.input.controls");
-
+	
 	/** @class dusk.sgui.TransitionManager
 	 * 
 	 * @classdesc A transition manager is a component that functions as a layer in a `{@link dusk.sgui.BasicMain}`.
@@ -29,28 +29,28 @@ load.provide("dusk.sgui.TransitionManager", (function() {
 	 *  and secondly the mark that the entity was spawned at.
 	 * 
 	 * `"out"` is an array describing the transition between rooms, each element is an array describing one exit.
-	 * The first element is a trigger criteria, format described in `{@link dusk.sgui.Entity}`, that describes the entitiy 
-	 *  that can trigger this exit, second element is an integer describing what mark to add the exit for, third element is
-	 *  a boolean indicating whether pressing "up" is needed, and the last element is an object describing the room to load.
+	 * The first element is a trigger criteria, format described in `{@link dusk.sgui.Entity}`, that describes the
+	 *  entitiy  that can trigger this exit, second element is an integer describing what mark to add the exit for,
+	 *  third element is a boolean indicating whether pressing "up" is needed, and the last element is an object
+	 *  describing the room to load.
 	 * 
 	 * The last object can have the following properties:
 	 * 
-	 * - `"package"` The package that the room is in. This will be imported when the current room is running, and this will
-	 *  wait untill that package is imported before trying to load the room. This will also be the name of the room.
+	 * - `"package"` The package that the room is in. This will be set as the room.
 	 * - `"mark"` The mark at which to spawn the seek entity.
 	 * - `"custom"` Similar to the `"custom"` property of the `"in"` object, but ran when the current out transition is
 	 *  being used, the functions only have the current out transition as the first argument and no second argument.
 	 * - `"supressFade"` If true, then the room will not fade out.
 	 * 
-	 * If this component is focused and `{@link dusk.editor#active}` is true then this will display all the transitions 
-	 *  on the canvas, and let the user edit them. This will not respect the width and height of the component, because I'm
+	 * If this component is focused and `dusk.editor#active` is true then this will display all the transitions on the
+	 *  canvas, and let the user edit them. This will not respect the width and height of the component, because I'm
 	 *  too lazy to have that work. As such the width and height of this are both 1. The controls are as follows:
 	 * 
 	 * - `a` Add a transition, alerts will get the relevent information.
 	 * - `r` Remove a transition.
 	 * - `i` Edit the `"in"` transition.
 	 * 
-	 * @param {dusk.sgui.IContainer} parent The container that this component is in.
+	 * @param {dusk.sgui.Group} parent The container that this component is in.
 	 * @param {string} comName The name of the component.
 	 * @extends dusk.sgui.Component
 	 * @extends dusk.sgui.IBasicMainLayer
@@ -120,7 +120,7 @@ load.provide("dusk.sgui.TransitionManager", (function() {
 		);
 	};
 	TransitionManager.prototype = Object.create(Component.prototype);
-
+	
 	/** Loads the transitions from the room data, begins loading any packages for the next rooms, and transitions in.
 	 * @param {object} data The transition data.
 	 * @param {integer} mark The mark the seek entity will appear at.
@@ -129,7 +129,7 @@ load.provide("dusk.sgui.TransitionManager", (function() {
 		this._transitions = data;
 		
 		//Pre-import all packages
-		if("out" in this._transitions && options.get("net.prefetchRooms")) {
+		if("out" in this._transitions && options.get("net.prefetchRooms") && false) {
 			for(var i = 0; i < this._transitions.out.length; i ++) {
 				if("package" in this._transitions.out[i][3]) load.import(this._transitions.out[i][3].package);
 			}
@@ -149,9 +149,9 @@ load.provide("dusk.sgui.TransitionManager", (function() {
 			}
 		}
 	};
-
-	/** Saves the current transition data so it can be retrieved later. Due to limits in how JSON works, any custom in/out 
-	 * functions will be replaced with `"%X"` where X is an integer.
+	
+	/** Saves the current transition data so it can be retrieved later. Due to limits in how JSON works, any custom
+	 *  in/out functions will be replaced with `"%X"` where X is an integer.
 	 * @return {object} The transitions this TransitionManager has edited.
 	 */
 	TransitionManager.prototype.saveBM = function() {
@@ -178,7 +178,7 @@ load.provide("dusk.sgui.TransitionManager", (function() {
 		
 		return copy;
 	};
-
+	
 	/** Adds a new "out" transition.
 	 * @param {string} trigger Trigger criteria for the entity.
 	 * @param {integer} mark The mark that is to be the exit point.
@@ -189,26 +189,26 @@ load.provide("dusk.sgui.TransitionManager", (function() {
 		if(!("out" in this._transitions)) this._transitions.out = [];
 		this._transitions.out[this._transitions.out.length] = [trigger, mark, up, data];
 	};
-
+	
 	/** Removes an "out" transition.
 	 * @param {integer} id The index at which to remove.
 	 */
 	TransitionManager.prototype.remove = function(id) {
 		this._transitions.out.splice(id,  1);
 	};
-
+	
 	/** Used in custom functions, the TransitionManager to not load the next room until
-	 * `{@link dusk.sgui.TransitionManager#endWait}` is called the same amount of times as this function. This allows you to
-	 * do async stuff while the room is transitioning.
+	 * `{@link dusk.sgui.TransitionManager#endWait}` is called the same amount of times as this function. This allows
+	 *  you to do async stuff while the room is transitioning.
 	 */
 	TransitionManager.prototype.wait = function() {
 		this._waits ++;
 	};
-
+	
 	/** Used in custom functions, the TransitionManager to not load the next room until
-	 * `{@link dusk.sgui.TransitionManager#wait}` is called the same amount of times as this function. This allows you to
-	 * do async stuff while the room is transitioning. `{@link dusk.sgui.TransitionManager#wait}` should always be called
-	 * first.
+	 * `{@link dusk.sgui.TransitionManager#wait}` is called the same amount of times as this function. This allows you
+	 *  to do async stuff while the room is transitioning. `{@link dusk.sgui.TransitionManager#wait}` should always be 
+	 *  called first.
 	 */
 	TransitionManager.prototype.endWait = function() {
 		this._waits --;
@@ -222,7 +222,7 @@ load.provide("dusk.sgui.TransitionManager", (function() {
 			}
 		}
 	};
-
+	
 	/** Used internally to manage a mark being triggered.
 	 * @param {object} e An event object from `{@link dusk.entities#markTrigger}`.
 	 * @private
@@ -242,10 +242,6 @@ load.provide("dusk.sgui.TransitionManager", (function() {
 				load.abort();
 				if(this._current.package) {
 					load.import(this._current.package);
-					if(!load.isImported(this._current.package)) {
-						this.wait();
-						load.onProvide.listen(this.endWait.bind(this), this._current.package);
-					}
 				}
 				
 				//Fade
@@ -266,7 +262,7 @@ load.provide("dusk.sgui.TransitionManager", (function() {
 			}
 		}
 	};
-
+	
 	/** Gets the trigger criteria of the "out" trigger with the highest index.
 	 * @return {string} The trigger criteria, or an empty string if there is none.
 	 * @private
@@ -276,7 +272,7 @@ load.provide("dusk.sgui.TransitionManager", (function() {
 		
 		return this._transitions.out[this._transitions.out.length-1][0];
 	};
-
+	
 	/** Called every frame, and makes sure the text (for editing) always appears at the right place no matter what the 
 	 * offsets.
 	 * @param {object} e An event object from `{@link dusk.sgui.Component#frame}`.
@@ -289,7 +285,7 @@ load.provide("dusk.sgui.TransitionManager", (function() {
 		this.x = this.container.xOffset;
 		this.y = this.container.yOffset+10;
 	};
-
+	
 	/** Draws the text that this displays when editing.
 	 * @param {object} e An event object from `{@link dusk.sgui.Component#prepareDraw}`.
 	 * @private
@@ -307,7 +303,7 @@ load.provide("dusk.sgui.TransitionManager", (function() {
 			y += 10;
 		}
 	};
-
+	
 	/** Displays the transitions in a nice, friendly, happy way to be displayed on the screen.
 	 * @return {string} A pretty printed version of the transitions in this transitionManager.
 	 * @private
@@ -345,10 +341,7 @@ load.provide("dusk.sgui.TransitionManager", (function() {
 	options.register("net.prefetchRooms", "boolean", true, 
 		"Whether connecting rooms shound be automatically downloaded when a room is loaded."
 	);
-
-	Object.seal(TransitionManager);
-	Object.seal(TransitionManager.prototype);
-
+	
 	sgui.registerType("TransitionManager", TransitionManager);
 	
 	return TransitionManager;
