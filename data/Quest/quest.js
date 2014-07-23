@@ -22,14 +22,20 @@ load.provide("quest", (function() {
 	var sgui = load.require("dusk.sgui");
 	var TileMapWeights = load.require("dusk.sgui.TileMapWeights");
 	var reversiblePromiseChain = load.require("dusk.reversiblePromiseChain");
-
+	
 	var ents = load.require("quest.ents");
 	load.require("quest.rooms.rooma");
 	
 	var quest = {};
 	
-	dusk.onLoad.listen(function (e){dquest.rooms.setRoom("quest.rooms.rooma", 0);});
-
+	dusk.onLoad.listen(function (e){
+		dquest.rooms.setRoom("quest.rooms.rooma", 0).then((function(e) {
+			_turns.register("ally", quest.allyTurn);
+			_turns.register("enemy", quest.enemyTurn);
+			_turns.start();
+		}).bind(this));
+	});
+	
 	//Test
 	sgui.getPane("menu").parseProps({
 	   "children":{
@@ -92,7 +98,7 @@ load.provide("quest", (function() {
 			}
 		}
 	});
-
+	
 	sgui.getPane("menu").parseProps({
 		"children":{
 			"meter":{
@@ -139,7 +145,7 @@ load.provide("quest", (function() {
 		}
 	});
 	var feed = sgui.getPane("actionFeed").getComponent("feed");
-
+	
 	/*dusk.sgui.getPane("test").parseProps({
 		"active":true,
 		"focus":"text",
@@ -162,20 +168,9 @@ load.provide("quest", (function() {
 			},
 		}
 	});*/
-
+	
 	window.q = dquest.puppeteer;
 	
-	var _move = function(arg, qu) {
-		var t = dusk.utils.clone(targ);
-		t.region = "r"+Math.random();
-		t.opts.forEach[0].name = t.region+"_attack";
-		
-		qu(q.requestBoundPair("getSeek", {})); qu(q.requestBoundPair("generateRegion", t));
-		qu(q.requestBoundPair("getTilePathInRange", {"colour":"#999999"}));
-		qu(q.requestBoundPair("moveViaPath"));
-		qu(q.requestBoundPair("uncolourRegion", {"regions":[t.region+"_attack", t.region, t.region+"_path"]}));
-	}
-
 	window.aarg =
 		{"name":"attack", "colour":"#990000", "los":true, "entFilter":"stat(faction, 1) = ENEMY"};
 	window.targ = 
@@ -184,7 +179,7 @@ load.provide("quest", (function() {
 		};
 
 	var _turns = new TurnTicker();
-
+	
 	quest.allyTurnInner = function() {
 		return reversiblePromiseChain([
 			q.requestBoundPair("selectEntity", 
@@ -293,7 +288,7 @@ load.provide("quest", (function() {
 			}
 		});
 	};
-
+	
 	quest.allyTurn = function() {
 		feed.append({"text":"Player Phase", "colour":"#000099"});
 		return new Promise(function(oFulfill, oReject) {
@@ -309,28 +304,24 @@ load.provide("quest", (function() {
 			});
 		});
 	}
-
+	
 	quest.enemyTurn = function() {
 		feed.append({"text":"Enemy Phase", "colour":"#990000"});
 		return new Promise(function(fulfill) {
 			setTimeout(fulfill, 500);
 		});
 	};
-
+	
 	targ.weights = new TileMapWeights(2, 10);
 	targ.weights.addWeight(1, 0, 100);
 	targ.weights.addWeight(2, 0, 100);
-
+	
 	targ.forEach[0].weights = new TileMapWeights(2, 10);
 	targ.forEach[0].weights.addWeight(1, 0, 100);
-
+	
 	dusk.startGame();
 	//quest.go();
-
-	_turns.register("ally", quest.allyTurn);
-	_turns.register("enemy", quest.enemyTurn);
-	_turns.start();
-
+	
 	window.ss = new SaveSpec("ss", "ss");
 	ss.add("dusk.stats", "stats", {});
 	
