@@ -25,6 +25,7 @@ load.provide("dusk.sgui.BasicMain", (function() {
 		
 		this.scrollSpeed = 3;
 		this.scrollRegion = 0.60;
+		this.scrollInstantly = false;
 		this.spawn = 0;
 		this.roomName = "";
 		this._primaryEntityGroup = "";
@@ -42,6 +43,7 @@ load.provide("dusk.sgui.BasicMain", (function() {
 		this._registerPropMask("scrollRegion", "scrollRegion");
 		this._registerPropMask("editorColour", "editorColour");
 		this._registerPropMask("editorColor", "editorColor");
+		this._registerPropMask("scrollInstantly", "scrollInstantly");
 		this._registerPropMask("room", "room", true, ["spawn"]);
 		
 		//Listeners
@@ -100,23 +102,37 @@ load.provide("dusk.sgui.BasicMain", (function() {
 				for(var i = entLayers.length-1; i >= 0; i --) {
 					entLayers[i].scheme = this.getFirstLayerOfType(BasicMain.LAYER_SCHEME);
 					entLayers[i].particles = this.getFirstLayerOfType(BasicMain.LAYER_PARTICLES);
-					entLayers[i].width = this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).width;
-					entLayers[i].height = this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).height;
+					entLayers[i].width =
+						this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).width;
+					entLayers[i].height =
+						this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).height;
 				}
 				
 				var pLayers = this.getAllLayersOfType(BasicMain.LAYER_PARTICLES);
 				for(var i = pLayers.length-1; i >= 0; i --) {
-					pLayers[i].width = this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).width;
-					pLayers[i].height = this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).height;
+					pLayers[i].width =
+						this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).width;
+					pLayers[i].height =
+						this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).height;
 				}
 				
-				var crd = this.getFirstLayerOfType(BasicMain.LAYER_SCHEME).lookTile(spawn, 1);
+				var crd = [0, 0];
+				if(Array.isArray(spawn)) {
+					crd = spawn;
+				}else{
+					crd = this.getFirstLayerOfType(BasicMain.LAYER_SCHEME).lookTile(spawn, 1);
+					if(crd) {
+						crd[0] *= entities.twidth;
+						crd[1] *= entities.theight;
+					}
+				}
+				
 				if(crd && entities.seek){
 					var playerData = {};
 					playerData.name = entities.seek;
 					playerData.type = entities.seekType;
-					playerData.x = crd[0]*entities.twidth;
-					playerData.y = crd[1]*entities.theight;
+					playerData.x = crd[0];
+					playerData.y = crd[1];
 				
 					this.getComponent(this._primaryEntityGroup).dropEntity(playerData, true);
 				}
@@ -310,20 +326,22 @@ load.provide("dusk.sgui.BasicMain", (function() {
 			return;
 		}
 		
-		//this.xOffset = seekCoords[0] - (this.width >> 1);
-		//this.yOffset = seekCoords[1] - (this.height >> 1);
-		
-		var oldX = this.xOffset;
-		var oldY = this.yOffset;
-		
-		if(seekCoords[0] + (seekCoords[2] >> 1) < this.xOffset + (this.width >> 1) * this.scrollRegion)
-			this.xOffset -= this.scrollSpeed;
-		if(seekCoords[0] + (seekCoords[2] >> 1) > this.xOffset + this.width - ((this.width >> 1) * this.scrollRegion))
-			this.xOffset += this.scrollSpeed;
-		if(seekCoords[1] + (seekCoords[3] >> 1) < this.yOffset + (this.height >> 1) * this.scrollRegion)
-			this.yOffset -= this.scrollSpeed;
-		if(seekCoords[1] + (seekCoords[3] >> 1) > this.yOffset + this.height - ((this.height >> 1) * this.scrollRegion))
-			this.yOffset += this.scrollSpeed;
+		if(this.scrollInstantly) {
+			this.xOffset = seekCoords[0] - (this.width >> 1);
+			this.yOffset = seekCoords[1] - (this.height >> 1);
+		}else{
+			var oldX = this.xOffset;
+			var oldY = this.yOffset;
+			
+			if(seekCoords[0] + (seekCoords[2] >> 1) < this.xOffset + (this.width >> 1) * this.scrollRegion)
+				this.xOffset -= this.scrollSpeed;
+			if(seekCoords[0] + (seekCoords[2] >> 1) > this.xOffset + this.width - ((this.width >> 1)*this.scrollRegion))
+				this.xOffset += this.scrollSpeed;
+			if(seekCoords[1] + (seekCoords[3] >> 1) < this.yOffset + (this.height >> 1) * this.scrollRegion)
+				this.yOffset -= this.scrollSpeed;
+			if(seekCoords[1] + (seekCoords[3] >> 1) > this.yOffset+this.height - ((this.height >> 1)*this.scrollRegion))
+				this.yOffset += this.scrollSpeed;
+		}
 		
 		if(this.xOffset > this.getContentsWidth(false) - this.width)
 			this.xOffset = this.getContentsWidth(false) - this.width;
