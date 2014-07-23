@@ -28,6 +28,8 @@ load.provide("example.plat", (function() {
 	load.require("dusk.sgui.PlusText");
 	load.require("dusk.sgui.EntityWorkshop");
 	
+	var SaveSpec = load.require("dusk.save.SaveSpec");
+	
 	var dplat = load.require("dusk.plat");
 	var entities = load.require("dusk.entities");
 	var dusk = load.require("dusk");
@@ -284,6 +286,9 @@ load.provide("example.plat", (function() {
 	});
 
 	dusk.startGame();
+	
+	window.ss = new SaveSpec("ss", "ss");
+	ss.add("dusk.plat", "roomAndSeek");
 	
 	return plat;
 })());

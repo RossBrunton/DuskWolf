@@ -10,12 +10,10 @@ load.provide("dusk.plat", (function() {
 	var TileMapWeights = load.require("dusk.sgui.TileMapWeights");
 	var skills = load.require("dusk.skills");
 	
-	/** @namespace dusk.plat
-	 * @name dusk.plat
-	 * 
-	 * @description Plat is a simple platforming engine that uses `{@link dusk.sgui}`.
+	/** Plat is a simple platforming engine that uses `{@link dusk.sgui}`.
 	 * 
 	 * Importing this package will automatically set up a pane and stuff that a platformer can be used in.
+	 * @implements dusk.save.ISavable
 	 */
 	var plat = {};
 	
@@ -25,7 +23,7 @@ load.provide("dusk.plat", (function() {
 	//skills.giveSkill("infinijump");
 	
 	var main = sgui.getPane("plat");
-	main.modifyComponent([{"name":"main", "type":"BasicMain", "width":-2, "height":-2}]);
+	main.modifyComponent([{"name":"main", "type":"BasicMain", "width":-2, "height":-2, "scrollInstantly":true}]);
 	main.becomeActive();
 	main.flow("main");
 	
@@ -52,8 +50,24 @@ load.provide("dusk.plat", (function() {
 	
 	plat.rooms = new RoomManager("dusk.plat", "rooms");
 	plat.rooms.setBasicMain(main.getComponent("main"));
-
-	Object.seal(plat);
+	
+	plat.save = function(type, args, ref) {
+		if(this.rooms.basicMain.getSeek() && type == "roomAndSeek") {
+			return [this.rooms.basicMain.roomName, this.rooms.basicMain.getSeek().x, this.rooms.basicMain.getSeek().y];
+		}else if(type == "roomOnly" || type == "roomAndSeek"){
+			return [this.rooms.basicMain.roomName];
+		}else{
+			throw TypeError("Type must be either 'roomAndSeek' or 'roomOnly', got "+type);
+		}
+	};
+	
+	plat.load = function(data, type, args, unref) {
+		if(data.length > 1) {
+			return this.rooms.basicMain.createRoom(data[0], [data[1], data[2]]);
+		}else{
+			return this.rooms.basicMain.createRoom(data[0]);
+		}
+	};
 	
 	return plat;
 })());
