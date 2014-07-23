@@ -11,7 +11,7 @@ load.provide("dusk.options", (function() {
 	 * Importing this package will automatically set up a pane and stuff that a platformer can be used in.
 	 */
 	var options = {};
-
+	
 	var _options = {};
 	var _optionSelected = {};
 	var _optionSetPriority = {}; //0 = never set; 1 = set by game engine; 2 = set by user
@@ -30,13 +30,13 @@ load.provide("dusk.options", (function() {
 			options.reset(name);
 		}
 	}
-
+	
 	options.register = function(name, type, def, desc, values) {
 		_options[name] = [type, def, desc, values];
 		_optionSelected[name] = def;
 		_optionSetPriority[name] = 0;
 	};
-
+	
 	options.get = function(name) {
 		if(!(name in _options)) {
 			return;
@@ -44,7 +44,7 @@ load.provide("dusk.options", (function() {
 		
 		return _optionSelected[name];
 	};
-
+	
 	options.reset = function(name) {
 		if(!(name in _options)) {
 			return;
@@ -53,7 +53,7 @@ load.provide("dusk.options", (function() {
 		_optionSelected[name] = _options[name][1];
 		_optionSetPriority[name] = 0;
 	};
-
+	
 	options.set = function(name, value, priority) {
 		if(priority === undefined) priority = 1;
 		if(!(name in _options)) {
@@ -63,11 +63,15 @@ load.provide("dusk.options", (function() {
 		
 		if(priority < _optionSetPriority) return;
 		
+		var invalid = false;
+		
 		switch(_options[name][0]) {
 			case "positiveInteger":
 				if(!isNaN(+value) && value >= 0) {
 					_optionSelected[name] = ~~+value;
 					_optionSetPriority[name] = priority;
+				}else{
+					invalid = true;
 				}
 				break;
 			
@@ -82,6 +86,8 @@ load.provide("dusk.options", (function() {
 				if(!isNaN(+value)) {
 					_optionSelected[name] = ~~+value;
 					_optionSetPriority[name] = priority;
+				}else{
+					invalid = true;
 				}
 				break;
 			
@@ -89,6 +95,8 @@ load.provide("dusk.options", (function() {
 				if(!isNaN(+value)) {
 					_optionSelected[name] = +value;
 					_optionSetPriority[name] = priority;
+				}else{
+					invalid = true;
 				}
 				break;
 			
@@ -106,14 +114,21 @@ load.provide("dusk.options", (function() {
 				if(_options[name][3].indexOf(value) !== -1) {
 					_optionSelected[name] = value;
 					_optionSetPriority[name] = priority;
+				}else{
+					invalid = true;
 				}
 				break;
+			
+			default:
+				invalid = true;
 		}
 		
 		//Option invalid, do nothing and warn
-		console.warn("Option invalid: "+name+", "+value);
+		if(invalid) {
+			console.warn("Option invalid for "+name+": "+value);
+		}
 	};
-
+	
 	options.list = function() {
 		var options = Object.keys(_options).sort();
 		
@@ -147,7 +162,7 @@ load.provide("dusk.options", (function() {
 		}
 		if(none) console.log("(none)");
 	};
-
+	
 	var _listLine = function(name) {
 		var tstr = " {type:"+_options[name][0]+"; default:"+_options[name][1];
 		if(_options[name][0] == "selection") tstr += "; values: "+_options[name][3].join(", ");
@@ -156,8 +171,6 @@ load.provide("dusk.options", (function() {
 		
 		console.log(name+": "+_options[name][2]+tstr);
 	};
-	
-	Object.seal(options);
 	
 	return options;
 })());
