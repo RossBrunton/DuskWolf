@@ -12,8 +12,8 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 	
 	/** Extends the regular tilemap to add the ability to edit them.
 	 * 
-	 * When this has focus, keyboard combinations will be recognised and can change things,
-	 *  and a "frame" or "cursor" will appear, allowing you to select and change tiles.
+	 * When this has focus, keyboard combinations will be recognised and can change things, and a "frame" or "cursor"
+	 *  will appear, allowing you to select and change tiles.
 	 * 
 	 * @param {dusk.sgui.Group} parent The container that this component is in.
 	 * @param {string} componentName The name of the component.
@@ -80,9 +80,10 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 		this._registerPropMask("frameHeight", "frameHeight");
 		
 		//Listeners
-		this.prepareDraw.listen(this._editTileMapDraw.bind(this));
-		this.frame.listen(this._editTileMapFrame.bind(this));
+		this.prepareDraw.listen(_draw.bind(this));
+		this.frame.listen(_frame.bind(this));
 		
+		// Set image path
 		this.onControl.listen((function(e) {
 			if(editor.active) {
 				this.src = prompt("Please enter an image path.", this.src);
@@ -90,6 +91,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 			}
 		}).bind(this), controls.addControl("editabletm_path", "I"));
 		
+		// Set animation
 		this.onControl.listen((function(e) {
 			if(editor.active) {
 				var tile = this.getTile(this._cx, this._cy);
@@ -104,33 +106,34 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 			}
 		}).bind(this), controls.addControl("editabletm_animation", "E"));
 		
-		this.onControl.listen(this._copy.bind(this), controls.addControl("editabletm_copy", "C"));
-		this.onControl.listen(this._paste.bind(this), controls.addControl("editabletm_paste", "P"));
+		// Copy/paste
+		this.onControl.listen(_copy.bind(this), controls.addControl("editabletm_copy", "C"));
+		this.onControl.listen(_paste.bind(this), controls.addControl("editabletm_paste", "P"));
 		
 		//Directions
-		this.dirPress.listen(this._etmRightAction.bind(this), c.DIR_RIGHT);
-		this.dirPress.listen(this._etmLeftAction.bind(this), c.DIR_LEFT);
-		this.dirPress.listen(this._etmUpAction.bind(this), c.DIR_UP);
-		this.dirPress.listen(this._etmDownAction.bind(this), c.DIR_DOWN);
+		this.dirPress.listen(_rightAction.bind(this), c.DIR_RIGHT);
+		this.dirPress.listen(_leftAction.bind(this), c.DIR_LEFT);
+		this.dirPress.listen(_upAction.bind(this), c.DIR_UP);
+		this.dirPress.listen(_downAction.bind(this), c.DIR_DOWN);
 	};
 	EditableTileMap.prototype = Object.create(TileMap.prototype);
 	
-	/** This is the tile x coordinate for all tiles that have `{@link #globalCoords}` to true.
+	/** This is the tile x coordinate for all editable tilemaps that have `globalCoords` to true.
 	 * @type integer
 	 * @static
 	 */
 	EditableTileMap.globalEditX = 0;
-	/** This is the tile y coordinate for all tiles that have `{@link #globalCoords}` to true.
+	/** This is the tile y coordinate for all editable tilemaps that have `globalCoords` to true.
 	 * @type integer
 	 * @static
 	 */
 	EditableTileMap.globalEditY = 0;
-	/** This is the frame height for all tiles that have `{@link #globalCoords}` to true.
+	/** This is the frame height for all editable tilemaps that have `globalCoords` to true.
 	 * @type integer
 	 * @static
 	 */
 	EditableTileMap.globalEditHeight = 1;
-	/** This is the frame width for all tiles that have `{@link #globalCoords}` to true.
+	/** This is the frame width for all editable tilemaps that have `globalCoords` to true.
 	 * @type integer
 	 * @static
 	 */
@@ -140,7 +143,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 	 * @param {object} e A draw event.
 	 * @private
 	 */
-	EditableTileMap.prototype._editTileMapDraw = function(e) {
+	var _draw = function(e) {
 		if(!this.focused || !editor.active) return;
 		
 		if(-e.d.sourceX + (this._cx*this.tileWidth()) > e.d.width) return;
@@ -179,7 +182,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 	 * @param {object} e An event object from `{@link dusk.sgui.Component#frame}`.
 	 * @private
 	 */
-	EditableTileMap.prototype._editTileMapFrame = function(e) {
+	var _frame = function(e) {
 		if(this.globalCoords) {
 			if(this.focused && editor.active) {
 				EditableTileMap.globalEditX = this._cx;
@@ -209,12 +212,14 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 		}
 	};
 	
-	/** Does a copy operation, copying the current frame to the clipboard.
-	 * @param {object} e An event object from `{@link dusk.sgui.Component#keyPress}`.
+	/** Does a copy operation, copying the current frame to a storage area.
+	 * 
+	 * This does not actually set it to the user's clipboard
+	 * @param {object} e An event object.
 	 * @private
 	 * @since 0.0.21-alpha
 	 */
-	EditableTileMap.prototype._copy = function(e) {
+	var _copy = function(e) {
 		if(e.ctrl || !editor.active) return true;
 		
 		this._clipboard = [];
@@ -233,12 +238,12 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 		return false;
 	};
 	
-	/** Does a paste operation, coping the current frame from the clipboard to the map.
-	 * @param {object} e An event object from `{@link dusk.sgui.Component#keyPress}`.
+	/** Does a paste operation, coping the current frame from the storage area to the map.
+	 * @param {object} e An event object.
 	 * @private
 	 * @since 0.0.21-alpha
 	 */
-	EditableTileMap.prototype._paste = function(e) {
+	var _paste = function(e) {
 		if(e.ctrl || !editor.active) return true;
 		
 		var p = 0;
@@ -254,11 +259,11 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 	};
 	
 	/** Used to manage what happens when "up" is pressed, and any other keyboard combinations.
-	 * @param {object} e An event object from `{@link dusk.sgui.Component#dirPress}`.
+	 * @param {object} e An event object from `dirPress`.
 	 * @return {boolean} True if this event should bubble up to the container, else false.
 	 * @private
 	 */
-	EditableTileMap.prototype._etmUpAction = function(e) {
+	var _upAction = function(e) {
 		if(e.e.ctrl || !editor.active) return true;
 		if(e.e.shift) {
 			var current = this.getTile(this._cx, this._cy);
@@ -288,11 +293,11 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 	};
 	
 	/** Used to manage what happens when "down" is pressed, and any other keyboard combinations.
-	 * @param {object} e An event object from `{@link dusk.sgui.Component#dirPress}`.
+	 * @param {object} e An event object from `dirPress`.
 	 * @return {boolean} True if this event should bubble up to the container, else false.
 	 * @private
 	 */
-	EditableTileMap.prototype._etmDownAction = function(e) {
+	var _downAction = function(e) {
 		if(e.e.ctrl || !editor.active) return true;
 		if(e.e.shift) {
 			var current = this.getTile(this._cx, this._cy);
@@ -322,11 +327,11 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 	};
 	
 	/** Used to manage what happens when "right" is pressed, and any other keyboard combinations.
-	 * @param {object} e An event object from `{@link dusk.sgui.Component#dirPress}`.
+	 * @param {object} e An event object from `dirPress`.
 	 * @return {boolean} True if this event should bubble up to the container, else false.
 	 * @private
 	 */
-	EditableTileMap.prototype._etmRightAction = function(e) {
+	var _rightAction = function(e) {
 		if(e.e.ctrl || !editor.active) return true;
 		if(e.e.shift) {
 			var current = this.getTile(this._cx, this._cy);
@@ -356,11 +361,11 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 	};
 	
 	/** Used to manage what happens when "left" is pressed, and any other keyboard combinations.
-	 * @param {object} e An event object from `{@link dusk.sgui.Component#dirPress}`.
+	 * @param {object} e An event object from `dirPress`.
 	 * @return {boolean} True if this event should bubble up to the container, else false.
 	 * @private
 	 */
-	EditableTileMap.prototype._etmLeftAction = function(e) {
+	var _leftAction = function(e) {
 		if(e.e.ctrl || !editor.active) return true;
 		if(e.e.shift) {
 			var current = this.getTile(this._cx, this._cy);
@@ -545,15 +550,6 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 		this._tileBuffer[0] = newTileBuffer;
 		this._tiles[0] = new Uint8Array(this._tileBuffer[0]);
 		this.drawAll();
-	};
-	
-	/** Returns a string representing the map in this tilemap.
-	 * 
-	 * This will be able to be used with `{@link dusk.sgui.TileMap#map}` to create this map.
-	 * @return {string} A string representation of the map.
-	 */
-	EditableTileMap.prototype.getMap= function() {
-		return this.map.map;
 	};
 	
 	sgui.registerType("EditableTileMap", EditableTileMap);

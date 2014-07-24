@@ -7,6 +7,19 @@ load.provide("dusk.behave.PlayerGridWalker", (function() {
 	var Behave = load.require("dusk.behave.Behave");
 	var controls = load.require("dusk.input.controls");
 	
+	/** Allows player control of a `dusk.behave.GridWalker` behaviour.
+	 * 
+	 * If the `controlActive` behaviour property is true, this responds to the controls `entity_left`, `entity_right`,
+	 *  `entity_up` or `entity_down` to make the `GridWalker` behaviour work.
+	 * 
+	 * This behaviour uses the following behaviour properties:
+	 * - playerControl:boolean = true - If false, player control is disabled.
+	 * 
+	 * @extends dusk.behave.Behave
+	 * @param {?dusk.sgui.Entity} entity The entity this behaviour is attached to.
+	 * @see dusk.behave.PlayerControl
+	 * @constructor
+	 */
 	var PlayerGridWalker = function(entity) {
 		Behave.call(this, entity);
 		
@@ -24,17 +37,17 @@ load.provide("dusk.behave.PlayerGridWalker", (function() {
 		controls.addControl("entity_down", 40, "1+0.5");
 	};
 	PlayerGridWalker.prototype = Object.create(Behave.prototype);
-
-	/** Workshop data used by `{@link dusk.sgui.EntityWorkshop}`.
+	
+	/** Workshop data used by `dusk.sgui.EntityWorkshop`.
 	 * @static
 	 */
 	PlayerGridWalker.workshopData = {
 		"help":"Will allow the player to control it (gridwalker version).",
 		"data":[
-			["playerControl", "boolean", "If false, player control is disabled."],
+			["playerControl", "boolean", "Is player control enabled?", "true"],
 		]
 	};
-
+	
 	entities.registerBehaviour("PlayerGridWalker", PlayerGridWalker);
 	
 	return PlayerGridWalker;
@@ -47,6 +60,26 @@ load.provide("dusk.behave.GridWalker", (function() {
 	var c = load.require("dusk.sgui.c");
 	var TileMap = load.require("dusk.sgui.TileMap");
 	
+	/** Allows the entity to walk as if it was a grid.
+	 * 
+	 * The entity stays still, then when it has to move (either from an input or a script) it can go either left, right
+	 *  up or down and moves along that path until it has reached the next grid square.
+	 * 
+	 * This behaviour uses the following behaviour properties:
+	 * - gwspeed:integer = 4 - The speed the speed at which the entity moves.
+	 * - gwmoving:boolean = false - If true, then the entity is moving via the grid walker.
+	 * - gwtargetx:integer - While the entity is moving, this is the x destination it is moving to.
+	 * - gwtargety:integer - While the entity is moving, this is the y destination it is moving to.
+	 * - gwregion:dusk.sgui.TileRegion = null - If not null, then the entity will not be able to move out this region.
+	 * - gwfacing:integer = 1 - One of the `dusk.sgui.c.DIR_` constants representing which direction the entity is
+	 *  facing.
+	 * - gwmoves:array - A move stack; if this is set, whenever this entity isn't moving, a move is poped from this
+	 *  stack and the entity moves that way.
+	 * 
+	 * @extends dusk.behave.Behave
+	 * @param {?dusk.sgui.Entity} entity The entity this behaviour is attached to.
+	 * @constructor
+	 */
 	var GridWalker = function(entity) {
 		Behave.call(this, entity);
 		
@@ -58,14 +91,18 @@ load.provide("dusk.behave.GridWalker", (function() {
 		this._data("gwfacing", c.DIR_DOWN, true);
 		this._data("gwmoves", [], true);
 		
-		this.entityEvent.listen(this._gwFrame.bind(this), "frame");
+		this.entityEvent.listen(_frame.bind(this), "frame");
 	};
 	GridWalker.prototype = Object.create(Behave.prototype);
-
-	GridWalker.prototype._gwFrame = function(e) {
+	
+	/** Called on the `frame` entity event to manage motion.
+	 * @param e {object} The entity event.
+	 */
+	var _frame = function(e) {
 		var startMove = false;
 		var d = 0;
 		
+		// Check to see if there are any moves in the move stack or inputs
 		if(!this._data("gwmoving") && e.active) {
 			if(this._data("gwmoves").length) {
 				startMove = true;
@@ -87,11 +124,15 @@ load.provide("dusk.behave.GridWalker", (function() {
 		
 		if(startMove && this._entity.scheme) {
 			//Try to move
-			var oldT = this._entity.scheme.tilePointIn(this._entity.x, this._entity.y);
-			var newT = this._entity.scheme.tilePointIn(this._entity.x, this._entity.y);
 			
+			// Old location
+			var oldT = this._entity.scheme.tilePointIn(this._entity.x, this._entity.y);
+			
+			// New location
+			var newT = this._entity.scheme.tilePointIn(this._entity.x, this._entity.y);
 			this._entity.scheme.shiftTile(newT, d);
 			
+			// Check if the locations are different
 			if(((oldT[2] != newT[2] || oldT[3] != newT[3]) && !newT[5]) || !this._data("collides")) {
 				if(this._data("gwregion") == null || this._data("gwregion").isIn(newT[2], newT[3])) {
 					this._entity.behaviourFire("gwStartMove", {"dir":d, "targetX":newT[2], "targetY":newT[3]});
@@ -107,8 +148,11 @@ load.provide("dusk.behave.GridWalker", (function() {
 		}
 		
 		if(this._data("gwmoving")) {
+			// If we are currently moving
+			// We must be going in the direction we are facing
 			var d = this._data("gwfacing");
 			
+			// For each direction, check if we have reached the target, otherwise keep moving
 			if(d == c.DIR_RIGHT) {
 				if(this._entity.x >= this._data("gwtargetx")) {
 					this._entity.x = this._data("gwtargetx");
@@ -139,24 +183,28 @@ load.provide("dusk.behave.GridWalker", (function() {
 				}
 			}
 			
+			// If we have stopped moving, fire the event and run this handler again
 			if(!this._data("gwmoving")) {
 				this._entity.behaviourFire("gwStopMove", 
 					{"dir":d, "targetX":this._data("gwtargetx")/this._entity.width, 
 					"targetY":this._data("gwtargety")/this._entity.height}
 				);
 				
-				this._gwFrame(e);
+				_frame.call(this, e);
 			}
 		}
 	};
-
+	
+	/** Workshop data used by `dusk.sgui.EntityWorkshop`.
+	 * @static
+	 */
 	GridWalker.workshopData = {
 		"help":"Will move as if it were on a grid.",
 		"data":[
-			
+			["gwspeed", "integer","The speed the speed at which the entity moves on the grid.", 4]
 		]
 	};
-
+	
 	entities.registerBehaviour("GridWalker", GridWalker);
 	
 	return GridWalker;
@@ -168,6 +216,24 @@ load.provide("dusk.behave.GridRecorder", (function() {
 	var Behave = load.require("dusk.behave.Behave");
 	var c = load.require("dusk.sgui.c");
 	
+	/** While the entity moves around (via `dusk.behave.GridWalker`) this records the movements and stores them in an
+	 *  array.
+	 * 
+	 * This behaviour uses the following behaviour properties:
+	 * - grmoves:array - Every time a move is made and `grrecording` is true, the move is pushed onto this stack.
+	 * - grrecording:boolean = false - Moves will only be recorded if this is true.
+	 * - grrange:integer = 0 - If `grsnap` is true, this is the maximum length a path can be.
+	 * - grsnap:boolean = false - If true, if the length of the recorded moves is longer than `grrange` then the
+	 *  shortest route that goes to the same tile is calculated and replaces the current one.
+	 * - grregion:dusk.sgui.TileRegion = null - If set, the recorded path won't lead out of this region. If it tries, 
+	 *  no moves are added, and the next time it enters the region a new path is calculated.
+	 * - grregionto:dusk.sgui.TileRegion = null - If set, the path this entity takes will be inserted into the given
+	 *  region.
+	 * 
+	 * @extends dusk.behave.Behave
+	 * @param {?dusk.sgui.Entity} entity The entity this behaviour is attached to.
+	 * @constructor
+	 */
 	var GridRecorder = function(entity) {
 		Behave.call(this, entity);
 		
@@ -178,14 +244,23 @@ load.provide("dusk.behave.GridRecorder", (function() {
 		this._data("grregionto", null, true);
 		this._data("grsnap", false, true);
 		
+		/** If the entity has left the region, this is set to true so we know to calculate the path next time it's in
+		 *  the region.
+		 * @type boolean
+		 * @private
+		 */
 		this._leftRegion = false;
 		
-		this.entityEvent.listen(this._gwStartMove.bind(this), "gwStartMove");
-		this.entityEvent.listen(this._gwStopMove.bind(this), "gwStopMove");
+		this.entityEvent.listen(_startMove.bind(this), "gwStartMove");
+		this.entityEvent.listen(_stopMove.bind(this), "gwStopMove");
 	};
 	GridRecorder.prototype = Object.create(Behave.prototype);
-
-	GridRecorder.prototype._gwStartMove = function(e) {
+	
+	/** Manages the start of a move.
+	 * @param {object} e An event object.
+	 * @private
+	 */
+	var _startMove = function(e) {
 		if(this._data("grrecording")
 		&& this._data("grregion").isIn(e.targetX, e.targetY)) {
 			var moves = this._data("grmoves");
@@ -211,8 +286,12 @@ load.provide("dusk.behave.GridRecorder", (function() {
 			this._leftRegion = true;
 		}
 	};
-
-	GridRecorder.prototype._gwStopMove = function(e) {
+	
+	/** Manages the end of a move.
+	 * @param {object} e An event object.
+	 * @private
+	 */
+	var _stopMove = function(e) {
 		if(this._data("grrecording") && this._data("grregion").isIn(e.targetX, e.targetY)) {
 			if(this._data("grregionto")) {
 				this._data("grregionto").clear();
@@ -220,14 +299,18 @@ load.provide("dusk.behave.GridRecorder", (function() {
 			}
 		}
 	};
-
+	
+	/** Workshop data used by `dusk.sgui.EntityWorkshop`.
+	 * @static
+	 */
 	GridRecorder.workshopData = {
 		"help":"Will record the path that has been taken.",
 		"data":[
-			
+			["gwrange", "integer", "The maximum range of the recorded path.", "0"],
+			["gwsnap", "boolean", "Should the maximum range should be enforced?", "false"],
 		]
 	};
-
+	
 	entities.registerBehaviour("GridRecorder", GridRecorder);
 	
 	return GridRecorder;
@@ -239,17 +322,33 @@ load.provide("dusk.behave.GridMouse", (function() {
 	var Behave = load.require("dusk.behave.Behave");
 	var options = load.require("dusk.options");
 	
+	/** Allows mouse control for `dusk.behave.GridWalker`.
+	 * 
+	 * This behaviour uses the following behaviour properties:
+	 * - gmMouseMove:boolean = true - Whether the mouse should move the entity.
+	 * 
+	 * This behavior enables mouse support on it's entity, and adds the option `"controls.mouseGrid"` to enable or
+	 *  disable.
+	 * 
+	 * @extends dusk.behave.Behave
+	 * @param {?dusk.sgui.Entity} entity The entity this behaviour is attached to.
+	 * @constructor
+	 */
 	var GridMouse = function(entity) {
 		Behave.call(this, entity);
 		
 		this._data("gmMouseMove", true, true);
 		
 		this.entityEvent.listen((function(e){this._entity.ensureMouse()}).bind(this), "typeChange");
-		this.entityEvent.listen(this._gmMouseMove.bind(this), "mouseMove");
+		this.entityEvent.listen(_mouseMove.bind(this), "mouseMove");
 	};
 	GridMouse.prototype = Object.create(Behave.prototype);
-
-	GridMouse.prototype._gmMouseMove = function(e) {
+	
+	/** Manages mouse motion.
+	 * @param {object} e An event object.
+	 * @private
+	 */
+	var _mouseMove = function(e) {
 		if(this._data("gmMouseMove") && options.get("controls.mouseGrid") && this._entity.active) {
 			var destX = ~~((this._entity.x + this._entity.mouse.x) / this._entity.width);
 			var destY = ~~((this._entity.y + this._entity.mouse.y) / this._entity.height);
@@ -262,18 +361,21 @@ load.provide("dusk.behave.GridMouse", (function() {
 			}
 		}
 	};
-
+	
+	/** Workshop data used by `dusk.sgui.EntityWorkshop`.
+	 * @static
+	 */
 	GridMouse.workshopData = {
 		"help":"Will record the path that has been taken.",
 		"data":[
-			
+			["gmMouseMove", "boolean", "Is mouse support enabled?", "true"]
 		]
 	};
-
+	
 	options.register("controls.mouseGrid", "boolean", true,
 		"Whether moving the mouse changes the location of grid selectors."
 	);
-
+	
 	entities.registerBehaviour("GridMouse", GridMouse);
 	
 	return GridMouse;

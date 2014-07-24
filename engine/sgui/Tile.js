@@ -7,21 +7,19 @@ load.provide("dusk.sgui.Tile", (function() {
 	var Component = load.require("dusk.sgui.Component");
 	var sgui = load.require("dusk.sgui");
 
-	/** @class dusk.sgui.Tile
-	 * 
-	 * @classdesc A tile.
+	/** A tile.
 	 *
-	 * This is a smaller image selected from a larger image.
-	 *	Essentially, the source image has a lot of possible different images that this component can display.
-	 *	This component will take the location of the image from the source, in x,y form, and display only that image.
-	 *	It is given the dimensions of each "tile" on the source image,
-	 *   and expects the source image to be a grid of images of those sizes.
+	 * This is a smaller image selected from a larger image. The source image has a lot of possible different images
+	 *  that this component can display. This component will take the location of the image from the source, in x,y
+	 *  form, and display only that image. It is given the dimensions of each "tile" on the source image, and expects
+	 *  the source image to be a grid of images of those sizes. This is what the "x" and "y" values refer to, rather
+	 *  than the absolute coordinates of the tile.
 	 * 
-	 *  The origin sprites have their width and height described using `this.swidth` and `this.sheight`.
-	 * 	This only determines the size of the sprites on the source image,
-	 *   the tile can be resized as normal using the `height` and `width` properties.
+	 *  The origin sprites have their width and height described using `swidth` and `sheight`. This only determines the
+	 *  size of the sprites on the source image, the tile can be resized as normal using the `height` and `width`
+	 *  properties.
 	 * 
-	 * @param {dusk.sgui.IContainer} parent The container that this component is in.
+	 * @param {dusk.sgui.Group} parent The container that this component is in.
 	 * @param {string} comName The name of the component.
 	 * @extends dusk.sgui.Component
 	 * @see {@link dusk.sgui.Image}
@@ -50,12 +48,12 @@ load.provide("dusk.sgui.Tile", (function() {
 		 */
 		this.sheight = 16;
 		
-		/** X coordinate of the current sprite.
+		/** X coordinate of the current image on the source.
 		 * @type integer
 		 * @private
 		 */
 		this._tx = 0;
-		/** Y coordinate of the current sprite.
+		/** Y coordinate of the current imag on the source.
 		 * @type integer
 		 * @private
 		 */
@@ -63,7 +61,6 @@ load.provide("dusk.sgui.Tile", (function() {
 		
 		/** The path to the origin image.
 		 * 
-		 * This is relative to `{@link dusk.dataDir}` if needed.
 		 * @type string
 		 */
 		this.src = "";
@@ -96,16 +93,16 @@ load.provide("dusk.sgui.Tile", (function() {
 		this._registerPropMask("sheight", "sheight", true);
 		
 		//Listeners
-		this.prepareDraw.listen(this._tileDraw.bind(this));
+		this.prepareDraw.listen(_draw.bind(this));
 	};
 	Tile.prototype = Object.create(Component.prototype);
-
+	
 	/** Used to draw the tile.
 	 * 
 	 * @param {object} e A draw event.
 	 * @private
 	 */
-	Tile.prototype._tileDraw = function(e) {
+	var _draw = function(e) {
 		if(this._img && this._img.isReady()){
 			this._img.paintScaled(e.c, this.imageTrans, false,
 				this._tx * this.swidth + e.d.sourceX, this._ty * this.sheight + e.d.sourceY, e.d.width, e.d.height,
@@ -130,7 +127,7 @@ load.provide("dusk.sgui.Tile", (function() {
 			return this._img.src;
 		}
 	});
-
+	
 	//tileStr
 	Object.defineProperty(Tile.prototype, "tileStr", {
 		set: function(value) {
@@ -143,7 +140,7 @@ load.provide("dusk.sgui.Tile", (function() {
 			return this._tx+","+this._ty;
 		}
 	});
-
+	
 	//tile
 	Object.defineProperty(Tile.prototype, "tile", {
 		set: function(value) {
@@ -155,37 +152,36 @@ load.provide("dusk.sgui.Tile", (function() {
 			return [this._tx, this._ty];
 		}
 	});
-
+	
 	/*dusk.sgui.Tile.prototype.snapX = function(down) {
 		if(down)
 			this.x = Math.ceil(this.x/this.width)*this.width;
 		else
 			this.x = Math.floor(this.x/this.width)*this.width;
 	};
-
+	
 	dusk.sgui.Tile.prototype.snapY = function(right) {
 		if(right)
 			this.y = Math.ceil(this.y/this.height)*this.height;
 		else
 			this.y = Math.floor(this.y/this.height)*this.height;
 	};
-
+	
 	dusk.sgui.Tile.prototype.gridGo = function(x, y) {
 		this.x = x*this.width;
 		this.y = y*this.height;
 	};*/
-
-	/** Imagines that this tile is on a grid, and returns it's x location on the grid.
+	
+	/** Imagines that this tile is on a grid of tiles the same size, and returns it's x location on that grid.
 	 * 
-	 * If it was to the right of two other tiles that are next to each other, it would return 2, for example.
 	 * @return {integer} The tile's x coordinate in a grid of tiles the same size.
 	 * @since 0.0.21-alpha
 	 */
 	Tile.prototype.tileX = function() {
 		return ~~(this.x/this.width);
 	};
-
-	/** Imagines that this tile is on a grid, and returns it's y location on the grid.
+	
+	/** Imagines that this tile is on a grid of tiles the same size, and returns it's y location on that grid.
 	 * 
 	 * If it was below two other tiles that are next to each other, it would return 2, for example.
 	 * @return {integer} The tile's y coordinate in a grid of tiles the same size.
@@ -194,9 +190,6 @@ load.provide("dusk.sgui.Tile", (function() {
 	Tile.prototype.tileY = function() {
 		return ~~(this.y/this.height);
 	};
-	
-	Object.seal(Tile);
-	Object.seal(Tile.prototype);
 	
 	sgui.registerType("Tile", Tile);
 	

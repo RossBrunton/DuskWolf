@@ -10,59 +10,60 @@ load.provide("dusk.sgui.TileMap", (function() {
 	var utils = load.require("dusk.utils");
 	var Image = load.require("dusk.Image");
 	var Pool = load.require("dusk.Pool");
-
-	/** @class dusk.sgui.TileMap
+	
+	/** This is a grid of tiles.
 	 * 
-	 * @classdesc This is a lot of tiles arranged in a grid.
+	 * It is a grid with a specified width and height for each "tile". Each of these tiles is given a location on an
+	 *  image file which it then draws onto its location.
 	 * 
-	 * This can be thought of as a lot of `{@link dusk.sgui.Tile}` instances arranged in a grid,
-	 *  but for practical reasons this is not how it is implemented.
+	 * Each tile on the grid has a "tilemap coordinate", where the tile at the upper left is at (0, 0), and the next one
+	 *  to the right is (1, 0) and so on. This is different from the "exact coordinate" which is the (x, y)th pixel on
+	 *  the entire component. For a tilemap where each tile is 32 px wide, the exact coordinate of the tile at tilemap
+	 *  coordinate (1, 0) would be (32, 0) for example.
 	 * 
-	 * Each tile on the grid has a coordinate, where the tile at the upper left is at (0, 0),
-	 *  and the next one to the right is (1, 0) and so on.
+	 * Tilemaps have a "source image" which is where they read the images to display from. Every tile has a "source
+	 *  image coordinate" which is the tilemap coordinate of the source image of the image it is displaying.
 	 * 
-	 * The tilemap must be drawn completley before it can be used, hence changing any tile
-	 *  and especially changing the dimensions of the tilemap is a really expensive operation.
-	 *
-	 * Only part of the tilemap is visible, as described by the `*bound` properties, and this will be the only area drawn.
+	 * The tilemap must be drawn completley before it can be used, hence changing any tile and especially changing the
+	 *  dimensions of the tilemap is a really expensive operation.
 	 * 
-	 * Some functions accept and return tileData objects. This is essentially an array, the first two elements are the x and
-	 *  y coordinates of the image displayed (from the original stylesheet), the second two are the x and y coordinates that
-	 *  this tiledata describes, and the last two elements is the weight of this tile and an integer which is 0 iff the
-	 *  tile is not solid else 1.
+	 * Some functions accept and return tileData objects. This is  an array, the first two elements are the x and y
+	 *  source image coordinate of the tile dysplayed, the second two are the x and y tilemap coordinates of the tile,
+	 *  and the last two elements are the weight of this tile and an integer which is 0 iff the tile is not solid,
+	 *  otherwise it's 1.
 	 * 
-	 * TileMaps have the property `{@link dusk.sgui.Component#mousePierce}` set to true by default.
+	 * TileMaps have the property `dusk.sgui.MouseAugment.mousePierce` set to true by default.
 	 * 
 	 * @extends dusk.sgui.Component
-	 * @param {?dusk.sgui.Component} parent The container that this component is in.
+	 * @param {?dusk.sgui.Group} parent The container that this component is in.
 	 * @param {string} componentName The name of the component.
 	 * @constructor
 	 */
 	var TileMap = function (parent, comName) {
 		Component.call(this, parent, comName);
 		
-		/** The width (for displaying) of a single tile if this tilemap is in `"DECIMAL"` mode.
+		/** The width of a single tile.
 		 * @type integer
 		 * @default 32
 		 */
 		this.twidth = 32;
-		/** The height (for displaying) of a single tile if this tilemap is in `"DECIMAL"` mode.
+		/** The height of a single tile.
 		 * @type integer
 		 * @default 32
 		 */
 		this.theight = 32;
 		
-		/** The width (for reading from the image) of a single tile if this tilemap is in `"DECIMAL"` mode.
+		/** The width of the tiles in the source image.
 		 * @type integer
 		 * @default 16
 		 */
 		this.swidth = 16;
-		/** The height (for reading from the image) of a single tile if this tilemap is in `"DECIMAL"` mode.
+		/** The height of the tiles in the source image.
 		 * @type integer
 		 * @default 16
 		 */
 		this.sheight = 16;
-
+		
 		
 		/** The number of rows in this TileMap.
 		 * @type integer
@@ -77,18 +78,23 @@ load.provide("dusk.sgui.TileMap", (function() {
 		
 		/** The actual map to draw. Setting this will cause the map to update.
 		 * 
-		 * This can be set in two ways. Both ways require a string that describes the TileMap,
-		 *  this can be outputted from `{@link dusk.sgui.EditableTilemap#save}`,
-		 *  or as a whitespace seperated list of all the tile coordinates in order.
+		 * This requires  a string that describes the TileMap, this can be acquired from `getMap`, or as a whitespace
+		 *  seperated list of all the tile coordinates in order.
 		 * 
-		 * This can either be an object with optional properties `rows` and `cols` describing the dimensions,
-		 *  and a required property `map` being the string. Or the string itself can be set directly.
+		 * This can be an object with the following properties:
+		 * - map: Required, a string that can be decoded with `utils.stringToData` which represents the map itself.
+		 * - rows: Number of rows in the TileMap.
+		 * - cols: Number of cols in the TileMap.
+		 * - src: Set to the src image of the tilemap.
+		 * - ani: An array of animations which are fed to `setAnimation`.
+		 * 
+		 * In addition, the `map` string can be set directly.
 		 * 
 		 * @type object|string
 		 */
 		this.map = null;
 		
-		/** Used internall ty store the set image src.
+		/** Used internally to store the set image src.
 		 * @type string
 		 * @private
 		 * @since 0.0.20-alpha
@@ -104,8 +110,8 @@ load.provide("dusk.sgui.TileMap", (function() {
 		 */
 		this._img = null;
 		
-		/** An array of canvases that has the full drawn tilemap for each frame on it.
-		 *  This will be copied onto the real canvas when it's time to draw it.
+		/** An array of canvases that has the full drawn tilemap for each frame on it. This will be copied onto the real
+		 *  canvas when it's time to draw it.
 		 * @type array
 		 * @private
 		 */
@@ -121,11 +127,10 @@ load.provide("dusk.sgui.TileMap", (function() {
 		 * @protected
 		 */
 		this._tileBuffer = [];
-		/** An array of all the tiles that the tilemap contains per frame,
-		 *  in order of where they appear on the screen (left to right, then up to down).
+		/** An array of UintClampedArrays representing frames of tiles, tiles are arranged left to right, then up to
+		 *  down.
 		 * 
-		 * Each coordinate has two bytes (hence to entries in this array), `x` then `y`,
-		 *  and refers to the location on the origin image for the tile.
+		 * Each tile consists of two bytes, which are their x and y source image coordinates.
 		 * @type array
 		 * @protected
 		 */
@@ -184,8 +189,8 @@ load.provide("dusk.sgui.TileMap", (function() {
 		this._registerPropMask("twidth", "twidth");
 		
 		//Listeners
-		this.prepareDraw.listen(this._tileMapDraw.bind(this));
-		this.frame.listen(this._tileMapFrame.bind(this));
+		this.prepareDraw.listen(_tileMapDraw.bind(this));
+		this.frame.listen(_tileMapFrame.bind(this));
 		
 		//Default values
 		this.augment.listen((function(e) {
@@ -193,7 +198,7 @@ load.provide("dusk.sgui.TileMap", (function() {
 		}).bind(this), "mouse");
 	};
 	TileMap.prototype = Object.create(Component.prototype);
-
+	
 	//map
 	Object.defineProperty(TileMap.prototype, "map", {
 		set: function(value) {
@@ -201,36 +206,43 @@ load.provide("dusk.sgui.TileMap", (function() {
 			if(typeof value == "string") value = {"map":value};
 			var map = value;
 			
-			//Get stuff
+			//Set width and height
 			if(!("rows" in map)) map.rows = this.rows;
 			if(!("cols" in map)) map.cols = this.cols;
 			
+			// Set src, if it exists
 			if("src" in map) {
 				this.src = map.src;
 			}
 			
+			// And animation
 			if("ani" in map) {
 				for(var i = map.ani.length-1; i >= 0; i --) {
 					TileMap.setAnimation(this.src, map.ani[i]);
 				}
 			}
 			
+			// Count the number of frames needed
 			this._frames = this._framesNeeded();
 			
 			var singleW = this.twidth;
 			var singleH = this.theight;
 			
+			// Time performance
 			if("performance" in window && "now" in window.performance) var t = performance.now();
 			
+			// Reset all the things
 			this._tileBuffer = [];
 			this._tiles = [];
 			this._all = [];
 			
+			// Create the first frame
 			var buffer = utils.stringToData(map.map);
 			this._tileBuffer[0] = buffer;
 			this._tiles[0] = new Uint8ClampedArray(this._tileBuffer[0]);
 			this._all[0] = utils.createCanvas((this.cols*singleW)+this.width, (this.rows*singleH)+this.height);
 			
+			// And then loop and create the other frames
 			if(this._frames > 1) {
 				for(var i = 1; i < this._frames; i ++) {
 					this._tileBuffer[i] = buffer.slice(0);
@@ -239,10 +251,14 @@ load.provide("dusk.sgui.TileMap", (function() {
 				}
 			}
 			
+			// Set the rows and columns
 			this.rows = map.rows;
 			this.cols = map.cols;
 			
+			// Draw it
 			this.drawAll();
+			
+			// Output performance
 			if(t) console.log("Map took "+(performance.now()-t)+"ms to render!");
 		},
 		
@@ -263,7 +279,7 @@ load.provide("dusk.sgui.TileMap", (function() {
 			return hold;
 		}
 	});
-
+	
 	//src
 	Object.defineProperty(TileMap.prototype, "src", {
 		get: function() {return this._src;},
@@ -278,8 +294,8 @@ load.provide("dusk.sgui.TileMap", (function() {
 			}
 		}
 	});
-
-	/** Causes the map to update it's display. 
+	
+	/** Causes the map to update its display. 
 	 * 
 	 * This will be called automatically before the map is drawn, but you can call it here first if you want.
 	 * 
@@ -312,8 +328,9 @@ load.provide("dusk.sgui.TileMap", (function() {
 		this._drawn = true;
 		return true;
 	};
-
-	/** Given the first frame in the tilemap, will update `arr` such that it is `offset` frames array.
+	
+	/** Given the first frame in the tilemap, will update the tiles on the tilemap to create the frame `offset` frames
+	 *  later.
 	 * 
 	 * If the arrays are not the same size, then the destination array will be recreated at that size.
 	 * @param {Uint8Array} origin The first frame.
@@ -349,18 +366,17 @@ load.provide("dusk.sgui.TileMap", (function() {
 			}
 		}
 	};
-
-	/** Returns the location of the source tile on the origin image
-	 *  (as in, the one that was drawn to here) that the specified coordinate is in.
+	
+	/** Returns the tile data of the tile that the specified coordinate is in.
 	 * 
-	 * Please return the output to `{@link dusk.sgui.TileMap.tileData}` when you are done.
-	 * @param {integer} x The x coordinate to look in.
-	 * @param {integer} y The y coordinate to look in.
+	 * Please return the output to `tileData` when you are done.
+	 * @param {integer} x The x exact coordinate to look in.
+	 * @param {integer} y The y exact coordinate to look in.
 	 * @param {boolean=false} exactX If true
 	 *  then the specified x coordinate must exactly match the x coordinate of a tile on this map.
 	 * @param {boolean=false} exactY If true
 	 *  then the specified y coordinate must exactly match the y coordinate of a tile on this map.
-	 * @return {?array} An `[x,y]` array specifying the tile that is here, or `null`, if there is no tile here.
+	 * @return {?array} A tileData object describing the tile, or `null`, if there is no tile here.
 	 */
 	TileMap.prototype.tilePointIn = function(x, y, exactX, exactY) {
 		var xpt = x/this.twidth;
@@ -379,13 +395,13 @@ load.provide("dusk.sgui.TileMap", (function() {
 
 	/** Assumes this TileMap is a schematic, and returns whether the specified coordinates are in a solid place.
 	 * 
-	 * If they are in a solid place, it returns the number of pixels to add to the x or y coordinate such that there is no
-	 * collision.
+	 * If they are in a solid place, it returns the number of pixels to add to the x or y coordinate such that there is
+	 *  no collision.
 	 * 
-	 * Solid tiles have a weight of greater than 100.
+	 * This TileMap must have a `weights` value to use make use of this.
 	 * 
-	 * @param {integer} x The x coordinate to check.
-	 * @param {integer} y The y coordinate to check.
+	 * @param {integer} x The x exact coordinate to check.
+	 * @param {integer} y The y exact coordinate to check.
 	 * @param {boolean=false} shiftRight If true, then the entitiy will be shifted right/down, else left/up.
 	 * @param {boolean=false} shiftVer If true, then this will return the shift for vertical, rather than horizontal.
 	 * @return {integer} The number of pixels to shift this. This will be negative for left or up shifts.
@@ -414,12 +430,12 @@ load.provide("dusk.sgui.TileMap", (function() {
 		
 		return toRet;
 	};
-
+	
 	/** Used internally to manage frames.
 	 * @param {object} e A `frame` event object.
 	 * @private
 	 */
-	TileMap.prototype._tileMapFrame = function(e) {
+	var _tileMapFrame = function(e) {
 		if(this.animating && (!editor || !editor.active)) {
 			if(--this._framesRemaining == 0) {
 				this._framesRemaining = this._frameDelay;
@@ -429,28 +445,29 @@ load.provide("dusk.sgui.TileMap", (function() {
 			this._currentFrame = 0;
 		}
 	};
-
+	
 	/** Used internally to draw the tilemap.
 	 * @param {object} e A `prepareDraw` event object.
 	 * @private
 	 */
-	TileMap.prototype._tileMapDraw = function(e) {
+	var _tileMapDraw = function(e) {
 		if(!this._img) return;
 		if(!this._drawn) this.drawAll();
 		
 		var hscale = this.swidth/this.twidth;
 		var vscale = this.sheight/this.theight;
-		e.c.drawImage(this._all[this._currentFrame], e.d.sourceX*hscale, e.d.sourceY*vscale, e.d.width*hscale, e.d.height*vscale, 
+		e.c.drawImage(this._all[this._currentFrame],
+			e.d.sourceX*hscale, e.d.sourceY*vscale, e.d.width*hscale, e.d.height*vscale, 
 			e.d.destX, e.d.destY, e.d.width, e.d.height
 		);
 	};
-
-	/** Returns the tile drawn at the specified coordinates.
+	
+	/** Returns the tile data of the tile at the specified tilemap coordinates.
 	 * 
-	 * Please return the output to `{@link dusk.sgui.TileMap.tileData}` when you are done.
+	 * Please return the output to `tileData` when you are done.
 	 * @param {integer} x The x coordinate.
 	 * @param {integer} y The y coordinate.
-	 * @return {array} An `[x,y]` style array of the tile at this location.
+	 * @return {array} Tiledata of the specified tile.
 	 */
 	TileMap.prototype.getTile = function(x, y) {
 		var t = TileMap.tileData.alloc();
@@ -474,10 +491,11 @@ load.provide("dusk.sgui.TileMap", (function() {
 		
 		return t;
 	};
-
-	/** Given a tile and a direction, updates the tile data such that it refers to that tile.
+	
+	/** Given a tileData and a `dusk.sgui.c.DIR_*` direction, updates the tile data such that it refers to an adjacent
+	 *  tile.
 	 * 
-	 * Please return the output to `{@link dusk.sgui.TileMap.tileData}` when you are done.
+	 * Please return the output to `tileData` when you are done.
 	 * @param {Array} t The tile to shift.
 	 * @param {integer} dir The direction to shift, one of the `dusk.sgui.c.DIR_*` constants.
 	 * @return {array} A tiledata array of the tile at this location.
@@ -511,15 +529,14 @@ load.provide("dusk.sgui.TileMap", (function() {
 		
 		return t;
 	};
-
+	
 	/** Sets the tile to be drawn at a specified location.
-	 * @param {integer} x The x coordinate of the tile to change.
-	 * @param {integer} y The y coordinate of the tile to change.
-	 * @param {integer} tx The x coordinate to change the tile to.
-	 * @param {integer} ty The y coordinate to change the tile to.
-	 * @param {boolean} update If true,
-	 *  then the map will be redrawn and updated when the new tile is set (an expensive operation).
-	 *  If this is not true, then the changes won't take effect until the map is redrawn.
+	 * @param {integer} x The x tilemap coordinate of the tile to change.
+	 * @param {integer} y The y tilemap coordinate of the tile to change.
+	 * @param {integer} tx The x source image coordinate to change the tile to.
+	 * @param {integer} ty The y source image coordinate to change the tile to.
+	 * @param {boolean} update If true, then the map will be redrawn and updated when the new tile is set (an expensive
+	 *  operation). If this is not true, then the changes won't take effect until the map is redrawn.
 	 */
 	TileMap.prototype.setTile = function(x, y, tx, ty, update) {
 		if(x > this.cols || y > this.rows || x < 0 || y < 0) return;
@@ -532,54 +549,41 @@ load.provide("dusk.sgui.TileMap", (function() {
 			//console.warn("Tile "+x+","+y+" not found on "+this.comName+".");
 		}
 	};
-
-	/* I have no idea what this function does, I think it doesn't work anyway.
-	dusk.sgui.TileMap.prototype.getRelativeTile = function(xcoord, ycoord) {
-		if(this.mode == "BINARY") {
-			return this.getTile((xcoord+this.lbound >> this.tsize), (ycoord+this.ubound >> this.tsize));
-		}
-		return this.getTile((xcoord+this.lbound * this.twidth), (ycoord+this.ubound * this.theight));
-	};
-
-	dusk.sgui.TileMap.prototype.inRelativeRange = function(xcoord, ycoord) {
-		if(xcoord+(this.lbound*this.twidth) < 0 || xcoord+(this.lbound*this.twidth) >= this.cols
-		|| ycoord+(this.ubound*this.theight) < 0 || ycoord+(this.ubound*this.theight) >= this.rows) return false;
-		return true;
-	};*/
-
+	
 	/** Returns the width of a single tile.
 	 * @return {integer} The width of a tile.
 	 */
 	TileMap.prototype.tileWidth = function() {
 		return this.twidth;
 	};
-
+	
 	/** Returns the height of a single tile.
 	 * @return {integer} The height of a tile.
 	 */
 	TileMap.prototype.tileHeight = function() {
 		return this.theight;
 	};
-
+	
 	/** Returns the number of visible columns.
 	 * @return {integer} The number of visible columns.
 	 */
 	TileMap.prototype.visibleCols = function() {
 		return Math.floor(this.width/this.tileWidth());
 	};
-
+	
 	/** Returns the number of visible rows.
 	 * @return {integer} The number of visible columns.
 	 */
 	TileMap.prototype.visibleRows = function() {
 		return Math.floor(this.height/this.tileHeight());
 	};
-
-	/** Looks for a specified tile (from the origin image), and then returns the coordinates of where it is on this tilemap.
-	 * @param {integer} x The x of the tile origin we are looking for.
-	 * @param {integer} y The y of the tile origin we are looking for.
-	 * @return {?array} The location of a tile that contains the specified image,
-	 *  in `[x,y]` format, or null if none were found.
+	
+	/** Looks for a specified tile given source coordinates, and then returns the tilemap coordinates of a tile that has
+	 *  them.
+	 * @param {integer} x The x source coordinate.
+	 * @param {integer} y The y source coordinate.
+	 * @return {?array} The location of a tile that contains the specified image, in `[x,y]` format, or null if none
+	 *  were found.
 	 */
 	TileMap.prototype.lookTile = function(x, y) {
 		for(var t = (this.rows*this.cols)<<1; t > 0; t-=2){
@@ -590,7 +594,7 @@ load.provide("dusk.sgui.TileMap", (function() {
 		
 		return null;
 	};
-
+	
 	//width
 	Object.defineProperty(TileMap.prototype, "width", {
 		get: function() {
@@ -599,7 +603,7 @@ load.provide("dusk.sgui.TileMap", (function() {
 
 		set: function(value) {if(value > 0) console.warn("TileMap setting width is not supported.");}
 	});
-
+	
 	//height
 	Object.defineProperty(TileMap.prototype, "height", {
 		get: function() {
@@ -608,21 +612,22 @@ load.provide("dusk.sgui.TileMap", (function() {
 
 		set: function(value) {if(value > 0) console.warn("TileMap setting height is not supported.");}
 	});
-
+	
 	/** Internal storage for the animation data.
 	 * 
-	 * Keys are tilesheet paths and the value is another object. In the second object, the keys are the first frame of the
-	 *  animation, and their value is the whole animation.
+	 * Keys are tilesheet paths and the value is another object. In the second object, the keys are the first frame of
+	 *  the animation, and their value is the whole animation.
 	 * @type object
 	 * @private
 	 * @since 0.0.19-alpha
 	 */
 	var _animationData = {};
-
-	/** Sets an animation on the specified sheet, animating all tiles that match the first element of the animation array.
+	
+	/** Sets an animation on the specified sheet, animating all tiles that match the first element of the animation
+	 *  array.
 	 * 
-	 * @param {string} sheet The path of the sheet to animate with. Must be exactly the same as the src used to specify the 
-	 *  tiles on the TileMap.
+	 * @param {string} sheet The path of the sheet to animate with. Must be exactly the same as the src used to specify
+	 *  the  tiles on the TileMap.
 	 * @param {array} animation An array of tile strings (`"0,0"` for example) that describe the animation. The first
 	 *  element must be the tile set on the map data.
 	 * @static
@@ -638,13 +643,14 @@ load.provide("dusk.sgui.TileMap", (function() {
 			delete _animationData[sheet][animation[0]];
 		}
 	};
-
+	
 	/** Gets an animation on the specified sheet.
 	 * 
-	 * @param {string} sheet The path of the sheet to animate with. Must be exactly the same as the src used to specify the 
-	 *  tiles on the TileMap.
+	 * @param {string} sheet The path of the sheet to animate with. Must be exactly the same as the src used to specify
+	 *  the tiles on the TileMap.
 	 * @param {array} base The first tile of the animation.
-	 * @return {array} The animation, as an array of tiles to set. If no animation is set, this will have a length of one.
+	 * @return {array} The animation, as an array of tiles to set. If no animation is set, this will have a length of
+	 *  one.
 	 * @static
 	 * @since 0.0.20-alpha
 	 */
@@ -659,7 +665,7 @@ load.provide("dusk.sgui.TileMap", (function() {
 		
 		return [base];
 	};
-
+	
 	/** Returns an object of all the animations registered on the specified sheet.
 	 * 
 	 * @param {string} sheet The path of the sheet to get the animations for.
@@ -674,7 +680,7 @@ load.provide("dusk.sgui.TileMap", (function() {
 		}
 		return _animationData[sheet];
 	};
-
+	
 	/** Returns the minimum number of frames needed to animate.
 	 * 
 	 * @param {?integer} test Used for recursion; the number to test to see if it works.
@@ -695,9 +701,9 @@ load.provide("dusk.sgui.TileMap", (function() {
 		if(valid == true) return test;
 		return this._framesNeeded(test+1);
 	};
-
-
-
+	
+	
+	
 	/** Returns the map for `{@link dusk.sgui.BasicMain}` to save it.
 	 * 
 	 * @return {object} The current map.
@@ -706,29 +712,34 @@ load.provide("dusk.sgui.TileMap", (function() {
 	TileMap.prototype.saveBM = function() {
 		return this.map;
 	};
-
-	/** Loads a map from an object. This is used by `{@link dusk.sgui.BasicMain}`.
+	
+	/** Loads a map from an object. This is used by `dusk.sgui.BasicMain`.
 	 * 
-	 * @param {object} map The map to load, will be assigned to `{@link dusk.sgui.EditableTileMap#map}`.
+	 * @param {object} map The map to load, will be assigned to `map`.
 	 * @since 0.0.18-alpha
 	 */
 	TileMap.prototype.loadBM = function(map) {
 		this.map = map;
 	};
-
-	/** A pool containing the values returned by `{@link dusk.sgui.TileMap#getTile}` please return them here when you are
-	 *  done.
+	
+	/** Returns a string representing the map in this tilemap.
+	 * 
+	 * This can be used with `map` to create this map (although just reading the `map` property is prefered).
+	 * @return {string} A string representation of the map.
+	 */
+	TileMap.prototype.getMap = function() {
+		return this.map.map;
+	};
+	
+	/** A pool containing the values returned by `getTile` please return them here when you are done.
 	 * 
 	 * Tile data is an array in the form `[value x, value y, tile x, tile y, weight]`.
 	 * 
-	 * @type dusk.pool<Array>
+	 * @type dusk.pool(Array)
 	 * @since 0.0.21-alpha
 	 */
 	TileMap.tileData = new Pool(Uint8Array.bind(undefined, 5));
-
-	Object.seal(TileMap);
-	Object.seal(TileMap.prototype);
-
+	
 	sgui.registerType("TileMap", TileMap);
 	
 	return TileMap;
@@ -736,9 +747,7 @@ load.provide("dusk.sgui.TileMap", (function() {
 
 
 load.provide("dusk.sgui.TileMapWeights", (function() {
-	/** @class dusk.sgui.TileMapWeights
-	 * 
-	 * @classdesc Stores weights of tilemap schematic layers.
+	/** Stores weights of tilemap schematic layers.
 	 * 
 	 * Essentially, it maps a given tile on the schematic layer to a weight.
 	 * 
@@ -794,9 +803,6 @@ load.provide("dusk.sgui.TileMapWeights", (function() {
 	TileMapWeights.prototype.getSolid = function(x, y) {
 		return (this._weights[(y * this.cols) + x] & 0x80) == 0x80;
 	};
-	
-	Object.seal(TileMapWeights);
-	Object.seal(TileMapWeights.prototype);
 	
 	return TileMapWeights;
 })());
