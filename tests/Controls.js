@@ -9,8 +9,9 @@ load.provide("test.dusk.Controls", (function() {
 	test.registerTestFunction("test.dusk.Controls", function(tester) {
 		tester.start("Registering New Control");
 		
-		controls.addControl("none");
-		tester.assertEqual(controls.lookupControl("none"), [null, null]);
+		// Every control requires a key now
+		//controls.addControl("none");
+		//tester.assertEqual(controls.lookupControl("none"), [null, null]);
 		
 		controls.addControl("keya", 65);
 		tester.assertEqual(controls.lookupControl("keya"), [65, null]);

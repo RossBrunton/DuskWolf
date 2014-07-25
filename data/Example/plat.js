@@ -297,8 +297,8 @@ load.provide("example.plat", (function() {
 		"focus":"ew"
 	});*/
 	
-	controls.addControl("entity_spawn_slash", 79, 1);
-	controls.addControl("entity_spawn_shot", 69, 2);
+	controls.addControl("entity_spawn_slash", "O", 1, "dvorak");
+	controls.addControl("entity_spawn_shot", "E", 2, "dvorak");
 	
 	var gameActive = true;
 	frameTicker.onFrame.listen(function(e) {

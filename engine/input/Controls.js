@@ -9,15 +9,21 @@ load.provide("dusk.input.controls", (function() {
 	var frameTicker = load.require("dusk.frameTicker");
 	var options = load.require("dusk.options");
 	var interaction = load.require("dusk.input.interaction");
+	var layouts = load.require("dusk.input.layouts");
 	
-	/** @namespace dusk.input.controls
-	 * @name dusk.input.controls
-	 * 
-	 * @description Provides a simple way to describe changeable control schemes.
+	/** Provides a simple way to describe changeable control schemes.
 	 * 
 	 * How control mapping works is that code registers the name of a "control", and a default key/button and then
 	 *  either gets an event when the control is pressed, or checks button/key presses against it. This allows the input
 	 *  mapped to a control to change.
+	 * 
+	 * Controls can also be "translated". Suppose you want three buttons for jump, attack and shoot. You don't
+	 *  particularly care what the actual keys are, but want them to be the three keys on the left of the keyboard.
+	 *  On a QWERTY keyboard these would be A, S and D, but you want to be able to support multiple layouts. This is
+	 *  where translation comes in. On any key you want to be translated into another layout, when adding them you
+	 *  specify the layout the default is in. Then you can ask the user for their keyboard layout and call `translate`
+	 *  with it. This will convert all controls that the user hasn't changed themselves from the layout they were added
+	 *  with to the one the user has chosen.
 	 * 
 	 * @extends save.ISavable
 	 * @since 0.0.15-alpha
@@ -27,13 +33,19 @@ load.provide("dusk.input.controls", (function() {
 	/** The mappings of controls to their respective key or button.
 	 * 
 	 * The key of this object is the name of the control, and the value is a two element array.
-	 *  The first element is the keycode of the key, and the second a button representation.
+	 *  In order, the values in this array mean:
+	 *  - The current keycode that this control will be triggered on.
+	 *  - The current button representation that this control will be triggered on.
+	 *  - A boolean representing whether this control has changed from its defaults.
+	 *  - Its default key.
+	 *  - Its default button representation.
+	 *  - If available, the translation of the default key or "none" if it isn't.
 	 * @type object
 	 * @private
 	 */
 	var _mappings = {};
 	
-	/** A constant used when firing the `{@link dusk.input.controls.controlPressed}` event, indicating that a key was pressed.
+	/** A constant used when firing the `controlPressed` event, indicating that a key was pressed.
 	 * @type integer
 	 * @constant
 	 * @value 0
@@ -69,12 +81,14 @@ load.provide("dusk.input.controls", (function() {
 	 * 
 	 * If the control is already registered, this does nothing.
 	 * @param {string} name The name of the controll to add.
-	 * @param {?integer|string} defaultKey The default key to fire this control on, as a keycode or name.
-	 * @param {?integer|string} defaultButton The default button to fire this control on, either a button ID, or a
+	 * @param {integer|string} defaultKey The default key to fire this control on, as a keycode or name.
+	 * @param {?integer|string} defaultButton The default button to fire this control on, either a button ID, or an
 	 *  axis description.
+	 * @param {?string} The translation (I.E. layout) that the key was specified in, but only if you want this control
+	 *  to be translated.
 	 * @return {string} The name of the control that was just added.
 	 */
-	controls.addControl = function(name, defaultKey, defaultButton) {
+	controls.addControl = function(name, defaultKey, defaultButton, translation) {
 		if(name in _mappings) return name;
 		
 		if(typeof defaultKey == "string") {
@@ -84,7 +98,11 @@ load.provide("dusk.input.controls", (function() {
 		
 		_mappings[name] = [
 			defaultKey===undefined?null:defaultKey,
-			defaultButton===undefined?null:defaultButton
+			defaultButton===undefined?null:defaultButton,
+			false,
+			defaultKey===undefined?null:defaultKey,
+			defaultButton===undefined?null:defaultButton,
+			translation?translation:"none"
 		];
 		
 		return name;
@@ -99,7 +117,7 @@ load.provide("dusk.input.controls", (function() {
 	 */
 	controls.lookupControl = function(name) {
 		if(!(name in _mappings)) return null;
-		return _mappings[name];
+		return _mappings[name].slice(0, 2);
 	};
 	
 	/** Registers a key to a control; when that key is pressed, the control will fire.
@@ -115,16 +133,29 @@ load.provide("dusk.input.controls", (function() {
 		}
 		
 		_mappings[name][0] = key;
+		_mappings[name][2] = true;
 	};
 	
-	/** Registers a button or axis to a control; 
-	 *   when that button is pressed, or the axis is greater than the threshold, the control will fire.
+	/** Registers a button or axis to a control; when that button is pressed, or the axis is greater than the threshold,
+	 *  the control will fire.
 	 * @param {string} name The name of the control to add the button/axis to.
 	 * @param {integer|string} button The button ID, or the axis description to register to the control.
 	 */
 	controls.mapButton = function(name, button) {
 		if(!(name in _mappings)) return;
 		_mappings[name][1] = button;
+		_mappings[name][2] = true;
+	};
+	
+	/** Translate all unchanged from default controls to the specified layout.
+	 * @param {string} name The layout to translate to.
+	 */
+	controls.translate = function(layout) {
+		for(var c in _mappings) {
+			if(!_mappings[c][2] && _mappings[c][5] != "none") {
+				_mappings[c][0] = layouts.translate(_mappings[c][3], _mappings[c][5], layout);
+			}
+		}
 	};
 	
 	/** Checks if a button or a key matches the specified control.
@@ -239,21 +270,22 @@ load.provide("dusk.input.controls", (function() {
 	 * 
 	 * @param {string} type The type of thing to save; must be `"bindings"`.
 	 * @param {array} arg The argument to the save, as described above.
+	 * @param {function(*):integer|array} The reffing function.
 	 * @return {object} Save data that can be loaded later.
 	 * @since 0.0.21-alpha
 	 */
-	controls.save = function(type, arg) {
+	controls.save = function(type, arg, ref) {
 		if(type == "bindings") {
 			var out = {};
 			
 			if(!arg || arg.indexOf("*") !== -1) {
 				for(p in _mappings) {
-					out[p] = _mappings[p];
+					out[p] = ref(_mappings[p]);
 				}
 			}else{
 				for(var i = arg.length-1; i >= 0; i --) {
 					if(_mappings[arg[p]]) {
-						out[arg[i]] = _mappings[arg[i]];
+						out[arg[i]] = ref(_mappings[arg[i]]);
 					}
 				}
 			}
@@ -262,24 +294,24 @@ load.provide("dusk.input.controls", (function() {
 		}
 	};
 	
-	/** Restores data that was saved via `{@link dusk.input.controls.save}`.
+	/** Restores data that was saved via `save`.
 	 * 
 	 * @param {object} data The data that was saved.
 	 * @param {string} type The type of data that was saved.
 	 * @param {array} arg The argument that was used in saving.
+	 * @param {function(array|integer):*} The unreffing function.
 	 * @since 0.0.21-alpha
 	 */
-	controls.load = function(data, type, arg) {
+	controls.load = function(data, type, arg, unref) {
 		if(type == "bindings") {
 			for(var p in data) {
-				this.addControl(p);
-				this.mapKey(p, data[p][0]);
-				this.mapButton(p, data[p][1]);
+				_mappings[p] = unref(data[p]);
+				//this.addControl(p);
+				//this.mapKey(p, data[p][0]);
+				//this.mapButton(p, data[p][1]);
 			}
 		}
 	};
-	
-	Object.seal(controls);
 	
 	return controls;
 })());
