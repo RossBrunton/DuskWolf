@@ -94,7 +94,7 @@ load.provide("dusk.checkpoints", (function() {
 	};
 	
 	checkpoints.isActivated = function(name, room, comName) {
-		if(_activeCheckpoints[name][0] == name && _activeCheckpoints[name][1] = comName) {
+		if(name in _activeCheckpoints && _activeCheckpoints[name][0] == room && _activeCheckpoints[name][1] == comName){
 			return true;
 		}
 		

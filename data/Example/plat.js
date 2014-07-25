@@ -10,6 +10,7 @@ load.provide("example.plat", (function() {
 	load.require("dusk.behave.Spawner");
 	load.require("dusk.behave.MarkTrigger");
 	load.require("dusk.behave.Volatile");
+	load.require("dusk.behave.Checkpoint");
 	var Persist = load.require("dusk.behave.Persist");
 	load.require("dusk.behave.BackForth");
 	load.require("dusk.behave.Fall");
@@ -164,8 +165,14 @@ load.provide("example.plat", (function() {
 		]
 	}, "plat");
 	
-	entities.types.createNewType("checkpoint", {"behaviours":{"InteractableTarget":true},
-		"data":{"gravity":0, "solid":false, "src":"pimg/checkpoint.png", "interactType":"checkpoint"}
+	entities.types.createNewType("checkpoint", {"behaviours":{"InteractableTarget":true, "Checkpoint":true},
+		"data":{"gravity":0, "solid":false, "src":"pimg/checkpoint.png", "interactType":"checkpoint",
+			"checkpointName":"plat"
+		},
+		"animation":[
+			["", "0,0", {}],
+			[":checkpointActive", "1,0", {}]
+		]
 	}, "plat");
 
 
