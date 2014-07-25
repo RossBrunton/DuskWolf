@@ -29,6 +29,7 @@ load.provide("example.plat", (function() {
 	load.require("dusk.sgui.EntityWorkshop");
 	
 	var SaveSpec = load.require("dusk.save.SaveSpec");
+	var checkpoints = load.require("dusk.checkpoints");
 	
 	var dplat = load.require("dusk.plat");
 	var entities = load.require("dusk.entities");
@@ -162,6 +163,10 @@ load.provide("example.plat", (function() {
 			["", "0,0|1,0", {}]
 		]
 	}, "plat");
+	
+	entities.types.createNewType("checkpoint", {"behaviours":{"InteractableTarget":true},
+		"data":{"gravity":0, "solid":false, "src":"pimg/checkpoint.png", "interactType":"checkpoint"}
+	}, "plat");
 
 
 	sgui.getPane("hud").parseProps({
@@ -280,15 +285,20 @@ load.provide("example.plat", (function() {
 	dusk.onLoad.listen(function (e) {
 		reversiblePromiseChain([
 			dplat.rooms.setRoom.bind(dplat.rooms, "example.plat.rooms.exhall", 0),
-			Scriptable.requestBoundPair("hero", "rawInput", {"inputs":[[30, "right"], [30, "left", "jump"]]}),
+			//Scriptable.requestBoundPair("hero", "rawInput", {"inputs":[[30, "right"], [30, "left", "jump"]]}),
 		], false, {})
 		.then(console.log.bind(console), console.error.bind(console));
 	});
 
 	dusk.startGame();
 	
-	window.ss = new SaveSpec("ss", "ss");
-	ss.add("dusk.plat", "roomAndSeek");
+	// Set up checkpoints
+	var checkSS = window.checkSS = new SaveSpec("plattest", "Plat Test Checkpoint");
+	checkSS.add("dusk.plat", "roomAndSeek");
+	checkSS.add("dusk.behave.Persist", "data", {});
+	checkSS.add("dusk.behave.Pickup", "data", {});
+	
+	checkpoints.set("plat", {"loadType":"plat", "saveType":"checkpoint", "priority":0, "spec":checkSS});
 	
 	return plat;
 })());

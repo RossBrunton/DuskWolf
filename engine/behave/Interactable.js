@@ -28,7 +28,8 @@ load.provide("dusk.behave.InteractableTarget", (function() {
 			InteractableTarget.interact.fire(
 				{
 					"type":this._data("interactType"), "comName":this._entity.comName, "interacter":e.interacter,
-					"target":this._entity, "up":e.up
+					"target":this._entity, "up":e.up,
+					"room":this._entity.path("../../")?this._entity.path("../../").roomName:undefined
 				}, this._data("interactType")
 			);
 		}
