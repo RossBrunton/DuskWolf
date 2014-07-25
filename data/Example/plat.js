@@ -57,13 +57,13 @@ load.provide("example.plat", (function() {
 	
 	var _playerAni = [
 		["true", "0,0", {}],
-		[":lastMoveLeft", "0,1", {}],
-		["#dx>0", '0,0|1,0|0,0|2,0', {"name":"walkRight"}],
-		["#dx<0", "0,1|1,1|0,1|2,1", {}],
+		[":headingLeft", "0,1", {}],
+		["#dx != 0", '0,0|1,0|0,0|2,0', {"name":"walkRight"}],
+		["#dx != 0 & :headingLeft", "0,1|1,1|0,1|2,1", {}],
 		["#dy<0", "3,0", {}],
-		["#dy<0 & :lastMoveLeft=true", "3,1", {}],
+		["#dy<0 & :headingLeft=true", "3,1", {}],
 		["#dy>0 & #tb=0", "4,0", {}],
-		["#dy>0 & :lastMoveLeft=true & #tb=0", "4,1", {}],
+		["#dy>0 & :headingLeft=true & #tb=0", "4,1", {}],
 		["on terminate", "L|0,1|0,2|1,2|2,2|3,2|4,2|5,2|6,2|7,2|/terminate", {}]
 	];
 	

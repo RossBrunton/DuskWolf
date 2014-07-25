@@ -6,7 +6,7 @@ load.provide("dusk.behave.Spawner", (function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.behave.Behave");
 	var LightEntity = load.require("dusk.entities.LightEntity");
-	var EntityGroup = load.suggest("dusk.EntityGroup", function(p) {EntityGroup = p});
+	var EntityGroup = load.suggest("dusk.sgui.EntityGroup", function(p) {EntityGroup = p});
 
 	/** @class dusk.behave.Spawner
 	 * @memberof dusk.behave
@@ -85,15 +85,15 @@ load.provide("dusk.behave.Spawner", (function() {
 		this._data("spawns", {}, true);
 		this._data("_spawn_cooldowns", {}, true);
 		
-		this.entityEvent.listen(this._spFrame.bind(this), "frame");
+		this.entityEvent.listen(_frame.bind(this), "frame");
 	};
 	Spawner.prototype = Object.create(Behave.prototype);
-
+	
 	/** Called every frame to check for controls to spawn something.
 	 * @param {object} e A "frame" event dispatched from `{@link dusk.behave.Behave.entityEvent}`.
 	 * @private
 	 */
-	Spawner.prototype._spFrame = function(e) {
+	var _frame = function(e) {
 		for(var c in this._data("_spawn_cooldowns")) {
 			if(this._data("_spawn_cooldowns")[c] > 0) {
 				this._data("_spawn_cooldowns")[c] --;
@@ -112,7 +112,7 @@ load.provide("dusk.behave.Spawner", (function() {
 			}
 		}
 	};
-
+	
 	/** Actually spawns an entity with the given name.
 	 * @param {string} name The name of the entity to spawn.
 	 * @param {?string} dirOverride The direction to spawn; if omitted, then this is determined by the data.
@@ -250,7 +250,7 @@ load.provide("dusk.behave.Spawner", (function() {
 			this._entity.performAnimation("spawn_after_"+name);
 		}).bind(this));
 	};
-
+	
 	/** Given a spawn property name and a direction, finds which of the array entries to use, by the following rules:
 	 * - If `arr` is not an array, return `arr`.
 	 * - If `dir` is `"left"` then return the first element of `arr`.
@@ -273,7 +273,7 @@ load.provide("dusk.behave.Spawner", (function() {
 		
 		return arr[0];
 	};
-
+	
 	/** Workshop data used by `{@link dusk.sgui.EntityWorkshop}`.
 	 * @static
 	 */
@@ -283,10 +283,7 @@ load.provide("dusk.behave.Spawner", (function() {
 			["spawns", "object", "All the entities this can spawn.", "{}"]
 		]
 	};
-
-	Object.seal(Spawner);
-	Object.seal(Spawner.prototype);
-
+	
 	entities.registerBehaviour("Spawner", Spawner);
 	
 	return Spawner;

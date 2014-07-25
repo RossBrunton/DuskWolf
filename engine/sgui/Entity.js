@@ -1211,6 +1211,8 @@ load.provide("dusk.sgui.Entity", (function() {
 
 load.provide("dusk.entities.LightEntity", (function() {
 	var Entity = load.require("dusk.sgui.Entity");
+	var entities = load.require("dusk.entities");
+	var utils = load.require("dusk.utils");
 	
 	/**  Creates a new lightweight entity.
 	 * 
@@ -1281,9 +1283,9 @@ load.provide("dusk.entities.LightEntity", (function() {
 		set: function(type) {
 			// Get data
 			this._type = type;
-			this.behaviourData = utils.clone(dusk.entities.types.getAll(type).data);
-			this._animationData = utils.clone(dusk.entities.types.getAll(type).animation);
-			this._particleData = utils.clone(dusk.entities.types.getAll(type).particles);
+			this.behaviourData = utils.clone(entities.types.getAll(type).data);
+			this._animationData = utils.clone(entities.types.getAll(type).animation);
+			this._particleData = utils.clone(entities.types.getAll(type).particles);
 			
 			//Set up animation
 			this._currentAni = -1;
