@@ -456,9 +456,9 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 			now.behaviourFire("collide", {"dir":dir, "target":testee});
 		if(now.eProp("collides"))
 			testee.behaviourFire("collidedInto", {"dir":oppDir, "target":now});
-		if(testee.eProp("solid"))
+		//if(testee.eProp("solid"))
 			now.addToucher(dir, testee);
-		if(now.eProp("collides"))
+		//if(now.eProp("collides"))
 			testee.addToucher(oppDir, now);
 	};
 
