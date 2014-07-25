@@ -104,5 +104,36 @@ load.provide("dusk.checkpoints", (function() {
 		return false;
 	};
 	
+	checkpoints.save = function(type, args, ref) {
+		var out = {};
+		if("only" in args) {
+			for(var i = 0; i < args.only.length; i ++) {
+				if(args.only[i] in _savedData) {
+					out[args.only[i]] = [ref(_savedData[args.only[i]]), ref(_activeCheckpoints[args.only[i]])];
+				}else{
+					out[args.only[i]] = [ref([]), ref(0)];
+				}
+			}
+		}else if("except" in args) {
+			for(var p in _savedData) {
+				if(args.except.indexOf(p) === -1) {
+					out[p] = [ref(_savedData[p]), ref(_activeCheckpoints[p])];
+				}
+			}
+		}else{
+			for(var p in _savedData) {
+				out[p] = [ref(_savedData[p]), ref(_activeCheckpoints[p])];
+			}
+		}
+		return out;
+	};
+	
+	checkpoints.load = function(data, type, args, unref) {
+		for(var p in data) {
+			_savedData[p] = unref(data[p][0]);
+			_activeCheckpoints[p] = unref(data[p][1]);
+		}
+	};
+	
 	return checkpoints;
 })());
