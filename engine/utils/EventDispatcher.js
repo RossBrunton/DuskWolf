@@ -324,7 +324,7 @@ load.provide("dusk.EventDispatcher", (function() {
 				var l = this._listeners[i];
 				
 				//Check filter
-				if(l[1] && l[1].indexOf(filter) === -1) {
+				if(l[1] && filter.indexOf(l[1]) === -1) {
 					continue;
 				}
 				
@@ -354,7 +354,7 @@ load.provide("dusk.EventDispatcher", (function() {
 				var l = this._listeners[i];
 				
 				//Check filter
-				if(l[1] && l[1].indexOf(filter) === -1) {
+				if(l[1] && filter.indexOf(l[1]) === -1) {
 					continue;
 				}
 				
