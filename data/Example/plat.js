@@ -40,7 +40,7 @@ load.provide("example.plat", (function() {
 	var controls = load.require("dusk.input.controls");
 	var frameTicker = load.require("dusk.frameTicker");
 	var Range = load.require("dusk.Range");
-
+	
 	load.require("example.plat.rooms.exhall");
 	
 	var reversiblePromiseChain = load.require("dusk.reversiblePromiseChain");
@@ -54,7 +54,7 @@ load.provide("example.plat", (function() {
 	entities.sheight = 32;
 	
 	plat.health = new Range(0, 5, 0);
-
+	
 	var _playerAni = [
 		["true", "0,0", {}],
 		[":lastMoveLeft", "0,1", {}],
@@ -66,7 +66,7 @@ load.provide("example.plat", (function() {
 		["#dy>0 & :lastMoveLeft=true & #tb=0", "4,1", {}],
 		["on terminate", "L|0,1|0,2|1,2|2,2|3,2|4,2|5,2|6,2|7,2|/terminate", {}]
 	];
-
+	
 	var _playerParts = [
 		["#tb>0",
 			'*spew {"source":"C^#path", "x":".x+16", "y":".y+.height", "count":25, "d":[0, 1.5], "lifespan":10, "angle":[1, 2]}',
@@ -83,14 +83,14 @@ load.provide("example.plat", (function() {
 			{"cooldown":30, "onlyOnce":true}
 		]
 	];
-
+	
 	//Define entities
 	entities.types.createNewType("walk", {
 		"behaviours":{"BackForth":true, "Persist":true, /*"HitDam":true,*/ "Killable":true, "Gravity":true, "Spawner":true}, 
 		"data":{"dx":5, "slowdown":0, "hp":1, "collisionOffsetX":10, "collisionWidth":22, "collisionOffsetY":3},
 		"animation":_playerAni, "particles":_playerParts
 	}, "plat");
-
+	
 	entities.types.createNewType("player", {
 		"behaviours":{
 			"Persist":true, "PlayerControl":true, "Jumper":true, "MarkTrigger":true, "Killable":true,
@@ -114,13 +114,13 @@ load.provide("example.plat", (function() {
 		},
 		"animation":_playerAni, "particles":_playerParts
 	}, "plat");
-
+	
 	entities.types.createNewType("bad", {
 		"behaviours":{"HitDam":true},
 		"data":{"gravity":0, "damage":1, "types":["electric", "fire"], "src":"pimg/techBad.png"},
 		"animation":[["", "0,0|1,0|+30", {}]]
 	}, "plat");
-
+	
 	entities.types.createNewType("coin", {
 		"behaviours":{"Pickup":true},
 		"data":{"gravity":0, "solid":false, "src":"Example/Coin.png", "collisionOffsetX":8, "collisionOffsetY":8,
@@ -128,7 +128,7 @@ load.provide("example.plat", (function() {
 		},
 		"animation":[]
 	}, "plat");
-
+	
 	entities.types.createNewType("heart", {
 		"behaviours":{"Pickup":true, "HealthRestore":true, "Gravity":true},
 		"data":{"gravity":1, "terminal":2, "solid":false, "collides": true, "src":"Example/BigHeart.png",
@@ -137,7 +137,7 @@ load.provide("example.plat", (function() {
 		},
 		"animation":[]
 	}, "plat");
-
+	
 	entities.types.createNewType("block", {"behaviours":{}, "data":{"anchor":true, "gravity":0}}, "plat");
 	entities.types.createNewType("fall", {"behaviours":{"Fall":true, "InteractableTarget":true}, 
 		"data":{"gravity":0, "fallSpeed":3, "src":"pimg/techFallBlock.png", "interactType":"Falli"},
@@ -146,14 +146,14 @@ load.provide("example.plat", (function() {
 	entities.types.createNewType("push", {"behaviours":{"Push":true},
 		"data":{"gravity":0, "src":"pimg/techFreeMove.png"}
 	}, "plat");
-
+	
 	entities.types.createNewType("slash", {"behaviours":{"HitDam":true},
 		"data":{"gravity":0, "collides":false, "solid":false, "src":"Example/Slash.png", "damages":".entType != player"},
 		"animation":[
 			["", "0,0|1,0|2,0|3,0|4,0|t", {}]
 		],
 	}, "plat");
-
+	
 	entities.types.createNewType("shot", {
 		"behaviours":{"HitDam":true, "BackForth":true, "Volatile":true},
 		"data":{"solid":false, "src":"Example/Shot.png", "collisionOffsetX":12, "collisionOffsetY":12,
@@ -174,8 +174,8 @@ load.provide("example.plat", (function() {
 			[":checkpointActive", "1,0", {}]
 		]
 	}, "plat");
-
-
+	
+	
 	sgui.getPane("hud").parseProps({
 		"children":{
 			"healthBack":{
@@ -218,10 +218,29 @@ load.provide("example.plat", (function() {
 				"font":"monospace",
 				"x":25,
 				"y":21
+			},
+			"lifeIcon":{
+				"type":"Tile",
+				"width":16,
+				"height":16,
+				"swidth":16,
+				"sheight":16,
+				"x":5,
+				"y":41,
+				"src":"pimg/lives.png"
+			},
+			"livesCount":{
+				"type":"Label",
+				"text":"0",
+				"height":22,
+				"colour":"#999999",
+				"font":"monospace",
+				"x":25,
+				"y":38
 			}
 		}
 	});
-
+	
 	sgui.getPane("paused").parseProps({
 		"visible":false,
 		"focus":"controls",
@@ -277,17 +296,26 @@ load.provide("example.plat", (function() {
 		},
 		"focus":"ew"
 	});*/
-
+	
 	controls.addControl("entity_spawn_slash", 79, 1);
 	controls.addControl("entity_spawn_shot", 69, 2);
-
+	
+	var gameActive = true;
 	frameTicker.onFrame.listen(function(e) {
 		if(Persist.getPersist("hero")) {
 			plat.health.value = Persist.getPersist("hero").hp;
+			if(Persist.getPersist("hero").hp <= 0 && gameActive) {
+				if(!checkpoints.loadCheckpoint("plat", {})) {
+					alert("Lol! Game Over!");
+					gameActive = false;
+					if(sgui.path("hud:/")) sgui.path("hud:/").visible = false;
+				}
+			}
 		}
 		if(sgui.path("hud:/coinCount")) sgui.path("hud:/coinCount").text = ""+Pickup.count("coin");
+		if(sgui.path("hud:/livesCount")) sgui.path("hud:/livesCount").text = ""+lives;
 	}, this);
-
+	
 	
 	dusk.onLoad.listen(function (e) {
 		reversiblePromiseChain([
@@ -296,7 +324,7 @@ load.provide("example.plat", (function() {
 		], false, {})
 		.then(console.log.bind(console), console.error.bind(console));
 	});
-
+	
 	dusk.startGame();
 	
 	// Set up checkpoints
@@ -304,8 +332,22 @@ load.provide("example.plat", (function() {
 	checkSS.add("dusk.plat", "roomAndSeek");
 	checkSS.add("dusk.behave.Persist", "data", {});
 	checkSS.add("dusk.behave.Pickup", "data", {});
+	checkSS.add("example.plat", "", {});
 	
-	checkpoints.set("plat", {"loadType":"plat", "saveType":"checkpoint", "priority":0, "spec":checkSS});
+	checkpoints.set("plat", {
+		"loadType":"plat", "saveType":"checkpoint", "priority":0, "spec":checkSS,
+		"postLoad":function(e) {lives --;}, "checkLoad":function(e) {return lives > 0;}
+	});
+	
+	var lives = 3;
+	
+	plat.save = function(type, args, ref) {
+		return [ref(lives)];
+	}
+	
+	plat.load = function(data, type, args, unref) {
+		lives = unref(data[0]);
+	}
 	
 	return plat;
 })());

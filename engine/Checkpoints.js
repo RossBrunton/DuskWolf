@@ -70,7 +70,8 @@ load.provide("dusk.checkpoints", (function() {
 			var check = "";
 			
 			for(var p in _points) {
-				if((!check || _points[p].priority < min) && complete.indexOf(p) === -1 && _points[p].loadType == type) {
+				if((!check || _points[p].priority < min) && complete.indexOf(p) === -1
+				&& _points[p].loadType == type && _savedData[p]) {
 					min = _points[p].priority;
 					check = p;
 				}
@@ -88,9 +89,11 @@ load.provide("dusk.checkpoints", (function() {
 					if("postSave" in _points[p]) _points[p].postSave(true);
 				});
 				
-				break;
+				return true;
 			}
 		}
+		
+		return false;
 	};
 	
 	checkpoints.isActivated = function(name, room, comName) {

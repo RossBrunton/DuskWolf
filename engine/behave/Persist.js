@@ -61,26 +61,26 @@ load.provide("dusk.behave.Persist", (function() {
 		return _persistData[name];
 	};
 
-	Persist.save = function(type, arg) {
+	Persist.save = function(type, arg, ref) {
 		if(type !== "data") return {};
 		
 		var out = {};
 		
 		if(!("names" in arg) && !("types" in arg)) {
 			for(var p in _persistData) {
-				out[p] = _persistData[p];
+				out[p] = ref(_persistData[p]);
 			}
 		}else{
 			if("names" in arg) {
 				for(var i = arg.names.length-1; i >= 0; i --) {
-					out[arg.names[i]] = _persistData[arg.names[i]];
+					out[arg.names[i]] = ref(_persistData[arg.names[i]]);
 				}
 			}
 			
 			if("types" in arg) {
 				for(var p in this._persistData) {
 					if(arg.types.indexOf(_persistData[p].entityType) != -1) {
-						out[p] = _persistData[p];
+						out[p] = ref(_persistData[p]);
 					}
 				}
 			}
@@ -89,11 +89,11 @@ load.provide("dusk.behave.Persist", (function() {
 		return out;
 	};
 
-	Persist.load = function(data, type, arg) {
+	Persist.load = function(data, type, arg, unref) {
 		if(type != "data") return;
 		
 		for(var p in data) {
-			_persistData[p] = data[p];
+			_persistData[p] = unref(data[p]);
 		}
 	};
 
