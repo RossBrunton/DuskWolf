@@ -17,11 +17,11 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 	/** An entity group is a group that stores `{@link dusk.sgui.Entity}` and provides the ability to move them 
 	 * and have them collide with each other.
 	 * 
-	 * This component, when active and `{@link dusk.editor#active}` is true, will allow the user to edit the entities by 
-	 * dragging them around, using the number keys to drop entries and so on. An `{@link dusk.sgui.EntityWorkshop}` is also
+	 * This component, when active and `dusk.editor#active` is true, will allow the user to edit the entities by 
+	 * dragging them around, using the number keys to drop entries and so on. An `dusk.sgui.EntityWorkshop` is also
 	 * created and can be opened using the `w` key.
 	 * 
-	 * Entities should be added using `{@link dusk.sgui.EntityGroup#dropEntity}` function.
+	 * Entities should be added using `dusk.sgui.EntityGroup#dropEntity` function.
 	 * 
 	 * @param {?dusk.sgui.IContainer} parent The container that this component is in.
 	 * @param {string} componentName The name of the component.
@@ -209,11 +209,18 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 			
 			e.c.fillText(out, x, y);
 			
+			y += 20;
 			if(this._selectedEntity) {
-				y += 20;
-				e.c.fillText("SELECTED: "+this._selectedEntity.comName, x, y);
+				e.c.fillText("SELECTED: "+this._selectedEntity.comName +" : "+this._selectedEntity.entType, x, y);
+			}else{
+				e.c.fillText("SELECTED: [none]", x, y);
 			}
 			
+			y += 10;
+			for(var i = 0; i < editor.editDroppers.length; i ++) {
+				y += 10;
+				e.c.fillText(i + ": "+editor.editDroppers[i], x, y);
+			}
 		}
 	};
 	
@@ -221,7 +228,9 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 		if(!editor.active) return;
 		
 		if(!this._selectedEntity){
-			var entityList = this.getEntitiesHere((this._cx*this.twidth)+this._offsetX, (this._cy*this.theight)+this._offsetY, null);
+			var entityList = this.getEntitiesHere(
+				(this._cx*this.twidth)+this._offsetX, (this._cy*this.theight)+this._offsetY,
+			null);
 			if(entityList.length) this._selectedEntity = entityList[0];
 		}else{
 			this._selectedEntity = null;
@@ -651,6 +660,10 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 		
 		if(e.shift) {
 			editor.editDroppers[e.which-48] = prompt("Enter a type for dropper #"+(e.which-48));
+			if(editor.editDroppers[e.which-48] && !entities.types.isValidType(editor.editDroppers[e.which-48])) {
+				console.error(editor.editDroppers[e.which-48]+" is not a valid type.");
+				editor.editDroppers[e.which-48] = undefined;
+			}
 			return;
 		}
 		
@@ -666,7 +679,7 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 		}
 		
 		editor.editNext = "";
-		entity.type = editor.editDroppers[e.key-48];
+		entity.type = editor.editDroppers[e.which-48];
 		entity.x = (this._cx*this.twidth)+this._offsetX;
 		entity.y = (this._cy*this.theight)+this._offsetY;
 		this.dropEntity(entity, false);
