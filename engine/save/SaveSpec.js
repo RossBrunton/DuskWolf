@@ -202,7 +202,7 @@ load.provide("dusk.save.SaveSpec", (function() {
 			this.push(obj.refSave(_saveRef.bind(this)));
 			return [this.length-1, obj.refClass()];
 		}else{
-			this.push(obj);
+			this.push(utils.clone(obj));
 			return this.length-1;
 		}
 	};
