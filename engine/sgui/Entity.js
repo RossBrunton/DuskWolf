@@ -299,6 +299,18 @@ load.provide("dusk.sgui.Entity", (function() {
 		this._touchers[c.DIR_LEFT] = [];
 		this._touchers[c.DIR_RIGHT] = [];
 		
+		/** The arrays of entities, including non-solid ones touching this entity. Keys are directions, while values are
+		 *  arrays of entities that are touching it, or the string `"wall"`.
+		 * @type object
+		 * @private
+		 * @since 0.0.21-alpha
+		 */
+		this._touchersNonSolid = {};
+		this._touchersNonSolid[c.DIR_UP] = [];
+		this._touchersNonSolid[c.DIR_DOWN] = [];
+		this._touchersNonSolid[c.DIR_LEFT] = [];
+		this._touchersNonSolid[c.DIR_RIGHT] = [];
+		
 		/** The offset for the x coordinate for this entity's hitbox.
 		 * @type integer
 		 */
@@ -576,11 +588,11 @@ load.provide("dusk.sgui.Entity", (function() {
 	/** Applys a horizontal speed and acceleration to the entity.
 	 * @param {string} name The name of the source of this dx, used to change it later.
 	 * @param {integer} value The initial value for the speed.
-	 * @param {duration=-1} duration The number of frames the speed and acceleration effects last for.
-	 *  A value of -1 means it will never stop.
+	 * @param {integer=-1} duration The number of frames the speed and acceleration effects last for. A value of -1
+	 *  means it will never stop.
 	 * @param {float=0} accel The acceleration, this value will be added to the speed every frame.
-	 * @param {?integer} limit The maximum or minimum speed, the speed will not increase past this, or 
-	 *  decrease below this. If it is undefined, there is no limit.
+	 * @param {?integer} limit The maximum or minimum speed, the speed will not increase past this, or decrease below
+	 *  this. If it is undefined, there is no limit.
 	 * @param {boolean=false} noReplace If true and the speed already exists, the value will not be
 	 *  changed, but all the other values will be. If it is false, then the value will be reset.
 	 */ 
@@ -658,6 +670,10 @@ load.provide("dusk.sgui.Entity", (function() {
 		this._touchers[c.DIR_DOWN] = [];
 		this._touchers[c.DIR_LEFT] = [];
 		this._touchers[c.DIR_RIGHT] = [];
+		this._touchersNonSolid[c.DIR_UP] = [];
+		this._touchersNonSolid[c.DIR_DOWN] = [];
+		this._touchersNonSolid[c.DIR_LEFT] = [];
+		this._touchersNonSolid[c.DIR_RIGHT] = [];
 		
 		//Accelerate or decelerate
 		for(var p in this._dx) {
@@ -1091,8 +1107,8 @@ load.provide("dusk.sgui.Entity", (function() {
 	
 	
 	//Touchers
-	/** Returns an array of either `{@link dusk.sgui.Entity}` instances or the string `"wall"` which are
-	 *  touching this entity on the specified side.
+	/** Returns an array of either `Entity` instances or the string `"wall"` which are touching this entity on the
+	 *  specified side.
 	 * @param {integer} dir The specified direction, one of the `dusk.sgui.c.DIR_*` constants.
 	 * @return {array} The things touching this entity on the specified side.
 	 */
@@ -1115,12 +1131,40 @@ load.provide("dusk.sgui.Entity", (function() {
 		return out;
 	};
 	
+	/** Returns an array of either `Entity` instances or the string `"wall"` which are touching this entity on the
+	 *  specified side, including entities which are not solid.
+	 * @param {integer} dir The specified direction, one of the `dusk.sgui.c.DIR_*` constants.
+	 * @return {array} The things touching this entity on the specified side.
+	 * @since 0.0.21-alpha
+	 */
+	Entity.prototype.touchersNonSolid = function(dir) {
+		if(!(dir in this._touchersNonSolid)) {console.warn("Unknown dir "+dir+" for touching!"); return [];}
+		return this._touchersNonSolid[dir];
+	};
+	
+	/** Returns an array of either `Entity` instances or the string `"wall"` which are touching this entity on any side,
+	 *  even if they are not solid.
+	 * @return {array} The things touching this entity.
+	 * @since 0.0.21-alpha
+	 */
+	Entity.prototype.allTouchersNonSolid = function(dir) {
+		var out = [];
+		
+		out = this.touchersNonSolid(c.DIR_UP);
+		out = utils.arrayUnion(out, this.touchersNonSolid(c.DIR_DOWN));
+		out = utils.arrayUnion(out, this.touchersNonSolid(c.DIR_LEFT));
+		out = utils.arrayUnion(out, this.touchersNonSolid(c.DIR_RIGHT));
+		
+		return out;
+	};
+	
 	/** Called by `{@link dusk.sgui.EntityGroup}` to indicate that the specified entity is touching it.
 	 * @param {integer} dir The side it is touching this, one of the `dusk.sgui.c.DIR_*` constants.
 	 * @param {dusk.sgui.Entity|string} entity The entity touching this, or the string `"wall"`.
 	 */
 	Entity.prototype.addToucher = function(dir, entity) {
-		this._touchers[dir].push(entity);
+		if(entity === "wall" || entity.eProp("solid")) this._touchers[dir].push(entity);
+		this._touchersNonSolid[dir].push(entity);
 	};
 	
 	
