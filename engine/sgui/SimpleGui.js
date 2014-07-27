@@ -14,45 +14,40 @@ load.provide("dusk.sgui", (function() {
 	var Pool = load.require("dusk.Pool");
 	var interaction = load.require("dusk.input.interaction");
 	var UserCancelError = load.suggest("dusk.UserCancelError", function(p) {UserCancelError = p});
+	var containerUtils = load.require("dusk.containerUtils");
 	
-	/** @namespace dusk.sgui
-	 * @name dusk.sgui
+	/** This module contains a SimpleGui system, allowing for canvas UIs.
 	 * 
-	 * @description This module contains a SimpleGui system, allowing for canvas UIs.
+	 * Generally, everything in the Simple GUI system is a subclass of `dusk.sgui.Component`. All components are in a
+	 *  parent component that subclasses `dusk.sgui.Group`, until you get to the top, which are containers of type
+	 *  `dusk.sgui.Pane`. Components are things that are displayed, such as images or text, each has a draw function
+	 *  that lets them draw directly to a canvas, rotated and offseted already for them.
 	 * 
-	 * Generally, everything in the Simple GUI system is a subclass of `{@link dusk.sgui.Component}.
-	 * 	All components are in a parent component that subclasses `{@link dusk.sgui.Group}`,
-	 *   until you get to the top, which are containers of type `{@link dusk.sgui.Pane}`.
-	 * 	Components are things that are displayed, such as images or text,
-	 *   each has a draw function that lets them draw directly to a canvas, rotated and offseted already for them.
+	 * Containers allow you to define their contents as JSON objects (but only for simple properties), or you can simply
+	 *  use refrences to the objects themselves. If you use JSON, the property names of the JSON keys generally match up
+	 *  to the property names of the components. You cannot call functions using JSON, only modify the properties at the
+	 *  current time.
 	 * 
-	 * Containers allow you to define their contents as JSON objects (but only for simple properties),
-	 *   or you can simply use refrences to the objects themselves.
-	 * 	If you use JSON, the property names of the JSON keys generally match up to the property names of the components.
-	 * 	You cannot call functions using JSON, only modify the properties at the current time.
+	 * In the JSON, if you are describing a group's children, each child element must contain a `name` and `type`
+	 *  property. This is the name and type of the object, surprisingly. `type` must be a valid type (extends
+	 *  `dusk.sgui.Component` and be registered using `registerType`).
 	 * 
-	 * In the JSON, if you are describing a group's children, each child element must contain a `name` and `type` property.
-	 * 	This is the name and type of the object, surprisingly.
-	 * 	`type` must be a valid type (extends `{@link dusk.sgui.Component}` and be registered using 
-	 * `{@link dusk.sgui.registerType}`).
+	 * Components can be "active", a component which is active will receive keyboard events, and should act like the
+	 *  user is paying attention to it.	When a component changes whether it is active, its
+	 *  `dusk.sgui.Component.onActiveChange` event is fired. For a component to be active, all its parent groups must be
+	 *  too.
 	 * 
-	 * Components can be "active", a component which is active will receive keyboard events,
-	 *   and should act like the user is paying attention to it.
-	 * 	When a component changes whether it is active, its `{@link dusk.sgui.Component.onActiveChange}` event is fired.
-	 * 	For a component to be active, all it's parent groups must be too.
+	 * Components can also be "focused", focused components will be made active when the container it is in becomes
+	 *  active.	Focus is usually changed by the arrow keys (only active components can handle key events, remember),
+	 *  though this can be remapped using `dusk.input.controls`. If a direction key is pressed, a function like
+	 *  `sgui.Component.upAction` returns true, and a variable like `upFlow` is not empty, focus changes to the named
+	 *  element in this one's container. The arrow keys can be changed by using the controls "sgui_up", "sgui_down",
+	 *  "sgui_left" and "sgui_right". If a component changes whether it is focused , its
+	 *  `dusk.sgui.Component.onFocusChange` event will fire.
 	 * 
-	 * Components can also be "focused", focused components will be made active when the container it is in becomes active.
-	 * 	Focus is generally changed by the arrow keys (only active components can handle key events, remember),
-	 *   though this can be remapped using `{@link dusk.input.controls}`.
-	 * 	If a direction key is pressed, a function like `{@link sgui.Component.upAction}` returns true,
-	 *   and a variable like `{@link upFlow}` is not empty, focus changes to the named element in this one's container.
-	 *	The arrow keys can be overriden by using the controls "sgui_up", "sgui_down", "sgui_left" and "sgui_right".
-	 *  If a component changes whether it is focused , its `{@link dusk.sgui.Component.onFocusChange}` event will fire.
-	 * 
-	 * Component paths also exist, these paths are similar to file names
-	 *   and allow you to specify one component relative to another.
-	 * 	From an example container "X" in another container "Y", which itself is in a pane "Z",
-	 *   and with children "a", "b" and "c", with "c" having children "c1" and "c2" the following paths are as described:
+	 * Component paths also exist, these paths are similar to file names and allow you to specify one component relative
+	 *  to another.	From an example container "X" in another container "Y", which itself is in a pane "Z", and with
+	 *  children "a", "b" and "c", with "c" having children "c1" and "c2" the following paths are as described:
 	 * 
 	 * - a - Access the child "a".
 	 * - c/c1 - Access the child "c1" of the container "c", which is in "X".
@@ -60,37 +55,41 @@ load.provide("dusk.sgui", (function() {
 	 * - /Y - Access the child "Y" in the pane "Z".
 	 * - Z:/Y - Directly accesses Y from the pane.
 	 * 
-	 * Components can be styled similarly to CSS. When a new component is created, the list of styles (Set by 
-	 * `{@link dusk.sgui.addStyle}` is checked. If it matches that component, all the properties in the object set with the
-	 *  style will be applied to the object (see the JSON representation above). This only occurs when the object is created
-	 * or its type changes, it won't happen at any other time. The syntax for a rule contains the following, they must be in 
-	 * this order, but are all optional: 
+	 * Components can be styled similarly to CSS. When a new component is created, the list of styles (Set by `addStyle`
+	 *  is checked. If it matches that component, all the properties in the object set with the style will be applied to
+	 *  the object (see the JSON representation above). This only occurs when the object is created or its type changes,
+	 *  it won't happen at any other time. The syntax for a rule contains the following, they must be in this order, but
+	 *  are all optional: 
 	 * 
 	 * - `typename` - The name of the component's type, as registered using `{@link dusk.sgui.registerType}`.
 	 * - `.style` - The value of, or one of the values of, the component's `{@link dusk.sgui.Component.style}` property.
 	 * - `#name` - The component's name.
 	 * - `[prop=value]` - The property must equal the value, the property is a name that can be looked up using the JSON 
-	 *  representation, and must equal the value. At the moment only `=` is supported, and there can only be one of these.
+	 *  representation, and must equal the value. At the moment only `=` is supported, and there can only be one of
+	 *  these.
 	 * 
 	 * Concisely, `typename.style#name[prop=value]`.
 	 * 
-	 * Components can also have "extras" which are essentially objects that are bolted onto components and give them extra
-	 * functionality. They are stored on the component, and are deleted when the component is, or on their own accord.
-	 * Extras are added to components using `{@link dusk.sgui.Component#addExtra}`, removed using
-	 * `{@link dusk.sgui.Component#removeExtra}` and retreived using `{@link dusk.sgui.Component#getExtra}`.
+	 * Components can also have "extras" which are essentially objects that are bolted onto components and give them
+	 * extra functionality. They are stored on the component, and are deleted when the component is, or on their own
+	 * accord. Extras are added to components using `dusk.sgui.Component#addExtra`, removed using
+	 * `dusk.sgui.Component#removeExtra` and retreived using `dusk.sgui.Component#getExtra`.
 	 * 
 	 * Mouse control is also supported for components. A component will be able to see the mouse location, relative to
-	 * themselves in their `{@link dusk.sgui.Component._mouseX}` and `{@link dusk.sgui.Component._mouseY}` properties.
-	 * If the property `{@link dusk.sgui.Component.allowMouse}` is true, then rolling over the component will set the focus
-	 * to that component, whether the default is true depends on the component's type. If
-	 * `{@link dusk.sgui.Component.mouseAction}` is true, then clicking on the component will fire its
-	 * `{@link dusk.sgui.Component.action}` event.
+	 *  themselves in their `{@link dusk.sgui.Component._mouseX}` and `{@link dusk.sgui.Component._mouseY}` properties.
+	 *  If the property `{@link dusk.sgui.Component.allowMouse}` is true, then rolling over the component will set the
+	 *  focus to that component, whether the default is true depends on the component's type. If
+	 *  `dusk.sgui.Component.mouseAction` is true, then clicking on the component will fire its
+	 *  `dusk.sgui.Component.action` event.
 	 * 
-	 * This namespace registers the following controls for `{@link dusk.input.controls}`:
+	 * This namespace registers the following controls for `dusk.input.controls`:
 	 * 
 	 * - `dusk_up`, `dusk_down`, `dusk_left` and `dusk_right` are the controls used to change the active component,
 	 *   these are the arrow keys or first stick by default.
-	 * - `dusk_action` is used to trigger the "action" event on a component, this is by default the `a` key, or button 0.
+	 * - `dusk_action` is used to trigger the "action" event on a component, this is by default the `a` key, or button
+	 *  0.
+	 * - `dusk_carcel` is used to trigger the "cancel" event on a component, by default this is the `ESC` key or button
+	 *  1.
 	 */
 	var sgui = {};
 	
@@ -278,26 +277,121 @@ load.provide("dusk.sgui", (function() {
 		return document.getElementById(dusk.elemPrefix);
 	};
 	
+	
 	/** Returns or creates a pane.
 	 * @param {string} name The name of the pane to get or create.
-	 * @param {?boolean} noNew If this is `true`, then a new pane will not be created,
-	 *  otherwise a new pane will be created if it does not exist.
+	 * @param {?boolean} create If this is `true`, then a new pane will be created if it does not exist.
 	 * @return {?dusk.sgui.Pane} The pane, or `null` if it doesn't exist and `noNew` is `true`.
 	 */
-	sgui.getPane = function(name, noNew) {
+	sgui.get = function(name, create) {
 		//if(this._panes[name.toLowerCase()]) return this._panes[name.toLowerCase()];
 		for(var p = _panes.length-1; p >= 0; p --) {
 			if(_panes[p].comName == name) return _panes[p];
 		}
 		
-		if(!noNew) {
+		if(create) {
 			_panes.push(new Pane(this, name));
 			return _panes[_panes.length-1];
 		}
 		
 		return null;
 	};
-
+	/** Depreciated alias for `get`.
+	 * @param {string} name The name of the pane to get or create.
+	 * @param {?boolean} noNew If this is `true`, then a new pane will not be created,
+	 *  otherwise a new pane will be created if it does not exist.
+	 * @return {?dusk.sgui.Pane} The pane, or `null` if it doesn't exist and `noNew` is `true`.
+	 * @depreciated 
+	 */
+	sgui.getPane = function(name, noNew) {
+		return sgui.get(name, !noNew);
+	};
+	
+	/** Given a pane object, adds it to the SGui system.
+	 * @param {string} name The name to set this as; will overrite the pane's comName.
+	 * @param {dusk.sgui.Pane} pane The pane to add.
+	 * @return {boolean} True if successfull.
+	 */
+	sgui.set = function(name, pane) {
+		var slot = _panes.length;
+		for(var i = 0; i < _panes.length; i ++) {
+			if(_panes[i].comName == name.toLowerCase()) {
+				slot = i;
+			}
+		}
+		
+		if(data instanceof Pane) {
+			//data.comName = name;
+			_panes[slot] = data;
+			return true;
+		}
+		
+		this.get(name, true).parseProps(data);
+		return true;
+	};
+	
+	/** Removes a pane from the SGui system.
+	 * @param {string} name The name of the pane to remove.
+	 * @return {boolean} True if successfull.
+	 * @since 0.0.21-alpha
+	 */
+	sgui.remove = function(name) {
+		var com = this.get(com);
+		if(com) {
+			if(_activePane == com.comName) _activePane = "";
+			com.onDelete.fire({"com":com});
+			_panes.splice(_panes.indexOf(com), 1);
+			return true;
+		}
+		
+		return false;
+	};
+	
+	/** Returns the number of panes.
+	 * @return {integer} Pane count.
+	 * @since 0.0.21-alpha
+	 */
+	sgui.length = function() {
+		return _panes.length;
+	};
+	
+	/** Returns an iterator for all the panes.
+	 * @return {object} An iterator
+	 * @since 0.0.21-alpha
+	 */
+	sgui.iterate = function() {
+		var i = -1;
+		return {
+			"next":function(){
+				i ++;
+				if(i < _panes.length){
+					return {"done":false, "value":_panes[i], "key":_panes[i].comName};
+				}else{
+					return {"done":true};
+				}
+			}
+		};
+	};
+	
+	/** Returns whether the given argument can be used for `set`. It must be either a `Pane` or an object.
+	 * @param {*} An object to check.
+	 * @return {boolean} Whether the argument is valid.
+	 * @since 0.0.21-alpha
+	 */
+	sgui.valid = function(pane) {
+		return typeof pane == "object";
+	};
+	
+	/** Checks if the given pane has been added to the system.
+	 * @param {dusk.sgui.Pane} The pane to check.
+	 * @return {boolean} Whether the pane has been added.
+	 * @since 0.0.21-alpha
+	 */
+	sgui.contains = function(pane) {
+		return _panes.indexOf(pane) !== -1;
+	};
+	
+	
 	/** Sets the currently active pane. This is the only one that will recieve keypresses.
 	 * @param {string} to The name of the pane to set to the active one.
 	 */
@@ -307,7 +401,7 @@ load.provide("dusk.sgui", (function() {
 			sgui.getActivePane().onFocusChange.fire({"focus":true}, true);
 		}
 		
-		sgui.getPane(to);
+		sgui.get(to);
 		_activePane = to.toLowerCase();
 		sgui.getActivePane().onActiveChange.fire({"active":true}, true);
 		sgui.getActivePane().onFocusChange.fire({"focus":true}, true);
@@ -334,7 +428,7 @@ load.provide("dusk.sgui", (function() {
 	 */
 	sgui.getActivePane = function() {
 		if(_activePane === "") return null;
-		return sgui.getPane(_activePane);
+		return sgui.get(_activePane);
 	};
 	
 	/** Draws all the panes onto the main canvas specified, and fires the onRender event.
@@ -413,7 +507,7 @@ load.provide("dusk.sgui", (function() {
 		}
 		var pane = path.split(":", 1)[0];
 		path = path.substr(pane.length+1);
-		return this.getPane(pane).path(path);
+		return this.get(pane).path(path);
 	};
 	
 	/** A pattern used to select styles.
@@ -495,6 +589,8 @@ load.provide("dusk.sgui", (function() {
 		_types[name] = type;
 	};
 	
+	
+	
 	/** Returns a constructor for the specified component, 
 	 *  provided it has been registered beforehand with {@link dusk.sgui.registerType}.
 	 * @param {string} name The name of the type to look up.
@@ -523,6 +619,8 @@ load.provide("dusk.sgui", (function() {
 		return null;
 	};
 	
+	
+	
 	/** Adds a new extra that can be accessed using `{@link dusk.sgui.getExtra}`.
 	 * @param {string} name The name of the added extra.
 	 * @param {class(dusk.sgui.Component, string) extends dusk.sgui.extras.Extra} extra The extra to add.
@@ -535,7 +633,7 @@ load.provide("dusk.sgui", (function() {
 	/** Returns a constructor for the specified extra,
 	 *  provided it has been registered beforehand with `{@link dusk.sgui.registerExtra}`.
 	 * @param {string} name The name of the extra to look up.
-	 * @return {?class(dusk.sgui.Component, string) extends dusk.sgui.extra.Extra} A constructor for the specified extra,
+	 * @return {?class(dusk.sgui.Component, string) extends dusk.sgui.extra.Extra} A constructor for the specified extra
 	 *  or null if it doesn't exist.
 	 * @since 0.0.18-alpha
 	 */
@@ -543,6 +641,8 @@ load.provide("dusk.sgui", (function() {
 		if(!(name in _extras)) return null;
 		return _extras[name];
 	};
+	
+	
 	
 	//width
 	Object.defineProperty(sgui, "width", {
@@ -573,6 +673,8 @@ load.provide("dusk.sgui", (function() {
 			return _getCanvas().height;
 		}
 	});
+	
+	
 	
 	// Listen for interaction events
 	interaction.on.listen(function(e) {
@@ -645,8 +747,6 @@ load.provide("dusk.sgui", (function() {
 	//And begin
 	_draw(0);
 	
-	Object.seal(sgui);
-	
 	return sgui;
 })());
 
@@ -655,10 +755,7 @@ load.provide("dusk.pause", (function() {
 	var controls = load.require("dusk.input.controls");
 	var sgui = load.require("dusk.sgui");
 	
-	/** @namespace dusk.pause
-	 * @name dusk.pause
-	 * 
-	 * @description Simple module that allows simple pausing and unpausing of a game.
+	/** Simple module that allows simple pausing and unpausing of a game.
 	 * 
 	 * Consists of a pane named "pause" that is made active or inactive depending on whether the game is paused or not.
 	 *  The pane also is made invisible when it is not active.
@@ -680,31 +777,31 @@ load.provide("dusk.pause", (function() {
 	 * @type boolean
 	 */
 	pause.allow = false;
-
+	
 	/** Pauses the game. 
 	 */
 	pause.pause = function() {
 		if(!pause.allow) return;
 		if(!_previous) _previous = sgui.getActivePane().comName;
 		sgui.setActivePane("paused");
-		sgui.getPane("paused").visible = true;
+		sgui.get("paused").visible = true;
 	};
-
+	
 	/** Unpauses the game.
 	 */
 	pause.unpause = function() {
 		sgui.setActivePane(_previous);
 		_previous = "";
-		sgui.getPane("paused").visible = false;
+		sgui.get("paused").visible = false;
 	};
-
+	
 	/** Checks if the game is paused.
 	 * @return {boolean} Whether the game is paused or not.
 	 */
 	pause.isPaused = function() {
 		return _previous !== "";
 	};
-
+	
 	/** If the game is paused, unpause it, else pause it.
 	 */
 	pause.toggle = function() {
@@ -718,8 +815,6 @@ load.provide("dusk.pause", (function() {
 	//Bind controls
 	controls.addControl("pause", 13, 9);
 	controls.controlPressed.listen(pause.toggle, "pause");
-	
-	Object.seal(pause);
 	
 	return pause;
 })());
