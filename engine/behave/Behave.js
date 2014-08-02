@@ -49,36 +49,23 @@ load.provide("dusk.behave.Behave", (function() {
 	 * @protected
 	 */
 	Behave.prototype._data = function(name, value, init) {
-		if(init && value !== undefined) {
-			if(!(name in this._entity.behaviourData)) this._entity.behaviourData[name] = value;
-		}else if(value !== undefined) {
-			this._entity.behaviourData[name] = value;
-		}
-		
-		return this._entity.behaviourData[name];
+		return this._entity.eProp(name, value, init);
 	};
 	
 	/** Returns true if the specified control is active.
 	 * 
-	 * Entities should listen for the "controlActive" event, whose object has the property "control"; the name of the
-	 *  control. Any of these listeners returning true will mean the control is active.
+	 * Other behaviours should listen for the "controlActive" event. The event object will have the property "control",
+	 *  and the listeners are expected to return `true` if the control is "activated". This method will return true if
+	 *  one of the listeners returns true.
 	 * 
-	 * If the control is in an entity data array "controlsOn", this will always return true, as well.
+	 * If the control is in a behaviour property array `controlsOn`, this will always return true, as well.
 	 * 
 	 * @param {string} name The name of the control to check.
 	 * @return {boolean} Whether the control is activated or not.
 	 * @protected
 	 */
 	Behave.prototype._controlActive = function(name) {
-		if(this._data("controlsOn") && this._data("controlsOn").indexOf(name) !== -1) {
-			return true;
-		}
-		
-		if(this._entity.behaviourFireWithReturn("controlActive", {"control":name}).indexOf(true) !== -1) {
-			return true;
-		}
-		
-		return false;
+		return this._entity.controlActive(name);
 	};
 	
 	return Behave;

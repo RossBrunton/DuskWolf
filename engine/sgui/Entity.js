@@ -11,6 +11,7 @@ load.provide("dusk.sgui.Entity", (function() {
 	var c = load.require("dusk.sgui.c");
 	var sgui = load.require("dusk.sgui");
 	var interaction = load.require("dusk.input.interaction");
+	var editor = load.suggest("dusk.editor", function(p){editor = p;});
 	
 	/** An entity is a component that has "behaviours" and can do certain activites, possibly in response to another
 	 *  entity or user input.
@@ -166,6 +167,7 @@ load.provide("dusk.sgui.Entity", (function() {
 	 * - `#tl`: The number of entities touching the left of this.
 	 * - `#tr`: The number of entities touching the right of this.
 	 * - `#path`: The path to this entity.
+	 * - `#edit`: True if the editor is on, otherwise false.
 	 * - `$var`: The value of the animation variable `var`.
 	 * - `.var`: The value of the component property `var`.
 	 * - `:var`: The value of the entity data property `var`.
@@ -377,46 +379,6 @@ load.provide("dusk.sgui.Entity", (function() {
 		 * @private
 		 */
 		this._eventTriggeredMark = false;
-		/** The current animation event, if there is one.
-		 * @type ?string
-		 * @private
-		 */
-		this._currentEvent = "";
-		/** The parse tree used for evaluating triggers.
-		 * @type dusk.parseTree
-		 * @private
-		 */
-		this._triggerTree = new parseTree.Compiler([], [
-			["on", (function(o, v) {
-					if(this._currentEvent == v) {
-						this._eventTriggeredMark = true;
-						return true;
-					}
-					return false;
-				}).bind(this), false
-			],
-			["#", (function(o, v) {
-					switch(v) {
-						case "dx": return this.getDx();
-						case "dy": return this.getDy();
-						case "tb": return this.touchers(c.DIR_DOWN).length;
-						case "tu": return this.touchers(c.DIR_UP).length;
-						case "tl": return this.touchers(c.DIR_LEFT).length;
-						case "tr": return this.touchers(c.DIR_RIGHT).length;
-						case "path": return this.fullPath();
-						default: return "#"+v;
-					}
-				}).bind(this), false
-			],
-			["$", (function(o, v) {return this._aniVars[v];}).bind(this), false],
-			[".", (function(o, v) {
-					if(this.isLight()) return undefined;
-					return this.prop(v);
-				}).bind(this), false],
-			[":", (function(o, v) {return this.eProp(v);}).bind(this), false],
-			["stat", (function(o, v) {return this.stats?this.stats.get(v[0], v[1]):undefined;}).bind(this), false],
-			["stati", (function(o, v) {return this.stats?this.stats.geti(v[0], v[1]):undefined;}).bind(this), false],
-		], []);
 		
 		/** Internal storage of this entity's type's name.
 		 * @type string
@@ -789,26 +751,27 @@ load.provide("dusk.sgui.Entity", (function() {
 	/** Sets an entity data property to the value, or returns it if no value is specified.
 	 * @param {string} prop The name of the property to set or get.
 	 * @param {?*} set The value to set the property, if no value is provided, then nothing will be set.
+	 * @param {?boolean} init If true, the value will ONLY be set if it has not already been set.
 	 * @return {*} The value of the specified property.
 	 */
-	Entity.prototype.eProp = function(prop, set) {
-		if(prop == "src" && set) {
+	Entity.prototype.eProp = function(prop, set, init) {
+		if(prop == "src" && set && !init) {
 			this.src = set;
 		}
-		if(prop == "collisionWidth" && set !== undefined) {
+		if(prop == "collisionWidth" && set !== undefined && !init) {
 			this.collisionWidth = set;
 		}
-		if(prop == "collisionHeight" && set !== undefined) {
+		if(prop == "collisionHeight" && set !== undefined && !init) {
 			this.collisionHeight = set;
 		}
-		if(prop == "collisionOffsetX" && set !== undefined) {
+		if(prop == "collisionOffsetX" && set !== undefined && !init) {
 			this.collisionOffsetX = set;
 		}
-		if(prop == "collisionOffsetY" && set !== undefined) {
+		if(prop == "collisionOffsetY" && set !== undefined && !init) {
 			this.collisionOffsetY = set;
 		}
 		
-		if(set !== undefined) {
+		if(set !== undefined && (!init || !(prop in this.behaviourData))) {
 			this.behaviourData[prop] = set;
 			return set;
 		}
@@ -816,6 +779,29 @@ load.provide("dusk.sgui.Entity", (function() {
 		if(this.behaviourData && prop in this.behaviourData) {
 			return this.behaviourData[prop];
 		}
+	};
+	
+	/** Returns true if the specified control is active.
+	 * 
+	 * Other behaviours should listen for the "controlActive" event. The event object will have the property "control",
+	 *  and the listeners are expected to return `true` if the control is "activated". This method will return true if
+	 *  one of the listeners returns true.
+	 * 
+	 * If the control is in a behaviour property array `controlsOn`, this will always return true, as well.
+	 * 
+	 * @param {string} name The name of the control to check.
+	 * @return {boolean} Whether the control is activated or not.
+	 */
+	Entity.prototype.controlActive = function(name) {
+		if(this.eProp("controlsOn") && this.eProp("controlsOn").indexOf(name) !== -1) {
+			return true;
+		}
+		
+		if(this.behaviourFireWithReturn("controlActive", {"control":name}).indexOf(true) !== -1) {
+			return true;
+		}
+		
+		return false;
 	};
 	
 	
@@ -1093,17 +1079,52 @@ load.provide("dusk.sgui.Entity", (function() {
 		this._currentEvent = event;
 		
 		//var t = performance.now();
-		var e = this._triggerTree.compile(trigger).eval();
+		var e = _triggerTree.compile(trigger).eval({"ent":this, "currentEvent":event});
 		//var ta = performance.now() - t;
 		//t = performance.now();
 		////var f = this._triggerTree.compileToFunct(trigger)();
 		//var tb = performance.now() - t;
 		//console.log(ta + " vs " + tb);
 		
-		
 		return e;
 	};
 	
+	/** The parse tree used for evaluating triggers.
+	 * @type dusk.parseTree
+	 * @private
+	 */
+	var _triggerTree = new parseTree.Compiler([], [
+		["on", function(o, v, c) {
+				if(c.currentEvent == v) {
+					c.ent._eventTriggeredMark = true;
+					return true;
+				}
+				return false;
+			}, false
+		],
+		["#", function(o, v, ctx) {
+				switch(v) {
+					case "dx": return ctx.ent.getDx();
+					case "dy": return ctx.ent.getDy();
+					case "tb": return ctx.ent.touchers(c.DIR_DOWN).length;
+					case "tu": return ctx.ent.touchers(c.DIR_UP).length;
+					case "tl": return ctx.ent.touchers(c.DIR_LEFT).length;
+					case "tr": return ctx.ent.touchers(c.DIR_RIGHT).length;
+					case "path": return ctx.ent.fullPath();
+					case "edit": return editor && editor.active;
+					default: return "#"+v;
+				}
+			}, false
+		],
+		["$", function(o, v, c) {return c.ent._aniVars[v];}, false],
+		[".", function(o, v, c) {
+				if(c.ent.isLight()) return undefined;
+				return c.ent.prop(v);
+			}, false],
+		[":", function(o, v, c) {return c.ent.eProp(v);}, false],
+		["stat", function(o, v, c) {return c.ent.stats?c.ent.stats.get(v[0], v[1]):undefined;}, false],
+		["stati", function(o, v, c) {return c.ent.stats?c.ent.stats.geti(v[0], v[1]):undefined;}, false],
+	], []);
 	
 	
 	//Touchers

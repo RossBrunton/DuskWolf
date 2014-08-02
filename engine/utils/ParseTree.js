@@ -3,9 +3,7 @@
 "use strict";
 
 load.provide("dusk.parseTree", (function() {
-	/** @namespace dusk.parseTree
-	 * 
-	 * @description This module provides the ability to create parse trees.
+	/** This module provides the ability to create parse trees.
 	 * 
 	 * It has two classes, `{@link dusk.parseTree.Compiler}` and 
 	 *  `{@link dusk.parseTree.Node}` for building and evaluating parse trees.
@@ -13,12 +11,8 @@ load.provide("dusk.parseTree", (function() {
 	 * @since 0.0.20-alpha
 	 */
 	var parseTree = {};
-
-	/** Creates a new parse tree compiler.
-	 * 
-	 * @class dusk.parseTree.Compiler
-	 * 
-	 * @classdesc A parse tree compiler is a class that takes an arbitary string and uses it's own list
+	
+	/** A parse tree compiler is a class that takes an arbitary string and uses it's own list
 	 *  of operators to make a parse tree.
 	 * 
 	 * In it's constructor, you specify an array of operators. Each operator is an array itself, in the
@@ -185,28 +179,28 @@ load.provide("dusk.parseTree", (function() {
 			}
 		}
 	};
-
+	
 	/** Whitespace should surround operators only if the operators consist only of a-z characters.
 	 * @type int
 	 * @value 0
 	 * @constant
 	 */
 	parseTree.WS_ONLYCHARS = parseTree.Compiler.WS_ONLYCHARS = 0;
-
+	
 	/** Whitespace should always surround operators.
 	 * @type int
 	 * @value 1
 	 * @constant
 	 */
 	parseTree.WS_ALWAYS = parseTree.Compiler.WS_ALWAYS = 1;
-
+	
 	/** Whitespace is optional for all operators.
 	 * @type int
 	 * @value 2
 	 * @constant
 	 */
 	parseTree.WS_OPTIONAL = parseTree.Compiler.WS_OPTIONAL = 2;
-
+	
 	/** This takes a string, and then compiles it down into a parse tree made using
 	 *  `{@link dusk.parseTree.Node}` instances.
 	 * 
@@ -320,7 +314,7 @@ load.provide("dusk.parseTree", (function() {
 			}
 		}
 	};
-
+	
 	/** Compiles a string directly to a function with caching.
 	 * @param {string} The string to compile.
 	 * @returns {function():*} A function that returns the value of the evaluated string.
@@ -332,7 +326,7 @@ load.provide("dusk.parseTree", (function() {
 		this._functCaches[str] = f;
 		return f;
 	}
-
+	
 	/** Reads until it finds an operand and then an operator.
 	 * 
 	 * @param {string} str The string to read.
@@ -444,12 +438,9 @@ load.provide("dusk.parseTree", (function() {
 		
 		return [buffer.trim(), null, null, true, 0, 0, uops];
 	};
-
-	Object.seal(parseTree.Compiler);
-	Object.seal(parseTree.Compiler.prototype);
-
+	
 	// ----
-
+	
 	/** All the built in binary operators.
 	 * @type array
 	 * @private
@@ -501,8 +492,8 @@ load.provide("dusk.parseTree", (function() {
 		
 		[",", function(o, l, r) {return [l].concat(r);}, true],
 	];
-
-
+	
+	
 	/** All the built in unary operators.
 	 * @type array
 	 * @private
@@ -523,7 +514,7 @@ load.provide("dusk.parseTree", (function() {
 			}
 		}, true]
 	];
-
+	
 	/** All the built in constant operators.
 	 * @type array
 	 * @private
@@ -535,9 +526,9 @@ load.provide("dusk.parseTree", (function() {
 		["null", function(o) {return null;}, true],
 		["undefined", function(o) {return undefined;}, true],
 	];
-
+	
 	// ----
-
+	
 	/** Creates a new parse tree compile error.
 	 * 
 	 * @class dusk.parseTree.ParseTreeCompileError
@@ -553,17 +544,10 @@ load.provide("dusk.parseTree", (function() {
 		this.message = message;
 	}	
 	parseTree.ParseTreeCompileError.prototype = Object.create(Error.prototype);
-
-	Object.seal(parseTree.ParseTreeCompileError);
-	Object.seal(parseTree.ParseTreeCompileError.prototype);
-
+	
 	// ----
-
-	/** Creates a new node.
-	 * 
-	 * @class dusk.parseTree.Node
-	 * 
-	 * @classdesc A single node of the compiled parse tree.
+	
+	/** A single node of the compiled parse tree.
 	 * 
 	 * It can be evaluated to a single value using `{@link dusk.parseTree.Node#eval}`.
 	 * 
@@ -612,21 +596,21 @@ load.provide("dusk.parseTree", (function() {
 		 */
 		this._con = con;
 	};
-
+	
 	/** Returns true if and only if the node has a function it can execute.
 	 * @return {boolean} Whether this has a function.
 	 */
 	parseTree.Node.prototype.hasNoFunct = function() {
 		return !this.exec;
 	};
-
+	
 	/** Returns true if and only if the node is a leaf node.
 	 * @return {boolean} Whether this is a leaf node.
 	 */
 	parseTree.Node.prototype.isLeaf = function() {
 		return !(this.lhs && this.lhs.value !== "") && !(this.rhs && this.rhs.value !== "");
 	};
-
+	
 	/** Returns true if and only if the node and all of it's children are con.
 	 * @return {boolean} Whether this is con.
 	 */
@@ -636,25 +620,29 @@ load.provide("dusk.parseTree", (function() {
 		if(this.lhs && !this.lhs.isCon()) return false;
 		return true;
 	};
-
+	
 	/** Returns true if and only if the node represents a unary operation.
 	 * @return {boolean} Whether this is a unary node.
 	 */
 	parseTree.Node.prototype.isUnary = function() {
 		return !this.rhs;
 	};
-
+	
 	/** Evaluates this node, and returns its value.
+	 * @param {?*} arg Argument, will be passed as the last argument to the exec function, and to the `eval` methods
+	 *  of it's children.
 	 * @return {*} The value of this node.
 	 */
-	parseTree.Node.prototype.eval = function() {
+	parseTree.Node.prototype.eval = function(arg) {
 		if(this.hasNoFunct()) return this.value;
-		if(!this.hasNoFunct() && this.isLeaf()) return this.exec(this.value);
-		if(this.isUnary()) return this.exec(this.value, this.lhs.eval());
-		return this.exec(this.value, this.lhs.eval(), this.rhs.eval());
+		if(!this.hasNoFunct() && this.isLeaf()) return this.exec(this.value, arg);
+		if(this.isUnary()) return this.exec(this.value, this.lhs.eval(arg), arg);
+		return this.exec(this.value, this.lhs.eval(arg), this.rhs.eval(arg), arg);
 	};
-
+	
 	/** Returns a function that, when called, will return the value of evaluating this tree.
+	 * 
+	 * Will not work with an arg like the param for `eval` does.
 	 * @return {function():*} A function representing this tree.
 	 */
 	parseTree.Node.prototype.toFunction = function() {
@@ -674,11 +662,11 @@ load.provide("dusk.parseTree", (function() {
 			return this.exec(this.value, l(), r());
 		}).bind(this, this.lhs.toFunction(), this.rhs.toFunction());
 	};
-
+	
 	/** If this is con, then will evaluate this and turn it into a leaf node with the value. This modifies the original
 	 *  node.
 	 * 
-	 * Otherswise, will call `{@link dusk.parseTree.Node#collapse}` on all it's children.
+	 * Otherswise, will call `collapse` on all its children.
 	 * 
 	 * @return {dusk.parseTree.Node} This node; as a convienience.
 	 * @since 0.0.21-alpha
@@ -697,7 +685,7 @@ load.provide("dusk.parseTree", (function() {
 		
 		return this;
 	};
-
+	
 	/** Returns a multiline string representation of this node and it's children.
 	 * @param {int=0} indent The indentation of the node.
 	 * @return {string} A string representation of this node.
@@ -749,7 +737,7 @@ load.provide("dusk.parseTree", (function() {
 		
 		return out;
 	};
-
+	
 	/** Builds a representation (not the original representation) of this node.
 	 * 
 	 * @return {string} This expression.
@@ -764,10 +752,6 @@ load.provide("dusk.parseTree", (function() {
 		if(this.lhs && this.rhs) out += "("+this.lhs.toExpr() + " " + this.value + " " + this.rhs.toExpr()+")"
 		return out;
 	};
-
-	Object.seal(parseTree.Node);
-	Object.seal(parseTree.Node.prototype);
-	Object.seal(parseTree);
 	
 	return parseTree;
-})());
+})(), {"alsoSeal":["Node", "Compiler", "ParseTreeCompileError"]});
