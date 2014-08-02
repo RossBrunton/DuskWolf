@@ -78,22 +78,14 @@ load.provide("dusk.items", (function() {
 		 */
 		this._items = [];
 		
-		/** The tree used for restrictions.
-		 * 
-		 * @type dusk.parseTree.Compiler
-		 * @private
-		 * @since 0.0.21-alpha
-		 */
-		this._tree = new parseTree.Compiler([], [], [
-			["item", (function(o) {return this._item;}).bind(this)],
-		]);
+		var c = _tree.compile(restriction);
 		/** The compiled node for the restriction tree.
 		 * 
 		 * @type function
 		 * @private
 		 * @since 0.0.21-alpha
 		 */
-		this._restriction = this._tree.compile(restriction).toFunction();
+		this._restriction = c.eval.bind(c);
 		/** The restriction, as unprocessed text.
 		 * 
 		 * @type string
@@ -101,13 +93,6 @@ load.provide("dusk.items", (function() {
 		 * @since 0.0.21-alpha
 		 */
 		this._restrictionText = restriction;
-		/** Temporary storage for the item that is to be added for the parse tree.
-		 * 
-		 * @type ?dusk.Inheritable
-		 * @private
-		 * @since 0.0.21-alpha
-		 */
-		this._item = null;
 		
 		/** The maximum number of items that can be in one stack.
 		 * No item stack will have larger than this number of elements.
@@ -123,6 +108,17 @@ load.provide("dusk.items", (function() {
 		 */
 		this.contentsChanged = new EventDispatcher("dusk.items.Invent.contentsChanged");
 	};
+	
+	/** The tree used for restrictions.
+	 * 
+	 * @type dusk.parseTree.Compiler
+	 * @private
+	 * @static
+	 * @since 0.0.21-alpha
+	 */
+	var _tree = new parseTree.Compiler([], [], [
+		["item", function(o, c) {return c}],
+	]);
 	
 	/** Checks if the specified item can be added into the inventory.
 	 * @param {dusk.Inheritable} item An item from `{@link dusk.items.items}` that should be checked.
@@ -148,8 +144,7 @@ load.provide("dusk.items", (function() {
 			}
 		}*/
 		
-		this._item = item;
-		return this._restriction();
+		return this._restriction(item);
 	};
 
 	/** Checks if the specified item can be addet to an item slot.

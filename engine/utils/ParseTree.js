@@ -625,7 +625,7 @@ load.provide("dusk.parseTree", (function() {
 	 * @return {boolean} Whether this is a unary node.
 	 */
 	parseTree.Node.prototype.isUnary = function() {
-		return !this.rhs;
+		return !(this.rhs && this.rhs.value !== "");
 	};
 	
 	/** Evaluates this node, and returns its value.

@@ -87,23 +87,17 @@ load.provide("dusk.stats", (function() {
 		this.layerNames = layerNames?layerNames:[];
 		this._extras = {};
 		
-		this._x = null;
-		this._max = null;
-		this._min = null;
-		this._field = null;
-		this._block = null;
-		
 		this.changed = new EventDispatcher("dusk.stats.LayeredStats.changed");
-		
-		this._tree = new parseTree.Compiler([], [], [
-			["X", (function(o) {return this._x;}).bind(this)],
-			["MAX", (function(o) {return this._max;}).bind(this)],
-			["MIN", (function(o) {return this._min;}).bind(this)],
-			["FIELD", (function(o) {return this._field;}).bind(this)],
-			["all", (function(o) {return this;}).bind(this)],
-			["block", (function(o) {return this._block;}).bind(this)]
-		]);
 	};
+	
+	var _tree = new parseTree.Compiler([], [], [
+		["X", function(o, c) {return c.x;}],
+		["MAX", function(o, c) {return c.max;}],
+		["MIN", function(o, c) {return c.min;}],
+		["FIELD", function(o, c) {return c.field;}],
+		["all", function(o, c) {return c.ls;}],
+		["block", function(o, c) {return c.block;}]
+	]);
 	
 	stats.LayeredStats.prototype.addBlock = function(layer, name, block, copy) {
 		layer = this._lookupLayer(layer);
@@ -305,13 +299,7 @@ load.provide("dusk.stats", (function() {
 	};
 	
 	stats.LayeredStats.prototype._eval = function(expr, field, value, min, max, block) {
-		this._x = value;
-		this._min = min;
-		this._max = max;
-		this._field = field;
-		this._block = block;
-		
-		return this._tree.compile(expr).eval();
+		return _tree.compile(expr).eval({"x":value, "min":min, "max":max, "field":field, "block":block, "ls":this});
 	};
 	
 	stats.LayeredStats.prototype._lookupLayer = function(layer) {
