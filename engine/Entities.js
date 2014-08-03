@@ -118,6 +118,13 @@ load.provide("dusk.entities", (function() {
 	 * @since 0.0.18-alpha
 	 */
 	var _behaviours = {};
+	
+	/** Workshop data for all behaviours.
+	 * @type object
+	 * @private
+	 * @since 0.0.21-alpha
+	 */
+	var _workshop = {};
 
 	/** Adds a new behaviour that can be added to entities. This must be called before the behaviour can be used.
 	 * @param {string} name The name of the added behaviour.
@@ -126,6 +133,11 @@ load.provide("dusk.entities", (function() {
 	 */
 	entities.registerBehaviour = function(name, behaviour) {
 		_behaviours[name] = behaviour;
+		
+		//Legacy code, remove when all behaviours use registerWorkshop
+		if(behaviour.workshopData) {
+			entities.registerWorkshop(name, behaviour.workshopData);
+		}
 	};
 
 	/** Returns a constructor for the specified behaviour, 
@@ -147,9 +159,38 @@ load.provide("dusk.entities", (function() {
 	 */
 	entities.getAllBehaviours = function() {
 		return _behaviours;
-	}; 
+	};
 	
-	Object.seal(entities);
+	/** Associates the given workshop data for a given behaviour.
+	 * 
+	 * See `dusk.sgui.EntityWorkshop` for details on the format.
+	 * @param {string} name The name of the behaviour.
+	 * @param {object} data Workshop data.
+	 * @since 0.0.21-alpha
+	 */
+	entities.registerWorkshop = function(name, data) {
+		_workshop[name] = data;
+	};
+	
+	/** Returns the workshop data for a given behaviour.
+	 * @param {string} name The name of the behaviour.
+	 * @return {object} Workshop data for the behaviour.
+	 * @since 0.0.21-alpha
+	 */
+	entities.getWorkshop = function(name) {
+		if(name in _workshop) return _workshop[name];
+		
+		return null;
+	};
+	
+	/** Returns the workshop data for all entities that have been defined, as an object. Key is behaviour name, value
+	 *  is the workshop object.
+	 * @return {object} All workshop data.
+	 * @since 0.0.21-alpha
+	 */
+	entities.getAllWorkshops = function(name) {
+		return _workshop;
+	};
 	
 	return entities;
 })());

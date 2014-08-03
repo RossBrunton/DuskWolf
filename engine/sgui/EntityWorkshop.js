@@ -21,14 +21,7 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.behave.Behave");
 
-	/** Creates a new EntityWorkshop component.
-	 * 
-	 * @param {dusk.sgui.Component} parent The container that this component is in.
-	 * @param {string} comName The name of the component.
-	 * 
-	 * @class dusk.sgui.EntityWorkshop
-	 * 
-	 * @classdesc 
+	/** 
 	 * 
 	 * @extends dusk.sgui.Group
 	 * @constructor
@@ -158,14 +151,9 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 						"type":"Group",
 						"focus":"list",
 						"children":{
-							"title":{
-								"type":"Label",
-								"text":"Behaviours",
-							},
 							"help":{
 								"type":"Label",
-								"text":"Help",
-								"x":100
+								"text":"---",
 							},
 							"list":{
 								"type":"Grid",
@@ -187,18 +175,16 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 						"type":"Group",
 						"focus":"list",
 						"children":{
-							"title":{
-								"type":"Label",
-								"text":"Data",
-							},
 							"help":{
 								"type":"Label",
-								"text":"Help",
-								"x":100
+								"text":"---",
+								"height":32,
+								"width":700,
+								"multiline":true
 							},
 							"list":{
 								"type":"Grid",
-								"y":30,
+								"y":40,
 								"cols":2,
 								"hspacing":5,
 								"vspacing":10,
@@ -219,7 +205,7 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 						"children":{
 							"title":{
 								"type":"Label",
-								"text":"Animation",
+								"text":"Animation (Not yet built)",
 							}
 						}
 					},
@@ -235,15 +221,13 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 		}).bind(this));
 		
 		//Build the list of behaviours
-		var behaviours = entities.getAllBehaviours();
+		var workshops = entities.getAllWorkshops();
 		var l = []
-		for(var p in behaviours) {
-			if("workshopData" in behaviours[p]) {
+		for(var p in workshops) {
+			if(p !== "Core") {
 				l.push({"text":p});
 			}
 		}
-		
-		//while(l.length % this.path("bodies/behaviours/list").cols) l.push({"text":"---"});
 		
 		this.path("bodies/behaviours/list").rows = Math.ceil(l.length/this.path("bodies/behaviours/list").cols);
 		this.path("bodies/behaviours/list").populate(l);
@@ -256,7 +240,7 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 		//Prop masks
 		
 		//Listeners
-		this.frame.listen((this._ewFrame).bind(this));
+		this.frame.listen(_frame.bind(this));
 		this.onControl.listen((function(e) {
 			if(editor.active) {
 				sgui.setActivePane("plat");
@@ -266,7 +250,7 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 	};
 	EntityWorkshop.prototype = Object.create(Group.prototype);
 	
-	EntityWorkshop.coreWorkshopData = [
+	EntityWorkshop.coreWorkshopData = {"help":"Built in entity properties", "data":[
 		["img", "string", "Path to this entities source image.", "no default"],
 		["collisionWidth", "integer", "Width of this entity's collision rectange.", "height"],
 		["collisionHeight", "integer", "Height of this entity's collision rectangle.", "width"],
@@ -277,37 +261,31 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 		["controlsOn", "array", "An :: seperated array of all the controls that are always on.", "[]"],
 		["headingLeft", "boolean", "If true, then the entity heads left by default.", "false"],
 		["headingUp", "boolean", "If true, then the entity heads up by default.", "false"],
-	];
+	]};
 	
-	EntityWorkshop.prototype._ewFrame = function(e) {
+	entities.registerWorkshop("Core", EntityWorkshop.coreWorkshopData);
+	
+	var _frame = function(e) {
+		// Behaviour help display
 		if(this.path("bodies/behaviours/list").getFocused()
-		&& entities.getBehaviour(this.path("bodies/behaviours/list").getFocused().text)) {
+		&& entities.getWorkshop(this.path("bodies/behaviours/list").getFocused().text)) {
 			this.path("bodies/behaviours/help").text = 
-				entities.getBehaviour(this.path("bodies/behaviours/list").getFocused().text).workshopData.help;
+				entities.getWorkshop(this.path("bodies/behaviours/list").getFocused().text).help;
 		}else{
 			this.path("bodies/behaviours/help").text = "---";
 		}
 		
+		// Data help display
 		if(this.path("bodies/data/list").getFocused()) {
 			var frags = this._deFormatData(this.path("bodies/data/list").getFocused().text);
-			if(frags[1] == "Core") {
-				for(var i = EntityWorkshop.coreWorkshopData.length-1; i >= 0; i --) {
-					if(EntityWorkshop.coreWorkshopData[i][0] == frags[2]) {
-						this.path("bodies/data/help").text = 
-							"[[]"+EntityWorkshop.coreWorkshopData[i][1]+"] "
-							+ EntityWorkshop.coreWorkshopData[i][2]+
-							" {"+EntityWorkshop.coreWorkshopData[i][3]+"}";
-					}
-				}
-			}else if(entities.getBehaviour(frags[1])) {
-				var b = entities.getBehaviour(frags[1]);
+			
+			if(entities.getWorkshop(frags[1])) {
+				var b = entities.getWorkshop(frags[1]);
 				
-				for(var i = b.workshopData.data.length-1; i >= 0; i --) {
-					if(b.workshopData.data[i][0] == frags[2]) {
-						this.path("bodies/data/help").text = 
-							"[[]"+b.workshopData.data[i][1]+"] "
-							+ b.workshopData.data[i][2]+
-							" {"+b.workshopData.data[i][3]+"}";
+				for(var i = b.data.length-1; i >= 0; i --) {
+					if(b.data[i][0] == frags[2]) {
+						this.path("bodies/data/help").text = "[[]"+b.data[i][1]+", " + b.data[i][3] +", " + frags[1]
+							+ "] " + b.data[i][2];
 					}
 				}
 			}else{
@@ -317,7 +295,7 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 	};
 	
 	EntityWorkshop.prototype._behaviourChecked = function(e) {
-		if(e.component.path("..").text == "---") return;
+		if(e.component.path("..").text == "---" || e.component.path("..").text == "Core") return;
 		if(e.checked) {
 			this._workingWith.behaviours[e.component.path("..").text] = true;
 		}else{
@@ -363,11 +341,7 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 			var frags = this._deFormatData(c.text);
 			
 			var ewd;
-			if(frags[1] == "Core") {
-				ewd = EntityWorkshop.coreWorkshopData;
-			}else{
-				ewd = entities.getBehaviour(frags[1]).workshopData.data;
-			}
+			ewd = entities.getWorkshop(frags[1]).data;
 			
 			for(var i = ewd.length-1; i >= 0; i --) {
 				if(ewd[i][0] == frags[2]) {
@@ -399,6 +373,7 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 			ent.data[ewd[0]] = toSet;
 		}, this);
 		
+		console.log("Saved Entity type: ");
 		console.log(JSON.stringify(ent));
 		
 		entities.types.createNewType(this.path("top/name").text, ent, this.path("top/extends").text);
@@ -408,22 +383,13 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 		if(!("data" in this._workingWith)) this._workingWith.data = {};
 		var l = [];
 		
-		for(var i = 0; i < EntityWorkshop.coreWorkshopData.length; i ++) {
-			var n = EntityWorkshop.coreWorkshopData[i][0];
-			var t = EntityWorkshop.coreWorkshopData[i][1].charAt(0);
-			if(n in this._workingWith.data) {
-				l.push({"text":t+" Core: "+n, "plus":{"text":""+this._workingWith.data[n]}});
-			}else{
-				l.push({"text":t+" Core: "+n});
-			}
-		}
-		
-		var behaviours = entities.getAllBehaviours();
-		for(var p in behaviours) {
-			if("workshopData" in behaviours[p] && p in this._workingWith.behaviours) {
-				for(var i = 0; i < behaviours[p].workshopData.data.length; i ++) {
-					var n = behaviours[p].workshopData.data[i][0];
-					var t = behaviours[p].workshopData.data[i][1].charAt(0);
+		var workshops = entities.getAllWorkshops();
+		for(var p in workshops) {
+			if(p == "Core" || p in this._workingWith.behaviours) {
+				for(var i = 0; i < workshops[p].data.length; i ++) {
+					var n = workshops[p].data[i][0];
+					var t = workshops[p].data[i][1].charAt(0);
+					
 					if(n in this._workingWith.data) {
 						var datStr = this._workingWith.data[n];
 						if(Array.isArray(datStr)) datStr = datStr.join("::");
@@ -437,7 +403,6 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 		}
 		
 		this.path("bodies/data/list").rows = Math.ceil(l.length/this.path("bodies/data/list").cols);
-		//while(l.length % this.path("bodies/data/list").cols) l.push({"text":"---"});
 		this.path("bodies/data/list").populate(l);
 	};
 	
@@ -445,9 +410,6 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 		var frags = str.split(": ");
 		return [frags[0].charAt(0), frags[0].substr(2), frags[1]];
 	}
-	
-	Object.seal(EntityWorkshop);
-	Object.seal(EntityWorkshop.prototype);
 	
 	sgui.registerType("EntityWorkshop", EntityWorkshop);
 	
