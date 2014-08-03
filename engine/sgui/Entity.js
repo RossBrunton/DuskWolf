@@ -215,6 +215,12 @@ load.provide("dusk.sgui.Entity", (function() {
 		 * @private
 		 */
 		this._behaviours = {};
+		/** Listeners for classless behaviours. Key is behavour event name, and value is an array of functions to call.
+		 * @type object
+		 * @private
+		 * @since 0.0.21-alpha
+		 */
+		this._behaviourListeners = {};
 		/** The entity's behaviour data. This is data used by the entity's behaviour objects. It
 		 *  it contains stuff such as HP and gravity.
 		 * @type object
@@ -695,10 +701,18 @@ load.provide("dusk.sgui.Entity", (function() {
 	Entity.prototype.behaviourFire = function(event, data) {
 		if(!data) data = {};
 		data.name = event;
+		
 		this.entityEvent.fire(data, event);
+		
 		var keys = Object.keys(this._behaviours);
 		for(var b = keys.length-1; b >= 0; b --) {
 			this._behaviours[keys[b]].entityEvent.fire(data, event);
+		}
+		
+		if(event in this._behaviourListeners) {
+			for(var i = 0; i < this._behaviourListeners[event].length; i ++) {
+				this._behaviourListeners[event][i].call(window, this, data, event);
+			}
 		}
 	};
 	
@@ -714,10 +728,18 @@ load.provide("dusk.sgui.Entity", (function() {
 		var output = [];
 		if(!data) data = {};
 		data.name = event;
+		
 		output[0] = this.entityEvent.fire(data, event);
+		
 		var keys = Object.keys(this._behaviours);
 		for(var b = keys.length-1; b >= 0; b --) {
 			output.push(this._behaviours[keys[b]].entityEvent.fire(data, event));
+		}
+		
+		if(event in this._behaviourListeners) {
+			for(var i = 0; i < this._behaviourListeners[event].length; i ++) {
+				output.push(this._behaviourListeners[event][i].call(window, this, data, event));
+			}
 		}
 		
 		return output;
@@ -735,7 +757,22 @@ load.provide("dusk.sgui.Entity", (function() {
 			console.error("Behaviour "+name+" does not exist for "+this.entType);
 			return;
 		}
-		this._behaviours[name] = new (entities.getBehaviour(name))(this);
+		
+		if(typeof entities.getBehaviour(name) == "function") {
+			this._behaviours[name] = new (entities.getBehaviour(name))(this);
+		}else{
+			//Classless behaviour
+			var beh = entities.getBehaviour(name);
+			
+			for(var p in beh) {
+				if(typeof beh[p] == "function") {
+					if(!this._behaviourListeners[p]) this._behaviourListeners[p] = [];
+					this._behaviourListeners[p].push(beh[p]);
+				}else{
+					this.eProp(p, beh[p], true);
+				}
+			}
+		}
 	};
 	
 	/** Returns a behaviour from this entity.

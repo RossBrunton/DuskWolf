@@ -4,31 +4,27 @@
 
 load.provide("dusk.behave.PlayerControl", (function() {
 	var entities = load.require("dusk.entities");
-	var Behave = load.require("dusk.behave.Behave");
 	var controls = load.require("dusk.input.controls");
 	
-	var PlayerControl = function(entity) {
-		Behave.call(this, entity);
+	var PlayerControl = {
+		"playerControl":true,
 		
-		this._data("playerControl", true, true);
-		
-		this.entityEvent.listen((function(e) {
-			if(this._data("playerControl")) {
+		"controlActive":function(ent, e) {
+			if(ent.eProp("playerControl")) {
 				return controls.controlActive("entity_"+e.control);
 			}
-		}).bind(this), "controlActive");
+		},
 	};
-	PlayerControl.prototype = Object.create(Behave.prototype);
 	
 	/** Workshop data used by `{@link dusk.sgui.EntityWorkshop}`.
 	 * @static
 	 */
-	PlayerControl.workshopData = {
+	entities.registerWorkshop("PlayerControl", {
 		"help":"Will allow the player to control it.",
 		"data":[
 			["playerControl", "boolean", "If false, player control is disabled."],
 		]
-	};
+	});
 	
 	controls.addControl("entity_left", 37, "0-");
 	controls.addControl("entity_right", 39, "0+");
@@ -86,14 +82,14 @@ load.provide("dusk.behave.LeftRightControl", (function() {
 		}
 	};
 	
-	LeftRightControl.workshopData = {
+	entities.registerWorkshop("LeftRightControl", {
 		"help":"Will move left and right on control input.",
 		"data":[
 			["haccel", "integer", "Acceleration left and right."],
 			["hspeed", "integer", "Fastest speed left and right."],
 			["airhaccelmult", "float", "Multiplier for left and right acceleration when in the air."],
 		]
-	};
+	});
 	
 	entities.registerBehaviour("LeftRightControl", LeftRightControl);
 	
