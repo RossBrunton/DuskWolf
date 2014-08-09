@@ -8,14 +8,11 @@ load.provide("dusk.behave.Spawner", (function() {
 	var LightEntity = load.require("dusk.entities.LightEntity");
 	var EntityGroup = load.suggest("dusk.sgui.EntityGroup", function(p) {EntityGroup = p});
 
-	/** @class dusk.behave.Spawner
-	 * @memberof dusk.behave
+	/** This gives the entity the ability to spawn other entities.
 	 * 
-	 * @classdesc This gives the entity the ability to spawn other entities.
-	 * 
-	 * Generally, entities are spawned when a control is "on", and there is no cooldown in effect. Each spawn has a name,
-	 *  and if the control `spawn_name` is on, then that entity will be spawned. Other versions of the spawning controls
-	 *  exist, to spawn an entity in a different direction, as follows (where `name` is the name of the spawn):
+	 * Generally, entities are spawned when a control is "on", and there is no cooldown in effect. Each spawn has a
+	 *  name, and if the control `spawn_name` is on, then that entity will be spawned. Other versions of the spawning
+	 *  controls exist, to spawn an entity in a different direction, as follows (where `name` is the name of the spawn):
 	 * 
 	 * - `spawn_name_l`: Spawns an entity to the left of the one this is attached to.
 	 * - `spawn_name_r`: Spawns an entity to the right of the one this is attached to.
@@ -24,56 +21,58 @@ load.provide("dusk.behave.Spawner", (function() {
 	 * - `spawn_name_h`: Spawns an entity horizontal to the one this is attached to.
 	 * - `spawn_name_v`: Spawns an entity vertical to the one this is attached to.
 	 * 
-	 * Spawns are described in the behaviour data `spawns`; an object. The key is the name of the spawn, whilst the value is
-	 *  an object describing the nature of the spawn. The properties of the spawn object are as follows:
+	 * Spawns are described in the behaviour data `spawns`; an object. The key is the name of the spawn, whilst the
+	 *  value is an object describing the nature of the spawn. The properties of the spawn object are as follows:
 	 * 
 	 * - `type`: A string; the only required property. It is the type of entity to create.
-	 * - `horBase`: A string; either `"facing"`, `"middle"`, `"left"` or `"right"`, which determines what side the entity
-	 *  will be spawned horizontally. `"left"` or `"right"` will spawn it on the left or right side of the spawner,
-	 *  `"middle"` will spawn it at the middle, while `"facing"` will spawn it to the left or right based on the
-	 *  `"headingLeft"` behaviour property. Default is `"middle"`.
-	 * - `verBase`: A string; either `"facing"`, `"middle"`, `"bottom"` or `"top"`, which determines what side the entity
-	 *  will be spawned vertically. `"bottom"` or `"top"` will spawn it on the bottom or top side of the spawner,
+	 * - `horBase`: A string; either `"facing"`, `"middle"`, `"left"` or `"right"`, which determines what side the
+	 *  entity will be spawned horizontally. `"left"` or `"right"` will spawn it on the left or right side of the
+	 *  spawner, `"middle"` will spawn it at the middle, while `"facing"` will spawn it to the left or right based on
+	 *  the `"headingLeft"` behaviour property. Default is `"middle"`.
+	 * - `verBase`: A string; either `"facing"`, `"middle"`, `"bottom"` or `"top"`, which determines what side the
+	 *  entity will be spawned vertically. `"bottom"` or `"top"` will spawn it on the bottom or top side of the spawner,
 	 *  `"middle"` will spawn it at the middle, while `"facing"` will spawn it to the bottom or top based on the
 	 *  `"headingUp"` behaviour property. Default is `"middle"`
 	 * - `horOffset`: An integer; how far away from the spawner to spawn this. Will be added to the x coordinate if the
 	 *  entity spawns on the right or middle, and subtracted if it spawns on the left.
 	 * - `verOffset`: An integer; how far away from the spawner to spawn this. Will be added to the y coordinate if the
 	 *  entity spawns on the bottom or middle, and subtracted if it spawns on the top.
-	 * - `horInitial`: A string; Initial value of the spawned entity's `headingLeft` behaviour property. Must be the string
-	 *  `"left"` or `"right"`. If omited, then this is determined by the spawn direction or (if that is `"middle"`), 
-	 *  this entity's `headingLeft` property.
-	 * - `horInitial`: A string; Initial value of the spawned entity's `headingUp` behaviour property. Must be the string 
-	 *  `"up"` or `"down"`. If omited, then this is determined by the spawn direction or (if that is `"middle"`), this
-	 *  entity's `headingUp` property.
+	 * - `horInitial`: A string; Initial value of the spawned entity's `headingLeft` behaviour property. Must be the
+	 *  string `"left"` or `"right"`. If omited, then this is determined by the spawn direction or (if that is
+	 *  `"middle"`), this entity's `headingLeft` property.
+	 * - `horInitial`: A string; Initial value of the spawned entity's `headingUp` behaviour property. Must be the
+	 *  string `"up"` or `"down"`. If omited, then this is determined by the spawn direction or (if that is `"middle"`),
+	 *  this entity's `headingUp` property.
 	 * - `cooldown`: An integer; The amount of frames that be waited until another spawn with the same name can spawn.
-	 * - `onlyIf`: A string; The entity will only spawn if `{@link dusk.sgui.Entity#evalTrigger}` is true with this trigger.
+	 * - `onlyIf`: A string; The entity will only spawn if `{@link dusk.sgui.Entity#evalTrigger}` is true with this
+	 *  trigger.
 	 * - `applyDx`, `applyDy`, `multDx`, `multDy`: An array of arguments without the first one to call the respective
 	 *  functions on the spawner with. Will be called before the animation starts.
-	 * - `applyDxDrop`, `applyDyDrop`, `multDxDrop`, `multDyDrop`: An array of arguments without the first one to call the
-	 *  respective functions on the dropped entity with. Will be called at the instant the entity is created.
+	 * - `applyDxDrop`, `applyDyDrop`, `multDxDrop`, `multDyDrop`: An array of arguments without the first one to call
+	 *  the respective functions on the dropped entity with. Will be called at the instant the entity is created.
 	 * 
 	 * 
-	 * When the "side" of an entity is spawned, it means the size of the entity's collision rectangle, rather than the size
-	 *  of the tile. All properties besides `horBase` and `verBase` support "direction resolving", instead of any property
-	 *  in the spawn data and in the spawn data's `data` property, an array may be given (this means that, however, any 
-	 *  "real" array like the `applyDx` ones MUST be nested in a one element array), and the property used will be the nth
-	 *  element in the array, depending on the direction of the spawn (this will be the vertical direction, up or down,
-	 *  unless the entity was spawned using one of the controls with a direction or the vertical direction is "middle"),
-	 *  as follows:
+	 * When the "side" of an entity is spawned, it means the size of the entity's collision rectangle, rather than the
+	 *  size of the tile. All properties besides `horBase` and `verBase` support "direction resolving", instead of any
+	 *  property in the spawn data and in the spawn data's `data` property, an array may be given (this means that,
+	 *  however, any "real" array like the `applyDx` ones MUST be nested in a one element array), and the property used
+	 *  will be the nth element in the array, depending on the direction of the spawn (this will be the vertical
+	 *  direction, up or down, unless the entity was spawned using one of the controls with a direction or the vertical
+	 *  direction is "middle"), as follows:
 	 * 
 	 * - If the direction is `"left"` then n = 0.
 	 * - If the direction is `"right"` then n = 1.
 	 * - If the direction is `"up"` then n = 2 if it exists, else n = 0.
 	 * - If the direction is `"down"` then n = 3 if it exists, else n = 1.
 	 * 
-	 * For example, for entity data with the `type` value equal to `["a", "b"]`, and a `horBase` of `"facing"` then if the
-	 *  entity was being spawned when the spawner was facing left, it would be of type `a` otherwise it would be of type
-	 *  `b`. If the entity was spawned with the control `spawn_name_d`, then the spawned element would be of type `b`.
+	 * For example, for entity data with the `type` value equal to `["a", "b"]`, and a `horBase` of `"facing"` then if
+	 *  the entity was being spawned when the spawner was facing left, it would be of type `a` otherwise it would be of
+	 *  type `b`. If the entity was spawned with the control `spawn_name_d`, then the spawned element would be of type
+	 *  `b`.
 	 * 
-	 * This behaviour fires two animation events; the first is `spawn_name` where `name` is the name of the spawn data. This
-	 *  is fired before the entity is spawned, and must be ended (i.e. Using the animation event `/spawn_name`) to spawn the
-	 *  entity. The second is fired after the entity is spawned, and is named `spawn_after_name`.
+	 * This behaviour fires two animation events; the first is `spawn_name` where `name` is the name of the spawn data.
+	 *  This is fired before the entity is spawned, and must be ended (i.e. Using the animation event `/spawn_name`) to
+	 *  spawn the entity. The second is fired after the entity is spawned, and is named `spawn_after_name`.
 	 * 
 	 * @extends dusk.behave.Behave
 	 * @param {?dusk.sgui.Entity} entity The entity this behaviour is attached to.

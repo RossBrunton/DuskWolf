@@ -15,40 +15,32 @@ load.provide("dusk.behave.PlayerGridWalker", (function() {
 	 * This behaviour uses the following behaviour properties:
 	 * - playerControl:boolean = true - If false, player control is disabled.
 	 * 
-	 * @extends dusk.behave.Behave
-	 * @param {?dusk.sgui.Entity} entity The entity this behaviour is attached to.
+	 * This is a classless behaviour.
 	 * @see dusk.behave.PlayerControl
-	 * @constructor
 	 */
-	var PlayerGridWalker = function(entity) {
-		Behave.call(this, entity);
+	var PlayerGridWalker = {
+		"playerControl":true,
 		
-		this._data("playerControl", true, true);
-		
-		this.entityEvent.listen((function(e) {
-			if(this._data("playerControl")) {
+		"controlActive":function(entity, e) {
+			if(entity.eProp("playerControl")) {
 				return controls.controlActive("entity_"+e.control);
 			}
-		}).bind(this), "controlActive");
-		
-		controls.addControl("entity_left", 37, "0-0.5");
-		controls.addControl("entity_right", 39, "0+0.5");
-		controls.addControl("entity_up", 38, "1-0.5");
-		controls.addControl("entity_down", 40, "1+0.5");
+		}
 	};
-	PlayerGridWalker.prototype = Object.create(Behave.prototype);
 	
-	/** Workshop data used by `dusk.sgui.EntityWorkshop`.
-	 * @static
-	 */
-	PlayerGridWalker.workshopData = {
+	entities.registerWorkshop("PlayerGridWalker", {
 		"help":"Will allow the player to control it (gridwalker version).",
 		"data":[
 			["playerControl", "boolean", "Is player control enabled?", "true"],
 		]
-	};
+	});
 	
 	entities.registerBehaviour("PlayerGridWalker", PlayerGridWalker);
+	
+	controls.addControl("entity_left", 37, "0-0.5");
+	controls.addControl("entity_right", 39, "0+0.5");
+	controls.addControl("entity_up", 38, "1-0.5");
+	controls.addControl("entity_down", 40, "1+0.5");
 	
 	return PlayerGridWalker;
 })());

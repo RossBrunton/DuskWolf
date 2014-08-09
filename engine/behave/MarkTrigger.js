@@ -6,13 +6,40 @@ load.provide("dusk.behave.MarkTrigger", (function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.behave.Behave");
 	var TileMap = load.require("dusk.sgui.TileMap");
-
+	
+	/** Allows interacting with marks.
+	 * 
+	 * Simply put, whenever an entity with this behaviour enters a tile with a source y coordinate of 1 on the schematic
+	 *  layer, `entities.markTrigger` will fire. This event can also be fired again by pressing the up key. This can be
+	 *  used, for example, by `dusk.sgui.TransitionManager` to switch rooms.
+	 * 
+	 * The event object contains the following properties:
+	 * - up:boolean - Whether the up key was pressed.
+	 * - mark:integer - The source y coordinate of the tile triggered.
+	 * - activator:string - The comName of the entity that activated the mark.
+	 * - entity:dusk.sgui.Entity - The entity itself that activated the mark.
+	 * - room:string - The name of the room that was activated.
+	 * 
+	 * This behaviour does not use any behaviour properties.
+	 * 
+	 * @param {dusk.sgui.Entity} entity The entity this behaviour will act with.
+	 * @constructor
+	 */
 	var MarkTrigger = function(entity) {
 		Behave.call(this, entity);
 		
-		this._markAt = "";
+		/** The current mark the entity is at, so that it isn't triggered twice in a row, or as soon as the room loads.
+		 * @type integer
+		 * @private
+		 */
+		this._markAt = -1;
+		/** The time between mark event firing. No idea why this is needed, but it's here.
+		 * @type integer
+		 * @private
+		 */
 		this._coolDown = 5;
 		
+		// Initial mark at
 		var t = this._entity.scheme && this._entity.scheme.tilePointIn(
 			this._entity.x+(this._entity.prop("width")/2), this._entity.y+(this._entity.prop("height")/2)
 		);
@@ -23,25 +50,31 @@ load.provide("dusk.behave.MarkTrigger", (function() {
 		
 		if(t) TileMap.tileData.free(t);
 		
-		this.entityEvent.listen(this._markTriggerFrame.bind(this), "frame");
+		this.entityEvent.listen(_frame.bind(this), "frame");
 	};
 	MarkTrigger.prototype = Object.create(Behave.prototype);
-
-	MarkTrigger.prototype._markTriggerFrame = function(name, e) {
+	
+	/** Used to handle frame events.
+	 * @param {object} e The event.
+	 * @private
+	 */
+	var _frame = function(e) {
 		if(this._coolDown) this._coolDown --;
 		
 		if(!this._entity.scheme) return;
 		
+		// Get the tile the entity is in
 		var t = this._entity.scheme.tilePointIn(
 			this._entity.x+(this._entity.prop("width")/2), this._entity.y+(this._entity.prop("height")/2)
 		);
 		
+		// Clear the mark we are currently at if we are not at a mark
 		if(t[1] != 1) {
 			this._markAt = -1;
 		}
 		
-		if(t[1] == 1 && t[0] != this._markAt
-		) {
+		// And if we are at a mark, fire the event
+		if(t[1] == 1 && t[0] != this._markAt) {
 			this._markAt = t[0];
 			
 			if(!this._coolDown) {
@@ -53,10 +86,11 @@ load.provide("dusk.behave.MarkTrigger", (function() {
 			}
 		}
 		
+		// Free the tile
 		TileMap.tileData.free(t);
 	};
-
-	/** Workshop data used by `{@link dusk.sgui.EntityWorkshop}`.
+	
+	/** Workshop data used by `dusk.sgui.EntityWorkshop`.
 	 * @static
 	 */
 	MarkTrigger.workshopData = {
@@ -65,10 +99,7 @@ load.provide("dusk.behave.MarkTrigger", (function() {
 			
 		]
 	};
-
-	Object.seal(MarkTrigger);
-	Object.seal(MarkTrigger.prototype);
-
+	
 	entities.registerBehaviour("MarkTrigger", MarkTrigger);
 	
 	return MarkTrigger;
