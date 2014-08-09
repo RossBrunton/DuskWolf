@@ -145,7 +145,7 @@ load.provide("dusk.sgui.Label", (function() {
 		 * @type dusk.EventDispatcher
 		 * @since 0.0.21-alpha
 		 */
-		this.onChange = new EventDispatcher("dusk.sgui.Label.onChange", EventDispatcher.MODE_AND);
+		this.onChange = new EventDispatcher("dusk.sgui.Label.onChange");
 		/** Event dispatcher fired after the Label changes its content. There is no way to cancel this, and it is fired
 		 *  after `{@link dusk.sgui.Label#onChange}` if the change is to be made.
 		 * 
@@ -191,7 +191,7 @@ load.provide("dusk.sgui.Label", (function() {
 		 * @type dusk.EventDispatcher
 		 * @protected
 		 */
-		this._command = new EventDispatcher("dusk.sgui.Label._command", EventDispatcher.MODE_LAST);
+		this._command = new EventDispatcher("dusk.sgui.Label._command");
 		this._command.listen((function(e){return [null, ""];}).bind(this));
 		this._command.listen((function(e){return [null, "["];}).bind(this), "[");
 		this._command.listen((function(e){return [Label._EVENT_BOLD, ""];}).bind(this),"b");
@@ -603,7 +603,7 @@ load.provide("dusk.sgui.Label", (function() {
 		set: function(value) {
 			if(this._text != value) {
 				if(!this.validFilter || !this.validCancel || this.validFilter.test(value)) {
-					if(this.onChange.fire({"component":this, "text":""+value})) {
+					if(this.onChange.fireAnd({"component":this, "text":""+value})) {
 						this._text = ""+value;
 						this._updateCache(true);
 						this.postChange.fire({"component":this, "text":""+value});
@@ -637,8 +637,8 @@ load.provide("dusk.sgui.Label", (function() {
 			var commandStr = text.match(/^\[([^\]]*?)\]/i);
 			var commands = commandStr[1].split(/\s/);
 			
-			return this._command.fire({"command":commands[0].toLowerCase(), "args":commands}, commands[0].toLowerCase())
-				.concat([commandStr[0].length]);
+			return this._command.fireOne({"command":commands[0].toLowerCase(), "args":commands},
+				commands[0].toLowerCase()).concat([commandStr[0].length]);
 		}else{
 			return [null, text.charAt(0), 1];
 		}

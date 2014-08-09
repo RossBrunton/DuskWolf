@@ -27,7 +27,7 @@ load.provide("dusk.Range", (function() {
 		 *  This can be changed, and will alter the value of the range.
 		 * @type dusk.EventDispatcher
 		 */
-		this.onChange = new EventDispatcher("dusk.Range.onChange", EventDispatcher.MODE_PASS);
+		this.onChange = new EventDispatcher("dusk.Range.onChange");
 		/** Internal property for the current value.
 		 * @type integer|float
 		 * @private
@@ -67,7 +67,7 @@ load.provide("dusk.Range", (function() {
 			if(value > this.max) value = this.max;
 			if(this._value == value) return;
 			this._value = value;
-			this._value = this.onChange.fire({"value":this._value}, value).value;
+			this._value = this.onChange.firePass({"value":this._value}, value).value;
 		}
 	});
 

@@ -91,7 +91,7 @@ load.provide("dusk.sgui.Grid", (function() {
 		 * @protected
 		 * @since 0.0.17-alpha
 		 */
-		this._populationEvent = new EventDispatcher("dusk.sgui.Grid._populationEvent", EventDispatcher.MODE_PASS);
+		this._populationEvent = new EventDispatcher("dusk.sgui.Grid._populationEvent");
 		
 		//Prop masks
 		this._registerPropMask("vspacing", "vspacing");
@@ -128,7 +128,7 @@ load.provide("dusk.sgui.Grid", (function() {
 		if(!Array.isArray(child)) child = [child];
 		
 		//Fire before event
-		child = this._populationEvent.fire({"action":"before", "child":child}, "before").child;
+		child = this._populationEvent.firePass({"action":"before", "child":child}, "before").child;
 		
 		//Delete all the existing ones, or all the out of range one
 		if(!this.recycle) {
@@ -143,7 +143,7 @@ load.provide("dusk.sgui.Grid", (function() {
 		}
 		
 		if(this.rows <= 0 || this.cols <= 0) {
-			this._populationEvent.fire({"action":"complete", "child":child}, "complete");
+			this._populationEvent.firePass({"action":"complete", "child":child}, "complete");
 			return;
 		}
 		
@@ -169,7 +169,7 @@ load.provide("dusk.sgui.Grid", (function() {
 				}
 				
 				// Fire the event
-				com = this._populationEvent.fire({"action":"create", "current":child[p], "child":child, "component":com,
+				com = this._populationEvent.firePass({"action":"create", "current":child[p], "child":child, "component":com,
 					"globals":this.globals
 				}, "create").component;
 				

@@ -19,12 +19,11 @@ load.provide("dusk.EventDispatcher", (function() {
 	 * Similarly, `propsNo` will only fire if the properties specified are NOT equal to the event properties.
 	 * 
 	 * @param {string} name A name for the event dispatcher; used for identifying it in debbuging.
-	 * @param {integer=dusk.EventDispatcher.MODE_NONE} mode The current behaviour used for managing return values.
 	 * @param {integer=dusk.EventDispatcher.FILTER_EQUALS} filterType The current filter type.
 	 * @since 0.0.14-alpha
 	 * @constructor
 	 */
-	var EventDispatcher = function(name, mode, filterType) {
+	var EventDispatcher = function(name, filterType) {
 		/** All the listeners; each element is an array in the form `[callback, propsYes, propsNo, scope]`.
 		 * @type array
 		 * @private
@@ -37,16 +36,6 @@ load.provide("dusk.EventDispatcher", (function() {
 		 */
 		this._name = name;
 		
-		/** The current mode of the EventDispatcher.
-		 * 
-		 * This must be a number equal to one of the MODE_* constants.
-		 *
-		 * This will determine the return value of `{@link dusk.EventDispatcher.fire}`, and what the listeners should 
-		 *  return.
-		 * @type integer
-		 */
-		this.mode = (mode === undefined)?EventDispatcher.MODE_NONE:mode;
-		
 		/** The filter type of the EventDispatcher
 		 * 
 		 * This must be an integer equal to one of the FILTER_* constants.
@@ -56,47 +45,6 @@ load.provide("dusk.EventDispatcher", (function() {
 		 */
 		this.filterType = (filterType === undefined)?EventDispatcher.FILTER_EQUALS:filterType;
 	};
-	
-	/** The default return mode, this will cause the fire method to return nothing.
-	 * 
-	 * @type integer
-	 * @constant
-	 * @value 0
-	 */
-	EventDispatcher.MODE_NONE = 0;
-	
-	/** The "and" mode, this will cause the fire method to return true only if all the listeners return true.
-	 * 
-	 * @type integer
-	 * @constant
-	 * @value 1
-	 */
-	EventDispatcher.MODE_AND = 1;
-	
-	/** The "or" mode, this will cause the fire method to return true only if at least one of the listeners return true.
-	 * 
-	 * @type integer
-	 * @constant
-	 * @value 2
-	 */
-	EventDispatcher.MODE_OR = 2;
-	
-	/** The "pass" mode, this will take the event object returned by a listener
-	 *   and then pass it to the next one and so on then finaly return that value.
-	 * 
-	 * @type integer
-	 * @constant
-	 * @value 3
-	 */
-	EventDispatcher.MODE_PASS = 3;
-	
-	/** The "last" mode, this will return the last non-undefined result returned by a listener.
-	 * 
-	 * @type integer
-	 * @constant
-	 * @value 4
-	 */
-	EventDispatcher.MODE_LAST = 4;
 	
 	
 	/** For a listener to fire, the value of the listener's filter must equal that of the fired event.
@@ -162,6 +110,20 @@ load.provide("dusk.EventDispatcher", (function() {
 	EventDispatcher.prototype.unlisten = function(id) {
 		this._listeners.splice(id, 1);
 	};
+	
+	/** Checks whether "test" should trigger the given filter based on this' filter type.
+	 * 
+	 * @param {*} filter The filter.
+	 * @param {*} test The value to check.
+	 * @return {boolean} Whether an event should be fired.
+	 * @since 0.0.21-alpha
+	 * @private
+	 */
+	EventDispatcher.prototype._checkFilter = function(filter, test) {
+		return (this.filterType == EventDispatcher.FILTER_EQUALS && filter == test)
+		|| (this.filterType == EventDispatcher.FILTER_MULTI && (filter & test))
+		|| (this.filterType == EventDispatcher.FILTER_ISIN && filter.indexOf(test) !== -1);
+	};
 
 	/** Fires an event; triggering all the listeners that apply.
 	 * 
@@ -169,221 +131,140 @@ load.provide("dusk.EventDispatcher", (function() {
 	 * @param {?*} filter The filter that listeners must adhere to.
 	 */
 	EventDispatcher.prototype.fire = function(event, filter) {
-		if(this.filterType == EventDispatcher.FILTER_EQUALS) {
-			return this._fireString(event, filter);
-		}else if(this.filterType == EventDispatcher.FILTER_MULTI) {
-			return this._fireInt(event, filter);
-		}else if(this.filterType == EventDispatcher.FILTER_ISIN) {
-			return this._fireArray(event, filter);
+		for(var i = 0; i < this._listeners.length; i ++) {
+			if(this._listeners[i] === null) continue;
+			
+			var l = this._listeners[i];
+			
+			//Check filter
+			if(l[1] !== undefined && !this._checkFilter(filter, l[1])) {
+				continue;
+			}
+			
+			//Fire listener
+			l[0](event);
 		}
 	};
 	
-	EventDispatcher.prototype._fireString = function(event, filter) {
-		if(this.mode == 0) {
-			for(var i = 0; i < this._listeners.length; i ++) {
-				if(this._listeners[i] === null) continue;
-				
-				var l = this._listeners[i];
-				
-				//Check filter
-				if(l[1] !== undefined && filter != l[1]) {
-					continue;
-				}
-				
-				//Fire listener
-				l[0](event);
-			}
-		}else{
-			var majorRet = null;
+	/** Fires an event; triggering all the listeners that apply, and returns true iff all of the listeners returned
+	 *  true.
+	 * 
+	 * @param {?object} event The event object to fire, and pass to all listeners. This may be undefined.
+	 * @param {?*} filter The filter that listeners must adhere to.
+	 * @param {?boolean} short If true, then this will return false when a listener returns false without calling the
+	 *  rest of the listeners.
+	 * @return {boolean} Whether all listeners returned true.
+	 * @since 0.0.21-alpha
+	 */
+	EventDispatcher.prototype.fireAnd = function(event, filter, short) {
+		var ret = true;
+		
+		for(var i = 0; i < this._listeners.length; i ++) {
+			if(this._listeners[i] === null) continue;
 			
-			switch(this.mode) {
-				case 1: //AND
-					majorRet = true;
-					break;
-				
-				case 2: //OR
-					majorRet = false;
-					break;
-				
-				case 3: //PASS
-					majorRet = event;
-					break;
+			var l = this._listeners[i];
+			
+			//Check filter
+			if(l[1] !== undefined && !this._checkFilter(filter, l[1])) {
+				continue;
 			}
 			
-			for(var i = 0; i < this._listeners.length; i ++) {
-				if(this._listeners[i] === null) continue;
-				
-				var l = this._listeners[i];
-				
-				//Check filter
-				if(l[1] !== undefined && filter != l[1]) {
-					continue;
-				}
-				
-				//Fire listener
-				var ret = l[0](event);
-			
-				switch(this.mode) {
-					case 1: //AND
-						majorRet = majorRet&&ret;
-						break;
-					
-					case 2: //OR
-						majorRet = majorRet||ret;
-						break;
-					
-					case 3: //PASS
-						majorRet = ret;
-						event = majorRet;
-						break;
-					
-					case 4: //LAST
-						majorRet = ret===undefined?majorRet:ret;
-						break;
-				}
-			}
-			
-			return majorRet;
+			//Fire listener
+			var ret = ret && l[0](event);
+			if(short && !ret) return false;
 		}
-	}
+		
+		return ret;
+	};
 	
-	EventDispatcher.prototype._fireInt = function(event, filter) {
-		if(this.mode == 0) {
-			for(var i = 0; i < this._listeners.length; i ++) {
-				if(this._listeners[i] === null) continue;
-				
-				var l = this._listeners[i];
-				
-				//Check filter
-				if(l[1] !== undefined && !(filter & l[1])) {
-					continue;
-				}
-				
-				//Fire listener
-				l[0](event);
-			}
-		}else{
-			var majorRet = null;
+	/** Fires an event; triggering all the listeners that apply, and returns true iff at least one of the listeners
+	 *  returned true.
+	 * 
+	 * @param {?object} event The event object to fire, and pass to all listeners. This may be undefined.
+	 * @param {?*} filter The filter that listeners must adhere to.
+	 * @param {?boolean} short If true, then this will return true when a listener returns true without calling the
+	 *  rest of the listeners.
+	 * @return {boolean} Whether one or more listeners returned true.
+	 * @since 0.0.21-alpha
+	 */
+	EventDispatcher.prototype.fireOr = function(event, filter, short) {
+		var ret = false;
+		
+		for(var i = 0; i < this._listeners.length; i ++) {
+			if(this._listeners[i] === null) continue;
 			
-			switch(this.mode) {
-				case 1: //AND
-					majorRet = true;
-					break;
-				
-				case 2: //OR
-					majorRet = false;
-					break;
-				
-				case 3: //PASS
-					majorRet = event;
-					break;
+			var l = this._listeners[i];
+			
+			//Check filter
+			if(l[1] !== undefined && !this._checkFilter(filter, l[1])) {
+				continue;
 			}
 			
-			for(var i = 0; i < this._listeners.length; i ++) {
-				if(this._listeners[i] === null) continue;
-				
-				var l = this._listeners[i];
-				
-				//Check filter
-				if(l[1] !== undefined && !(filter & l[1])) {
-					continue;
-				}
-				
-				//Fire listener
-				var ret = l[0](event);
-			
-				switch(this.mode) {
-					case 1: //AND
-						majorRet = majorRet&&ret;
-						break;
-					
-					case 2: //OR
-						majorRet = majorRet||ret;
-						break;
-					
-					case 3: //PASS
-						majorRet = ret;
-						event = majorRet;
-						break;
-					
-					case 4: //LAST
-						majorRet = ret===undefined?majorRet:ret;
-						break;
-				}
-			}
-			
-			return majorRet;
+			//Fire listener
+			var ret = ret || l[0](event);
+			if(short && ret) return true;
 		}
-	}
+		
+		return ret;
+	};
 	
-	EventDispatcher.prototype._fireArray = function(event, filter) {
-		if(this.mode == 0) {
-			for(var i = 0; i < this._listeners.length; i ++) {
-				if(this._listeners[i] === null) continue;
-				
-				var l = this._listeners[i];
-				
-				//Check filter
-				if(l[1] && filter.indexOf(l[1]) === -1) {
-					continue;
-				}
-				
-				//Fire listener
-				l[0](event);
-			}
-		}else{
-			var majorRet = null;
+	/** Fires an event; triggering all the listeners that apply. With this function, the event object for a listener is
+	 * the return value of the previous listener.
+	 * 
+	 * @param {?object} event The event object to pass to the first listener.
+	 * @param {?*} filter The filter that listeners must adhere to.
+	 * @return {object} The value of the last listener's return value.
+	 * @since 0.0.21-alpha
+	 */
+	EventDispatcher.prototype.firePass = function(event, filter) {
+		for(var i = 0; i < this._listeners.length; i ++) {
+			if(this._listeners[i] === null) continue;
 			
-			switch(this.mode) {
-				case 1: //AND
-					majorRet = true;
-					break;
-				
-				case 2: //OR
-					majorRet = false;
-					break;
-				
-				case 3: //PASS
-					majorRet = event;
-					break;
+			var l = this._listeners[i];
+			
+			//Check filter
+			if(l[1] !== undefined && !this._checkFilter(filter, l[1])) {
+				continue;
 			}
 			
-			for(var i = 0; i < this._listeners.length; i ++) {
-				if(this._listeners[i] === null) continue;
-				
-				var l = this._listeners[i];
-				
-				//Check filter
-				if(l[1] && filter.indexOf(l[1]) === -1) {
-					continue;
-				}
-				
-				//Fire listener
-				var ret = l[0](event);
-			
-				switch(this.mode) {
-					case 1: //AND
-						majorRet = majorRet&&ret;
-						break;
-					
-					case 2: //OR
-						majorRet = majorRet||ret;
-						break;
-					
-					case 3: //PASS
-						majorRet = ret;
-						event = majorRet;
-						break;
-					
-					case 4: //LAST
-						majorRet = ret===undefined?majorRet:ret;
-						break;
-				}
-			}
-			
-			return majorRet;
+			//Fire listener
+			var ret = l[0](event);
+			if(ret !== undefined) event = ret;
 		}
-	}
+		
+		return event;
+	};
+	
+	/** Fires an event; triggering all the listeners that apply and returns the value of one of the listeners return
+	 *  values.
+	 * 
+	 * @param {?object} event The event object to pass to the first listener.
+	 * @param {?*} filter The filter that listeners must adhere to.
+	 * @param {boolean} short If true, then only one listener will fire (the first valid one found), otherwise all are
+	 *  fired.
+	 * @return {object} The value of the last listener's return value.
+	 * @since 0.0.21-alpha
+	 */
+	EventDispatcher.prototype.fireOne = function(event, filter, short) {
+		var majorRet = undefined;
+		for(var i = 0; i < this._listeners.length; i ++) {
+			if(this._listeners[i] === null) continue;
+			
+			var l = this._listeners[i];
+			
+			//Check filter
+			if(l[1] !== undefined && !this._checkFilter(filter, l[1])) {
+				continue;
+			}
+			
+			//Fire listener
+			var ret = l[0](event);
+			if(ret !== undefined) majorRet = ret;
+			if(short) return majorRet;
+		}
+		
+		return majorRet;
+	};
 	
 	/** Returns whether this EventDispatcher has any listeners or not.
 	 * 

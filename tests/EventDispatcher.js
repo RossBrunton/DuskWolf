@@ -10,13 +10,11 @@ load.provide("test.dusk.EventDispatcher", (function() {
 		tester.start("Construction");
 		
 		var none = new EventDispatcher("tester.none");
-		tester.assertEqual(none.mode, EventDispatcher.MODE_NONE);
 		
-		none = new EventDispatcher("tester.none", EventDispatcher.MODE_NONE);
-		var and = new EventDispatcher("tester.and", EventDispatcher.MODE_AND);
-		var or = new EventDispatcher("tester.or", EventDispatcher.MODE_OR);
-		var pass = new EventDispatcher("tester.pass", EventDispatcher.MODE_PASS);
-		var last = new EventDispatcher("tester.last", EventDispatcher.MODE_LAST);
+		var and = new EventDispatcher("tester.and");
+		var or = new EventDispatcher("tester.or");
+		var pass = new EventDispatcher("tester.pass");
+		var last = new EventDispatcher("tester.last");
 		
 		tester.start("Simple Event Firing");
 		
@@ -69,33 +67,33 @@ load.provide("test.dusk.EventDispatcher", (function() {
 		none.unlisten(a);
 		
 		a = and.listen(t);
-		tester.assertTrue(and.fire());
+		tester.assertTrue(and.fireAnd());
 		b = and.listen(f);
-		tester.assertFalse(and.fire());
+		tester.assertFalse(and.fireAnd());
 		and.unlisten(a);
 		and.unlisten(b);
 		
 		a = or.listen(t);
-		tester.assertTrue(or.fire());
+		tester.assertTrue(or.fireOr());
 		b = or.listen(f);
-		tester.assertTrue(or.fire());
+		tester.assertTrue(or.fireOr());
 		or.unlisten(a);
-		tester.assertFalse(or.fire());
+		tester.assertFalse(or.fireOr());
 		or.unlisten(b);
 		
 		a = pass.listen(i);
-		tester.assertEqual(pass.fire(0), 1);
+		tester.assertEqual(pass.firePass(0), 1);
 		b = pass.listen(i);
-		tester.assertEqual(pass.fire(0), 2);
+		tester.assertEqual(pass.firePass(0), 2);
 		pass.unlisten(a);
 		pass.unlisten(b);
 		
 		a = last.listen(t);
-		tester.assertTrue(last.fire());
+		tester.assertTrue(last.fireOne());
 		b = last.listen(f);
-		tester.assertFalse(last.fire());
+		tester.assertFalse(last.fireOne());
 		last.unlisten(b);
-		tester.assertTrue(last.fire());
+		tester.assertTrue(last.fireOne());
 		last.unlisten(a);
 	});
 })());

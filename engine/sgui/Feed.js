@@ -61,7 +61,7 @@ load.provide("dusk.sgui.Feed", (function() {
 		 * @type dusk.EventDispatcher
 		 * @protected
 		 */
-		this._appendEvent = new EventDispatcher("dusk.sgui.Feed._appendEvent", EventDispatcher.MODE_PASS);
+		this._appendEvent = new EventDispatcher("dusk.sgui.Feed._appendEvent");
 		
 		//Prop masks
 		this._registerPropMask("spacing", "spacing");
@@ -89,7 +89,7 @@ load.provide("dusk.sgui.Feed", (function() {
 		if(!Array.isArray(child)) child = [child];
 		
 		//Fire before event
-		child = this._appendEvent.fire({"action":"before", "child":child}, "before").child;
+		child = this._appendEvent.firePass({"action":"before", "child":child}, "before").child;
 		
 		for(var i = 0; i < child.length; i++){
 			var com = null;
@@ -109,7 +109,7 @@ load.provide("dusk.sgui.Feed", (function() {
 				console.warn("Feed tried to append element with no type.");
 			}
 			
-			var com = this._appendEvent.fire({"action":"create", "current":child[i], "child":child, "component":com,
+			var com = this._appendEvent.firePass({"action":"create", "current":child[i], "child":child, "component":com,
 				"globals":this.globals
 			}, "create").component;
 			
@@ -118,7 +118,7 @@ load.provide("dusk.sgui.Feed", (function() {
 			this.alterChildLayer(name, "+");
 		}
 		
-		this._appendEvent.fire({"action":"complete", "child":child}, "complete");
+		this._appendEvent.firePass({"action":"complete", "child":child}, "complete");
 	};
 	Object.defineProperty(Feed.prototype, "__append", {
 		set: function(value) {this.append(value);},

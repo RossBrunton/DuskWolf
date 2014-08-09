@@ -35,7 +35,7 @@ load.provide("dusk.behave.Behave", (function() {
 		 * which contains the name of the event fired.
 		 * @type dusk.EventDispatcher
 		 */
-		this.entityEvent = new EventDispatcher("dusk.behave.Behave.entityEvent", EventDispatcher.MODE_LAST);
+		this.entityEvent = new EventDispatcher("dusk.behave.Behave.entityEvent");
 	};
 	
 	/** This accesses or sets behaviour data of the entity.

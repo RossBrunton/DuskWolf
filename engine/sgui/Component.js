@@ -137,7 +137,7 @@ load.provide("dusk.sgui.Component", (function() {
 		 * @since 0.0.17-alpha
 		 */
 		this.dirPress = new EventDispatcher(
-			"dusk.sgui.Component.dirPress", EventDispatcher.MODE_AND, EventDispatcher.FILTER_MULTI
+			"dusk.sgui.Component.dirPress", EventDispatcher.FILTER_MULTI
 		);
 		/** Fired when an interaction event is fired.
 		 * 
@@ -145,16 +145,14 @@ load.provide("dusk.sgui.Component", (function() {
 		 * @type dusk.EventDispatcher
 		 * @since 0.0.21-alpha
 		 */
-		this.onInteract = new EventDispatcher("dusk.sgui.Component.onInteract", EventDispatcher.MODE_AND);
+		this.onInteract = new EventDispatcher("dusk.sgui.Component.onInteract");
 		/** Fired when a control event is fired.
 		 * 
 		 * All listeners must return true if you want it to bubble up to its parent.
 		 * @type dusk.EventDispatcher
 		 * @since 0.0.21-alpha
 		 */
-		this.onControl = new EventDispatcher(
-			"dusk.sgui.Component.onControl", EventDispatcher.MODE_AND, EventDispatcher.FILTER_ISIN
-		);
+		this.onControl = new EventDispatcher("dusk.sgui.Component.onControl", EventDispatcher.FILTER_ISIN);
 		/** An event dispatcher that is fired once per frame.
 		 * 
 		 * The event object has no properties.
@@ -172,7 +170,7 @@ load.provide("dusk.sgui.Component", (function() {
 		 * @type dusk.EventDispatcher
 		 * @since 0.0.17-alpha
 		 */
-		this.action = new EventDispatcher("dusk.sgui.Component.action", EventDispatcher.MODE_AND);
+		this.action = new EventDispatcher("dusk.sgui.Component.action");
 		/** An event dispatcher that is fired when the action control `"sgui_cancel"` is pressed.
 		 * 	By default, this is the "esc" key, and should be the key that would cancel a selection.
 		 * 
@@ -183,7 +181,7 @@ load.provide("dusk.sgui.Component", (function() {
 		 * @type dusk.EventDispatcher
 		 * @since 0.0.21-alpha
 		 */
-		this.cancel = new EventDispatcher("dusk.sgui.Component.cancel", EventDispatcher.MODE_AND);
+		this.cancel = new EventDispatcher("dusk.sgui.Component.cancel");
 		/** Fired as part of the drawing proccess.
 		 * 
 		 * The event object is a 2D canvas rendering context, which is expected to be drawn on.
@@ -428,31 +426,31 @@ load.provide("dusk.sgui.Component", (function() {
 		
 		if(nofire) return false;
 		
-		var dirReturn = this.onInteract.fire(e, e.filter);
+		var dirReturn = this.onInteract.fireAnd(e, e.filter);
 		
 		if(dirReturn) {
 			// Directions
 			var cons = controls.interactionControl(e);
 			if(cons.indexOf("sgui_left") !== -1) {
-				if((dirReturn = this.dirPress.fire({"dir":c.DIR_LEFT, "e":e}, c.DIR_LEFT)) && !this._noFlow
+				if((dirReturn = this.dirPress.fireAnd({"dir":c.DIR_LEFT, "e":e}, c.DIR_LEFT)) && !this._noFlow
 				&& this.leftFlow && this.container.flow(this.leftFlow)) return false;
 			
 			}else if(cons.indexOf("sgui_up") !== -1) {
-				if((dirReturn = this.dirPress.fire({"dir":c.DIR_UP, "e":e}, c.DIR_UP)) && !this._noFlow
+				if((dirReturn = this.dirPress.fireAnd({"dir":c.DIR_UP, "e":e}, c.DIR_UP)) && !this._noFlow
 				&& this.upFlow && this.container.flow(this.upFlow)) return false;
 			
 			}else if(cons.indexOf("sgui_right") !== -1) {
-				if((dirReturn = this.dirPress.fire({"dir":c.DIR_RIGHT, "e":e}, c.DIR_RIGHT)) && !this._noFlow
+				if((dirReturn = this.dirPress.fireAnd({"dir":c.DIR_RIGHT, "e":e}, c.DIR_RIGHT)) && !this._noFlow
 				&& this.rightFlow && this.container.flow(this.rightFlow)) return false;
 			
 			}else if(cons.indexOf("sgui_down") !== -1) {
-				if((dirReturn = this.dirPress.fire({"dir":c.DIR_DOWN, "e":e}, c.DIR_DOWN)) && !this._noFlow
+				if((dirReturn = this.dirPress.fireAnd({"dir":c.DIR_DOWN, "e":e}, c.DIR_DOWN)) && !this._noFlow
 				&& this.downFlow && this.container.flow(this.downFlow)) return false;
 			
 			}else if(cons.indexOf("sgui_action") !== -1) {
-				return this.action.fire({"keyPress":e, "component":this});
+				return this.action.fireAnd({"keyPress":e, "component":this});
 			}else if(cons.indexOf("sgui_cancel") !== -1) {
-				return this.cancel.fire({"keyPress":e, "component":this});
+				return this.cancel.fireAnd({"keyPress":e, "component":this});
 			}
 		}
 		
@@ -471,7 +469,7 @@ load.provide("dusk.sgui.Component", (function() {
 	 * @return {boolean} Whether the parent container should run its own actions.
 	 */
 	Component.prototype.control = function(e, controls) {
-		var dirReturn = this.onControl.fire(e, controls);
+		var dirReturn = this.onControl.fireAnd(e, controls);
 		
 		return dirReturn;
 	};

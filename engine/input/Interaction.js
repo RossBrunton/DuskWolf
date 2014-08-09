@@ -12,7 +12,7 @@ load.provide("dusk.input.interaction", (function() {
 	var interaction = {};
 	
 	interaction.on = new EventDispatcher(
-		"dusk.input.interaction.on", EventDispatcher.MODE_AND, EventDispatcher.FILTER_MULTI
+		"dusk.input.interaction.on", EventDispatcher.FILTER_MULTI
 	);
 	
 	interaction.KEY_DOWN = 1;
@@ -33,7 +33,7 @@ load.provide("dusk.input.interaction", (function() {
 		obj.type = interaction.KEY_DOWN;
 		obj.filter = (obj.which << 16) | obj.type;
 		
-		var toRet = interaction.on.fire(obj, obj.filter);
+		var toRet = interaction.on.fireAnd(obj, obj.filter);
 		_interactions.free(obj);
 		return toRet;
 	});
@@ -49,7 +49,7 @@ load.provide("dusk.input.interaction", (function() {
 		obj.type = interaction.KEY_UP;
 		obj.filter = (obj.which << 16) | obj.type;
 		
-		var toRet = interaction.on.fire(obj, obj.filter);
+		var toRet = interaction.on.fireAnd(obj, obj.filter);
 		_interactions.free(obj);
 		return toRet;
 	});
@@ -67,7 +67,7 @@ load.provide("dusk.input.interaction", (function() {
 			obj.filter = (obj.which << 16) | obj.type;
 		}
 		
-		var toRet = interaction.on.fire(obj, obj.filter);
+		var toRet = interaction.on.fireAnd(obj, obj.filter);
 		_interactions.free(obj);
 		return toRet;
 	});
@@ -85,7 +85,7 @@ load.provide("dusk.input.interaction", (function() {
 			obj.filter = (obj.which << 16) | obj.type;
 		}
 		
-		var toRet = interaction.on.fire(obj, obj.filter);
+		var toRet = interaction.on.fireAnd(obj, obj.filter);
 		_interactions.free(obj);
 		return toRet;
 	});
@@ -101,7 +101,7 @@ load.provide("dusk.input.interaction", (function() {
 		obj.type = interaction.MOUSE_CLICK;
 		obj.filter = (obj.which << 16) | obj.type
 		
-		var toRet = interaction.on.fire(obj, obj.filter);
+		var toRet = interaction.on.fireAnd(obj, obj.filter);
 		_interactions.free(obj);
 		return toRet;
 	});
@@ -114,14 +114,12 @@ load.provide("dusk.input.interaction", (function() {
 		obj.type = interaction.MOUSE_MOVE;
 		obj.filter = obj.type;
 		
-		var toRet = interaction.on.fire(obj, obj.filter);
+		var toRet = interaction.on.fireAnd(obj, obj.filter);
 		_interactions.free(obj);
 		return toRet;
 	});
 	
 	var _interactions = new Pool(Object);
-	
-	Object.seal(interaction);
 	
 	return interaction;
 })());

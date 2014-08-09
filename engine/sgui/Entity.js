@@ -232,7 +232,7 @@ load.provide("dusk.sgui.Entity", (function() {
 		 * @type dusk.EventDispatcher
 		 * @since 0.0.21-alpha
 		 */
-		this.entityEvent = new EventDispatcher("dusk.sgui.Entity.entityEvent", EventDispatcher.MODE_LAST);
+		this.entityEvent = new EventDispatcher("dusk.sgui.Entity.entityEvent");
 		
 		/** The animation data for the entity, in the same format as described in the entity type
 		 *  description. For speed, the second element of the value will be sliced once, and so will be
@@ -729,11 +729,11 @@ load.provide("dusk.sgui.Entity", (function() {
 		if(!data) data = {};
 		data.name = event;
 		
-		output[0] = this.entityEvent.fire(data, event);
+		output[0] = this.entityEvent.fireOne(data, event);
 		
 		var keys = Object.keys(this._behaviours);
 		for(var b = keys.length-1; b >= 0; b --) {
-			output.push(this._behaviours[keys[b]].entityEvent.fire(data, event));
+			output.push(this._behaviours[keys[b]].entityEvent.fireOne(data, event));
 		}
 		
 		if(event in this._behaviourListeners) {

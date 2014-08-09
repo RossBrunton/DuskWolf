@@ -30,7 +30,7 @@ load.provide("dusk.input.keyboard", (function() {
 	 * @type dusk.EventDispatcher
 	 * @since 0.0.14-alpha
 	 */
-	keyboard.keyPress = new EventDispatcher("dusk.input.keyboard.keyPress", EventDispatcher.MODE_AND);
+	keyboard.keyPress = new EventDispatcher("dusk.input.keyboard.keyPress");
 	
 	/** An event dispatcher which fires when a key is released after being pressed.
 	 * 
@@ -43,7 +43,7 @@ load.provide("dusk.input.keyboard", (function() {
 	
 	dusk.getElement().addEventListener("keydown", function(e){
 		if(!_keys[e.keyCode]) {
-			if(!keyboard.keyPress.fire(e, e.keyCode)) false;//e.preventDefault(); //Seems to stop text input
+			if(!keyboard.keyPress.fireAnd(e, e.keyCode)) false;//e.preventDefault(); //Seems to stop text input
 		}
 		
 		//Block keys from moving page

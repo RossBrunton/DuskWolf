@@ -83,7 +83,7 @@ load.provide("dusk.sgui.MouseAugment", (function() {
 		 * The event object has at least a property `button`, which is the number of the button clicked.
 		 * @type dusk.EventDispatcher
 		 */
-		this.onClick = new EventDispatcher("dusk.sgui.MouseAugment.onClick", EventDispatcher.MODE_AND);
+		this.onClick = new EventDispatcher("dusk.sgui.MouseAugment.onClick");
 	};
 	
 	/** Handles a mouse click. This will fire `{@link dusk.sgui.MouseAugment.onClick}`, and possibly fire the 
@@ -100,9 +100,9 @@ load.provide("dusk.sgui.MouseAugment", (function() {
 		if(this._component instanceof Group && !this._component.containerClick(e))
 			return false;
 		
-		if(this.onClick.fire(e)) {
+		if(this.onClick.fireAnd(e)) {
 			if(this.action) {
-				return this._component.action.fire({"click":e, "component":this._component});
+				return this._component.action.fireAnd({"click":e, "component":this._component});
 			}
 		}
 		
