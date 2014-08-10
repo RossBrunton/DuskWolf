@@ -327,11 +327,11 @@ load.provide("dusk.sgui.Entity", (function() {
 		 * @type integer
 		 */
 		this.collisionOffsetY = 0;
-		/** The width of this entity's hitbox plus `{@link dusk.sgui.Entity#collisionOffsetX}`.
+		/** The width of this entity's hitbox plus `collisionOffsetX`.
 		 * @type integer
 		 */
 		this.collisionWidth = 0;
-		/** The height of this entity's hitbox plus `{@link dusk.sgui.Entity#collisionOffsetY}`.
+		/** The height of this entity's hitbox plus `collisionOffsetY`.
 		 * @type integer
 		 */
 		this.collisionHeight = 0;
@@ -342,7 +342,7 @@ load.provide("dusk.sgui.Entity", (function() {
 		 */
 		this.collisionMark = "";
 		
-		/** The `{@link dusk.sgui.TileMap}` instance that serves as this entity's schematic layer.
+		/** The `dusk.sgui.TileMap` instance that serves as this entity's schematic layer.
 		 * 
 		 * This will be used to calculate collisions with wall.
 		 * @type ?dusk.sgui.TileMap
@@ -352,8 +352,7 @@ load.provide("dusk.sgui.Entity", (function() {
 		 * @type string
 		 */
 		this.schemePath = null;
-		/** The `{@link dusk.sgui.ParticleField}` instance that this will insert it's particle effects
-		 *  into.
+		/** The `dusk.sgui.ParticleField` instance that this will insert its particle effects into.
 		 * @type ?dusk.sgui.ParticleField
 		 */
 		this.particles = null;
@@ -361,6 +360,14 @@ load.provide("dusk.sgui.Entity", (function() {
 		 * @type string
 		 */
 		this.particlesPath = null;
+		/** The `dusk.sgui.FluidLayer` instance that this will use.
+		 * @type ?dusk.sgui.FluidLayer
+		 */
+		this.fluid = null;
+		/** The path to the particle field instance. Setting this will update it.
+		 * @type string
+		 */
+		this.fluidPath = null;
 		
 		/** Use this to check if the entity is terminated or not, this is set to true by
 		 *  `{@link dusk.sgui.Entity#terminate}`, and means the entity is set for deleting when an
@@ -414,6 +421,7 @@ load.provide("dusk.sgui.Entity", (function() {
 		//this._registerPropMask("dy", "dy");
 		if(!this.isLight()) this._registerPropMask("scheme", "schemePath");
 		if(!this.isLight()) this._registerPropMask("particles", "particlesPath");
+		if(!this.isLight()) this._registerPropMask("fluid", "fluidPath");
 		if(!this.isLight()) this._registerPropMask("entType", "entType");
 		
 		//Listeners
@@ -453,6 +461,17 @@ load.provide("dusk.sgui.Entity", (function() {
 		
 		set: function(value) {
 			if(value) this.particles = this.path(value);
+		}
+	});
+	
+	//fluidPath
+	Object.defineProperty(Entity.prototype, "fluidPath", {
+		get: function() {
+			return this.fluid?this.fluid.fullPath():undefined;
+		},
+		
+		set: function(value) {
+			if(value) this.fluid = this.path(value);
 		}
 	});
 	
@@ -1225,6 +1244,22 @@ load.provide("dusk.sgui.Entity", (function() {
 		this._touchersNonSolid[dir].push(entity);
 	};
 	
+	
+	// Fluid
+	/** Returns 0 if the entity is above the fluid level completely, 1 if it is below the fluid level, and a value
+	 *  between 0 and 1 proportional to how much of the entity is below the fluid level.
+	 * @return {float} How under the fluid this entity is.
+	 * @since 0.0.21-alpha
+	 */
+	Entity.prototype.underFluid = function() {
+		if(!this.fluid) return 0.0;
+		
+		var start = this.fluid.start();
+		
+		if(this.y - start < 0) return 0.0;
+		if(this.y - start > this.height) return 1.0;
+		return (this.y - start) / this.height;
+	};
 	
 	
 	/*dusk.sgui.Entity.prototype.teather = function(target, dir) {

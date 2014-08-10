@@ -16,6 +16,7 @@ load.provide("example.platLong", (function() {
 	load.require("dusk.behave.Fall");
 	load.require("dusk.behave.Push");
 	load.require("dusk.behave.Gravity");
+	load.require("dusk.behave.Buoyancy");
 	var Pickup = load.require("dusk.behave.Pickup");
 	load.require("dusk.behave.HealthRestore");
 	var InteractableTarget = load.require("dusk.behave.InteractableTarget");
@@ -86,11 +87,12 @@ load.provide("example.platLong", (function() {
 	entities.types.createNewType("player", {
 		"behaviours":{
 			"Persist":true, "PlayerControl":true, "Jumper":true, "MarkTrigger":true, "Killable":true,
-			"Gravity":true, "LeftRightControl":true, "Spawner":true, "Scriptable":true, "InteractableHost":true
+			"Gravity":true, "LeftRightControl":true, "Spawner":true, "Scriptable":true, "InteractableHost":true,
+			"Buoyancy":true,
 		},
 		"data":{
 			"hp":5, "maxHp":5, "collisionOffsetX":10, "collisionWidth":22, "collisionOffsetY":3, "haccel":0.2,
-			"hspeed":10, "airhaccelmult":0.0,
+			"hspeed":10, "airhaccelmult":0.5, "fluidhaccelmult":{"water":0.5}, "buoyancy":{"water":3}, "terminalBuoyancy":{"water":7},
 			"spawns":{
 				"shot":{
 					"type":"shot", "horBase":"facing", "verBase":"middle", "cooldown":10,

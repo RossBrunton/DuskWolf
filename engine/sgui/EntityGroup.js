@@ -53,6 +53,9 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 		this._scheme = null;
 		this.scheme = null;
 		
+		this.particles = null;
+		this.fluid = null;
+		
 		this._selectedEntity = null;
 		this._offsetX = 0;
 		this._offsetY = 0;
@@ -490,6 +493,8 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 		
 		if(this.scheme) dropped.scheme = this.scheme;
 		if(this.particles) dropped.particles = this.particles;
+		if(this.fluid) dropped.fluid = this.fluid;
+		
 		this._entities.push(dropped);
 		dropped.onDelete.listen(EntityGroup.prototype._entityDeleted.bind(this));
 		if(takeFocus) this.flow(entity.name);

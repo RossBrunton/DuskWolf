@@ -47,6 +47,7 @@ load.provide("dusk.behave.LeftRightControl", (function() {
 		this._data("haccel", 2, true);
 		this._data("hspeed", 7, true);
 		this._data("airhaccelmult", 1.0, true);
+		this._data("fluidhaccelmult", {}, true);
 		this._collide = false;
 		
 		this.entityEvent.listen(_collide.bind(this), "collide");
@@ -57,6 +58,10 @@ load.provide("dusk.behave.LeftRightControl", (function() {
 	var _frame = function(e) {
 		var accel = this._data("haccel");
 		if(!this._entity.touchers(c.DIR_DOWN).length) accel *= this._data("airhaccelmult");
+		
+		if(this._entity.underFluid() > 0.0 && this._entity.fluid.fluidType in this._data("fluidhaccelmult")) {
+			accel *= this._data("fluidhaccelmult")[this._entity.fluid.fluidType];
+		}
 		
 		if(this._controlActive("left") && !this._collide) {
 			this._data("headingLeft", true);
@@ -88,6 +93,7 @@ load.provide("dusk.behave.LeftRightControl", (function() {
 			["haccel", "integer", "Acceleration left and right."],
 			["hspeed", "integer", "Fastest speed left and right."],
 			["airhaccelmult", "float", "Multiplier for left and right acceleration when in the air."],
+			["fluidhaccelmult", "object", "Multiplier for left and right acceleration when in a given fluid."],
 		]
 	});
 	

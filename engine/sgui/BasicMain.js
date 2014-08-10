@@ -10,6 +10,7 @@ load.provide("dusk.sgui.BasicMain", (function() {
 	var EntityGroup = load.require("dusk.sgui.EntityGroup");
 	var ParticleField = load.require("dusk.sgui.ParticleField");
 	var TransitionManager = load.require("dusk.sgui.TransitionManager");
+	var FluidLayer = load.require("dusk.sgui.FluidLayer");
 	var TileRegionGenerator = load.require("dusk.sgui.TileRegionGenerator");
 	var Label = load.require("dusk.sgui.Label");
 	var editor = load.require("dusk.editor");
@@ -79,6 +80,9 @@ load.provide("dusk.sgui.BasicMain", (function() {
 		this.onControl.listen(
 			_addLayer.bind(this, BasicMain.LAYER_REGION), controls.addControl("basicmain_add_region", "R")
 		);
+		this.onControl.listen(
+			_addLayer.bind(this, BasicMain.LAYER_FLUID), controls.addControl("basicmain_add_fluid", "F")
+		);
 		
 		this.augment.listen((function(e) {
 			this.mouse.focus = false;
@@ -98,6 +102,7 @@ load.provide("dusk.sgui.BasicMain", (function() {
 	BasicMain.LAYER_PARTICLES = 0x08;
 	BasicMain.LAYER_TRANSITIONS = 0x10;
 	BasicMain.LAYER_REGION = 0x20;
+	BasicMain.LAYER_FLUID = 0x40;
 	
 	var _LAYER_COLOURS = ["#990000", "#009900", "#000099", "#999900", "#990099"];
 	
@@ -243,6 +248,11 @@ load.provide("dusk.sgui.BasicMain", (function() {
 					
 					break;
 				
+				case BasicMain.LAYER_FLUID:
+					this.get(val[i].name, "FluidLayer").parseProps({"upFlow":(i > 0?val[i-1].name:""), "layer":"+"});
+					
+					break;
+				
 				case BasicMain.LAYER_TRANSITIONS:
 					this.get(val[i].name, "TransitionManager")
 						.parseProps({"upFlow":(i > 0?val[i-1].name:""), "layer":"+"});
@@ -263,13 +273,14 @@ load.provide("dusk.sgui.BasicMain", (function() {
 		for(var i = entLayers.length-1; i >= 0; i --) {
 			entLayers[i].scheme = this.getFirstLayerOfType(BasicMain.LAYER_SCHEME);
 			entLayers[i].particles = this.getFirstLayerOfType(BasicMain.LAYER_PARTICLES);
+			entLayers[i].fluid = this.getFirstLayerOfType(BasicMain.LAYER_FLUID);
 			entLayers[i].width =
 				this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).width;
 			entLayers[i].height =
 				this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).height;
 		}
 		
-		var pLayers = this.getAllLayersOfType(BasicMain.LAYER_PARTICLES);
+		var pLayers = this.getAllLayersOfType(BasicMain.LAYER_PARTICLES | BasicMain.LAYER_FLUID);
 		for(var i = pLayers.length-1; i >= 0; i --) {
 			pLayers[i].width =
 				this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).width;
@@ -356,6 +367,9 @@ load.provide("dusk.sgui.BasicMain", (function() {
 					}
 					if(this._layers[i].type == BasicMain.LAYER_REGION) {
 						layerImg = "[img default/bmlayers/region.png] ";
+					}
+					if(this._layers[i].type == BasicMain.LAYER_FLUID) {
+						layerImg = "[img default/bmlayers/fluid.png] ";
 					}
 				}
 			}
@@ -444,8 +458,6 @@ load.provide("dusk.sgui.BasicMain", (function() {
 					this.get(this._layers[i].name).rows ++;
 				}
 			}
-			
-			return false;
 		}
 		
 		if(keyboard.isKeyPressed(189)) {
@@ -459,6 +471,17 @@ load.provide("dusk.sgui.BasicMain", (function() {
 				}
 				if(this.get(this._layers[i].name) instanceof TileRegionGenerator) {
 					this.get(this._layers[i].name).rows --;
+				}
+			}
+		}
+		
+		if(keyboard.isKeyPressed(187) || keyboard.isKeyPressed(189)) {
+			for(var i = this._layers.length-1; i >= 0; i --) {
+				if(this.get(this._layers[i].name) instanceof FluidLayer) {
+					this.get(this._layers[i].name).width =
+						this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).width;
+					this.get(this._layers[i].name).height =
+						this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).height;
 				}
 			}
 			
@@ -480,7 +503,6 @@ load.provide("dusk.sgui.BasicMain", (function() {
 					this.get(this._layers[i].name).rows ++;
 				}
 			}
-			return false;
 		}
 		
 		if(keyboard.isKeyPressed(189)) {
@@ -493,6 +515,18 @@ load.provide("dusk.sgui.BasicMain", (function() {
 					this.get(this._layers[i].name).rows --;
 				}
 			}
+		}
+		
+		if(keyboard.isKeyPressed(187) || keyboard.isKeyPressed(189)) {
+			for(var i = this._layers.length-1; i >= 0; i --) {
+				if(this.get(this._layers[i].name) instanceof FluidLayer) {
+					this.get(this._layers[i].name).width =
+						this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).width;
+					this.get(this._layers[i].name).height =
+						this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).height;
+				}
+			}
+			
 			return false;
 		}
 		
@@ -514,7 +548,6 @@ load.provide("dusk.sgui.BasicMain", (function() {
 					this.get(this._layers[i].name).cols ++;
 				}
 			}
-			return false;
 		}
 		
 		if(keyboard.isKeyPressed(189)) {
@@ -530,6 +563,18 @@ load.provide("dusk.sgui.BasicMain", (function() {
 					this.get(this._layers[i].name).cols --;
 				}
 			}
+		}
+		
+		if(keyboard.isKeyPressed(187) || keyboard.isKeyPressed(189)) {
+			for(var i = this._layers.length-1; i >= 0; i --) {
+				if(this.get(this._layers[i].name) instanceof FluidLayer) {
+					this.get(this._layers[i].name).width =
+						this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).width;
+					this.get(this._layers[i].name).height =
+						this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).height;
+				}
+			}
+			
 			return false;
 		}
 		
@@ -548,6 +593,7 @@ load.provide("dusk.sgui.BasicMain", (function() {
 					this.get(this._layers[i].name).cols ++;
 				}
 			}
+				
 			return false;
 		}
 		
@@ -561,6 +607,19 @@ load.provide("dusk.sgui.BasicMain", (function() {
 					this.get(this._layers[i].name).cols --;
 				}
 			}
+			return false;
+		}
+		
+		if(keyboard.isKeyPressed(187) || keyboard.isKeyPressed(189)) {
+			for(var i = this._layers.length-1; i >= 0; i --) {
+				if(this.get(this._layers[i].name) instanceof FluidLayer) {
+					this.get(this._layers[i].name).width =
+						this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).width;
+					this.get(this._layers[i].name).height =
+						this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).height;
+				}
+			}
+			
 			return false;
 		}
 		
