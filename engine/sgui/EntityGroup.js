@@ -79,7 +79,11 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 		}).bind(this), controls.addControl("entitygroup_clear", "C"));
 		
 		this.onControl.listen((function(e) {
-			if(editor.active) editor.editNext = prompt("Enter name for next entity.");
+			if(editor.active && !e.alt) {
+				editor.editNext = prompt("Enter name for next entity.");
+			}else{
+				return true;
+			}
 		}).bind(this), controls.addControl("entitygroup_name", "N"));
 		
 		this.onControl.listen((function(e) {

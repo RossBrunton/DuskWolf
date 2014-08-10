@@ -27,18 +27,6 @@ load.provide("dusk.plat", (function() {
 	main.becomeActive();
 	main.flow("main");
 	
-	plat.weights = new TileMapWeights(2, 10);
-	plat.weights.addSolid(1, 0, true);
-	
-	main.getComponent("main").layers = [
-		{"name":"back", "type":BasicMain.LAYER_TILEMAP},
-		{"name":"scheme", "type":BasicMain.LAYER_SCHEME, "weights":plat.weights},
-		{"name":"entities", "type":BasicMain.LAYER_ENTITIES, "primary":true},
-		{"name":"parts", "type":BasicMain.LAYER_PARTICLES},
-		{"name":"over", "type":BasicMain.LAYER_TILEMAP},
-		{"name":"transitions", "type":BasicMain.LAYER_TRANSITIONS}
-	];
-	
 	entities.types.createNewType("plat", {
 		"data":{
 			"headingLeft":false, "headingUp":false,

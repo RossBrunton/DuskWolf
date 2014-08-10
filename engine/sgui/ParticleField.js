@@ -6,10 +6,9 @@ load.provide("dusk.sgui.ParticleField", (function() {
 	var Component = load.require("dusk.sgui.Component");
 	var core = load.require("dusk.sgui.particleEffects.core");
 	var sgui = load.require("dusk.sgui");
+	var editor = load.suggest("dusk.editor", function(p) {editor = p;});
 	
-	/** @class dusk.sgui.ParticleField
-	 * 
-	 * @classdesc 
+	/*
 	 * 
 	 * ParticleFields have the property `{@link dusk.sgui.Component#mousePierce}` set to true by default.
 	 * 
@@ -36,14 +35,14 @@ load.provide("dusk.sgui.ParticleField", (function() {
 		}).bind(this), "mouse");
 		
 		//Listeners
-		this.prepareDraw.listen(this._pfDraw.bind(this));
-		this.frame.listen(this._pfFrame.bind(this));
+		this.prepareDraw.listen(_draw.bind(this));
+		this.frame.listen(_frame.bind(this));
 		
 		this.createField(1 << 16);
 	};
 	ParticleField.prototype = Object.create(Component.prototype);
-
-	ParticleField.prototype._pfFrame = function(e) {
+	
+	var _frame = function(e) {
 		for(var i = 0; i <= this._highest; i += 11) {
 			if((this._field[i+1] & 0x00ff) != 0) {
 				//Dx and dy
@@ -92,10 +91,20 @@ load.provide("dusk.sgui.ParticleField", (function() {
 			}
 		}
 		
+		// Pointless fancy effect
+		if(editor && editor.active && this.focused) {
+			for(var c = (this.width * this.height) / 2000; c > 0; c --) {
+				this.inject(
+					0, 0, 0, 100, ~~(Math.random() * this.width), ~~(Math.random() * this.height),
+					1, 1, 0, 0, 0, 0, 0, 5
+				);
+			}
+		}
+		
 		return e;
 	};
-
-	ParticleField.prototype._pfDraw = function(e) {
+	
+	var _draw = function(e) {
 		var c = null;
 		/*if(this._highest > (10000 * 11)) var c = e.c.getImageData(e.d.destX, e.d.destY, e.d.width, e.d.height);*/
 		// Doesn't work with alpha (sets alpha of background, rather than of pixel)
@@ -135,7 +144,7 @@ load.provide("dusk.sgui.ParticleField", (function() {
 		
 		return e;
 	};
-
+	
 	ParticleField.prototype.inject =
 		function(r, g, b, a, x, y, dx, dy, ddx, ddy, dxlimit, dylimit, lifespan, decay) {
 		if(a == 0) return;
@@ -158,13 +167,13 @@ load.provide("dusk.sgui.ParticleField", (function() {
 			}
 		}
 	}
-
+	
 	ParticleField.prototype.createField = function(pixels) {
 		this._field = new Uint16Array(pixels * 11);
 		this._highest = 0;
 		this._pixels = pixels * 11;
 	};
-
+	
 	ParticleField.prototype.deRange = function(val, def) {
 		if(Array.isArray(val)) {
 			return (Math.random()*(val[1]-val[0])) + val[0];
@@ -174,7 +183,7 @@ load.provide("dusk.sgui.ParticleField", (function() {
 		
 		return val;
 	};
-
+	
 	ParticleField.prototype.applyEffect = function(name, data) {
 		data.name = name;
 		if(core.getEffect(name)) {
@@ -183,13 +192,10 @@ load.provide("dusk.sgui.ParticleField", (function() {
 			console.warn("Effect "+name+" not found!");
 		}
 	};
-
+	
 	ParticleField.prototype.loadBM = function(data) {};
 	ParticleField.prototype.saveBM = function() {return {}};
-
-	Object.seal(ParticleField);
-	Object.seal(ParticleField.prototype);
-
+	
 	sgui.registerType("ParticleField", ParticleField);
 	
 	return ParticleField;

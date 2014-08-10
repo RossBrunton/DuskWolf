@@ -25,16 +25,6 @@ load.provide("dusk.quest", (function() {
 	main.becomeActive();
 	main.flow("main");
 	
-	main.getComponent("main").layers = [
-		{"name":"back", "type":BasicMain.LAYER_TILEMAP},
-		{"name":"scheme", "type":BasicMain.LAYER_SCHEME},
-		{"name":"regions", "type":BasicMain.LAYER_REGION},
-		{"name":"entities", "type":BasicMain.LAYER_ENTITIES, "primary":true},
-		{"name":"parts", "type":BasicMain.LAYER_PARTICLES},
-		{"name":"over", "type":BasicMain.LAYER_TILEMAP},
-		{"name":"transitions", "type":BasicMain.LAYER_TRANSITIONS}
-	];
-	
 	entities.types.createNewType("quest", {
 		"data":{
 			"headingLeft":false, "headingUp":false,
@@ -49,8 +39,6 @@ load.provide("dusk.quest", (function() {
 	
 	quest.rooms = new RoomManager("dusk.quest", "rooms");
 	quest.rooms.setBasicMain(main.getComponent("main"));
-	
-	Object.seal(quest);
 	
 	return quest;
 })());

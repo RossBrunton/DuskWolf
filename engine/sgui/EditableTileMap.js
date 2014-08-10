@@ -9,6 +9,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 	var editor = load.require("dusk.editor");
 	var keyboard = load.require("dusk.input.keyboard");
 	var controls = load.require("dusk.input.controls");
+	var TileMapWeights = load.require("dusk.sgui.TileMapWeights");
 	
 	/** Extends the regular tilemap to add the ability to edit them.
 	 * 
@@ -66,7 +67,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 		this.frameWidth = 1;
 		/** The current copied selection.
 		 * 
-		 * @type Uint8Array
+		 * @type Uint8ClampedArray
 		 * @private
 		 * @since 0.0.21-alpha
 		 */
@@ -96,9 +97,16 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 			if(editor.active) {
 				var tile = this.getTile(this._cx, this._cy);
 				
+				var ani = TileMap.getAnimation(this.src, tile);
+				var anistr = "";
+				for(var i = 0; i < ani.length; i ++) {
+					if(i) anistr += " ";
+					anistr += ani[i];
+				}
+				
 				TileMap.setAnimation(this.src, prompt(
 					"Enter a (whitespace seperated) animation for "+tile[0]+","+tile[1],
-					TileMap.getAnimation(this.src, tile).join(" ")
+					anistr
 				).split(/\s+/));
 				
 				TileMap.tileData.free(tile);
@@ -109,6 +117,9 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 		// Copy/paste
 		this.onControl.listen(_copy.bind(this), controls.addControl("editabletm_copy", "C"));
 		this.onControl.listen(_paste.bind(this), controls.addControl("editabletm_paste", "P"));
+		this.onControl.listen(_solid.bind(this), controls.addControl("editabletm_solid", "X"));
+		this.onControl.listen(_weight.bind(this), controls.addControl("editabletm_weight", "W"));
+		this.onControl.listen(_addWeight.bind(this), controls.addControl("editabletm_add_weight", "K"));
 		
 		//Directions
 		this.dirPress.listen(_rightAction.bind(this), c.DIR_RIGHT);
@@ -157,6 +168,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 			height = (e.d.height) - (-e.d.sourceY + (this._cy*this.tileHeight()));
 		
 		e.c.strokeStyle = this.cursorColour;
+		e.c.lineWidth = 1;
 		e.c.strokeRect(e.d.destX - e.d.sourceX + (this._cx*this.tileWidth()),
 			e.d.destX - e.d.sourceY + (this._cy*this.tileHeight()), width, height
 		);
@@ -168,10 +180,29 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 			e.d.destY - e.d.sourceY + (this._cy*this.tileHeight()) + 6
 		);
 		
-		if(TileMap.getAnimation(this.src, t).length > 1) {
+		if(TileMap.getAnimation(this.src, t[0]+","+t[1]).length > 1) {
 			e.c.fillText("\u27F3",
-				e.d.destX - e.d.sourceX + ((this._cx+1)*this.tileWidth()) - 8,
-				e.d.destY - e.d.sourceY + ((this._cy+1)*this.tileHeight()) - 3
+				e.d.destX - e.d.sourceX + ((this._cx+1)*this.tileWidth()) - 9,
+				e.d.destY - e.d.sourceY + ((this._cy+1)*this.tileHeight()) - 4
+			);
+		}
+		
+		if(this.weights) {
+			var wstr = "";
+			
+			if(this.weights.getWeight(t[0], t[1])) {
+				wstr += this.weights.getWeight(t[0], t[1]);
+			}
+			
+			if(this.weights.getSolid(t[0], t[1])) {
+				wstr += "S";
+			}else{
+				wstr += "-";
+			}
+			
+			e.c.fillText(wstr,
+				e.d.destX - e.d.sourceX + ((this._cx)*this.tileWidth()) + 2,
+				e.d.destY - e.d.sourceY + ((this._cy+1)*this.tileHeight()) - 6
 			);
 		}
 		
@@ -244,7 +275,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 	 * @since 0.0.21-alpha
 	 */
 	var _paste = function(e) {
-		if(e.ctrl || !editor.active) return true;
+		if(e.ctrl || e.alt || !editor.active) return true;
 		
 		var p = 0;
 		for(var x = this.frameWidth-1; x >= 0; x --) {
@@ -254,6 +285,64 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 			}
 		}
 		this.drawAll();
+		
+		return false;
+	};
+	
+	/** Toggles the solidness of the current tile (given by its TileMapWeights).
+	 * @param {object} e An event object.
+	 * @private
+	 * @since 0.0.21-alpha
+	 */
+	var _solid = function(e) {
+		if(e.ctrl || !editor.active || !this.weights) return true;
+		
+		var t = this.getTile(this._cx, this._cy);
+		if(this.weights.getSolid(t[0], t[1])) {
+			this.weights.addSolid(t[0], t[1], false);
+		}else{
+			this.weights.addSolid(t[0], t[1], true);
+		}
+		TileMap.tileData.free(t);
+		
+		return false;
+	};
+	
+	/** Sets the weight of the current tile for TileMapWeights.
+	 * @param {object} e An event object.
+	 * @private
+	 * @since 0.0.21-alpha
+	 */
+	var _weight = function(e) {
+		if(e.ctrl || !editor.active || !this.weights) return true;
+		
+		var t = this.getTile(this._cx, this._cy);
+		var w = this.weights.getWeight(t[0], t[1]);
+		if(e.shift) {
+			w --;
+		}else{
+			w ++;
+		}
+		this.weights.addWeight(t[0], t[1], w);
+		TileMap.tileData.free(t);
+		return false;
+	};
+	
+	/** Adds or removes a TileMapWeights instance from this TileMap.
+	 * @param {object} e An event object.
+	 * @private
+	 * @since 0.0.21-alpha
+	 */
+	var _addWeight = function(e) {
+		if(e.ctrl || !editor.active) return true;
+		
+		if(this.weights) {
+			if(confirm("Really delete weights?")) {
+				this.weights = null;
+			}
+		}else{
+			this.weights = new TileMapWeights(this._img.height()/this.tileHeight(), this._img.width()/this.tileWidth());
+		}
 		
 		return false;
 	};
@@ -398,7 +487,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 	EditableTileMap.prototype.carveTop = function() {
 		this.rows --;
 		var newTileBuffer = new ArrayBuffer((this.rows*this.cols)<<1);
-		var newTiles = new Uint8Array(newTileBuffer);
+		var newTiles = new Uint8ClampedArray(newTileBuffer);
 		
 		var point = this.cols<<1;
 		for(var i = 0; i < (this.rows*this.cols)<<1; i++) {
@@ -406,7 +495,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 		}
 		
 		this._tileBuffer[0] = newTileBuffer;
-		this._tiles[0] = new Uint8Array(this._tileBuffer[0]);
+		this._tiles[0] = new Uint8ClampedArray(this._tileBuffer[0]);
 		this.drawAll();
 	};
 	
@@ -414,7 +503,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 	EditableTileMap.prototype.graftTop = function() {
 		this.rows ++;
 		var newTileBuffer = new ArrayBuffer((this.rows*this.cols)<<1);
-		var newTiles = new Uint8Array(newTileBuffer);
+		var newTiles = new Uint8ClampedArray(newTileBuffer);
 		
 		var point = 0;
 		for(var i = 0; i < (this.rows*this.cols)<<1; i++) {
@@ -427,7 +516,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 		}
 		
 		this._tileBuffer[0] = newTileBuffer;
-		this._tiles[0] = new Uint8Array(this._tileBuffer[0]);
+		this._tiles[0] = new Uint8ClampedArray(this._tileBuffer[0]);
 		this.drawAll();
 	};
 	
@@ -435,7 +524,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 	EditableTileMap.prototype.carveBottom = function() {
 		this.rows --;
 		var newTileBuffer = new ArrayBuffer((this.rows*this.cols)<<1);
-		var newTiles = new Uint8Array(newTileBuffer);
+		var newTiles = new Uint8ClampedArray(newTileBuffer);
 		
 		var point = 0;
 		for(var i = 0; i < (this.rows*this.cols)<<1; i++) {
@@ -443,7 +532,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 		}
 		
 		this._tileBuffer[0] = newTileBuffer;
-		this._tiles[0] = new Uint8Array(this._tileBuffer[0]);
+		this._tiles[0] = new Uint8ClampedArray(this._tileBuffer[0]);
 		this.drawAll();
 	};
 	
@@ -451,7 +540,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 	EditableTileMap.prototype.graftBottom = function() {
 		this.rows ++;
 		var newTileBuffer = new ArrayBuffer((this.rows*this.cols)<<1);
-		var newTiles = new Uint8Array(newTileBuffer);
+		var newTiles = new Uint8ClampedArray(newTileBuffer);
 		
 		var point = 0;
 		for(var i = 0; i < (this.rows*this.cols)<<1; i++) {
@@ -464,7 +553,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 		}
 		
 		this._tileBuffer[0] = newTileBuffer;
-		this._tiles[0] = new Uint8Array(this._tileBuffer[0]);
+		this._tiles[0] = new Uint8ClampedArray(this._tileBuffer[0]);
 		this.drawAll();
 	};
 	
@@ -472,7 +561,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 	EditableTileMap.prototype.graftLeft = function() {
 		this.cols ++;
 		var newTileBuffer = new ArrayBuffer((this.rows*this.cols)<<1);
-		var newTiles = new Uint8Array(newTileBuffer);
+		var newTiles = new Uint8ClampedArray(newTileBuffer);
 		
 		var point = 0;
 		for(var i = 0; i < (this.rows*this.cols)<<1; i++) {
@@ -486,7 +575,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 		}
 		
 		this._tileBuffer[0] = newTileBuffer;
-		this._tiles[0] = new Uint8Array(this._tileBuffer[0]);
+		this._tiles[0] = new Uint8ClampedArray(this._tileBuffer[0]);
 		this.drawAll();
 	};
 	
@@ -494,7 +583,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 	EditableTileMap.prototype.carveLeft = function() {
 		this.cols --;
 		var newTileBuffer = new ArrayBuffer((this.rows*this.cols)<<1);
-		var newTiles = new Uint8Array(newTileBuffer);
+		var newTiles = new Uint8ClampedArray(newTileBuffer);
 		
 		var point = 0;
 		for(var i = 0; i < (this.rows*this.cols)<<1; i++) {
@@ -506,7 +595,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 		}
 		
 		this._tileBuffer[0] = newTileBuffer;
-		this._tiles[0] = new Uint8Array(this._tileBuffer[0]);
+		this._tiles[0] = new Uint8ClampedArray(this._tileBuffer[0]);
 		this.drawAll();
 	};
 	
@@ -514,7 +603,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 	EditableTileMap.prototype.graftRight = function() {
 		this.cols ++;
 		var newTileBuffer = new ArrayBuffer((this.rows*this.cols)<<1);
-		var newTiles = new Uint8Array(newTileBuffer);
+		var newTiles = new Uint8ClampedArray(newTileBuffer);
 		
 		var point = 0;
 		for(var i = 0; i < (this.rows*this.cols)<<1; i++) {
@@ -528,7 +617,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 		}
 		
 		this._tileBuffer[0] = newTileBuffer;
-		this._tiles[0] = new Uint8Array(this._tileBuffer[0]);
+		this._tiles[0] = new Uint8ClampedArray(this._tileBuffer[0]);
 		this.drawAll();
 	};
 	
@@ -536,7 +625,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 	EditableTileMap.prototype.carveRight = function() {
 		this.cols --;
 		var newTileBuffer = new ArrayBuffer((this.rows*this.cols)<<1);
-		var newTiles = new Uint8Array(newTileBuffer);
+		var newTiles = new Uint8ClampedArray(newTileBuffer);
 		
 		var point = 0;
 		for(var i = 0; i < (this.rows*this.cols)<<1; i++) {
@@ -548,7 +637,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 		}
 		
 		this._tileBuffer[0] = newTileBuffer;
-		this._tiles[0] = new Uint8Array(this._tileBuffer[0]);
+		this._tiles[0] = new Uint8ClampedArray(this._tileBuffer[0]);
 		this.drawAll();
 	};
 	
