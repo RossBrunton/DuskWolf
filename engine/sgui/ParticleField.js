@@ -116,8 +116,8 @@ load.provide("dusk.sgui.ParticleField", (function() {
 		
 		for(var i = this._highest; i >= 0; i -= 11) {
 			if((this._field[i+1] & 0x00ff) != 0) {
-				var translatedX = this._field[i+2] - e.d.sourceX;
-				var translatedY = this._field[i+3] - e.d.sourceY;
+				var translatedX = this._field[i+2] - e.d.sourceX + e.d.destX;
+				var translatedY = this._field[i+3] - e.d.sourceY + e.d.destY;
 				
 				if(this._field[i+2] >= e.d.sourceX && this._field[i+3] >= e.d.sourceY
 				&& this._field[i+2] < e.d.sourceX + e.d.width && this._field[i+3] < e.d.sourceY + e.d.height) {
