@@ -121,7 +121,7 @@ load.provide("dusk.Image", (function() {
 		if(this._proxy) {
 			this._proxy.paint(ctx, this.transform.concat(extraTrans),true,ox,oy,owidth,oheight,dx,dy, dwidth, dheight);
 		}else{
-			ctx.drawImage(this.asCanvas(extraTrans, ino), ox, oy, owidth, oheight, dx, dy, dwidth, dheight);
+			ctx.drawImage(this.asCanvas(extraTrans, ino), ox, oy, owidth, oheight, ~~dx, ~~dy, dwidth, dheight);
 		}
 	};
 
@@ -131,7 +131,7 @@ load.provide("dusk.Image", (function() {
 				ctx, this.transform.concat(extraTrans),true, 0, 0, this.width(), this.height(), dx, dy, dwidth, dheight
 			);
 		}else{
-			ctx.drawImage(this.asCanvas(extraTrans, ino), 0, 0, this.width(), this.height(), dx, dy, dwidth, dheight);
+			ctx.drawImage(this.asCanvas(extraTrans, ino), 0, 0, this.width(), this.height(), ~dx, ~dy, dwidth, dheight);
 		}
 	};
 
@@ -204,9 +204,6 @@ load.provide("dusk.Image", (function() {
 	};
 
 	var _images = {};
-
-	Object.seal(Image);
-	Object.seal(Image.prototype);
 	
 	return Image;
 })());
