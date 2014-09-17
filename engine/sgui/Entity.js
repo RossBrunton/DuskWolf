@@ -16,34 +16,29 @@ load.provide("dusk.sgui.Entity", (function() {
 	/** An entity is a component that has "behaviours" and can do certain activites, possibly in response to another
 	 *  entity or user input.
 	 * 
-	 * In a nutshell, it is a normal tile with a movement system, an animation system, a collision
-	 *  system and a behaviour system added onto it.
+	 * It is a normal tile with a movement system, an animation system, a collision system and a behaviour system added
+	 *  onto it.
 	 * 
-	 * Entities have a type, which describes how they look and what behaviours they have. This is set by
-	 *  the `{@link dusk.sgui.Entity#entType}` property, and the types are managed by
-	 *  `{@link dusk.entities}`. The documentation there gives a good description of what is required to
-	 *  specify a type.
+	 * Entities have a type, which describes how they look and what behaviours they have. This is set by the `entType`
+	 *  property, and the types are managed by `dusk.entities`. The documentation there gives a good description of what
+	 *  is required to specify a type.
 	 * 
-	 * The movement system works along the lines of each entity having a `dx` and `dy` value, which
-	 *  determine its horizontal and vertical speed respectivley. The speed is calculated using a number
-	 *  of sources, which register themself using `{@link dusk.sgui.Entity#applyDx}` and 
-	 *  `{@link dusk.sgui.Entity#applyDy}`, meaning each source can vary the speed they contribute to
-	 *  the entity.
+	 * The movement system works along the lines of each entity having a `dx` and `dy` value, which determine its
+	 *  horizontal and vertical speed respectivley. The speed is calculated by behaviours that respond to the "horForce"
+	 *  and "verForce" entity events. The event handlers supply either a constant speed to move at that frame or a
+	 *  `[acceleration, max, name]` triple.
 	 * 
-	 * The animation system works based on choosing the highest priority animation and using it, unless
-	 *  it is no lorger applicable or a higher priority animation needs to be run. The entity's type
-	 *  determines the animations it performs. In the entity's type data there is an `animation` key,
-	 *  which is an array of arrays.
+	 * The animation system works based on choosing the highest priority animation and using it, unless it is no lorger
+	 *  applicable or a higher priority animation needs to be run. The entity's type determines the animations it
+	 *  performs. In the entity's type data there is an `animation` key, which is an array of arrays.
 	 * 
-	 * Each array in this data is a single animation, the last one in the array that can be used will
-	 *  be the one that is used. The first element is a trigger critera such that 
-	 *  `{@link dusk.sgui.Entity#evalTrigger}` is true if and only if the animation should run. The
-	 *  second is a string with "animation actions" as described below seperated by a "|" character.
-	 *  The third element is an option which describes additional flags and settings for the animation.
+	 * Each array in this data is a single animation, the last one in the array that can be used will be the one that is
+	 *  used. The first element is a trigger critera such that `evalTrigger` is true if and only if the animation should
+	 *  run. The second is a string with "animation actions" as described below seperated by a "|" character. The third
+	 *  element is an option which describes additional flags and settings for the animation.
 	 * 
-	 * The animation starts at the first animation frame, and then every 
-	 *  `{@link dusk.sgui.Entity#frameDelay}` frames, it will move onto the next one, and execute it.
-	 *  Some animation events cause the next one to be executed immediatley.
+	 * The animation starts at the first animation frame, and then every `frameDelay` frames, it will move onto the next
+	 *  one, and execute it. Some animation events cause the next one to be executed immediatley.
 	 * 
 	 * The animation actions are determined by the first character in the string, as follows:
 	 * 
@@ -71,42 +66,39 @@ load.provide("dusk.sgui.Entity", (function() {
 	 * The third element has the following possible keys:
 	 * 
 	 * - `name`: a string; the name of the animation, for use with the `>` event.
-	 * - `suppressSmooth`: a boolean; if false or ommited, then if the entity's current frame is
-	 *  anywhere in this animation's action list, then it will be skipped to. 
+	 * - `suppressSmooth`: a boolean; if false or ommited, then if the entity's current frame is anywhere in this
+	 *  animation's action list, then it will be skipped to. 
 	 * 
-	 * A particle effects system is also provided, which works on almost the same way as the animation
-	 *  system. In the entity's data, there is also a "particles" property, which has the same format.
+	 * A particle effects system is also provided, which works on almost the same way as the animation system. In the
+	 *  entity's data, there is also a "particles" property, which has the same format.
 	 * 
-	 * The difference is that only one animation can run at a time, yet more than one particle effect
-	 *  can also run. Also, while animations step through their action, particle effects run them all at
-	 *  once. The same animation events are used for particle effects, although only `$`, `*` and `t` should
-	 *  be used.
+	 * The difference is that only one animation can run at a time, yet more than one particle effect can also run.
+	 *  Also, while animations step through their action, particle effects run them all at once. The same animation
+	 *  events are used for particle effects, although only `$`, `*` and `t` should be used.
 	 * 
 	 * Additional "third element properties" can be set on particle effects:
 	 * 
-	 * - `onlyOnce`: A boolean; if true, then the effect will run only after if it's criteria has been
-	 *  false between the last time it ran and now.
+	 * - `onlyOnce`: A boolean; if true, then the effect will run only after if it's criteria has been false between the
+	 *  last time it ran and now.
 	 * - `cooldown`: An integer; the time in frames the effect must wait until it is ran again.
 	 * 
-	 * Due to the nature of animations, at least one of `onlyOnce` or `cooldown` must be specified, as 
-	 *  the function that resolves animations may be called more than once a frame.
+	 * Due to the nature of animations, at least one of `onlyOnce` or `cooldown` must be specified, as the function that
+	 *  resolves animations may be called more than once a frame.
 	 * 
-	 * Entities can collide with each other, if they are in a `{@link dusk.sgui.EntityGroup}`. The
-	 *  collision hit box is a rectangle from the coordinates
-	 *  (`x+{@link dusk.sgui.Entity#collisionOffestX}`, `y+{@link dusk.sgui.Entity#collisionOffestY}`)
-	 *  to (`x+{@link dusk.sgui.Entity#collisionWidth}`, `y+{@link dusk.sgui.Entity#collisionHeight}`).
-	 *  The function `{@link dusk.sgui.Entity#touchers}` can be used to get a list of components 
-	 *  touching this one on the specified side.
+	 * Entities can collide with each other, if they are in a `dusk.sgui.EntityGroup`. The collision hit box is a
+	 *  rectangle from the coordinates (`x+collisionOffestX`, `y+collisionOffestY`) to (`x+collisionWidth`,
+	 *  `y+collisionHeight`). The function `touchers` can be used to get a list of components touching this one on the
+	 *  specified side.
 	 * 
-	 * Entities can have behaviours on them. Behaviours available are as an object on the `behaviours`
-	 *  property of the entity type description. Each key of this object is the name of a behaviour,
-	 *  while the value is a boolean for whether the entity should have this behaviour.
+	 * Entities can have behaviours on them. Behaviours available are as an object on the `behaviours` property of the
+	 *  entity type description. Each key of this object is the name of a behaviour, while the value is a boolean for
+	 *  whether the entity should have this behaviour.
 	 * 
-	 * Behaviours are subclasses of `{@link dusk.behave.Behave}`, and must be registered using 
-	 *  `{@link dusk.entities.registerBehaviour}` before they can be used. Entity behaviours share a
-	 *  pool of data between themselves and the animation system, this is the object
-	 *  `{@link dusk.sgui.Entity#behaviourData}`, and can be accessed using
-	 *  `{@link dusk.sgui.Entity#eProp}` or `{@link dusk.behave.Behave._data}`.
+	 * Behaviours are subclasses of `Behave`, and must be registered using 
+	 *  `dusk.entities.registerBehaviour` before they can be used. Entity behaviours share an object `behaviourData`
+	 *  which is used for storing and retrieving values, and can be accessed using `eProp` or
+	 *  `dusk.behave.Behave._data`. By convention, the keys are of the form `"behaviourName:varName"` or
+	 *  `"_behaviourName:_privateVarName"`.
 	 * 
 	 * A number of "built in" entity data properties are available:
 	 * 
@@ -120,12 +112,11 @@ load.provide("dusk.sgui.Entity", (function() {
 	 * - `img`: A string, the path to the source image.
 	 * - `collisionWidth`,`collisionHeight`,`collisionOffsetX`,`collisionOffsetY`: Mapping to the respective properties.
 	 * 
-	 * Behaviours may also fire and listen to events between themselves and their entity. Events are
-	 *  fired using `{@link dusk.sgui.Entity#behaviourFire}` and listened to on each behaviour's
-	 *  `{@link dusk.behave.Behave.entityEvent}` dispatcher.
+	 * Behaviours may also fire and listen to events between themselves and their entity. Events are fired using
+	 *  `behaviourFire` and listened to on each behaviour's `Behave.entityEvent` dispatcher.
 	 * 
-	 * Each event has a name and an object event. On the event object as listened to, the name of the
-	 *  event will be the `name` property of the event object.
+	 * Each event has a name and an object event. On the event object as listened to, the name of the event will be the
+	 *  `name` property of the event object.
 	 * 
 	 * There are some "built in" events:
 	 * 
@@ -149,14 +140,22 @@ load.provide("dusk.sgui.Entity", (function() {
 	 *  true if they want to declare that the control is active. This has one property, `control`, the name of the
 	 *  control. If the entity data has an array `controlsOn` that contains the control name, then this event is not
 	 *  fired, and the control is assumed on.
+	 * - `horForce`: The horizontal force, behaviours should return either an integer (for constant speed) or
+	 *  `[acceleration, max, name]` for acceleration.
+	 * - `verForce`: Vertical force, behaves in the same way as `horForce`.
+	 * - `affectHorForce`: The event object has a property `forces` which is an array of outputs from `horForce` or
+	 *  undefineds which can be modified by other behaviours if they wish.
+	 * - `affectVerForce`: Similar to `affectHorForce`.
 	 * 
-	 * There are "triggers", which are essentially strings that evaluate into a constant value
-	 *  according to rules. They are used in animation and particle effects, as the first element of
-	 *  the array where they are checked if they are true or false. They are also used in behaviours,
-	 *  to allow a more fine control on what they interact with.
+	 * The events go in the order every frame: `verForce`, `affectVerForce`, `horForce`, `affectHorForce`, `beforeMove`,
+	 *  any collision events, `frame`.
 	 * 
-	 * They are essentially fed to a parse tree from `{@link dusk.parseTree}`, and support the following
-	 *  operators, low to high priority, in addition to the basic ones:
+	 * There are "triggers", which are essentially strings that evaluate into a constant value according to rules. They
+	 *  are used in animation and particle effects, as the first element of the array where they are checked if they are
+	 *  true or false. They are also used in behaviours, to allow a more fine control on what they interact with.
+	 * 
+	 * They are essentially fed to a parse tree from `dusk.parseTree`, and support the following operators, low to high
+	 *  priority, in addition to the basic ones:
 	 * 
 	 * - `on event`: True iff this trigger is being evaluated because of the animation event `event`. This will cause a
 	 *  lock to be set on the current animation if it's in that context.
@@ -180,34 +179,29 @@ load.provide("dusk.sgui.Entity", (function() {
 	var Entity = function(parent, comName) {
 		if(!this.isLight()) Tile.call(this, parent, comName);
 		
-		/** An object containing all the sources of horizontal motion.
-		 * Each key is the name of the source, and each value is an array of the form 
-		 * `[value, duration, accel, limit]` as per `{@link dusk.sgui.Entity#applyDx}`.
+		/** The current horizontal speed. This may be read, but not set directly; use the `horForce` behaviour event.
+		 * @type integer
+		 * @since 0.0.21-alpha
+		 */
+		this.dx = 0;
+		/** The current vertical speed. This may be read, but not set directly; use the `verForce` behaviour event.
+		 * @type integer
+		 * @since 0.0.21-alpha
+		 */
+		this.dy = 0;
+		
+		/** Accumulated dx. Key is source and value is the accumulated speed from that source.
 		 * @type object
 		 * @private
+		 * @since 0.0.21-alpha
 		 */
-		this._dx = {};
-		/** An object containing all the sources of vertical motion.
-		 * Each key is the name of the source, and each value is an array of the form 
-		 * `[value, duration, accel, limit]` as per `{@link dusk.sgui.Entity#applyDy}`.
+		this._dxAccum = {};
+		/** Accumulated dy. Key is source and value is the accumulated speed from that source.
 		 * @type object
 		 * @private
+		 * @since 0.0.21-alpha
 		 */
-		this._dy = {};
-		/** An object containing all the dx multiplications.
-		 * Each key is the name of the source, and each value is an array of the form 
-		 * `[factor, duration, ignores]` as per `{@link dusk.sgui.Entity#multDx}`.
-		 * @type object
-		 * @private
-		 */
-		this._dxMults = {};
-		/** An object containing all the dy multiplications.
-		 * Each key is the name of the source, and each value is an array of the form 
-		 * `[factor, duration, ignores]` as per `{@link dusk.sgui.Entity#multDy}`.
-		 * @type object
-		 * @private
-		 */
-		this._dyMults = {};
+		this._dyAccum = {};
 		
 		/** All the behaviours that this entity is using. Each key name is the name of the behaviour,
 		 *  and the value is a `{@link dusk.behave.Behave}` instance.
@@ -538,110 +532,147 @@ load.provide("dusk.sgui.Entity", (function() {
 	
 	
 	//Velocity
-	/** Returns the horizontal speed of this entity.
-	 * @return {integer} The entity's dx value.
+	/** Removes all dx speed from the entity.
+	 * @since 0.0.21-alpha
 	 */
-	Entity.prototype.getDx = function() {
-		var dx = 0;
-		for(var p in this._dx) {
-			var hold = this._dx[p][0];
-			for(var i in this._dxMults) {
-				if(this._dxMults[i][2].indexOf(p) === -1) {
-					hold *= this._dxMults[i][0];
-				}
-			}
-			dx += hold;
-		}
-		return dx;
+	Entity.prototype.killDx = function() {
+		this._dxAccum = {};
 	};
 	
-	/** Returns the vertical speed of this entity.
-	 * @return {integer} The entity's dx value.
+	/** Removes all dy speed from the entity.
+	 * @since 0.0.21-alpha
 	 */
-	Entity.prototype.getDy = function() {
-		var dy = 0;
-		for(var p in this._dy) {
-			var hold = this._dy[p][0];
-			for(var i in this._dyMults) {
-				if(this._dyMults[i][2].indexOf(p) === -1) {
-					hold *= this._dyMults[i][0];
-				}
-			}
-			dy += hold;
-		}
-		return dy;
+	Entity.prototype.killDy = function() {
+		this._dyAccum = {};
 	};
 	
-	/** Applys a horizontal speed and acceleration to the entity.
-	 * @param {string} name The name of the source of this dx, used to change it later.
-	 * @param {integer} value The initial value for the speed.
-	 * @param {integer=-1} duration The number of frames the speed and acceleration effects last for. A value of -1
-	 *  means it will never stop.
-	 * @param {float=0} accel The acceleration, this value will be added to the speed every frame.
-	 * @param {?integer} limit The maximum or minimum speed, the speed will not increase past this, or decrease below
-	 *  this. If it is undefined, there is no limit.
-	 * @param {boolean=false} noReplace If true and the speed already exists, the value will not be
-	 *  changed, but all the other values will be. If it is false, then the value will be reset.
-	 */ 
-	Entity.prototype.applyDx = function(name, value, duration, accel, limit, noReplace) {
-		if(duration == undefined) duration = -1;
-		if(!accel) accel = 0;
-		if(noReplace && name in this._dx) value = this._dx[name][0];
-		this._dx[name] = [value, duration, accel, limit];
+	/** Takes the output from "verForce" or "horForce" manages acceleration and returns the new dx or dy.
+	 * @param {array} arr The output of the event.
+	 * @param {integer} base The initial dx or dy.
+	 * @param {object} accum The dyAccum or dyAccum object.
+	 * @param {boolean} lowCollide Whether there is a collision on the left or top.
+	 * @param {boolean} highCollide Whether there is a collision on the right or bottom.
+	 * @private
+	 * @since 0.0.21-alpha
+	 */
+	var _sum = function(arr, base, accum, lowCollide, highCollide) {
+		var out = 0;
+		var vels = 0;
 		
-		if(this.getDx() < 0) this.eProp("lastMoveLeft", true);
-		if(this.getDx() > 0) this.eProp("lastMoveLeft", false);
-	};
-	
-	/** Applys a vertical speed and acceleration to the entity.
-	 * @param {string} name The name of the source of this dy, used to change it later.
-	 * @param {integer} value The initial value for the speed.
-	 * @param {duration=-1} duration The number of frames the speed and acceleration effects last for.
-	 *  A value of -1 means it will never stop.
-	 * @param {float=0} accel The acceleration, this value will be added to the speed every frame.
-	 * @param {?integer} limit The maximum or minimum speed, the speed will not increase past this, or 
-	 *  decrease below this. If it is undefined, there is no limit.
-	 * @param {boolean=false} noReplace If true and the speed already exists, the value will not be
-	 *  changed, but all the other values will be. If it is false, then the value will be reset.
-	 */
-	Entity.prototype.applyDy = function(name, value, duration, accel, limit, noReplace) {
-		if(duration == undefined) duration = -1;
-		if(!accel) accel = 0;
-		if(noReplace && name in this._dy) value = this._dy[name][0];
-		this._dy[name] = [value, duration, accel, limit];
+		var pa = 0;
+		var na = 0;
 		
-		if(this.getDy() < 0) this.eProp("lastMoveUp", true);
-		if(this.getDy() > 0) this.eProp("lastMoveUp", false);
-	};
-	
-	/** Applies a multiplication factor onto the dx. This multiplies the dx value by some value, and can
-	 *  be used to stop motion if the factor is 0.
-	 * @param {string} name The name of the mult, so it can be referred to later.
-	 * @param {float} factor The factor to multiply each dx vaue by.
-	 * @param {integer=-1} duration The duration of the effect, or -1 for no limit to the duration.
-	 * @param {array=[]} ignores An array of strings, each value is a dx source which will NOT be
-	 *  multiplied.
-	 */
-	Entity.prototype.multDx = function(name, factor, duration, ignores) {
-		if(duration === undefined) duration = -1;
-		if(!ignores) ignores = [];
-		if(factor == 1.0) delete this._dxMults[name];
-		else this._dxMults[name] = [factor, duration, ignores];
-	};
-	
-	/** Applies a multiplication factor onto the dy. This multiplies the dy value by some value, and can
-	 *  be used to stop motion if the factor is 0.
-	 * @param {string} name The name of the mult, so it can be referred to later.
-	 * @param {float} factor The factor to multiply each dy vaue by.
-	 * @param {integer=-1} duration The duration of the effect, or -1 for no limit to the duration.
-	 * @param {array=[]} ignores An array of strings, each value is a dy source which will NOT be
-	 *  multiplied.
-	 */
-	Entity.prototype.multDy = function(name, factor, duration, ignores) {
-		if(duration === undefined) duration = -1;
-		if(!ignores) ignores = [];
-		if(factor == 1.0) delete this._dyMults[name];
-		else this._dyMults[name] = [factor, duration, ignores];
+		// Accumuluate forces
+		var psum = 0;
+		var pforces = [];
+		var pvels = [];
+		var pvelsum = 0;
+		
+		var nsum = 0;
+		var nforces = [];
+		var nvels = [];
+		var nvelsum = 0;
+		
+		for(var i = 0; i < arr.length; i ++) {
+			if(arr[i] && Array.isArray(arr[i])) {
+				if(!(arr[i][2] in accum)) {
+					accum[arr[i][2]] = 0;
+				}
+				
+				vels ++;
+				if(arr[i][0] > 0) {
+					psum += arr[i][0];
+					pforces.push(arr[i]);
+				}else if(arr[i][0] < 0) {
+					nsum -= arr[i][0];
+					nforces.push(arr[i]);
+				}
+				
+				if(accum[arr[i][2]] > 0) {
+					pvelsum += accum[arr[i][2]];
+					pvels.push(arr[i]);
+				}else if(accum[arr[i][2]] < 0) {
+					nvelsum -= accum[arr[i][2]];
+					nvels.push(arr[i]);
+				}
+			} 
+		}
+		
+		// Friction!
+		if(base > 0) nsum += 0.05;
+		if(base < 0) psum += 0.05;
+		
+		var pleft = psum;
+		var nleft = nsum;
+		
+		// Check collisions and remove accumulated veleration
+		if(lowCollide) {
+			for(var i = 0; i < nvels.length; i ++) {
+				if(accum[nvels[i][2]] < 0) accum[nvels[i][2]] = 0;
+			}
+		}
+		if(highCollide) {
+			for(var i = 0; i < pvels.length; i ++) {
+				if(accum[pvels[i][2]] > 0) accum[pvels[i][2]] = 0;
+			}
+		}
+		
+		// Reduce the velerations by the forces opposing them
+		for(var i = 0; i < nvels.length; i ++) {
+			var pleftFrag = (-accum[nvels[i][2]] / nvelsum) * pleft;
+			
+			if(-accum[nvels[i][2]] > pleftFrag) {
+				accum[nvels[i][2]] += pleftFrag;
+				pleft -= pleftFrag;
+			}else{
+				accum[nvels[i][2]] = 0;
+				pleft += accum[nvels[i][2]];
+			}
+		}
+		
+		for(var i = 0; i < pvels.length; i ++) {
+			var nleftFrag = (accum[pvels[i][2]] / pvelsum) * nleft;
+			
+			if(accum[pvels[i][2]] > nleftFrag) {
+				accum[pvels[i][2]] -= nleftFrag;
+				nleft -= nleftFrag;
+			}else{
+				accum[pvels[i][2]] = 0;
+				nleft -= accum[pvels[i][2]];
+			}
+		}
+		
+		// Then divy up the remaining force
+		if(pleft) {
+			for(var i = 0; i < pforces.length; i ++) {
+				accum[pforces[i][2]] += pleft * (pforces[i][0] / psum);
+				
+				if(accum[pforces[i][2]] < -pforces[i][1]) accum[pforces[i][2]] = -pforces[i][1];
+				if(accum[pforces[i][2]] > pforces[i][1]) accum[pforces[i][2]] = pforces[i][1];
+			}
+		}
+		if(nleft) {
+			for(var i = 0; i < nforces.length; i ++) {
+				accum[nforces[i][2]] += nleft * (nforces[i][0] / nsum);
+				
+				if(accum[nforces[i][2]] < -nforces[i][1]) accum[nforces[i][2]] = -nforces[i][1];
+				if(accum[nforces[i][2]] > nforces[i][1]) accum[nforces[i][2]] = nforces[i][1];
+			}
+		}
+		
+		// And generate final velocity
+		var out = 0;
+		for(var i = 0; i < arr.length; i ++) {
+			if(arr[i]) {
+				if(Array.isArray(arr[i])) {
+					out += accum[arr[i][2]];
+				}else{
+					out += arr[i];
+				}
+			} 
+		}
+		
+		return out;
 	};
 	
 	/** Called before all entities are moved by `{@link dusk.sgui.EntityGroup}`, and causes all the 
@@ -652,6 +683,26 @@ load.provide("dusk.sgui.Entity", (function() {
 	 * It also fires a `beforeMove` behaviour event with an empty event object.
 	 */
 	Entity.prototype.beforeMove = function() {
+		// Apply forces
+		
+		// Listeners
+		var dys = this.behaviourFireWithReturn("verForce");
+		dys = this.behaviourFireWithPass("affectVerForce", {"forces":dys}).forces;
+		this.dy = _sum(
+			dys, this.dy, this._dyAccum, this.touchers(c.DIR_UP).length > 0, this.touchers(c.DIR_DOWN).length > 0
+		);
+		
+		var dxs = this.behaviourFireWithReturn("horForce");
+		dxs = this.behaviourFireWithPass("affectHorForce", {"forces":dxs}).forces;
+		this.dx = _sum(
+			dxs, this.dx, this._dxAccum, this.touchers(c.DIR_LEFT).length > 0, this.touchers(c.DIR_RIGHT).length > 0
+		);
+		
+		// Fire the modifier events
+		var out = this.behaviourFireWithPass("speedMod", {"dx":this.dx, "dy":this.dy});
+		this.dy = out.dy;
+		this.dx = out.dx;
+		
 		//Clear touchers
 		this._touchers[c.DIR_UP] = [];
 		this._touchers[c.DIR_DOWN] = [];
@@ -663,7 +714,7 @@ load.provide("dusk.sgui.Entity", (function() {
 		this._touchersNonSolid[c.DIR_RIGHT] = [];
 		
 		//Accelerate or decelerate
-		for(var p in this._dx) {
+		/*for(var p in this._dx) {
 			if(this._dx[p][1] == 0) {
 				delete this._dx[p];
 			}else{
@@ -704,7 +755,7 @@ load.provide("dusk.sgui.Entity", (function() {
 			}else{
 				if(this._dyMults[p][1] > 0) this._dyMults[p][1] --;
 			}
-		}
+		}*/
 		
 		//Fire beforeMove event
 		this.behaviourFire("beforeMove");
@@ -762,6 +813,34 @@ load.provide("dusk.sgui.Entity", (function() {
 		}
 		
 		return output;
+	};
+	
+	/** Fires a behaviour event to all of the behaviours on this entity.
+	 * 
+	 * This returns the event object, which will be passed through all events.
+	 * @param {string} event The name of the event, will be set as the `name` property on the event
+	 *  data.
+	 * @param {object={}} data The event data.
+	 * @return {object} The event data.
+	 */
+	Entity.prototype.behaviourFireWithPass = function(event, data) {
+		if(!data) data = {};
+		data.name = event;
+		
+		data = this.entityEvent.firePass(data, event);
+		
+		var keys = Object.keys(this._behaviours);
+		for(var b = keys.length-1; b >= 0; b --) {
+			data = this._behaviours[keys[b]].entityEvent.firePass(data, event);
+		}
+		
+		if(event in this._behaviourListeners) {
+			for(var i = 0; i < this._behaviourListeners[event].length; i ++) {
+				data = this._behaviourListeners[event][i].call(window, this, data, event);
+			}
+		}
+		
+		return data;
 	};
 	
 	/** Adds a new behaviour to this entity.
@@ -1160,8 +1239,8 @@ load.provide("dusk.sgui.Entity", (function() {
 		],
 		["#", function(o, v, ctx) {
 				switch(v) {
-					case "dx": return ctx.ent.getDx();
-					case "dy": return ctx.ent.getDy();
+					case "dx": return ctx.ent.dx;
+					case "dy": return ctx.ent.dy;
 					case "tb": return ctx.ent.touchers(c.DIR_DOWN).length;
 					case "tu": return ctx.ent.touchers(c.DIR_UP).length;
 					case "tl": return ctx.ent.touchers(c.DIR_LEFT).length;
@@ -1251,14 +1330,15 @@ load.provide("dusk.sgui.Entity", (function() {
 	 * @return {float} How under the fluid this entity is.
 	 * @since 0.0.21-alpha
 	 */
-	Entity.prototype.underFluid = function() {
+	Entity.prototype.underFluid = function(offset) {
 		if(!this.fluid) return 0.0;
+		if(offset === undefined) offset = 0;
 		
 		var start = this.fluid.start();
 		
-		if(this.y - start < 0) return 0.0;
-		if(this.y - start > this.height) return 1.0;
-		return (this.y - start) / this.height;
+		if(this.y + this.width + offset - start < 0) return 0.0;
+		if(this.y + this.width + offset - start > this.height) return 1.0;
+		return (this.y + this.width + offset - start) / this.height;
 	};
 	
 	

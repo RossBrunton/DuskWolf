@@ -91,12 +91,12 @@ load.provide("example.platLong", (function() {
 			"Buoyancy":true,
 		},
 		"data":{
-			"hp":5, "maxHp":5, "collisionOffsetX":10, "collisionWidth":22, "collisionOffsetY":3, "haccel":0.2,
-			"hspeed":10, "airhaccelmult":0.5, "fluidhaccelmult":{"water":0.5}, "buoyancy":{"water":3}, "terminalBuoyancy":{"water":7},
+			"hp":5, "maxHp":5, "collisionOffsetX":10, "collisionWidth":22, "collisionOffsetY":3, "haccel":0.3,
+			"hspeed":7, "airhaccelmult":0.5, "fluidhaccelmult":{"water":0.5}, "buoyancy":{"water":2}, "terminalBuoyancy":{"water":7},
 			"spawns":{
 				"shot":{
 					"type":"shot", "horBase":"facing", "verBase":"middle", "cooldown":10,
-					"horOffset":1, "multDx":[[0.5, 10, []]], "applyDx":[[1, 5], [-1, 5]]}, //value, duration, accel, limit
+					"horOffset":1, "controlLimitDx":[[0, 0, 60]]}, //value, duration, accel, limit
 				"slash":{"type":"slash", "horBase":"facing", "cooldown":30, "multDx":[0.5, 10, []],
 					"onlyIf":"#dx<1 & #dx>-1",
 					"data":[{

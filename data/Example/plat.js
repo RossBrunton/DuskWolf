@@ -101,7 +101,7 @@ load.provide("example.plat", (function() {
 			"spawns":{
 				"shot":{
 					"type":"shot", "horBase":"facing", "verBase":"middle", "cooldown":10,
-					"horOffset":1, "multDx":[[0.5, 10, []]], "applyDx":[[1, 5], [-1, 5]]}, //value, duration, accel, limit
+					"horOffset":1, "controlLimitDx":[0, 0, 60], "applyDx":[[1, 5, 60], [-1, 5, 60]]}, //value, duration, accel, limit
 				"slash":{"type":"slash", "horBase":"facing", "cooldown":30, "multDx":[0.5, 10, []],
 					"onlyIf":"#dx<1 & #dx>-1",
 					"data":[{

@@ -6,9 +6,7 @@ load.provide("dusk.behave.Gravity", (function() {
 	var entities = load.require("dusk.entities");
 	var c = load.require("dusk.sgui.c");
 	
-	/** @class dusk.behave.Gravity
-	 * 
-	 * @classdesc An entity with this behaviour will move down at a constant acceleration.
+	/** An entity with this behaviour will move down at a constant acceleration.
 	 * 
 	 * The acceleration is given by the behaviour property `"gravity"` (default 2), and the maximum speed is given by
 	 * `"terminal"` (default 7).
@@ -20,19 +18,11 @@ load.provide("dusk.behave.Gravity", (function() {
 	 * This is a classless behaviour.
 	 */
 	var Gravity = {
-		"gravity":2,
+		"gravity":1.5,
 		"terminal":7,
 		
-		"frame":function(entity, e) {
-			if(entity.touchers(c.DIR_DOWN).length) {
-				entity.applyDy(
-					"gravity", entity.eProp("gravity"), 1, entity.eProp("gravity"), entity.eProp("terminal")
-				);
-			}else{
-				entity.applyDy(
-					"gravity", entity.eProp("gravity"), 1, entity.eProp("gravity"), entity.eProp("terminal"), true
-				);
-			}
+		"verForce":function(entity, e) {
+			return [entity.eProp("gravity"), entity.eProp("terminal"), "Gravity"];
 		}
 	};
 	
@@ -47,4 +37,63 @@ load.provide("dusk.behave.Gravity", (function() {
 	entities.registerBehaviour("Gravity", Gravity);
 	
 	return Gravity;
+})());
+
+
+load.provide("dusk.behave.Buoyancy", (function() {
+	var entities = load.require("dusk.entities");
+	var c = load.require("dusk.sgui.c");
+	
+	/** An entity with this behaviour will move upwards at a speed when submerged in a liquid.
+	 * 
+	 * The acceleration is given by the behaviour property `"buoyancy"`, which is an object with the fluid name being
+	 *  the key, and the maximum speed is given by `"terminal"` in the same format.
+	 * 
+	 * This behaviour uses the following behaviour properties:
+	 * - buoyancy:object = {} - Acceleration due to buoyancy; keys are 
+	 * - terminal:object = {} - Maximum speed that buoyancy applies.
+	 * 
+	 * This is a classless behaviour.
+	 */
+	var Buoyancy = {
+		"buoyancy":{},
+		"terminalBuoyancy":{},
+		"buoyancyCentre":16,
+		
+		"verForce":function(entity, e) {
+			if(entity.fluid && entity.fluid.fluidType in entity.eProp("buoyancy")) {
+				if(entity.underFluid(-entity.eProp("buoyancyCentre")) > 0.0) {
+					var upforce = -entity.eProp("buoyancy")[entity.fluid.fluidType];
+					//upforce *= entity.underFluid(-entity.eProp("buoyancyCentre"));
+					
+					var limit = entity.eProp("terminalBuoyancy")[entity.fluid.fluidType];
+					
+					if(entity.dy <= entity.eProp("gravity")
+					&& entity.underFluid(-entity.eProp("buoyancyCentre")) < 1.0
+					&& limit > entity.height * entity.underFluid(-entity.eProp("buoyancyCentre"))) {
+						
+						limit = entity.height * entity.underFluid(-entity.eProp("buoyancyCentre"));
+					}
+					
+					return [
+						upforce, limit, "buoyancy"
+					];
+				}else{
+					return [0, 0, "buoyancy"];
+				}
+			}
+		},
+	};
+	
+	entities.registerWorkshop("Buoyancy", {
+		"help":"Will accelerate upwards when in a fluid.",
+		"data":[
+			["buoyancy", "object", "Acceleration by buoyancy for a given fluid."],
+			["terminalBuoyancy", "object", "Fastest speed for buoyancy for a given fluid."],
+		]
+	});
+	
+	entities.registerBehaviour("Buoyancy", Buoyancy);
+	
+	return Buoyancy;
 })());

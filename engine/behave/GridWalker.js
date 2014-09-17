@@ -84,8 +84,44 @@ load.provide("dusk.behave.GridWalker", (function() {
 		this._data("gwmoves", [], true);
 		
 		this.entityEvent.listen(_frame.bind(this), "frame");
+		this.entityEvent.listen(_horForce.bind(this), "horForce");
+		this.entityEvent.listen(_verForce.bind(this), "verForce");
 	};
 	GridWalker.prototype = Object.create(Behave.prototype);
+	
+	/** Called on the `horForce` behaviour event to manage motion.
+	 * @param e {object} The behaviour event.
+	 */
+	var _horForce = function(e) {
+		if(this._data("gwmoving")) {
+			var d = this._data("gwfacing");
+			
+			if(d == c.DIR_RIGHT) {
+				return this._data("gwspeed");
+			}else if(d == c.DIR_LEFT) {
+				return -this._data("gwspeed");
+			}
+		}
+		
+		return 0;
+	};
+	
+	/** Called on the `verForce` behaviour event to manage motion.
+	 * @param e {object} The behaviour event.
+	 */
+	var _verForce = function(e) {
+		if(this._data("gwmoving")) {
+			var d = this._data("gwfacing");
+			
+			if(d == c.DIR_DOWN) {
+				return this._data("gwspeed");
+			}else if(d == c.DIR_UP) {
+				return -this._data("gwspeed");
+			}
+		}
+		
+		return 0;
+	};
 	
 	/** Called on the `frame` entity event to manage motion.
 	 * @param e {object} The entity event.
@@ -149,29 +185,21 @@ load.provide("dusk.behave.GridWalker", (function() {
 				if(this._entity.x >= this._data("gwtargetx")) {
 					this._entity.x = this._data("gwtargetx");
 					this._data("gwmoving", false);
-				}else{
-					this._entity.applyDx("gw_move", this._data("gwspeed"), 1, 0, this._data("gwspeed"), false);
 				}
 			}else if(d == c.DIR_LEFT) {
 				if(this._entity.x <= this._data("gwtargetx")) {
 					this._entity.x = this._data("gwtargetx");
 					this._data("gwmoving", false);
-				}else{
-					this._entity.applyDx("gw_move", -this._data("gwspeed"), 1, 0, -this._data("gwspeed"), false);
 				}
 			}else if(d == c.DIR_DOWN) {
 				if(this._entity.y >= this._data("gwtargety")) {
 					this._entity.y = this._data("gwtargety");
 					this._data("gwmoving", false);
-				}else{
-					this._entity.applyDy("gw_move", this._data("gwspeed"), 1, 0, this._data("gwspeed"), false);
 				}
 			}else if(d == c.DIR_UP) {
 				if(this._entity.y <= this._data("gwtargety")) {
 					this._entity.y = this._data("gwtargety");
 					this._data("gwmoving", false);
-				}else{
-					this._entity.applyDy("gw_move", -this._data("gwspeed"), 1, 0, -this._data("gwspeed"), false);
 				}
 			}
 			

@@ -23,12 +23,12 @@ load.provide("dusk.behave.BackForth", (function() {
 		"hspeed":5,
 		"backforthif":"",
 		
-		"beforeMove":function(entity, e) {
+		"horForce":function(entity, e) {
 			if(entity.evalTrigger(entity.eProp("backforthif"))) {
 				if(entity.eProp("headingLeft")) {
-					entity.applyDx("bf_move", -entity.eProp("hspeed"), 1);
+					return -entity.eProp("hspeed");
 				}else{
-					entity.applyDx("bf_move", entity.eProp("hspeed"), 1);
+					return entity.eProp("hspeed");
 				}
 			}
 		},

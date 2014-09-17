@@ -323,13 +323,13 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 	};
 	
 	EntityGroup.prototype._singleMoveAndCollide = function(ent, noMove) {
-		if(!noMove && !ent.getDx() && !ent.getDy()) return;
+		if(!noMove && !ent.dx && !ent.dy) return;
 		
 		var destX = ent.x;
 		var destY = ent.y;
 		if(!noMove) {
-			destX = ent.x + ent.getDx();
-			destY = ent.y + ent.getDy();
+			destX = ent.x + ent.dx;
+			destY = ent.y + ent.dy;
 		}
 		
 		for(var t = this._entities.length-1; t >= 0; t --) {
@@ -344,10 +344,10 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 				if(ent.y + ent.collisionOffsetY < testee.y + testee.collisionHeight
 				&& ent.y + ent.collisionHeight > testee.y + testee.collisionOffsetY) {
 					if(testee.eProp("solid")
-					&& destX + ent.collisionOffsetX < testee.x + testee.collisionOffsetX && ent.getDx()) {
+					&& destX + ent.collisionOffsetX < testee.x + testee.collisionOffsetX && ent.dx) {
 						diffX = testee.x + testee.collisionOffsetX - destX - ent.collisionWidth;
 					}else if(testee.eProp("solid")
-					&& destX + ent.collisionWidth > testee.x + testee.collisionWidth && ent.getDx()) {
+					&& destX + ent.collisionWidth > testee.x + testee.collisionWidth && ent.dx) {
 						diffX = testee.x + testee.collisionWidth - destX - ent.collisionOffsetX;
 					}
 					
@@ -363,10 +363,10 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 				if(ent.x + ent.collisionOffsetX < testee.x + testee.collisionWidth
 				&& ent.x + ent.collisionWidth > testee.x + testee.collisionOffsetX) {
 					if(testee.eProp("solid")
-					&& destY + ent.collisionOffsetY < testee.y + testee.collisionOffsetY && ent.getDy()) {
+					&& destY + ent.collisionOffsetY < testee.y + testee.collisionOffsetY && ent.dy) {
 						diffY = testee.y + testee.collisionOffsetY - destY - ent.collisionHeight;
 					}else if(testee.eProp("solid")
-					&& destY + ent.collisionHeight > testee.y + testee.collisionHeight && ent.getDy()) {
+					&& destY + ent.collisionHeight > testee.y + testee.collisionHeight && ent.dy) {
 						diffY = testee.y + testee.collisionHeight - destY - ent.collisionOffsetY;
 					}
 					

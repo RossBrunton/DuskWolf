@@ -20,13 +20,22 @@ load.provide("dusk.behave.Push", (function() {
 	var Push = {
 		"pspeed":1,
 		
+		"horForce":function(entity, e) {
+			if(entity.eProp("_Push_collidedSide") == c.DIR_LEFT) return entity.eProp("pspeed");
+			if(entity.eProp("_Push_collidedSide") == c.DIR_RIGHT) return -entity.eProp("pspeed");
+		},
+		
+		"verForce":function(entity, e) {
+			if(entity.eProp("_Push_collidedSide") == c.DIR_UP) return entity.eProp("pspeed");
+			if(entity.eProp("_Push_collidedSide") == c.DIR_DOWN) return -entity.eProp("pspeed");
+		},
+		
+		"beforeMove":function(entity, e) {
+			entity.eProp("_Push_collidedSide", 0);
+		},
+		
 		"collidedInto":function(ent, e) {
-			switch(e.dir) {
-				case c.DIR_DOWN: ent.applyDy("push_push", -ent.eProp("pspeed"), 1);break;
-				case c.DIR_UP: ent.applyDy("push_push", ent.eProp("pspeed"), 1);break;
-				case c.DIR_RIGHT: ent.applyDx("push_push", -ent.eProp("pspeed"), 1);break;
-				case c.DIR_LEFT: ent.applyDx("push_push", ent.eProp("pspeed"), 1);break;
-			}
+			ent.eProp("_Push_collidedSide", e.dir);
 		}
 	};
 	
@@ -61,10 +70,16 @@ load.provide("dusk.behave.Fall", (function() {
 	var Fall = {
 		"fallSpeed":1,
 		
+		"verForce":function(entity, e) {
+			if(entity.eProp("falling")) {
+				return entity.eProp("fallSpeed");
+			}
+			return 0;
+		},
+		
 		"collidedInto": function(ent, e) {
 			if(e.dir !== c.DIR_UP) return;
-			//ent.performMotion(0, ent.eProp("fallSpeed"));
-			ent.applyDy("fall_fall", ent.eProp("fallSpeed"));
+			ent.eProp("falling", true);
 		}
 	};
 

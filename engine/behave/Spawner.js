@@ -6,6 +6,7 @@ load.provide("dusk.behave.Spawner", (function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.behave.Behave");
 	var LightEntity = load.require("dusk.entities.LightEntity");
+	var utils = load.require("dusk.utils");
 	var EntityGroup = load.suggest("dusk.sgui.EntityGroup", function(p) {EntityGroup = p});
 
 	/** This gives the entity the ability to spawn other entities.
@@ -44,12 +45,17 @@ load.provide("dusk.behave.Spawner", (function() {
 	 *  string `"up"` or `"down"`. If omited, then this is determined by the spawn direction or (if that is `"middle"`),
 	 *  this entity's `headingUp` property.
 	 * - `cooldown`: An integer; The amount of frames that be waited until another spawn with the same name can spawn.
-	 * - `onlyIf`: A string; The entity will only spawn if `{@link dusk.sgui.Entity#evalTrigger}` is true with this
-	 *  trigger.
-	 * - `applyDx`, `applyDy`, `multDx`, `multDy`: An array of arguments without the first one to call the respective
-	 *  functions on the spawner with. Will be called before the animation starts.
+	 * - `onlyIf`: A string; The entity will only spawn if `Entity#evalTrigger` is true with this trigger.
+	 * - `applyDx`, `applyDy`: A `[accel, limit, duration]` triplet. Will apply an acceleration of `accel` px/frame to a
+	 *  maximum of `limit` and a minimum of -`limit` for `duration` frames.
 	 * - `applyDxDrop`, `applyDyDrop`, `multDxDrop`, `multDyDrop`: An array of arguments without the first one to call
 	 *  the respective functions on the dropped entity with. Will be called at the instant the entity is created.
+	 * Currently not functional.
+	 * - `controlLimitDx`: An `[accel, limit, duration]` triplet, if `LeftRightControl`'s x acceleration or limit
+	 *  is higher or lower than this value or negative this value, they will be set to this value or negative for
+	 *  `duration` frames after spawning. Use -1 for no limit.
+	 * - `controlLimitDy`: Similar to `Spawner:controlLimitDx`. Actually doesn't make sense because
+	 *  `LeftRightControl` only has horizontal motion. Oh well.
 	 * 
 	 * 
 	 * When the "side" of an entity is spawned, it means the size of the entity's collision rectangle, rather than the
@@ -83,10 +89,90 @@ load.provide("dusk.behave.Spawner", (function() {
 		
 		this._data("spawns", {}, true);
 		this._data("_spawn_cooldowns", {}, true);
+		this._data("Spawner:_dxLimits", [], true);
+		this._data("Spawner:_dyLimits", [], true);
+		this._data("Spawner:_dxApply", [], true);
+		this._data("Spawner:_dyApply", [], true);
 		
 		this.entityEvent.listen(_frame.bind(this), "frame");
+		this.entityEvent.listen(_horForce.bind(this), "horForce");
+		this.entityEvent.listen(_verForce.bind(this), "verForce");
+		this.entityEvent.listen(_affectHorForce.bind(this), "affectHorForce");
+		//this.entityEvent.listen(_affectVerForce.bind(this), "affectVerForce");
 	};
 	Spawner.prototype = Object.create(Behave.prototype);
+	
+	var _horForce = function() {
+		var forces = this._data("Spawner:_dxApply");
+		
+		if(!forces.length) return;
+		
+		var accel = 0;
+		var limit = 0;
+		
+		for(var i = forces.length-1; i >= 0; i --) {
+			forces[i][2] --;
+			if(forces[i][2] < 0) {
+				forces.splice(i, 1);
+			}else{
+				accel += forces[i][0];
+				limit += forces[i][1];
+			}
+		}
+		
+		return [accel, limit, "Spawner"];
+	};
+	
+	var _verForce = function() {
+		var forces = this._data("Spawner:_dyApply");
+		
+		if(!forces.length) return;
+		
+		var accel = 0;
+		var limit = 0;
+		
+		for(var i = forces.length-1; i >= 0; i --) {
+			forces[i][2] --;
+			if(forces[i][2] < 0) {
+				forces.splice(i, 1);
+			}else{
+				accel += forces[i][0];
+				limit += forces[i][1];
+			}
+		}
+		
+		return [accel, limit, "Spawner"];
+	};
+	
+	var _affectHorForce = function(e) {
+		var limits = this._data("Spawner:_dxLimits");
+		
+		if(!limits) return e;
+		
+		var maxAccel = -1;
+		var maxLimit = -1;
+		
+		for(var i = limits.length-1; i >= 0; i --) {
+			limits[i][2] --;
+			if(limits[i][2] < 0) {
+				limits.splice(i, 1);
+			}else{
+				if(maxAccel > limits[i][0] || maxAccel < 0) maxAccel = limits[i][0];
+				if(maxLimit > limits[i][1] || maxLimit < 0) maxLimit = limits[i][1];
+			}
+		}
+		
+		for(var i = 0; i < e.forces.length; i ++) {
+			if(e.forces[i] && e.forces[i][2] == "LeftRightControl") {
+				if(maxAccel >= 0 && e.forces[i][0] > maxAccel) e.forces[i][0] = maxAccel;
+				if(maxAccel >= 0 && -e.forces[i][0] < -maxAccel) e.forces[i][0] = -maxAccel;
+				if(maxAccel >= 0 && e.forces[i][1] > maxLimit) e.forces[i][1] = maxLimit;
+				if(maxAccel >= 0 && -e.forces[i][1] < -maxLimit) e.forces[i][1] = -maxLimit;
+			}
+		}
+		
+		return e;
+	};
 	
 	/** Called every frame to check for controls to spawn something.
 	 * @param {object} e A "frame" event dispatched from `{@link dusk.behave.Behave.entityEvent}`.
@@ -143,20 +229,16 @@ load.provide("dusk.behave.Spawner", (function() {
 		if("cooldown" in spawn) this._data("_spawn_cooldowns")[name] = spawn.cooldown;
 		
 		//Apply dx and dy effects to the spawner
-		if("multDx" in spawn) {
-			this._entity.multDx.apply(this._entity, ["spawn_"+name].concat(this._resolve(dir, spawn.multDx)));
-		}
-		
-		if("multDy" in spawn) {
-			this._entity.multDy.apply(this._entity, ["spawn_"+name].concat(this._resolve(dir, spawn.multDy)));
+		if("controlLimitDx" in spawn) {
+			this._data("Spawner:_dxLimits").push(utils.cloneArray(_resolve(dir, spawn["controlLimitDx"])));
 		}
 		
 		if("applyDx" in spawn) {
-			this._entity.applyDx.apply(this._entity, ["spawn_"+name].concat(this._resolve(dir, spawn.applyDx)));
+			this._data("Spawner:_dxApply").push(utils.cloneArray(_resolve(dir, spawn["applyDx"])));
 		}
 		
 		if("applyDy" in spawn) {
-			this._entity.applyDy.apply(this._entity, ["spawn_"+name].concat(this._resolve(dir, spawn.applyDy)));
+			this._data("Spawner:_dyApply").push(utils.cloneArray(_resolve(dir, spawn["applyDy"])));
 		}
 		
 		//Animate until we can spawn it
@@ -166,7 +248,7 @@ load.provide("dusk.behave.Spawner", (function() {
 			ent.x = this._entity.x;
 			ent.y = this._entity.y;
 			
-			ent.type = this._resolve(dir, spawn.type);
+			ent.type = _resolve(dir, spawn.type);
 			var light = new LightEntity(ent.type);
 			
 			if(!("horOffset" in spawn)) spawn.horOffset = 0;
@@ -215,32 +297,32 @@ load.provide("dusk.behave.Spawner", (function() {
 			
 			//And additional properties
 			if(spawn.data) {
-				var dat = this._resolve(dir, spawn.data);
+				var dat = _resolve(dir, spawn.data);
 				for(var p in dat) {
-					dropped.eProp(p, this._resolve(dir, dat[p]));
+					dropped.eProp(p, _resolve(dir, dat[p]));
 				}
 			}
 			
 			//And apply dx or dy effects to the spawned entity
-			if("multDxDrop" in spawn) {
+			/*if("multDxDrop" in spawn) {
 				dropped.multDx.apply(dropped, 
-					["spawned_"+this._entity.comName].concat(this._resolve(dir, spawn.multDxDrop)));
+					["spawned_"+this._entity.comName].concat(_resolve(dir, spawn.multDxDrop)));
 			}
 			
 			if("multDyDrop" in spawn) {
 				dropped.multDy.apply(dropped, 
-					["spawned_"+this._entity.comName].concat(this._resolve(dir, spawn.multDyDrop)));
+					["spawned_"+this._entity.comName].concat(_resolve(dir, spawn.multDyDrop)));
 			}
 			
 			if("applyDxDrop" in spawn) {
 				dropped.applyDx.apply(dropped, 
-					["spawned_"+this._entity.comName].concat(this._resolve(dir, spawn.applyDxDrop)));
+					["spawned_"+this._entity.comName].concat(_resolve(dir, spawn.applyDxDrop)));
 			}
 			
 			if("applyDyDrop" in spawn) {
 				dropped.applyDy.apply(dropped, 
-					["spawned_"+this._entity.comName].concat(this._resolve(dir, spawn.applyDyDrop)));
-			}
+					["spawned_"+this._entity.comName].concat(_resolve(dir, spawn.applyDyDrop)));
+			}*/
 			
 			//Fire the "spawned" event
 			dropped.behaviourFire("spawned", {"spawner":this._entity, "data":spawn, "dir":dir});
@@ -261,7 +343,7 @@ load.provide("dusk.behave.Spawner", (function() {
 	 * @return {*} The element in the array as given by the rules above.
 	 * @private
 	 */
-	Spawner.prototype._resolve = function(dir, arr) {
+	var _resolve = function(dir, arr) {
 		if(!Array.isArray(arr)) return arr;
 		if(arr.length == 1) return arr[0];
 		
@@ -273,15 +355,12 @@ load.provide("dusk.behave.Spawner", (function() {
 		return arr[0];
 	};
 	
-	/** Workshop data used by `{@link dusk.sgui.EntityWorkshop}`.
-	 * @static
-	 */
-	Spawner.workshopData = {
+	entities.registerWorkshop("Spawner", {
 		"help":"Will be able to spawn entities.",
 		"data":[
 			["spawns", "object", "All the entities this can spawn.", "{}"]
 		]
-	};
+	});
 	
 	entities.registerBehaviour("Spawner", Spawner);
 	

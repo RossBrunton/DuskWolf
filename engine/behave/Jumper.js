@@ -14,8 +14,10 @@ load.provide("dusk.behave.Jumper", (function() {
 		this._jumps = 0;
 		this._jumping = 0;
 		this._jumpReleased = false;
+		this._jumpEnergy = 0;
 		
 		this.entityEvent.listen(this._jumpFrame.bind(this), "frame");
+		this.entityEvent.listen(this._verForce.bind(this), "verForce");
 		
 		this.entityEvent.listen((function(e) {
 			if(e.dir == c.DIR_DOWN) {
@@ -27,13 +29,24 @@ load.provide("dusk.behave.Jumper", (function() {
 		}).bind(this), "collide");
 	};
 	Jumper.prototype = Object.create(Behave.prototype);
+	
+	Jumper.prototype._verForce = function(e) {
+		if(this._jumping) return [-(this._jumping*0.3), this._jumping*0.3, "Jumper"];
+		return 0;
+	}
 
 	Jumper.prototype._jumpFrame = function(e) {
+		if(this._entity.underFluid() > 0.0) {
+			this._jumps = 0;
+		}
+		
 		if(this._controlActive("jump")) {
-			if(this._jumpReleased && ((this._entity.touchers(c.DIR_DOWN).length && skills.hasSkill("jump"))
-			|| (this._jumps == 0 && skills.hasSkill("dubjump"))
-			|| skills.hasSkill("infinijump"))) {
-				this._entity.applyDy("control_jump", -15, 15, 1, 0);
+			if(this._jumpReleased  && skills.hasSkill("jump") && (
+				this._entity.touchers(c.DIR_DOWN).length
+				|| this._entity.underFluid() > 0.0
+				|| (this._jumps == 0 && skills.hasSkill("dubjump"))
+				|| skills.hasSkill("infinijump"))
+			) {
 				if(!this._entity.touchers(c.DIR_DOWN).length) {
 					this._jumps ++;
 					this._entity.performAnimation("airjump");
@@ -41,14 +54,13 @@ load.provide("dusk.behave.Jumper", (function() {
 					this._entity.performAnimation("groundjump");
 				}
 				
-				this._jumping = 10;
+				this._jumping = 30;
 				this._jumpReleased = false;
+				this._entity.dy = 0;
 			}else if(this._jumping) {
-				this._entity.applyDy("control_jump", -15, 15, 1, 0);
 				this._jumping --;
 			}
 		}else{
-			//this._entity.applyDy("control_jump", 0);
 			this._jumping = 0;
 			this._jumpReleased = true;
 		}

@@ -13,7 +13,7 @@ load.provide("dusk.behave.PlayerControl", (function() {
 			if(ent.eProp("playerControl")) {
 				return controls.controlActive("entity_"+e.control);
 			}
-		},
+		}
 	};
 	
 	/** Workshop data used by `{@link dusk.sgui.EntityWorkshop}`.
@@ -49,13 +49,15 @@ load.provide("dusk.behave.LeftRightControl", (function() {
 		this._data("airhaccelmult", 1.0, true);
 		this._data("fluidhaccelmult", {}, true);
 		this._collide = false;
+
 		
 		this.entityEvent.listen(_collide.bind(this), "collide");
-		this.entityEvent.listen(_frame.bind(this), "frame");
+		this.entityEvent.listen(_horForce.bind(this), "horForce");
+		
 	};
 	LeftRightControl.prototype = Object.create(Behave.prototype);
 	
-	var _frame = function(e) {
+	var _horForce = function(e) {
 		var accel = this._data("haccel");
 		if(!this._entity.touchers(c.DIR_DOWN).length) accel *= this._data("airhaccelmult");
 		
@@ -65,20 +67,15 @@ load.provide("dusk.behave.LeftRightControl", (function() {
 		
 		if(this._controlActive("left") && !this._collide) {
 			this._data("headingLeft", true);
-			this._entity.applyDx("control_move", 0, 1, -accel, -this._data("hspeed"), true);
+			return [-accel, this._data("hspeed"), "LeftRightControl"];
 		}else if(this._controlActive("right") && !this._collide) {
 			this._data("headingLeft", false);
-			this._entity.applyDx("control_move", 0, 1, accel, this._data("hspeed"), true);
-		}else if(!this._collide) {
-			// No inputs, decay the speed
-			if(this._data("lastMoveLeft")) {
-				this._entity.applyDx("control_move", 0, 1, accel, 0, true);
-			}else{
-				this._entity.applyDx("control_move", 0, 1, -accel, -0, true);
-			}
+			return [accel, this._data("hspeed"), "LeftRightControl"];
 		}else{
 			this._collide = false;
 		}
+		
+		return [0, this._data("hspeed"), "LeftRightControl"];
 	};
 	
 	var _collide = function(e) {
