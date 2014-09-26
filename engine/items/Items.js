@@ -4,17 +4,17 @@
 
 load.provide("dusk.items", (function() {
 	var utils = load.require("dusk.utils");
-	var Inheritable = load.require("dusk.Inheritable");
-	var InheritableContainer = load.require("dusk.InheritableContainer");
-	var parseTree = load.require("dusk.parseTree");
-	var EventDispatcher = load.require("dusk.EventDispatcher");
+	var Inheritable = load.require("dusk.utils.Inheritable");
+	var InheritableContainer = load.require("dusk.utils.InheritableContainer");
+	var parseTree = load.require("dusk.utils.parseTree");
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	
 	/** @namespace dusk.items
 	 * @name dusk.items
 	 * 
 	 * @description Contains methods of managing items.
 	 * 
-	 * Items are essentially just instances of `{@link dusk.Inheritable}`, which are from `{@link dusk.items.items}`.
+	 * Items are essentially just instances of `{@link dusk.utils.Inheritable}`, which are from `{@link dusk.items.items}`.
 	 * 	These objects describe the items, and what they do.
 	 * 
 	 * Extra data is specific to one individial item, and not to it's type.
@@ -32,7 +32,7 @@ load.provide("dusk.items", (function() {
 	var items = {};
 	
 	/** An InheritableContainer that contains all the item types.
-	 * @type dusk.InheritableContainer
+	 * @type dusk.utils.InheritableContainer
 	 */
 	items.items = new InheritableContainer("dusk.items.items");
 	
@@ -69,7 +69,7 @@ load.provide("dusk.items", (function() {
 		 */
 		this._capacity = capacity;
 		/** An array of items.
-		 *  Each element of this array will itself be either an array of `{@link dusk.Inheritable}` items, 
+		 *  Each element of this array will itself be either an array of `{@link dusk.utils.Inheritable}` items, 
 		 *  or null if the stack is empty.
 		 * 
 		 * Each element of this array is an "inventory slot".
@@ -103,7 +103,7 @@ load.provide("dusk.items", (function() {
 		/** This will be fired when the contents of this inventory change. There is no event object.
 		 * 
 		 * This event may be fired multiple times for the same inventory change.
-		 * @type dusk.EventDispatcher
+		 * @type dusk.utils.EventDispatcher
 		 * @since 0.0.21-alpha
 		 */
 		this.contentsChanged = new EventDispatcher("dusk.items.Invent.contentsChanged");
@@ -111,7 +111,7 @@ load.provide("dusk.items", (function() {
 	
 	/** The tree used for restrictions.
 	 * 
-	 * @type dusk.parseTree.Compiler
+	 * @type dusk.utils.parseTree.Compiler
 	 * @private
 	 * @static
 	 * @since 0.0.21-alpha
@@ -121,7 +121,7 @@ load.provide("dusk.items", (function() {
 	]);
 	
 	/** Checks if the specified item can be added into the inventory.
-	 * @param {dusk.Inheritable} item An item from `{@link dusk.items.items}` that should be checked.
+	 * @param {dusk.utils.Inheritable} item An item from `{@link dusk.items.items}` that should be checked.
 	 * @return {boolean} Whether it can be added or not.
 	 */
 	items.Invent.prototype.isValidAddition = function(item) {
@@ -150,7 +150,7 @@ load.provide("dusk.items", (function() {
 	/** Checks if the specified item can be addet to an item slot.
 	 *   This does not do anything that `{@link dusk.items.Invent#isValidAddition}` does,
 	 *   and should not be used to replace it.
-	 * @param {string|dusk.Inheritable} item An item type that should be checked,
+	 * @param {string|dusk.utils.Inheritable} item An item type that should be checked,
 	 *  either an item from `{@link dusk.items.items}` or a string type name.
 	 * @param {integer} slot The slot to check.
 	 * @return {boolean} Whether it can be added or not.
@@ -176,7 +176,7 @@ load.provide("dusk.items", (function() {
 	};
 
 	/** Attempts to add multiple copies of the specified item, if possible.
-	 * @param {string|dusk.Inheritable} item An item from `{@link dusk.items.items}`,
+	 * @param {string|dusk.utils.Inheritable} item An item from `{@link dusk.items.items}`,
 	 *  or a string type name, that should be added.
 	 * @param {integer=1} amount The number of items that should be added, defaults to `1` if not specified.
 	 * @param {boolean=false} noFire If true, then the `itemsUpdated` event will not fire.
@@ -228,7 +228,7 @@ load.provide("dusk.items", (function() {
 
 	/** Returns an item of the specified type, if it exists in the inventory. The item will remain in the inventory.
 	 * @param {string} type The type of item to look up.
-	 * @return {?dusk.Inheritable} An item from `{@link dusk.items.items}` that was previously added of the specified type, 
+	 * @return {?dusk.utils.Inheritable} An item from `{@link dusk.items.items}` that was previously added of the specified type, 
 	 *  or null if it doesn't exist.
 	 */
 	items.Invent.prototype.getAnItem = function(type) {
@@ -242,7 +242,7 @@ load.provide("dusk.items", (function() {
 	};
 
 	/** Returns any item if it exists in the inventory. The item will remain in the inventory.
-	 * @return {?dusk.Inheritable} An item from `{@link dusk.items.items}` that was previously added,
+	 * @return {?dusk.utils.Inheritable} An item from `{@link dusk.items.items}` that was previously added,
 	 *  or null if the inventory is empty.
 	 */
 	items.Invent.prototype.getAnyItem = function() {
@@ -257,7 +257,7 @@ load.provide("dusk.items", (function() {
 
 	/** Removes and returns an item of the specified type. The item will no longer remain in the inventory.
 	 * @param {string} type The type of item to take.
-	 * @return {?dusk.Inheritable} An item from `{@link dusk.items.items}` that was previously added
+	 * @return {?dusk.utils.Inheritable} An item from `{@link dusk.items.items}` that was previously added
 	 *  and has just been removed of the specified type, or null if it doesn't exist.
 	 */
 	items.Invent.prototype.takeAnItem = function(type) {
@@ -417,7 +417,7 @@ load.provide("dusk.items", (function() {
 
 	/** Returns an item that is in the specified slot.
 	 * @param {integer} slot The slot to check for the item.
-	 * @return {?dusk.Inheritable} An item from `{@link dusk.items.items}` that is in this slot, 
+	 * @return {?dusk.utils.Inheritable} An item from `{@link dusk.items.items}` that is in this slot, 
 	 *  or null if it doesn't exist.
 	 */
 	items.Invent.prototype.getItemFromSlot = function(slot) {
@@ -427,7 +427,7 @@ load.provide("dusk.items", (function() {
 
 	/** Returns and removes an item that is in the specified slot.
 	 * @param {integer} slot The slot to remove the item from.
-	 * @return {?dusk.Inheritable} An item from `{@link dusk.items.items}` that is in this slot,
+	 * @return {?dusk.utils.Inheritable} An item from `{@link dusk.items.items}` that is in this slot,
 	 *  or null if it doesn't exist.
 	 */
 	items.Invent.prototype.takeItemFromSlot = function(slot) {
@@ -447,7 +447,7 @@ load.provide("dusk.items", (function() {
 
 	/** Puts an item into the specified slot.
 	 * @param {integer} slot The slot to check for the item.
-	 * @param {string|dusk.Inheritable} item The item to add to this slot, or the type name.
+	 * @param {string|dusk.utils.Inheritable} item The item to add to this slot, or the type name.
 	 * @return {boolean} Whether the item was successfully added.
 	 */
 	items.Invent.prototype.putItemIntoSlot = function(item, slot) {
@@ -503,7 +503,7 @@ load.provide("dusk.items", (function() {
 	};
 
 	/** Calls the given function once for each item in the invent.
-	 * @param {function(dusk.Inheritable, int):undefined} funct The function to call. Second argument is the slot.
+	 * @param {function(dusk.utils.Inheritable, int):undefined} funct The function to call. Second argument is the slot.
 	 * @since 0.0.21-alpha
 	 */
 	items.Invent.prototype.forEach = function(funct) {
@@ -517,7 +517,7 @@ load.provide("dusk.items", (function() {
 	};
 
 	/** Calls the given function once for each slot in the invent. For each slot, the top item in it will be the argument.
-	 * @param {function(dusk.Inheritable, int):undefined} funct The function to call. Second argument is the slot.
+	 * @param {function(dusk.utils.Inheritable, int):undefined} funct The function to call. Second argument is the slot.
 	 * @since 0.0.21-alpha
 	 */
 	items.Invent.prototype.forEachSlot = function(funct) {

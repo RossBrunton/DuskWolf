@@ -2,9 +2,9 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.reversiblePromiseChain", (function() {
+load.provide("dusk.utils.reversiblePromiseChain", (function() {
 	var utils = load.require("dusk.utils");
-	var UserCancelError = load.require(">dusk.UserCancelError", function(p) {UserCancelError = p});
+	var UserCancelError = load.require(">dusk.utils.reversiblePromiseChain.UserCancelError", function(p) {UserCancelError = p});
 	var dusk = load.require("dusk");
 	
 	/** Creates a promise that is a chain of promises that if any reject, a previous one in the sequence is used.
@@ -12,7 +12,7 @@ load.provide("dusk.reversiblePromiseChain", (function() {
 	 * This consists of an array of functions. Each function should return a promise or not (think functions that can be 
 	 *  fed to Promise.then). The first function in the array is ran with `initalArg`, if this fulfils or returns a
 	 *  constant value, the next element in the array is called with the fulfill or return value. If there are no more
-	 *  elements, then the promise returned by `dusk.reversiblePromiseChain` fulfills with the value.
+	 *  elements, then the promise returned by `dusk.utils.reversiblePromiseChain` fulfills with the value.
 	 * 
 	 * If at any point, any promise rejects, the "inverse" function of the previous element is called with the argument 
 	 *  of the value the forward function fulfilled. Then the previous element's forward function is called with the
@@ -32,7 +32,7 @@ load.provide("dusk.reversiblePromiseChain", (function() {
 	 * @param {cancelOut} boolean If true, then if the first element rejects, then the whole promise rejects. If false, 
 	 *  the first element is tried again.
 	 * @param {*} initialArg The initial argument for the first promise function.
-	 * @memberof dusk.reversiblePromiseChain
+	 * @memberof dusk.utils.reversiblePromiseChain
 	 */
 	var reversiblePromiseChain = function(promises, cancelOut, initialArg) {
 		return new Promise((function(fulfill, reject) {
@@ -182,7 +182,7 @@ load.provide("dusk.reversiblePromiseChain", (function() {
 	return reversiblePromiseChain;
 })());
 
-load.provide("dusk.UserCancelError", (function() {
+load.provide("dusk.utils.reversiblePromiseChain.UserCancelError", (function() {
 	/** Exception representing that the user has cancelled an action.
 	 * 
 	 * @extends Error

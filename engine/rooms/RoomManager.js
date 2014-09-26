@@ -2,14 +2,14 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.RoomManager", (function() {
+load.provide("dusk.rooms.RoomManager", (function() {
 	var load = window.load.require("load");
-	var EventDispatcher = load.require("dusk.EventDispatcher");
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	
 	/** Manages rooms, which contain tilemap data and the entities in the room.
 	 * 
-	 * This is intended to be used with an instance of `{@link dusk.sgui.BasicMain}` and essentially serves as a storage 
-	 *  for it's rooms. Both `{@link dusk.plat}` and `{@link dusk.quest}` have their own room managers for their own types
+	 * This is intended to be used with an instance of `{@link dusk.rooms.sgui.BasicMain}` and essentially serves as a storage 
+	 *  for it's rooms. Both `{@link dusk.rooms.plat}` and `{@link dusk.rooms.quest}` have their own room managers for their own types
 	 *  of rooms.
 	 * 
 	 * @param {?string} packageName The package that this room manager depends on; for generating rooms in the editor.
@@ -29,14 +29,14 @@ load.provide("dusk.RoomManager", (function() {
 		/** An event dispatcher which fires when a room is loaded.
 		 * 
 		 * This has the properties `"room"`; the name of the room, and `"spawn"` the mark number of the spawn point.
-		 * @type dusk.EventDispatcher
+		 * @type dusk.utils.EventDispatcher
 		 */
-		this.roomLoaded = new EventDispatcher("dusk.RoomManager.roomLoaded");
+		this.roomLoaded = new EventDispatcher("dusk.rooms.RoomManager.roomLoaded");
 		
 		/** The BasicMain instance this manager is for.
 		 * 
-		 * You should use `{@link dusk.RoomManager#setBasicMain}` to set this, instead of setting it directly.
-		 * @type dusk.sgui.BasicMain
+		 * You should use `{@link dusk.rooms.RoomManager#setBasicMain}` to set this, instead of setting it directly.
+		 * @type dusk.rooms.sgui.BasicMain
 		 */
 		this.basicMain = null;
 		
@@ -101,7 +101,7 @@ load.provide("dusk.RoomManager", (function() {
 	};
 	
 	/** Sets the Basic Main instance this is for; this should be called instead of setting it directly.
-	 * @param {dusk.sgui.BasicMain} bm The Basic Main instance.
+	 * @param {dusk.rooms.sgui.BasicMain} bm The Basic Main instance.
 	 */
 	RoomManager.prototype.setBasicMain = function(bm) {
 		this.basicMain = bm;
@@ -111,8 +111,8 @@ load.provide("dusk.RoomManager", (function() {
 	return RoomManager;
 })());
 
-load.provide("dusk.editor", (function() {
-	/** Provides configuration variables for level editing using `{@link dusk.sgui.BasicMain}`.
+load.provide("dusk.rooms.editor", (function() {
+	/** Provides configuration variables for level editing using `{@link dusk.rooms.sgui.BasicMain}`.
 	 * 
 	 * It is expected that HTML buttons and simple scripts on such (or just the console) would edit the properties of this.
 	 * 
@@ -130,7 +130,7 @@ load.provide("dusk.editor", (function() {
 	editor.active = false;
 	
 	/** The names of the entity types that the number keys will drop if editing is enabled
-	 *  and the `{@link dusk.sgui.EntityGroup}` has focus.
+	 *  and the `{@link dusk.entities.sgui.EntityGroup}` has focus.
 	 * 
 	 * The array index corresponds to the number of the key, pressing 0 will drop the entity at index 0, for example.
 	 * 

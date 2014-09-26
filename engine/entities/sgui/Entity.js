@@ -2,16 +2,16 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.Entity", (function() {
-	var Tile = load.require("dusk.sgui.Tile");
+load.provide("dusk.entities.sgui.Entity", (function() {
+	var Tile = load.require("dusk.tiles.sgui.Tile");
 	var utils = load.require("dusk.utils");
-	var parseTree = load.require("dusk.parseTree");
-	var EventDispatcher = load.require("dusk.EventDispatcher");
+	var parseTree = load.require("dusk.utils.parseTree");
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var entities = load.require("dusk.entities");
 	var c = load.require("dusk.sgui.c");
 	var sgui = load.require("dusk.sgui");
 	var interaction = load.require("dusk.input.interaction");
-	var editor = load.suggest("dusk.editor", function(p){editor = p;});
+	var editor = load.suggest("dusk.rooms.editor", function(p){editor = p;});
 	
 	/** An entity is a component that has "behaviours" and can do certain activites, possibly in response to another
 	 *  entity or user input.
@@ -54,7 +54,7 @@ load.provide("dusk.sgui.Entity", (function() {
 	 *  and cause the block to be removed. This also releases a lock.
 	 * - `\event`: Same as `/event` but does not release the lock.
 	 * - `*pname data`: Does the particle effect named `pname` with the data `data`. Data should be a 
-	 *  json string, and each of it's keys will be fed through `{@link dusk.sgui.Entity#evalTrigger}`.
+	 *  json string, and each of it's keys will be fed through `{@link dusk.entities.sgui.Entity#evalTrigger}`.
 	 *  The next event is executed.
 	 * - `L`: Locks the current animation, so it can't change until the lock is released, and then move onto and execute
 	 *  the next animation action.
@@ -85,7 +85,7 @@ load.provide("dusk.sgui.Entity", (function() {
 	 * Due to the nature of animations, at least one of `onlyOnce` or `cooldown` must be specified, as the function that
 	 *  resolves animations may be called more than once a frame.
 	 * 
-	 * Entities can collide with each other, if they are in a `dusk.sgui.EntityGroup`. The collision hit box is a
+	 * Entities can collide with each other, if they are in a `dusk.entities.sgui.EntityGroup`. The collision hit box is a
 	 *  rectangle from the coordinates (`x+collisionOffestX`, `y+collisionOffestY`) to (`x+collisionWidth`,
 	 *  `y+collisionHeight`). The function `touchers` can be used to get a list of components touching this one on the
 	 *  specified side.
@@ -97,7 +97,7 @@ load.provide("dusk.sgui.Entity", (function() {
 	 * Behaviours are subclasses of `Behave`, and must be registered using 
 	 *  `dusk.entities.registerBehaviour` before they can be used. Entity behaviours share an object `behaviourData`
 	 *  which is used for storing and retrieving values, and can be accessed using `eProp` or
-	 *  `dusk.behave.Behave._data`. By convention, the keys are of the form `"behaviourName:varName"` or
+	 *  `dusk.entities.behave.Behave._data`. By convention, the keys are of the form `"behaviourName:varName"` or
 	 *  `"_behaviourName:_privateVarName"`.
 	 * 
 	 * A number of "built in" entity data properties are available:
@@ -130,10 +130,10 @@ load.provide("dusk.sgui.Entity", (function() {
 	 * - `terminate`: Called when the entity is about to be terminated, the listener should return true if they don't
 	 *  want the entity to terminate. The event object has no properties.
 	 * - `delete`: Called when the entity is deleted.
-	 * - `collide`: Fired by `{@link dusk.sgui.EntityGroup}` when this entity collides into another entity or a wall.
+	 * - `collide`: Fired by `{@link dusk.entities.sgui.EntityGroup}` when this entity collides into another entity or a wall.
 	 *  The event object has two properties; `dir` a dusk.sgui.c.DIR_* constant representing the side that collided, and
 	 *  `target`, the entity that it collided into, or the string `"wall"`.
-	 * - `collidedInto`: Fired by `{@link dusk.sgui.EntityGroup}` when this is collided into by another entity. The
+	 * - `collidedInto`: Fired by `{@link dusk.entities.sgui.EntityGroup}` when this is collided into by another entity. The
 	 *  event object has two properties; `dir` a dusk.sgui.c.DIR_* constant representing the side that collided, and
 	 *  `target`, the entity that collided into this one.
 	 * - `controlActive`: Fired by all behaviours when they want to check a control is active. A listener should return
@@ -154,7 +154,7 @@ load.provide("dusk.sgui.Entity", (function() {
 	 *  are used in animation and particle effects, as the first element of the array where they are checked if they are
 	 *  true or false. They are also used in behaviours, to allow a more fine control on what they interact with.
 	 * 
-	 * They are essentially fed to a parse tree from `dusk.parseTree`, and support the following operators, low to high
+	 * They are essentially fed to a parse tree from `dusk.utils.parseTree`, and support the following operators, low to high
 	 *  priority, in addition to the basic ones:
 	 * 
 	 * - `on event`: True iff this trigger is being evaluated because of the animation event `event`. This will cause a
@@ -171,7 +171,7 @@ load.provide("dusk.sgui.Entity", (function() {
 	 * - `.var`: The value of the component property `var`.
 	 * - `:var`: The value of the entity data property `var`.
 	 * 
-	 * @extends dusk.sgui.Tile
+	 * @extends dusk.tiles.sgui.Tile
 	 * @param {dusk.sgui.Component} parent The container that this component is in.
 	 * @param {string} comName The name of the component.
 	 * @constructor
@@ -204,7 +204,7 @@ load.provide("dusk.sgui.Entity", (function() {
 		this._dyAccum = {};
 		
 		/** All the behaviours that this entity is using. Each key name is the name of the behaviour,
-		 *  and the value is a `{@link dusk.behave.Behave}` instance.
+		 *  and the value is a `{@link dusk.entities.behave.Behave}` instance.
 		 * @type object
 		 * @private
 		 */
@@ -222,11 +222,11 @@ load.provide("dusk.sgui.Entity", (function() {
 		this.behaviourData = {};
 		/** An event disptacher that fires when an entity event happens.
 		 * 
-		 * Firing this event does nothing, use `{@link dusk.sgui.Entity#behaviourFire}` instead.
-		 * @type dusk.EventDispatcher
+		 * Firing this event does nothing, use `{@link dusk.entities.sgui.Entity#behaviourFire}` instead.
+		 * @type dusk.utils.EventDispatcher
 		 * @since 0.0.21-alpha
 		 */
-		this.entityEvent = new EventDispatcher("dusk.sgui.Entity.entityEvent");
+		this.entityEvent = new EventDispatcher("dusk.entities.sgui.Entity.entityEvent");
 		
 		/** The animation data for the entity, in the same format as described in the entity type
 		 *  description. For speed, the second element of the value will be sliced once, and so will be
@@ -255,7 +255,7 @@ load.provide("dusk.sgui.Entity", (function() {
 		 * @private
 		 */
 		this._aniVars = {};
-		/** The functions set by `{@link dusk.sgui.Entity#animationWait}` for calling when the event is
+		/** The functions set by `{@link dusk.entities.sgui.Entity#animationWait}` for calling when the event is
 		 *  terminated. Keys are event names, while values are the functions to call.
 		 * @type object
 		 * @private
@@ -336,26 +336,26 @@ load.provide("dusk.sgui.Entity", (function() {
 		 */
 		this.collisionMark = "";
 		
-		/** The `dusk.sgui.TileMap` instance that serves as this entity's schematic layer.
+		/** The `dusk.tiles.sgui.TileMap` instance that serves as this entity's schematic layer.
 		 * 
 		 * This will be used to calculate collisions with wall.
-		 * @type ?dusk.sgui.TileMap
+		 * @type ?dusk.tiles.sgui.TileMap
 		 */
 		this.scheme = null;
 		/** The path to the scheme instance. Setting this will update the scheme instance.
 		 * @type string
 		 */
 		this.schemePath = null;
-		/** The `dusk.sgui.ParticleField` instance that this will insert its particle effects into.
-		 * @type ?dusk.sgui.ParticleField
+		/** The `dusk.particles.sgui.ParticleField` instance that this will insert its particle effects into.
+		 * @type ?dusk.particles.sgui.ParticleField
 		 */
 		this.particles = null;
 		/** The path to the particle field instance. Setting this will update it.
 		 * @type string
 		 */
 		this.particlesPath = null;
-		/** The `dusk.sgui.FluidLayer` instance that this will use.
-		 * @type ?dusk.sgui.FluidLayer
+		/** The `dusk.rooms.sgui.FluidLayer` instance that this will use.
+		 * @type ?dusk.rooms.sgui.FluidLayer
 		 */
 		this.fluid = null;
 		/** The path to the particle field instance. Setting this will update it.
@@ -364,7 +364,7 @@ load.provide("dusk.sgui.Entity", (function() {
 		this.fluidPath = null;
 		
 		/** Use this to check if the entity is terminated or not, this is set to true by
-		 *  `{@link dusk.sgui.Entity#terminate}`, and means the entity is set for deleting when an
+		 *  `{@link dusk.entities.sgui.Entity#terminate}`, and means the entity is set for deleting when an
 		 *  animation is finished. Please do not set this property directly.
 		 * @type boolean
 		 */
@@ -381,7 +381,7 @@ load.provide("dusk.sgui.Entity", (function() {
 		
 		/** Used on triggers. If it is true, then the last trigger tree to be evaluated used the `on`
 		 *  operator to successfully match against an event. This is used, for example, in 
-		 *  `{@link dusk.sgui.Entity#animationWait}` to check if an event was specifically "noticed".
+		 *  `{@link dusk.entities.sgui.Entity#animationWait}` to check if an event was specifically "noticed".
 		 * @type boolean
 		 * @private
 		 */
@@ -675,7 +675,7 @@ load.provide("dusk.sgui.Entity", (function() {
 		return out;
 	};
 	
-	/** Called before all entities are moved by `{@link dusk.sgui.EntityGroup}`, and causes all the 
+	/** Called before all entities are moved by `{@link dusk.entities.sgui.EntityGroup}`, and causes all the 
 	 *  speeds of this entity to accelerate or decelerate if needed.
 	 * 
 	 * This also resets the touchers, so it should be called before collisions are checked.
@@ -847,7 +847,7 @@ load.provide("dusk.sgui.Entity", (function() {
 	 * @param {string} name The name of the behaviour to add.
 	 * @param {boolean=false} reInit If the behaviour already exists and this is true, it will be
 	 *  deleted and recreated, else nothing happens.
-	 * @return {?dusk.behave.Behave} The behaviour that was added, or null if it wasn't added.
+	 * @return {?dusk.entities.behave.Behave} The behaviour that was added, or null if it wasn't added.
 	 */
 	Entity.prototype.addBehaviour = function(name, reInit) {
 		if(name in this._behaviours && !reInit) return null;
@@ -875,7 +875,7 @@ load.provide("dusk.sgui.Entity", (function() {
 	
 	/** Returns a behaviour from this entity.
 	 * @param {string} name The name of the behaviour to get.
-	 * @return {?dusk.behave.Behave} The behaviour that was added, or null if it hasn't got it.
+	 * @return {?dusk.entities.behave.Behave} The behaviour that was added, or null if it hasn't got it.
 	 */
 	Entity.prototype.getBehaviour = function(name) {
 		if(!(name in this._behaviours)) return null;
@@ -1189,7 +1189,7 @@ load.provide("dusk.sgui.Entity", (function() {
 	
 	
 	//Triggers
-	/** Alias to `{@link dusk.sgui.Entity#evalTrigger}`.
+	/** Alias to `{@link dusk.entities.sgui.Entity#evalTrigger}`.
 	 * @param {*} trigger The trigger.
 	 * @param {?string} event The name of the event, if appropriate.
 	 * @return {*} The result of the evaluated parse tree.
@@ -1225,7 +1225,7 @@ load.provide("dusk.sgui.Entity", (function() {
 	};
 	
 	/** The parse tree used for evaluating triggers.
-	 * @type dusk.parseTree
+	 * @type dusk.utils.parseTree
 	 * @private
 	 */
 	var _triggerTree = new parseTree.Compiler([], [
@@ -1314,9 +1314,9 @@ load.provide("dusk.sgui.Entity", (function() {
 		return out;
 	};
 	
-	/** Called by `{@link dusk.sgui.EntityGroup}` to indicate that the specified entity is touching it.
+	/** Called by `{@link dusk.entities.sgui.EntityGroup}` to indicate that the specified entity is touching it.
 	 * @param {integer} dir The side it is touching this, one of the `dusk.sgui.c.DIR_*` constants.
-	 * @param {dusk.sgui.Entity|string} entity The entity touching this, or the string `"wall"`.
+	 * @param {dusk.entities.sgui.Entity|string} entity The entity touching this, or the string `"wall"`.
 	 */
 	Entity.prototype.addToucher = function(dir, entity) {
 		if(entity === "wall" || entity.eProp("solid")) this._touchers[dir].push(entity);
@@ -1342,24 +1342,24 @@ load.provide("dusk.sgui.Entity", (function() {
 	};
 	
 	
-	/*dusk.sgui.Entity.prototype.teather = function(target, dir) {
+	/*dusk.entities.sgui.Entity.prototype.teather = function(target, dir) {
 		this._teatherClients[this._teatherClients.length] = [target, dir];
 		target.receiveTeather(this, dir);
 	};
 
-	dusk.sgui.Entity.prototype.unteather = function(target) {
+	dusk.entities.sgui.Entity.prototype.unteather = function(target) {
 		target.receiveTeather(null, null);
 		for(var i = this._teatherClients.length-1; i >= 0; i--) {
 			if(this._teatherClients[i][0] == target) this._teatherClients.splice(i, 1);
 		}
 	};
 
-	dusk.sgui.Entity.prototype.receiveTeather = function(host, dir) {
+	dusk.entities.sgui.Entity.prototype.receiveTeather = function(host, dir) {
 		if(!host) this._teatherHost = null; else this._teatherHost = [host, dir];
 		
 	};
 
-	dusk.sgui.Entity.prototype.teatherClients = function() {
+	dusk.entities.sgui.Entity.prototype.teatherClients = function() {
 		return this._teatherClients;
 	};*/
 	
@@ -1380,7 +1380,7 @@ load.provide("dusk.sgui.Entity", (function() {
 	
 	/** This terminates the entity, which is a way to "gracefully delete" it. First, a behaviour event
 	 *  `terminate` is fired, if none of the listeners to that return true, 
-	 *  `{@link dusk.sgui.Entity#animationWait}` is called with a `terminate` event with the callback 
+	 *  `{@link dusk.entities.sgui.Entity#animationWait}` is called with a `terminate` event with the callback 
 	 *  deleting this element.
 	 * 
 	 * This should be used if you want the entity to animate it's death, otherwise, if you just want it
@@ -1415,7 +1415,7 @@ load.provide("dusk.sgui.Entity", (function() {
 	
 	/** Returns if this is a light entity rather than an sgui entity.
 	 * @return {boolean} True if this is an instance of `{@link dusk.entities.Entity}`, false if it is
-	 *  an instance of `{@link dusk.sgui.Entity}`.
+	 *  an instance of `{@link dusk.entities.sgui.Entity}`.
 	 */
 	Entity.prototype.isLight = function() {
 		return false;
@@ -1427,7 +1427,7 @@ load.provide("dusk.sgui.Entity", (function() {
 
 
 load.provide("dusk.entities.LightEntity", (function() {
-	var Entity = load.require("dusk.sgui.Entity");
+	var Entity = load.require("dusk.entities.sgui.Entity");
 	var entities = load.require("dusk.entities");
 	var utils = load.require("dusk.utils");
 	
@@ -1438,10 +1438,10 @@ load.provide("dusk.entities.LightEntity", (function() {
 	 * @class dusk.entities.LightEntity
 	 * 
 	 * @classdesc A Light Entity implements all of the properties and methods of
-	 *  `{@link dusk.sgui.Entity}`, but does not extend from a base class, meaning it cannot be used as
+	 *  `{@link dusk.entities.sgui.Entity}`, but does not extend from a base class, meaning it cannot be used as
 	 *  a sgui component.
 	 * 
-	 * It has all the properties of `{@link dusk.sgui.Entity}`, so see that class.
+	 * It has all the properties of `{@link dusk.entities.sgui.Entity}`, so see that class.
 	 * 
 	 * It also has a `deleted` property, that should be checked to see if the entity was deleted.
 	 * 
@@ -1462,7 +1462,7 @@ load.provide("dusk.entities.LightEntity", (function() {
 	
 	/** Returns if this is a light entity rather than an sgui entity.
 	 * @return {boolean} True if this is an instance of `{@link dusk.entities.LightEntity}`, false if it
-	 *  is an instance of `{@link dusk.sgui.Entity}`.
+	 *  is an instance of `{@link dusk.entities.sgui.Entity}`.
 	 */
 	LightEntity.prototype.isLight = function() {
 		return true;

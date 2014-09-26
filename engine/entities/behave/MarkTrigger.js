@@ -2,27 +2,27 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.behave.MarkTrigger", (function() {
+load.provide("dusk.entities.behave.MarkTrigger", (function() {
 	var entities = load.require("dusk.entities");
-	var Behave = load.require("dusk.behave.Behave");
-	var TileMap = load.require("dusk.sgui.TileMap");
+	var Behave = load.require("dusk.entities.behave.Behave");
+	var TileMap = load.require("dusk.tiles.sgui.TileMap");
 	
 	/** Allows interacting with marks.
 	 * 
 	 * Simply put, whenever an entity with this behaviour enters a tile with a source y coordinate of 1 on the schematic
 	 *  layer, `entities.markTrigger` will fire. This event can also be fired again by pressing the up key. This can be
-	 *  used, for example, by `dusk.sgui.TransitionManager` to switch rooms.
+	 *  used, for example, by `dusk.rooms.sgui.TransitionManager` to switch rooms.
 	 * 
 	 * The event object contains the following properties:
 	 * - up:boolean - Whether the up key was pressed.
 	 * - mark:integer - The source y coordinate of the tile triggered.
 	 * - activator:string - The comName of the entity that activated the mark.
-	 * - entity:dusk.sgui.Entity - The entity itself that activated the mark.
+	 * - entity:dusk.entities.sgui.Entity - The entity itself that activated the mark.
 	 * - room:string - The name of the room that was activated.
 	 * 
 	 * This behaviour does not use any behaviour properties.
 	 * 
-	 * @param {dusk.sgui.Entity} entity The entity this behaviour will act with.
+	 * @param {dusk.entities.sgui.Entity} entity The entity this behaviour will act with.
 	 * @constructor
 	 */
 	var MarkTrigger = function(entity) {
@@ -90,7 +90,7 @@ load.provide("dusk.behave.MarkTrigger", (function() {
 		TileMap.tileData.free(t);
 	};
 	
-	/** Workshop data used by `dusk.sgui.EntityWorkshop`.
+	/** Workshop data used by `dusk.entities.sgui.EntityWorkshop`.
 	 * @static
 	 */
 	MarkTrigger.workshopData = {

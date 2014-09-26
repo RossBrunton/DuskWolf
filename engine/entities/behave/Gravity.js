@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.behave.Gravity", (function() {
+load.provide("dusk.entities.behave.Gravity", (function() {
 	var entities = load.require("dusk.entities");
 	var c = load.require("dusk.sgui.c");
 	
@@ -40,7 +40,7 @@ load.provide("dusk.behave.Gravity", (function() {
 })());
 
 
-load.provide("dusk.behave.Buoyancy", (function() {
+load.provide("dusk.entities.behave.Buoyancy", (function() {
 	var entities = load.require("dusk.entities");
 	var c = load.require("dusk.sgui.c");
 	

@@ -2,10 +2,10 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.TileRegion", (function() {
-	var EventDispatcher = load.require("dusk.EventDispatcher");
+load.provide("dusk.tiles.sgui.TileRegion", (function() {
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var c = load.require("dusk.sgui.c");
-	var TileMap = load.require("dusk.sgui.TileMap");
+	var TileMap = load.require("dusk.tiles.sgui.TileMap");
 	
 	var TileRegion = function(tileMap, generator, parent) {
 		this._tileMap = tileMap;
@@ -21,7 +21,7 @@ load.provide("dusk.sgui.TileRegion", (function() {
 		this.colour = "";
 		this.name = "";
 		
-		this.onChange = new EventDispatcher("dusk.sgui.TileRegion.onChange");
+		this.onChange = new EventDispatcher("dusk.tiles.sgui.TileRegion.onChange");
 	};
 	
 	TileRegion.prototype.setOrigin = function(x, y) {
@@ -378,16 +378,16 @@ load.provide("dusk.sgui.TileRegion", (function() {
 	return TileRegion;
 })());
 
-load.provide("dusk.sgui.TileRegionGenerator", (function() {
+load.provide("dusk.tiles.sgui.TileRegionGenerator", (function() {
 	var Component = load.require("dusk.sgui.Component");
-	var TileMap = load.require("dusk.sgui.TileMap");
+	var TileMap = load.require("dusk.tiles.sgui.TileMap");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
 	var utils = load.require("dusk.utils");
-	var Image = load.require("dusk.Image");
-	var TileRegion = load.require("dusk.sgui.TileRegion");
+	var Image = load.require("dusk.utils.Image");
+	var TileRegion = load.require("dusk.tiles.sgui.TileRegion");
 
-	/** @class dusk.sgui.TileRegionGenerator
+	/** @class dusk.tiles.sgui.TileRegionGenerator
 	 * 
 	 * @classdesc A tile region serves to group tiles, and can colour them.
 	 * 
@@ -396,7 +396,7 @@ load.provide("dusk.sgui.TileRegionGenerator", (function() {
 	 * them coloured, as well.
 	 * 
 	 * Tiles can be added to regions individually, but it is more usefull to use
-	 *  `{@link dusk.sgui.TileRegionGenerator#expandRegion}` to create a region that, essentially, says "Every tile
+	 *  `{@link dusk.tiles.sgui.TileRegionGenerator#expandRegion}` to create a region that, essentially, says "Every tile
 	 *  that is n tiles away from a given tile". If you use `expandRegion`, you get paths to and from the "origin" tile
 	 *  for free.
 	 * 
@@ -439,13 +439,13 @@ load.provide("dusk.sgui.TileRegionGenerator", (function() {
 		 */
 		this._regions = {};
 		/** The original tile in a region. Key is the region name, and the value is a shortcut to the origin tile in 
-		 *  `{@link dusk.sgui.TileRegionGenerator#_regions}`.
+		 *  `{@link dusk.tiles.sgui.TileRegionGenerator#_regions}`.
 		 * @type object
 		 * @private
 		 */
 		this._regionOrigins = {};
 		/** An object containing arrays for fast lookups. Key is region name, the value is a Uint16Array. The value
-		 *  `(y * cols) + x` is the index of the tile at that location in `{@link dusk.sgui.TileRegionGenerator#_regions}` or 0
+		 *  `(y * cols) + x` is the index of the tile at that location in `{@link dusk.tiles.sgui.TileRegionGenerator#_regions}` or 0
 		 *  (the tile is not in the region).
 		 * @type object
 		 * @private
@@ -483,7 +483,7 @@ load.provide("dusk.sgui.TileRegionGenerator", (function() {
 	/** Returns the location of the source tile on the origin image
 	 *  (as in, the one that was drawn to here) that the specified coordinate is in.
 	 * 
-	 * Please return the output to `{@link dusk.sgui.TileRegionGenerator.tileData}` when you are done.
+	 * Please return the output to `{@link dusk.tiles.sgui.TileRegionGenerator.tileData}` when you are done.
 	 * @param {integer} x The x coordinate to look in.
 	 * @param {integer} y The y coordinate to look in.
 	 * @param {boolean=false} exactX If true
@@ -763,7 +763,7 @@ load.provide("dusk.sgui.TileRegionGenerator", (function() {
 		set: function(value) {if(value > 0) console.warn("TileRegionGenerator setting height is not supported.");}
 	});
 
-	/** Returns the map for `{@link dusk.sgui.BasicMain}` to save it.
+	/** Returns the map for `{@link dusk.rooms.sgui.BasicMain}` to save it.
 	 * 
 	 * @return {object} The current map.
 	 * @since 0.0.18-alpha
@@ -772,9 +772,9 @@ load.provide("dusk.sgui.TileRegionGenerator", (function() {
 		return {"rows":this.rows, "cols":this.cols};
 	};
 
-	/* Loads a map from an object. This is used by `{@link dusk.sgui.BasicMain}`.
+	/* Loads a map from an object. This is used by `{@link dusk.rooms.sgui.BasicMain}`.
 	 * 
-	 * @param {object} map The map to load, will be assigned to `{@link dusk.sgui.EditableTileMap#map}`.
+	 * @param {object} map The map to load, will be assigned to `{@link dusk.tiles.sgui.EditableTileMap#map}`.
 	 * @since 0.0.18-alpha
 	 */
 	TileRegionGenerator.prototype.loadBM = function(data) {

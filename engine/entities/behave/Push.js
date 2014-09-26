@@ -2,9 +2,9 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.behave.Push", (function() {
+load.provide("dusk.entities.behave.Push", (function() {
 	var entities = load.require("dusk.entities");
-	var Behave = load.require("dusk.behave.Behave");
+	var Behave = load.require("dusk.entities.behave.Behave");
 	var c = load.require("dusk.sgui.c");
 	
 	/** An entity with this behaviour will, when hit from any direction, 
@@ -52,7 +52,7 @@ load.provide("dusk.behave.Push", (function() {
 })());
 
 
-load.provide("dusk.behave.Fall", (function() {
+load.provide("dusk.entities.behave.Fall", (function() {
 	var entities = load.require("dusk.entities");
 	var c = load.require("dusk.sgui.c");
 	

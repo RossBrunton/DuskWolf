@@ -2,15 +2,15 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.TileMap", (function() {
+load.provide("dusk.tiles.sgui.TileMap", (function() {
 	var Component = load.require("dusk.sgui.Component");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
-	var editor = load.suggest("dusk.editor", function(p) {editor = p});
+	var editor = load.suggest("dusk.rooms.editor", function(p) {editor = p});
 	var utils = load.require("dusk.utils");
-	var Image = load.require("dusk.Image");
-	var Pool = load.require("dusk.Pool");
-	var TileMapWeights = load.require("dusk.sgui.TileMapWeights", function(p){TileMapWeights = p;});
+	var Image = load.require("dusk.utils.Image");
+	var Pool = load.require("dusk.utils.Pool");
+	var TileMapWeights = load.require("dusk.tiles.sgui.TileMapWeights", function(p){TileMapWeights = p;});
 	
 	/** This is a grid of tiles.
 	 * 
@@ -107,7 +107,7 @@ load.provide("dusk.sgui.TileMap", (function() {
 		 */
 		this.src = "";
 		/** The actual image object used to store the source image.
-		 * @type dusk.Image
+		 * @type dusk.utils.Image
 		 * @private
 		 */
 		this._img = null;
@@ -170,7 +170,7 @@ load.provide("dusk.sgui.TileMap", (function() {
 		this.animating = true;
 		
 		/** If set, this is the weights of a given tile. This can be changed often, and incurs no performance problems.
-		 * @type ?dusk.sgui.TileMapWeights
+		 * @type ?dusk.tiles.sgui.TileMapWeights
 		 * @since 0.0.21-alpha
 		 */
 		this.weights = null;
@@ -720,7 +720,7 @@ load.provide("dusk.sgui.TileMap", (function() {
 	
 	
 	
-	/** Returns the map for `{@link dusk.sgui.BasicMain}` to save it.
+	/** Returns the map for `{@link dusk.rooms.sgui.BasicMain}` to save it.
 	 * 
 	 * @return {object} The current map.
 	 * @since 0.0.18-alpha
@@ -729,7 +729,7 @@ load.provide("dusk.sgui.TileMap", (function() {
 		return this.map;
 	};
 	
-	/** Loads a map from an object. This is used by `dusk.sgui.BasicMain`.
+	/** Loads a map from an object. This is used by `dusk.rooms.sgui.BasicMain`.
 	 * 
 	 * @param {object} map The map to load, will be assigned to `map`.
 	 * @since 0.0.18-alpha
@@ -762,7 +762,7 @@ load.provide("dusk.sgui.TileMap", (function() {
 })());
 
 
-load.provide("dusk.sgui.TileMapWeights", (function() {
+load.provide("dusk.tiles.sgui.TileMapWeights", (function() {
 	var utils = load.require("dusk.utils");
 	
 	/** Stores weights of tilemap schematic layers.

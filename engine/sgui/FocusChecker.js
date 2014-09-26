@@ -62,7 +62,7 @@ load.provide("dusk.sgui.FocusChecker", (function() {
 
 
 load.provide("dusk.sgui.FocusCheckerTile", (function() {
-	var Tile = load.require("dusk.sgui.Tile");
+	var Tile = load.require("dusk.tiles.sgui.Tile");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
 	
@@ -72,7 +72,7 @@ load.provide("dusk.sgui.FocusCheckerTile", (function() {
 	 * 
 	 * @param {dusk.sgui.IContainer} parent The container that this component is in.
 	 * @param {string} comName The name of the component.
-	 * @extends dusk.sgui.Tile
+	 * @extends dusk.tiles.sgui.Tile
 	 * @constructor
 	 * @since 0.0.19-alpha
 	 */

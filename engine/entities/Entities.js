@@ -3,8 +3,8 @@
 "use strict";
 
 load.provide("dusk.entities", (function() {
-	var EventDispatcher = load.require("dusk.EventDispatcher");
-	var InheritableContainer = load.require("dusk.InheritableContainer");
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
+	var InheritableContainer = load.require("dusk.utils.InheritableContainer");
 	
 	/** @namespace dusk.entities
 	 * @name dusk.entities
@@ -26,12 +26,12 @@ load.provide("dusk.entities", (function() {
 	 * 	If a property used by a behaviour is not in this object, it will be created automatically by the
 	 *  behaviour. This is a standard object.
 	 * 
-	 * The `animation` property describes animation, and is described at `{@link dusk.sgui.Entity}`.
+	 * The `animation` property describes animation, and is described at `{@link dusk.entities.sgui.Entity}`.
 	 * 
 	 * @since 0.0.17-alpha
-	 * @see {@link dusk.sgui.Entity}
-	 * @see {@link dusk.sgui.EntityGroup}
-	 * @see {@link dusk.sgui.BasicMain}
+	 * @see {@link dusk.entities.sgui.Entity}
+	 * @see {@link dusk.entities.sgui.EntityGroup}
+	 * @see {@link dusk.rooms.sgui.BasicMain}
 	 */
 	var entities = {};
 	
@@ -75,7 +75,7 @@ load.provide("dusk.entities", (function() {
 	
 	/** The name of the "seek" entity.
 	 * 
-	 * `{@link dusk.sgui.BasicMain}` adds an entity
+	 * `{@link dusk.rooms.sgui.BasicMain}` adds an entity
 	 *  with this name and the type `{@link dusk.entities.seekType}` as the "player".
 	 * 
 	 * In effect, this is the name of the player entity that moves between rooms, and the camera follows.
@@ -85,7 +85,7 @@ load.provide("dusk.entities", (function() {
 	entities.seek = "hero";
 	/** The type of the "seek" entity.
 	 * 
-	 * `{@link dusk.sgui.BasicMain}` adds an entity
+	 * `{@link dusk.rooms.sgui.BasicMain}` adds an entity
 	 *  with this type and the name `{@link dusk.entities.seek}` as the "player".
 	 * 
 	 * In effect, this is the name of the player entity that moves between rooms, and the camera follows.
@@ -97,13 +97,13 @@ load.provide("dusk.entities", (function() {
 	/** An event dispatcher that is fired when a "mark" is triggered.
 	 * 
 	 * See `{@link dusk.behaviours.MarkTrigger}` for details on marks.
-	 * @type dusk.EventDispatcher
+	 * @type dusk.utils.EventDispatcher
 	 */
 	entities.markTrigger = new EventDispatcher("dusk.entities.markTrigger");
 	
 	/** An inheritable container containing all the defined entity types.
 	 *	Use this to add or get entity types.
-	 * @type dusk.InheritableContainer
+	 * @type dusk.utils.InheritableContainer
 	 */
 	entities.types = new InheritableContainer("dusk.entities.types");
 	entities.types.createNewType("root", {
@@ -128,7 +128,7 @@ load.provide("dusk.entities", (function() {
 
 	/** Adds a new behaviour that can be added to entities. This must be called before the behaviour can be used.
 	 * @param {string} name The name of the added behaviour.
-	 * @param {class(dusk.sgui.Entity) extends dusk.behave.Behave} behaviour The behaviour to register.
+	 * @param {class(dusk.entities.sgui.Entity) extends dusk.entities.behave.Behave} behaviour The behaviour to register.
 	 * @since 0.0.18-alpha
 	 */
 	entities.registerBehaviour = function(name, behaviour) {
@@ -143,7 +143,7 @@ load.provide("dusk.entities", (function() {
 	/** Returns a constructor for the specified behaviour, 
 	 *  provided it has been registered beforehand with {@link dusk.entities.registerBehaviour}.
 	 * @param {string} name The name of the behaviour to look up.
-	 * @return {?class(dusk.sgui.Entity) extends dusk.behave.Behave} A constructor for the specified type, 
+	 * @return {?class(dusk.entities.sgui.Entity) extends dusk.entities.behave.Behave} A constructor for the specified type, 
 	 *  or null if it doesn't exist.
 	 * @since 0.0.18-alpha
 	 */
@@ -163,7 +163,7 @@ load.provide("dusk.entities", (function() {
 	
 	/** Associates the given workshop data for a given behaviour.
 	 * 
-	 * See `dusk.sgui.EntityWorkshop` for details on the format.
+	 * See `dusk.entities.sgui.EntityWorkshop` for details on the format.
 	 * @param {string} name The name of the behaviour.
 	 * @param {object} data Workshop data.
 	 * @since 0.0.21-alpha

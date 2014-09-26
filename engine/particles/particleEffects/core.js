@@ -3,8 +3,8 @@
 "use strict";
 
 
-load.provide("dusk.sgui.particleEffects.core", (function() {
-	var Image = load.require("dusk.Image");
+load.provide("dusk.particles.particleEffects.core", (function() {
+	var Image = load.require("dusk.utils.Image");
 	var utils = load.require("dusk.utils");
 	
 	var _images = {};
@@ -60,8 +60,8 @@ load.provide("dusk.sgui.particleEffects.core", (function() {
 })());
 
 
-load.provide("dusk.sgui.particleEffects.spew", (function() {
-	var core = load.require("dusk.sgui.particleEffects.core");
+load.provide("dusk.particles.particleEffects.core.spew", (function() {
+	var core = load.require("dusk.particles.particleEffects.core");
 	var spew = function(field, data) {
 		for(var i = 0; i < data.count; i ++) {
 			field.inject(
@@ -89,8 +89,8 @@ load.provide("dusk.sgui.particleEffects.spew", (function() {
 })());
 
 
-load.provide("dusk.sgui.particleEffects.spread", (function() {
-	var core = load.require("dusk.sgui.particleEffects.core");
+load.provide("dusk.particles.particleEffects.core.spread", (function() {
+	var core = load.require("dusk.particles.particleEffects.core");
 	var spread = function(field, data) {
 		for(var i = 0; i < data.count; i ++) {
 			var angle = field.deRange(data.angle, [0, 2]) * Math.PI;
@@ -123,8 +123,8 @@ load.provide("dusk.sgui.particleEffects.spread", (function() {
 })());
 
 
-load.provide("dusk.sgui.particleEffects.image", (function() {
-	var core = load.require("dusk.sgui.particleEffects.core");
+load.provide("dusk.particles.particleEffects.core.image", (function() {
+	var core = load.require("dusk.particles.particleEffects.core");
 	var utils = load.require("dusk.utils");
 	
 	var image = function(field, data) {

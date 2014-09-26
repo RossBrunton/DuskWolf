@@ -6,11 +6,11 @@ load.provide("dusk.sgui.RangeText", (function() {
 	var Label = load.require("dusk.sgui.Label");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
-	var Range = load.require("dusk.Range");
+	var Range = load.require("dusk.utils.Range");
 
 	/** @class dusk.sgui.RangeText
 	 * 
-	 * @classdesc A rangeText is a label that has its content linked to a `{@link dusk.Range}` instance.
+	 * @classdesc A rangeText is a label that has its content linked to a `{@link dusk.utils.Range}` instance.
 	 * 
 	 * When the value of the Range changes then the content of this label will change as well.
 	 * 
@@ -26,12 +26,12 @@ load.provide("dusk.sgui.RangeText", (function() {
 		Label.call(this, parent, comName);
 		
 		/** Internal storage for the range used in this component.
-		 * @type dusk.Range
+		 * @type dusk.utils.Range
 		 * @private
 		 */
 		this._range = null;
 		/** The range used for this.
-		 * @type dusk.Range
+		 * @type dusk.utils.Range
 		 */
 		this.range = null;
 		/** The id of the "onchanged" listener for range.

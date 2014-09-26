@@ -2,40 +2,40 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.behave.Behave", (function() {
-	var Entity = load.require(">dusk.sgui.Entity", function(p) {Entity = p});
-	var EventDispatcher = load.require("dusk.EventDispatcher");
+load.provide("dusk.entities.behave.Behave", (function() {
+	var Entity = load.require(">dusk.entities.sgui.Entity", function(p) {Entity = p});
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var entities = load.require("dusk.entities");
 	
 	/** A behaviour of an entity.
 	 * 
-	 * Objects of this class, and it's subclasses, are "attached" to `{@link dusk.sgui.Entity}` instances and
+	 * Objects of this class, and it's subclasses, are "attached" to `{@link dusk.entities.sgui.Entity}` instances and
 	 *  essentially provide details on how the entity should act.
 	 * 
 	 * This class is the base class of these behaviours, but does nothing on it's own.
 	 * 
 	 * Entities may have multiple behaviours, but each behaviour instance can only be attached to one entity.
 	 * 
-	 * Messages are passed to the behaviour using `{@link dusk.sgui.Entity.behaviourFire}`, which fires an event. The
+	 * Messages are passed to the behaviour using `{@link dusk.entities.sgui.Entity.behaviourFire}`, which fires an event. The
 	 * behaviour itself should edit the entity's public properties directly.
 	 * 
-	 * @param {dusk.sgui.Entity} entity The entity this behaviour will act with.
+	 * @param {dusk.entities.sgui.Entity} entity The entity this behaviour will act with.
 	 * @constructor
 	 */
 	var Behave = function(entity) {
 		/** The entitiy this behaviour is acting on.
-		 * @type dusk.sgui.Entity
+		 * @type dusk.entities.sgui.Entity
 		 * @protected
 		 */
 		this._entity = entity;
 		
-		/** An event dispatcher that is fired when the entity's `{@link dusk.sgui.Entity.behaviourFire}` method is called.
+		/** An event dispatcher that is fired when the entity's `{@link dusk.entities.sgui.Entity.behaviourFire}` method is called.
 		 * 
 		 * The properties of the event object will vary depending on it's type, but there will always be a `name` property
 		 * which contains the name of the event fired.
-		 * @type dusk.EventDispatcher
+		 * @type dusk.utils.EventDispatcher
 		 */
-		this.entityEvent = new EventDispatcher("dusk.behave.Behave.entityEvent");
+		this.entityEvent = new EventDispatcher("dusk.entities.behave.Behave.entityEvent");
 	};
 	
 	/** This accesses or sets behaviour data of the entity.

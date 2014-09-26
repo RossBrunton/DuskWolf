@@ -6,7 +6,7 @@ load.provide("dusk.sgui.Grid", (function() {
 	var Group = load.require("dusk.sgui.Group");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
-	var EventDispatcher = load.require("dusk.EventDispatcher");
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var utils = load.require("dusk.utils");
 	
 	/** A grid is a group of similar components arranged in a grid.
@@ -87,7 +87,7 @@ load.provide("dusk.sgui.Grid", (function() {
 		 * - `current` Only on `create` events. This is the object that was used to create the component.
 		 * 
 		 * The handler MUST return the event object when it is finished with it.
-		 * @type dusk.EventDispatcher
+		 * @type dusk.utils.EventDispatcher
 		 * @protected
 		 * @since 0.0.17-alpha
 		 */

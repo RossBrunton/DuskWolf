@@ -2,13 +2,13 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.behave.Scriptable", (function() {
+load.provide("dusk.entities.behave.Scriptable", (function() {
 	var entities = load.require("dusk.entities");
-	var Behave = load.require("dusk.behave.Behave");
-	var EventDispatcher = load.require("dusk.EventDispatcher");
-	var UserCancelError = load.require("dusk.UserCancelError");
+	var Behave = load.require("dusk.entities.behave.Behave");
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
+	var UserCancelError = load.require("dusk.utils.reversiblePromiseChain.UserCancelError");
 	var utils = load.require("dusk.utils");
-	var Entity = load.require("dusk.sgui.Entity");
+	var Entity = load.require("dusk.entities.sgui.Entity");
 
 	var Scriptable = function(entity) {
 		Behave.call(this, entity);
@@ -189,7 +189,7 @@ load.provide("dusk.behave.Scriptable", (function() {
 		];
 	};
 	
-	/** Workshop data used by `{@link dusk.sgui.EntityWorkshop}`.
+	/** Workshop data used by `{@link dusk.entities.sgui.EntityWorkshop}`.
 	 * @static
 	 */
 	Scriptable.workshopData = {

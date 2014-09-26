@@ -2,8 +2,8 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.Tile", (function() {
-	var Image = load.require("dusk.Image");
+load.provide("dusk.tiles.sgui.Tile", (function() {
+	var Image = load.require("dusk.utils.Image");
 	var Component = load.require("dusk.sgui.Component");
 	var sgui = load.require("dusk.sgui");
 
@@ -29,7 +29,7 @@ load.provide("dusk.sgui.Tile", (function() {
 		Component.call(this, parent, comName);
 
 		/** The current source image.
-		 * @type dusk.Image
+		 * @type dusk.utils.Image
 		 * @private
 		 */
 		this._img = null;
@@ -153,21 +153,21 @@ load.provide("dusk.sgui.Tile", (function() {
 		}
 	});
 	
-	/*dusk.sgui.Tile.prototype.snapX = function(down) {
+	/*dusk.tiles.sgui.Tile.prototype.snapX = function(down) {
 		if(down)
 			this.x = Math.ceil(this.x/this.width)*this.width;
 		else
 			this.x = Math.floor(this.x/this.width)*this.width;
 	};
 	
-	dusk.sgui.Tile.prototype.snapY = function(right) {
+	dusk.tiles.sgui.Tile.prototype.snapY = function(right) {
 		if(right)
 			this.y = Math.ceil(this.y/this.height)*this.height;
 		else
 			this.y = Math.floor(this.y/this.height)*this.height;
 	};
 	
-	dusk.sgui.Tile.prototype.gridGo = function(x, y) {
+	dusk.tiles.sgui.Tile.prototype.gridGo = function(x, y) {
 		this.x = x*this.width;
 		this.y = y*this.height;
 	};*/

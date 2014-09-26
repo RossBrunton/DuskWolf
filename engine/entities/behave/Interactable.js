@@ -2,10 +2,10 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.behave.InteractableTarget", (function() {
+load.provide("dusk.entities.behave.InteractableTarget", (function() {
 	var entities = load.require("dusk.entities");
-	var Behave = load.require("dusk.behave.Behave");
-	var EventDispatcher = load.require("dusk.EventDispatcher");
+	var Behave = load.require("dusk.entities.behave.Behave");
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	
 	/** Is interacted by from other entities, and then fires a global event handler.
 	 * 
@@ -15,8 +15,8 @@ load.provide("dusk.behave.InteractableTarget", (function() {
 	 * The `interact event` object contains the following properties:
 	 * - type:string - The value of `interactType`.
 	 * - comName:string - The name of the entity target.
-	 * - target:dusk.sgui.Entity - The target entity (this).
-	 * - interacter:dusk.sgui.Entity - The entity interacting with this.
+	 * - target:dusk.entities.sgui.Entity - The target entity (this).
+	 * - interacter:dusk.entities.sgui.Entity - The entity interacting with this.
 	 * - up:boolean - Whether the interaction was due to `entity_interact`.
 	 * - room:string - The name of the room, if available.
 	 * 
@@ -25,10 +25,10 @@ load.provide("dusk.behave.InteractableTarget", (function() {
 	 * - interactUpRequired:boolean = false - Whether the `entity_interact` control on the sender is requried for the
 	 *  event to fire.
 	 * 
-	 * @param {dusk.sgui.Entity} entity The entity this behaviour will act with.
+	 * @param {dusk.entities.sgui.Entity} entity The entity this behaviour will act with.
 	 * @constructor
 	 * @since 0.0.21-alpha
-	 * @see dusk.behave.InteractableHost
+	 * @see dusk.entities.behave.InteractableHost
 	 */
 	var InteractableTarget = function(entity) {
 		Behave.call(this, entity);
@@ -58,12 +58,12 @@ load.provide("dusk.behave.InteractableTarget", (function() {
 	
 	/** Fired when this entity is interacted with. The properties of the event object are detailed in the documentation
 	 *  for the class.
-	 * @type dusk.EventDispatcher
+	 * @type dusk.utils.EventDispatcher
 	 * @static
 	 */
-	InteractableTarget.interact = new EventDispatcher("dusk.behave.InteractableTarget.interact");
+	InteractableTarget.interact = new EventDispatcher("dusk.entities.behave.InteractableTarget.interact");
 	
-	/** Workshop data used by `dusk.sgui.EntityWorkshop`.
+	/** Workshop data used by `dusk.entities.sgui.EntityWorkshop`.
 	 * @static
 	 */
 	InteractableTarget.workshopData = {
@@ -81,28 +81,28 @@ load.provide("dusk.behave.InteractableTarget", (function() {
 })());
 
 
-load.provide("dusk.behave.InteractableHost", (function() {
+load.provide("dusk.entities.behave.InteractableHost", (function() {
 	var entities = load.require("dusk.entities");
-	var Behave = load.require("dusk.behave.Behave");
+	var Behave = load.require("dusk.entities.behave.Behave");
 	var controls = load.require("dusk.input.controls");
 	
 	/** Can interact with other entities.
 	 * 
 	 * When this entity collides with another entity (even if it isn't solid), it will fire an `interactedWith` event
 	 *  on it. Also, if the `entity_interact` control (default up key) is pressed and this entity has the behaviour
-	 *  `dusk.behave.PlayerControl`, another `interactedWith` event will be fired.
+	 *  `dusk.entities.behave.PlayerControl`, another `interactedWith` event will be fired.
 	 * 
 	 * The `interactedWith` event object contains the following properties:
 	 * - up:boolean - Whether the `entity_interact` key was pressed.
-	 * - interacter:dusk.sgui.Entity - The entity interacting with it.
+	 * - interacter:dusk.entities.sgui.Entity - The entity interacting with it.
 	 * 
 	 * This behaviour does not use any behaviour properties.
 	 * 
-	 * @param {dusk.sgui.Entity} entity The entity this behaviour will act with.
+	 * @param {dusk.entities.sgui.Entity} entity The entity this behaviour will act with.
 	 * @constructor
 	 * @since 0.0.21-alpha
-	 * @see dusk.behave.MarkTrigger
-	 * @see dusk.behave.InteractableTarget
+	 * @see dusk.entities.behave.MarkTrigger
+	 * @see dusk.entities.behave.InteractableTarget
 	 */
 	var InteractableHost = function(entity) {
 		Behave.call(this, entity);
@@ -148,7 +148,7 @@ load.provide("dusk.behave.InteractableHost", (function() {
 		this._interactingWith = touchers;
 	};
 	
-	/** Workshop data used by `dusk.sgui.EntityWorkshop`.
+	/** Workshop data used by `dusk.entities.sgui.EntityWorkshop`.
 	 * @static
 	 */
 	InteractableHost.workshopData = {

@@ -3,8 +3,8 @@
 "use strict";
 
 load.provide("dusk.options", (function() {
-	/* @namespace dusk.quest
-	 * @name dusk.quest
+	/* @namespace dusk.rooms.quest
+	 * @name dusk.rooms.quest
 	 * 
 	 * @description Plat is a simple platforming engine that uses `{@link dusk.sgui}`.
 	 * 

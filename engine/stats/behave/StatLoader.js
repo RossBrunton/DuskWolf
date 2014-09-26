@@ -2,17 +2,17 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.behave.StatLoader", (function() {
+load.provide("dusk.stats.behave.StatLoader", (function() {
 	var entities = load.require("dusk.entities");
-	var Behave = load.require("dusk.behave.Behave");
+	var Behave = load.require("dusk.entities.behave.Behave");
 	var stats = load.require("dusk.stats");
 
-	/* @class dusk.behave.StatLoader
+	/* @class dusk.stats.behave.StatLoader
 	 * 
 	 * @classdesc 
 	 * 
-	 * @extends dusk.behave.Behave
-	 * @param {?dusk.sgui.Entity} entity The entity this behaviour is attached to.
+	 * @extends dusk.entities.behave.Behave
+	 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
 	 * @constructor
 	 */
 	var StatLoader = function(entity) {
@@ -56,7 +56,7 @@ load.provide("dusk.behave.StatLoader", (function() {
 		}
 	};
 
-	/** Workshop data used by `{@link dusk.sgui.EntityWorkshop}`.
+	/** Workshop data used by `{@link dusk.entities.sgui.EntityWorkshop}`.
 	 * @static
 	 */
 	StatLoader.workshopData = {

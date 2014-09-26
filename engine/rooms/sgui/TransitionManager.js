@@ -2,20 +2,20 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.TransitionManager", (function() {
+load.provide("dusk.rooms.sgui.TransitionManager", (function() {
 	var load = window.load.require("load");
 	var Component = load.require("dusk.sgui.Component");
 	var sgui = load.require("dusk.sgui");
 	var options = load.require("dusk.options");
 	var utils = load.require("dusk.utils");
-	var editor = load.require("dusk.editor");
+	var editor = load.require("dusk.rooms.editor");
 	var entities = load.require("dusk.entities");
 	var Fade = load.require("dusk.sgui.extras.Fade");
 	var controls = load.require("dusk.input.controls");
 	
-	/** @class dusk.sgui.TransitionManager
+	/** @class dusk.rooms.sgui.TransitionManager
 	 * 
-	 * @classdesc A transition manager is a component that functions as a layer in a `{@link dusk.sgui.BasicMain}`.
+	 * @classdesc A transition manager is a component that functions as a layer in a `{@link dusk.rooms.sgui.BasicMain}`.
 	 * 
 	 * It essentially allows the passage between rooms when a mark is triggered.
 	 * 
@@ -29,7 +29,7 @@ load.provide("dusk.sgui.TransitionManager", (function() {
 	 *  and secondly the mark that the entity was spawned at.
 	 * 
 	 * `"out"` is an array describing the transition between rooms, each element is an array describing one exit.
-	 * The first element is a trigger criteria, format described in `{@link dusk.sgui.Entity}`, that describes the
+	 * The first element is a trigger criteria, format described in `{@link dusk.entities.sgui.Entity}`, that describes the
 	 *  entitiy  that can trigger this exit, second element is an integer describing what mark to add the exit for,
 	 *  third element is a boolean indicating whether pressing "up" is needed, and the last element is an object
 	 *  describing the room to load.
@@ -42,7 +42,7 @@ load.provide("dusk.sgui.TransitionManager", (function() {
 	 *  being used, the functions only have the current out transition as the first argument and no second argument.
 	 * - `"supressFade"` If true, then the room will not fade out.
 	 * 
-	 * If this component is focused and `dusk.editor#active` is true then this will display all the transitions on the
+	 * If this component is focused and `dusk.rooms.editor#active` is true then this will display all the transitions on the
 	 *  canvas, and let the user edit them. This will not respect the width and height of the component, because I'm
 	 *  too lazy to have that work. As such the width and height of this are both 1. The controls are as follows:
 	 * 
@@ -53,7 +53,7 @@ load.provide("dusk.sgui.TransitionManager", (function() {
 	 * @param {dusk.sgui.Group} parent The container that this component is in.
 	 * @param {string} comName The name of the component.
 	 * @extends dusk.sgui.Component
-	 * @extends dusk.sgui.IBasicMainLayer
+	 * @extends dusk.rooms.sgui.IBasicMainLayer
 	 * @constructor
 	 * @since 0.0.20-alpha
 	 */
@@ -75,8 +75,8 @@ load.provide("dusk.sgui.TransitionManager", (function() {
 		 * @protected
 		 */
 		this._current = null;
-		/** The amount of calls to `{@link dusk.sgui.TransitionManager#endWait}` we are waiting on. Every call to 
-		 * `{@link dusk.sgui.TransitionManager#wait}` increases this.
+		/** The amount of calls to `{@link dusk.rooms.sgui.TransitionManager#endWait}` we are waiting on. Every call to 
+		 * `{@link dusk.rooms.sgui.TransitionManager#wait}` increases this.
 		 * @type integer
 		 * @private
 		 */
@@ -198,7 +198,7 @@ load.provide("dusk.sgui.TransitionManager", (function() {
 	};
 	
 	/** Used in custom functions, the TransitionManager to not load the next room until
-	 * `{@link dusk.sgui.TransitionManager#endWait}` is called the same amount of times as this function. This allows
+	 * `{@link dusk.rooms.sgui.TransitionManager#endWait}` is called the same amount of times as this function. This allows
 	 *  you to do async stuff while the room is transitioning.
 	 */
 	TransitionManager.prototype.wait = function() {
@@ -206,8 +206,8 @@ load.provide("dusk.sgui.TransitionManager", (function() {
 	};
 	
 	/** Used in custom functions, the TransitionManager to not load the next room until
-	 * `{@link dusk.sgui.TransitionManager#wait}` is called the same amount of times as this function. This allows you
-	 *  to do async stuff while the room is transitioning. `{@link dusk.sgui.TransitionManager#wait}` should always be 
+	 * `{@link dusk.rooms.sgui.TransitionManager#wait}` is called the same amount of times as this function. This allows you
+	 *  to do async stuff while the room is transitioning. `{@link dusk.rooms.sgui.TransitionManager#wait}` should always be 
 	 *  called first.
 	 */
 	TransitionManager.prototype.endWait = function() {

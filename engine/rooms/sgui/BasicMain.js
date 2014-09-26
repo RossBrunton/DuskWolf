@@ -2,25 +2,25 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.BasicMain", (function() {
+load.provide("dusk.rooms.sgui.BasicMain", (function() {
 	var sgui = load.require("dusk.sgui");
 	var Group = load.require("dusk.sgui.Group");
-	var EditableTileMap = load.require("dusk.sgui.EditableTileMap");
-	var TileMap = load.require("dusk.sgui.TileMap");
-	var EntityGroup = load.require("dusk.sgui.EntityGroup");
-	var ParticleField = load.require("dusk.sgui.ParticleField");
-	var TransitionManager = load.require("dusk.sgui.TransitionManager");
-	var FluidLayer = load.require("dusk.sgui.FluidLayer");
-	var TileRegionGenerator = load.require("dusk.sgui.TileRegionGenerator");
+	var EditableTileMap = load.require("dusk.tiles.sgui.EditableTileMap");
+	var TileMap = load.require("dusk.tiles.sgui.TileMap");
+	var EntityGroup = load.require("dusk.entities.sgui.EntityGroup");
+	var ParticleField = load.require("dusk.particles.sgui.ParticleField");
+	var TransitionManager = load.require("dusk.rooms.sgui.TransitionManager");
+	var FluidLayer = load.require("dusk.rooms.sgui.FluidLayer");
+	var TileRegionGenerator = load.require("dusk.tiles.sgui.TileRegionGenerator");
 	var Label = load.require("dusk.sgui.Label");
-	var editor = load.require("dusk.editor");
-	var RoomManager = load.require("dusk.RoomManager");
+	var editor = load.require("dusk.rooms.editor");
+	var RoomManager = load.require("dusk.rooms.RoomManager");
 	var c = load.require("dusk.sgui.c");
 	var entities = load.require("dusk.entities");
 	var dusk = load.require("dusk");
 	var keyboard = load.require("dusk.input.keyboard");
 	var controls = load.require("dusk.input.controls");
-	var TileMapWeights = load.require("dusk.sgui.TileMapWeights");
+	var TileMapWeights = load.require("dusk.tiles.sgui.TileMapWeights");
 	var utils = load.require("dusk.utils");
 	
 	var BasicMain = function(parent, comName) {
@@ -732,7 +732,7 @@ load.provide("dusk.sgui.BasicMain", (function() {
 })());
 
 
-load.provide("dusk.sgui.IBasicMainLayer", (function() {
+load.provide("dusk.rooms.sgui.IBasicMainLayer", (function() {
 	var IBasicMainLayer = function() {};
 	
 	IBasicMainLayer.saveBM = function() {};

@@ -3,7 +3,7 @@
 "use strict";
 
 load.provide("dusk", (function() {
-	var EventDispatcher = load.require("dusk.EventDispatcher");
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var utils = load.require("dusk.utils");
 	
 	/** @namespace dusk
@@ -61,7 +61,7 @@ load.provide("dusk", (function() {
 	 * 
 	 * The events fired have no properties.
 	 * 
-	 * @type dusk.EventDispatcher
+	 * @type dusk.utils.EventDispatcher
 	 * @since 0.0.14-alpha
 	 */
 	dusk.onLoad = new EventDispatcher("dusk.onLoad");

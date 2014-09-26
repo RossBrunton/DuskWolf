@@ -3,7 +3,7 @@
 "use strict";
 
 load.provide("dusk.sgui.extras.Flash", (function() {
-	var Range = load.require("dusk.Range");
+	var Range = load.require("dusk.utils.Range");
 	var Effect = load.require("dusk.sgui.extras.Effect");
 	var sgui = load.require("dusk.sgui");
 	
@@ -36,7 +36,7 @@ load.provide("dusk.sgui.extras.Flash", (function() {
 		 */
 		this.speed = 16;
 		/** The range used internally to switch between the two values.
-		 * @type dusk.Range
+		 * @type dusk.utils.Range
 		 * @private
 		 */
 		this._range = null;

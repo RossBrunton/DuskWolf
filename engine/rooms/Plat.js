@@ -2,12 +2,12 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.plat", (function() {
+load.provide("dusk.rooms.plat", (function() {
 	var sgui = load.require("dusk.sgui");
-	var BasicMain = load.require("dusk.sgui.BasicMain");
+	var BasicMain = load.require("dusk.rooms.sgui.BasicMain");
 	var entities = load.require("dusk.entities");
-	var RoomManager = load.require("dusk.RoomManager");
-	var TileMapWeights = load.require("dusk.sgui.TileMapWeights");
+	var RoomManager = load.require("dusk.rooms.RoomManager");
+	var TileMapWeights = load.require("dusk.tiles.sgui.TileMapWeights");
 	var skills = load.require("dusk.skills");
 	
 	/** Plat is a simple platforming engine that uses `{@link dusk.sgui}`.
@@ -36,7 +36,7 @@ load.provide("dusk.plat", (function() {
 		"behaviours":{}
 	});
 	
-	plat.rooms = new RoomManager("dusk.plat", "rooms");
+	plat.rooms = new RoomManager("dusk.rooms.plat", "rooms");
 	plat.rooms.setBasicMain(main.getComponent("main"));
 	
 	plat.save = function(type, args, ref) {

@@ -2,12 +2,12 @@
 
 load.provide("quest.ents", (function() {
 	var entities = load.require("dusk.entities");
-	load.require("dusk.behave.BackForth");
-	load.require("dusk.behave.GridWalker");
-	load.require("dusk.behave.Persist");
-	load.require("dusk.behave.MarkTrigger");
-	load.require("dusk.behave.StatLoader");
-	load.require("dusk.behave.Scriptable");
+	load.require("dusk.entities.behave.BackForth");
+	load.require("dusk.entities.behave.GridWalker");
+	load.require("dusk.entities.behave.Persist");
+	load.require("dusk.entities.behave.MarkTrigger");
+	load.require("dusk.stats.behave.StatLoader");
+	load.require("dusk.entities.behave.Scriptable");
 	var items = load.require("dusk.items");
 	var stats = load.require("dusk.stats");
 	

@@ -3,7 +3,7 @@
 "use strict";
 
 load.provide("dusk.input.keyboard", (function() {
-	var EventDispatcher = load.require("dusk.EventDispatcher");
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var dusk = load.require("dusk");
 	var sgui = load.suggest("dusk.sgui", function(p) {sgui = p});
 	
@@ -27,7 +27,7 @@ load.provide("dusk.input.keyboard", (function() {
 	 * 
 	 * The event object is a JQuery `keydown` event.
 	 * 
-	 * @type dusk.EventDispatcher
+	 * @type dusk.utils.EventDispatcher
 	 * @since 0.0.14-alpha
 	 */
 	keyboard.keyPress = new EventDispatcher("dusk.input.keyboard.keyPress");
@@ -36,7 +36,7 @@ load.provide("dusk.input.keyboard", (function() {
 	 * 
 	 * The event object is a JQuery `keyup` event.
 	 * 
-	 * @type dusk.EventDispatcher
+	 * @type dusk.utils.EventDispatcher
 	 * @since 0.0.14-alpha
 	 */
 	keyboard.keyUp = new EventDispatcher("dusk.input.keyboard.keyUp");

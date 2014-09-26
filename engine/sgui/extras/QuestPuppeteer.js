@@ -5,11 +5,11 @@
 load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 	var Extra = load.require("dusk.sgui.extras.Extra");
 	var sgui = load.require("dusk.sgui");
-	var UserCancelError = load.require("dusk.UserCancelError");
-	var quest = load.require(">dusk.quest", function(p) {quest = p});
+	var UserCancelError = load.require("dusk.utils.reversiblePromiseChain.UserCancelError");
+	var quest = load.require(">dusk.rooms.quest", function(p) {quest = p});
 	var utils = load.require("dusk.utils");
 	var entities = load.require("dusk.entities");
-	var TileRegion = load.require("dusk.sgui.TileRegion");
+	var TileRegion = load.require("dusk.tiles.sgui.TileRegion");
 
 	/* @class dusk.sgui.extras.DynamicWidth
 	 * 

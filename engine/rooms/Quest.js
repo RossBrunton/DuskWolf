@@ -2,15 +2,15 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.quest", (function() {
+load.provide("dusk.rooms.quest", (function() {
 	var sgui = load.require("dusk.sgui");
-	var BasicMain = load.require("dusk.sgui.BasicMain");
+	var BasicMain = load.require("dusk.rooms.sgui.BasicMain");
 	var entities = load.require("dusk.entities");
-	var RoomManager = load.require("dusk.RoomManager");
+	var RoomManager = load.require("dusk.rooms.RoomManager");
 	var QuestPuppeteer = load.require("dusk.sgui.extras.QuestPuppeteer");
 	
-	/* @namespace dusk.quest
-	 * @name dusk.quest
+	/* @namespace dusk.rooms.quest
+	 * @name dusk.rooms.quest
 	 * 
 	 * @description Plat is a simple platforming engine that uses `{@link dusk.sgui}`.
 	 * 
@@ -37,7 +37,7 @@ load.provide("dusk.quest", (function() {
 	main.getComponent("main").addExtra("QuestPuppeteer", "questPuppeteer", {});
 	quest.puppeteer = main.getComponent("main").getExtra("questPuppeteer");
 	
-	quest.rooms = new RoomManager("dusk.quest", "rooms");
+	quest.rooms = new RoomManager("dusk.rooms.quest", "rooms");
 	quest.rooms.setBasicMain(main.getComponent("main"));
 	
 	return quest;

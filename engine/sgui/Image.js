@@ -5,7 +5,7 @@
 load.provide("dusk.sgui.Image", (function() {
 	var Component = load.require("dusk.sgui.Component");
 	var sgui = load.require("dusk.sgui");
-	var DImage = load.require("dusk.Image");
+	var DImage = load.require("dusk.utils.Image");
 
 	/** @class dusk.sgui.Image
 	 * 
@@ -28,7 +28,7 @@ load.provide("dusk.sgui.Image", (function() {
 		Component.call(this, parent, comName);
 
 		/** The current image.
-		 * @type dusk.Image
+		 * @type dusk.utils.Image
 		 * @protected
 		 */
 		this._img = null;

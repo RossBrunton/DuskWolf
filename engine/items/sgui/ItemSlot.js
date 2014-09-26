@@ -2,14 +2,14 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.ItemSlot", (function() {
+load.provide("dusk.items.sgui.ItemSlot", (function() {
 	var Group = load.require("dusk.sgui.Group");
 	var sgui = load.require("dusk.sgui");
 	var items = load.require("dusk.items");
 	var Image = load.require("dusk.sgui.Image");
 	var Label = load.require("dusk.sgui.Label");
-	var Tile = load.require("dusk.sgui.Tile");
-	var ItemHand = load.require("dusk.sgui.ItemHand");
+	var Tile = load.require("dusk.tiles.sgui.Tile");
+	var ItemHand = load.require("dusk.items.sgui.ItemHand");
 
 	var ItemSlot = function (parent, comName) {
 		Group.call(this, parent, comName);

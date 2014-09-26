@@ -2,11 +2,11 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.parseTree", (function() {
+load.provide("dusk.utils.parseTree", (function() {
 	/** This module provides the ability to create parse trees.
 	 * 
-	 * It has two classes, `{@link dusk.parseTree.Compiler}` and 
-	 *  `{@link dusk.parseTree.Node}` for building and evaluating parse trees.
+	 * It has two classes, `{@link dusk.utils.parseTree.Compiler}` and 
+	 *  `{@link dusk.utils.parseTree.Node}` for building and evaluating parse trees.
 	 * 
 	 * @since 0.0.20-alpha
 	 */
@@ -60,7 +60,7 @@ load.provide("dusk.parseTree", (function() {
 	 * @param {array} operators An array of binary operators.
 	 * @param {array} uoperators An array of unary operators.
 	 * @param {array} consts An array of constant operators.
-	 * @param {int=dusk.parseTree.Compiler.WS_ONLYCHARS} whitespace Whether whitespace needs to
+	 * @param {int=dusk.utils.parseTree.Compiler.WS_ONLYCHARS} whitespace Whether whitespace needs to
 	 *  surround the operators.
 	 * @param {boolean=false} noBuiltins If true, then the built in "basic" operators will not be used.
 	 * @constructor
@@ -202,12 +202,12 @@ load.provide("dusk.parseTree", (function() {
 	parseTree.WS_OPTIONAL = parseTree.Compiler.WS_OPTIONAL = 2;
 	
 	/** This takes a string, and then compiles it down into a parse tree made using
-	 *  `{@link dusk.parseTree.Node}` instances.
+	 *  `{@link dusk.utils.parseTree.Node}` instances.
 	 * 
 	 * @param {string} str The string to compile.
 	 * @param {int=0} init The character to start evaluating from.
 	 * @param {boolean=false} noCache If true, then there will be no caching, and the tree won't be saved for later.
-	 * @returns {dusk.parseTree.Node} The root of the tree it was compiled to.
+	 * @returns {dusk.utils.parseTree.Node} The root of the tree it was compiled to.
 	 */
 	parseTree.Compiler.prototype.compile = function(str, init, noCache) {
 		if(!noCache && str in this._caches && (init == 0 || init == undefined)) {
@@ -531,7 +531,7 @@ load.provide("dusk.parseTree", (function() {
 	
 	/** Creates a new parse tree compile error.
 	 * 
-	 * @class dusk.parseTree.ParseTreeCompileError
+	 * @class dusk.utils.parseTree.ParseTreeCompileError
 	 * 
 	 * @classdesc An error that is thrown whenever compiling a parse tree fails.
 	 * 
@@ -549,7 +549,7 @@ load.provide("dusk.parseTree", (function() {
 	
 	/** A single node of the compiled parse tree.
 	 * 
-	 * It can be evaluated to a single value using `{@link dusk.parseTree.Node#eval}`.
+	 * It can be evaluated to a single value using `{@link dusk.utils.parseTree.Node#eval}`.
 	 * 
 	 * @param {string} value For leaves it is it's value, for nodes it is the operator.
 	 * @param {int=0} priority Used when building the tree, priority  of the operator. Lower values are
@@ -557,8 +557,8 @@ load.provide("dusk.parseTree", (function() {
 	 * @param {?function(string, *, *):* | function(string, *):* | function(string):*} exec The function that should be
 	 *  called to evaluate this node.
 
-	 * @param {?dusk.parseTree.Node} lhs The left branch, if it is known and exists.
-	 * @param {?dusk.parseTree.Node} rhs The right branch, if it is known and exists.
+	 * @param {?dusk.utils.parseTree.Node} lhs The left branch, if it is known and exists.
+	 * @param {?dusk.utils.parseTree.Node} rhs The right branch, if it is known and exists.
 	 * @param {boolean} con If true, then this node will always have the same value if both it's chilren are con.
 	 * @constructor
 	 * @since 0.0.20-alpha
@@ -580,12 +580,12 @@ load.provide("dusk.parseTree", (function() {
 		this.exec = exec?exec:null;
 		
 		/** The left hand side of the operator or null if it is a leaf.
-		 * @type ?dusk.parseTree.Node
+		 * @type ?dusk.utils.parseTree.Node
 		 */
 		this.lhs = lhs?lhs:null;
 		
 		/** The right hand side of the operator or null if it is a leaf.
-		 * @type ?dusk.parseTree.Node
+		 * @type ?dusk.utils.parseTree.Node
 		 */
 		this.rhs = rhs?rhs:null;
 		
@@ -668,7 +668,7 @@ load.provide("dusk.parseTree", (function() {
 	 * 
 	 * Otherswise, will call `collapse` on all its children.
 	 * 
-	 * @return {dusk.parseTree.Node} This node; as a convienience.
+	 * @return {dusk.utils.parseTree.Node} This node; as a convienience.
 	 * @since 0.0.21-alpha
 	 */
 	parseTree.Node.prototype.collapse = function() {

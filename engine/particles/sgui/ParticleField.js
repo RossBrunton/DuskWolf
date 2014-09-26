@@ -2,11 +2,11 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.ParticleField", (function() {
+load.provide("dusk.particles.sgui.ParticleField", (function() {
 	var Component = load.require("dusk.sgui.Component");
-	var core = load.require("dusk.sgui.particleEffects.core");
+	var core = load.require("dusk.particles.particleEffects.core");
 	var sgui = load.require("dusk.sgui");
-	var editor = load.suggest("dusk.editor", function(p) {editor = p;});
+	var editor = load.suggest("dusk.rooms.editor", function(p) {editor = p;});
 	
 	/*
 	 * 

@@ -16,14 +16,14 @@ load.provide("questScript", (function() {
 	var dusk = load.require("dusk");
 	var items = load.require("dusk.items");
 	var save = load.require("dusk.save");
-	var ConsoleSource = load.require("dusk.save.ConsoleSource");
+	var ConsoleSource = load.require("dusk.save.sources.ConsoleSource");
 	var TurnTicker = load.require("dusk.TurnTicker");
 	var c = load.require("dusk.sgui.c");
-	var dquest = load.require("dusk.quest");
+	var dquest = load.require("dusk.rooms.quest");
 	var sgui = load.require("dusk.sgui");
-	var TileMapWeights = load.require("dusk.sgui.TileMapWeights");
-	var reversiblePromiseChain = load.require("dusk.reversiblePromiseChain");
-	var Scriptable = load.require("dusk.behave.Scriptable");
+	var TileMapWeights = load.require("dusk.tiles.sgui.TileMapWeights");
+	var reversiblePromiseChain = load.require("dusk.utils.reversiblePromiseChain");
+	var Scriptable = load.require("dusk.entities.behave.Scriptable");
 
 	var ents = load.require("quest.ents");
 	load.require("quest.rooms.rooma");

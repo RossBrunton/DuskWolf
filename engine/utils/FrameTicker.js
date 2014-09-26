@@ -2,13 +2,13 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.frameTicker", (function() {
+load.provide("dusk.utils.frameTicker", (function() {
     var dusk = load.require("dusk");
-    var EventDispatcher = load.require("dusk.EventDispatcher");
+    var EventDispatcher = load.require("dusk.utils.EventDispatcher");
     var sgui = load.suggest("dusk.sgui", function(p) {sgui = p});
     
-    /** @namespace dusk.frameTicker
-     * @name dusk.frameTicker
+    /** @namespace dusk.utils.frameTicker
+     * @name dusk.utils.frameTicker
      * 
      * @description This module contains things that allow code to be run at a specified frame rate.
      * 
@@ -22,11 +22,11 @@ load.provide("dusk.frameTicker", (function() {
      * 
      * The events fired have no properties.
      * 
-     * @type dusk.EventDispatcher
+     * @type dusk.utils.EventDispatcher
      */
-    frameTicker.onFrame = new EventDispatcher("dusk.frameTicker.onFrame");
+    frameTicker.onFrame = new EventDispatcher("dusk.utils.frameTicker.onFrame");
     
-    //setInterval(dusk.frameTicker.onFrame.fire.bind(dusk.frameTicker.onFrame), 1000/dusk.frameRate);
+    //setInterval(dusk.utils.frameTicker.onFrame.fire.bind(dusk.utils.frameTicker.onFrame), 1000/dusk.frameRate);
     
     var _do = function() {
         requestAnimationFrame(_do);

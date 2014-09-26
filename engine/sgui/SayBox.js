@@ -9,7 +9,7 @@ load.provide("dusk.sgui.SayBox", (function() {
 	var Fade = load.require("dusk.sgui.extras.Fade");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
-	var UserCancelError = load.require("dusk.UserCancelError");
+	var UserCancelError = load.require("dusk.utils.reversiblePromiseChain.UserCancelError");
 	
 	/** Creates a new SayBox component.
 	 * 

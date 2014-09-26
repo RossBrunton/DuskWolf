@@ -2,10 +2,10 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.behave.Persist", (function() {
+load.provide("dusk.entities.behave.Persist", (function() {
 	var entities = load.require("dusk.entities");
-	var Behave = load.require("dusk.behave.Behave");
-	var EventDispatcher = load.require("dusk.EventDispatcher");
+	var Behave = load.require("dusk.entities.behave.Behave");
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	
 	/** Saves and loads behaviour data, making the entity persistent.
 	 * 
@@ -16,7 +16,7 @@ load.provide("dusk.behave.Persist", (function() {
 	 * 
 	 * This behaviour does not use any behaviour properties.
 	 * 
-	 * @param {dusk.sgui.Entity} entity The entity this behaviour will act with.
+	 * @param {dusk.entities.sgui.Entity} entity The entity this behaviour will act with.
 	 * @implements dusk.save.ISavable
 	 * @constructor
 	 * @since 0.0.21-alpha
@@ -50,7 +50,7 @@ load.provide("dusk.behave.Persist", (function() {
 	 * The event object has two properties; `name` and `data`. `data` is the persist data that has been updated, and
 	 *  `name` is the name of the entity.
 	 * 
-	 * @type dusk.EventDispatcher
+	 * @type dusk.utils.EventDispatcher
 	 */
 	Persist.persistDataUpdate = new EventDispatcher("dusk.entities.persistDataUpdate");
 	
@@ -142,7 +142,7 @@ load.provide("dusk.behave.Persist", (function() {
 		}
 	};
 	
-	/** Workshop data used by `dusk.sgui.EntityWorkshop`.
+	/** Workshop data used by `dusk.entities.sgui.EntityWorkshop`.
 	 * @static
 	 */
 	Persist.workshopData = {

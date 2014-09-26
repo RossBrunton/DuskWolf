@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.behave.PlayerControl", (function() {
+load.provide("dusk.entities.behave.PlayerControl", (function() {
 	var entities = load.require("dusk.entities");
 	var controls = load.require("dusk.input.controls");
 	
@@ -16,7 +16,7 @@ load.provide("dusk.behave.PlayerControl", (function() {
 		}
 	};
 	
-	/** Workshop data used by `{@link dusk.sgui.EntityWorkshop}`.
+	/** Workshop data used by `{@link dusk.entities.sgui.EntityWorkshop}`.
 	 * @static
 	 */
 	entities.registerWorkshop("PlayerControl", {
@@ -36,9 +36,9 @@ load.provide("dusk.behave.PlayerControl", (function() {
 })());
 
 
-load.provide("dusk.behave.LeftRightControl", (function() {
+load.provide("dusk.entities.behave.LeftRightControl", (function() {
 	var entities = load.require("dusk.entities");
-	var Behave = load.require("dusk.behave.Behave");
+	var Behave = load.require("dusk.entities.behave.Behave");
 	var c = load.require("dusk.sgui.c");
 	
 	var LeftRightControl = function(entity) {

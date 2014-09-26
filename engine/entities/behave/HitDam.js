@@ -2,11 +2,11 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.behave.HitDam", (function() {
+load.provide("dusk.entities.behave.HitDam", (function() {
 	var entities = load.require("dusk.entities");
-	var Behave = load.require("dusk.behave.Behave");
+	var Behave = load.require("dusk.entities.behave.Behave");
 
-	/** @class dusk.behave.HitDam
+	/** @class dusk.entities.behave.HitDam
 	 * 
 	 * @classdesc An entity with this behaviour, on colliding into or with another entity will attempt to damage it.
 	 * 
@@ -14,10 +14,10 @@ load.provide("dusk.behave.HitDam", (function() {
 	 * The type of damage is given by the behaviour property `"types"` which is an array (default []) and the amount of
 	 * damage is given by the behaviour property `"damage"` (default 1).
 	 * 
-	 * Understandably, the target must have the behaviour `{@link dusk.behave.Killable}` to react to this.
+	 * Understandably, the target must have the behaviour `{@link dusk.entities.behave.Killable}` to react to this.
 	 * 
-	 * @extends dusk.behave.Behave
-	 * @param {?dusk.sgui.Entity} entity The entity this behaviour is attached to.
+	 * @extends dusk.entities.behave.Behave
+	 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
 	 * @constructor
 	 */
 	var HitDam = function(entity) {
@@ -33,7 +33,7 @@ load.provide("dusk.behave.HitDam", (function() {
 	HitDam.prototype = Object.create(Behave.prototype);
 
 	/** Used to manage collisions internally.
-	 * @param {object} e A "collide" or "collidedInto" event dispatched from `{@link dusk.behave.Behave.entityEvent}`.
+	 * @param {object} e A "collide" or "collidedInto" event dispatched from `{@link dusk.entities.behave.Behave.entityEvent}`.
 	 * @private
 	 */
 	HitDam.prototype._hdCollide = function(e) {
@@ -44,7 +44,7 @@ load.provide("dusk.behave.HitDam", (function() {
 		});
 	};
 
-	/** Workshop data used by `{@link dusk.sgui.EntityWorkshop}`.
+	/** Workshop data used by `{@link dusk.entities.sgui.EntityWorkshop}`.
 	 * @static
 	 */
 	HitDam.workshopData = {

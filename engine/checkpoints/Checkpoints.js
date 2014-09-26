@@ -3,8 +3,8 @@
 "use strict";
 
 load.provide("dusk.checkpoints", (function() {
-	var InteractableTarget = load.require("dusk.behave.InteractableTarget");
-	var containerUtils = load.require("dusk.containerUtils");
+	var InteractableTarget = load.require("dusk.entities.behave.InteractableTarget");
+	var containerUtils = load.require("dusk.utils.containerUtils");
 	
 	/** 
 	 * Checkpoint objects have the following properties:
@@ -39,7 +39,7 @@ load.provide("dusk.checkpoints", (function() {
 	 * Checkpoints do not, and should not be used as, normal "saving" points. Although checkpoints can be saved, they
 	 *  do not save their own checkpoints to sources; if you want that functionality, autosave after saving.
 	 * @since 0.0.21-alpha
-	 * @implements dusk.IContainer
+	 * @implements dusk.utils.IContainer
 	 */
 	var checkpoints = {};
 	

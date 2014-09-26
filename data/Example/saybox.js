@@ -9,7 +9,7 @@ load.provide("example.saybox", (function() {
 	var sgui = load.require("dusk.sgui");
 	var FancyRect = load.require("dusk.sgui.FancyRect");
 	var FpsMeter = load.require("dusk.sgui.FpsMeter");
-	var reversiblePromiseChain = load.require("dusk.reversiblePromiseChain");
+	var reversiblePromiseChain = load.require("dusk.utils.reversiblePromiseChain");
 	
 	// Apply styles
 	sgui.addStyle("SayBox>PlusText", {

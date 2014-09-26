@@ -2,15 +2,15 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.EntityWorkshop", (function() {
+load.provide("dusk.entities.sgui.EntityWorkshop", (function() {
 	var Group = load.require("dusk.sgui.Group");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
 	var utils = load.require("dusk.utils");
-	var editor = load.require("dusk.editor");
+	var editor = load.require("dusk.rooms.editor");
 	var controls = load.require("dusk.input.controls");
 	
-	load.require("dusk.sgui.Tile");
+	load.require("dusk.tiles.sgui.Tile");
 	load.require("dusk.sgui.Label");
 	load.require("dusk.sgui.TextBox");
 	load.require("dusk.sgui.PlusText");
@@ -19,7 +19,7 @@ load.provide("dusk.sgui.EntityWorkshop", (function() {
 	load.require("dusk.sgui.Grid");
 	
 	var entities = load.require("dusk.entities");
-	var Behave = load.require("dusk.behave.Behave");
+	var Behave = load.require("dusk.entities.behave.Behave");
 
 	/** 
 	 * 

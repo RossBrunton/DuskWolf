@@ -2,12 +2,12 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.behave.PlayerGridWalker", (function() {
+load.provide("dusk.entities.behave.PlayerGridWalker", (function() {
 	var entities = load.require("dusk.entities");
-	var Behave = load.require("dusk.behave.Behave");
+	var Behave = load.require("dusk.entities.behave.Behave");
 	var controls = load.require("dusk.input.controls");
 	
-	/** Allows player control of a `dusk.behave.GridWalker` behaviour.
+	/** Allows player control of a `dusk.entities.behave.GridWalker` behaviour.
 	 * 
 	 * If the `controlActive` behaviour property is true, this responds to the controls `entity_left`, `entity_right`,
 	 *  `entity_up` or `entity_down` to make the `GridWalker` behaviour work.
@@ -16,7 +16,7 @@ load.provide("dusk.behave.PlayerGridWalker", (function() {
 	 * - playerControl:boolean = true - If false, player control is disabled.
 	 * 
 	 * This is a classless behaviour.
-	 * @see dusk.behave.PlayerControl
+	 * @see dusk.entities.behave.PlayerControl
 	 */
 	var PlayerGridWalker = {
 		"playerControl":true,
@@ -46,11 +46,11 @@ load.provide("dusk.behave.PlayerGridWalker", (function() {
 })());
 
 
-load.provide("dusk.behave.GridWalker", (function() {
+load.provide("dusk.entities.behave.GridWalker", (function() {
 	var entities = load.require("dusk.entities");
-	var Behave = load.require("dusk.behave.Behave");
+	var Behave = load.require("dusk.entities.behave.Behave");
 	var c = load.require("dusk.sgui.c");
-	var TileMap = load.require("dusk.sgui.TileMap");
+	var TileMap = load.require("dusk.tiles.sgui.TileMap");
 	
 	/** Allows the entity to walk as if it was a grid.
 	 * 
@@ -62,14 +62,14 @@ load.provide("dusk.behave.GridWalker", (function() {
 	 * - gwmoving:boolean = false - If true, then the entity is moving via the grid walker.
 	 * - gwtargetx:integer - While the entity is moving, this is the x destination it is moving to.
 	 * - gwtargety:integer - While the entity is moving, this is the y destination it is moving to.
-	 * - gwregion:dusk.sgui.TileRegion = null - If not null, then the entity will not be able to move out this region.
+	 * - gwregion:dusk.tiles.sgui.TileRegion = null - If not null, then the entity will not be able to move out this region.
 	 * - gwfacing:integer = 1 - One of the `dusk.sgui.c.DIR_` constants representing which direction the entity is
 	 *  facing.
 	 * - gwmoves:array - A move stack; if this is set, whenever this entity isn't moving, a move is poped from this
 	 *  stack and the entity moves that way.
 	 * 
-	 * @extends dusk.behave.Behave
-	 * @param {?dusk.sgui.Entity} entity The entity this behaviour is attached to.
+	 * @extends dusk.entities.behave.Behave
+	 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
 	 * @constructor
 	 */
 	var GridWalker = function(entity) {
@@ -215,7 +215,7 @@ load.provide("dusk.behave.GridWalker", (function() {
 		}
 	};
 	
-	/** Workshop data used by `dusk.sgui.EntityWorkshop`.
+	/** Workshop data used by `dusk.entities.sgui.EntityWorkshop`.
 	 * @static
 	 */
 	GridWalker.workshopData = {
@@ -231,12 +231,12 @@ load.provide("dusk.behave.GridWalker", (function() {
 })());
 
 
-load.provide("dusk.behave.GridRecorder", (function() {
+load.provide("dusk.entities.behave.GridRecorder", (function() {
 	var entities = load.require("dusk.entities");
-	var Behave = load.require("dusk.behave.Behave");
+	var Behave = load.require("dusk.entities.behave.Behave");
 	var c = load.require("dusk.sgui.c");
 	
-	/** While the entity moves around (via `dusk.behave.GridWalker`) this records the movements and stores them in an
+	/** While the entity moves around (via `dusk.entities.behave.GridWalker`) this records the movements and stores them in an
 	 *  array.
 	 * 
 	 * This behaviour uses the following behaviour properties:
@@ -245,13 +245,13 @@ load.provide("dusk.behave.GridRecorder", (function() {
 	 * - grrange:integer = 0 - If `grsnap` is true, this is the maximum length a path can be.
 	 * - grsnap:boolean = false - If true, if the length of the recorded moves is longer than `grrange` then the
 	 *  shortest route that goes to the same tile is calculated and replaces the current one.
-	 * - grregion:dusk.sgui.TileRegion = null - If set, the recorded path won't lead out of this region. If it tries, 
+	 * - grregion:dusk.tiles.sgui.TileRegion = null - If set, the recorded path won't lead out of this region. If it tries, 
 	 *  no moves are added, and the next time it enters the region a new path is calculated.
-	 * - grregionto:dusk.sgui.TileRegion = null - If set, the path this entity takes will be inserted into the given
+	 * - grregionto:dusk.tiles.sgui.TileRegion = null - If set, the path this entity takes will be inserted into the given
 	 *  region.
 	 * 
-	 * @extends dusk.behave.Behave
-	 * @param {?dusk.sgui.Entity} entity The entity this behaviour is attached to.
+	 * @extends dusk.entities.behave.Behave
+	 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
 	 * @constructor
 	 */
 	var GridRecorder = function(entity) {
@@ -320,7 +320,7 @@ load.provide("dusk.behave.GridRecorder", (function() {
 		}
 	};
 	
-	/** Workshop data used by `dusk.sgui.EntityWorkshop`.
+	/** Workshop data used by `dusk.entities.sgui.EntityWorkshop`.
 	 * @static
 	 */
 	GridRecorder.workshopData = {
@@ -337,12 +337,12 @@ load.provide("dusk.behave.GridRecorder", (function() {
 })());
 
 
-load.provide("dusk.behave.GridMouse", (function() {
+load.provide("dusk.entities.behave.GridMouse", (function() {
 	var entities = load.require("dusk.entities");
-	var Behave = load.require("dusk.behave.Behave");
+	var Behave = load.require("dusk.entities.behave.Behave");
 	var options = load.require("dusk.options");
 	
-	/** Allows mouse control for `dusk.behave.GridWalker`.
+	/** Allows mouse control for `dusk.entities.behave.GridWalker`.
 	 * 
 	 * This behaviour uses the following behaviour properties:
 	 * - gmMouseMove:boolean = true - Whether the mouse should move the entity.
@@ -350,8 +350,8 @@ load.provide("dusk.behave.GridMouse", (function() {
 	 * This behavior enables mouse support on it's entity, and adds the option `"controls.mouseGrid"` to enable or
 	 *  disable.
 	 * 
-	 * @extends dusk.behave.Behave
-	 * @param {?dusk.sgui.Entity} entity The entity this behaviour is attached to.
+	 * @extends dusk.entities.behave.Behave
+	 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
 	 * @constructor
 	 */
 	var GridMouse = function(entity) {
@@ -382,7 +382,7 @@ load.provide("dusk.behave.GridMouse", (function() {
 		}
 	};
 	
-	/** Workshop data used by `dusk.sgui.EntityWorkshop`.
+	/** Workshop data used by `dusk.entities.sgui.EntityWorkshop`.
 	 * @static
 	 */
 	GridMouse.workshopData = {

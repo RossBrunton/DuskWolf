@@ -2,26 +2,26 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.EntityGroup", (function() {
+load.provide("dusk.entities.sgui.EntityGroup", (function() {
 	var Group = load.require("dusk.sgui.Group");
-	var Entity = load.require("dusk.sgui.Entity");
-	var EditableTileMap = load.require("dusk.sgui.EditableTileMap");
+	var Entity = load.require("dusk.entities.sgui.Entity");
+	var EditableTileMap = load.require("dusk.tiles.sgui.EditableTileMap");
 	var sgui = load.require("dusk.sgui");
-	var editor = load.require("dusk.editor");
+	var editor = load.require("dusk.rooms.editor");
 	var entities = load.require("dusk.entities");
 	var c = load.require("dusk.sgui.c");
-	var EntityWorkshop = load.suggest("dusk.sgui.EntityWorkshop", function(p) {EntityWorkshop = p});
+	var EntityWorkshop = load.suggest("dusk.entities.sgui.EntityWorkshop", function(p) {EntityWorkshop = p});
 	var interaction = load.require("dusk.input.interaction");
 	var controls = load.require("dusk.input.controls");
 	
-	/** An entity group is a group that stores `{@link dusk.sgui.Entity}` and provides the ability to move them 
+	/** An entity group is a group that stores `{@link dusk.entities.sgui.Entity}` and provides the ability to move them 
 	 * and have them collide with each other.
 	 * 
-	 * This component, when active and `dusk.editor#active` is true, will allow the user to edit the entities by 
-	 * dragging them around, using the number keys to drop entries and so on. An `dusk.sgui.EntityWorkshop` is also
+	 * This component, when active and `dusk.rooms.editor#active` is true, will allow the user to edit the entities by 
+	 * dragging them around, using the number keys to drop entries and so on. An `dusk.entities.sgui.EntityWorkshop` is also
 	 * created and can be opened using the `w` key.
 	 * 
-	 * Entities should be added using `dusk.sgui.EntityGroup#dropEntity` function.
+	 * Entities should be added using `dusk.entities.sgui.EntityGroup#dropEntity` function.
 	 * 
 	 * @param {?dusk.sgui.IContainer} parent The container that this component is in.
 	 * @param {string} componentName The name of the component.
@@ -95,7 +95,7 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 		
 		this.onControl.listen((function(e) {
 			if(editor.active) {
-				load.import("dusk.sgui.EntityWorkshop").then(function(ew) {
+				load.import("dusk.entities.sgui.EntityWorkshop").then(function(ew) {
 					sgui.getPane("workshop").parseProps({
 						"focus":"ew",
 						"children":{
@@ -286,7 +286,7 @@ load.provide("dusk.sgui.EntityGroup", (function() {
 		return out; 
 	};
 	
-	/*dusk.sgui.EntityGroup.prototype.getCollisions = function(x1, y1, x2, y2, ignore, onlyOne) {
+	/*dusk.entities.sgui.EntityGroup.prototype.getCollisions = function(x1, y1, x2, y2, ignore, onlyOne) {
 		var out = [];
 		for(var c = this._entities.length-1; c >= 0; c --){
 			var com = this._entities[c];

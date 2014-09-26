@@ -5,8 +5,8 @@
 load.provide("saving", (function() {
 	window.save = load.require("dusk.save");
 	window.SS = load.require("dusk.save.SaveSpec");
-	window.lss = load.require("dusk.save.LocalStorageSource");
-	window.cs = load.require("dusk.save.ConsoleSource");
+	window.lss = load.require("dusk.save.sources.LocalStorageSource");
+	window.cs = load.require("dusk.save.sources.ConsoleSource");
 	window.st = load.require("dusk.save.SaveTest");
 	window.sti = load.require("dusk.save.SaveTestInstance");
 	

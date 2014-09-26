@@ -2,8 +2,8 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.Pool", (function() {
-	/** @class dusk.Pool
+load.provide("dusk.utils.Pool", (function() {
+	/** @class dusk.utils.Pool
 	 * 
 	 * @classdesc Object pools, for static memory allocation.
 	 * 

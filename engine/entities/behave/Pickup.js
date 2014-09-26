@@ -2,17 +2,17 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.behave.Pickup", (function() {
+load.provide("dusk.entities.behave.Pickup", (function() {
 	var entities = load.require("dusk.entities");
-	var Behave = load.require("dusk.behave.Behave");
+	var Behave = load.require("dusk.entities.behave.Behave");
 	
-	/* * @class dusk.behave.Pickup
-	 * @memberof dusk.behave
+	/* * @class dusk.entities.behave.Pickup
+	 * @memberof dusk.entities.behave
 	 * 
 	 * @classdesc 
 	 * 
-	 * @extends dusk.behave.Behave
-	 * @param {?dusk.sgui.Entity} entity The entity this behaviour is attached to.
+	 * @extends dusk.entities.behave.Behave
+	 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
 	 * @constructor
 	 */
 	var Pickup = function(entity) {
@@ -30,7 +30,7 @@ load.provide("dusk.behave.Pickup", (function() {
 	Pickup.prototype = Object.create(Behave.prototype);
 	
 	/** Used to manage collisions internally.
-	 * @param {object} e A "collidedInto" event dispatched from `{@link dusk.behave.Behave.entityEvent}`.
+	 * @param {object} e A "collidedInto" event dispatched from `{@link dusk.entities.behave.Behave.entityEvent}`.
 	 * @private
 	 */
 	Pickup.prototype._pickCollided = function(e) {
@@ -125,7 +125,7 @@ load.provide("dusk.behave.Pickup", (function() {
 		}
 	};
 	
-	/** Workshop data used by `{@link dusk.sgui.EntityWorkshop}`.
+	/** Workshop data used by `{@link dusk.entities.sgui.EntityWorkshop}`.
 	 * @static
 	 */
 	Pickup.workshopData = {

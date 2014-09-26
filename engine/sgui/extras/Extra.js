@@ -4,8 +4,8 @@
 
 load.provide("dusk.sgui.extras.Extra", (function() {
 	var sgui = load.require("dusk.sgui");
-	var Mapper = load.require("dusk.Mapper");
-	var EventDispatcher = load.require("dusk.EventDispatcher");
+	var Mapper = load.require("dusk.utils.Mapper");
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 
 	/** @namespace dusk.sgui.extras
 	 * @name dusk.sgui.extras
@@ -50,13 +50,13 @@ load.provide("dusk.sgui.extras.Extra", (function() {
 		/** An event dispatcher which is fired when this extra is going to be deleted from it's component.
 		 * 
 		 * The event object has no properties.
-		 * @type dusk.EventDispatcher
+		 * @type dusk.utils.EventDispatcher
 		 */
 		this.onDelete = new EventDispatcher("dusk.sgui.extras.Extra.onDelete");
 		
 		/** A mapper that contains all the properties of this component
 		 *  for when the component has to use it's JSON description to describe extras.
-		 * @type dusk.Mapper
+		 * @type dusk.utils.Mapper
 		 * @protected
 		 */
 		this._props = new Mapper(this);

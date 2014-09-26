@@ -2,11 +2,11 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("test.dusk.EventDispatcher", (function() {
+load.provide("test.dusk.utils.EventDispatcher", (function() {
 	var test = load.require("test");
-	var EventDispatcher = load.require("dusk.EventDispatcher");
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	
-	test.registerTestFunction("test.dusk.EventDispatcher", function(tester) {
+	test.registerTestFunction("test.dusk.utils.EventDispatcher", function(tester) {
 		tester.start("Construction");
 		
 		var none = new EventDispatcher("tester.none");

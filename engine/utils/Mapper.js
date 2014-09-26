@@ -2,10 +2,10 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.Mapper", (function() {
+load.provide("dusk.utils.Mapper", (function() {
 	/** Creates a new mapper for the specified object.
 	 * 
-	 * @class dusk.Mapper
+	 * @class dusk.utils.Mapper
 	 * 
 	 * @classdesc Mappers are essentially objects that can be attached to another object,
 	 *  and allow that object to be controlled using JSON and basic objects.

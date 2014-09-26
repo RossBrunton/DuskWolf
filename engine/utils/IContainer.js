@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.IContainer", (function() {
+load.provide("dusk.utils.IContainer", (function() {
 	/** The IContainer interface is an interface for objects that contain other objects. It provides a standard set of
 	 *  functions that they should implement.
 	 * 
@@ -66,7 +66,7 @@ load.provide("dusk.IContainer", (function() {
 })());
 
 
-load.provide("dusk.containerUtils", (function() {
+load.provide("dusk.utils.containerUtils", (function() {
 	/** This namespace provides a number of methods that operate on objects implementing IContainer, objects themselves
 	 *  and arrays.
 	 * 

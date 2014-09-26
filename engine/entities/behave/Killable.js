@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.behave.Killable", (function() {
+load.provide("dusk.entities.behave.Killable", (function() {
 	var entities = load.require("dusk.entities");
 	
 	/** Gives the entity the notion of health, allows it to be damaged or healed, and terminates it when it runs out of

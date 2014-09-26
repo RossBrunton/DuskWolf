@@ -17,7 +17,7 @@ load.provide("example.newGui", (function() {
 	load.require("dusk.sgui.RangeText");
 	load.require("dusk.sgui.Scroller");
 	load.require("dusk.sgui.NumberBox");
-	var Range = load.require("dusk.Range");
+	var Range = load.require("dusk.utils.Range");
 	var dusk = load.require("dusk");
 	var c = load.require("dusk.sgui.c");
 	var sgui = load.require("dusk.sgui");

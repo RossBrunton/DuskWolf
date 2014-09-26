@@ -6,7 +6,7 @@ load.provide("dusk.sgui.FancyRect", (function() {
 	var Rect = load.require("dusk.sgui.Rect");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
-	var Image = load.require("dusk.Image");
+	var Image = load.require("dusk.utils.Image");
 	var utils = load.require("dusk.utils");
 
 	/* Creates a new FancyRect.

@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.behave.Checkpoint", (function() {
+load.provide("dusk.checkpoint.behave.Checkpoint", (function() {
 	var entities = load.require("dusk.entities");
 	var checkpoints = load.require("dusk.checkpoints");
 	

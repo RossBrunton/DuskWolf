@@ -2,11 +2,11 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("test.dusk.Pool", (function() {
+load.provide("test.dusk.utils.Pool", (function() {
 	var test = load.require("test");
-	var Pool = load.require("dusk.Pool");
+	var Pool = load.require("dusk.utils.Pool");
 	
-	test.registerTestFunction("test.dusk.Pool", function(tester) {
+	test.registerTestFunction("test.dusk.utils.Pool", function(tester) {
 		tester.start("Basic Functionality");
 		
 		var p = new Pool(Object);

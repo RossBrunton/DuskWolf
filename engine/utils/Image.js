@@ -2,11 +2,11 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.Image", (function() {
+load.provide("dusk.utils.Image", (function() {
 	var utils = load.require("dusk.utils");
 	var dusk = load.require("dusk");
 	
-	/* @class dusk.Image
+	/* @class dusk.utils.Image
 	 * 
 	 * @classdesc 
 	 * 

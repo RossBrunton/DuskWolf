@@ -1,7 +1,7 @@
 "use strict";
 
 load.provide("quest.rooms.rooma", (function() {
-	var manager = load.require("dusk.quest");
+	var manager = load.require("dusk.rooms.quest");
 	load.require("dusk.entities");
 	load.require("quest.ents");
 	

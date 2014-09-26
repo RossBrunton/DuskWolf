@@ -2,12 +2,12 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.behave.Spawner", (function() {
+load.provide("dusk.entities.behave.Spawner", (function() {
 	var entities = load.require("dusk.entities");
-	var Behave = load.require("dusk.behave.Behave");
+	var Behave = load.require("dusk.entities.behave.Behave");
 	var LightEntity = load.require("dusk.entities.LightEntity");
 	var utils = load.require("dusk.utils");
-	var EntityGroup = load.suggest("dusk.sgui.EntityGroup", function(p) {EntityGroup = p});
+	var EntityGroup = load.suggest("dusk.entities.sgui.EntityGroup", function(p) {EntityGroup = p});
 
 	/** This gives the entity the ability to spawn other entities.
 	 * 
@@ -80,8 +80,8 @@ load.provide("dusk.behave.Spawner", (function() {
 	 *  This is fired before the entity is spawned, and must be ended (i.e. Using the animation event `/spawn_name`) to
 	 *  spawn the entity. The second is fired after the entity is spawned, and is named `spawn_after_name`.
 	 * 
-	 * @extends dusk.behave.Behave
-	 * @param {?dusk.sgui.Entity} entity The entity this behaviour is attached to.
+	 * @extends dusk.entities.behave.Behave
+	 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
 	 * @constructor
 	 */
 	var Spawner = function(entity) {
@@ -175,7 +175,7 @@ load.provide("dusk.behave.Spawner", (function() {
 	};
 	
 	/** Called every frame to check for controls to spawn something.
-	 * @param {object} e A "frame" event dispatched from `{@link dusk.behave.Behave.entityEvent}`.
+	 * @param {object} e A "frame" event dispatched from `{@link dusk.entities.behave.Behave.entityEvent}`.
 	 * @private
 	 */
 	var _frame = function(e) {

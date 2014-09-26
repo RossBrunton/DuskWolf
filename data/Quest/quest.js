@@ -15,13 +15,13 @@ load.provide("quest", (function() {
 	var dusk = load.require("dusk");
 	var items = load.require("dusk.items");
 	var SaveSpec = load.require("dusk.save.SaveSpec");
-	var ConsoleSource = load.require("dusk.save.ConsoleSource");
+	var ConsoleSource = load.require("dusk.save.sources.ConsoleSource");
 	var TurnTicker = load.require("dusk.TurnTicker");
 	var c = load.require("dusk.sgui.c");
-	var dquest = load.require("dusk.quest");
+	var dquest = load.require("dusk.rooms.quest");
 	var sgui = load.require("dusk.sgui");
-	var TileMapWeights = load.require("dusk.sgui.TileMapWeights");
-	var reversiblePromiseChain = load.require("dusk.reversiblePromiseChain");
+	var TileMapWeights = load.require("dusk.tiles.sgui.TileMapWeights");
+	var reversiblePromiseChain = load.require("dusk.utils.reversiblePromiseChain");
 	
 	var ents = load.require("quest.ents");
 	load.require("quest.rooms.rooma");

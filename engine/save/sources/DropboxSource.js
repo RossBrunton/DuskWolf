@@ -2,11 +2,11 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.save.DropboxSource", (function() {
+load.provide("dusk.save.sources.DropboxSource", (function() {
 	var save = load.require("dusk.save");
-	var SaveSource = load.require("dusk.save.SaveSource");
+	var SaveSource = load.require("dusk.save.sources.SaveSource");
 	var SaveData = load.require("dusk.save.SaveData");
-	var LocalStorageSource = load.require("dusk.save.LocalStorageSource");
+	var LocalStorageSource = load.require("dusk.save.sources.LocalStorageSource");
 	var utils = load.require("dusk.utils");
 	load.require("@https://www.dropbox.com/static/api/2/dropins.js");
 	

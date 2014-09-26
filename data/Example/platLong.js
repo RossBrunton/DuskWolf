@@ -3,49 +3,49 @@
 "use strict";
 
 load.provide("example.platLong", (function() {
-	load.require("dusk.behave.HitDam");
-	load.require("dusk.behave.Killable");
-	load.require("dusk.behave.PlayerControl");
-	load.require("dusk.behave.Jumper");
-	load.require("dusk.behave.Spawner");
-	load.require("dusk.behave.MarkTrigger");
-	load.require("dusk.behave.Volatile");
-	load.require("dusk.behave.Checkpoint");
-	var Persist = load.require("dusk.behave.Persist");
-	load.require("dusk.behave.BackForth");
-	load.require("dusk.behave.Fall");
-	load.require("dusk.behave.Push");
-	load.require("dusk.behave.Gravity");
-	load.require("dusk.behave.Buoyancy");
-	var Pickup = load.require("dusk.behave.Pickup");
-	load.require("dusk.behave.HealthRestore");
-	var InteractableTarget = load.require("dusk.behave.InteractableTarget");
+	load.require("dusk.entities.behave.HitDam");
+	load.require("dusk.entities.behave.Killable");
+	load.require("dusk.entities.behave.PlayerControl");
+	load.require("dusk.entities.behave.Jumper");
+	load.require("dusk.entities.behave.Spawner");
+	load.require("dusk.entities.behave.MarkTrigger");
+	load.require("dusk.entities.behave.Volatile");
+	load.require("dusk.checkpoint.behave.Checkpoint");
+	var Persist = load.require("dusk.entities.behave.Persist");
+	load.require("dusk.entities.behave.BackForth");
+	load.require("dusk.entities.behave.Fall");
+	load.require("dusk.entities.behave.Push");
+	load.require("dusk.entities.behave.Gravity");
+	load.require("dusk.entities.behave.Buoyancy");
+	var Pickup = load.require("dusk.entities.behave.Pickup");
+	load.require("dusk.entities.behave.HealthRestore");
+	var InteractableTarget = load.require("dusk.entities.behave.InteractableTarget");
 	
 	load.require("dusk.sgui.DynamicGrid");
-	load.require("dusk.sgui.ControlConfig");
+	load.require("dusk.input.sgui.ControlConfig");
 	load.require("dusk.sgui.Label");
 	load.require("dusk.sgui.Image");
-	load.require("dusk.sgui.particleEffects.spread");
+	load.require("dusk.particles.particleEffects.core.spread");
 	load.require("dusk.sgui.FpsMeter");
 	load.require("dusk.sgui.PlusText");
-	load.require("dusk.sgui.EntityWorkshop");
+	load.require("dusk.entities.sgui.EntityWorkshop");
 	
 	var SaveSpec = load.require("dusk.save.SaveSpec");
 	var checkpoints = load.require("dusk.checkpoints");
 	
-	var dplat = load.require("dusk.plat");
+	var dplat = load.require("dusk.rooms.plat");
 	var entities = load.require("dusk.entities");
 	var dusk = load.require("dusk");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
 	var controls = load.require("dusk.input.controls");
-	var frameTicker = load.require("dusk.frameTicker");
-	var Range = load.require("dusk.Range");
+	var frameTicker = load.require("dusk.utils.frameTicker");
+	var Range = load.require("dusk.utils.Range");
 	
 	load.require("example.plat.rooms.exhall");
 	
-	var reversiblePromiseChain = load.require("dusk.reversiblePromiseChain");
-	var Scriptable = load.require("dusk.behave.Scriptable");
+	var reversiblePromiseChain = load.require("dusk.utils.reversiblePromiseChain");
+	var Scriptable = load.require("dusk.entities.behave.Scriptable");
 	
 	var platLong = {};
 	

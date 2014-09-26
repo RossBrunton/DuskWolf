@@ -2,9 +2,9 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.ControlConfig", (function() {
+load.provide("dusk.input.sgui.ControlConfig", (function() {
 	var Group = load.require("dusk.sgui.Group");
-	var Tile = load.require("dusk.sgui.Tile");
+	var Tile = load.require("dusk.tiles.sgui.Tile");
 	var Label = load.require("dusk.sgui.Label");
 	var controls = load.require("dusk.input.controls");
 	var keyboard = load.require("dusk.input.keyboard");
@@ -16,7 +16,7 @@ load.provide("dusk.sgui.ControlConfig", (function() {
 	 * @param {dusk.sgui.Component} parent The container that this component is in.
 	 * @param {string} comName The name of the component.
 	 * 
-	 * @class dusk.sgui.ControlConfig
+	 * @class dusk.input.sgui.ControlConfig
 	 * 
 	 * @classdesc A control config allows the user to configure a control (as used by `{@link dusk.input.controls}`).
 	 * 

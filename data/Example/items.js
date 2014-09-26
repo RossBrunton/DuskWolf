@@ -3,12 +3,12 @@
 "use strict";
 
 load.provide("example.items", (function() {
-	load.require("dusk.sgui.ItemSlot");
+	load.require("dusk.items.sgui.ItemSlot");
 	load.require("dusk.sgui.Grid");
-	load.require("dusk.sgui.ItemHand");
-	load.require("dusk.sgui.ControlConfig");
+	load.require("dusk.items.sgui.ItemHand");
+	load.require("dusk.input.sgui.ControlConfig");
 	load.require("dusk.sgui.FocusChecker");
-	load.require("dusk.sgui.ItemGrid");
+	load.require("dusk.items.sgui.ItemGrid");
 	load.require("dusk.sgui.Rect");
 	var dusk = load.require("dusk");
 	var sgui = load.require("dusk.sgui");

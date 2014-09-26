@@ -3,7 +3,7 @@
 "use strict";
 
 load.provide("dusk.input.mouse", (function() {
-	var EventDispatcher = load.require("dusk.EventDispatcher");
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var dusk = load.require("dusk");
 	
 	var mouse = {};

@@ -7,8 +7,8 @@ load.provide("dusk.sgui.Label", (function() {
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
 	var utils = load.require("dusk.utils");
-	var Image = load.require("dusk.Image");
-	var EventDispatcher = load.require("dusk.EventDispatcher");
+	var Image = load.require("dusk.utils.Image");
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	
 	/** @class dusk.sgui.Label
 	 * 
@@ -142,7 +142,7 @@ load.provide("dusk.sgui.Label", (function() {
 		 * 
 		 * The event object has two properties; "component", the component that fired the event and "text" the text that
 		 *  is being proposed.
-		 * @type dusk.EventDispatcher
+		 * @type dusk.utils.EventDispatcher
 		 * @since 0.0.21-alpha
 		 */
 		this.onChange = new EventDispatcher("dusk.sgui.Label.onChange");
@@ -151,7 +151,7 @@ load.provide("dusk.sgui.Label", (function() {
 		 * 
 		 * The event object has two properties; "component", the component that fired the event and "text" the text that
 		 *  is being proposed.
-		 * @type dusk.EventDispatcher
+		 * @type dusk.utils.EventDispatcher
 		 * @since 0.0.21-alpha
 		 */
 		this.postChange = new EventDispatcher("dusk.sgui.Label.postChange");
@@ -188,7 +188,7 @@ load.provide("dusk.sgui.Label", (function() {
 		 *  elements in this array. The first element is the command name.
 		 * 
 		 * This is in "Last mode" so only the last non-undefined return value will matter.
-		 * @type dusk.EventDispatcher
+		 * @type dusk.utils.EventDispatcher
 		 * @protected
 		 */
 		this._command = new EventDispatcher("dusk.sgui.Label._command");
@@ -820,7 +820,7 @@ load.provide("dusk.sgui.NumberBox", (function() {
 	var Label = load.require("dusk.sgui.Label");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
-	var Range = load.require("dusk.Range");
+	var Range = load.require("dusk.utils.Range");
 	
 	/** @class dusk.sgui.NumberBox
 	 * 
@@ -842,7 +842,7 @@ load.provide("dusk.sgui.NumberBox", (function() {
 		TextBox.call(this, parent, comName);
 		
 		/** Internal storage for the range used in this box.
-		 * @type dusk.Range
+		 * @type dusk.utils.Range
 		 * @private
 		 */
 		this._range = null;
@@ -853,7 +853,7 @@ load.provide("dusk.sgui.NumberBox", (function() {
 		this._rangeChangedId = 0;
 		/** The range used for this box. The value will be in this range, and the increasing and decreasing will be
 		 *  based on it.
-		 * @type dusk.Range
+		 * @type dusk.utils.Range
 		 */
 		this.range = null;
 		

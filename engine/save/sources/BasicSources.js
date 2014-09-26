@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.save.SaveSource", (function() {
+load.provide("dusk.save.sources.SaveSource", (function() {
 	/** Base class for objects that wish to save and load save data from a specific source.
 	 * 
 	 * Inheriters must replace the `save` and `load` functions with their own versions, and not call the versions on
@@ -33,7 +33,7 @@ load.provide("dusk.save.SaveSource", (function() {
 		return Promise.reject(Error("Save Source "+this+" doesn't support saving."));
 	};
 	
-	/** Similar to `{@link dusk.save.SaveSource#save}`, only this is called in cases where saving should be done without
+	/** Similar to `{@link dusk.save.sources.SaveSource#save}`, only this is called in cases where saving should be done without
 	 *  interrupting the user. By default, this calls the normal save function.
 	 * 
 	 * @param {dusk.save.SaveData} saveData The save data to save.
@@ -76,13 +76,13 @@ load.provide("dusk.save.SaveSource", (function() {
 })());
 
 
-load.provide("dusk.save.LocalStorageSource", (function() {
-	var SaveSource = load.require("dusk.save.SaveSource");
+load.provide("dusk.save.sources.LocalStorageSource", (function() {
+	var SaveSource = load.require("dusk.save.sources.SaveSource");
 	var SaveData = load.require("dusk.save.SaveData");
 
 	/** A basic save source that saves and loads from local storage.
 	 * 
-	 * @extends dusk.save.SaveSource
+	 * @extends dusk.save.sources.SaveSource
 	 * @constructor
 	 * @since 0.0.21-alpha
 	 */
@@ -125,15 +125,15 @@ load.provide("dusk.save.LocalStorageSource", (function() {
 })());
 
 
-load.provide("dusk.save.ConsoleSource", (function() {
-	var SaveSource = load.require("dusk.save.SaveSource");
+load.provide("dusk.save.sources.ConsoleSource", (function() {
+	var SaveSource = load.require("dusk.save.sources.SaveSource");
 	var SaveData = load.require("dusk.save.SaveData");
 	
 	/** A save source that logs it's save data to the console, and puts it on the `data` property of it's constructor.
 	 * 
 	 * This should only be used for testing, obviously.
 	 * 
-	 * @extends dusk.save.SaveSource
+	 * @extends dusk.save.sources.SaveSource
 	 * @constructor
 	 * @since 0.0.21-alpha
 	 */

@@ -8,7 +8,7 @@ load.provide("dusk.sgui.Group", (function() {
 	var c = load.require("dusk.sgui.c");
 	var sgui = load.require(">dusk.sgui", function(p) {sgui = p});
 	var interaction = load.require("dusk.input.interaction");
-	var containerUtils = load.require("dusk.containerUtils");
+	var containerUtils = load.require("dusk.utils.containerUtils");
 	
 	/** A group contains multiple components, and manages things like keyboard events and drawing.
 	 * 
@@ -18,7 +18,7 @@ load.provide("dusk.sgui.Group", (function() {
 	 *  focused components will be the only ones that receive keypresses.
 	 * 
 	 * @extends dusk.sgui.Component
-	 * @implements dusk.IContainer
+	 * @implements dusk.utils.IContainer
 	 * @param {?dusk.sgui.Component} parent The container that this component is in.
 	 * @param {string} componentName The name of the component.
 	 * @constructor
@@ -116,12 +116,12 @@ load.provide("dusk.sgui.Group", (function() {
 		
 		/** The horizontal scrolling. Set to a range, and the fractional value of the range (from 0.0 to 1.0) will be
 		 * interpreted as the "scrolling" where 0.0 is an xOffset of 0, while 1.0 is the maximum offset possible.
-		 * @type dusk.Range
+		 * @type dusk.utils.Range
 		 * @since 0.0.19-alpha
 		 */
 		this.horScroll = null;
 		/** Internal storage for horizontal scrolling.
-		 * @type dusk.Range
+		 * @type dusk.utils.Range
 		 * @private
 		 * @since 0.0.19-alpha
 		 */
@@ -134,12 +134,12 @@ load.provide("dusk.sgui.Group", (function() {
 		this._horChangedId = 0;
 		/** The vertical scrolling. Set to a range, and the fractional value of the range (from 0.0 to 1.0) will be
 		 * interpreted as the "scrolling" where 0.0 is an yOffset of 0, while 1.0 is the maximum offset possible.
-		 * @type dusk.Range
+		 * @type dusk.utils.Range
 		 * @since 0.0.19-alpha
 		 */
 		this.verScroll = null;
 		/** Internal storage for vertical scrolling.
-		 * @type dusk.Range
+		 * @type dusk.utils.Range
 		 * @private
 		 * @since 0.0.19-alpha
 		 */

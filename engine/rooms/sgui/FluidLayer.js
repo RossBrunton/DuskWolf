@@ -2,18 +2,18 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.FluidLayer", (function() {
+load.provide("dusk.rooms.sgui.FluidLayer", (function() {
 	var Component = load.require("dusk.sgui.Component");
 	var sgui = load.require("dusk.sgui");
 	var controls = load.require("dusk.input.controls");
-	var editor = load.require("dusk.editor");
+	var editor = load.require("dusk.rooms.editor");
 	
 	/*
 	 * 
 	 * @param {dusk.sgui.Group} parent The container that this component is in.
 	 * @param {string} comName The name of the component.
 	 * @extends dusk.sgui.Component
-	 * @extends dusk.sgui.IBasicMainLayer
+	 * @extends dusk.rooms.sgui.IBasicMainLayer
 	 * @constructor
 	 * @since 0.0.21-alpha
 	 */

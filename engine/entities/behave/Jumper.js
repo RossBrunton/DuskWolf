@@ -2,9 +2,9 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.behave.Jumper", (function() {
+load.provide("dusk.entities.behave.Jumper", (function() {
 	var entities = load.require("dusk.entities");
-	var Behave = load.require("dusk.behave.Behave");
+	var Behave = load.require("dusk.entities.behave.Behave");
 	var skills = load.require("dusk.skills");
 	var c = load.require("dusk.sgui.c");
 	
@@ -66,7 +66,7 @@ load.provide("dusk.behave.Jumper", (function() {
 		}
 	};
 
-	/** Workshop data used by `{@link dusk.sgui.EntityWorkshop}`.
+	/** Workshop data used by `{@link dusk.entities.sgui.EntityWorkshop}`.
 	 * @static
 	 */
 	Jumper.workshopData = {

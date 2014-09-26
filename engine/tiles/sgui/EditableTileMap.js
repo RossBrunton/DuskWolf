@@ -2,14 +2,14 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.EditableTileMap", (function() {
-	var TileMap = load.require("dusk.sgui.TileMap");
+load.provide("dusk.tiles.sgui.EditableTileMap", (function() {
+	var TileMap = load.require("dusk.tiles.sgui.TileMap");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
-	var editor = load.require("dusk.editor");
+	var editor = load.require("dusk.rooms.editor");
 	var keyboard = load.require("dusk.input.keyboard");
 	var controls = load.require("dusk.input.controls");
-	var TileMapWeights = load.require("dusk.sgui.TileMapWeights");
+	var TileMapWeights = load.require("dusk.tiles.sgui.TileMapWeights");
 	
 	/** Extends the regular tilemap to add the ability to edit them.
 	 * 
@@ -18,7 +18,7 @@ load.provide("dusk.sgui.EditableTileMap", (function() {
 	 * 
 	 * @param {dusk.sgui.Group} parent The container that this component is in.
 	 * @param {string} componentName The name of the component.
-	 * @extends dusk.sgui.TileMap
+	 * @extends dusk.tiles.sgui.TileMap
 	 * @constructor
 	 */
 	var EditableTileMap = function (parent, comName) {
