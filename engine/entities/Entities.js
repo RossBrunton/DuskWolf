@@ -31,7 +31,7 @@ load.provide("dusk.entities", (function() {
 	 * @since 0.0.17-alpha
 	 * @see {@link dusk.entities.sgui.Entity}
 	 * @see {@link dusk.entities.sgui.EntityGroup}
-	 * @see {@link dusk.rooms.sgui.BasicMain}
+	 * @see {@link dusk.rooms.sgui.LayeredRoom}
 	 */
 	var entities = {};
 	
@@ -75,7 +75,7 @@ load.provide("dusk.entities", (function() {
 	
 	/** The name of the "seek" entity.
 	 * 
-	 * `{@link dusk.rooms.sgui.BasicMain}` adds an entity
+	 * `{@link dusk.rooms.sgui.LayeredRoom}` adds an entity
 	 *  with this name and the type `{@link dusk.entities.seekType}` as the "player".
 	 * 
 	 * In effect, this is the name of the player entity that moves between rooms, and the camera follows.
@@ -85,7 +85,7 @@ load.provide("dusk.entities", (function() {
 	entities.seek = "hero";
 	/** The type of the "seek" entity.
 	 * 
-	 * `{@link dusk.rooms.sgui.BasicMain}` adds an entity
+	 * `{@link dusk.rooms.sgui.LayeredRoom}` adds an entity
 	 *  with this type and the name `{@link dusk.entities.seek}` as the "player".
 	 * 
 	 * In effect, this is the name of the player entity that moves between rooms, and the camera follows.

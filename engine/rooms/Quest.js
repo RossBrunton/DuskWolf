@@ -4,7 +4,7 @@
 
 load.provide("dusk.rooms.quest", (function() {
 	var sgui = load.require("dusk.sgui");
-	var BasicMain = load.require("dusk.rooms.sgui.BasicMain");
+	var LayeredRoom = load.require("dusk.rooms.sgui.LayeredRoom");
 	var entities = load.require("dusk.entities");
 	var RoomManager = load.require("dusk.rooms.RoomManager");
 	var QuestPuppeteer = load.require("dusk.sgui.extras.QuestPuppeteer");
@@ -21,7 +21,7 @@ load.provide("dusk.rooms.quest", (function() {
 	//Default skills
 	
 	var main = sgui.getPane("quest");
-	main.modifyComponent([{"name":"main", "type":"BasicMain", "width":-2, "height":-2}]);
+	main.modifyComponent([{"name":"main", "type":"LayeredRoom", "width":-2, "height":-2}]);
 	main.becomeActive();
 	main.flow("main");
 	
@@ -38,7 +38,7 @@ load.provide("dusk.rooms.quest", (function() {
 	quest.puppeteer = main.getComponent("main").getExtra("questPuppeteer");
 	
 	quest.rooms = new RoomManager("dusk.rooms.quest", "rooms");
-	quest.rooms.setBasicMain(main.getComponent("main"));
+	quest.rooms.setLayeredRoom(main.getComponent("main"));
 	
 	return quest;
 })());

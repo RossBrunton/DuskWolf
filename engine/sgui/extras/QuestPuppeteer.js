@@ -451,7 +451,7 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 		return [this.request.bind(this, type, args), this.request.bind(this, type+"^-1", args), type];
 	};
 
-	QuestPuppeteer.prototype.getBasicMain = function() {
+	QuestPuppeteer.prototype.getLayeredRoom = function() {
 		return this._owner;
 	};
 

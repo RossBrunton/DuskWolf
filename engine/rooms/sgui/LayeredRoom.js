@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.rooms.sgui.BasicMain", (function() {
+load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 	var sgui = load.require("dusk.sgui");
 	var Group = load.require("dusk.sgui.Group");
 	var EditableTileMap = load.require("dusk.tiles.sgui.EditableTileMap");
@@ -23,7 +23,7 @@ load.provide("dusk.rooms.sgui.BasicMain", (function() {
 	var TileMapWeights = load.require("dusk.tiles.sgui.TileMapWeights");
 	var utils = load.require("dusk.utils");
 	
-	var BasicMain = function(parent, comName) {
+	var LayeredRoom = function(parent, comName) {
 		Group.call(this, parent, comName);
 		
 		this.scrollSpeed = 3;
@@ -63,25 +63,25 @@ load.provide("dusk.rooms.sgui.BasicMain", (function() {
 		}).bind(this), controls.addControl("basicmain_goto", "G"));
 		
 		this.onControl.listen(
-			_addLayer.bind(this, BasicMain.LAYER_TILEMAP), controls.addControl("basicmain_add_tilemap", "M")
+			_addLayer.bind(this, LayeredRoom.LAYER_TILEMAP), controls.addControl("basicmain_add_tilemap", "M")
 		);
 		this.onControl.listen(
-			_addLayer.bind(this, BasicMain.LAYER_SCHEME), controls.addControl("basicmain_add_scheme", "S")
+			_addLayer.bind(this, LayeredRoom.LAYER_SCHEME), controls.addControl("basicmain_add_scheme", "S")
 		);
 		this.onControl.listen(
-			_addLayer.bind(this, BasicMain.LAYER_ENTITIES), controls.addControl("basicmain_add_entities", "N")
+			_addLayer.bind(this, LayeredRoom.LAYER_ENTITIES), controls.addControl("basicmain_add_entities", "N")
 		);
 		this.onControl.listen(
-			_addLayer.bind(this, BasicMain.LAYER_PARTICLES), controls.addControl("basicmain_add_particles", "P")
+			_addLayer.bind(this, LayeredRoom.LAYER_PARTICLES), controls.addControl("basicmain_add_particles", "P")
 		);
 		this.onControl.listen(
-			_addLayer.bind(this, BasicMain.LAYER_TRANSITIONS), controls.addControl("basicmain_add_transitions", "T")
+			_addLayer.bind(this, LayeredRoom.LAYER_TRANSITIONS), controls.addControl("basicmain_add_transitions", "T")
 		);
 		this.onControl.listen(
-			_addLayer.bind(this, BasicMain.LAYER_REGION), controls.addControl("basicmain_add_region", "R")
+			_addLayer.bind(this, LayeredRoom.LAYER_REGION), controls.addControl("basicmain_add_region", "R")
 		);
 		this.onControl.listen(
-			_addLayer.bind(this, BasicMain.LAYER_FLUID), controls.addControl("basicmain_add_fluid", "F")
+			_addLayer.bind(this, LayeredRoom.LAYER_FLUID), controls.addControl("basicmain_add_fluid", "F")
 		);
 		
 		this.augment.listen((function(e) {
@@ -94,19 +94,19 @@ load.provide("dusk.rooms.sgui.BasicMain", (function() {
 		this.dirPress.listen(_bmUpAction.bind(this), c.DIR_UP);
 		this.dirPress.listen(_bmDownAction.bind(this), c.DIR_DOWN);
 	};
-	BasicMain.prototype = Object.create(Group.prototype);
+	LayeredRoom.prototype = Object.create(Group.prototype);
 	
-	BasicMain.LAYER_TILEMAP = 0x01;
-	BasicMain.LAYER_SCHEME = 0x02;
-	BasicMain.LAYER_ENTITIES = 0x04;
-	BasicMain.LAYER_PARTICLES = 0x08;
-	BasicMain.LAYER_TRANSITIONS = 0x10;
-	BasicMain.LAYER_REGION = 0x20;
-	BasicMain.LAYER_FLUID = 0x40;
+	LayeredRoom.LAYER_TILEMAP = 0x01;
+	LayeredRoom.LAYER_SCHEME = 0x02;
+	LayeredRoom.LAYER_ENTITIES = 0x04;
+	LayeredRoom.LAYER_PARTICLES = 0x08;
+	LayeredRoom.LAYER_TRANSITIONS = 0x10;
+	LayeredRoom.LAYER_REGION = 0x20;
+	LayeredRoom.LAYER_FLUID = 0x40;
 	
 	var _LAYER_COLOURS = ["#990000", "#009900", "#000099", "#999900", "#990099"];
 	
-	BasicMain.prototype.createRoom = function(name, spawn) {
+	LayeredRoom.prototype.createRoom = function(name, spawn) {
 		return new Promise((function(fulfill, reject) {
 			var room = null;
 			this.roomManager.getRoomData(name).then((function(room) {;
@@ -141,7 +141,7 @@ load.provide("dusk.rooms.sgui.BasicMain", (function() {
 				if(Array.isArray(spawn)) {
 					crd = spawn;
 				}else{
-					crd = this.getFirstLayerOfType(BasicMain.LAYER_SCHEME).lookTile(spawn, 1);
+					crd = this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME).lookTile(spawn, 1);
 					if(crd) {
 						crd[0] *= entities.twidth;
 						crd[1] *= entities.theight;
@@ -168,7 +168,7 @@ load.provide("dusk.rooms.sgui.BasicMain", (function() {
 	};
 	
 	//layers
-	Object.defineProperty(BasicMain.prototype, "layers", {
+	Object.defineProperty(LayeredRoom.prototype, "layers", {
 		get: function() {
 			return this._layers;
 		},
@@ -189,14 +189,14 @@ load.provide("dusk.rooms.sgui.BasicMain", (function() {
 		}
 	});
 	
-	BasicMain.prototype._updateLayers = function() {
+	LayeredRoom.prototype._updateLayers = function() {
 		var val = this._layers;
 		var colour = 0;
 		var mapType = dusk.dev?"EditableTileMap":"TileMap";
 		
 		for(var i = 0; i < val.length; i ++) {
 			switch(val[i].type) {
-				case BasicMain.LAYER_TILEMAP:
+				case LayeredRoom.LAYER_TILEMAP:
 					this.get(val[i].name, mapType).parseProps(
 					{"cursorColour":_LAYER_COLOURS[colour++],
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
@@ -206,7 +206,7 @@ load.provide("dusk.rooms.sgui.BasicMain", (function() {
 					
 					break;
 				
-				case BasicMain.LAYER_SCHEME:
+				case LayeredRoom.LAYER_SCHEME:
 					this.get(val[i].name, mapType).parseProps(
 					{"cursorColour":_LAYER_COLOURS[colour++],
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
@@ -220,7 +220,7 @@ load.provide("dusk.rooms.sgui.BasicMain", (function() {
 					
 					break;
 				
-				case BasicMain.LAYER_REGION:
+				case LayeredRoom.LAYER_REGION:
 					this.get(val[i].name, "TileRegionGenerator").parseProps(
 					{
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
@@ -231,7 +231,7 @@ load.provide("dusk.rooms.sgui.BasicMain", (function() {
 					
 					break;
 				
-				case BasicMain.LAYER_ENTITIES:
+				case LayeredRoom.LAYER_ENTITIES:
 					this.get(val[i].name, "EntityGroup").parseProps(
 					{"name":"entities", "type":"EntityGroup",
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
@@ -243,17 +243,17 @@ load.provide("dusk.rooms.sgui.BasicMain", (function() {
 					
 					break;
 				
-				case BasicMain.LAYER_PARTICLES:
+				case LayeredRoom.LAYER_PARTICLES:
 					this.get(val[i].name, "ParticleField").parseProps({"upFlow":(i > 0?val[i-1].name:""), "layer":"+"});
 					
 					break;
 				
-				case BasicMain.LAYER_FLUID:
+				case LayeredRoom.LAYER_FLUID:
 					this.get(val[i].name, "FluidLayer").parseProps({"upFlow":(i > 0?val[i-1].name:""), "layer":"+"});
 					
 					break;
 				
-				case BasicMain.LAYER_TRANSITIONS:
+				case LayeredRoom.LAYER_TRANSITIONS:
 					this.get(val[i].name, "TransitionManager")
 						.parseProps({"upFlow":(i > 0?val[i-1].name:""), "layer":"+"});
 					
@@ -269,27 +269,27 @@ load.provide("dusk.rooms.sgui.BasicMain", (function() {
 		
 		if(this.get("editorLabel")) this.get("editorLabel").alterLayer("+");
 		
-		var entLayers = this.getAllLayersOfType(BasicMain.LAYER_ENTITIES);
+		var entLayers = this.getAllLayersOfType(LayeredRoom.LAYER_ENTITIES);
 		for(var i = entLayers.length-1; i >= 0; i --) {
-			entLayers[i].scheme = this.getFirstLayerOfType(BasicMain.LAYER_SCHEME);
-			entLayers[i].particles = this.getFirstLayerOfType(BasicMain.LAYER_PARTICLES);
-			entLayers[i].fluid = this.getFirstLayerOfType(BasicMain.LAYER_FLUID);
+			entLayers[i].scheme = this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME);
+			entLayers[i].particles = this.getFirstLayerOfType(LayeredRoom.LAYER_PARTICLES);
+			entLayers[i].fluid = this.getFirstLayerOfType(LayeredRoom.LAYER_FLUID);
 			entLayers[i].width =
-				this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).width;
+				this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP).width;
 			entLayers[i].height =
-				this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).height;
+				this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP).height;
 		}
 		
-		var pLayers = this.getAllLayersOfType(BasicMain.LAYER_PARTICLES | BasicMain.LAYER_FLUID);
+		var pLayers = this.getAllLayersOfType(LayeredRoom.LAYER_PARTICLES | LayeredRoom.LAYER_FLUID);
 		for(var i = pLayers.length-1; i >= 0; i --) {
 			pLayers[i].width =
-				this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).width;
+				this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP).width;
 			pLayers[i].height =
-				this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).height;
+				this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP).height;
 		}
 	};
 	
-	BasicMain.prototype.getFirstLayerOfType = function(type) {
+	LayeredRoom.prototype.getFirstLayerOfType = function(type) {
 		for(var i = 0; i < this._layers.length; i ++) {
 			if((this._layers[i].type & type) > 0) return this.get(this._layers[i].name);
 		}
@@ -297,7 +297,7 @@ load.provide("dusk.rooms.sgui.BasicMain", (function() {
 		return null;
 	};
 	
-	BasicMain.prototype.getAllLayersOfType = function(type) {
+	LayeredRoom.prototype.getAllLayersOfType = function(type) {
 		var out = [];
 		for(var i = 0; i < this._layers.length; i ++) {
 			if((this._layers[i].type & type) > 0) out.push(this.get(this._layers[i].name));
@@ -306,23 +306,23 @@ load.provide("dusk.rooms.sgui.BasicMain", (function() {
 		return out;
 	};
 	
-	BasicMain.prototype.getPrimaryEntityLayer = function() {
+	LayeredRoom.prototype.getPrimaryEntityLayer = function() {
 		return this.get(this._primaryEntityGroup);
 	};
 	
-	BasicMain.prototype.getTransitionManager = function() {
-		return this.getAllLayersOfType(BasicMain.LAYER_TRANSITIONS)[0];
+	LayeredRoom.prototype.getTransitionManager = function() {
+		return this.getAllLayersOfType(LayeredRoom.LAYER_TRANSITIONS)[0];
 	};
 	
-	BasicMain.prototype.getScheme = function() {
-		return this.getAllLayersOfType(BasicMain.LAYER_SCHEME)[0];
+	LayeredRoom.prototype.getScheme = function() {
+		return this.getAllLayersOfType(LayeredRoom.LAYER_SCHEME)[0];
 	};
 	
-	BasicMain.prototype.getRegion = function() {
-		return this.getAllLayersOfType(BasicMain.LAYER_REGION)[0];
+	LayeredRoom.prototype.getRegion = function() {
+		return this.getAllLayersOfType(LayeredRoom.LAYER_REGION)[0];
 	};
 	
-	BasicMain.prototype.getSeek = function() {
+	LayeredRoom.prototype.getSeek = function() {
 		if(!this.get(this._primaryEntityGroup)) return null;
 		return this.get(this._primaryEntityGroup).getComponent(entities.seek);
 	};
@@ -334,7 +334,7 @@ load.provide("dusk.rooms.sgui.BasicMain", (function() {
 		//Ask all entities to do something
 		//if(this.active) {
 			for(var i = 0; i < this._layers.length; i ++) {
-				if(this._layers[i].type == BasicMain.LAYER_ENTITIES) 
+				if(this._layers[i].type == LayeredRoom.LAYER_ENTITIES) 
 					this.get(this._layers[i].name).doFrame(this.active);
 			}
 		//}
@@ -346,29 +346,29 @@ load.provide("dusk.rooms.sgui.BasicMain", (function() {
 			var layerImg = "";
 			for(var i = 0; i < this._layers.length; i ++) {
 				if(this._layers[i].name == this.focus) {
-					if(this._layers[i].type == BasicMain.LAYER_TILEMAP) {
+					if(this._layers[i].type == LayeredRoom.LAYER_TILEMAP) {
 						layerImg = "[img default/bmlayers/tilemap.png] ";
 					}
-					if(this._layers[i].type == BasicMain.LAYER_SCHEME) {
+					if(this._layers[i].type == LayeredRoom.LAYER_SCHEME) {
 						layerImg = "[img default/bmlayers/scheme.png] ";
 					}
-					if(this._layers[i].type == BasicMain.LAYER_ENTITIES) {
+					if(this._layers[i].type == LayeredRoom.LAYER_ENTITIES) {
 						if(this._layers[i].primary) {
 							layerImg = "[img default/bmlayers/entitiesPrimary.png] ";
 						}else{
 							layerImg = "[img default/bmlayers/entities.png] ";
 						}
 					}
-					if(this._layers[i].type == BasicMain.LAYER_PARTICLES) {
+					if(this._layers[i].type == LayeredRoom.LAYER_PARTICLES) {
 						layerImg = "[img default/bmlayers/particles.png] ";
 					}
-					if(this._layers[i].type == BasicMain.LAYER_TRANSITIONS) {
+					if(this._layers[i].type == LayeredRoom.LAYER_TRANSITIONS) {
 						layerImg = "[img default/bmlayers/transitions.png] ";
 					}
-					if(this._layers[i].type == BasicMain.LAYER_REGION) {
+					if(this._layers[i].type == LayeredRoom.LAYER_REGION) {
 						layerImg = "[img default/bmlayers/region.png] ";
 					}
-					if(this._layers[i].type == BasicMain.LAYER_FLUID) {
+					if(this._layers[i].type == LayeredRoom.LAYER_FLUID) {
 						layerImg = "[img default/bmlayers/fluid.png] ";
 					}
 				}
@@ -394,7 +394,7 @@ load.provide("dusk.rooms.sgui.BasicMain", (function() {
 		}
 	};
 	
-	BasicMain.prototype.autoScroll = function() {
+	LayeredRoom.prototype.autoScroll = function() {
 		// Centre the player
 		var seekCoords = [];
 		if(editor.active) {
@@ -479,9 +479,9 @@ load.provide("dusk.rooms.sgui.BasicMain", (function() {
 			for(var i = this._layers.length-1; i >= 0; i --) {
 				if(this.get(this._layers[i].name) instanceof FluidLayer) {
 					this.get(this._layers[i].name).width =
-						this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).width;
+						this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP).width;
 					this.get(this._layers[i].name).height =
-						this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).height;
+						this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP).height;
 				}
 			}
 			
@@ -521,9 +521,9 @@ load.provide("dusk.rooms.sgui.BasicMain", (function() {
 			for(var i = this._layers.length-1; i >= 0; i --) {
 				if(this.get(this._layers[i].name) instanceof FluidLayer) {
 					this.get(this._layers[i].name).width =
-						this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).width;
+						this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP).width;
 					this.get(this._layers[i].name).height =
-						this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).height;
+						this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP).height;
 				}
 			}
 			
@@ -569,9 +569,9 @@ load.provide("dusk.rooms.sgui.BasicMain", (function() {
 			for(var i = this._layers.length-1; i >= 0; i --) {
 				if(this.get(this._layers[i].name) instanceof FluidLayer) {
 					this.get(this._layers[i].name).width =
-						this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).width;
+						this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP).width;
 					this.get(this._layers[i].name).height =
-						this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).height;
+						this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP).height;
 				}
 			}
 			
@@ -614,9 +614,9 @@ load.provide("dusk.rooms.sgui.BasicMain", (function() {
 			for(var i = this._layers.length-1; i >= 0; i --) {
 				if(this.get(this._layers[i].name) instanceof FluidLayer) {
 					this.get(this._layers[i].name).width =
-						this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).width;
+						this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP).width;
 					this.get(this._layers[i].name).height =
-						this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP).height;
+						this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP).height;
 				}
 			}
 			
@@ -638,11 +638,11 @@ load.provide("dusk.rooms.sgui.BasicMain", (function() {
 		
 		var layer = {"type":type, "name":name};
 		
-		if(type == BasicMain.LAYER_ENTITIES) layer.primary = e.shift;
+		if(type == LayeredRoom.LAYER_ENTITIES) layer.primary = e.shift;
 		
-		if(type & (BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP)){
+		if(type & (LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP)){
 			// Rows and cols, copy from any existing layer
-			var firstMap = this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP);
+			var firstMap = this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP);
 			if(firstMap) {
 				layer.cols = firstMap.cols;
 				layer.rows = firstMap.rows;
@@ -656,9 +656,9 @@ load.provide("dusk.rooms.sgui.BasicMain", (function() {
 			layer.src = prompt("What will be the image for this tilemap?", firstMap?firstMap.src:"");
 		}
 		
-		if(type == BasicMain.LAYER_REGION){
+		if(type == LayeredRoom.LAYER_REGION){
 			// Rows and cols, copy from any existing layer
-			var firstMap = this.getFirstLayerOfType(BasicMain.LAYER_SCHEME | BasicMain.LAYER_TILEMAP);
+			var firstMap = this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP);
 			if(firstMap) {
 				layer.cols = firstMap.cols;
 				layer.rows = firstMap.rows;
@@ -676,7 +676,7 @@ load.provide("dusk.rooms.sgui.BasicMain", (function() {
 		this.get(name).loadBM(layer, -1);
 	};
 	
-	BasicMain.prototype.saveRoomToConsole = function(e, returnRoom) {
+	LayeredRoom.prototype.saveRoomToConsole = function(e, returnRoom) {
 		if(!editor.active) return true;
 		
 		if(e !== undefined && e.alt) return true;
@@ -726,17 +726,17 @@ load.provide("dusk.rooms.sgui.BasicMain", (function() {
 		return false;
 	};
 	
-	sgui.registerType("BasicMain", BasicMain);
+	sgui.registerType("LayeredRoom", LayeredRoom);
 	
-	return BasicMain;
+	return LayeredRoom;
 })());
 
 
-load.provide("dusk.rooms.sgui.IBasicMainLayer", (function() {
-	var IBasicMainLayer = function() {};
+load.provide("dusk.rooms.sgui.ILayeredRoomLayer", (function() {
+	var ILayeredRoomLayer = function() {};
 	
-	IBasicMainLayer.saveBM = function() {};
-	IBasicMainLayer.loadBM = function() {};
+	ILayeredRoomLayer.saveBM = function() {};
+	ILayeredRoomLayer.loadBM = function() {};
 	
-	return IBasicMainLayer;
+	return ILayeredRoomLayer;
 })());

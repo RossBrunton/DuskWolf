@@ -13,7 +13,7 @@ load.provide("dusk.rooms.sgui.FluidLayer", (function() {
 	 * @param {dusk.sgui.Group} parent The container that this component is in.
 	 * @param {string} comName The name of the component.
 	 * @extends dusk.sgui.Component
-	 * @extends dusk.rooms.sgui.IBasicMainLayer
+	 * @extends dusk.rooms.sgui.ILayeredRoomLayer
 	 * @constructor
 	 * @since 0.0.21-alpha
 	 */

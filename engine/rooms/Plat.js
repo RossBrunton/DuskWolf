@@ -4,7 +4,7 @@
 
 load.provide("dusk.rooms.plat", (function() {
 	var sgui = load.require("dusk.sgui");
-	var BasicMain = load.require("dusk.rooms.sgui.BasicMain");
+	var LayeredRoom = load.require("dusk.rooms.sgui.LayeredRoom");
 	var entities = load.require("dusk.entities");
 	var RoomManager = load.require("dusk.rooms.RoomManager");
 	var TileMapWeights = load.require("dusk.tiles.sgui.TileMapWeights");
@@ -23,7 +23,7 @@ load.provide("dusk.rooms.plat", (function() {
 	//skills.giveSkill("infinijump");
 	
 	var main = sgui.getPane("plat");
-	main.modifyComponent([{"name":"main", "type":"BasicMain", "width":-2, "height":-2, "scrollInstantly":true}]);
+	main.modifyComponent([{"name":"main", "type":"LayeredRoom", "width":-2, "height":-2, "scrollInstantly":true}]);
 	main.becomeActive();
 	main.flow("main");
 	
@@ -37,7 +37,7 @@ load.provide("dusk.rooms.plat", (function() {
 	});
 	
 	plat.rooms = new RoomManager("dusk.rooms.plat", "rooms");
-	plat.rooms.setBasicMain(main.getComponent("main"));
+	plat.rooms.setLayeredRoom(main.getComponent("main"));
 	
 	plat.save = function(type, args, ref) {
 		if(this.rooms.basicMain.getSeek() && type == "roomAndSeek") {

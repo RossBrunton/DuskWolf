@@ -763,7 +763,7 @@ load.provide("dusk.tiles.sgui.TileRegionGenerator", (function() {
 		set: function(value) {if(value > 0) console.warn("TileRegionGenerator setting height is not supported.");}
 	});
 
-	/** Returns the map for `{@link dusk.rooms.sgui.BasicMain}` to save it.
+	/** Returns the map for `{@link dusk.rooms.sgui.LayeredRoom}` to save it.
 	 * 
 	 * @return {object} The current map.
 	 * @since 0.0.18-alpha
@@ -772,7 +772,7 @@ load.provide("dusk.tiles.sgui.TileRegionGenerator", (function() {
 		return {"rows":this.rows, "cols":this.cols};
 	};
 
-	/* Loads a map from an object. This is used by `{@link dusk.rooms.sgui.BasicMain}`.
+	/* Loads a map from an object. This is used by `{@link dusk.rooms.sgui.LayeredRoom}`.
 	 * 
 	 * @param {object} map The map to load, will be assigned to `{@link dusk.tiles.sgui.EditableTileMap#map}`.
 	 * @since 0.0.18-alpha

@@ -15,7 +15,7 @@ load.provide("dusk.rooms.sgui.TransitionManager", (function() {
 	
 	/** @class dusk.rooms.sgui.TransitionManager
 	 * 
-	 * @classdesc A transition manager is a component that functions as a layer in a `{@link dusk.rooms.sgui.BasicMain}`.
+	 * @classdesc A transition manager is a component that functions as a layer in a `{@link dusk.rooms.sgui.LayeredRoom}`.
 	 * 
 	 * It essentially allows the passage between rooms when a mark is triggered.
 	 * 
@@ -53,7 +53,7 @@ load.provide("dusk.rooms.sgui.TransitionManager", (function() {
 	 * @param {dusk.sgui.Group} parent The container that this component is in.
 	 * @param {string} comName The name of the component.
 	 * @extends dusk.sgui.Component
-	 * @extends dusk.rooms.sgui.IBasicMainLayer
+	 * @extends dusk.rooms.sgui.ILayeredRoomLayer
 	 * @constructor
 	 * @since 0.0.20-alpha
 	 */

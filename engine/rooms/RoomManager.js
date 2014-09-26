@@ -8,7 +8,7 @@ load.provide("dusk.rooms.RoomManager", (function() {
 	
 	/** Manages rooms, which contain tilemap data and the entities in the room.
 	 * 
-	 * This is intended to be used with an instance of `{@link dusk.rooms.sgui.BasicMain}` and essentially serves as a storage 
+	 * This is intended to be used with an instance of `{@link dusk.rooms.sgui.LayeredRoom}` and essentially serves as a storage 
 	 *  for it's rooms. Both `{@link dusk.rooms.plat}` and `{@link dusk.rooms.quest}` have their own room managers for their own types
 	 *  of rooms.
 	 * 
@@ -33,10 +33,10 @@ load.provide("dusk.rooms.RoomManager", (function() {
 		 */
 		this.roomLoaded = new EventDispatcher("dusk.rooms.RoomManager.roomLoaded");
 		
-		/** The BasicMain instance this manager is for.
+		/** The LayeredRoom instance this manager is for.
 		 * 
-		 * You should use `{@link dusk.rooms.RoomManager#setBasicMain}` to set this, instead of setting it directly.
-		 * @type dusk.rooms.sgui.BasicMain
+		 * You should use `{@link dusk.rooms.RoomManager#setLayeredRoom}` to set this, instead of setting it directly.
+		 * @type dusk.rooms.sgui.LayeredRoom
 		 */
 		this.basicMain = null;
 		
@@ -89,7 +89,7 @@ load.provide("dusk.rooms.RoomManager", (function() {
 			return;
 		}
 		if(!this.basicMain) {
-			console.error("No BasicMain to set the room!");
+			console.error("No LayeredRoom to set the room!");
 			return;
 		}
 		console.log("Setting room "+room);
@@ -101,9 +101,9 @@ load.provide("dusk.rooms.RoomManager", (function() {
 	};
 	
 	/** Sets the Basic Main instance this is for; this should be called instead of setting it directly.
-	 * @param {dusk.rooms.sgui.BasicMain} bm The Basic Main instance.
+	 * @param {dusk.rooms.sgui.LayeredRoom} bm The Basic Main instance.
 	 */
-	RoomManager.prototype.setBasicMain = function(bm) {
+	RoomManager.prototype.setLayeredRoom = function(bm) {
 		this.basicMain = bm;
 		bm.roomManager = this;
 	};
@@ -112,7 +112,7 @@ load.provide("dusk.rooms.RoomManager", (function() {
 })());
 
 load.provide("dusk.rooms.editor", (function() {
-	/** Provides configuration variables for level editing using `{@link dusk.rooms.sgui.BasicMain}`.
+	/** Provides configuration variables for level editing using `{@link dusk.rooms.sgui.LayeredRoom}`.
 	 * 
 	 * It is expected that HTML buttons and simple scripts on such (or just the console) would edit the properties of this.
 	 * 

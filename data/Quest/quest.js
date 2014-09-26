@@ -279,7 +279,7 @@ load.provide("quest", (function() {
 		], false)
 	//	.then(console.log.bind(console), console.error.bind(console))
 		.then(function(pa) {
-			if(!pa.endTurn || !q.getBasicMain().getPrimaryEntityLayer().filter(
+			if(!pa.endTurn || !q.getLayeredRoom().getPrimaryEntityLayer().filter(
 				"stat(faction, 1) = ALLY & stat(moved, 3) = false").length
 			) {
 				return quest.allyTurnInner();
@@ -294,7 +294,7 @@ load.provide("quest", (function() {
 		return new Promise(function(oFulfill, oReject) {
 			quest.allyTurnInner()
 			.then(function(pa) {
-				var ents = q.getBasicMain().getPrimaryEntityLayer().filter("stat(moved, 3)");
+				var ents = q.getLayeredRoom().getPrimaryEntityLayer().filter("stat(moved, 3)");
 				
 				for(var i = 0; i < ents.length; i ++) {
 					ents[i].stats.removeBlock(3, "moved");
