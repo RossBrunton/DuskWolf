@@ -4,7 +4,7 @@
 
 load.provide("dusk.sgui.DynamicGrid", (function() {
 	var Grid = load.require("dusk.sgui.Grid");
-	var Range = load.require("dusk.Range");
+	var Range = load.require("dusk.utils.Range");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
 
@@ -12,7 +12,7 @@ load.provide("dusk.sgui.DynamicGrid", (function() {
 	 * 
 	 * @classdesc A dynamic grid is a grid whose rows or columns are tied to a range of values, and will autoupdate itself.
 	 * 
-	 * It is essentially a grid that an instance of `{@link dusk.Range}` can be attached to.
+	 * It is essentially a grid that an instance of `{@link dusk.utils.Range}` can be attached to.
 	 *  When the value of the range changes, the grid repopulates itself such that the number of rows/columns (depending 
 	 *   on orientation) matches the range's value.
 	 * 
@@ -29,12 +29,12 @@ load.provide("dusk.sgui.DynamicGrid", (function() {
 		Grid.call(this, parent, comName);
 		
 		/** Internal storage for the range used in this component.
-		 * @type dusk.Range
+		 * @type dusk.utils.Range
 		 * @private
 		 */
 		this._range = null;
 		/** The range used for this DynamicGrid, when the value of this changes, the number of elements changes accordingly.
-		 * @type dusk.Range
+		 * @type dusk.utils.Range
 		 */
 		this.range = null;
 		/** The id of the "onchanged" listener for range.

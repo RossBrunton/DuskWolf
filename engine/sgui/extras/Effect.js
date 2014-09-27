@@ -4,8 +4,8 @@
 
 load.provide("dusk.sgui.extras.Effect", (function() {
 	var Extra = load.require("dusk.sgui.extras.Extra");
-	var EventDispatcher = load.require("dusk.EventDispatcher");
-	var Range = load.require("dusk.Range");
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
+	var Range = load.require("dusk.utils.Range");
 	
 	/** @class dusk.sgui.extras.Effect
 	 * 
@@ -92,18 +92,18 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 		/** Fired when the effect should do one frame of whatever it is doing.
 		 * 
 		 * While the effect is active, this will be called once per frame.
-		 * @type dusk.EventDispatcher
+		 * @type dusk.utils.EventDispatcher
 		 * @protected
 		 */
 		this._tick = new EventDispatcher("dusk.sgui.extras.Effect._tick");
 		/** Fired once when the effect starts, this is after any delay that has been specified.
-		 * @type dusk.EventDispatcher
+		 * @type dusk.utils.EventDispatcher
 		 * @protected
 		 */
 		this._onStart = new EventDispatcher("dusk.sgui.extras.Effect._onStart");
 		/** Fired when the event ends, either through running out of time or by someone calling
 		 *  `{@link dusk.sgui.extras.Effect#end}`
-		 * @type dusk.EventDispatcher
+		 * @type dusk.utils.EventDispatcher
 		 * @protected
 		 */
 		this._onEnd = new EventDispatcher("dusk.sgui.extras.Effect._onEnd");
@@ -214,8 +214,8 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 	 * 
 	 * A single trigger is an array, how the trigger works depends on what type the first element is.
 	 * 
-	 * - `{@link dusk.EventDispatcher}`: The effect will start when the dispatcher fires.
-	 * - `{@link dusk.Range}`: When the value reaches a threshold, the first element of the trigger is the range object to
+	 * - `{@link dusk.utils.EventDispatcher}`: The effect will start when the dispatcher fires.
+	 * - `{@link dusk.utils.Range}`: When the value reaches a threshold, the first element of the trigger is the range object to
 	 *  check, the second is the threshold, and the third is -1 (<=), 0 (==) or 1 (>=) indicating how the value needs to 
 	 *  relate to the threshold.
 	 * - `true`: If the value is exactly `true`, then the event will trigger on the next frame.
@@ -223,7 +223,7 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 	 * 
 	 * This may be used in the JSON representation using the key "on".
 	 * 
-	 * @param {dusk.EventDispatcher|dusk.Range|boolean|array} trigger A trigger as described above.
+	 * @param {dusk.utils.EventDispatcher|dusk.utils.Range|boolean|array} trigger A trigger as described above.
 	 */
 	Effect.prototype.addTrigger = function(trigger) {
 		if(Array.isArray(trigger[0])) {

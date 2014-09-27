@@ -3,8 +3,8 @@
 "use strict";
 
 load.provide("dusk.input.gamepad", (function() {
-	var EventDispatcher = load.require("dusk.EventDispatcher");
-	var frameTicker = load.require("dusk.frameTicker");
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
+	var frameTicker = load.require("dusk.utils.frameTicker");
 	var options = load.require("dusk.options");
 	
 	/** @namespace dusk.input.gamepad
@@ -97,7 +97,7 @@ load.provide("dusk.input.gamepad", (function() {
 		return _axis[i];
 	};
 	
-	/** Registered on `{@link dusk.frameTicker.onFrame}`.
+	/** Registered on `{@link dusk.utils.frameTicker.onFrame}`.
 	 * 	This checks to see if gamepad buttons or pressed, or if axises are tilted,
 	 *   and fires the relative events, and updates the relative variables.
 	 * @param {object} e The event object.

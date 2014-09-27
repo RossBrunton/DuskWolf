@@ -3,7 +3,7 @@
 "use strict";
 
 load.provide("dusk.sgui.extras.DynamicWidth", (function() {
-	var Range = load.require("dusk.Range");
+	var Range = load.require("dusk.utils.Range");
 	var Extra = load.require("dusk.sgui.extras.Extra");
 	var sgui = load.require("dusk.sgui");
 	
@@ -23,12 +23,12 @@ load.provide("dusk.sgui.extras.DynamicWidth", (function() {
 		Extra.call(this, owner, name);
 		
 		/** Internal storage for the range used in this component.
-		 * @type dusk.Range
+		 * @type dusk.utils.Range
 		 * @private
 		 */
 		this._range = null;
 		/** The range used for this.
-		 * @type dusk.Range
+		 * @type dusk.utils.Range
 		 */
 		this.range = null;
 		/** The id of the "onchanged" listener for range.
@@ -71,7 +71,7 @@ load.provide("dusk.sgui.extras.DynamicWidth", (function() {
 	});
 
 	/** Used internally to manage the range value changing.
-	 * @param {object} e An event object from `{@link dusk.Range.onChange}`.
+	 * @param {object} e An event object from `{@link dusk.utils.Range.onChange}`.
 	 * @private
 	 */
 	DynamicWidth.prototype._rangeChanged = function(e) {
@@ -89,7 +89,7 @@ load.provide("dusk.sgui.extras.DynamicWidth", (function() {
 
 
 load.provide("dusk.sgui.extras.DynamicHeight", (function() {
-	var Range = load.require("dusk.Range");
+	var Range = load.require("dusk.utils.Range");
 	var Extra = load.require("dusk.sgui.extras.Extra");
 	var sgui = load.require("dusk.sgui");
 	
@@ -109,12 +109,12 @@ load.provide("dusk.sgui.extras.DynamicHeight", (function() {
 		Extra.call(this, owner, name);
 		
 		/** Internal storage for the range used in this component.
-		 * @type dusk.Range
+		 * @type dusk.utils.Range
 		 * @private
 		 */
 		this._range = null;
 		/** The range used for this.
-		 * @type dusk.Range
+		 * @type dusk.utils.Range
 		 */
 		this.range = null;
 		/** The id of the "onchanged" listener for range.
@@ -157,7 +157,7 @@ load.provide("dusk.sgui.extras.DynamicHeight", (function() {
 	});
 
 	/** Used internally to manage the range value changing.
-	 * @param {object} e An event object from `{@link dusk.Range.onChange}`.
+	 * @param {object} e An event object from `{@link dusk.utils.Range.onChange}`.
 	 * @private
 	 */
 	DynamicHeight.prototype._rangeChanged = function(e) {

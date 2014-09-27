@@ -2,9 +2,9 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.InheritableContainer", (function() {
+load.provide("dusk.utils.InheritableContainer", (function() {
 	var utils = load.require("dusk.utils");
-	var Inheritable = load.require(">dusk.Inheritable", function(p) {Inheritable = p});
+	var Inheritable = load.require(">dusk.utils.Inheritable", function(p) {Inheritable = p});
 	
 	/** Inheritable objects are essentially objects which inherit properties from other objects. Think OOP style-
 	 *  inheritance mixed with objects.
@@ -13,7 +13,7 @@ load.provide("dusk.InheritableContainer", (function() {
 	 *  to ("inherited from") is checked for that property.
 	 * 
 	 * This class can create regular JavaScript objects that have all the properties that the specified type had when it
-	 *  was created. It can also can create instances of `{@link dusk.Inheritable}` which update automatically, however 
+	 *  was created. It can also can create instances of `{@link dusk.utils.Inheritable}` which update automatically, however 
 	 *  are not normal JavaScript objects.
 	 * 
 	 * The base type, that all inheritables are linked to, is named `"root"`, and can be modified as any other type.
@@ -137,13 +137,13 @@ load.provide("dusk.InheritableContainer", (function() {
 		return this._objectData[name];
 	};
 	
-	/** Creates a new instance of `{@link dusk.Inheritable}` of the specified type, which is linked to this.
+	/** Creates a new instance of `{@link dusk.utils.Inheritable}` of the specified type, which is linked to this.
 	 * 
 	 * If the type is not found, then the Inheritable will use the type `"root"` instead.
 	 * 
 	 * @param {string} type The name of the type to create the inheritable for.
 	 * @param {?object} extraData Any extra properties that this specific instance of the item should have.
-	 * @return {dusk.Inheritable} An inheritable of the specified type.
+	 * @return {dusk.utils.Inheritable} An inheritable of the specified type.
 	 */
 	InheritableContainer.prototype.create = function(type, extraData) {
 		if(!(type in this._objectData)) {
@@ -200,7 +200,7 @@ load.provide("dusk.InheritableContainer", (function() {
 	
 	/** Given a name, gets the container with that name.
 	 * @param {string} name The name to look up.
-	 * @return {dusk.InheritableContainer} The container with that name.
+	 * @return {dusk.utils.InheritableContainer} The container with that name.
 	 * @since 0.0.21-alpha
 	 */
 	InheritableContainer.getContainer = function(name) {
@@ -211,13 +211,13 @@ load.provide("dusk.InheritableContainer", (function() {
 })());
 
 
-load.provide("dusk.Inheritable", (function(){
+load.provide("dusk.utils.Inheritable", (function(){
 	var utils = load.require("dusk.utils");
-	var InheritableContainer = load.require("dusk.InheritableContainer");
+	var InheritableContainer = load.require("dusk.utils.InheritableContainer");
 	var save = load.suggest("dusk.save", function(p) {save = p});
-	var containerUtils = load.require("dusk.containerUtils");
+	var containerUtils = load.require("dusk.utils.containerUtils");
 	
-	/** Inheritables are created by instances of `dusk.InheritableContainer` and generally serve to provide dynamic
+	/** Inheritables are created by instances of `dusk.utils.InheritableContainer` and generally serve to provide dynamic
 	 *  access to a type.
 	 * 
 	 * They can also contain their own "extra" data which is not linked to the type data in the container. All of the
@@ -225,10 +225,10 @@ load.provide("dusk.Inheritable", (function(){
 	 *  data, and then looks to the container for the property.
 	 * 
 	 * @param {string} type The type to create the Inheritable of. Must be a valid type in the container.
-	 * @param {dusk.InheritableContainer} container The container this is "connected to".
+	 * @param {dusk.utils.InheritableContainer} container The container this is "connected to".
 	 * @param {?object} extraData Any data that is unique to this specific instance of the type.
 	 * @constructor
-	 * @implements dusk.IContainer
+	 * @implements dusk.utils.IContainer
 	 * @since 0.0.17-alpha
 	 */
 	var Inheritable = function(type, container, extraData) {
@@ -237,7 +237,7 @@ load.provide("dusk.Inheritable", (function(){
 		 */
 		this.type = type;
 		/** The container this inheritable is connected to.
-		 * @type dusk.InheritableContainer}
+		 * @type dusk.utils.InheritableContainer}
 		 */
 		this.container = container;
 		/** This inheritable's "extra data".
@@ -283,13 +283,13 @@ load.provide("dusk.Inheritable", (function(){
 	
 	/** Makes a copy of the inheritable, of the same type, linked to the same container and with the same extra data.
 	 * 
-	 * @return {dusk.Inheritable} A copy of this inheritable.
+	 * @return {dusk.utils.Inheritable} A copy of this inheritable.
 	 */
 	Inheritable.prototype.copy = function() {
 		return new Inheritable(this.type, this.container, utils.clone(this._extraData));
 	};
 	
-	/** Saves this to an object that can then be loaded with `{@link dusk.Inheritable#refLoad}`.
+	/** Saves this to an object that can then be loaded with `{@link dusk.utils.Inheritable#refLoad}`.
 	 * 
 	 * This requires `{@link dusk.save}` to be imported.
 	 * @return {object} This inheritable, as an object.
@@ -299,10 +299,10 @@ load.provide("dusk.Inheritable", (function(){
 		return [this.type, this.container.name, ref(this._extraData)];
 	};
 	
-	/** Given a previously saved inventory (via `{@link dusk.Inheritable#refSave}`) will create a inheritable for this 
+	/** Given a previously saved inventory (via `{@link dusk.utils.Inheritable#refSave}`) will create a inheritable for this 
 	 *  object.
 	 * @param {object} data The saved data.
-	 * @return {dusk.Inheritable} An inheritable from the saved data.
+	 * @return {dusk.utils.Inheritable} An inheritable from the saved data.
 	 * @since 0.0.21-alpha
 	 * @static
 	 */
@@ -311,11 +311,11 @@ load.provide("dusk.Inheritable", (function(){
 	};
 	
 	/** Returns the name of the class for use in saving.
-	 * @return {string} The string "dusk.Inheritable".
+	 * @return {string} The string "dusk.utils.Inheritable".
 	 * @since 0.0.21-alpha
 	 */
 	Inheritable.prototype.refClass = Inheritable.refClass = function() {
-		return "dusk.Inheritable";
+		return "dusk.utils.Inheritable";
 	};
 	
 	return Inheritable;

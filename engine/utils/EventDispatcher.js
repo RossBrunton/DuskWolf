@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.EventDispatcher", (function() {
+load.provide("dusk.utils.EventDispatcher", (function() {
 	/** An EventDispatcher essentially manages events.
 	 * 
 	 * Code registeres a "listen" function in the dispatcher that is called when the event is fired.
@@ -19,7 +19,7 @@ load.provide("dusk.EventDispatcher", (function() {
 	 * Similarly, `propsNo` will only fire if the properties specified are NOT equal to the event properties.
 	 * 
 	 * @param {string} name A name for the event dispatcher; used for identifying it in debbuging.
-	 * @param {integer=dusk.EventDispatcher.FILTER_EQUALS} filterType The current filter type.
+	 * @param {integer=dusk.utils.EventDispatcher.FILTER_EQUALS} filterType The current filter type.
 	 * @since 0.0.14-alpha
 	 * @constructor
 	 */

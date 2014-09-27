@@ -5,16 +5,16 @@
 load.provide("dusk.sgui", (function() {
 	var Pane = load.require(">dusk.sgui.Pane", function(p){Pane = p});
 	var keyboard = load.require("dusk.input.keyboard");
-	var frameTicker = load.require("dusk.frameTicker");
-	var EventDispatcher = load.require("dusk.EventDispatcher");
+	var frameTicker = load.require("dusk.utils.frameTicker");
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var controls = load.require("dusk.input.controls");
 	var dusk = load.require("dusk");
 	var c = load.require("dusk.sgui.c");
 	var options = load.require("dusk.options");
-	var Pool = load.require("dusk.Pool");
+	var Pool = load.require("dusk.utils.Pool");
 	var interaction = load.require("dusk.input.interaction");
-	var UserCancelError = load.suggest("dusk.UserCancelError", function(p) {UserCancelError = p});
-	var containerUtils = load.require("dusk.containerUtils");
+	var UserCancelError = load.suggest("dusk.utils.reversiblePromiseChain.UserCancelError", function(p) {UserCancelError = p});
+	var containerUtils = load.require("dusk.utils.containerUtils");
 	
 	/** This module contains a SimpleGui system, allowing for canvas UIs.
 	 * 
@@ -130,7 +130,7 @@ load.provide("dusk.sgui", (function() {
 	/** Fires when the simpleGui system is about to draw a new frame.
 	 * 
 	 * The event object is empty.
-	 * @type dusk.EventDispatcher
+	 * @type dusk.utils.EventDispatcher
 	 */
 	sgui.onRender = new EventDispatcher("onRender");
 	
@@ -209,7 +209,7 @@ load.provide("dusk.sgui", (function() {
 	 * 
 	 * Properties will not be deleted when freed.
 	 * 
-	 * @type dusk.Pool<Object>
+	 * @type dusk.utils.Pool<Object>
 	 * @since 0.0.21-alpha
 	 */
 	sgui.drawDataPool = new Pool(Object);
@@ -751,7 +751,7 @@ load.provide("dusk.sgui", (function() {
 })());
 
 
-load.provide("dusk.pause", (function() {
+load.provide("dusk.sgui.pause", (function() {
 	var controls = load.require("dusk.input.controls");
 	var sgui = load.require("dusk.sgui");
 	

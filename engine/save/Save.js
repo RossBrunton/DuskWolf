@@ -11,7 +11,7 @@ load.provide("dusk.save", (function() {
 	 * 
 	 * The saving system has three main parts, the interface `{@link dusk.save.ISavable}` should be implemented by
 	 *  namespaces that wish to be saved and loaded. Instances of `{@link dusk.save.SaveSpec}` are used to list what
-	 *  exactly should be saved. Lastly, `{@link dusk.save.SaveSource}` instances describe a location to save or load
+	 *  exactly should be saved. Lastly, `{@link dusk.save.sources.SaveSource}` instances describe a location to save or load
 	 *  from, such as local storage or cloud based systems.
 	 * 
 	 * For objects that do not have a static location, it gets more complicated. Generally, they are saved in a long
@@ -28,7 +28,7 @@ load.provide("dusk.save", (function() {
 	
 	/** Saves data from the specified spec into the specified source.
 	 * @param {dusk.save.SaveSpec} spec The specification of what to save.
-	 * @param {dusk.save.SaveSource} source The source to save to.
+	 * @param {dusk.save.sources.SaveSource} source The source to save to.
 	 * @param {string} identifier The identifier at which to save the file.
 	 * @return {Promise(boolean)} A promise that fullfills the constant true, or rejects if the save failed.
 	 */
@@ -39,7 +39,7 @@ load.provide("dusk.save", (function() {
 	
 	/** Loads data from a specified spec and source.
 	 * @param {dusk.save.SaveSpec} spec The specification to use when loading.
-	 * @param {dusk.save.SaveSource} source The source to load from.
+	 * @param {dusk.save.sources.SaveSource} source The source to load from.
 	 * @param {string} identifier An identifier of what you want to load.
 	 * @return {Promise(boolean)} A promise that fullfills the constant true, or rejects if load fails.
 	 */

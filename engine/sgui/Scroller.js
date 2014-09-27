@@ -7,7 +7,7 @@ load.provide("dusk.sgui.Scroller", (function() {
 	var sgui = load.require("dusk.sgui");
 	var controls = load.require("dusk.input.controls");
 	var c = load.require("dusk.sgui.c");
-	var Range = load.require("dusk.Range");
+	var Range = load.require("dusk.utils.Range");
 
 	/** Creates a new Scroller.
 	 * 

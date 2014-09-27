@@ -6,7 +6,7 @@ load.provide("dusk.sgui.Feed", (function() {
 	var Group = load.require("dusk.sgui.Group");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
-	var EventDispatcher = load.require("dusk.EventDispatcher");
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var utils = load.require("dusk.utils");
 	
 	/** @class dusk.sgui.Feed
@@ -58,7 +58,7 @@ load.provide("dusk.sgui.Feed", (function() {
 		 * 
 		 * The handler MUST return the event object when it is finished with it.
 		 * 
-		 * @type dusk.EventDispatcher
+		 * @type dusk.utils.EventDispatcher
 		 * @protected
 		 */
 		this._appendEvent = new EventDispatcher("dusk.sgui.Feed._appendEvent");

@@ -123,7 +123,7 @@ window.load = (function() {
 	 * 
 	 * The event object has only one property, package, a string with the package name in it.
 	 * 
-	 * This object will be `null` until `dusk.EventDispatcher` is imported; 
+	 * This object will be `null` until `dusk.utils.EventDispatcher` is imported; 
 	 *  and this namespace will not make any attempt to import it.
 	 * @type null|EventDispatcher
 	 * @since 0.0.14-alpha
@@ -764,7 +764,7 @@ window.load = (function() {
 	raf(_displayLoad);
 	
 	var dusk = load.suggest("dusk", function(p) {dusk = p});
-	var EventDispatcher = load.suggest("dusk.EventDispatcher", function(p) {
+	var EventDispatcher = load.suggest("dusk.utils.EventDispatcher", function(p) {
 		EventDispatcher = p;
 		load.onProvide = new EventDispatcher("dusk.load.onProvide");
 	});

@@ -5,7 +5,7 @@
 load.provide("dusk.sgui.Checkbox", (function() {
 	var FocusCheckerTile = load.require("dusk.sgui.FocusCheckerTile");
 	var sgui = load.require("dusk.sgui");
-	var EventDispatcher = load.require("dusk.EventDispatcher");
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	
 	/** Creates a new Checkbox component.
 	 * 
@@ -16,7 +16,7 @@ load.provide("dusk.sgui.Checkbox", (function() {
 	 * 
 	 * @classdesc A checkbox has two states, on or off. This is represented by the property "checked" and its appearance.
 	 * 
-	 * A checkbox (eventually) inherits from `{@link dusk.sgui.Tile}`, where each tile indicates a different state:
+	 * A checkbox (eventually) inherits from `{@link dusk.tiles.sgui.Tile}`, where each tile indicates a different state:
 	 * - `0,0`: Not checked.
 	 * - `1,0`: Checked.
 	 * - `2,0`: Not checked, but in a radiobox.

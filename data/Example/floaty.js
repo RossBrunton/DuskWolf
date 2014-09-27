@@ -3,11 +3,11 @@
 "use strict";
 
 load.provide("example.floaty", (function() {
-	load.require("dusk.sgui.ParticleField");
+	load.require("dusk.particles.sgui.ParticleField");
 	load.require("dusk.sgui.Label");
 	load.require("dusk.sgui.extras.SineSlide");
 	load.require("dusk.sgui.extras.Fade");
-	load.require("dusk.sgui.particleEffects.core");
+	load.require("dusk.particles.particleEffects.core");
 	
 	var dusk = load.require("dusk");
 	var sgui = load.require("dusk.sgui");

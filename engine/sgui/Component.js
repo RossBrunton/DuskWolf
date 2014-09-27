@@ -4,12 +4,12 @@
 
 load.provide("dusk.sgui.Component", (function() {
 	var utils = load.require("dusk.utils");
-	var EventDispatcher = load.require("dusk.EventDispatcher");
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var controls = load.require("dusk.input.controls");
 	var sgui = load.require("dusk.sgui");
-	var Mapper = load.require("dusk.Mapper");
+	var Mapper = load.require("dusk.utils.Mapper");
 	var MouseAugment = load.require("dusk.sgui.MouseAugment");
-	var Pool = load.require("dusk.Pool");
+	var Pool = load.require("dusk.utils.Pool");
 	var Group = load.suggest("dusk.sgui.Group", function(p) {Group = p});
 	var c = load.require("dusk.sgui.c");
 	var Pane = load.suggest("dusk.sgui.Pane", function(p) {Pane = p});
@@ -133,7 +133,7 @@ load.provide("dusk.sgui.Component", (function() {
 		 *  and `e` the actual keypress event.
 		 * 
 		 * For the component to flow to the relevent flow location, all listeners registered must return true.
-		 * @type dusk.EventDispatcher
+		 * @type dusk.utils.EventDispatcher
 		 * @since 0.0.17-alpha
 		 */
 		this.dirPress = new EventDispatcher(
@@ -142,21 +142,21 @@ load.provide("dusk.sgui.Component", (function() {
 		/** Fired when an interaction event is fired.
 		 * 
 		 * All listeners must return true if you want it to bubble up to its parent.
-		 * @type dusk.EventDispatcher
+		 * @type dusk.utils.EventDispatcher
 		 * @since 0.0.21-alpha
 		 */
 		this.onInteract = new EventDispatcher("dusk.sgui.Component.onInteract");
 		/** Fired when a control event is fired.
 		 * 
 		 * All listeners must return true if you want it to bubble up to its parent.
-		 * @type dusk.EventDispatcher
+		 * @type dusk.utils.EventDispatcher
 		 * @since 0.0.21-alpha
 		 */
 		this.onControl = new EventDispatcher("dusk.sgui.Component.onControl", EventDispatcher.FILTER_ISIN);
 		/** An event dispatcher that is fired once per frame.
 		 * 
 		 * The event object has no properties.
-		 * @type dusk.EventDispatcher
+		 * @type dusk.utils.EventDispatcher
 		 * @since 0.0.17-alpha
 		 */
 		this.frame = new EventDispatcher("dusk.sgui.Component.frame");
@@ -167,7 +167,7 @@ load.provide("dusk.sgui.Component", (function() {
 		 *  will stop the event bubbling to the container component.
 		 * 
 		 * This has a single event object, `component`, which is the component that fired this event.
-		 * @type dusk.EventDispatcher
+		 * @type dusk.utils.EventDispatcher
 		 * @since 0.0.17-alpha
 		 */
 		this.action = new EventDispatcher("dusk.sgui.Component.action");
@@ -178,20 +178,20 @@ load.provide("dusk.sgui.Component", (function() {
 		 *  will stop the event bubbling to the container component.
 		 * 
 		 * This has a single event object, `component`, which is the component that fired this event.
-		 * @type dusk.EventDispatcher
+		 * @type dusk.utils.EventDispatcher
 		 * @since 0.0.21-alpha
 		 */
 		this.cancel = new EventDispatcher("dusk.sgui.Component.cancel");
 		/** Fired as part of the drawing proccess.
 		 * 
 		 * The event object is a 2D canvas rendering context, which is expected to be drawn on.
-		 * @type dusk.EventDispatcher
+		 * @type dusk.utils.EventDispatcher
 		 * @since 0.0.17-alpha
 		 */
 		this.prepareDraw = new EventDispatcher("dusk.sgui.Component.prepareDraw");
 		
 		/** A mapper used to map JSON properties to the properties on this object.
-		 * @type dusk.Mapper
+		 * @type dusk.utils.Mapper
 		 * @protected
 		 */
 		this._props = new Mapper(this);
@@ -199,7 +199,7 @@ load.provide("dusk.sgui.Component", (function() {
 		 * 
 		 * The event object has a single property named `component`, which is this.
 		 * 
-		 * @type dusk.EventDispatcher
+		 * @type dusk.utils.EventDispatcher
 		 * @since 0.0.15-alpha
 		 */
 		this.onDelete = new EventDispatcher("dusk.sgui.Component.onDelete");
@@ -209,7 +209,7 @@ load.provide("dusk.sgui.Component", (function() {
 		 * The event object has a single property named `augment` which is the name of the augment added. At the moment
 		 *  only `"mouse"` can be added.
 		 * 
-		 * @type dusk.EventDispatcher
+		 * @type dusk.utils.EventDispatcher
 		 * @since 0.0.21-alpha
 		 */
 		this.augment = new EventDispatcher("dusk.sgui.Component.augment");
@@ -251,14 +251,14 @@ load.provide("dusk.sgui.Component", (function() {
 		/** Fired whenever this component becomes focused, or looses focus.
 		 * 
 		 * The event object has a single property, `focus`, which is true if and only if the component is now focused.
-		 * @type dusk.EventDispatcher
+		 * @type dusk.utils.EventDispatcher
 		 */
 		this.onFocusChange = new EventDispatcher("dusk.sgui.Component.onFocusChange");
 		this.onFocusChange.listen((function(e){this.focused = e.focus;}).bind(this));
 		/** Fired whenever this component becomes active, or stops being active.
 		 * 
 		 * The event object has a single property, `active`, which is true if and only if the component is now active.
-		 * @type dusk.EventDispatcher
+		 * @type dusk.utils.EventDispatcher
 		 */
 		this.onActiveChange = new EventDispatcher("dusk.sgui.Component.onActiveChange");
 		this.onActiveChange.listen((function(e){this.active = e.active;}).bind(this));
@@ -843,7 +843,7 @@ load.provide("dusk.sgui.Component", (function() {
 	});
 	
 	/** Pool of event objects for `{@link dusk.sgui.Component#prepareDraw}`.
-	 * @type dusk.Pool<Object>
+	 * @type dusk.utils.Pool<Object>
 	 * @private
 	 * @since 0.0.21-alpha
 	 */

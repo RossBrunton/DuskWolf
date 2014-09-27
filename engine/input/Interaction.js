@@ -3,11 +3,11 @@
 "use strict";
 
 load.provide("dusk.input.interaction", (function() {
-	var EventDispatcher = load.require("dusk.EventDispatcher");
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var keyboard = load.require("dusk.input.keyboard");
 	var gamepad = load.require("dusk.input.gamepad");
 	var mouse = load.require("dusk.input.mouse");
-	var Pool = load.require("dusk.Pool");
+	var Pool = load.require("dusk.utils.Pool");
 	
 	var interaction = {};
 	

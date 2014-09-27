@@ -6,7 +6,7 @@ load.provide("dusk.sgui.extras.SineSlide", (function() {
 	var Effect = load.require("dusk.sgui.extras.Effect");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
-	var Range = load.require("dusk.Range");
+	var Range = load.require("dusk.utils.Range");
 
 	/** @class dusk.sgui.extras.SineSlide
 	 * 
@@ -45,7 +45,7 @@ load.provide("dusk.sgui.extras.SineSlide", (function() {
 		 */
 		this._base = 0;
 		/** The range used internally track time.
-		 * @type dusk.Range
+		 * @type dusk.utils.Range
 		 * @private
 		 */
 		this._range = null;

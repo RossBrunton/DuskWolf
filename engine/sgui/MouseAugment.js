@@ -4,7 +4,7 @@
 
 load.provide("dusk.sgui.MouseAugment", (function() {
 	var utils = load.require("dusk.utils");
-	var EventDispatcher = load.require("dusk.EventDispatcher");
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var Group = load.suggest("dusk.sgui.Group", function(p) {Group = p});
 	
 	/** @class dusk.sgui.MouseAugment
@@ -81,7 +81,7 @@ load.provide("dusk.sgui.MouseAugment", (function() {
 		/** Fired when this component is clicked on.
 		 * 
 		 * The event object has at least a property `button`, which is the number of the button clicked.
-		 * @type dusk.EventDispatcher
+		 * @type dusk.utils.EventDispatcher
 		 */
 		this.onClick = new EventDispatcher("dusk.sgui.MouseAugment.onClick");
 	};

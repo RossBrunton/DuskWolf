@@ -4,8 +4,8 @@
 
 load.provide("test.dusk.Inherit", (function() {
 	var test = load.require("test");
-	var InheritableContainer = load.require("dusk.InheritableContainer");
-	var Inheritable = load.require("dusk.Inheritable");
+	var InheritableContainer = load.require("dusk.utils.InheritableContainer");
+	var Inheritable = load.require("dusk.utils.Inheritable");
 	var utils = load.require("dusk.utils");
 	
 	test.registerTestFunction("test.dusk.Inherit", function(tester) {

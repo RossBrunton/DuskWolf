@@ -5,8 +5,8 @@
 load.provide("dusk.input.controls", (function() {
 	var keyboard = load.require("dusk.input.keyboard");
 	var gamepad = load.require("dusk.input.gamepad");
-	var EventDispatcher = load.require("dusk.EventDispatcher");
-	var frameTicker = load.require("dusk.frameTicker");
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
+	var frameTicker = load.require("dusk.utils.frameTicker");
 	var options = load.require("dusk.options");
 	var interaction = load.require("dusk.input.interaction");
 	var layouts = load.require("dusk.input.layouts");

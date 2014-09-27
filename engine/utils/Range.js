@@ -2,11 +2,11 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.Range", (function() {
-	var EventDispatcher = load.require("dusk.EventDispatcher");
+load.provide("dusk.utils.Range", (function() {
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	/** Creates a new Range
 	 * 
-	 * @class dusk.Range
+	 * @class dusk.utils.Range
 	 * 
 	 * @classdesc A range is a data type that stores a value between a maximum and a minimum.
 	 *  This class will automatically ensure that the specified value is in the range.
@@ -25,15 +25,15 @@ load.provide("dusk.Range", (function() {
 		/** An event dispatcher that is fired when the value in this range changes.
 		 *  The event object has a single property "`value`" which is the value that was set.
 		 *  This can be changed, and will alter the value of the range.
-		 * @type dusk.EventDispatcher
+		 * @type dusk.utils.EventDispatcher
 		 */
-		this.onChange = new EventDispatcher("dusk.Range.onChange");
+		this.onChange = new EventDispatcher("dusk.utils.Range.onChange");
 		/** Internal property for the current value.
 		 * @type integer|float
 		 * @private
 		 */
 		this._value = 0;
-		/** The current value of this range, this will be between `{@link dusk.Range#min}` and `{@link dusk.Range#max}`.
+		/** The current value of this range, this will be between `{@link dusk.utils.Range#min}` and `{@link dusk.utils.Range#max}`.
 		 * @type integer|float
 		 */
 		this.value = value!==undefined?value:50;
@@ -71,7 +71,7 @@ load.provide("dusk.Range", (function() {
 		}
 	});
 
-	/** Increases the value by `{@link dusk.Range#stepUp}`.
+	/** Increases the value by `{@link dusk.utils.Range#stepUp}`.
 	 * @return {boolean} Whether the value changed.
 	 */
 	Range.prototype.up = function() {
@@ -80,7 +80,7 @@ load.provide("dusk.Range", (function() {
 		return old != this.value;
 	};
 
-	/** Decreases the value by `{@link dusk.Range#stepDown}`. 
+	/** Decreases the value by `{@link dusk.utils.Range#stepDown}`. 
 	 * @return {boolean} Whether the value changed.
 	 */
 	Range.prototype.down = function() {
@@ -89,14 +89,14 @@ load.provide("dusk.Range", (function() {
 		return old != this.value;
 	};
 
-	/** Sets the amount that `{@link dusk.Range#up}` will change to a fraction of the possible range.
+	/** Sets the amount that `{@link dusk.utils.Range#up}` will change to a fraction of the possible range.
 	 * @param {float} fract The fraction to set it to.
 	 */
 	Range.prototype.setUpFraction = function(fract) {
 		this.stepUp = (this.max - this.min) * fract;
 	};
 
-	/** Sets the amount that `{@link dusk.Range#down}` will change to a fraction of the possible range.
+	/** Sets the amount that `{@link dusk.utils.Range#down}` will change to a fraction of the possible range.
 	 * @param {float} fract The fraction to set it to.
 	 */
 	Range.prototype.setDownFraction = function(fract) {

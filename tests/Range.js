@@ -2,11 +2,11 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("test.dusk.Range", (function() {
+load.provide("test.dusk.utils.Range", (function() {
 	var test = load.require("test");
-	var Range = load.require("dusk.Range");
+	var Range = load.require("dusk.utils.Range");
 	
-	test.registerTestFunction("test.dusk.Range", function(tester) {
+	test.registerTestFunction("test.dusk.utils.Range", function(tester) {
 		tester.start("Construction");
 		
 		var ten = new Range(0, 10, 5, 1, 1);
