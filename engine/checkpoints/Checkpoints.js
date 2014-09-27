@@ -6,17 +6,33 @@ load.provide("dusk.checkpoints", (function() {
 	var InteractableTarget = load.require("dusk.entities.behave.InteractableTarget");
 	var containerUtils = load.require("dusk.utils.containerUtils");
 	
-	/** 
+	/** Checkpoints listen for specific interaction events, and then saves a checkpoint. It can then load that
+	 *  checkpoint later.
+	 * 
+	 * Basically, it listens for a specific Interaction event (from `dusk.entities.behave.InteractableTarget`), and if
+	 *  it checks out, will use a SaveSpec to save the current state. When `loadCheckpoint` is called with the correct
+	 *  arguments, it will load this state.
+	 * 
+	 * You use the `get` and `set` method to manipulate "checkpoint objects", which describe the process of saving and
+	 *  loading a checkpoint.
+	 * 
+	 * When loading a checkpoint, it is saved immediatley afterwards, this is so that any changes made during the
+	 *  "postLoad" function, such as reducing lives, are saved.
+	 * 
 	 * Checkpoint objects have the following properties:
-	 * - saveType: (required) What interaction event to trigger saving.
-	 * - loadType: (required) What checkpoint type to trigger loading.
+	 * - saveType: (required) What interaction event name (the `interactType` of the checkpoint entity) to trigger
+	 *  saving.
+	 * - loadType: (required) What checkpoint type (first argument to the `loadCheckpoint`) to trigger loading.
 	 * - priority: (required) An integer, higher values will be checked for loading first.
 	 * - spec: (required) The save spec to save and load.
-	 * - checkSave: A function that checks if this checkpoint wants to save.
-	 * - postSave: A function called after saving
-	 * - checkLoad: A function that checks if this checkpoint wants to load.
-	 * - postLoad: A method called when this checkpoint has finished loading.
-	 * They also have a name, which is the key of the object.
+	 * - checkSave: A function that checks if this checkpoint wants to save, should return a boolean, given the
+	 *  interaction event as an argument.
+	 * - postSave: A function called after saving, the first argument is whether the save was after a load or not
+	 *  (boolean), the second is the interaction event.
+	 * - checkLoad: A function that checks if this checkpoint wants to load, first argument is the loadType, the second
+	 *  is the "arg" parameter to loadCheckpoint.
+	 * - postLoad: A method called when this checkpoint has finished loading, first argument is the loadType, second is
+	 *  the "arg" parameter.
 	 * 
 	 * On interaction event:
 	 * - For every checkpoint
@@ -38,42 +54,75 @@ load.provide("dusk.checkpoints", (function() {
 	 * 
 	 * Checkpoints do not, and should not be used as, normal "saving" points. Although checkpoints can be saved, they
 	 *  do not save their own checkpoints to sources; if you want that functionality, autosave after saving.
+	 * 
 	 * @since 0.0.21-alpha
 	 * @implements dusk.utils.IContainer
+	 * @implements dusk.save.ISavable
+	 * @see dusk.checkpoints.behave.Checkpoint
 	 */
 	var checkpoints = {};
 	
+	/** An object conataining checkpoint objects.
+	 * @type object
+	 * @private
+	 */
 	var _points = {};
+	/** The data saved by the save sources. Key is the checkpoint name, value is the save data object.
+	 * @type object
+	 * @private
+	 */
 	var _savedData = {};
+	/** Which entity has activated this checkpoint, key is checkpoint name, value is a `[room, name]` pair for the
+	 *  InteractableTarget entity that triggered it.
+	 * @type object
+	 * @private
+	 */
 	var _activeCheckpoints = {};
 	
+	// Implement IContainer
 	containerUtils.implementIContainer(checkpoints, _points, function(value) {
 		return value && ("saveType" in value) && ("loadType" in value) && ("priority" in value) && ("spec" in value);
 	});
 	
+	// Listen for the interactable event and possibly save a checkpoint
 	InteractableTarget.interact.listen(function(e) {
-		for(var p in _points) {
-			if(e.type == _points[p].saveType) {
-				if(("checkSave" in _points[p] && _points[p].checkSave(e)) || !("checkSave" in _points[p])) {
-					_savedData[p] = _points[p].spec.save();
-					if("postSave" in _points[p]) _points[p].postSave(false, e);
-					_activeCheckpoints[p] = [e.room, e.comName];
+		var it = checkpoints.iterate();
+		for(var p = it.next(); !p.done; p = it.next()) {
+			if(e.type == p.value.saveType) {
+				if(("checkSave" in p.value && p.value.checkSave(e)) || !("checkSave" in p.value)) {
+					_savedData[p.key] = p.value.spec.save();
+					if("postSave" in _points[p.key]) p.value.postSave(false, e);
+					_activeCheckpoints[p.key] = [e.room, e.comName];
 				}
 			}
 		}
 	});
 	
+	/** Loads a checkpoint.
+	 * 
+	 * It is given the type of checkpoint, and will find the checkpoint object with the highest priority that has a
+	 *  "loadType" which matches it. It then loads previously saved data that exists for this checkpoint.
+	 * 
+	 * @param {string} type The type of the checkpoint.
+	 * @param {*} args An argument which will be sent to checkLoad and postLoad.
+	 * @return {boolean} Whether any checkpoint was loaded.
+	 */
 	checkpoints.loadCheckpoint = function(type, args) {
+		// Stores which checkpoints have been checked
 		var complete = [];
 		while(true) {
-			var min = 0;
+			var max = 0;
 			var check = "";
+			var point = null;
 			
-			for(var p in _points) {
-				if((!check || _points[p].priority < min) && complete.indexOf(p) === -1
-				&& _points[p].loadType == type && _savedData[p]) {
-					min = _points[p].priority;
-					check = p;
+			// Find the highest priority checkpoint that is valid
+			var it = checkpoints.iterate();
+			for(var p = it.next(); !p.done; p = it.next()) {
+				if((!check || p.value.priority > max) && complete.indexOf(p.key) === -1
+				&& p.value.loadType == type && _savedData[p.key]) {
+					max = p.value.priority;
+					check = p.key;
+					point = p.value;
 				}
 			}
 			
@@ -82,11 +131,13 @@ load.provide("dusk.checkpoints", (function() {
 			}
 			
 			complete.push(check);
-			if(("checkLoad" in _points[p] && _points[p].checkLoad(type, args)) || !("checkLoad" in _points[p])) {
-				_points[p].spec.load(_savedData[p]).then(function(v) {
-					if("postLoad" in _points[p]) _points[p].postLoad(type, args);
-					_savedData[p] = _points[p].spec.save();
-					if("postSave" in _points[p]) _points[p].postSave(true);
+			
+			// Now try to load it, if it fails, we loop again
+			if(("checkLoad" in point && point.checkLoad(type, args)) || !("checkLoad" in point)) {
+				point.spec.load(_savedData[check]).then(function(v) {
+					if("postLoad" in point) point.postLoad(type, args);
+					_savedData[check] = point.spec.save();
+					if("postSave" in point) point.postSave(true);
 				});
 				
 				return true;
@@ -96,6 +147,13 @@ load.provide("dusk.checkpoints", (function() {
 		return false;
 	};
 	
+	/** Checks if an entity with the given details is the last component to have saved this checkpoint.
+	 * 
+	 * @param {string} name The name of the checkpoint to check, will be the key used by `set`.
+	 * @param {string} room The room that the entity to check is in.
+	 * @param {string} comName The component name of the entity to check.
+	 * @return {boolean} Whether the entity described is the last entity to have saved this checkpoint.
+	 */
 	checkpoints.isActivated = function(name, room, comName) {
 		if(name in _activeCheckpoints && _activeCheckpoints[name][0] == room && _activeCheckpoints[name][1] == comName){
 			return true;
@@ -104,14 +162,23 @@ load.provide("dusk.checkpoints", (function() {
 		return false;
 	};
 	
+	/** Saves the data for all checkpoints into an object, used by SaveSpec.
+	 * 
+	 * Checkpoints will ignore the "type" argument, and only save objects. The argument must be an object, and may
+	 *  contain either only or except. "only" will be an array of checkpoint names which will be the only ones saved,
+	 *  while "except" will save all checkpoints except those with a name in the array.
+	 *  
+	 * @param {string} type The type of data to save.
+	 * @param {object} args What to save.
+	 * @param {function(*):*} ref The reffing function.
+	 * @return {object} Saved data.
+	 */
 	checkpoints.save = function(type, args, ref) {
 		var out = {};
 		if("only" in args) {
 			for(var i = 0; i < args.only.length; i ++) {
 				if(args.only[i] in _savedData) {
 					out[args.only[i]] = [ref(_savedData[args.only[i]]), ref(_activeCheckpoints[args.only[i]])];
-				}else{
-					out[args.only[i]] = [ref([]), ref(0)];
 				}
 			}
 		}else if("except" in args) {
@@ -128,6 +195,13 @@ load.provide("dusk.checkpoints", (function() {
 		return out;
 	};
 	
+	/** Loads checkpoints from a given save data.
+	 * 
+	 * @param {object} data The saved data.
+	 * @param {string} type What has been saved.
+	 * @param {*} args The argument sent to the saving function.
+	 * @param {function(*):*} The unreffing function.
+	 */
 	checkpoints.load = function(data, type, args, unref) {
 		for(var p in data) {
 			_savedData[p] = unref(data[p][0]);

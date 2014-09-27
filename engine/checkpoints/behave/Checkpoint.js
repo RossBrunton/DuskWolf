@@ -6,12 +6,12 @@ load.provide("dusk.checkpoint.behave.Checkpoint", (function() {
 	var entities = load.require("dusk.entities");
 	var checkpoints = load.require("dusk.checkpoints");
 	
-	/** Checks if the entity is an active checkpoint, and sets a behaviour property if so.
+	/** Checks if the entity is an active checkpoint, and sets a behaviour property `checkpointActive` if so.
 	 * 
 	 * This does not actually allow the entity to be used as a checkpoint, see `dusk.checkpoints` on how to do so.
 	 * 
 	 * This behaviour uses the following behaviour properties:
-	 * - checkpointName:string - The name of the checkpoint that will be checked.
+	 * - checkpointName:string - The name of the checkpoint (the value used when `set`ing it) that will be checked.
 	 * - checkpointActive:boolean - Whether this is the checkpoint that was last triggered.
 	 * 
 	 * This is a classless behaviour.
@@ -30,6 +30,7 @@ load.provide("dusk.checkpoint.behave.Checkpoint", (function() {
 		"load":function(entity, e) {Checkpoint.frame(entity, e);}
 	};
 	
+	// Store help data
 	entities.registerWorkshop("Checkpoint", {
 		"help":"Detects if this is an active checkpoint or not.",
 		"data":[
@@ -37,6 +38,7 @@ load.provide("dusk.checkpoint.behave.Checkpoint", (function() {
 		]
 	});
 	
+	// Add the behaviour
 	entities.registerBehaviour("Checkpoint", Checkpoint);
 	
 	return Checkpoint;
