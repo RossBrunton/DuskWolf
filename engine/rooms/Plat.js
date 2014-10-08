@@ -10,9 +10,9 @@ load.provide("dusk.rooms.plat", (function() {
 	var TileMapWeights = load.require("dusk.tiles.sgui.TileMapWeights");
 	var skills = load.require("dusk.skills");
 	
-	/** Plat is a simple platforming engine that uses `{@link dusk.sgui}`.
+	/** Plat is a simple platforming engine that uses `dusk.sgui`.
 	 * 
-	 * Importing this package will automatically set up a pane and stuff that a platformer can be used in.
+	 * Use `make` to add a child to a component to have a platformer engine run in it.
 	 * @implements dusk.save.ISavable
 	 */
 	var plat = {};
@@ -21,11 +21,6 @@ load.provide("dusk.rooms.plat", (function() {
 	skills.giveSkill("jump");
 	skills.giveSkill("dubjump");
 	//skills.giveSkill("infinijump");
-	
-	var main = sgui.getPane("plat");
-	main.modifyComponent([{"name":"main", "type":"LayeredRoom", "width":-2, "height":-2, "scrollInstantly":true}]);
-	main.becomeActive();
-	main.flow("main");
 	
 	entities.types.createNewType("plat", {
 		"data":{
@@ -37,7 +32,15 @@ load.provide("dusk.rooms.plat", (function() {
 	});
 	
 	plat.rooms = new RoomManager("dusk.rooms.plat", "rooms");
-	plat.rooms.setLayeredRoom(main.getComponent("main"));
+	
+	plat.make = function(component, name) {
+		component.modifyComponent(
+			[{"name":name, "type":"LayeredRoom", "width":-2, "height":-2, "scrollInstantly":true}]
+		);
+		component.becomeActive();
+		component.flow(name);
+		plat.rooms.setLayeredRoom(component.get(name));
+	}
 	
 	plat.save = function(type, args, ref) {
 		if(this.rooms.basicMain.getSeek() && type == "roomAndSeek") {

@@ -25,7 +25,7 @@ load.provide("example.newGui", (function() {
 	var _testRange = new Range(0, 10, 5);
 
 	//Basic offsets and such
-	sgui.getPane("newGui").parseProps({
+	sgui.get("newGui", true).parseProps({
 		"xOffset":50,
 		"yOffset":45,
 		"x":50,

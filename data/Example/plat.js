@@ -175,8 +175,10 @@ load.provide("example.plat", (function() {
 		]
 	}, "plat");
 	
+	var root = sgui.get("plat", true);
+	dplat.make(root, "orange");
 	
-	sgui.getPane("hud").parseProps({
+	root.get("hud", "Group").parseProps({
 		"children":{
 			"healthBack":{
 				"type":"Grid",
@@ -241,7 +243,7 @@ load.provide("example.plat", (function() {
 		}
 	});
 	
-	sgui.getPane("paused").parseProps({
+	/*sgui.get("paused", true).parseProps({
 		"visible":false,
 		"focus":"controls",
 		"children":{
@@ -273,9 +275,9 @@ load.provide("example.plat", (function() {
 				]
 			},
 		}
-	});
+	});*/
 
-	sgui.getPane("rate").parseProps({
+	root.get("rate", "Group").parseProps({
 		"children":{
 			"meter":{
 				"type":"FpsMeter",
@@ -308,12 +310,12 @@ load.provide("example.plat", (function() {
 				if(!checkpoints.loadCheckpoint("plat", {})) {
 					alert("Lol! Game Over!");
 					gameActive = false;
-					if(sgui.path("hud:/")) sgui.path("hud:/").visible = false;
+					if(root) root.visible = false;
 				}
 			}
 		}
-		if(sgui.path("hud:/coinCount")) sgui.path("hud:/coinCount").text = ""+Pickup.count("coin");
-		if(sgui.path("hud:/livesCount")) sgui.path("hud:/livesCount").text = ""+lives;
+		if(root.path("hud/coinCount")) root.path("hud/coinCount").text = ""+Pickup.count("coin");
+		if(root.path("hud/livesCount")) root.path("hud/livesCount").text = ""+lives;
 	}, this);
 	
 	

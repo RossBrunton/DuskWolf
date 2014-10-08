@@ -54,6 +54,9 @@ load.provide("example.platLong", (function() {
 	entities.swidth = 32;
 	entities.sheight = 32;
 	
+	var root = sgui.get("plat", true);
+	dplat.make(root, "orange");
+	
 	var _playerAni = [
 		["true", "0,0", {}],
 		[":headingLeft", "0,1", {}],
@@ -128,7 +131,7 @@ load.provide("example.platLong", (function() {
 		]
 	}, "plat");
 
-	sgui.getPane("rate").parseProps({
+	root.get("rate", "Group").parseProps({
 		"children":{
 			"meter":{
 				"type":"FpsMeter",

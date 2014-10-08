@@ -291,8 +291,7 @@ load.provide("dusk.sgui.Group", (function() {
 	Group.prototype._newComponent = function(com, type) {
 		if(type === undefined) type = "NullCom";
 		if(!sgui.getType(type)){
-			console.warn(type + " is not a valid component type.");
-			type = "NullCom";
+			throw new TypeError(type + " is not a valid component type.");
 		}
 		
 		this._components[com.toLowerCase()] = new (sgui.getType(type))(this, com.toLowerCase());

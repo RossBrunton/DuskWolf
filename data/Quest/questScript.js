@@ -31,7 +31,7 @@ load.provide("questScript", (function() {
 	var quest = {};
 
 	//Test
-	sgui.getPane("menu").parseProps({
+	sgui.get("menu", true).parseProps({
 	   "children":{
 			"back":{
 				"type":"FancyRect",
@@ -93,7 +93,7 @@ load.provide("questScript", (function() {
 		}
 	});
 
-	sgui.getPane("menu").parseProps({
+	sgui.get("menu", true).parseProps({
 		"children":{
 			"meter":{
 				"type":"FpsMeter",
@@ -103,7 +103,7 @@ load.provide("questScript", (function() {
 		}
 	});
 	
-	sgui.getPane("actionFeed").parseProps({
+	sgui.get("actionFeed", true).parseProps({
 		"width":-2,
 		"children":{
 			"feed":{
@@ -138,7 +138,7 @@ load.provide("questScript", (function() {
 			}
 		}
 	});
-	var feed = sgui.getPane("actionFeed").getComponent("feed");
+	var feed = sgui.get("actionFeed", true).getComponent("feed");
 
 	window.q = dquest.puppeteer;
 	
@@ -166,7 +166,7 @@ load.provide("questScript", (function() {
 	});
 	
 	// Draw GUI
-	sgui.getPane("saybox").parseProps({
+	sgui.get("saybox", true).parseProps({
 		"focus":"say",
 		"children":{
 			"say":{

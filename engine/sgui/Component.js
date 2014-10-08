@@ -12,7 +12,7 @@ load.provide("dusk.sgui.Component", (function() {
 	var Pool = load.require("dusk.utils.Pool");
 	var Group = load.suggest("dusk.sgui.Group", function(p) {Group = p});
 	var c = load.require("dusk.sgui.c");
-	var Pane = load.suggest("dusk.sgui.Pane", function(p) {Pane = p});
+	var Root = load.suggest("dusk.sgui.Root", function(p) {Root = p});
 	var interaction = load.require("dusk.input.interaction");
 	
 	/** A component is a single "thing" that exists in the SimpleGui system. Everything in the Simple GUI system that
@@ -672,7 +672,7 @@ load.provide("dusk.sgui.Component", (function() {
 			
 			case "":
 				if(!path.length) return this;
-				if(Pane && this instanceof Pane) return this.path(path);
+				if(Root && this instanceof Root) return this.path(path);
 				return this.container.path(path);
 			
 			default:
@@ -697,8 +697,6 @@ load.provide("dusk.sgui.Component", (function() {
 	 * @since 0.0.17-alpha
 	 */
 	Component.prototype.fullPath = function() {
-		if(Pane && this instanceof Pane) return this.comName+":";
-		
 		return this.container.fullPath() + "/" + this.comName;
 	};
 	

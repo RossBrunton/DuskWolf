@@ -36,8 +36,11 @@ load.provide("quest", (function() {
 		}).bind(this));
 	});
 	
+	var root = sgui.get("quest", true);
+	dquest.make(root, "quest");
+	
 	//Test
-	sgui.getPane("menu").parseProps({
+	root.get("menu", "Group").parseProps({
 	   "children":{
 			"back":{
 				"type":"FancyRect",
@@ -99,17 +102,13 @@ load.provide("quest", (function() {
 		}
 	});
 	
-	sgui.getPane("menu").parseProps({
-		"children":{
-			"meter":{
-				"type":"FpsMeter",
-				"xOrigin":c.ORIGIN_MAX,
-				"yOrigin":c.ORIGIN_MAX
-			},
-		}
+	root.get("fps", "FpsMeter").parseProps({
+		"type":"FpsMeter",
+		"xOrigin":c.ORIGIN_MAX,
+		"yOrigin":c.ORIGIN_MAX
 	});
 	
-	sgui.getPane("actionFeed").parseProps({
+	root.get("actionFeed", "Group").parseProps({
 		"width":-2,
 		"children":{
 			"feed":{
@@ -144,7 +143,7 @@ load.provide("quest", (function() {
 			}
 		}
 	});
-	var feed = sgui.getPane("actionFeed").getComponent("feed");
+	var feed = root.get("actionFeed").get("feed");
 	
 	/*dusk.sgui.getPane("test").parseProps({
 		"active":true,
@@ -187,7 +186,7 @@ load.provide("quest", (function() {
 			),
 			[function(passedArg, qu) {
 				if(!passedArg.entity) {
-					qu(q.requestBoundPair("selectListMenu", {"path":"menu:/menu"}));
+					qu(q.requestBoundPair("selectListMenu", {"path":"quest:menu/menu"}));
 					qu(reversiblePromiseChain.STOP);
 					
 					passedArg.options = [];
@@ -256,7 +255,7 @@ load.provide("quest", (function() {
 						
 						return pa;
 					}, undefined, "Generate weapons list"]);
-					qu(q.requestBoundPair("selectListMenu", {"path":"menu:/menu"}));
+					qu(q.requestBoundPair("selectListMenu", {"path":"quest:/menu/menu"}));
 					
 					return pa;
 				}});
@@ -269,7 +268,7 @@ load.provide("quest", (function() {
 				
 				return pa;
 			}, undefined, "After move menu"],
-			q.requestBoundPair("selectListMenu", {"path":"menu:/menu"}),
+			q.requestBoundPair("selectListMenu", {"path":"quest:menu/menu"}),
 			q.requestBoundPair("uncolourRegion", {"regionsToUncolour":["attack"]}),
 			[function(pa) {
 				pa.mover.stats.addBlock(3, "moved", {"moved":true});

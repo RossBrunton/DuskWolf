@@ -35,7 +35,7 @@ load.provide("example.saybox", (function() {
 	});
 	
 	// Draw GUI
-	sgui.getPane("saybox").parseProps({
+	sgui.get("saybox", true).parseProps({
 		"focus":"say",
 		"active":true,
 		"children":{

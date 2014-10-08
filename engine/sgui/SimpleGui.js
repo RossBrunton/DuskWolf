@@ -3,7 +3,7 @@
 "use strict";
 
 load.provide("dusk.sgui", (function() {
-	var Pane = load.require(">dusk.sgui.Pane", function(p){Pane = p});
+	var Root = load.require(">dusk.sgui.Root", function(p){Root = p});
 	var keyboard = load.require("dusk.input.keyboard");
 	var frameTicker = load.require("dusk.utils.frameTicker");
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
@@ -13,7 +13,8 @@ load.provide("dusk.sgui", (function() {
 	var options = load.require("dusk.options");
 	var Pool = load.require("dusk.utils.Pool");
 	var interaction = load.require("dusk.input.interaction");
-	var UserCancelError = load.suggest("dusk.utils.reversiblePromiseChain.UserCancelError", function(p) {UserCancelError = p});
+	var UserCancelError =
+		load.suggest("dusk.utils.reversiblePromiseChain.UserCancelError", function(p) {UserCancelError = p});
 	var containerUtils = load.require("dusk.utils.containerUtils");
 	
 	/** This module contains a SimpleGui system, allowing for canvas UIs.
@@ -45,15 +46,15 @@ load.provide("dusk.sgui", (function() {
 	 *  "sgui_left" and "sgui_right". If a component changes whether it is focused , its
 	 *  `dusk.sgui.Component.onFocusChange` event will fire.
 	 * 
-	 * Component paths also exist, these paths are similar to file names and allow you to specify one component relative
-	 *  to another.	From an example container "X" in another container "Y", which itself is in a pane "Z", and with
+	 * Component paths also exist, these paths are similar to file paths and allow you to specify one component relative
+	 *  to another.	From an example container "X" in another container "Y", which itself is in a root "Z", and with
 	 *  children "a", "b" and "c", with "c" having children "c1" and "c2" the following paths are as described:
 	 * 
 	 * - a - Access the child "a".
 	 * - c/c1 - Access the child "c1" of the container "c", which is in "X".
 	 * - ../ - Access this parent, "Y".
-	 * - /Y - Access the child "Y" in the pane "Z".
-	 * - Z:/Y - Directly accesses Y from the pane.
+	 * - /Y - Access the child "Y" in the root "Z".
+	 * - Z:/Y - Directly accesses "Y" from the root "Z".
 	 * 
 	 * Components can be styled similarly to CSS. When a new component is created, the list of styles (Set by `addStyle`
 	 *  is checked. If it matches that component, all the properties in the object set with the style will be applied to
@@ -107,16 +108,11 @@ load.provide("dusk.sgui", (function() {
 	 */
 	sgui.MODE_FULL = 1;
 
-	/** All the planes.
+	/** All the roots.
 	 * @type array
 	 * @private
 	 */
-	var _panes = [];
-	/** The name of the currently active pane.
-	 * @type string
-	 * @private
-	 */
-	var _activePane = "";
+	var _roots = [];
 	
 	/** The current width of the canvas.
 	 * @type integer
@@ -278,51 +274,41 @@ load.provide("dusk.sgui", (function() {
 	};
 	
 	
-	/** Returns or creates a pane.
-	 * @param {string} name The name of the pane to get or create.
-	 * @param {?boolean} create If this is `true`, then a new pane will be created if it does not exist.
-	 * @return {?dusk.sgui.Pane} The pane, or `null` if it doesn't exist and `noNew` is `true`.
+	/** Returns or creates a root.
+	 * @param {string} name The name of the root to get or create.
+	 * @param {?boolean} create If this is `true`, then a new root will be created if it does not exist.
+	 * @return {?dusk.sgui.Pane} The root, or `null` if it doesn't exist and `create` is `false`.
 	 */
 	sgui.get = function(name, create) {
-		//if(this._panes[name.toLowerCase()]) return this._panes[name.toLowerCase()];
-		for(var p = _panes.length-1; p >= 0; p --) {
-			if(_panes[p].comName == name) return _panes[p];
+		//if(this._roots[name.toLowerCase()]) return this._roots[name.toLowerCase()];
+		for(var p = _roots.length-1; p >= 0; p --) {
+			if(_roots[p].comName == name) return _roots[p];
 		}
 		
 		if(create) {
-			_panes.push(new Pane(this, name));
-			return _panes[_panes.length-1];
+			_roots.push(new Root(this, name));
+			return _roots[_roots.length-1];
 		}
 		
 		return null;
 	};
-	/** Depreciated alias for `get`.
-	 * @param {string} name The name of the pane to get or create.
-	 * @param {?boolean} noNew If this is `true`, then a new pane will not be created,
-	 *  otherwise a new pane will be created if it does not exist.
-	 * @return {?dusk.sgui.Pane} The pane, or `null` if it doesn't exist and `noNew` is `true`.
-	 * @depreciated 
-	 */
-	sgui.getPane = function(name, noNew) {
-		return sgui.get(name, !noNew);
-	};
 	
-	/** Given a pane object, adds it to the SGui system.
-	 * @param {string} name The name to set this as; will overrite the pane's comName.
-	 * @param {dusk.sgui.Pane} pane The pane to add.
+	/** Given a root object, adds it to the SGui system.
+	 * @param {string} name The name to set this as; will change the root's comName.
+	 * @param {dusk.sgui.Root} root The root to add.
 	 * @return {boolean} True if successfull.
 	 */
-	sgui.set = function(name, pane) {
-		var slot = _panes.length;
-		for(var i = 0; i < _panes.length; i ++) {
-			if(_panes[i].comName == name.toLowerCase()) {
+	sgui.set = function(name, root) {
+		var slot = _roots.length;
+		for(var i = 0; i < _roots.length; i ++) {
+			if(_roots[i].comName == name.toLowerCase()) {
 				slot = i;
 			}
 		}
 		
-		if(data instanceof Pane) {
+		if(data instanceof Root) {
 			//data.comName = name;
-			_panes[slot] = data;
+			_roots[slot] = data;
 			return true;
 		}
 		
@@ -330,32 +316,31 @@ load.provide("dusk.sgui", (function() {
 		return true;
 	};
 	
-	/** Removes a pane from the SGui system.
-	 * @param {string} name The name of the pane to remove.
+	/** Removes a root from the SGui system.
+	 * @param {string} name The name of the root to remove.
 	 * @return {boolean} True if successfull.
 	 * @since 0.0.21-alpha
 	 */
 	sgui.remove = function(name) {
 		var com = this.get(com);
 		if(com) {
-			if(_activePane == com.comName) _activePane = "";
 			com.onDelete.fire({"com":com});
-			_panes.splice(_panes.indexOf(com), 1);
+			_roots.splice(_roots.indexOf(com), 1);
 			return true;
 		}
 		
 		return false;
 	};
 	
-	/** Returns the number of panes.
-	 * @return {integer} Pane count.
+	/** Returns the number of roots.
+	 * @return {integer} Root count.
 	 * @since 0.0.21-alpha
 	 */
 	sgui.length = function() {
-		return _panes.length;
+		return _roots.length;
 	};
 	
-	/** Returns an iterator for all the panes.
+	/** Returns an iterator for all the roots.
 	 * @return {object} An iterator
 	 * @since 0.0.21-alpha
 	 */
@@ -364,8 +349,8 @@ load.provide("dusk.sgui", (function() {
 		return {
 			"next":function(){
 				i ++;
-				if(i < _panes.length){
-					return {"done":false, "value":_panes[i], "key":_panes[i].comName};
+				if(i < _roots.length){
+					return {"done":false, "value":_roots[i], "key":_roots[i].comName};
 				}else{
 					return {"done":true};
 				}
@@ -378,60 +363,20 @@ load.provide("dusk.sgui", (function() {
 	 * @return {boolean} Whether the argument is valid.
 	 * @since 0.0.21-alpha
 	 */
-	sgui.valid = function(pane) {
-		return typeof pane == "object";
+	sgui.valid = function(root) {
+		return typeof root == "object";
 	};
 	
-	/** Checks if the given pane has been added to the system.
-	 * @param {dusk.sgui.Pane} The pane to check.
-	 * @return {boolean} Whether the pane has been added.
+	/** Checks if the given root has been added to the system.
+	 * @param {dusk.sgui.Pane} The root to check.
+	 * @return {boolean} Whether the root has been added.
 	 * @since 0.0.21-alpha
 	 */
-	sgui.contains = function(pane) {
-		return _panes.indexOf(pane) !== -1;
+	sgui.contains = function(root) {
+		return _roots.indexOf(root) !== -1;
 	};
 	
-	
-	/** Sets the currently active pane. This is the only one that will recieve keypresses.
-	 * @param {string} to The name of the pane to set to the active one.
-	 */
-	sgui.setActivePane = function(to) {
-		if(sgui.getActivePane()) {
-			sgui.getActivePane().onActiveChange.fire({"active":false}, false);
-			sgui.getActivePane().onFocusChange.fire({"focus":true}, true);
-		}
-		
-		sgui.get(to);
-		_activePane = to.toLowerCase();
-		sgui.getActivePane().onActiveChange.fire({"active":true}, true);
-		sgui.getActivePane().onFocusChange.fire({"focus":true}, true);
-	};
-	
-	/** For reversible promise chains, sets the active pane and provides an inverse.
-	 * @param {string} to The name of the pane to set active.
-	 * @return {array} An array for a reversible promise chain.
-	 * @since 0.0.21-alpha
-	 */
-	sgui.rpcSetActivePane = function(to) {
-		return [function(passedArg, queue) {
-			passedArg.sguiPreActivePane = sgui.getActivePane().comName;
-			sgui.setActivePane(to);
-			return passedArg;
-		}, function(passedArg) {
-			sgui.setActivePane(passedArg.sguiPreActivePane);
-			return Promise.reject(new UserCancelError());
-		}, "Sgui set active pane to "+to]
-	};
-	
-	/** Returns the currently active pane.
-	 * @return {dusk.sgui.Pane} The currently active pane.
-	 */
-	sgui.getActivePane = function() {
-		if(_activePane === "") return null;
-		return sgui.get(_activePane);
-	};
-	
-	/** Draws all the panes onto the main canvas specified, and fires the onRender event.
+	/** Draws all the roots onto the main canvas specified, and fires the onRender event.
 	 * 
 	 * This will be called whenever `requestAnimationFrame` tells it to, which should be 60 frames a second.
 	 * @return {boolean} Whether any changes were made.
@@ -465,21 +410,21 @@ load.provide("dusk.sgui", (function() {
 				_cacheCtx.clearRect(0, 0, sgui.width, sgui.height);
 		}
 		
-		//Draw panes
-		for(var c = 0; c < _panes.length; c ++){
+		//Draw roots
+		for(var c = 0; c < _roots.length; c ++){
 			var data = sgui.drawDataPool.alloc();
 			data.alpha = 1;
 			data.sourceX = 0;
 			data.sourceY = 0;
-			data.destX = _panes[c].x;
-			data.destY = _panes[c].y;
-			data.width = _panes[c].width;
-			data.height = _panes[c].height;
+			data.destX = _roots[c].x;
+			data.destY = _roots[c].y;
+			data.width = _roots[c].width;
+			data.height = _roots[c].height;
 			
 			if(sgui.noCacheCanvas) {
-				_panes[c].draw(data, _ctx);
+				_roots[c].draw(data, _ctx);
 			}else{
-				_panes[c].draw(data, _cacheCtx);
+				_roots[c].draw(data, _cacheCtx);
 			}
 			sgui.drawDataPool.free(data);
 		}
@@ -495,7 +440,7 @@ load.provide("dusk.sgui", (function() {
 	
 	/** Resolves a path.
 	 * 
-	 * The path from this function must contain a colon, all text to the left of the colon will be the pane to path from
+	 * The path from this function must contain a colon, all text to the left of the colon will be the root to path from
 	 *  and all text to the right will be a standard path.
 	 * @param {string} path The path to resolve.
 	 * @return {dusk.sgui.Component} The component the path represents.
@@ -505,9 +450,9 @@ load.provide("dusk.sgui", (function() {
 			console.error("Tried to set an invalid path (no colon): "+path);
 			return null;
 		}
-		var pane = path.split(":", 1)[0];
-		path = path.substr(pane.length+1);
-		return this.get(pane).path(path);
+		var root = path.split(":", 1)[0];
+		path = path.substr(root.length+1);
+		return this.get(root).path(path);
 	};
 	
 	/** A pattern used to select styles.
@@ -678,13 +623,23 @@ load.provide("dusk.sgui", (function() {
 	
 	// Listen for interaction events
 	interaction.on.listen(function(e) {
-		if(sgui.getActivePane()) sgui.getActivePane().interact(e);
+		for(var r in _roots) {
+			_roots[r].interact(e);
+		}
 		
 		var a = controls.interactionControl(e);
-		if(a.length && sgui.getActivePane()) sgui.getActivePane().control(e, a);
+		if(a.length) {
+			for(var r in _roots) {
+				_roots[r].control(e, a);
+			}
+		}
 		
 		if(e.type == interaction.MOUSE_CLICK) {
-			if(sgui.getActivePane() && sgui.getActivePane().mouse) sgui.getActivePane().mouse.doClick(e);
+			for(var r in _roots) {
+				if(_roots[r].mouse) {
+					_roots[r].mouse.doClick(e);
+				}
+			}
 		}
 	});
 	
@@ -712,8 +667,8 @@ load.provide("dusk.sgui", (function() {
 			}
 		}
 		
-		for(var p = _panes.length-1; p >= 0; p --){
-			_panes[p].frame.fire();
+		for(var p = _roots.length-1; p >= 0; p --){
+			_roots[p].frame.fire();
 		}
 	});
 	
@@ -757,15 +712,17 @@ load.provide("dusk.sgui.pause", (function() {
 	
 	/** Simple module that allows simple pausing and unpausing of a game.
 	 * 
-	 * Consists of a pane named "pause" that is made active or inactive depending on whether the game is paused or not.
-	 *  The pane also is made invisible when it is not active.
+	 * Consists of a root named "pause" that is made active or inactive depending on whether the game is paused or not.
+	 *  The root also is made invisible when it is not active.
 	 * 
 	 * A control is added, whith defaults to ENTER and button 9. If pausing is enabled, this will pause and unpause the
 	 *  game.
+	 * 
+	 * Likley is broken.
 	 */
 	var pause = {};
 	
-	/** The name of the pane that was active before the game was paused. Used to set the active pane back to what it
+	/** The name of the root that was active before the game was paused. Used to set the active root back to what it
 	 *  was. If the game is not paused, this will be an empty string.
 	 * @type string
 	 * @private
