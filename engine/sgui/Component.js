@@ -36,7 +36,7 @@ load.provide("dusk.sgui.Component", (function() {
 		/** This component's name.
 		 * @type string
 		 */
-		this.comName = componentName;
+		this.name = componentName;
 		
 		/** The components x coordinate.
 		 * @type integer
@@ -273,7 +273,7 @@ load.provide("dusk.sgui.Component", (function() {
 			if(this.alsoFocus) {
 				for(var i = this.alsoFocus.length-1; i >= 0; i --) {
 					if(this.path(this.alsoFocus[i]) && this.path(this.alsoFocus[i]).container) {
-						this.path(this.alsoFocus[i]).container.flow(this.path(this.alsoFocus[i]).comName);
+						this.path(this.alsoFocus[i]).container.flow(this.path(this.alsoFocus[i]).name);
 					}
 				}
 			}
@@ -292,7 +292,7 @@ load.provide("dusk.sgui.Component", (function() {
 			if(this.actionFocus) {
 				for(var i = this.actionFocus.length-1; i >= 0; i --) {
 					if(this.path(this.actionFocus[i]) && this.path(this.actionFocus[i]).container) {
-						this.path(this.actionFocus[i]).container.flow(this.path(this.actionFocus[i]).comName);
+						this.path(this.actionFocus[i]).container.flow(this.path(this.actionFocus[i]).name);
 						toReturn = false;
 					}
 				}
@@ -351,7 +351,7 @@ load.provide("dusk.sgui.Component", (function() {
 		this._registerPropMask("rightFlow", "rightFlow");
 		this._registerPropMask("enabled", "enabled");
 		this._registerPropMask("deleted", "deleted");
-		this._registerPropMask("name", "comName");
+		this._registerPropMask("name", "name");
 		this._registerPropMask("style", "style");
 		this._registerPropMask("layer", "__layer");
 		this._registerPropMask("extras", "__extras");
@@ -574,7 +574,7 @@ load.provide("dusk.sgui.Component", (function() {
 		set: function (value) {
 			if(value && !this._deleted) {
 				this._deleted = true;
-				this.container.deleteComponent(this.comName);
+				this.container.deleteComponent(this.name);
 			}
 		},
 		
@@ -632,7 +632,7 @@ load.provide("dusk.sgui.Component", (function() {
 	 */
 	Component.prototype.alterLayer = function(alteration) {
 		if(this.container) {
-			this.container.alterChildLayer(this.comName, alteration);
+			this.container.alterChildLayer(this.name, alteration);
 		}
 	};
 	Object.defineProperty(Component.prototype, "__layer", {
@@ -685,7 +685,7 @@ load.provide("dusk.sgui.Component", (function() {
 					}
 				}
 				
-				console.warn(path + " from " + this.comName + " was not found.");
+				console.warn(path + " from " + this.name + " was not found.");
 				return null;
 		}
 	};
@@ -697,7 +697,7 @@ load.provide("dusk.sgui.Component", (function() {
 	 * @since 0.0.17-alpha
 	 */
 	Component.prototype.fullPath = function() {
-		return this.container.fullPath() + "/" + this.comName;
+		return this.container.fullPath() + "/" + this.name;
 	};
 	
 	
@@ -806,7 +806,7 @@ load.provide("dusk.sgui.Component", (function() {
 	 * @since 0.0.21-alpha
 	 */
 	Component.prototype.becomeActive = function(child) {
-		if("flow" in this && child) this.flow(child.comName);
+		if("flow" in this && child) this.flow(child.name);
 		
 		this.container.becomeActive(this);
 	};
@@ -816,7 +816,7 @@ load.provide("dusk.sgui.Component", (function() {
 	 * @return {string} A string representation of this component.
 	 */
 	Component.prototype.toString = function() {
-		return "[sgui "+sgui.getTypeName(this)+" "+this.comName+"]";
+		return "[sgui "+sgui.getTypeName(this)+" "+this.name+"]";
 	};
 	
 	
@@ -830,8 +830,8 @@ load.provide("dusk.sgui.Component", (function() {
 				data.type = value;
 				data.deleted = false;
 				
-				this.container.getComponent(this.comName, value).parseProps(data);
-				sgui.applyStyles(this.container.getComponent(this.comName));
+				this.container.getComponent(this.name, value).parseProps(data);
+				sgui.applyStyles(this.container.getComponent(this.name));
 			}
 		},
 		
@@ -864,8 +864,8 @@ load.provide("dusk.sgui.NullCom", (function() {
 	 * @classdesc A NullCom is essentially a "blank component". It is invisible, and does nothing.
 	 * @extends dusk.sgui.Component
 	 */
-	var NullCom = function(parent, comName) {
-		Component.call(this, parent, comName);
+	var NullCom = function(parent, name) {
+		Component.call(this, parent, name);
 		this.visible = false;
 	};
 	NullCom.prototype = Object.create(Component.prototype);

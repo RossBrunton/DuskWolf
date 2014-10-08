@@ -26,8 +26,8 @@ load.provide("dusk.entities.sgui.EntityWorkshop", (function() {
 	 * @extends dusk.sgui.Group
 	 * @constructor
 	 */
-	var EntityWorkshop = function (parent, comName) {
-		Group.call(this, parent, comName);
+	var EntityWorkshop = function (parent, name) {
+		Group.call(this, parent, name);
 		
 		this._workingWith = {"behaviours":{}, "data":{}, "animation":{}, "particles":{}};
 		this._workingWithName = "";

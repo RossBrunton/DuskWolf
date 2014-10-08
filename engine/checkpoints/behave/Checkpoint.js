@@ -23,7 +23,7 @@ load.provide("dusk.checkpoint.behave.Checkpoint", (function() {
 		"frame":function(entity, e) {
 			var room = entity.path("../..")?entity.path("../..").roomName:undefined;
 			entity.eProp("checkpointActive",
-				checkpoints.isActivated(entity.eProp("checkpointName"), room, entity.comName)
+				checkpoints.isActivated(entity.eProp("checkpointName"), room, entity.name)
 			);
 		},
 		

@@ -32,17 +32,17 @@ load.provide("dusk.stats.behave.StatLoader", (function() {
 			var room = "*";
 			if(this._entity.path("..")) room = this._entity.path("../..").roomName;
 			
-			if(stats.getStats("putback_"+room+"_"+this._entity.comName)) {
-				this._entity.stats = stats.getStats("putback_"+room+"_"+this._entity.comName)
+			if(stats.getStats("putback_"+room+"_"+this._entity.name)) {
+				this._entity.stats = stats.getStats("putback_"+room+"_"+this._entity.name)
 			}else{
 				this._entity.stats = stats.getStats(this._data("statsName"));
 				
 				if(this._data("statsPutBack")) {
-					stats.addStats("putback_"+room+"_"+this._entity.comName, this._entity.stats);
+					stats.addStats("putback_"+room+"_"+this._entity.name, this._entity.stats);
 				}
 			}
 		}else{
-			this._entity.stats = stats.getStats(this._entity.stats.comName);
+			this._entity.stats = stats.getStats(this._entity.stats.name);
 		}
 		
 		if(this._data("statsLoadImage")) {

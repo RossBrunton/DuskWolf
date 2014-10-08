@@ -14,7 +14,7 @@ load.provide("dusk.sgui.SayBox", (function() {
 	/** Creates a new SayBox component.
 	 * 
 	 * @param {dusk.sgui.Group} parent The container that this component is in.
-	 * @param {string} comName The name of the component.
+	 * @param {string} name The name of the component.
 	 * 
 	 * @class dusk.sgui.SayBox
 	 * 
@@ -42,8 +42,8 @@ load.provide("dusk.sgui.SayBox", (function() {
 	 * @constructor
 	 * @since 0.0.21-alpha
 	 */
-	var SayBox = function (parent, comName) {
-		Group.call(this, parent, comName);
+	var SayBox = function (parent, name) {
+		Group.call(this, parent, name);
 		
 		/** The body component.
 		 * @type dusk.sgui.PlusText

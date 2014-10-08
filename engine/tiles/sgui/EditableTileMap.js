@@ -21,8 +21,8 @@ load.provide("dusk.tiles.sgui.EditableTileMap", (function() {
 	 * @extends dusk.tiles.sgui.TileMap
 	 * @constructor
 	 */
-	var EditableTileMap = function (parent, comName) {
-		TileMap.call(this, parent, comName);
+	var EditableTileMap = function (parent, name) {
+		TileMap.call(this, parent, name);
 		
 		/** If true, then this will use "global coordinates", meaning that the location of the frame will be the same
 		 *  over all EditableTileMaps with this set to true.

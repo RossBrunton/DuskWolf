@@ -25,8 +25,8 @@ load.provide("dusk.sgui.DynamicGrid", (function() {
 	 * @since 0.0.18-alpha
 	 * @constructor
 	 */
-	var DynamicGrid = function (parent, comName) {
-		Grid.call(this, parent, comName);
+	var DynamicGrid = function (parent, name) {
+		Grid.call(this, parent, name);
 		
 		/** Internal storage for the range used in this component.
 		 * @type dusk.utils.Range

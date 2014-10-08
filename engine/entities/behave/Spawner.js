@@ -306,22 +306,22 @@ load.provide("dusk.entities.behave.Spawner", (function() {
 			//And apply dx or dy effects to the spawned entity
 			/*if("multDxDrop" in spawn) {
 				dropped.multDx.apply(dropped, 
-					["spawned_"+this._entity.comName].concat(_resolve(dir, spawn.multDxDrop)));
+					["spawned_"+this._entity.name].concat(_resolve(dir, spawn.multDxDrop)));
 			}
 			
 			if("multDyDrop" in spawn) {
 				dropped.multDy.apply(dropped, 
-					["spawned_"+this._entity.comName].concat(_resolve(dir, spawn.multDyDrop)));
+					["spawned_"+this._entity.name].concat(_resolve(dir, spawn.multDyDrop)));
 			}
 			
 			if("applyDxDrop" in spawn) {
 				dropped.applyDx.apply(dropped, 
-					["spawned_"+this._entity.comName].concat(_resolve(dir, spawn.applyDxDrop)));
+					["spawned_"+this._entity.name].concat(_resolve(dir, spawn.applyDxDrop)));
 			}
 			
 			if("applyDyDrop" in spawn) {
 				dropped.applyDy.apply(dropped, 
-					["spawned_"+this._entity.comName].concat(_resolve(dir, spawn.applyDyDrop)));
+					["spawned_"+this._entity.name].concat(_resolve(dir, spawn.applyDyDrop)));
 			}*/
 			
 			//Fire the "spawned" event

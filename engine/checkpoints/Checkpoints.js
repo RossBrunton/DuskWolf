@@ -92,7 +92,7 @@ load.provide("dusk.checkpoints", (function() {
 				if(("checkSave" in p.value && p.value.checkSave(e)) || !("checkSave" in p.value)) {
 					_savedData[p.key] = p.value.spec.save();
 					if("postSave" in _points[p.key]) p.value.postSave(false, e);
-					_activeCheckpoints[p.key] = [e.room, e.comName];
+					_activeCheckpoints[p.key] = [e.room, e.name];
 				}
 			}
 		}
@@ -151,11 +151,11 @@ load.provide("dusk.checkpoints", (function() {
 	 * 
 	 * @param {string} name The name of the checkpoint to check, will be the key used by `set`.
 	 * @param {string} room The room that the entity to check is in.
-	 * @param {string} comName The component name of the entity to check.
+	 * @param {string} ent The component name of the entity to check.
 	 * @return {boolean} Whether the entity described is the last entity to have saved this checkpoint.
 	 */
-	checkpoints.isActivated = function(name, room, comName) {
-		if(name in _activeCheckpoints && _activeCheckpoints[name][0] == room && _activeCheckpoints[name][1] == comName){
+	checkpoints.isActivated = function(name, room, ent) {
+		if(name in _activeCheckpoints && _activeCheckpoints[name][0] == room && _activeCheckpoints[name][1] == ent){
 			return true;
 		}
 		

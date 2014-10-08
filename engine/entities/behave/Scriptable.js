@@ -150,11 +150,11 @@ load.provide("dusk.entities.behave.Scriptable", (function() {
 	var _entities = {};
 	
 	var _load = function(e) {
-		_entities[this._entity.comName] = this._entity;
+		_entities[this._entity.name] = this._entity;
 	};
 	
 	var _delete = function(e) {
-		delete _entities[this._entity.comName];
+		delete _entities[this._entity.name];
 	}
 	
 	Scriptable.request = function(entity, type, args, passedArg, queue) {

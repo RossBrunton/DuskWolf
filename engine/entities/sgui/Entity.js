@@ -173,11 +173,11 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	 * 
 	 * @extends dusk.tiles.sgui.Tile
 	 * @param {dusk.sgui.Component} parent The container that this component is in.
-	 * @param {string} comName The name of the component.
+	 * @param {string} name The name of the component.
 	 * @constructor
 	 */
-	var Entity = function(parent, comName) {
-		if(!this.isLight()) Tile.call(this, parent, comName);
+	var Entity = function(parent, name) {
+		if(!this.isLight()) Tile.call(this, parent, name);
 		
 		/** The current horizontal speed. This may be read, but not set directly; use the `horForce` behaviour event.
 		 * @type integer

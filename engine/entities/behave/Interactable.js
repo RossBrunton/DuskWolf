@@ -14,7 +14,7 @@ load.provide("dusk.entities.behave.InteractableTarget", (function() {
 	 * 
 	 * The `interact event` object contains the following properties:
 	 * - type:string - The value of `interactType`.
-	 * - comName:string - The name of the entity target.
+	 * - name:string - The name of the entity target.
 	 * - target:dusk.entities.sgui.Entity - The target entity (this).
 	 * - interacter:dusk.entities.sgui.Entity - The entity interacting with this.
 	 * - up:boolean - Whether the interaction was due to `entity_interact`.
@@ -48,7 +48,7 @@ load.provide("dusk.entities.behave.InteractableTarget", (function() {
 		if(!e.up || !this._data("interactUpRequired")) {
 			InteractableTarget.interact.fire(
 				{
-					"type":this._data("interactType"), "comName":this._entity.comName, "interacter":e.interacter,
+					"type":this._data("interactType"), "name":this._entity.name, "interacter":e.interacter,
 					"target":this._entity, "up":e.up,
 					"room":this._entity.path("../../")?this._entity.path("../../").roomName:undefined
 				}, this._data("interactType")

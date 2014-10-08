@@ -20,8 +20,8 @@ load.provide("dusk.sgui.Rect", (function() {
 	 * @extends dusk.sgui.Component
 	 * @constructor
 	 */
-	var Rect = function (parent, comName) {
-		Component.call(this, parent, comName);
+	var Rect = function (parent, name) {
+		Component.call(this, parent, name);
 
 		/** The colour of the rectangle.
 		 * @type string

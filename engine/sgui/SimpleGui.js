@@ -282,7 +282,7 @@ load.provide("dusk.sgui", (function() {
 	sgui.get = function(name, create) {
 		//if(this._roots[name.toLowerCase()]) return this._roots[name.toLowerCase()];
 		for(var p = _roots.length-1; p >= 0; p --) {
-			if(_roots[p].comName == name) return _roots[p];
+			if(_roots[p].name == name) return _roots[p];
 		}
 		
 		if(create) {
@@ -294,20 +294,20 @@ load.provide("dusk.sgui", (function() {
 	};
 	
 	/** Given a root object, adds it to the SGui system.
-	 * @param {string} name The name to set this as; will change the root's comName.
+	 * @param {string} name The name to set this as; will change the root's name.
 	 * @param {dusk.sgui.Root} root The root to add.
 	 * @return {boolean} True if successfull.
 	 */
 	sgui.set = function(name, root) {
 		var slot = _roots.length;
 		for(var i = 0; i < _roots.length; i ++) {
-			if(_roots[i].comName == name.toLowerCase()) {
+			if(_roots[i].name == name.toLowerCase()) {
 				slot = i;
 			}
 		}
 		
 		if(data instanceof Root) {
-			//data.comName = name;
+			//data.name = name;
 			_roots[slot] = data;
 			return true;
 		}
@@ -350,7 +350,7 @@ load.provide("dusk.sgui", (function() {
 			"next":function(){
 				i ++;
 				if(i < _roots.length){
-					return {"done":false, "value":_roots[i], "key":_roots[i].comName};
+					return {"done":false, "value":_roots[i], "key":_roots[i].name};
 				}else{
 					return {"done":true};
 				}
@@ -498,7 +498,7 @@ load.provide("dusk.sgui", (function() {
 				if((current[1] && sgui.getType(current[1]) && !(hold instanceof sgui.getType(current[1])))
 				|| (current[2] && !Array.isArray(hold.style) && hold.style != current[2])
 				|| (current[2] && Array.isArray(hold.style) && current[2] in hold.style)
-				|| (current[3] && hold.comName != current[3])
+				|| (current[3] && hold.name != current[3])
 				|| (current[4] && !current[5] && hold.prop(current[4]) != current[6])) {
 					valid = false;
 					break;
@@ -739,7 +739,7 @@ load.provide("dusk.sgui.pause", (function() {
 	 */
 	pause.pause = function() {
 		if(!pause.allow) return;
-		if(!_previous) _previous = sgui.getActivePane().comName;
+		if(!_previous) _previous = sgui.getActivePane().name;
 		sgui.setActivePane("paused");
 		sgui.get("paused").visible = true;
 	};

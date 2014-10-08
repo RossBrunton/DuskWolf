@@ -31,8 +31,8 @@ load.provide("dusk.sgui.Grid", (function() {
 	 * @param {string} componentName The name of the component.
 	 * @constructor
 	 */
-	var Grid = function (parent, comName) {
-		Group.call(this, parent, comName);
+	var Grid = function (parent, name) {
+		Group.call(this, parent, name);
 		
 		/** The number of rows that are to be created when the grid is populated.
 		 * @type integer
@@ -216,7 +216,7 @@ load.provide("dusk.sgui.Grid", (function() {
 		if(this.focusBehaviour == Group.FOCUS_ALL) return true;
 		
 		if(this.componentRelative(this.focus, e.dir)){
-			this.flow(this.componentRelative(this.focus, e.dir).comName);
+			this.flow(this.componentRelative(this.focus, e.dir).name);
 			return false;
 		}
 		

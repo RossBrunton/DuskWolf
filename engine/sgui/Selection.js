@@ -7,8 +7,8 @@ load.provide("dusk.sgui.Selection", (function() {
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
 
-	var Selection = function (parent, comName) {
-		Grid.call(this, parent, comName);
+	var Selection = function (parent, name) {
+		Grid.call(this, parent, name);
 		
 		this.options = 0;
 		this.orientation = c.ORIENT_VER;

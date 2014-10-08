@@ -11,7 +11,7 @@ load.provide("dusk.sgui.PlusText", (function() {
 	/** Makes your own, brand new PlusText component.
 	 * 
 	 * @param {dusk.sgui.Component} parent The container that this component is in.
-	 * @param {string} comName The name of the component.
+	 * @param {string} name The name of the component.
 	 * 
 	 * @class dusk.sgui.PlusText
 	 * 
@@ -25,8 +25,8 @@ load.provide("dusk.sgui.PlusText", (function() {
 	 * @constructor
 	 * @since 0.0.20-alpha
 	 */
-	var PlusText = function (parent, comName) {
-		Group.call(this, parent, comName);
+	var PlusText = function (parent, name) {
+		Group.call(this, parent, name);
 		
 		//Set up components
 		this.getComponent("plus", "NullCom");

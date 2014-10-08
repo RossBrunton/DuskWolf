@@ -13,12 +13,12 @@ load.provide("dusk.particles.sgui.ParticleField", (function() {
 	 * ParticleFields have the property `{@link dusk.sgui.Component#mousePierce}` set to true by default.
 	 * 
 	 * @param {dusk.sgui.IContainer} parent The container that this component is in.
-	 * @param {string} comName The name of the component.
+	 * @param {string} name The name of the component.
 	 * @extends dusk.sgui.Component
 	 * @constructor
 	 */
-	var ParticleField = function(parent, comName) {
-		Component.call(this, parent, comName);
+	var ParticleField = function(parent, name) {
+		Component.call(this, parent, name);
 		
 		//[r+g, b+a, x, y, xscratch+dx, yscratch+dy, dxscratch+ddx, dyscratch+ddy, dxlimit+dylimit, lifespan, dalphadecay]
 		this._field = null;

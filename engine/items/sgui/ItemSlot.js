@@ -11,8 +11,8 @@ load.provide("dusk.items.sgui.ItemSlot", (function() {
 	var Tile = load.require("dusk.tiles.sgui.Tile");
 	var ItemHand = load.require("dusk.items.sgui.ItemHand");
 
-	var ItemSlot = function (parent, comName) {
-		Group.call(this, parent, comName);
+	var ItemSlot = function (parent, name) {
+		Group.call(this, parent, name);
 		
 		this._invent = new items.Invent(1, "true", 0xffffffff);
 		this.maxStack = 0xffffffff;

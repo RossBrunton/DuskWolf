@@ -10,7 +10,7 @@ load.provide("dusk.sgui.FpsMeter", (function() {
 	/** Creates a new FpsMeter component.
 	 * 
 	 * @param {dusk.sgui.Component} parent The container that this component is in.
-	 * @param {string} comName The name of the component.
+	 * @param {string} name The name of the component.
 	 * 
 	 * @class dusk.sgui.FpsMeter
 	 * 
@@ -19,8 +19,8 @@ load.provide("dusk.sgui.FpsMeter", (function() {
 	 * @extends dusk.sgui.Label
 	 * @constructor
 	 */
-	var FpsMeter = function (parent, comName) {
-		Label.call(this, parent, comName);
+	var FpsMeter = function (parent, name) {
+		Label.call(this, parent, name);
 		
 		this._count = 0;
 		this._readings = new Uint8Array(30);

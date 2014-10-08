@@ -34,7 +34,7 @@ load.provide("dusk.entities.behave.Pickup", (function() {
 	 * @private
 	 */
 	Pickup.prototype._pickCollided = function(e) {
-		var name = this._entity.comName;
+		var name = this._entity.name;
 		if(this._data("pickupName")) name = this._data("pickupName");
 		if(!e.target.meetsTrigger(this._data("pickupBy"))) return;
 		
@@ -54,7 +54,7 @@ load.provide("dusk.entities.behave.Pickup", (function() {
 	};
 	
 	Pickup.prototype._pickLoad = function(e) {
-		var name = this._entity.comName;
+		var name = this._entity.name;
 		if(this._data("pickupName")) name = this._data("pickupName");
 		
 		var room = "*";
@@ -135,7 +135,7 @@ load.provide("dusk.entities.behave.Pickup", (function() {
 			["value", "integer", "How much it rises how much you have by."],
 			["roomLinked", "boolean", "Should be true unless you give each one a unique name."],
 			["pickupBy", "string", "Trigger criteria for entities that can pick this up."],
-			["pickupName", "string", "If not empty, this will be considered the name of the pickup, rather than its comName"
+			["pickupName", "string", "If not empty, this will be considered the name of the pickup, rather than its name"
 			]
 		]
 	};

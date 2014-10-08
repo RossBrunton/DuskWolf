@@ -79,7 +79,7 @@ load.provide("dusk.sgui.extras.Extra", (function() {
 	 * @return {string} A representation of this extra.
 	 */
 	Extra.prototype.toString = function() {
-		return "[extra "+this.name+" on "+this._owner.comName+"]";
+		return "[extra "+this.name+" on "+this._owner.name+"]";
 	};
 	
 	Object.seal(Extra);

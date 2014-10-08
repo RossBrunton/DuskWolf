@@ -23,8 +23,8 @@ load.provide("dusk.sgui.Group", (function() {
 	 * @param {string} componentName The name of the component.
 	 * @constructor
 	 */
-	var Group = function(parent, comName) {
-		Component.call(this, parent, comName);
+	var Group = function(parent, name) {
+		Component.call(this, parent, name);
 		
 		/** All the components in this container, key names are component names.
 		 * @type object
@@ -332,7 +332,7 @@ load.provide("dusk.sgui.Group", (function() {
 					console.warn(data[i].name + " has not been given a type and does not exist, ignoring.");
 					success = false;
 				}else{
-					console.warn("A component has no name in "+this.comName+", cannot create or edit.");
+					console.warn("A component has no name in "+this.name+", cannot create or edit.");
 					success = false;
 				}
 			}
@@ -547,7 +547,7 @@ load.provide("dusk.sgui.Group", (function() {
 	 */
 	Group.prototype.empty = function() {
 		for(var c = this._componentsArr.length-1; c >= 0; c --) {
-			this.deleteComponent(this._componentsArr[c].comName);
+			this.deleteComponent(this._componentsArr[c].name);
 		}
 	};
 	/** Depreciated alias of `empty`.
@@ -556,7 +556,7 @@ load.provide("dusk.sgui.Group", (function() {
 	 */
 	Group.prototype.deleteAllComponents = function() {
 		for(var c = this._componentsArr.length-1; c >= 0; c --) {
-			this.deleteComponent(this._componentsArr[c].comName);
+			this.deleteComponent(this._componentsArr[c].name);
 		}
 	};
 	
@@ -654,7 +654,7 @@ load.provide("dusk.sgui.Group", (function() {
 			
 			if(this._focusVisible) {
 				for(var c = this._componentsArr.length-1; c >= 0; c --) {
-					if(this.focusedCom != this._componentsArr[c].comName) {
+					if(this.focusedCom != this._componentsArr[c].name) {
 						this._componentsArr[c].visible = false;
 					}else{
 						this._componentsArr[c].visible = true;
@@ -917,7 +917,7 @@ load.provide("dusk.sgui.Group", (function() {
 		if(com.xOrigin == c.ORIGIN_MAX) destXAdder = this.width - com.width;
 		if(com.xOrigin == c.ORIGIN_MIDDLE) destXAdder = (this.width - com.width)>>1;
 		
-		return this.container.getTrueX(this.comName) + com.x - this.xOffset + destXAdder;
+		return this.container.getTrueX(this.name) + com.x - this.xOffset + destXAdder;
 	};
 	
 	/** Returns the actual Y location, relative to the screen, that the component is at.
@@ -932,7 +932,7 @@ load.provide("dusk.sgui.Group", (function() {
 		if(com.yOrigin == c.ORIGIN_MAX) destYAdder = this.height - com.height;
 		if(com.yOrigin == c.ORIGIN_MIDDLE) destYAdder = (this.height - com.height)>>1;
 		
-		return this.container.getTrueY(this.comName) + com.y - this.yOffset + destYAdder;
+		return this.container.getTrueY(this.name) + com.y - this.yOffset + destYAdder;
 	};
 	
 	sgui.registerType("Group", Group);

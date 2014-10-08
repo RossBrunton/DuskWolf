@@ -28,8 +28,8 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 	 * @extends dusk.sgui.Group
 	 * @constructor
 	 */
-	var EntityGroup = function (parent, comName) {
-		Group.call(this, parent, comName);
+	var EntityGroup = function (parent, name) {
+		Group.call(this, parent, name);
 		
 		/** Array of all the entities in this group. In no particular order.
 		 * @type array
@@ -218,7 +218,7 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 			
 			y += 20;
 			if(this._selectedEntity) {
-				e.c.fillText("SELECTED: "+this._selectedEntity.comName +" : "+this._selectedEntity.entType, x, y);
+				e.c.fillText("SELECTED: "+this._selectedEntity.name +" : "+this._selectedEntity.entType, x, y);
 			}else{
 				e.c.fillText("SELECTED: [none]", x, y);
 			}
@@ -555,11 +555,11 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 	EntityGroup.prototype.saveBM = function(addDep) {
 		var list = [];
 		for(var i = this._entities.length-1; i >= 0; i --){
-			if(this._entities[i].comName != entities.seek && !this._entities[i].eProp("noSave")){
+			if(this._entities[i].name != entities.seek && !this._entities[i].eProp("noSave")){
 				this._entities[i].behaviourFire("saveBM", {"addDep":addDep});
 				
 				list[list.length] = {};
-				list[list.length-1].name = this._entities[i].comName;
+				list[list.length-1].name = this._entities[i].name;
 				list[list.length-1].type = this._entities[i].entType;
 				list[list.length-1].x = this._entities[i].x;
 				list[list.length-1].y = this._entities[i].y;
@@ -599,8 +599,8 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 	
 	EntityGroup.prototype.clear = function() {
 		for(var c = this._componentsArr.length-1; c >= 0; c --) {
-			if(this._componentsArr[c].comName != "blank") {
-				this.deleteComponent(this._componentsArr[c].comName);
+			if(this._componentsArr[c].name != "blank") {
+				this.deleteComponent(this._componentsArr[c].name);
 			}
 		}
 		
@@ -613,7 +613,7 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 	
 	EntityGroup.prototype._entityDeleted = function(e) {
 		for(var i = this._entities.length-1; i >= 0; i --) {
-			if(this._entities[i].comName == e.com.comName) {
+			if(this._entities[i].name == e.com.name) {
 				this._entities.splice(i, 1);
 				return;
 			}
@@ -702,7 +702,7 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 		for(var c = this._componentsArr.length-1; c >= 0; c --) {
 			if(this._componentsArr[c] == this._selectedEntity) {
 				this._entities.splice(this._entities.indexOf(this._componentsArr[c]), 1);
-				this.deleteComponent(this._componentsArr[c].comName);
+				this.deleteComponent(this._componentsArr[c].name);
 				this._selectedEntity = null;
 			}
 		}

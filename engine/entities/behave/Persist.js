@@ -34,7 +34,7 @@ load.provide("dusk.entities.behave.Persist", (function() {
 	 * @private
 	 */
 	var _load = function(data) {
-		this._entity.behaviourData = Persist.getPersist(this._entity.comName) || this._entity.behaviourData;
+		this._entity.behaviourData = Persist.getPersist(this._entity.name) || this._entity.behaviourData;
 	};
 	
 	/** Used to handle ever frame; saving the data.
@@ -42,7 +42,7 @@ load.provide("dusk.entities.behave.Persist", (function() {
 	 * @private
 	 */
 	var _frame = function(data) {
-		_storePersist(this._entity.comName, this._entity.behaviourData, this._entity.entType);
+		_storePersist(this._entity.name, this._entity.behaviourData, this._entity.entType);
 	};
 	
 	/** An event dispatcher that is fired when persistent entity data is updated.

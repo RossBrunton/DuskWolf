@@ -40,8 +40,8 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 	 * @param {string} componentName The name of the component.
 	 * @constructor
 	 */
-	var TileMap = function (parent, comName) {
-		Component.call(this, parent, comName);
+	var TileMap = function (parent, name) {
+		Component.call(this, parent, name);
 		
 		/** The width of a single tile.
 		 * @type integer
@@ -499,7 +499,7 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 			}
 		}
 		
-		//console.warn("Tile "+x+","+y+" not found on "+this.comName+".");
+		//console.warn("Tile "+x+","+y+" not found on "+this.name+".");
 		
 		return t;
 	};
@@ -558,7 +558,7 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 			this._tiles[0][(((y*this.cols)+x)<<1)+1] = ty;
 			if(update) this.drawAll();
 		}else{
-			//console.warn("Tile "+x+","+y+" not found on "+this.comName+".");
+			//console.warn("Tile "+x+","+y+" not found on "+this.name+".");
 		}
 	};
 	

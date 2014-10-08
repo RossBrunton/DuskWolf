@@ -176,7 +176,7 @@ load.provide("dusk.save", (function() {
 	 * @constructor
 	 * @since 0.0.21-alpha
 	 */
-	save.SaveIntegrityError = function(parent, comName) {
+	save.SaveIntegrityError = function() {
 		Error.call(this);
 		
 		this.name = "SaveIntegrityError";

@@ -23,8 +23,8 @@ load.provide("dusk.sgui.FancyRect", (function() {
 	 * @extends dusk.sgui.Component
 	 * @constructor
 	 */
-	var FancyRect = function (parent, comName) {
-		Rect.call(this, parent, comName);
+	var FancyRect = function (parent, name) {
+		Rect.call(this, parent, name);
 		
 		this._back = null;
 		this._top = null;

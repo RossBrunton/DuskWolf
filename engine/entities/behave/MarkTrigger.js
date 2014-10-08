@@ -16,7 +16,7 @@ load.provide("dusk.entities.behave.MarkTrigger", (function() {
 	 * The event object contains the following properties:
 	 * - up:boolean - Whether the up key was pressed.
 	 * - mark:integer - The source y coordinate of the tile triggered.
-	 * - activator:string - The comName of the entity that activated the mark.
+	 * - activator:string - The name of the entity that activated the mark.
 	 * - entity:dusk.entities.sgui.Entity - The entity itself that activated the mark.
 	 * - room:string - The name of the room that was activated.
 	 * 
@@ -79,7 +79,7 @@ load.provide("dusk.entities.behave.MarkTrigger", (function() {
 			
 			if(!this._coolDown) {
 				entities.markTrigger.fire({
-					"up":false, "mark":this._markAt, "activator":this._entity.comName, "entity":this._entity,
+					"up":false, "mark":this._markAt, "activator":this._entity.name, "entity":this._entity,
 					"room":this._entity.path("../..").roomName
 				}, this._markAt);
 				this._coolDown = 5;

@@ -23,8 +23,8 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 	var TileMapWeights = load.require("dusk.tiles.sgui.TileMapWeights");
 	var utils = load.require("dusk.utils");
 	
-	var LayeredRoom = function(parent, comName) {
-		Group.call(this, parent, comName);
+	var LayeredRoom = function(parent, name) {
+		Group.call(this, parent, name);
 		
 		this.scrollSpeed = 3;
 		this.scrollRegion = 0.60;
@@ -158,7 +158,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 					this.get(this._primaryEntityGroup).dropEntity(playerData, true);
 				}
 				
-				this.flow(this.getPrimaryEntityLayer().comName);
+				this.flow(this.getPrimaryEntityLayer().name);
 				
 				this.autoScroll();
 				

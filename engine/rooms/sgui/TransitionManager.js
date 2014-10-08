@@ -51,14 +51,14 @@ load.provide("dusk.rooms.sgui.TransitionManager", (function() {
 	 * - `i` Edit the `"in"` transition.
 	 * 
 	 * @param {dusk.sgui.Group} parent The container that this component is in.
-	 * @param {string} comName The name of the component.
+	 * @param {string} name The name of the component.
 	 * @extends dusk.sgui.Component
 	 * @extends dusk.rooms.sgui.ILayeredRoomLayer
 	 * @constructor
 	 * @since 0.0.20-alpha
 	 */
-	var TransitionManager = function(parent, comName) {
-		Component.call(this, parent, comName);
+	var TransitionManager = function(parent, name) {
+		Component.call(this, parent, name);
 		
 		/** The transition data for the current room.
 		 * @type object

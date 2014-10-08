@@ -85,7 +85,7 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 					if(x !== undefined) this.selector.x = x * this.selector.width;
 					if(y !== undefined) this.selector.y = y * this.selector.height;
 					
-					entities.seek = this.selector.comName;
+					entities.seek = this.selector.name;
 					this.selector.visible = true;
 					this.selector.eProp("gmMouseMove", true);
 					
@@ -238,7 +238,7 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 						}
 					}
 					
-					entities.seek = this.selector.comName;
+					entities.seek = this.selector.name;
 					this.selector.visible = true;
 					this.selector.eProp("gmMouseMove", true);
 					
@@ -399,7 +399,7 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 					
 					var l = c.action.listen((function(e) {
 						var s = c.getFocused();
-						var opt = options[s.comName.split(",")[1]];
+						var opt = options[s.name.split(",")[1]];
 						
 						if("listSelectFunction" in opt) {
 							queue(opt.listSelectFunction);

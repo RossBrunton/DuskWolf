@@ -20,12 +20,12 @@ load.provide("dusk.sgui.Image", (function() {
 	 * This uses the theme key `img.src` (default "default/img.png") as the default image.
 	 * 
 	 * @param {dusk.sgui.IContainer} parent The container that this component is in.
-	 * @param {string} comName The name of the component.
+	 * @param {string} name The name of the component.
 	 * @extends dusk.sgui.Component
 	 * @constructor
 	 */
-	var Image = function(parent, comName) {
-		Component.call(this, parent, comName);
+	var Image = function(parent, name) {
+		Component.call(this, parent, name);
 
 		/** The current image.
 		 * @type dusk.utils.Image

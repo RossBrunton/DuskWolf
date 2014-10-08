@@ -22,12 +22,12 @@ load.provide("dusk.sgui.Feed", (function() {
 	 * 
 	 * @extends dusk.sgui.Group
 	 * @param {?dusk.sgui.Component} parent The container that this component is in.
-	 * @param {string} comName The name of the component.
+	 * @param {string} name The name of the component.
 	 * @constructor
 	 * @since 0.0.21-alpha
 	 */
-	var Feed = function (parent, comName) {
-		Group.call(this, parent, comName);
+	var Feed = function (parent, name) {
+		Group.call(this, parent, name);
 		
 		/** The space, in pixels, between each grid component.
 		 * 

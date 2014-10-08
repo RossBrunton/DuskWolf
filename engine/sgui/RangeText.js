@@ -22,8 +22,8 @@ load.provide("dusk.sgui.RangeText", (function() {
 	 * @since 0.0.18-alpha
 	 * @constructor
 	 */
-	var RangeText = function (parent, comName) {
-		Label.call(this, parent, comName);
+	var RangeText = function (parent, name) {
+		Label.call(this, parent, name);
 		
 		/** Internal storage for the range used in this component.
 		 * @type dusk.utils.Range

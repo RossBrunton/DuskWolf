@@ -9,8 +9,8 @@ load.provide("dusk.items.sgui.ItemGrid", (function() {
 	var c = load.require("dusk.sgui.c");
 	var items = load.require("dusk.items");
 
-	var ItemGrid = function (parent, comName) {
-		Grid.call(this, parent, comName);
+	var ItemGrid = function (parent, name) {
+		Grid.call(this, parent, name);
 		
 		this.maxStack = 0xffffffff;
 		this._invent = new items.Invent(this.rows*this.cols, true, this.maxStack);

@@ -11,14 +11,14 @@ load.provide("dusk.rooms.sgui.FluidLayer", (function() {
 	/*
 	 * 
 	 * @param {dusk.sgui.Group} parent The container that this component is in.
-	 * @param {string} comName The name of the component.
+	 * @param {string} name The name of the component.
 	 * @extends dusk.sgui.Component
 	 * @extends dusk.rooms.sgui.ILayeredRoomLayer
 	 * @constructor
 	 * @since 0.0.21-alpha
 	 */
-	var FluidLayer = function(parent, comName) {
-		Component.call(this, parent, comName);
+	var FluidLayer = function(parent, name) {
+		Component.call(this, parent, name);
 		
 		this.level = 50;
 		this.colour = "#6699ff";

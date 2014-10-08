@@ -14,7 +14,7 @@ load.provide("dusk.input.sgui.ControlConfig", (function() {
 	/** Creates a new ControlConfig component.
 	 * 
 	 * @param {dusk.sgui.Component} parent The container that this component is in.
-	 * @param {string} comName The name of the component.
+	 * @param {string} name The name of the component.
 	 * 
 	 * @class dusk.input.sgui.ControlConfig
 	 * 
@@ -25,8 +25,8 @@ load.provide("dusk.input.sgui.ControlConfig", (function() {
 	 * @extends dusk.sgui.Group
 	 * @constructor
 	 */
-	var ControlConfig = function (parent, comName) {
-		Group.call(this, parent, comName);
+	var ControlConfig = function (parent, name) {
+		Group.call(this, parent, name);
 		
 		this.setting = false;
 		this.control = "";

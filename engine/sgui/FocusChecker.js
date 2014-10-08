@@ -13,12 +13,12 @@ load.provide("dusk.sgui.FocusChecker", (function() {
 	 * Using the default image, this will be red if it is active, blue if focused but not active, and green otherwise.
 	 * 
 	 * @param {dusk.sgui.IContainer} parent The container that this component is in.
-	 * @param {string} comName The name of the component.
+	 * @param {string} name The name of the component.
 	 * @extends dusk.sgui.Image
 	 * @constructor
 	 */
-	var FocusChecker = function(parent, comName) {
-		Image.call(this, parent, comName);
+	var FocusChecker = function(parent, name) {
+		Image.call(this, parent, name);
 		
 		/** The path to the image to be displayed when the component is not focused or active.
 		 * @type string
@@ -71,13 +71,13 @@ load.provide("dusk.sgui.FocusCheckerTile", (function() {
 	 * @classdesc Functions like a `{@link dusk.sgui.FocusChecker}` only it uses a tile instead of an image.
 	 * 
 	 * @param {dusk.sgui.IContainer} parent The container that this component is in.
-	 * @param {string} comName The name of the component.
+	 * @param {string} name The name of the component.
 	 * @extends dusk.tiles.sgui.Tile
 	 * @constructor
 	 * @since 0.0.19-alpha
 	 */
-	var FocusCheckerTile = function(parent, comName) {
-		Tile.call(this, parent, comName);
+	var FocusCheckerTile = function(parent, name) {
+		Tile.call(this, parent, name);
 		
 		/** The orientation to set the tiles for. One of the `dusk.sgui.c.ORIENT_*` constants.
 		 * Vertical means the y coordianate will be set, while horizontal means the x one.
@@ -153,12 +153,12 @@ load.provide("dusk.sgui.FocusCheckerRect", (function() {
 	 * @classdesc A rectangle that changes colour depending on whether it is active or focused.
 	 * 
 	 * @param {dusk.sgui.IContainer} parent The container that this component is in.
-	 * @param {string} comName The name of the component.
+	 * @param {string} name The name of the component.
 	 * @extends dusk.sgui.Rect
 	 * @constructor
 	 */
-	var FocusCheckerRect = function(parent, comName) {
-		Rect.call(this, parent, comName);
+	var FocusCheckerRect = function(parent, name) {
+		Rect.call(this, parent, name);
 		
 		/** The colour when the component is not focused or active.
 		 * @type string

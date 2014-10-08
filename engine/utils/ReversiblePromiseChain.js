@@ -189,7 +189,7 @@ load.provide("dusk.utils.reversiblePromiseChain.UserCancelError", (function() {
 	 * @constructor
 	 * @since 0.0.21-alpha
 	 */
-	var UserCancelError = function(parent, comName) {
+	var UserCancelError = function() {
 		Error.call(this);
 		
 		this.name = "UserCancelError";

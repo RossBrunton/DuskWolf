@@ -10,7 +10,7 @@ load.provide("dusk.sgui.Checkbox", (function() {
 	/** Creates a new Checkbox component.
 	 * 
 	 * @param {dusk.sgui.Component} parent The container that this component is in.
-	 * @param {string} comName The name of the component.
+	 * @param {string} name The name of the component.
 	 * 
 	 * @class dusk.sgui.Checkbox
 	 * 
@@ -32,8 +32,8 @@ load.provide("dusk.sgui.Checkbox", (function() {
 	 * @extends dusk.sgui.FocusCheckerTile
 	 * @constructor
 	 */
-	var Checkbox = function (parent, comName) {
-		FocusCheckerTile.call(this, parent, comName);
+	var Checkbox = function (parent, name) {
+		FocusCheckerTile.call(this, parent, name);
 		
 		/** Used internally to store if this is checked.
 		 * @type boolean

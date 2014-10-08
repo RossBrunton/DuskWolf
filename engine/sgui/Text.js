@@ -32,12 +32,12 @@ load.provide("dusk.sgui.Label", (function() {
 	 * `{@link dusk.sgui.Label#borderColour}` properties.
 	 * 
 	 * @param {dusk.sgui.Group} parent The container that this component is in.
-	 * @param {string} comName The name of the component.
+	 * @param {string} name The name of the component.
 	 * @extends dusk.sgui.Component
 	 * @constructor
 	 */
-	var Label = function(parent, comName) {
-		Component.call(this, parent, comName);
+	var Label = function(parent, name) {
+		Component.call(this, parent, name);
 		
 		/** The stored width of the text. This is generated before the text is drawn so we know how wide the canvas
 		 * should be. This is also used when returning the `width` property.
@@ -672,12 +672,12 @@ load.provide("dusk.sgui.TextBox", (function() {
 	 * switch away from the TextBox.
 	 * 
 	 * @param {dusk.sgui.Group} parent The container that this component is in.
-	 * @param {string} comName The name of the component.
+	 * @param {string} name The name of the component.
 	 * @extends dusk.sgui.Label
 	 * @constructor
 	 */
-	var TextBox = function(parent, comName) {
-		Label.call(this, parent, comName);
+	var TextBox = function(parent, name) {
+		Label.call(this, parent, name);
 		
 		/** The border of the TextBox when it is not active.
 		 * @type string
@@ -790,8 +790,8 @@ load.provide("dusk.sgui.TextBox", (function() {
 			elem.style.padding = this.padding+"px";
 			elem.style.width = (this.width-(this.padding<<1))+"px";
 			elem.style.height = (this.height-(this.padding<<1))+"px"; //this.size+"px";
-			elem.style.left = this.container.getTrueX(this.comName)+"px";
-			elem.style.top = this.container.getTrueY(this.comName)+"px";
+			elem.style.left = this.container.getTrueX(this.name)+"px";
+			elem.style.top = this.container.getTrueY(this.name)+"px";
 			elem.style.font = this.size + "px " + this.font;
 			elem.style.lineHeight = "100%";
 			elem.style.outline = "none";
@@ -834,12 +834,12 @@ load.provide("dusk.sgui.NumberBox", (function() {
 	 * By default this sets it's validator to `{@link dusk.sgui.Label#VALID_NUMBER}`.
 	 * 
 	 * @param {dusk.sgui.Group} parent The container that this component is in.
-	 * @param {string} comName The name of the component.
+	 * @param {string} name The name of the component.
 	 * @extends dusk.sgui.TextBox
 	 * @constructor
 	 */
-	var NumberBox = function(parent, comName) {
-		TextBox.call(this, parent, comName);
+	var NumberBox = function(parent, name) {
+		TextBox.call(this, parent, name);
 		
 		/** Internal storage for the range used in this box.
 		 * @type dusk.utils.Range

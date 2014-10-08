@@ -20,13 +20,13 @@ load.provide("dusk.tiles.sgui.Tile", (function() {
 	 *  properties.
 	 * 
 	 * @param {dusk.sgui.Group} parent The container that this component is in.
-	 * @param {string} comName The name of the component.
+	 * @param {string} name The name of the component.
 	 * @extends dusk.sgui.Component
 	 * @see {@link dusk.sgui.Image}
 	 * @constructor
 	 */
-	var Tile = function(parent, comName) {
-		Component.call(this, parent, comName);
+	var Tile = function(parent, name) {
+		Component.call(this, parent, name);
 
 		/** The current source image.
 		 * @type dusk.utils.Image

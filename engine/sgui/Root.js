@@ -13,10 +13,10 @@ load.provide("dusk.sgui.Root", (function() {
 	 * 
 	 * @extends dusk.sgui.Group
 	 * @param {?dusk.sgui.IContainer} parent The container that this component is in, this will always be null.
-	 * @param {string} comName The name of the component.
+	 * @param {string} name The name of the component.
 	 */
-	var Root = function(parent, comName) {
-		Group.call(this, null, comName);
+	var Root = function(parent, name) {
+		Group.call(this, null, name);
 		
 		//Roots are always active and focused
 		this.active = true;
@@ -62,7 +62,7 @@ load.provide("dusk.sgui.Root", (function() {
 	 * @param {?dusk.sgui.Component} child A child that wants to be made active.
 	 */
 	Root.prototype.becomeActive = function(child) {
-		if(child) this.flow(child.comName);
+		if(child) this.flow(child.name);
 	};
 	
 	/** Returns the full path of this component.
@@ -71,7 +71,7 @@ load.provide("dusk.sgui.Root", (function() {
 	 * @return {string} A full path to this component.
 	 */
 	Root.prototype.fullPath = function() {
-		return this.comName+":";
+		return this.name+":";
 	};
 	
 	Object.defineProperty(Root.prototype, "type", {

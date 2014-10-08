@@ -7,8 +7,8 @@ load.provide("dusk.items.sgui.ItemHand", (function() {
 	var sgui = load.require("dusk.sgui");
 	var items = load.require("dusk.items");
 
-	var ItemHand = function (parent, comName) {
-		Group.call(this, parent, comName);
+	var ItemHand = function (parent, name) {
+		Group.call(this, parent, name);
 		
 		this._hand = new items.Invent(1, "true", 0xffffffff);
 		this.maxStack = 0xffffffff;

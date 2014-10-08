@@ -12,7 +12,7 @@ load.provide("dusk.sgui.Scroller", (function() {
 	/** Creates a new Scroller.
 	 * 
 	 * @param {dusk.sgui.Component} parent The container that this component is in.
-	 * @param {string} comName The name of the component.
+	 * @param {string} name The name of the component.
 	 * 
 	 * @class dusk.sgui.Scroller
 	 * 
@@ -31,8 +31,8 @@ load.provide("dusk.sgui.Scroller", (function() {
 	 * @since 0.0.19-alpha
 	 * @constructor
 	 */
-	var Scroller = function (parent, comName) {
-		FocusCheckerTile.call(this, parent, comName);
+	var Scroller = function (parent, name) {
+		FocusCheckerTile.call(this, parent, name);
 		
 		/** The orientation of the scroller. Vertical means it scrolls up and down, while horizontal means it scrolls left
 		 *   and right.

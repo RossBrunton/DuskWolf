@@ -406,8 +406,8 @@ load.provide("dusk.tiles.sgui.TileRegionGenerator", (function() {
 	 * @constructor
 	 * @since 0.0.21-alpha
 	 */
-	var TileRegionGenerator = function (parent, comName) {
-		Component.call(this, parent, comName);
+	var TileRegionGenerator = function (parent, name) {
+		Component.call(this, parent, name);
 		
 		/** The width of a single tile.
 		 * @type integer
