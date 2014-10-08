@@ -31,7 +31,7 @@ load.provide("questScript", (function() {
 	var quest = {};
 
 	//Test
-	sgui.get("menu", true).parseProps({
+	sgui.get("menu", true).update({
 	   "children":{
 			"back":{
 				"type":"FancyRect",
@@ -93,7 +93,7 @@ load.provide("questScript", (function() {
 		}
 	});
 
-	sgui.get("menu", true).parseProps({
+	sgui.get("menu", true).update({
 		"children":{
 			"meter":{
 				"type":"FpsMeter",
@@ -103,7 +103,7 @@ load.provide("questScript", (function() {
 		}
 	});
 	
-	sgui.get("actionFeed", true).parseProps({
+	sgui.get("actionFeed", true).update({
 		"width":-2,
 		"children":{
 			"feed":{
@@ -166,7 +166,7 @@ load.provide("questScript", (function() {
 	});
 	
 	// Draw GUI
-	sgui.get("saybox", true).parseProps({
+	sgui.get("saybox", true).update({
 		"focus":"say",
 		"children":{
 			"say":{

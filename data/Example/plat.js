@@ -178,7 +178,7 @@ load.provide("example.plat", (function() {
 	var root = sgui.get("plat", true);
 	dplat.make(root, "orange");
 	
-	root.get("hud", "Group").parseProps({
+	root.get("hud", "Group").update({
 		"children":{
 			"healthBack":{
 				"type":"Grid",
@@ -243,7 +243,7 @@ load.provide("example.plat", (function() {
 		}
 	});
 	
-	/*sgui.get("paused", true).parseProps({
+	/*sgui.get("paused", true).update({
 		"visible":false,
 		"focus":"controls",
 		"children":{
@@ -277,7 +277,7 @@ load.provide("example.plat", (function() {
 		}
 	});*/
 
-	root.get("rate", "Group").parseProps({
+	root.get("rate", "Group").update({
 		"children":{
 			"meter":{
 				"type":"FpsMeter",
@@ -289,7 +289,7 @@ load.provide("example.plat", (function() {
 		"height":sgui.height
 	});
 
-	/*dusk.sgui.getPane("ew").parseProps({
+	/*dusk.sgui.getPane("ew").update({
 		"active":true,
 		"children":{
 			"ew":{

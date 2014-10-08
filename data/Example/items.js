@@ -16,7 +16,7 @@ load.provide("example.items", (function() {
 	var items = load.require("dusk.items");
 	
 	//Items test
-	sgui.getPane("itemsTest").parseProps({
+	sgui.getPane("itemsTest").update({
 		"active":true,
 		"focus":"itemHand",
 		"children":[

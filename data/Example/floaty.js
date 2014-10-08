@@ -13,7 +13,7 @@ load.provide("example.floaty", (function() {
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
 	
-	sgui.getPane("floaty").parseProps({
+	sgui.getPane("floaty").update({
 		"children":{
 			"text":{
 				"type":"Label",

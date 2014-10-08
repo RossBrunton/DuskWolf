@@ -78,7 +78,7 @@ load.provide("dusk.sgui.Feed", (function() {
 	/** Appends the specified component object, or an array of components.
 	 * 
 	 * The value must be an object or an array of objects, which will be used with
-	 *  `{@link dusk.sgui.Component.parseProps}` to create the object.
+	 *  `{@link dusk.sgui.Component.update}` to create the object.
 	 * 
 	 * This may be used in the JSON representation with the property `append`.
 	 * 
@@ -113,8 +113,8 @@ load.provide("dusk.sgui.Feed", (function() {
 				"globals":this.globals
 			}, "create").component;
 			
-			if(this.globals !== null) com.parseProps(utils.clone(this.globals));
-			com.parseProps(utils.clone(child[i]));
+			if(this.globals !== null) com.update(utils.clone(this.globals));
+			com.update(utils.clone(child[i]));
 			this.alterChildLayer(name, "+");
 		}
 		

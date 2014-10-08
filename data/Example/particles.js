@@ -12,7 +12,7 @@ load.provide("example.particles", (function() {
 	load.require("dusk.particles.particleEffects.core.spread");
 	load.require("dusk.particles.particleEffects.core.spew");
 	
-	sgui.get("particles", true).parseProps({
+	sgui.get("particles", true).update({
 		//"yOffset":50,
 		"children":{
 			"parts":{

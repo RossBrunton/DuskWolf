@@ -25,7 +25,7 @@ load.provide("example.newGui", (function() {
 	var _testRange = new Range(0, 10, 5);
 
 	//Basic offsets and such
-	sgui.get("newGui", true).parseProps({
+	sgui.get("newGui", true).update({
 		"xOffset":50,
 		"yOffset":45,
 		"x":50,
@@ -115,7 +115,7 @@ load.provide("example.newGui", (function() {
 	});
 
 	//Grids
-	sgui.getPane("grid").parseProps({
+	sgui.getPane("grid").update({
 		"active":true,
 		"focus":"check",
 		"extras":{
@@ -200,7 +200,7 @@ load.provide("example.newGui", (function() {
 	});
 
 	//Text
-	sgui.getPane("textTest").parseProps({
+	sgui.getPane("textTest").update({
 		"focus":"in",
 		"children":{
 			"textTest":{
@@ -219,7 +219,7 @@ load.provide("example.newGui", (function() {
 	});
 
 	//Scrolling
-	sgui.getPane("scrollTest").parseProps({
+	sgui.getPane("scrollTest").update({
 		"active":true,
 		"focus":"scroll",
 		"children":{
@@ -274,7 +274,7 @@ load.provide("example.newGui", (function() {
 		}
 	});
 
-	sgui.getPane("inputs").parseProps({
+	sgui.getPane("inputs").update({
 		"active":true,
 		"focus":"inp",
 		"children":{

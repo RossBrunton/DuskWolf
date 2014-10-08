@@ -131,7 +131,7 @@ load.provide("example.platLong", (function() {
 		]
 	}, "plat");
 
-	root.get("rate", "Group").parseProps({
+	root.get("rate", "Group").update({
 		"children":{
 			"meter":{
 				"type":"FpsMeter",

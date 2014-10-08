@@ -96,7 +96,7 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 		this.onControl.listen((function(e) {
 			if(editor.active) {
 				load.import("dusk.entities.sgui.EntityWorkshop").then(function(ew) {
-					sgui.get("workshop", true).parseProps({
+					sgui.get("workshop", true).update({
 						"focus":"ew",
 						"children":{
 							"ew":{

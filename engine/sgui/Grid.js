@@ -113,7 +113,7 @@ load.provide("dusk.sgui.Grid", (function() {
 	/** Creates a new population of the specified component.
 	 * 
 	 * This will erase all components in this group, and create new ones of the type `value.type`,
-	 *  and then call `{@link dusk.sgui.Component.parseProps}` with a copy of `value`.
+	 *  and then call `{@link dusk.sgui.Component.update}` with a copy of `value`.
 	 * 
 	 * The x and y coordinates will be set automatically.
 	 * 
@@ -174,9 +174,9 @@ load.provide("dusk.sgui.Grid", (function() {
 				}, "create").component;
 				
 				// Give the component properties
-				if(this.globals !== null) com.parseProps(utils.clone(this.globals));
-				com.parseProps(utils.clone(child[p]));
-				com.parseProps({"y":ypoint, "x":xpoint});
+				if(this.globals !== null) com.update(utils.clone(this.globals));
+				com.update(utils.clone(child[p]));
+				com.update({"y":ypoint, "x":xpoint});
 				
 				// Set the location of the component
 				xpoint += com.width+this.hspacing;
@@ -203,7 +203,7 @@ load.provide("dusk.sgui.Grid", (function() {
 		for(var hy = 0; hy < this.rows; hy++){
 			for(var hx = 0; hx < this.cols; hx++){
 				var com = this.getComponent(hx+","+hy);
-				if(com) com.parseProps({"y":(hy*com.height+hy*this.vspacing), "x":(hx*com.width+hx*this.hspacing)});
+				if(com) com.update({"y":(hy*com.height+hy*this.vspacing), "x":(hx*com.width+hx*this.hspacing)});
 			}
 		}
 	};

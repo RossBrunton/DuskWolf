@@ -498,7 +498,7 @@ load.provide("dusk.sgui.Component", (function() {
 		get: function() {return this.mouse != null;}
 	});
 	
-	/** This maps a property from the JSON representation of the object (One from {@link #parseProps})
+	/** This maps a property from the JSON representation of the object (One from {@link #update})
 	 *  to the JavaScript representation of the object.
 	 * 	If the property `name` exists in the JSON properties, then `mask` will be assigned its value.
 	 * 
@@ -537,19 +537,19 @@ load.provide("dusk.sgui.Component", (function() {
 	 * @param {object} props The object to read the properties off.
 	 * @see {@link dusk.sgui.Component#_registerPropMask}
 	 */
-	Component.prototype.parseProps = function(props) {
+	Component.prototype.update = function(props) {
 		this._props.massSet(props);
 	};
 	
 	/** Returns or sets a single property of the component.
-	 *	See `{@link dusk.sgui.Component#parseProps}` for details on how properties work.
+	 *	See `{@link dusk.sgui.Component#update}` for details on how properties work.
 	 * 
 	 * If value is omitted, no value will be set.
 	 * 
 	 * @param {string} name The property to set.
 	 * @param {?*} value The new value to set for the object.
 	 * @return {?*} The (new) value of the object, or null if no property by that name can be handled.
-	 * @see {dusk.sgui.Component#parseProps}
+	 * @see {dusk.sgui.Component#update}
 	 */
 	Component.prototype.prop = function(name, value) {
 		if(value === undefined) return this._props.get(name);
@@ -709,7 +709,7 @@ load.provide("dusk.sgui.Component", (function() {
 	 */
 	Component.prototype.addExtra = function(type, name, data) {
 		this._extras[name] = new (sgui.getExtra(type))(this, name);
-		this._extras[name].parseProps(data);
+		this._extras[name].update(data);
 	};
 	
 	/** Removes a previously added extra from this component, if it exists.
@@ -736,7 +736,7 @@ load.provide("dusk.sgui.Component", (function() {
 	 */
 	Component.prototype.modExtra = function(name, data) {
 		if(name in this._extras) {
-			this._extras[name].parseProps(data);
+			this._extras[name].update(data);
 		}else if("type" in data) {
 			this.addExtra(data.type, name, data);
 		}else{
@@ -830,7 +830,7 @@ load.provide("dusk.sgui.Component", (function() {
 				data.type = value;
 				data.deleted = false;
 				
-				this.container.getComponent(this.name, value).parseProps(data);
+				this.container.getComponent(this.name, value).update(data);
 				sgui.applyStyles(this.container.getComponent(this.name));
 			}
 		},

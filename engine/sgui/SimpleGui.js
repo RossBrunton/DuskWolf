@@ -312,7 +312,7 @@ load.provide("dusk.sgui", (function() {
 			return true;
 		}
 		
-		this.get(name, true).parseProps(data);
+		this.get(name, true).update(data);
 		return true;
 	};
 	
@@ -521,7 +521,7 @@ load.provide("dusk.sgui", (function() {
 		var styles = sgui.getStyles(com);
 		
 		for(var i = 0; i < styles.length; i ++) {
-			com.parseProps(styles[i]);
+			com.update(styles[i]);
 		}
 	};
 	

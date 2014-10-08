@@ -71,7 +71,7 @@ load.provide("dusk.sgui.extras.Extra", (function() {
 	 * Unless otherwise stated, you can assume that all public properties of event objects are settable using this.
 	 * @param {object} props An object describing this extra.
 	 */
-	Extra.prototype.parseProps = function(props) {
+	Extra.prototype.update = function(props) {
 		this._props.massSet(props);
 	};
 

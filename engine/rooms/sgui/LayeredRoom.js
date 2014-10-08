@@ -181,7 +181,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 			
 			this._updateLayers();
 			
-			this.get("editorLabel", "Label").parseProps({
+			this.get("editorLabel", "Label").update({
 				"visible":false,
 				"text":"",
 				"height":18
@@ -197,7 +197,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 		for(var i = 0; i < val.length; i ++) {
 			switch(val[i].type) {
 				case LayeredRoom.LAYER_TILEMAP:
-					this.get(val[i].name, mapType).parseProps(
+					this.get(val[i].name, mapType).update(
 					{"cursorColour":_LAYER_COLOURS[colour++],
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
 						"twidth":entities.twidth, "theight":entities.theight,
@@ -207,7 +207,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 					break;
 				
 				case LayeredRoom.LAYER_SCHEME:
-					this.get(val[i].name, mapType).parseProps(
+					this.get(val[i].name, mapType).update(
 					{"cursorColour":_LAYER_COLOURS[colour++],
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
 						"twidth":entities.twidth, "theight":entities.theight,
@@ -221,7 +221,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 					break;
 				
 				case LayeredRoom.LAYER_REGION:
-					this.get(val[i].name, "TileRegionGenerator").parseProps(
+					this.get(val[i].name, "TileRegionGenerator").update(
 					{
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
 						"twidth":entities.twidth, "theight":entities.theight,
@@ -232,7 +232,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 					break;
 				
 				case LayeredRoom.LAYER_ENTITIES:
-					this.get(val[i].name, "EntityGroup").parseProps(
+					this.get(val[i].name, "EntityGroup").update(
 					{"name":"entities", "type":"EntityGroup",
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
 						"twidth":entities.twidth, "theight":entities.theight,
@@ -244,18 +244,18 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 					break;
 				
 				case LayeredRoom.LAYER_PARTICLES:
-					this.get(val[i].name, "ParticleField").parseProps({"upFlow":(i > 0?val[i-1].name:""), "layer":"+"});
+					this.get(val[i].name, "ParticleField").update({"upFlow":(i > 0?val[i-1].name:""), "layer":"+"});
 					
 					break;
 				
 				case LayeredRoom.LAYER_FLUID:
-					this.get(val[i].name, "FluidLayer").parseProps({"upFlow":(i > 0?val[i-1].name:""), "layer":"+"});
+					this.get(val[i].name, "FluidLayer").update({"upFlow":(i > 0?val[i-1].name:""), "layer":"+"});
 					
 					break;
 				
 				case LayeredRoom.LAYER_TRANSITIONS:
 					this.get(val[i].name, "TransitionManager")
-						.parseProps({"upFlow":(i > 0?val[i-1].name:""), "layer":"+"});
+						.update({"upFlow":(i > 0?val[i-1].name:""), "layer":"+"});
 					
 					break;
 			}

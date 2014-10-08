@@ -308,7 +308,7 @@ load.provide("dusk.sgui.Group", (function() {
 	};
 	
 	/** Modifies this component's children using JSON data.
-	 *	See `dusk.sgui.Component.parseProps` for a basic description on how JSON properties work.
+	 *	See `dusk.sgui.Component.update` for a basic description on how JSON properties work.
 	 * 
 	 * `data` is either a single component description, an array of component description or an object with the keys
 	 *  being component names, and the value being their data. Each component must have a `name` property, stating the
@@ -326,7 +326,7 @@ load.provide("dusk.sgui.Group", (function() {
 		if(Array.isArray(data)) {
 			for (var i = 0; i < data.length; i++) {
 				if(("name" in data[i]) && this.get(data[i].name.toLowerCase(), data[i].type)) {
-					this.get(data[i].name.toLowerCase()).parseProps(data[i]);
+					this.get(data[i].name.toLowerCase()).update(data[i]);
 					sgui.applyStyles(this.get(data[i].name.toLowerCase()));
 				}else if(data[i].name){
 					console.warn(data[i].name + " has not been given a type and does not exist, ignoring.");
@@ -339,7 +339,7 @@ load.provide("dusk.sgui.Group", (function() {
 		}else{
 			if("name" in data && typeof data.name == "string") {
 				if(this.get(data.name.toLowerCase(), data.type)) {
-					return this.get(data.name.toLowerCase()).parseProps(data);
+					return this.get(data.name.toLowerCase()).update(data);
 					sgui.applyStyles(this.get(data.name.toLowerCase()));
 				}
 				console.warn(data.name + " has not been given a type and does not exist, ignoring.");
@@ -347,7 +347,7 @@ load.provide("dusk.sgui.Group", (function() {
 			}else{
 				for(var p in data) {
 					if(this.get(p.toLowerCase(), data[p].type)) {
-						this.get(p.toLowerCase()).parseProps(data[p]);
+						this.get(p.toLowerCase()).update(data[p]);
 						sgui.applyStyles(this.get(p.toLowerCase()));
 					}else{
 						console.warn(p + " has not been given a type and does not exist, ignoring.");
@@ -383,7 +383,7 @@ load.provide("dusk.sgui.Group", (function() {
 	 */
 	Group.prototype.modifyAllChildren = function(data) {
 		for(var c = this._componentsArr.length-1; c >= 0; c --) {
-			this._componentsArr[c].parseProps(data);
+			this._componentsArr[c].update(data);
 		}
 	};
 	Object.defineProperty(Group.prototype, "__allChildren", {

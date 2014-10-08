@@ -40,7 +40,7 @@ load.provide("quest", (function() {
 	dquest.make(root, "quest");
 	
 	//Test
-	root.get("menu", "Group").parseProps({
+	root.get("menu", "Group").update({
 	   "children":{
 			"back":{
 				"type":"FancyRect",
@@ -102,13 +102,13 @@ load.provide("quest", (function() {
 		}
 	});
 	
-	root.get("fps", "FpsMeter").parseProps({
+	root.get("fps", "FpsMeter").update({
 		"type":"FpsMeter",
 		"xOrigin":c.ORIGIN_MAX,
 		"yOrigin":c.ORIGIN_MAX
 	});
 	
-	root.get("actionFeed", "Group").parseProps({
+	root.get("actionFeed", "Group").update({
 		"width":-2,
 		"children":{
 			"feed":{
@@ -145,7 +145,7 @@ load.provide("quest", (function() {
 	});
 	var feed = root.get("actionFeed").get("feed");
 	
-	/*dusk.sgui.getPane("test").parseProps({
+	/*dusk.sgui.getPane("test").update({
 		"active":true,
 		"focus":"text",
 		"children":{
