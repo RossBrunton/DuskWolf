@@ -87,7 +87,7 @@ load.provide("dusk.input.sgui.ControlConfig", (function() {
 	ControlConfig.prototype._ccDraw = function(e) {
 		e.c.strokeStyle = this.active?this.borderActive:this.border;
 		
-		e.c.strokeRect(e.d.destX, e.d.destY, e.d.width, e.d.height);
+		e.c.strokeRect(e.d.dest.x, e.d.dest.y, e.d.dest.width, e.d.dest.height);
 	};
 	
 	ControlConfig.prototype._ccKey = function(e) {

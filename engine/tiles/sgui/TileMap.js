@@ -469,8 +469,8 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 		var hscale = this.swidth/this.twidth;
 		var vscale = this.sheight/this.theight;
 		e.c.drawImage(this._all[this._currentFrame],
-			e.d.sourceX*hscale, e.d.sourceY*vscale, e.d.width*hscale, e.d.height*vscale, 
-			e.d.destX, e.d.destY, e.d.width, e.d.height
+			e.d.slice.x*hscale, e.d.slice.y*vscale, e.d.slice.width*hscale, e.d.slice.height*vscale, 
+			e.d.dest.x, e.d.dest.y, e.d.dest.width, e.d.dest.height
 		);
 	};
 	

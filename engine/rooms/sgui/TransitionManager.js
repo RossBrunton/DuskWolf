@@ -295,8 +295,8 @@ load.provide("dusk.rooms.sgui.TransitionManager", (function() {
 		if(!this.focused) return;
 		
 		var frags = this._tmPretty().split("\n");
-		var y = 50 + e.d.sourceY + e.d.destY;
-		var x = 5 + e.d.sourceX + e.d.destX
+		var y = 50 + e.d.slice.y + e.d.dest.y;
+		var x = 5 + e.d.slice.x + e.d.dest.x;
 		e.c.fillStyle = this.container.editorColour;
 		for(var i = 0; i < frags.length; i ++) {
 			e.c.fillText(frags[i], x, y);

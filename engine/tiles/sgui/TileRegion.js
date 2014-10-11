@@ -579,18 +579,18 @@ load.provide("dusk.tiles.sgui.TileRegionGenerator", (function() {
 		for(var i = 0; i < this._cachedTileColours.length; i ++) {
 			var c = this._cachedTileColours[i];
 			
-			if((c[0]+1) * this.tileWidth() < e.d.sourceX
-			|| c[0] * this.tileWidth() > e.d.sourceX + e.d.width
-			|| (c[1]+1) * this.tileHeight() < e.d.sourceY
-			|| c[1] * this.tileHeight() > e.d.sourceY + e.d.height) {
+			if((c[0]+1) * this.tileWidth() < e.d.slice.x
+			|| c[0] * this.tileWidth() > e.d.slice.x + e.d.width
+			|| (c[1]+1) * this.tileHeight() < e.d.slice.y
+			|| c[1] * this.tileHeight() > e.d.slice.y + e.d.height) {
 				continue;
 			}
 			
 			if(c[2].charAt(0) != ":") {
 				e.c.fillStyle = c[2];
 				e.c.fillRect(
-					e.d.destX + ((c[0] * this.tileWidth()) - e.d.sourceX) + 1,
-					e.d.destY + ((c[1] * this.tileHeight()) - e.d.sourceY) + 1,
+					e.d.dest.x + ((c[0] * this.tileWidth()) - e.d.slice.x) + 1,
+					e.d.dest.y + ((c[1] * this.tileHeight()) - e.d.slice.y) + 1,
 					this.tileWidth() - 2, this.tileHeight() - 2
 				);
 			}else{
@@ -602,8 +602,8 @@ load.provide("dusk.tiles.sgui.TileRegionGenerator", (function() {
 						c[5] * this.tileWidth(), c[6] * this.tileHeight(), 
 						this.tileWidth()*hscale, this.tileWidth()*vscale,
 						
-						e.d.destX + ((c[0] * this.tileWidth()) - e.d.sourceX),
-						e.d.destY + ((c[1] * this.tileHeight()) - e.d.sourceY),
+						e.d.dest.x + ((c[0] * this.tileWidth()) - e.d.slice.x),
+						e.d.dest.y + ((c[1] * this.tileHeight()) - e.d.slice.y),
 						this.tileWidth(), this.tileHeight(),
 						1, 1
 					);

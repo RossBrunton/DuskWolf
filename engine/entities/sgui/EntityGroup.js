@@ -110,7 +110,7 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 			}
 		}).bind(this), controls.addControl("entitygroup_workshop", "W"));
 		
-		this.prepareDraw.listen(this._entityGroupDraw.bind(this));
+		this.prepareDraw.listen(_entityGroupDraw.bind(this));
 		this.action.listen(this._entityGroupAction.bind(this));
 		
 		//Directions
@@ -159,7 +159,7 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 		}
 	};
 	
-	EntityGroup.prototype._entityGroupDraw = function(e) {
+	var _entityGroupDraw = function(e) {
 		if(!editor.active) return;
 		if(!this.focused) return;
 		
@@ -169,11 +169,11 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 		var xAt = this._cx*this.twidth;
 		var yAt = this._cy*this.theight;
 		
-		if(-e.d.sourceX + xAt > e.d.width) return;
-		if(-e.d.sourceY + yAt > e.d.height) return;
+		if(-e.d.slice.x + xAt > e.d.dest.width) return;
+		if(-e.d.slice.y + yAt > e.d.dest.height) return;
 		
-		if(-e.d.sourceX + xAt + width > e.d.width) width = e.d.width - (-e.d.sourceX + xAt);
-		if(-e.d.sourceY + yAt + height > e.d.height) height = e.d.height - (-e.d.sourceY + yAt);
+		if(-e.d.slice.x + xAt + width > e.d.dest.width) width = e.d.dest.width - (-e.d.slice.x + xAt);
+		if(-e.d.slice.y + yAt + height > e.d.dest.height) height = e.d.dest.height - (-e.d.slice.y + yAt);
 		
 		if(!this._selectedEntity){
 			e.c.strokeStyle = "#00ffff";
@@ -182,22 +182,22 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 		}
 		e.c.lineWidth = 1;
 		
-		e.c.strokeRect(e.d.destX - e.d.sourceX + xAt,
-			e.d.destY - e.d.sourceY + yAt, width, height
+		e.c.strokeRect(e.d.dest.x - e.d.slice.x + xAt,
+			e.d.dest.y - e.d.slice.y + yAt, width, height
 		);
-		e.c.strokeRect(e.d.destX - e.d.sourceX + xAt + this._offsetX - 1,
-			e.d.destY - e.d.sourceY + yAt + this._offsetY - 1, 3, 3
+		e.c.strokeRect(e.d.dest.x - e.d.slice.x + xAt + this._offsetX - 1,
+			e.d.dest.y - e.d.slice.y + yAt + this._offsetY - 1, 3, 3
 		);
 		
 		e.c.fillStyle = this.container.editorColour;
 		e.c.fillText(editor.editNext,
-			e.d.destX - e.d.sourceX + xAt + 1,
-			e.d.destY - e.d.sourceY + yAt - 6
+			e.d.dest.x - e.d.slice.x + xAt + 1,
+			e.d.dest.y - e.d.slice.y + yAt - 6
 		);
 		
 		if(this._showEntities) {
-			var y = 50 + e.d.destY + 10;
-			var x = 5 + e.d.destX;
+			var y = 50 + e.d.dest.y + 10;
+			var x = 5 + e.d.dest.x;
 			e.c.fillStyle = this.container.editorColour;
 			e.c.fillText("ENTITY LIST:", x, y);
 			y += 10;

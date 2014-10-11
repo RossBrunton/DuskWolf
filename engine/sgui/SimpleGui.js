@@ -16,6 +16,7 @@ load.provide("dusk.sgui", (function() {
 	var UserCancelError =
 		load.suggest("dusk.utils.reversiblePromiseChain.UserCancelError", function(p) {UserCancelError = p});
 	var containerUtils = load.require("dusk.utils.containerUtils");
+	var PosRect = load.require("dusk.utils.PosRect");
 	
 	/** This module contains a SimpleGui system, allowing for canvas UIs.
 	 * 
@@ -413,6 +414,11 @@ load.provide("dusk.sgui", (function() {
 		//Draw roots
 		for(var c = 0; c < _roots.length; c ++){
 			var data = sgui.drawDataPool.alloc();
+			
+			data.origin = PosRect.pool.alloc().setWH(_roots[c].x, _roots[c].x, _roots[c].width, _roots[c].height);
+			data.slice = PosRect.pool.alloc().setWH(0, 0, _roots[c].width, _roots[c].width);
+			data.dest = PosRect.pool.alloc().setWH(0, 0, _roots[c].width, _roots[c].width);
+			
 			data.alpha = 1;
 			data.sourceX = 0;
 			data.sourceY = 0;
@@ -426,6 +432,11 @@ load.provide("dusk.sgui", (function() {
 			}else{
 				_roots[c].draw(data, _cacheCtx);
 			}
+			
+			PosRect.pool.free(data.origin);
+			PosRect.pool.free(data.slice);
+			PosRect.pool.free(data.dest);
+			
 			sgui.drawDataPool.free(data);
 		}
 		

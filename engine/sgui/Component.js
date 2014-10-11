@@ -611,12 +611,12 @@ load.provide("dusk.sgui.Component", (function() {
 
 		if(this.mark !== null) {
 			c.strokeStyle = this.mark;
-			c.strokeRect(d.destX, d.destY, d.width, d.height);
+			c.strokeRect(d.dest.x, d.dest.y, d.dest.width, d.dest.height);
 		}
 		
 		if(this.activeBorder !== null && this.active) {
 			c.strokeStyle = this.activeBorder;
-			c.strokeRect(d.destX+0.5, d.destY+0.5, d.width-1, d.height-1);
+			c.strokeRect(d.dest.x+0.5, d.dest.y+0.5, d.dest.width-1, d.dest.height-1);
 		}
 		
 		if(oldAlpha >= 0) c.globalAlpha = oldAlpha;

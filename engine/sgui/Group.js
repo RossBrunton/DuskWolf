@@ -9,6 +9,7 @@ load.provide("dusk.sgui.Group", (function() {
 	var sgui = load.require(">dusk.sgui", function(p) {sgui = p});
 	var interaction = load.require("dusk.input.interaction");
 	var containerUtils = load.require("dusk.utils.containerUtils");
+	var PosRect = load.require("dusk.utils.PosRect");
 	
 	/** A group contains multiple components, and manages things like keyboard events and drawing.
 	 * 
@@ -404,55 +405,78 @@ load.provide("dusk.sgui.Group", (function() {
 				var com = this._components[this._drawOrder[i]];
 				var data = sgui.drawDataPool.alloc();
 				data.alpha = e.alpha;
-				data.destX = e.d.destX;
-				data.destY = e.d.destY;
+				data.destX = e.d.dest.x;
+				data.destY = e.d.dest.y;
 				data.sourceX = 0;
 				data.sourceY = 0;
 				
-				var destXAdder = 0;
-				if(com.xOrigin == c.ORIGIN_MAX) destXAdder = this.width - com.width;
-				if(com.xOrigin == c.ORIGIN_MIDDLE) destXAdder = (this.width - com.width)>>1;
+				data.origin = PosRect.pool.alloc().setWH(com.x, com.y, com.width, com.height);
+				data.slice = PosRect.pool.alloc().setWH(0, 0, com.width, com.height);
+				data.dest = PosRect.pool.alloc().setWH(e.d.dest.x, e.d.dest.y, com.width, com.height);
 				
-				var destYAdder = 0;
-				if(com.yOrigin == c.ORIGIN_MAX) destYAdder = this.height - com.height;
-				if(com.yOrigin == c.ORIGIN_MIDDLE) destYAdder = (this.height - com.height)>>1;
+				// Handle origins
+				if(com.xOrigin == c.ORIGIN_MAX) data.dest.shift(e.d.origin.width - data.origin.width, 0);
+				if(com.xOrigin == c.ORIGIN_MIDDLE) data.dest.shift((e.d.origin.width - data.origin.width) >> 1, 0);
 				
+				if(com.yOrigin == c.ORIGIN_MAX) data.dest.shift(0, (e.d.origin.height - data.origin.height));
+				if(com.yOrigin == c.ORIGIN_MIDDLE) data.dest.shift(0, (e.d.origin.height - data.origin.height) >> 1);
 				
-				if((-this.xOffset + com.x + destXAdder - e.d.sourceX)<0) {
-					data.sourceX = -(-this.xOffset + com.x + destXAdder - e.d.sourceX);
+				// Handle offsets
+				data.dest.shift(-this.xOffset, -this.yOffset);
+				
+				// And slices
+				data.dest.shift(-e.d.slice.x, -e.d.slice.y);
+				
+				// Handle the component's location
+				data.dest.shift(com.x, com.y);
+				
+				// Handle right
+				if(data.dest.ex > e.d.dest.ex) {
+					var ex = data.dest.ex - e.d.dest.ex;
+					data.dest.size(-ex, 0);
+					data.slice.size(-ex, 0);
 				}
 				
-				if((-this.yOffset + com.y + destYAdder - e.d.sourceY)<0) {
-					data.sourceY = -(-this.yOffset + com.y + destYAdder - e.d.sourceY);
+				// Down
+				if(data.dest.ey > e.d.dest.ey) {
+					var ey = data.dest.ey - e.d.dest.ey;
+					data.dest.size(0, -ey);
+					data.slice.size(0, -ey);
 				}
 				
-				if((com.x - this.xOffset - e.d.sourceX + destXAdder) > 0) {
-					data.destX = com.x - this.xOffset - e.d.sourceX + e.d.destX + destXAdder;
+				// Left
+				if(data.dest.x < e.d.dest.x) {
+					var x = e.d.dest.x - data.dest.x;
+					data.dest.startSize(-x, 0);
+					data.slice.startSize(-x, 0);
 				}
 				
-				if((com.y - this.yOffset - e.d.sourceY + destYAdder) > 0) {
-					data.destY = com.y - this.yOffset - e.d.sourceY + e.d.destY + destYAdder;
+				// Top
+				if(data.dest.y < e.d.dest.y) {
+					var y = e.d.dest.y - data.dest.y;
+					data.dest.startSize(0, -y);
+					data.slice.startSize(0, -y);
 				}
-				
-				data.width = com.width - data.sourceX;
-				data.height = com.height - data.sourceY;
 				
 				var skip = false;
 				
-				if(data.destX >= e.d.width + e.d.destX) skip = true;
-				if(data.destY >= e.d.height + e.d.destY) skip = true;
+				// Off to the right/bottom
+				if(data.dest.x >= e.d.dest.ex) skip = true;
+				if(data.dest.y >= e.d.dest.ey) skip = true;
 				
-				if(data.width <= 0 || data.height <= 0) skip = true;
+				// Small
+				if(data.dest.width <= 0 || data.dest.height <= 0) skip = true;
+				
+				// And off the left
+				if(data.slice.x < 0 || data.slice.y < 0) skip = true;
 				
 				if(!skip) {
-					if(data.width + data.destX > e.d.width + e.d.destX) 
-						data.width = (e.d.destX + e.d.width) - data.destX;
-					if(data.height + data.destY > e.d.height + e.d.destY) 
-						data.height = (e.d.destY + e.d.height) - data.destY;
-					
 					com.draw(data, e.c);
 				}
 				
+				PosRect.pool.free(data.origin);
+				PosRect.pool.free(data.slice);
+				PosRect.pool.free(data.dest);
 				sgui.drawDataPool.free(data);
 			}
 		}

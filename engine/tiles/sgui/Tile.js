@@ -6,7 +6,8 @@ load.provide("dusk.tiles.sgui.Tile", (function() {
 	var Image = load.require("dusk.utils.Image");
 	var Component = load.require("dusk.sgui.Component");
 	var sgui = load.require("dusk.sgui");
-
+	var PosRect = load.require("dusk.utils.PosRect");
+	
 	/** A tile.
 	 *
 	 * This is a smaller image selected from a larger image. The source image has a lot of possible different images
@@ -104,14 +105,17 @@ load.provide("dusk.tiles.sgui.Tile", (function() {
 	 */
 	var _draw = function(e) {
 		if(this._img && this._img.isReady()){
-			this._img.paintScaled(e.c, this.imageTrans, false,
+			/*this._img.paintScaled(e.c, this.imageTrans, false,
 				this._tx * this.swidth + e.d.sourceX, this._ty * this.sheight + e.d.sourceY, e.d.width, e.d.height,
 				e.d.destX, e.d.destY, e.d.width, e.d.height,
 				this.swidth/this.width, this.sheight/this.height
-			);
+			);*/
+			var t = PosRect.pool.alloc().setWH(this._tx * this.swidth, this._ty * this.sheight, this.swidth, this.sheight);
+			this._img.paintRangesTile(e.c, this.imageTrans, false, e.d.origin, e.d.slice, e.d.dest, t);
+			PosRect.pool.free(t);
 		}
 	};
-
+	
 	//src
 	Object.defineProperty(Tile.prototype, "src", {
 		set: function(value) {

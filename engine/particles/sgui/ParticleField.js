@@ -116,11 +116,11 @@ load.provide("dusk.particles.sgui.ParticleField", (function() {
 		
 		for(var i = this._highest; i >= 0; i -= 11) {
 			if((this._field[i+1] & 0x00ff) != 0) {
-				var translatedX = this._field[i+2] - e.d.sourceX + e.d.destX;
-				var translatedY = this._field[i+3] - e.d.sourceY + e.d.destY;
+				var translatedX = this._field[i+2] - e.d.slice.x + e.d.dest.x;
+				var translatedY = this._field[i+3] - e.d.slice.y + e.d.dest.y;
 				
-				if(this._field[i+2] >= e.d.sourceX && this._field[i+3] >= e.d.sourceY
-				&& this._field[i+2] < e.d.sourceX + e.d.width && this._field[i+3] < e.d.sourceY + e.d.height) {
+				if(this._field[i+2] >= e.d.slice.x && this._field[i+3] >= e.d.slice.y
+				&& this._field[i+2] < e.d.slice.ex && this._field[i+3] < e.d.slice.ey) {
 					if(c) {
 						var origin = (translatedX + (translatedY * e.d.width)) * 4;
 						c.data[origin] = this._field[i] >> 8;
@@ -140,7 +140,7 @@ load.provide("dusk.particles.sgui.ParticleField", (function() {
 			}
 		}
 		
-		if(c) e.c.putImageData(c, e.d.destX, e.d.destY);
+		if(c) e.c.putImageData(c, e.d.dest.x, e.d.dest.y);
 		
 		return e;
 	};

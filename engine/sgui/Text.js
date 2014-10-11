@@ -369,14 +369,14 @@ load.provide("dusk.sgui.Label", (function() {
 	 */
 	var _draw = function(e) {
 		if(this.text !== "" && !this._supressTextDisplay){
-			if(this._sig != this._genSig()) {
+			if(this._sig != this._genSig(e)) {
 				//Rebuild the text cache
 				this._updateCache(true);
 				this._updateCache();
 			}
 			
-			e.c.drawImage(this._cache, e.d.sourceX, e.d.sourceY, e.d.width,  e.d.height,
-				e.d.destX, e.d.destY, e.d.width, e.d.height
+			e.c.drawImage(this._cache, e.d.slice.x, e.d.slice.x, e.d.slice.width,  e.d.slice.height,
+				e.d.dest.x, e.d.dest.y, e.d.dest.width, e.d.dest.height
 			);
 		}
 	};
@@ -739,7 +739,7 @@ load.provide("dusk.sgui.TextBox", (function() {
 		if(this.active) return;
 		e.c.strokeStyle = this.border;
 		
-		e.c.strokeRect(e.d.destX, e.d.destY, e.d.width, e.d.height);
+		e.c.strokeRect(e.d.dest.x, e.d.dest.y, e.d.dest.width, e.d.dest.height);
 	};
 	
 	/** Used to handle keypresses.

@@ -1373,7 +1373,7 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 		e.c.strokeStyle = this.collisionMark;
 		e.c.lineWidth = 1;
 		e.c.strokeRect(
-			e.d.destX + this.collisionOffsetX, e.d.destY + this.collisionOffsetY, 
+			e.d.dest.x + this.collisionOffsetX, e.d.dest.y + this.collisionOffsetY, 
 			this.collisionWidth - this.collisionOffsetX, this.collisionHeight - this.collisionOffsetY
 		);
 	};

@@ -157,33 +157,33 @@ load.provide("dusk.tiles.sgui.EditableTileMap", (function() {
 	var _draw = function(e) {
 		if(!this.focused || !editor.active) return;
 		
-		if(-e.d.sourceX + (this._cx*this.tileWidth()) > e.d.width) return;
-		if(-e.d.sourceY + (this._cy*this.tileHeight()) > e.d.height) return;
+		if(-e.d.slice.x + (this._cx*this.tileWidth()) > e.d.dest.width) return;
+		if(-e.d.slice.y + (this._cy*this.tileHeight()) > e.d.dest.height) return;
 		
 		var width = this.tileWidth()*this.frameWidth;
 		var height = this.tileWidth()*this.frameHeight;
-		if(-e.d.sourceX + (this._cx*this.tileWidth()) + width > e.d.width)
-			width = (e.d.width) - (-e.d.sourceX + (this._cx*this.tileWidth()));
-		if(-e.d.sourceY + (this._cy*this.tileHeight()) + height > e.d.height)
-			height = (e.d.height) - (-e.d.sourceY + (this._cy*this.tileHeight()));
+		if(-e.d.slice.x + (this._cx*this.tileWidth()) + width > e.d.dest.width)
+			width = (e.d.dest.width) - (-e.d.slice.x + (this._cx*this.tileWidth()));
+		if(-e.d.slice.y + (this._cy*this.tileHeight()) + height > e.d.dest.height)
+			height = (e.d.dest.height) - (-e.d.slice.y + (this._cy*this.tileHeight()));
 		
 		e.c.strokeStyle = this.cursorColour;
 		e.c.lineWidth = 1;
-		e.c.strokeRect(e.d.destX - e.d.sourceX + (this._cx*this.tileWidth()),
-			e.d.destX - e.d.sourceY + (this._cy*this.tileHeight()), width, height
+		e.c.strokeRect(e.d.destX - e.d.slice.x + (this._cx*this.tileWidth()),
+			e.d.destX - e.d.slice.y + (this._cy*this.tileHeight()), width, height
 		);
 		
 		e.c.fillStyle = this.cursorColour;
 		var t = this.getTile(this._cx, this._cy);
 		e.c.fillText(t[0]+","+t[1],
-			e.d.destX - e.d.sourceX + (this._cx*this.tileWidth()) + 1,
-			e.d.destY - e.d.sourceY + (this._cy*this.tileHeight()) + 6
+			e.d.destX - e.d.slice.x + (this._cx*this.tileWidth()) + 1,
+			e.d.destY - e.d.slice.y + (this._cy*this.tileHeight()) + 6
 		);
 		
 		if(TileMap.getAnimation(this.src, t[0]+","+t[1]).length > 1) {
 			e.c.fillText("\u27F3",
-				e.d.destX - e.d.sourceX + ((this._cx+1)*this.tileWidth()) - 9,
-				e.d.destY - e.d.sourceY + ((this._cy+1)*this.tileHeight()) - 4
+				e.d.destX - e.d.slice.x + ((this._cx+1)*this.tileWidth()) - 9,
+				e.d.destY - e.d.slice.y + ((this._cy+1)*this.tileHeight()) - 4
 			);
 		}
 		
@@ -201,8 +201,8 @@ load.provide("dusk.tiles.sgui.EditableTileMap", (function() {
 			}
 			
 			e.c.fillText(wstr,
-				e.d.destX - e.d.sourceX + ((this._cx)*this.tileWidth()) + 2,
-				e.d.destY - e.d.sourceY + ((this._cy+1)*this.tileHeight()) - 6
+				e.d.destX - e.d.slice.x + ((this._cx)*this.tileWidth()) + 2,
+				e.d.destY - e.d.slice.y + ((this._cy+1)*this.tileHeight()) - 6
 			);
 		}
 		

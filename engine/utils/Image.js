@@ -59,12 +59,12 @@ load.provide("dusk.utils.Image", (function() {
 			}).bind(this));
 		}
 	};
-
+	
 	Image.prototype.loadPromise = function() {
 		if(this._proxy) return this._proxy.loadPromise();
 		return this._loadPromise;
 	};
-
+	
 	Image.prototype.asCanvas = function(extraTrans, ignoreNormalTrans) {
 		if(this._proxy) return this._proxy.asCanvas(this.transform.concat(extraTrans?extraTrans:[]), true);
 		
@@ -116,7 +116,7 @@ load.provide("dusk.utils.Image", (function() {
 			return can;
 		}
 	};
-
+	
 	Image.prototype.paint = function(ctx, extraTrans, ino, ox, oy, owidth, oheight, dx, dy, dwidth, dheight) {
 		if(this._proxy) {
 			this._proxy.paint(ctx, this.transform.concat(extraTrans),true,ox,oy,owidth,oheight,dx,dy, dwidth, dheight);
@@ -124,17 +124,45 @@ load.provide("dusk.utils.Image", (function() {
 			ctx.drawImage(this.asCanvas(extraTrans, ino), ox, oy, owidth, oheight, ~~dx, ~~dy, dwidth, dheight);
 		}
 	};
-
+	
 	Image.prototype.paintFull = function(ctx, extraTrans, ino, dx, dy, dwidth, dheight) {
 		if(this._proxy) {
 			this._proxy.paint(
 				ctx, this.transform.concat(extraTrans),true, 0, 0, this.width(), this.height(), dx, dy, dwidth, dheight
 			);
 		}else{
-			ctx.drawImage(this.asCanvas(extraTrans, ino), 0, 0, this.width(), this.height(), ~dx, ~dy, dwidth, dheight);
+			ctx.drawImage(this.asCanvas(extraTrans, ino), 0, 0, this.width(), this.height(), ~~dx, ~~dy, dwidth, dheight);
 		}
 	};
-
+	
+	Image.prototype.paintRanges = function(ctx, extraTrans, ino, origin, slice, dest) {
+		if(this._proxy) {
+			this._proxy.paintRanges(ctx, this.transform.concat(extraTrans), true, origin, slice, dest);
+		}else{
+			var w = origin.width / this.width();
+			var h = origin.height / this.height();
+			ctx.drawImage(
+				this.asCanvas(extraTrans, ino),
+				slice.x / w, slice.y / h, slice.width / w, slice.height / h,
+				dest.x, dest.y, dest.width, dest.height
+			);
+		}
+	};
+	
+	Image.prototype.paintRangesTile = function(ctx, extraTrans, ino, origin, slice, dest, tile) {
+		if(this._proxy) {
+			this._proxy.paintRangesTile(ctx, this.transform.concat(extraTrans), true, origin, slice, dest, tile);
+		}else{
+			var w = origin.width / tile.width;
+			var h = origin.height / tile.height;
+			ctx.drawImage(
+				this.asCanvas(extraTrans, ino),
+				(slice.x) / w + tile.x, (slice.y) / h + tile.y, slice.width / w, slice.height / h,
+				dest.x, dest.y, dest.width, dest.height
+			);
+		}
+	};
+	
 	Image.prototype.paintScaled = function
 		(ctx, extraTrans, ino, ox, oy, owidth, oheight, dx, dy, dwidth, dheight, sx, sy) {
 		
@@ -143,18 +171,18 @@ load.provide("dusk.utils.Image", (function() {
 			dx, dy, dwidth, dheight
 		);
 	};
-
+	
 	Image.prototype.isReady = function() {
 		if(this._proxy) return this._proxy.isReady();
 		return this._base !== null;
 	};
-
+	
 	Image.prototype.width = function() {
 		if(this._proxy) return this._proxy.width();
 		if(!this._base) return 0;
 		return this._base.width;
 	};
-
+	
 	Image.prototype.height = function() {
 		if(this._proxy) return this._proxy.height();
 		if(!this._base) return 0;
@@ -169,7 +197,7 @@ load.provide("dusk.utils.Image", (function() {
 	Image.prototype.toString = function() {
 		return "[Image "+this.src+"]";
 	};
-
+	
 	var _parseTransString = function(str) {
 		var out = str.split(";");
 		for(var i = 0; i < out.length; i ++) {
@@ -177,7 +205,7 @@ load.provide("dusk.utils.Image", (function() {
 		}
 		return out;
 	};
-
+	
 	var _parseTags = function(trans) {
 		var out = {};
 		
@@ -202,7 +230,7 @@ load.provide("dusk.utils.Image", (function() {
 		
 		return out;
 	};
-
+	
 	var _images = {};
 	
 	return Image;

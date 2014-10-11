@@ -60,11 +60,12 @@ load.provide("dusk.sgui.Image", (function() {
 	 */
 	Image.prototype._imageDraw = function(e) {
 		if(this._img && this._img.isReady() && this._img.width() && this._img.height()){
-			this._img.paintScaled(e.c, this.imageTrans, false,
+			/*this._img.paintScaled(e.c, this.imageTrans, false,
 				e.d.sourceX, e.d.sourceY, e.d.width, e.d.height,
 				e.d.destX, e.d.destY, e.d.width, e.d.height,
 				this._img.width()/this.width, this._img.height()/this.height
-			);
+			);*/
+			this._img.paintRanges(e.c, this.imageTrans, false, e.d.origin, e.d.slice, e.d.dest);
 		}
 	};
 

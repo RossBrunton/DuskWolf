@@ -5,7 +5,7 @@
 load.provide("dusk.sgui.Rect", (function() {
 	var Component = load.require("dusk.sgui.Component");
 	var sgui = load.require("dusk.sgui");
-
+	
 	/** Creates a new Rect.
 	 * 
 	 * @param {dusk.sgui.Component} parent The container that this component is in.
@@ -58,7 +58,7 @@ load.provide("dusk.sgui.Rect", (function() {
 		this.prepareDraw.listen(this._rectDraw.bind(this));
 	};
 	Rect.prototype = Object.create(Component.prototype);
-
+	
 	/** A draw handler which draws the rectangle.
 	 * @param {object} e A draw event.
 	 * @private
@@ -70,38 +70,44 @@ load.provide("dusk.sgui.Rect", (function() {
 		
 		this._fill(e, this.bWidth != 0, this.colour == "");
 	};
-
+	
 	/** Does the rectangle thing, for use in subclasses. Will draw the rectangle, but not set any of the styles.
-	 * @param {object} e A draw event, it doesn't have to be the original one.
+	 * @param {object} e A draw event, it doesn't have to be the.sliceal one.
 	 * @protected
 	 * @since 0.0.21-alpha
 	 */
 	Rect.prototype._fill = function(e, border, noFill) {
 		if(this.radius) {
 			e.c.beginPath();
-			e.c.moveTo(e.d.destX + this.radius, e.d.destY);
-			e.c.lineTo(e.d.destX + e.d.width - this.radius, e.d.destY);
-			e.c.quadraticCurveTo(e.d.destX + e.d.width, e.d.destY, e.d.destX + e.d.width, e.d.destY + this.radius);
-			e.c.lineTo(e.d.destX + e.d.width, e.d.destY + e.d.height - this.radius);
+			
+			e.c.moveTo(e.d.dest.x + this.radius, e.d.dest.y);
+			e.c.lineTo(e.d.dest.x + e.d.slice.width - this.radius, e.d.dest.y);
 			e.c.quadraticCurveTo(
-				e.d.destX + e.d.width, e.d.destY + e.d.height, e.d.destX + e.d.width - this.radius, e.d.destY+e.d.height
+				e.d.dest.x + e.d.slice.width, e.d.dest.y, e.d.dest.x + e.d.slice.width, e.d.dest.y + this.radius
 			);
-			e.c.lineTo(e.d.destX + this.radius, e.d.destY + e.d.height);
-			e.c.quadraticCurveTo(e.d.destX, e.d.destY + e.d.height, e.d.destX, e.d.destY + e.d.height - this.radius);
-			e.c.lineTo(e.d.destX, e.d.destY + this.radius);
-			e.c.quadraticCurveTo(e.d.destX, e.d.destY, e.d.destX + this.radius, e.d.destY);
+			
+			e.c.lineTo(e.d.dest.x + e.d.slice.width, e.d.dest.y + e.d.slice.height - this.radius);
+			e.c.quadraticCurveTo(
+				e.d.dest.x + e.d.slice.width, e.d.dest.y + e.d.slice.height, e.d.dest.x + e.d.slice.width - this.radius, e.d.dest.y+e.d.slice.height
+			);
+			
+			e.c.lineTo(e.d.dest.x + this.radius, e.d.dest.y + e.d.slice.height);
+			e.c.quadraticCurveTo(
+				e.d.dest.x, e.d.dest.y + e.d.slice.height, e.d.dest.x, e.d.dest.y + e.d.slice.height - this.radius
+			);
+			
+			e.c.lineTo(e.d.dest.x, e.d.dest.y + this.radius);
+			e.c.quadraticCurveTo(e.d.dest.x, e.d.dest.y, e.d.dest.x + this.radius, e.d.dest.y);
 			e.c.closePath();
+			
 			if(!noFill) e.c.fill();
 			if(border) e.c.stroke();
 		}else{
-			if(!noFill) e.c.fillRect(e.d.destX, e.d.destY, e.d.width, e.d.height);
-			if(border) e.c.strokeRect(e.d.destX, e.d.destY, e.d.width, e.d.height);
+			if(!noFill) e.c.fillRect(e.d.dest.x, e.d.dest.y, e.d.slice.width, e.d.slice.height);
+			if(border) e.c.strokeRect(e.d.dest.x, e.d.dest.y, e.d.slice.width, e.d.slice.height);
 		}
 	};
-
-	Object.seal(Rect);
-	Object.seal(Rect.prototype);
-
+	
 	sgui.registerType("Rect", Rect);
 	
 	return Rect;
