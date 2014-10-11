@@ -306,7 +306,7 @@ load.provide("dusk.sgui.SayBox", (function() {
 	});
 	sgui.addStyle("SayBox>#right", {
 		"behind":true,
-		"xOrigin":c.ORIGIN_MAX,
+		"xOrigin":"right",
 		"x":-10,
 		"label":{
 			"padding":10,
@@ -314,8 +314,8 @@ load.provide("dusk.sgui.SayBox", (function() {
 	});
 	sgui.addStyle("SayBox>#continue", {
 		"behind":true,
-		"xOrigin":c.ORIGIN_MAX,
-		"yOrigin":c.ORIGIN_MAX,
+		"xOrigin":"right",
+		"yOrigin":"bottom",
 		"x":-10,
 		"y":-5,
 		"src":"default/next.png",

@@ -135,8 +135,8 @@ load.provide("example.platLong", (function() {
 		"children":{
 			"meter":{
 				"type":"FpsMeter",
-				"yOrigin":c.ORIGIN_MAX,
-				"xOrigin":c.ORIGIN_MAX,
+				"yOrigin":"bottom",
+				"xOrigin":"right",
 			}
 		},
 		"width":sgui.width,

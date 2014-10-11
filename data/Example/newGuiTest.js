@@ -153,8 +153,8 @@ load.provide("example.newGui", (function() {
 			},
 			"grd":{
 				"type":"Selection",
-				"xOrigin":c.ORIGIN_MAX,
-				"yOrigin":c.ORIGIN_MAX,
+				"xOrigin":"right",
+				"yOrigin":"bottom",
 				"x":-50,
 				"y":-50,
 				"options":10,
@@ -166,7 +166,7 @@ load.provide("example.newGui", (function() {
 			}/*,
 			"test":{
 				"type":"Label",
-				"xOrigin":dusk.sgui.Component.ORIGIN_MAX,
+				"xOrigin":"right",
 				"x":-20,
 				"text":"Test Text",
 			}*/,
@@ -174,8 +174,8 @@ load.provide("example.newGui", (function() {
 				"type":"Rect",
 				"width":50,
 				"height":50,
-				"xOrigin":c.ORIGIN_MIDDLE,
-				"yOrigin":c.ORIGIN_MIDDLE
+				"xOrigin":"middle",
+				"yOrigin":"middle"
 			},
 			"c":{
 				"type":"Rect",

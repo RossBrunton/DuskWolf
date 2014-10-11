@@ -44,24 +44,24 @@ load.provide("dusk.sgui.Component", (function() {
 		this.x = 0;
 		/** The origin point for the x coordinate, this describes where the x coordinate "begins".
 		 * 
-		 * Must be one of the `ORIGIN_*` constants.
+		 * Must be one of "left", "middle" or "right".
 		 * @type integer
 		 * @default dusk.sgui.c#ORIGIN_MIN
 		 * @since 0.0.18-alpha
 		 */
-		this.xOrigin = c.ORIGIN_MIN;
+		this.xOrigin = "left";
 		/** The components y coordinate.
 		 * @type integer
 		 */
 		this.y = 0;
 		/** The origin point for the y coordinate, this describes where the y coordinate "begins".
 		 * 
-		 * Must be one of the `ORIGIN_*` constants.
+		 * Must be one of "top", "middle" or "bottom".
 		 * @type integer
 		 * @default dusk.sgui.c#ORIGIN_MIN
 		 * @since 0.0.18-alpha
 		 */
-		this.yOrigin = c.ORIGIN_MIN;
+		this.yOrigin = "top";
 		/** Whether the component will draw. If false, the component will not render.
 		 * @type boolean
 		 * @default true
@@ -399,11 +399,11 @@ load.provide("dusk.sgui.Component", (function() {
 				destX = this.container.mouse.x;
 				destY = this.container.mouse.y;
 				
-				if(this.xOrigin == c.ORIGIN_MAX) destXAdder = this.container.width - this.width;
-				if(this.xOrigin == c.ORIGIN_MIDDLE) destXAdder = (this.container.width - this.width)>>1;
+				if(this.xOrigin == "right") destXAdder = this.container.width - this.width;
+				if(this.xOrigin == "middle") destXAdder = (this.container.width - this.width)>>1;
 				
-				if(this.yOrigin == c.ORIGIN_MAX) destYAdder = this.container.height - this.height;
-				if(this.yOrigin == c.ORIGIN_MIDDLE) destYAdder = (this.container.height - this.height)>>1;
+				if(this.yOrigin == "bottom") destYAdder = this.container.height - this.height;
+				if(this.yOrigin == "middle") destYAdder = (this.container.height - this.height)>>1;
 				
 				destX += -this.x + this.container.xOffset - destXAdder;
 				destY += -this.y + this.container.yOffset - destYAdder;
@@ -411,11 +411,11 @@ load.provide("dusk.sgui.Component", (function() {
 				destX = e.x;
 				destY = e.y;
 				
-				if(this.xOrigin == c.ORIGIN_MAX) destXAdder = sgui.width - this.width;
-				if(this.xOrigin == c.ORIGIN_MIDDLE) destXAdder = (sgui.width - this.width)>>1;
+				if(this.xOrigin == "right") destXAdder = sgui.width - this.width;
+				if(this.xOrigin == "middle") destXAdder = (sgui.width - this.width)>>1;
 				
-				if(this.yOrigin == c.ORIGIN_MAX) destYAdder = sgui.height - this.height;
-				if(this.yOrigin == c.ORIGIN_MIDDLE) destYAdder = (sgui.height - this.height)>>1;
+				if(this.yOrigin == "bottom") destYAdder = sgui.height - this.height;
+				if(this.yOrigin == "middle") destYAdder = (sgui.height - this.height)>>1;
 				
 				destX += -this.x - destXAdder;
 				destY += -this.y - destYAdder;

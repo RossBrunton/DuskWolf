@@ -60,7 +60,7 @@ load.provide("dusk.rooms.sgui.FluidLayer", (function() {
 		
 		if((fluidY - e.d.slice.y) > e.d.dest.height) return;
 		
-		e.c.fillRect(e.d.dest.x, e.d.dest.y + (fluidY - e.d.slice.y), e.d.width, e.d.height - (fluidY - e.d.slice.y));
+		e.c.fillRect(e.d.dest.x, e.d.dest.y + (fluidY - e.d.slice.y), e.d.dest.width, e.d.dest.height - (fluidY - e.d.slice.y));
 	};
 	
 	FluidLayer.prototype.start = function() {

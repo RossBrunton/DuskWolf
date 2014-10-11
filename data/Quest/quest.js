@@ -104,8 +104,8 @@ load.provide("quest", (function() {
 	
 	root.get("fps", "FpsMeter").update({
 		"type":"FpsMeter",
-		"xOrigin":c.ORIGIN_MAX,
-		"yOrigin":c.ORIGIN_MAX
+		"xOrigin":"right",
+		"yOrigin":"bottom"
 	});
 	
 	root.get("actionFeed", "Group").update({
@@ -113,7 +113,7 @@ load.provide("quest", (function() {
 		"children":{
 			"feed":{
 				"type":"Feed",
-				"xOrigin":c.ORIGIN_MAX,
+				"xOrigin":"right",
 				"x":-5,
 				"y":5,
 				"globals":{

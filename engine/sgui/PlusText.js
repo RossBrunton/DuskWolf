@@ -115,7 +115,7 @@ load.provide("dusk.sgui.PlusText", (function() {
 			}
 			
 			this.getComponent("plus").x = 0;
-			this.getComponent("label").xOrigin = c.ORIGIN_MIDDLE;
+			this.getComponent("label").xOrigin = "middle";
 			this.getComponent("label").x = 0;
 			
 			this.getComponent("plus").width = this.width;

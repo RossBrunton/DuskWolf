@@ -97,8 +97,8 @@ load.provide("questScript", (function() {
 		"children":{
 			"meter":{
 				"type":"FpsMeter",
-				"xOrigin":c.ORIGIN_MAX,
-				"yOrigin":c.ORIGIN_MAX
+				"xOrigin":"right",
+				"yOrigin":"bottom"
 			},
 		}
 	});
@@ -108,7 +108,7 @@ load.provide("questScript", (function() {
 		"children":{
 			"feed":{
 				"type":"Feed",
-				"xOrigin":c.ORIGIN_MAX,
+				"xOrigin":"right",
 				"x":-5,
 				"y":5,
 				"globals":{
@@ -171,8 +171,8 @@ load.provide("questScript", (function() {
 		"children":{
 			"say":{
 				"type":"SayBox",
-				"yOrigin":c.ORIGIN_MAX,
-				"xOrigin":c.ORIGIN_MIDDLE,
+				"yOrigin":"bottom",
+				"xOrigin":"middle",
 				"children":{
 					"right":{
 					},

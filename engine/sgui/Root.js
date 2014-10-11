@@ -36,8 +36,8 @@ load.provide("dusk.sgui.Root", (function() {
 		var com = this._components[name];
 		
 		var destXAdder = 0;
-		if(com.xOrigin == c.ORIGIN_MAX) destXAdder = this.width - com.width;
-		if(com.xOrigin == c.ORIGIN_MIDDLE) destXAdder = (this.width - com.width)>>1;
+		if(com.xOrigin == "right") destXAdder = this.width - com.width;
+		if(com.xOrigin == "middle") destXAdder = (this.width - com.width)>>1;
 		
 		return this.x + com.x - this.xOffset + destXAdder;
 	};
@@ -51,8 +51,8 @@ load.provide("dusk.sgui.Root", (function() {
 		var com = this._components[name];
 		
 		var destYAdder = 0;
-		if(com.yOrigin == c.ORIGIN_MAX) destYAdder = this.height - com.height;
-		if(com.yOrigin == c.ORIGIN_MIDDLE) destYAdder = (this.height - com.height)>>1;
+		if(com.yOrigin == "bottom") destYAdder = this.height - com.height;
+		if(com.yOrigin == "middle") destYAdder = (this.height - com.height)>>1;
 		
 		return this.y + com.y - this.yOffset + destYAdder;
 	};

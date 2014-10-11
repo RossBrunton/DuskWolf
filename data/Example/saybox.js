@@ -41,8 +41,8 @@ load.provide("example.saybox", (function() {
 		"children":{
 			"say":{
 				"type":"SayBox",
-				"yOrigin":c.ORIGIN_MAX,
-				"xOrigin":c.ORIGIN_MIDDLE,
+				"yOrigin":"bottom",
+				"xOrigin":"middle",
 				"children":{
 					"right":{
 					},
@@ -55,7 +55,7 @@ load.provide("example.saybox", (function() {
 			
 			"meter":{
 				"type":"FpsMeter",
-				"xOrigin":c.ORIGIN_MAX
+				"xOrigin":"right"
 			},
 		},
 	});

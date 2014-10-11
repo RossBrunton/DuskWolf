@@ -250,7 +250,7 @@ load.provide("example.plat", (function() {
 			"pauseText":{
 				"type":"Label",
 				"text":"Paused",
-				"xOrigin":c.ORIGIN_MAX,
+				"xOrigin":"right",
 				"colour":"#0000ff",
 			},
 			"controls":{
@@ -281,8 +281,8 @@ load.provide("example.plat", (function() {
 		"children":{
 			"meter":{
 				"type":"FpsMeter",
-				"yOrigin":c.ORIGIN_MAX,
-				"xOrigin":c.ORIGIN_MAX,
+				"yOrigin":"bottom",
+				"xOrigin":"right",
 			}
 		},
 		"width":sgui.width,

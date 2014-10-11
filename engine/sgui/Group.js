@@ -415,11 +415,11 @@ load.provide("dusk.sgui.Group", (function() {
 				data.dest = PosRect.pool.alloc().setWH(e.d.dest.x, e.d.dest.y, com.width, com.height);
 				
 				// Handle origins
-				if(com.xOrigin == c.ORIGIN_MAX) data.dest.shift(e.d.origin.width - data.origin.width, 0);
-				if(com.xOrigin == c.ORIGIN_MIDDLE) data.dest.shift((e.d.origin.width - data.origin.width) >> 1, 0);
+				if(com.xOrigin == "right") data.dest.shift(e.d.origin.width - data.origin.width, 0);
+				if(com.xOrigin == "middle") data.dest.shift((e.d.origin.width - data.origin.width) >> 1, 0);
 				
-				if(com.yOrigin == c.ORIGIN_MAX) data.dest.shift(0, (e.d.origin.height - data.origin.height));
-				if(com.yOrigin == c.ORIGIN_MIDDLE) data.dest.shift(0, (e.d.origin.height - data.origin.height) >> 1);
+				if(com.yOrigin == "bottom") data.dest.shift(0, (e.d.origin.height - data.origin.height));
+				if(com.yOrigin == "middle") data.dest.shift(0, (e.d.origin.height - data.origin.height) >> 1);
 				
 				// Handle offsets
 				data.dest.shift(-this.xOffset, -this.yOffset);
@@ -938,8 +938,8 @@ load.provide("dusk.sgui.Group", (function() {
 		var com = this._components[name];
 		
 		var destXAdder = 0;
-		if(com.xOrigin == c.ORIGIN_MAX) destXAdder = this.width - com.width;
-		if(com.xOrigin == c.ORIGIN_MIDDLE) destXAdder = (this.width - com.width)>>1;
+		if(com.xOrigin == "right") destXAdder = this.width - com.width;
+		if(com.xOrigin == "middle") destXAdder = (this.width - com.width)>>1;
 		
 		return this.container.getTrueX(this.name) + com.x - this.xOffset + destXAdder;
 	};
@@ -953,8 +953,8 @@ load.provide("dusk.sgui.Group", (function() {
 		var com = this._components[name];
 		
 		var destYAdder = 0;
-		if(com.yOrigin == c.ORIGIN_MAX) destYAdder = this.height - com.height;
-		if(com.yOrigin == c.ORIGIN_MIDDLE) destYAdder = (this.height - com.height)>>1;
+		if(com.yOrigin == "bottom") destYAdder = this.height - com.height;
+		if(com.yOrigin == "middle") destYAdder = (this.height - com.height)>>1;
 		
 		return this.container.getTrueY(this.name) + com.y - this.yOffset + destYAdder;
 	};
