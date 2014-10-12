@@ -26,6 +26,13 @@ load.provide("dusk.sgui.Grid", (function() {
 	 *  If `multiple` is false, then it will stop; this makes groups a really usefull way of populating a group of
 	 *  elements dynamically. 
 	 * 
+	 * When adding a child with display "expand", it will be sized and located so that it takes up an appropriate amount
+	 *  of the grid. For example, you can create two components next to each other, and have them automatically take up
+	 *  half the grid, by setting both their displays to expand.
+	 * 
+	 * You should not change the x or y coordinates of component in a grid, and should not make anny assumptions on
+	 *  them.
+	 * 
 	 * @extends dusk.sgui.Group
 	 * @param {?dusk.sgui.Group} parent The container that this component is in.
 	 * @param {string} componentName The name of the component.
@@ -92,6 +99,9 @@ load.provide("dusk.sgui.Grid", (function() {
 		 * @since 0.0.17-alpha
 		 */
 		this._populationEvent = new EventDispatcher("dusk.sgui.Grid._populationEvent");
+		
+		this._cachedWidth = 0;
+		this._cachedHeight = 0;
 		
 		//Prop masks
 		this._registerPropMask("vspacing", "vspacing");
@@ -169,8 +179,8 @@ load.provide("dusk.sgui.Grid", (function() {
 				}
 				
 				// Fire the event
-				com = this._populationEvent.firePass({"action":"create", "current":child[p], "child":child, "component":com,
-					"globals":this.globals
+				com = this._populationEvent.firePass({"action":"create", "current":child[p], "child":child,
+					"component":com, "globals":this.globals
 				}, "create").component;
 				
 				// Give the component properties
@@ -196,14 +206,88 @@ load.provide("dusk.sgui.Grid", (function() {
 		get: function() {return undefined;}
 	});
 	
+	/** Override to enable expand components to be in the correct locations.
+	 * 
+	 * @param {dusk.sgui.Component} com The component added.
+	 * @param {object} event The event object for this group's draw function.
+	 * @param {object} ranges The current component's draw event object, which is incomplete.
+	 * @param {int} pos The position, elements earlier in the draw order will have lower number, and it increases by one
+	 *  each time.
+	 * @return {int} The width of the component.
+	 * @since 0.0.21-alpha
+	 * @protected
+	 */
+	Grid.prototype._getExpandWidth = function(com, event, ranges, pos) {
+		return (event.d.slice.width / this.cols) - this.hspacing;
+	};
+	
+	/** Override to enable expand components to be in the correct locations.
+	 * 
+	 * @param {dusk.sgui.Component} com The component added.
+	 * @param {object} event The event object for this group's draw function.
+	 * @param {object} ranges The current component's draw event object, which is incomplete.
+	 * @param {int} pos The position, elements earlier in the draw order will have lower number, and it increases by one
+	 *  each time.
+	 * @return {int} The height of the component.
+	 * @since 0.0.21-alpha
+	 * @protected
+	 */
+	Grid.prototype._getExpandHeight = function(com, event, ranges, pos) {
+		return (event.d.slice.height / this.rows) - this.vspacing;
+	};
+	
+	/** Override to enable expand components to be in the correct locations.
+	 * 
+	 * @param {dusk.sgui.Component} com The component added.
+	 * @param {object} event The event object for this group's draw function.
+	 * @param {object} ranges The current component's draw event object, which is incomplete.
+	 * @param {int} pos The position, elements earlier in the draw order will have lower number, and it increases by one
+	 *  each time.
+	 * @return {int} The x coordinate of the component.
+	 * @since 0.0.21-alpha
+	 * @protected
+	 */
+	Grid.prototype._getExpandX = function(com, event, ranges, pos) {
+		var cx = pos % this.cols;
+		var width = ((event.d.slice.width + this.hspacing) / this.cols) - this.hspacing;
+		
+		return cx*(width+this.hspacing);
+	};
+	
+	/** Override to enable expand components to be in the correct locations.
+	 * 
+	 * @param {dusk.sgui.Component} com The component added.
+	 * @param {object} event The event object for this group's draw function.
+	 * @param {object} ranges The current component's draw event object, which is incomplete.
+	 * @param {int} pos The position, elements earlier in the draw order will have lower number, and it increases by one
+	 *  each time.
+	 * @return {int} The y coordinate of the component.
+	 * @since 0.0.21-alpha
+	 * @protected
+	 */
+	Grid.prototype._getExpandY = function(com, event, ranges, pos) {
+		var cy = ~~(pos / this.cols);
+		var height = ((event.d.slice.height + this.vspacing) / this.rows) - this.vspacing;
+		
+		return cy*(height+this.vspacing);
+	};
+	
 	/** Updates the location of all the components, arranging them back into a grid if, for example,
 	 *  they have been moved or the spacing between them has changed.
 	 */
 	Grid.prototype.adjust = function() {
+		this._cachedWidth = 0;
 		for(var hy = 0; hy < this.rows; hy++){
 			for(var hx = 0; hx < this.cols; hx++){
 				var com = this.getComponent(hx+","+hy);
-				if(com) com.update({"y":(hy*com.height+hy*this.vspacing), "x":(hx*com.width+hx*this.hspacing)});
+				if(com) {
+					if(com.xDisplay == "fixed") {
+						com.update({"x":(hx*com.width+hx*this.hspacing)});
+					}
+					if(com.yDisplay == "fixed") {
+						com.update({"y":(hy*com.height+hy*this.vspacing)});
+					}
+				}
 			}
 		}
 	};

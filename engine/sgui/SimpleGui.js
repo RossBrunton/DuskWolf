@@ -47,6 +47,11 @@ load.provide("dusk.sgui", (function() {
 	 *  "sgui_left" and "sgui_right". If a component changes whether it is focused , its
 	 *  `dusk.sgui.Component.onFocusChange` event will fire.
 	 * 
+	 * Components have two "display modes"; "fixed" and "expand", when the component is in "fixed" mode, it will be
+	 *  placed at the coordinates given by it's "x,y" values, and with a width and height of those properties. When in
+	 *  "expand" mode, it will expand to take up a size, and have margins removed from it. How exactly this works
+	 *  depends on the container.
+	 * 
 	 * Component paths also exist, these paths are similar to file paths and allow you to specify one component relative
 	 *  to another.	From an example container "X" in another container "Y", which itself is in a root "Z", and with
 	 *  children "a", "b" and "c", with "c" having children "c1" and "c2" the following paths are as described:
@@ -415,17 +420,11 @@ load.provide("dusk.sgui", (function() {
 		for(var c = 0; c < _roots.length; c ++){
 			var data = sgui.drawDataPool.alloc();
 			
-			data.origin = PosRect.pool.alloc().setWH(_roots[c].x, _roots[c].x, _roots[c].width, _roots[c].height);
-			data.slice = PosRect.pool.alloc().setWH(0, 0, _roots[c].width, _roots[c].width);
-			data.dest = PosRect.pool.alloc().setWH(0, 0, _roots[c].width, _roots[c].width);
+			data.origin = PosRect.pool.alloc().setWH(_roots[c].x, _roots[c].x, sgui.width, sgui.height);
+			data.slice = PosRect.pool.alloc().setWH(0, 0, sgui.width, sgui.height);
+			data.dest = PosRect.pool.alloc().setWH(0, 0, sgui.width, sgui.height);
 			
 			data.alpha = 1;
-			data.sourceX = 0;
-			data.sourceY = 0;
-			data.destX = _roots[c].x;
-			data.destY = _roots[c].y;
-			data.width = _roots[c].width;
-			data.height = _roots[c].height;
 			
 			if(sgui.noCacheCanvas) {
 				_roots[c].draw(data, _ctx);

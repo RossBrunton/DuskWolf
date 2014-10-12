@@ -31,6 +31,8 @@ load.provide("dusk.sgui.Label", (function() {
 	 * Text can have a border round it, using the `{@link dusk.sgui.Label#bsize}` and
 	 * `{@link dusk.sgui.Label#borderColour}` properties.
 	 * 
+	 * Labels with an xDisplay or yDisplay of "expand" are a bit wonky, and will not work correctly.
+	 * 
 	 * @param {dusk.sgui.Group} parent The container that this component is in.
 	 * @param {string} name The name of the component.
 	 * @extends dusk.sgui.Component
@@ -407,8 +409,8 @@ load.provide("dusk.sgui.Label", (function() {
 		var cache = this._widthCache;
 		if(!widthOnly) {
 			cache = this._cache;
-			this._cache.width = this.width;
-			this._cache.height = this.height;
+			this._cache.width = this._cachedWidth;
+			this._cache.height = this.size + (this.padding << 1);
 		};
 		var c = cache.getContext("2d");
 		var font = this.font;

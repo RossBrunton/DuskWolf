@@ -39,6 +39,8 @@ load.provide("dusk.particles.sgui.ParticleField", (function() {
 		this.frame.listen(_frame.bind(this));
 		
 		this.createField(1 << 16);
+		this.xDisplay = "expand";
+		this.yDisplay = "expand";
 	};
 	ParticleField.prototype = Object.create(Component.prototype);
 	
@@ -91,16 +93,6 @@ load.provide("dusk.particles.sgui.ParticleField", (function() {
 			}
 		}
 		
-		// Pointless fancy effect
-		if(editor && editor.active && this.focused) {
-			for(var c = (this.width * this.height) / 2000; c > 0; c --) {
-				this.inject(
-					0, 0, 0, 100, ~~(Math.random() * this.width), ~~(Math.random() * this.height),
-					1, 1, 0, 0, 0, 0, 0, 5
-				);
-			}
-		}
-		
 		return e;
 	};
 	
@@ -137,6 +129,16 @@ load.provide("dusk.particles.sgui.ParticleField", (function() {
 				}
 			}else if(this._highest == i) {
 				this._highest -= 11;
+			}
+		}
+		
+		// Pointless fancy effect
+		if(editor && editor.active && this.focused) {
+			for(var i = (e.d.origin.width * e.d.origin.height) / 2000; i > 0; i --) {
+				this.inject(
+					0, 0, 0, 100, ~~(Math.random() * e.d.origin.width), ~~(Math.random() * e.d.origin.height),
+					1, 1, 0, 0, 0, 0, 0, 5
+				);
 			}
 		}
 		

@@ -51,6 +51,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 		
 		//Listeners
 		this.frame.listen(_basicMainFrame.bind(this));
+		this._drawingChildren.listen(_updateScroll.bind(this));
 		this.onControl.listen(this.saveRoomToConsole.bind(this), controls.addControl("basicmain_save", "S"));
 		this.onControl.listen((function(e) {
 			if(editor.active) {
@@ -93,6 +94,11 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 		this.dirPress.listen(_bmLeftAction.bind(this), c.DIR_LEFT);
 		this.dirPress.listen(_bmUpAction.bind(this), c.DIR_UP);
 		this.dirPress.listen(_bmDownAction.bind(this), c.DIR_DOWN);
+		
+		this.xDisplay = "expand";
+		this.yDisplay = "expand";
+		this.width = -1;
+		this.height = -1;
 	};
 	LayeredRoom.prototype = Object.create(Group.prototype);
 	
@@ -159,8 +165,6 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 				}
 				
 				this.flow(this.getPrimaryEntityLayer().name);
-				
-				this.autoScroll();
 				
 				fulfill({"name":name});
 			}).bind(this));
@@ -274,18 +278,18 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 			entLayers[i].scheme = this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME);
 			entLayers[i].particles = this.getFirstLayerOfType(LayeredRoom.LAYER_PARTICLES);
 			entLayers[i].fluid = this.getFirstLayerOfType(LayeredRoom.LAYER_FLUID);
-			entLayers[i].width =
-				this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP).width;
-			entLayers[i].height =
-				this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP).height;
+			//entLayers[i].width =
+			//	this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP).width;
+			//entLayers[i].height =
+			//	this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP).height;
 		}
 		
 		var pLayers = this.getAllLayersOfType(LayeredRoom.LAYER_PARTICLES | LayeredRoom.LAYER_FLUID);
 		for(var i = pLayers.length-1; i >= 0; i --) {
-			pLayers[i].width =
-				this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP).width;
-			pLayers[i].height =
-				this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP).height;
+			//pLayers[i].width =
+			//	this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP).width;
+			//pLayers[i].height =
+			//	this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP).height;
 		}
 	};
 	
@@ -328,9 +332,6 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 	};
 	
 	var _basicMainFrame = function(e) {
-		//Center the player
-		this.autoScroll();
-		
 		//Ask all entities to do something
 		//if(this.active) {
 			for(var i = 0; i < this._layers.length; i ++) {
@@ -377,7 +378,8 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 			if(this.get("editorLabel")) {
 				this.get("editorLabel").visible = true;
 				this.get("editorLabel").text = layerImg + this.focus;
-				this.get("editorLabel").x = this.xOffset+this.width/2-this.get("editorLabel").width/2;
+				this.get("editorLabel").xOrigin = "middle";
+				this.get("editorLabel").x = this.xOffset;
 				this.get("editorLabel").y = this.yOffset + 10;
 				this.get("editorLabel").size = 14;
 				this.get("editorLabel").colour = this.editorColour;
@@ -394,7 +396,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 		}
 	};
 	
-	LayeredRoom.prototype.autoScroll = function() {
+	var _updateScroll = function(e) {
 		// Centre the player
 		var seekCoords = [];
 		if(editor.active) {
@@ -412,26 +414,26 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 		}
 		
 		if(this.scrollInstantly) {
-			this.xOffset = seekCoords[0] - (this.width >> 1);
-			this.yOffset = seekCoords[1] - (this.height >> 1);
+			this.xOffset = seekCoords[0] - (e.d.slice.width >> 1);
+			this.yOffset = seekCoords[1] - (e.d.slice.height >> 1);
 		}else{
 			var oldX = this.xOffset;
 			var oldY = this.yOffset;
 			
-			if(seekCoords[0] + (seekCoords[2] >> 1) < this.xOffset + (this.width >> 1) * this.scrollRegion)
+			if(seekCoords[0] + (seekCoords[2] >> 1) < this.xOffset + (e.d.origin.width >> 1) * this.scrollRegion)
 				this.xOffset -= this.scrollSpeed;
-			if(seekCoords[0] + (seekCoords[2] >> 1) > this.xOffset + this.width - ((this.width >> 1)*this.scrollRegion))
+			if(seekCoords[0] + (seekCoords[2] >> 1) > this.xOffset + e.d.origin.width - ((e.d.origin.width >> 1)*this.scrollRegion))
 				this.xOffset += this.scrollSpeed;
-			if(seekCoords[1] + (seekCoords[3] >> 1) < this.yOffset + (this.height >> 1) * this.scrollRegion)
+			if(seekCoords[1] + (seekCoords[3] >> 1) < this.yOffset + (e.d.origin.height >> 1) * this.scrollRegion)
 				this.yOffset -= this.scrollSpeed;
-			if(seekCoords[1] + (seekCoords[3] >> 1) > this.yOffset+this.height - ((this.height >> 1)*this.scrollRegion))
+			if(seekCoords[1] + (seekCoords[3] >> 1) > this.yOffset+e.d.origin.height - ((e.d.origin.height >> 1)*this.scrollRegion))
 				this.yOffset += this.scrollSpeed;
 		}
 		
-		if(this.xOffset > this.getContentsWidth(false) - this.width)
-			this.xOffset = this.getContentsWidth(false) - this.width;
-		if(this.yOffset > this.getContentsHeight(false) - this.height)
-			this.yOffset = this.getContentsHeight(false) - this.height;
+		if(this.xOffset > this.getContentsWidth(false) - e.d.slice.width)
+			this.xOffset = this.getContentsWidth(false) - e.d.slice.width;
+		if(this.yOffset > this.getContentsHeight(false) - e.d.slice.height)
+			this.yOffset = this.getContentsHeight(false) - e.d.slice.height;
 		
 		if(this.xOffset < 0) this.xOffset = 0;
 		if(this.yOffset < 0) this.yOffset = 0;

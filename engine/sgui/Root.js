@@ -21,9 +21,6 @@ load.provide("dusk.sgui.Root", (function() {
 		//Roots are always active and focused
 		this.active = true;
 		this.focused = true;
-		
-		this.height = -2;
-		this.width = -2;
 	};
 	Root.prototype = Object.create(Group.prototype);
 

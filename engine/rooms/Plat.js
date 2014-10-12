@@ -35,7 +35,7 @@ load.provide("dusk.rooms.plat", (function() {
 	
 	plat.make = function(component, name) {
 		component.modifyComponent(
-			[{"name":name, "type":"LayeredRoom", "width":-2, "height":-2, "scrollInstantly":true}]
+			[{"name":name, "type":"LayeredRoom", "scrollInstantly":true, "margins":[10, 10, 10, 10], "mark":"#00ffff"}]
 		);
 		component.becomeActive();
 		component.flow(name);

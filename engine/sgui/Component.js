@@ -38,30 +38,6 @@ load.provide("dusk.sgui.Component", (function() {
 		 */
 		this.name = componentName;
 		
-		/** The components x coordinate.
-		 * @type integer
-		 */
-		this.x = 0;
-		/** The origin point for the x coordinate, this describes where the x coordinate "begins".
-		 * 
-		 * Must be one of "left", "middle" or "right".
-		 * @type integer
-		 * @default dusk.sgui.c#ORIGIN_MIN
-		 * @since 0.0.18-alpha
-		 */
-		this.xOrigin = "left";
-		/** The components y coordinate.
-		 * @type integer
-		 */
-		this.y = 0;
-		/** The origin point for the y coordinate, this describes where the y coordinate "begins".
-		 * 
-		 * Must be one of "top", "middle" or "bottom".
-		 * @type integer
-		 * @default dusk.sgui.c#ORIGIN_MIN
-		 * @since 0.0.18-alpha
-		 */
-		this.yOrigin = "top";
 		/** Whether the component will draw. If false, the component will not render.
 		 * @type boolean
 		 * @default true
@@ -72,18 +48,68 @@ load.provide("dusk.sgui.Component", (function() {
 		 * @default 1
 		 */
 		this.alpha = 1;
-		/** The component's height, in pixels.
-		 * Some components do not support setting their dimensions,
-		 * 	in which case you cannot set this to anything other than 0.
+		
+		/** The display mode of the component in the horizontal direction.
+		 * 
+		 * Must be one of "fixed" or "expand".
+		 * @type string
+		 * @default "fixed"
+		 * @since 0.0.21-alpha
+		 */
+		this.xDisplay = "fixed";
+		/** The display mode of the component in the vertical direction.
+		 * 
+		 * Must be one of "fixed" or "expand".
+		 * @type string
+		 * @default "fixed"
+		 * @since 0.0.21-alpha
+		 */
+		this.yDisplay = "fixed";
+		
+		/** The components x coordinate when the display mode is "fixed".
+		 * @type integer
+		 */
+		this.x = 0;
+		/** The origin point for the x coordinate, this describes where the x coordinate "begins".
+		 * 
+		 * Must be one of "left", "middle" or "right".
+		 * @type string
+		 * @default "left"
+		 * @since 0.0.18-alpha
+		 */
+		this.xOrigin = "left";
+		/** The components y coordinate when the display mode is "fixed".
+		 * @type integer
+		 */
+		this.y = 0;
+		/** The origin point for the y coordinate, this describes where the y coordinate "begins".
+		 * 
+		 * Must be one of "top", "middle" or "bottom".
+		 * @type string
+		 * @default "top"
+		 * @since 0.0.18-alpha
+		 */
+		this.yOrigin = "top";
+		
+		/** The component's height, in pixels if the display mode is "fixed".
+		 * 
+		 * Some components do not support setting their dimensions,	in which case you cannot set this to anything other
+		 *  than 0.
 		 * @type integer
 		 */
 		this.height = 0;
-		/** The component's width, in pixels. 
-		 * Some components do not support setting their dimensions,
-		 * 	in which case you cannot set this to anything other than 0.
+		/** The component's width, in pixels, if the display mode is "fixed". 
+		 * Some components do not support setting their dimensions, in which case you cannot set this to anything other
+		 *  than 0.
 		 * @type integer
 		 */
 		this.width = 0;
+		/** When the display is "expand", this is empty space around the top, right, bottom and left side.
+		 * @type array
+		 * @since 0.0.21-alpha
+		 */
+		this.margins = [0, 0, 0, 0];
+		
 		/** If set to a string representing a colour ("#ff0000" or "red", for example) this will draw a border
 		 *  of that colour around the component. This can be used to check if width and height are set properly.
 		 * @type string
@@ -335,6 +361,9 @@ load.provide("dusk.sgui.Component", (function() {
 		}
 		
 		//Prop masks
+		this._registerPropMask("xDisplay", "xDisplay");
+		this._registerPropMask("yDisplay", "yDisplay");
+		this._registerPropMask("margins", "margins");
 		this._registerPropMask("x", "x");
 		this._registerPropMask("xOrigin", "xOrigin");
 		this._registerPropMask("y", "y");

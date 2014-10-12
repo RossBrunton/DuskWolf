@@ -10,6 +10,7 @@ load.provide("dusk.sgui.Group", (function() {
 	var interaction = load.require("dusk.input.interaction");
 	var containerUtils = load.require("dusk.utils.containerUtils");
 	var PosRect = load.require("dusk.utils.PosRect");
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	
 	/** A group contains multiple components, and manages things like keyboard events and drawing.
 	 * 
@@ -151,6 +152,15 @@ load.provide("dusk.sgui.Group", (function() {
 		 * @since 0.0.20-alpha
 		 */
 		this._verChangedId = 0;
+		
+		/** An event dispatcher which is fired before children are drawn.
+		 * 
+		 * The event object is the same one given to the draw function.
+		 * @type dusk.utils.EventDispatcher
+		 * @protected
+		 * @since 0.0.21-alpha
+		 */
+		this._drawingChildren = new EventDispatcher("dusk.sgui.Group._drawingChildren");
 		
 		//Prop masks
 		this._registerPropMask("focus", "focus", true, ["children"]);
@@ -399,7 +409,8 @@ load.provide("dusk.sgui.Group", (function() {
 	 * @private
 	 */
 	var _groupDraw = function(e) {
-		//Assume all children can support all rendering options
+		this._drawingChildren.fire(e);
+		
 		for(var i = 0; i < this._drawOrder.length; i++) {
 			if(this._drawOrder[i] in this._components) {
 				var com = this._components[this._drawOrder[i]];
@@ -414,21 +425,51 @@ load.provide("dusk.sgui.Group", (function() {
 				data.slice = PosRect.pool.alloc().setWH(0, 0, com.width, com.height);
 				data.dest = PosRect.pool.alloc().setWH(e.d.dest.x, e.d.dest.y, com.width, com.height);
 				
-				// Handle origins
-				if(com.xOrigin == "right") data.dest.shift(e.d.origin.width - data.origin.width, 0);
-				if(com.xOrigin == "middle") data.dest.shift((e.d.origin.width - data.origin.width) >> 1, 0);
+				// Handle display modes
+				// For X:
+				if(com.xDisplay == "expand") {
+					data.dest.shift(this._getExpandX(com, e, data, i) + com.margins[3], 0);
+					data.origin.shiftTo(com.margins[3], data.origin.y);
+					
+					var width = this._getExpandWidth(com, e, data, i);
+					
+					data.dest.sizeTo(width - com.margins[1] - com.margins[3], data.dest.height);
+					data.origin.sizeTo(width - com.margins[1] - com.margins[3], data.origin.height);
+					data.slice.sizeTo(width - com.margins[1] - com.margins[3], data.slice.height);
+				}else{
+					// Handle origins
+					if(com.xOrigin == "right") data.dest.shift(e.d.origin.width - data.origin.width, 0);
+					if(com.xOrigin == "middle") data.dest.shift((e.d.origin.width - data.origin.width) >> 1, 0);
 				
-				if(com.yOrigin == "bottom") data.dest.shift(0, (e.d.origin.height - data.origin.height));
-				if(com.yOrigin == "middle") data.dest.shift(0, (e.d.origin.height - data.origin.height) >> 1);
+					// Handle the component's location
+					data.dest.shift(com.x, 0);
+				}
+				
+				// For Y:
+				if(com.yDisplay == "expand") {
+					data.dest.shift(0, this._getExpandY(com, e, data, i) + com.margins[0]);
+					data.origin.shiftTo(data.origin.x, com.margins[0]);
+					
+					var height = this._getExpandHeight(com, e, data);
+					
+					data.dest.sizeTo(data.dest.width, height - com.margins[2] - com.margins[0]);
+					data.origin.sizeTo(data.origin.width, height - com.margins[2] - com.margins[0]);
+					data.slice.sizeTo(data.slice.width, height - com.margins[2] - com.margins[0]);
+				}else{
+					// Handle origins
+					if(com.yOrigin == "bottom") data.dest.shift(0, (e.d.origin.height - data.origin.height));
+					if(com.yOrigin == "middle") data.dest.shift(0, (e.d.origin.height - data.origin.height) >> 1);
+				
+					// Handle the component's location
+					data.dest.shift(0, com.y);
+				}
 				
 				// Handle offsets
-				data.dest.shift(-this.xOffset, -this.yOffset);
+				//data.dest.shift(-this.xOffset, -this.yOffset);
+				data.slice.shift(this.xOffset, this.yOffset);
 				
 				// And slices
 				data.dest.shift(-e.d.slice.x, -e.d.slice.y);
-				
-				// Handle the component's location
-				data.dest.shift(com.x, com.y);
 				
 				// Handle right
 				if(data.dest.ex > e.d.dest.ex) {
@@ -461,8 +502,8 @@ load.provide("dusk.sgui.Group", (function() {
 				var skip = false;
 				
 				// Off to the right/bottom
-				if(data.dest.x >= e.d.dest.ex) skip = true;
-				if(data.dest.y >= e.d.dest.ey) skip = true;
+				if(data.slice.x >= e.d.slice.ex) skip = true;
+				if(data.slice.y >= e.d.slice.ey) skip = true;
 				
 				// Small
 				if(data.dest.width <= 0 || data.dest.height <= 0) skip = true;
@@ -480,6 +521,70 @@ load.provide("dusk.sgui.Group", (function() {
 				sgui.drawDataPool.free(data);
 			}
 		}
+	};
+	
+	/** Should return the width of a component with display set to "expand".
+	 * 
+	 * This mainly exists so that subclasses can extend it.
+	 * @param {dusk.sgui.Component} com The component added.
+	 * @param {object} event The event object for this group's draw function.
+	 * @param {object} ranges The current component's draw event object, which is incomplete.
+	 * @param {int} pos The position, elements earlier in the draw order will have lower number, and it increases by one
+	 *  each time.
+	 * @return {int} The width of the component.
+	 * @since 0.0.21-alpha
+	 * @protected
+	 */
+	Group.prototype._getExpandWidth = function(com, event, ranges, pos) {
+		return event.d.slice.width;
+	};
+	
+	/** Should return the height of a component with display set to "expand".
+	 * 
+	 * This mainly exists so that subclasses can extend it.
+	 * @param {dusk.sgui.Component} com The component added.
+	 * @param {object} event The event object for this group's draw function.
+	 * @param {object} ranges The current component's draw event object, which is incomplete.
+	 * @param {int} pos The position, elements earlier in the draw order will have lower number, and it increases by one
+	 *  each time.
+	 * @return {int} The height of the component.
+	 * @since 0.0.21-alpha
+	 * @protected
+	 */
+	Group.prototype._getExpandHeight = function(com, event, ranges, pos) {
+		return event.d.slice.height;
+	};
+	
+	/** Should return the x coordinate of a component with display set to "expand".
+	 * 
+	 * This mainly exists so that subclasses can extend it.
+	 * @param {dusk.sgui.Component} com The component added.
+	 * @param {object} event The event object for this group's draw function.
+	 * @param {object} ranges The current component's draw event object, which is incomplete.
+	 * @param {int} pos The position, elements earlier in the draw order will have lower number, and it increases by one
+	 *  each time.
+	 * @return {int} The x coordinate of the component.
+	 * @since 0.0.21-alpha
+	 * @protected
+	 */
+	Group.prototype._getExpandX = function(com, event, ranges, pos) {
+		return 0;
+	};
+	
+	/** Should return the y coordinate of a component with display set to "expand".
+	 * 
+	 * This mainly exists so that subclasses can extend it.
+	 * @param {dusk.sgui.Component} com The component added.
+	 * @param {object} event The event object for this group's draw function.
+	 * @param {object} ranges The current component's draw event object, which is incomplete.
+	 * @param {int} pos The position, elements earlier in the draw order will have lower number, and it increases by one
+	 *  each time.
+	 * @return {int} The y coordinate of the component.
+	 * @since 0.0.21-alpha
+	 * @protected
+	 */
+	Group.prototype._getExpandY = function(com, event, ranges, pos) {
+		return 0;
 	};
 	
 	/** Calls the `{@link dusk.sgui.Component.frame}` method of all components.
@@ -754,13 +859,7 @@ load.provide("dusk.sgui.Group", (function() {
 	//Width
 	Object.defineProperty(Group.prototype, "width", {
 		get: function() {
-			if(this._width == -2) {
-				if(this.container !== null) {
-					return this.container.width;
-				}
-				
-				return sgui.width;
-			}else if(this._width == -1) {
+			if(this._width == -1) {
 				return this.getContentsWidth(true);
 			}else{
 				return this._width;
@@ -775,13 +874,7 @@ load.provide("dusk.sgui.Group", (function() {
 	//Height
 	Object.defineProperty(Group.prototype, "height", {
 		get: function() {
-			if(this._height == -2) {
-				if(this.container !== null) {
-					return this.container.height;
-				}
-				
-				return sgui.height;
-			}else if(this._height == -1) {
+			if(this._height == -1) {
 				return this.getContentsHeight(true);
 			}else{
 				return this._height;
