@@ -104,14 +104,14 @@ load.provide("dusk.sgui.Grid", (function() {
 		this._cachedHeight = 0;
 		
 		//Prop masks
-		this._registerPropMask("vspacing", "vspacing");
-		this._registerPropMask("hspacing", "hspacing");
-		this._registerPropMask("rows", "rows");
-		this._registerPropMask("cols", "cols");
-		this._registerPropMask("globals", "globals");
-		this._registerPropMask("recycle", "recycle");
-		this._registerPropMask("multiple", "multiple");
-		this._registerPropMask("populate", "__populate", undefined,["rows", "cols", "hspacing", "vspacing", "globals",
+		this._mapper.map("vspacing", "vspacing");
+		this._mapper.map("hspacing", "hspacing");
+		this._mapper.map("rows", "rows");
+		this._mapper.map("cols", "cols");
+		this._mapper.map("globals", "globals");
+		this._mapper.map("recycle", "recycle");
+		this._mapper.map("multiple", "multiple");
+		this._mapper.map("populate", "__populate", ["rows", "cols", "hspacing", "vspacing", "globals",
 			"recycle", "multiple"]
 		);
 		

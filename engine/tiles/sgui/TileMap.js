@@ -176,19 +176,17 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 		this.weights = null;
 		
 		//Prop masks
-		this._registerPropMask("map", "map", true, 
-			["src", "swidth", "sheight", "theight", "twidth", "tsize"]
-		);
-		this._registerPropMask("src", "src");
-		this._registerPropMask("rows", "rows");
-		this._registerPropMask("cols", "cols");
-		this._registerPropMask("animated", "animated");
+		this._mapper.map("map", "map", ["src", "swidth", "sheight", "theight", "twidth", "tsize"]);
+		this._mapper.map("src", "src");
+		this._mapper.map("rows", "rows");
+		this._mapper.map("cols", "cols");
+		this._mapper.map("animated", "animated");
 		
-		this._registerPropMask("sheight", "sheight");
-		this._registerPropMask("swidth", "swidth");
+		this._mapper.map("sheight", "sheight");
+		this._mapper.map("swidth", "swidth");
 		
-		this._registerPropMask("theight", "theight");
-		this._registerPropMask("twidth", "twidth");
+		this._mapper.map("theight", "theight");
+		this._mapper.map("twidth", "twidth");
 		
 		//Listeners
 		this.prepareDraw.listen(_draw.bind(this));

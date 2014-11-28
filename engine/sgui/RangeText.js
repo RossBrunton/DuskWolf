@@ -53,8 +53,8 @@ load.provide("dusk.sgui.RangeText", (function() {
 		this.activeBorder = "#990000";
 		
 		//Prop masks
-		this._registerPropMask("range", "range");
-		this._registerPropMask("orientation", "orientation");
+		this._mapper.map("range", "range");
+		this._mapper.map("orientation", "orientation");
 		
 		//Listeners
 		this.dirPress.listen(this._changeValue.bind(this));

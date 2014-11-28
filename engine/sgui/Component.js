@@ -220,7 +220,7 @@ load.provide("dusk.sgui.Component", (function() {
 		 * @type dusk.utils.Mapper
 		 * @protected
 		 */
-		this._props = new Mapper(this);
+		this._mapper = new Mapper(this);
 		/** An event dispatcher which fires when the element is deleted.
 		 * 
 		 * The event object has a single property named `component`, which is this.
@@ -361,39 +361,39 @@ load.provide("dusk.sgui.Component", (function() {
 		}
 		
 		//Prop masks
-		this._registerPropMask("xDisplay", "xDisplay");
-		this._registerPropMask("yDisplay", "yDisplay");
-		this._registerPropMask("margins", "margins");
-		this._registerPropMask("x", "x");
-		this._registerPropMask("xOrigin", "xOrigin");
-		this._registerPropMask("y", "y");
-		this._registerPropMask("yOrigin", "yOrigin");
-		this._registerPropMask("width", "width");
-		this._registerPropMask("height", "height");
-		this._registerPropMask("alpha", "alpha");
-		this._registerPropMask("visible", "visible");
-		this._registerPropMask("mark", "mark");
-		this._registerPropMask("activeBorder", "activeBorder");
-		this._registerPropMask("upFlow", "upFlow");
-		this._registerPropMask("downFlow", "downFlow");
-		this._registerPropMask("leftFlow", "leftFlow");
-		this._registerPropMask("rightFlow", "rightFlow");
-		this._registerPropMask("enabled", "enabled");
-		this._registerPropMask("deleted", "deleted");
-		this._registerPropMask("name", "name");
-		this._registerPropMask("style", "style");
-		this._registerPropMask("layer", "__layer");
-		this._registerPropMask("extras", "__extras");
-		this._registerPropMask("type", "type");
-		this._registerPropMask("mouse", "__mouse");
-		this._registerPropMask("allowMouse", "mouse.allow", undefined, ["mouse"]);
-		this._registerPropMask("mouse.allow", "mouse.allow", undefined, ["mouse"]);
-		this._registerPropMask("mouseAction", "mouse.action", undefined, ["mouse"]);
-		this._registerPropMask("mouse.action", "mouse.action", undefined, ["mouse"]);
-		this._registerPropMask("clickPierce", "mouse.clickPierce", undefined, ["mouse"]);
-		this._registerPropMask("mouse.clickPierce", "mouse.clickPierce", undefined, ["mouse"]);
-		this._registerPropMask("alsoFocus", "alsoFocus");
-		this._registerPropMask("actionFocus", "actionFocus");
+		this._mapper.map("xDisplay", "xDisplay");
+		this._mapper.map("yDisplay", "yDisplay");
+		this._mapper.map("margins", "margins");
+		this._mapper.map("x", "x");
+		this._mapper.map("xOrigin", "xOrigin");
+		this._mapper.map("y", "y");
+		this._mapper.map("yOrigin", "yOrigin");
+		this._mapper.map("width", "width");
+		this._mapper.map("height", "height");
+		this._mapper.map("alpha", "alpha");
+		this._mapper.map("visible", "visible");
+		this._mapper.map("mark", "mark");
+		this._mapper.map("activeBorder", "activeBorder");
+		this._mapper.map("upFlow", "upFlow");
+		this._mapper.map("downFlow", "downFlow");
+		this._mapper.map("leftFlow", "leftFlow");
+		this._mapper.map("rightFlow", "rightFlow");
+		this._mapper.map("enabled", "enabled");
+		this._mapper.map("deleted", "deleted");
+		this._mapper.map("name", "name");
+		this._mapper.map("style", "style");
+		this._mapper.map("layer", "__layer");
+		this._mapper.map("extras", "__extras");
+		this._mapper.map("type", "type");
+		this._mapper.map("mouse", "__mouse");
+		this._mapper.map("allowMouse", "mouse.allow", ["mouse"]);
+		this._mapper.map("mouse.allow", "mouse.allow", ["mouse"]);
+		this._mapper.map("mouseAction", "mouse.action", ["mouse"]);
+		this._mapper.map("mouse.action", "mouse.action", ["mouse"]);
+		this._mapper.map("clickPierce", "mouse.clickPierce", ["mouse"]);
+		this._mapper.map("mouse.clickPierce", "mouse.clickPierce", ["mouse"]);
+		this._mapper.map("alsoFocus", "alsoFocus");
+		this._mapper.map("actionFocus", "actionFocus");
 	};
 	
 	
@@ -527,35 +527,9 @@ load.provide("dusk.sgui.Component", (function() {
 		get: function() {return this.mouse != null;}
 	});
 	
-	/** This maps a property from the JSON representation of the object (One from {@link #update})
-	 *  to the JavaScript representation of the object.
-	 * 	If the property `name` exists in the JSON properties, then `mask` will be assigned its value.
-	 * 
-	 * @param {string} name The name in the JSON representation.
-	 * @param {string} mask The property name that that name shall be mapped to.
-	 * @param {boolean} redraw Depreciated
-	 * @param {?array} depends An array of "dependencies" of the property.
-	 * 	All the properties in this array will be set (if they exist in the JSON) beforet this one.
-	 * @protected
-	 */
-	Component.prototype._registerPropMask = function(name, mask, redraw, depends) {
-		this._props.map(name, mask, depends);
-	};
-	
-	/** Adds new dependancies to an existing property mask.
-	 * 
-	 * @param {string} name The property to add dependencies of.
-	 * @param {string|array} depends A string name, or array of such, of dependancies to add.
-	 * @protected
-	 * @since 0.0.17-alpha
-	 */
-	Component.prototype._addNewPropDepends = function(name, depends) {
-		this._props.addDepends(name, depends);
-	};
-	
 	/** Given an object, this function sets the properties of this object in relation to the properties of the object.
 	 * 
-	 * This is used to describe the component using JSON, for quicker efficiency.
+	 * This is used to describe the component using JSON.
 	 * 
 	 * The properties of the `props` object tend to match up with the names of public properties of the class
 	 *  (any changes will be noted in the documentation).
@@ -563,11 +537,10 @@ load.provide("dusk.sgui.Component", (function() {
 	 * This function will loop through all the properties is `props`
 	 *  and set that value to the corresponding value in this object.
 	 * 
-	 * @param {object} props The object to read the properties off.
-	 * @see {@link dusk.sgui.Component#_registerPropMask}
+	 * @param {object} props The object to read the properties from.
 	 */
 	Component.prototype.update = function(props) {
-		this._props.massSet(props);
+		this._mapper.massSet(props);
 	};
 	
 	/** Returns or sets a single property of the component.
@@ -581,9 +554,9 @@ load.provide("dusk.sgui.Component", (function() {
 	 * @see {dusk.sgui.Component#update}
 	 */
 	Component.prototype.prop = function(name, value) {
-		if(value === undefined) return this._props.get(name);
+		if(value === undefined) return this._mapper.get(name);
 		
-		return this._props.set(name, value);
+		return this._mapper.set(name, value);
 	};
 	
 	/** "Bundles up" the component into a simple object.
@@ -594,7 +567,7 @@ load.provide("dusk.sgui.Component", (function() {
 	 * @since 0.0.17-alpha
 	 */
 	Component.prototype.bundle = function() {
-		return this._props.massGet();
+		return this._mapper.massGet();
 	};
 	
 	

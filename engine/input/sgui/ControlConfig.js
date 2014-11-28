@@ -38,9 +38,9 @@ load.provide("dusk.input.sgui.ControlConfig", (function() {
 		this.borderActive = "#ff5555";
 		
 		//Prop masks
-		this._registerPropMask("border", "border");
-		this._registerPropMask("borderActive", "borderActive");
-		this._registerPropMask("control", "control");
+		this._mapper.map("border", "border");
+		this._mapper.map("borderActive", "borderActive");
+		this._mapper.map("control", "control");
 		
 		//Listeners
 		this.frame.listen(this._ccFrame.bind(this));

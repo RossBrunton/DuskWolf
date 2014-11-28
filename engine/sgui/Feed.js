@@ -64,10 +64,12 @@ load.provide("dusk.sgui.Feed", (function() {
 		this._appendEvent = new EventDispatcher("dusk.sgui.Feed._appendEvent");
 		
 		//Prop masks
-		this._registerPropMask("spacing", "spacing");
-		this._registerPropMask("appendDir", "appendDir");
-		this._registerPropMask("globals", "globals");
-		this._registerPropMask("append", "__append", undefined,["rows", "cols", "spacing", "globals", "appendDir"]);
+		this._mapper.map("spacing", "spacing");
+		this._mapper.map("appendDir", "appendDir");
+		this._mapper.map("globals", "globals");
+		this._mapper.map("append", [
+			function() {return undefined;}, function(value) {this.append(value)}
+		], ["rows", "cols", "spacing", "globals", "appendDir"]);
 		
 		//Listeners
 		this.dirPress.listen(_dirAction.bind(this));

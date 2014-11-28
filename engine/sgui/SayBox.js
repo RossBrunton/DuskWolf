@@ -118,8 +118,8 @@ load.provide("dusk.sgui.SayBox", (function() {
 		this.cancel.listen(_cancel.bind(this));
 		
 		// Prop masks
-		this._registerPropMask("delay", "delay");
-		this._registerPropMask("autoActive", "autoActive");
+		this._mapper.map("delay", "delay");
+		this._mapper.map("autoActive", "autoActive");
 	};
 	SayBox.prototype = Object.create(Group.prototype);
 	

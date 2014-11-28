@@ -51,15 +51,15 @@ load.provide("dusk.sgui.FancyRect", (function() {
 		this._cacheValue = "";
 		
 		//Prop masks
-		this._registerPropMask("back", "back", true);
-		this._registerPropMask("top", "top", true);
-		this._registerPropMask("bottom", "bottom", true);
-		this._registerPropMask("left", "left", true);
-		this._registerPropMask("right", "right", true);
-		this._registerPropMask("topLeft", "topLeft", true);
-		this._registerPropMask("topRight", "topRight", true);
-		this._registerPropMask("bottomLeft", "bottomLeft", true);
-		this._registerPropMask("bottomRight", "bottomRight", true);
+		this._mapper.map("back", "back");
+		this._mapper.map("top", "top");
+		this._mapper.map("bottom", "bottom");
+		this._mapper.map("left", "left");
+		this._mapper.map("right", "right");
+		this._mapper.map("topLeft", "topLeft");
+		this._mapper.map("topRight", "topRight");
+		this._mapper.map("bottomLeft", "bottomLeft");
+		this._mapper.map("bottomRight", "bottomRight");
 		
 		//Listeners
 		this.prepareDraw.listen(this._fancyRectDraw.bind(this));

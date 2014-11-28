@@ -109,7 +109,7 @@ load.provide("quest", (function() {
 	});
 	
 	root.get("actionFeed", "Group").update({
-		"width":-2,
+		"xDisplay":"expand",
 		"children":{
 			"feed":{
 				"type":"Feed",

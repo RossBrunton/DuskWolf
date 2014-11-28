@@ -236,22 +236,22 @@ load.provide("dusk.sgui.Label", (function() {
 		}).bind(this), "img");
 		
 		//Prop masks
-		this._registerPropMask("text", "text", true);
-		this._registerPropMask("font", "font", true);
-		this._registerPropMask("colour", "colour", true);
-		this._registerPropMask("color", "colour", true);
-		this._registerPropMask("borderColour", "borderColour", true);
-		this._registerPropMask("borderColor", "borderColour", true);
-		this._registerPropMask("borderSize", "borderSize", true);
-		this._registerPropMask("padding", "padding", true);
-		this._registerPropMask("size", "size", true);
-		this._registerPropMask("format", "format", true);
-		this._registerPropMask("width", "width", true, ["font", "text", "multiline"]);
-		this._registerPropMask("height", "height", true, ["font", "text", "multiline"]);
-		this._registerPropMask("multiline", "multiline");
-		this._registerPropMask("validFilter", "validFilter");
-		this._registerPropMask("validCancel", "validCancel");
-		this._registerPropMask("validDefault", "validDefault");
+		this._mapper.map("text", "text");
+		this._mapper.map("font", "font");
+		this._mapper.map("colour", "colour");
+		this._mapper.map("color", "colour");
+		this._mapper.map("borderColour", "borderColour");
+		this._mapper.map("borderColor", "borderColour");
+		this._mapper.map("borderSize", "borderSize");
+		this._mapper.map("padding", "padding");
+		this._mapper.map("size", "size");
+		this._mapper.map("format", "format");
+		this._mapper.map("width", "width", ["font", "text", "multiline"]);
+		this._mapper.map("height", "height", ["font", "text", "multiline"]);
+		this._mapper.map("multiline", "multiline");
+		this._mapper.map("validFilter", "validFilter");
+		this._mapper.map("validCancel", "validCancel");
+		this._mapper.map("validDefault", "validDefault");
 		
 		//Listeners
 		this.prepareDraw.listen(_draw.bind(this));
@@ -694,7 +694,7 @@ load.provide("dusk.sgui.TextBox", (function() {
 		this._otherUpdate = false;
 		
 		//Prop masks
-		this._registerPropMask("border", "border", true);
+		this._mapper.map("border", "border");
 		
 		//Listeners
 		this.prepareDraw.listen(_draw.bind(this));
@@ -875,8 +875,8 @@ load.provide("dusk.sgui.NumberBox", (function() {
 		this.postChange.listen(_postChange.bind(this));
 		
 		//Prop masks
-		this._registerPropMask("orientation", "orientation");
-		this._registerPropMask("range", "range");
+		this._mapper.map("orientation", "orientation");
+		this._mapper.map("range", "range");
 	};
 	NumberBox.prototype = Object.create(TextBox.prototype);
 	

@@ -18,9 +18,9 @@ load.provide("dusk.items.sgui.ItemGrid", (function() {
 		this._counter = 0;
 		
 		//Prop masks
-		this._registerPropMask("maxStack", "maxStack");
-		this._registerPropMask("invent", "__invent", undefined, ["maxStack"]);
-		this._addNewPropDepends("populate", "invent");
+		this._mapper.map("maxStack", "maxStack");
+		this._mapper.map("invent", "__invent", ["maxStack"]);
+		this._mapper.addDepends("populate", "invent");
 		
 		//Listeners
 		this._populationEvent.listen(this._igBefore.bind(this), "before");

@@ -39,9 +39,9 @@ load.provide("dusk.sgui.FocusChecker", (function() {
 		this.src = this.inactiveImg;
 		
 		//Prop masks
-		this._registerPropMask("inactiveImg", "inactiveImg");
-		this._registerPropMask("focusedImg", "focusedImg");
-		this._registerPropMask("activeImg", "activeImg");
+		this._mapper.map("inactiveImg", "inactiveImg");
+		this._mapper.map("focusedImg", "focusedImg");
+		this._mapper.map("activeImg", "activeImg");
 		
 		//Listeners
 		this.onFocusChange.listen((function(e) {if(this.focusedImg) this.src = this.focusedImg;}).bind(this), true);
@@ -96,8 +96,8 @@ load.provide("dusk.sgui.FocusCheckerTile", (function() {
 		this.focusValues = [0, 0, 1];
 		
 		//Prop masks
-		this._registerPropMask("focusOrient", "focusOrient");
-		this._registerPropMask("focusValues", "focusValues");
+		this._mapper.map("focusOrient", "focusOrient");
+		this._mapper.map("focusValues", "focusValues");
 		
 		//Listeners
 		this.onFocusChange.listen((function(e) {
@@ -215,21 +215,21 @@ load.provide("dusk.sgui.FocusCheckerRect", (function() {
 		this.bwActive = 0;
 		
 		//Prop masks
-		this._registerPropMask("inactive", "inactiveFill");
-		this._registerPropMask("focused", "focusedFill");
-		this._registerPropMask("active", "activeFill");
+		this._mapper.map("inactive", "inactiveFill");
+		this._mapper.map("focused", "focusedFill");
+		this._mapper.map("active", "activeFill");
 		
-		this._registerPropMask("inactiveFill", "inactiveFill");
-		this._registerPropMask("focusedFill", "focusedFill");
-		this._registerPropMask("activeFill", "activeFill");
+		this._mapper.map("inactiveFill", "inactiveFill");
+		this._mapper.map("focusedFill", "focusedFill");
+		this._mapper.map("activeFill", "activeFill");
 		
-		this._registerPropMask("bInactive", "bInactive");
-		this._registerPropMask("bFocused", "bFocused");
-		this._registerPropMask("bActive", "bActive");
+		this._mapper.map("bInactive", "bInactive");
+		this._mapper.map("bFocused", "bFocused");
+		this._mapper.map("bActive", "bActive");
 		
-		this._registerPropMask("bwInactive", "bwInactive");
-		this._registerPropMask("bwFocused", "bwFocused");
-		this._registerPropMask("bwActive", "bwActive");
+		this._mapper.map("bwInactive", "bwInactive");
+		this._mapper.map("bwFocused", "bwFocused");
+		this._mapper.map("bwActive", "bwActive");
 		
 		//Listeners
 		this.onFocusChange.listen((function(e) {

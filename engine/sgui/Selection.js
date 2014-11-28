@@ -13,8 +13,8 @@ load.provide("dusk.sgui.Selection", (function() {
 		this.options = 0;
 		this.orientation = c.ORIENT_VER;
 		
-		this._registerPropMask("options", "options");
-		this._registerPropMask("orientation", "orientation");
+		this._mapper.map("options", "options");
+		this._mapper.map("orientation", "orientation");
 		
 		//Listeners
 		this._populationEvent.listen((function(e) {

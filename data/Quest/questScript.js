@@ -104,7 +104,7 @@ load.provide("questScript", (function() {
 	});
 	
 	sgui.get("actionFeed", true).update({
-		"width":-2,
+		"xDisplay":"expand",
 		"children":{
 			"feed":{
 				"type":"Feed",

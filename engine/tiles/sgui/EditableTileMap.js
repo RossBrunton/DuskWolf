@@ -74,11 +74,11 @@ load.provide("dusk.tiles.sgui.EditableTileMap", (function() {
 		this._clipboard = null;
 		
 		//Prop masks
-		this._registerPropMask("cursorColour", "cursorColour");
-		this._registerPropMask("cursorColor", "cursorColour");
-		this._registerPropMask("globalCoords", "globalCoords");
-		this._registerPropMask("frameWidth", "frameWidth");
-		this._registerPropMask("frameHeight", "frameHeight");
+		this._mapper.map("cursorColour", "cursorColour");
+		this._mapper.map("cursorColor", "cursorColour");
+		this._mapper.map("globalCoords", "globalCoords");
+		this._mapper.map("frameWidth", "frameWidth");
+		this._mapper.map("frameHeight", "frameHeight");
 		
 		//Listeners
 		this.prepareDraw.listen(_draw.bind(this));

@@ -6,7 +6,7 @@ load.provide("dusk.sgui.Image", (function() {
 	var Component = load.require("dusk.sgui.Component");
 	var sgui = load.require("dusk.sgui");
 	var DImage = load.require("dusk.utils.Image");
-
+	
 	/** @class dusk.sgui.Image
 	 * 
 	 * @classdesc An image.
@@ -46,14 +46,14 @@ load.provide("dusk.sgui.Image", (function() {
 		this.src = "default/img.png";
 		
 		//Prop masks
-		this._registerPropMask("src", "src");
-		this._registerPropMask("imageTrans", "imageTrans", true);
+		this._mapper.map("src", "src");
+		this._mapper.map("imageTrans", "imageTrans");
 		
 		//Listeners
 		this.prepareDraw.listen(this._imageDraw.bind(this));
 	};
 	Image.prototype = Object.create(Component.prototype);
-
+	
 	/** Used to draw the image.
 	 * @param {object} e A draw event.
 	 * @private
@@ -68,7 +68,7 @@ load.provide("dusk.sgui.Image", (function() {
 			this._img.paintRanges(e.c, this.imageTrans, false, e.d.origin, e.d.slice, e.d.dest);
 		}
 	};
-
+	
 	//src
 	Object.defineProperty(Image.prototype, "src", {
 		get: function() {
@@ -84,10 +84,7 @@ load.provide("dusk.sgui.Image", (function() {
 			}
 		}
 	});
-
-	Object.seal(Image);
-	Object.seal(Image.prototype);
-
+	
 	sgui.registerType("Image", Image);
 	
 	return Image;

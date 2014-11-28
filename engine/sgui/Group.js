@@ -163,18 +163,18 @@ load.provide("dusk.sgui.Group", (function() {
 		this._drawingChildren = new EventDispatcher("dusk.sgui.Group._drawingChildren");
 		
 		//Prop masks
-		this._registerPropMask("focus", "focus", true, ["children"]);
-		this._registerPropMask("focusBehaviour", "focusBehaviour");
-		this._registerPropMask("focusVisible", "focusVisible");
-		this._registerPropMask("xOffset", "xOffset");
-		this._registerPropMask("yOffset", "yOffset");
-		this._registerPropMask("mouseFocus", "mouseFocus");
-		this._registerPropMask("horScroll", "horScroll", undefined, ["children", "allChildren", "width"]);
-		this._registerPropMask("verScroll", "verScroll", undefined, ["children", "allChildren", "height"]);
-		this._registerPropMask("children", "__children", undefined, ["focusBehaviour"]);
-		this._registerPropMask("allChildren", "__allChildren", undefined, ["focusBehaviour", "children"]);
-		this._registerPropMask("mouseFocus", "mouse.focus", false, ["mouse"]);
-		this._registerPropMask("mouse.focus", "mouse.focus", false, ["mouse"]);
+		this._mapper.map("focus", "focus", ["children"]);
+		this._mapper.map("focusBehaviour", "focusBehaviour");
+		this._mapper.map("focusVisible", "focusVisible");
+		this._mapper.map("xOffset", "xOffset");
+		this._mapper.map("yOffset", "yOffset");
+		this._mapper.map("mouseFocus", "mouseFocus");
+		this._mapper.map("horScroll", "horScroll", ["children", "allChildren", "width"]);
+		this._mapper.map("verScroll", "verScroll", ["children", "allChildren", "height"]);
+		this._mapper.map("children", "__children", ["focusBehaviour"]);
+		this._mapper.map("allChildren", "__allChildren", ["focusBehaviour", "children"]);
+		this._mapper.map("mouseFocus", "mouse.focus", ["mouse"]);
+		this._mapper.map("mouse.focus", "mouse.focus", ["mouse"]);
 		
 		//Listeners
 		this.prepareDraw.listen(_groupDraw.bind(this));

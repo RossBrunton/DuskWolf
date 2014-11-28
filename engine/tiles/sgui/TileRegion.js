@@ -468,11 +468,11 @@ load.provide("dusk.tiles.sgui.TileRegionGenerator", (function() {
 		this._needsCacheUpdating = false;
 		
 		//Prop masks
-		this._registerPropMask("rows", "rows");
-		this._registerPropMask("cols", "cols");
+		this._mapper.map("rows", "rows");
+		this._mapper.map("cols", "cols");
 		
-		this._registerPropMask("theight", "theight");
-		this._registerPropMask("twidth", "twidth");
+		this._mapper.map("theight", "theight");
+		this._mapper.map("twidth", "twidth");
 		
 		//Listeners
 		this.prepareDraw.listen(this._tileRegionDraw.bind(this));

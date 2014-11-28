@@ -64,11 +64,11 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 		this._priorEntity = "";
 		
 		//Prop masks
-		this._registerPropMask("sheight", "sheight");
-		this._registerPropMask("swidth", "swidth");
+		this._mapper.map("sheight", "sheight");
+		this._mapper.map("swidth", "swidth");
 		
-		this._registerPropMask("theight", "theight");
-		this._registerPropMask("twidth", "twidth");
+		this._mapper.map("theight", "theight");
+		this._mapper.map("twidth", "twidth");
 		
 		//Listeners
 		for(var i = 48; i <= 57; i++) {

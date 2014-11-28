@@ -50,8 +50,8 @@ load.provide("dusk.sgui.Scroller", (function() {
 		this.target = null;
 		
 		//Prop masks
-		this._registerPropMask("orientation", "orientation");
-		this._registerPropMask("target", "target");
+		this._mapper.map("orientation", "orientation");
+		this._mapper.map("target", "target");
 		
 		//Listeners
 		this.frame.listen(this._sFrame.bind(this));

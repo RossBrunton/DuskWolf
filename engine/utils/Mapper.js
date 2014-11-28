@@ -3,15 +3,14 @@
 "use strict";
 
 load.provide("dusk.utils.Mapper", (function() {
-	/** Creates a new mapper for the specified object.
+	/** Mappers are essentially objects that can be attached to another object, and allow that object to be controlled
+	 *  using JSON and basic objects.
 	 * 
-	 * @class dusk.utils.Mapper
+	 * To use this, the object that is being mapped must "register" mappings using `{@link dusk.mapper#map}`, this links
+	 *  a key for the JSON representation to a key for the "real" representation.
 	 * 
-	 * @classdesc Mappers are essentially objects that can be attached to another object,
-	 *  and allow that object to be controlled using JSON and basic objects.
-	 * 
-	 * To use this, the object that is being mapped must "register" mappings using `{@link dusk.mapper#map}`,
-	 *  this links a key for the JSON representation to a key for the "real" representation.
+	 * Mapping to something with a "." in it's name works as expected, that is, "a.b" will set the property "b" of the
+	 *  property "a" of the object that this mapper is attached to.
 	 * 
 	 * @param {*} target The object this mapper is mapping.
 	 * @constructor
@@ -32,18 +31,25 @@ load.provide("dusk.utils.Mapper", (function() {
 		 */
 		this._maps = {};
 	};
-
+	
 	/** This maps a property from the JSON representation of the object "real" representation of the object.
 	 * 
 	 * @param {string} from The name in the JSON representation.
-	 * @param {string} to The property name that that name shall be mapped to in the "real" representation.
+	 * @param {string|array} to The property name that that name shall be mapped to in the "real" representation. If it
+	 *  is a string, it will map to that property, if it is an array, it will be a `[get, set]` pair of functions to
+	 *  call with `this._target` as the `this` value. The getter should return a value (the value to get), and the
+	 *  setter will be given the set value as an argument.
 	 * @param {?array} depends An array of "dependencies" of the property.
 	 * 	All the properties in this array will be set (if they exist in the JSON) before this one.
 	 */
 	Mapper.prototype.map = function(from, to, depends) {
-		this._maps[from] = [to, depends, to.indexOf(".") !== -1];
+		if(Array.isArray(to)) {
+			this._maps[from] = [to, depends];
+		}else{
+			this._maps[from] = [to, depends, to.indexOf(".") !== -1];
+		}
 	};
-
+	
 	/** Adds new dependancies to an existing mask.
 	 * 
 	 * @param {string} name The property to add dependencies of.
@@ -56,7 +62,7 @@ load.provide("dusk.utils.Mapper", (function() {
 			this._maps[name][1] = this._maps[name][1].concat(depends);
 		}
 	};
-
+	
 	/** Sets the property of the "real" representation that is mapped by the specified name.
 	 * 
 	 * @param {string} name The property to set.
@@ -65,7 +71,9 @@ load.provide("dusk.utils.Mapper", (function() {
 	 */
 	Mapper.prototype.set = function(name, value) {
 		if(this._maps[name] !== undefined) {
-			if(this._maps[name][2]) {
+			if(Array.isArray(this._maps[name][0])) {
+				this._maps[name][0][1].call(this._target, value);
+			}else if(this._maps[name][2]) {
 				var o = this._target;
 				var frags = this._maps[name][0].split(".");
 				var p = 0;
@@ -82,7 +90,7 @@ load.provide("dusk.utils.Mapper", (function() {
 		
 		return undefined;
 	};
-
+	
 	/** Given an object, sets all the properties of that object to their respective mappings on the target object.
 	 * 
 	 * @param {object} props The object to read the properties from.
@@ -115,7 +123,7 @@ load.provide("dusk.utils.Mapper", (function() {
 			}
 		}
 	};
-
+	
 	/** Returns the value on the target object that has been mapped to the specified key.
 	 * 
 	 * @param {string} name The name to look up the mapping for.
@@ -123,12 +131,25 @@ load.provide("dusk.utils.Mapper", (function() {
 	 */
 	Mapper.prototype.get = function(name) {
 		if(this._maps[name] !== undefined) {
-			return this._target[this._maps[name][0]];
+			if(Array.isArray(this._maps[name][0])) {
+				return this._maps[name][0][0].call(this._target);
+			}else if(this._maps[name][2]) {
+				var o = this._target;
+				var frags = this._maps[name][0].split(".");
+				var p = 0;
+				while(p < frags.length-1) {
+					o = o[frags[p]];
+					p ++;
+				}
+				return o[frags[p]];
+			}else{
+				return this._target[this._maps[name][0]];
+			}
 		}
 		
 		return undefined;
 	};
-
+	
 	/** Loops through all the mappings this has been given, adds their value to an object, and returns that object.
 	 * 
 	 * @return {object} An object with all the mappings this has been given, with the values from the target object.
@@ -136,20 +157,17 @@ load.provide("dusk.utils.Mapper", (function() {
 	Mapper.prototype.massGet = function() {
 		var hold = {};
 		for(var p in this._maps) {
-			hold[p] = this._target[this._maps[p][0]];
+			hold[p] = this.get(p);
 		}
 		return hold;
 	};
-
+	
 	/** Returns a string representation of this object.
 	 * @returns {string} A string representation of this object.
 	 */
 	Mapper.prototype.toString = function() {
 		return "[Mapper for "+this._target.toString()+"]";
 	};
-
-	Object.seal(Mapper);
-	Object.seal(Mapper.prototype);
 	
 	return Mapper;
 })());

@@ -26,8 +26,8 @@ load.provide("dusk.items.sgui.ItemSlot", (function() {
 		this.alterChildLayer("count", "+");
 		
 		//Prop masks
-		this._registerPropMask("maxStack", "maxStack");
-		this._registerPropMask("invent", "__invent", undefined, ["maxStack"]);
+		this._mapper.map("maxStack", "maxStack");
+		this._mapper.map("invent", "__invent", ["maxStack"]);
 		
 		//Listeners
 		this.frame.listen(this._itemSlotFrame.bind(this));

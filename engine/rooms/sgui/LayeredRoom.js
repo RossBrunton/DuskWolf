@@ -40,14 +40,14 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 		this.editorColour = "#000000";
 		
 		//Prop masks
-		this._registerPropMask("spawn", "spawn");
-		this._registerPropMask("layers", "layers");
-		this._registerPropMask("scrollSpeed", "scrollSpeed");
-		this._registerPropMask("scrollRegion", "scrollRegion");
-		this._registerPropMask("editorColour", "editorColour");
-		this._registerPropMask("editorColor", "editorColor");
-		this._registerPropMask("scrollInstantly", "scrollInstantly");
-		this._registerPropMask("room", "room", true, ["spawn"]);
+		this._mapper.map("spawn", "spawn");
+		this._mapper.map("layers", "layers");
+		this._mapper.map("scrollSpeed", "scrollSpeed");
+		this._mapper.map("scrollRegion", "scrollRegion");
+		this._mapper.map("editorColour", "editorColour");
+		this._mapper.map("editorColor", "editorColor");
+		this._mapper.map("scrollInstantly", "scrollInstantly");
+		this._mapper.map("room", "room", ["spawn"]);
 		
 		//Listeners
 		this.frame.listen(_basicMainFrame.bind(this));

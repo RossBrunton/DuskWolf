@@ -47,12 +47,12 @@ load.provide("dusk.sgui.Rect", (function() {
 		this.radius = 0;
 		
 		//Prop masks
-		this._registerPropMask("colour", "colour", true);
-		this._registerPropMask("color", "colour", true);
-		this._registerPropMask("bColour", "bColour", true);
-		this._registerPropMask("bColor", "bColour", true);
-		this._registerPropMask("bWidth", "bWidth", true);
-		this._registerPropMask("radius", "radius", true);
+		this._mapper.map("colour", "colour");
+		this._mapper.map("color", "colour");
+		this._mapper.map("bColour", "bColour");
+		this._mapper.map("bColor", "bColour");
+		this._mapper.map("bWidth", "bWidth");
+		this._mapper.map("radius", "radius");
 		
 		//Listeners
 		this.prepareDraw.listen(this._rectDraw.bind(this));

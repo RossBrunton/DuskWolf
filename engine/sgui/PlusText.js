@@ -75,14 +75,14 @@ load.provide("dusk.sgui.PlusText", (function() {
 		this.plusProxy = true;
 		
 		//Prop masks
-		this._registerPropMask("text", "text");
-		this._registerPropMask("plus", "plus", undefined, ["plusType"]);
-		this._registerPropMask("label", "label");
-		this._registerPropMask("spacing", "spacing");
-		this._registerPropMask("behind", "behind");
-		this._registerPropMask("onLeft", "onLeft");
-		this._registerPropMask("plusType", "plusType");
-		this._registerPropMask("plusProxy", "plusProxy");
+		this._mapper.map("text", "text");
+		this._mapper.map("plus", "plus", ["plusType"]);
+		this._mapper.map("label", "label");
+		this._mapper.map("spacing", "spacing");
+		this._mapper.map("behind", "behind");
+		this._mapper.map("onLeft", "onLeft");
+		this._mapper.map("plusType", "plusType");
+		this._mapper.map("plusProxy", "plusProxy");
 		
 		//Listeners
 		this.frame.listen(_frame.bind(this));

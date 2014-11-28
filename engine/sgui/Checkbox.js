@@ -70,7 +70,7 @@ load.provide("dusk.sgui.Checkbox", (function() {
 		}
 		
 		//Prop masks
-		this._registerPropMask("checked", "checked");
+		this._mapper.map("checked", "checked");
 		
 		//Listeners
 		this.action.listen((function(e) {

@@ -179,6 +179,8 @@ load.provide("example.plat", (function() {
 	dplat.make(root, "orange");
 	
 	root.get("hud", "Group").update({
+		"xDisplay":"expand",
+		"yDisplay":"expand",
 		"children":{
 			"healthBack":{
 				"type":"Grid",

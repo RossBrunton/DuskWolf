@@ -75,8 +75,8 @@ load.provide("dusk.sgui.DynamicGrid", (function() {
 		}).bind(this), "before");
 		
 		//Prop masks
-		this._registerPropMask("range", "range");
-		this._registerPropMask("orientation", "orientation");
+		this._mapper.map("range", "range");
+		this._mapper.map("orientation", "orientation");
 	};
 	DynamicGrid.prototype = Object.create(Grid.prototype);
 

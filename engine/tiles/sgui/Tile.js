@@ -87,11 +87,11 @@ load.provide("dusk.tiles.sgui.Tile", (function() {
 		this.tile = [0,0];
 		
 		//Prop masks
-		this._registerPropMask("src", "src", true);
-		this._registerPropMask("imageTrans", "imageTrans", true);
-		this._registerPropMask("tile", "tileStr", true);
-		this._registerPropMask("swidth", "swidth", true);
-		this._registerPropMask("sheight", "sheight", true);
+		this._mapper.map("src", "src");
+		this._mapper.map("imageTrans", "imageTrans");
+		this._mapper.map("tile", "tileStr");
+		this._mapper.map("swidth", "swidth");
+		this._mapper.map("sheight", "sheight");
 		
 		//Listeners
 		this.prepareDraw.listen(_draw.bind(this));

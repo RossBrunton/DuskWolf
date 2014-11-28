@@ -411,12 +411,12 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 		this.height = entities.theight;
 		
 		//Prop masks
-		//this._registerPropMask("dx", "dx");
-		//this._registerPropMask("dy", "dy");
-		if(!this.isLight()) this._registerPropMask("scheme", "schemePath");
-		if(!this.isLight()) this._registerPropMask("particles", "particlesPath");
-		if(!this.isLight()) this._registerPropMask("fluid", "fluidPath");
-		if(!this.isLight()) this._registerPropMask("entType", "entType");
+		//this._mapper.map("dx", "dx");
+		//this._mapper.map("dy", "dy");
+		if(!this.isLight()) this._mapper.map("scheme", "schemePath");
+		if(!this.isLight()) this._mapper.map("particles", "particlesPath");
+		if(!this.isLight()) this._mapper.map("fluid", "fluidPath");
+		if(!this.isLight()) this._mapper.map("entType", "entType");
 		
 		//Listeners
 		if(!this.isLight()) if(this.collisionMark) this.prepareDraw.listen(this._collisionDraw.bind(this));

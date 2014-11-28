@@ -15,9 +15,9 @@ load.provide("dusk.items.sgui.ItemHand", (function() {
 		this.supressHand = false;
 		
 		//Prop masks
-		this._registerPropMask("maxStack", "maxStack");
-		this._registerPropMask("supressHand", "supressHand");
-		this._registerPropMask("invent", "__invent", undefined, ["maxStack"]);
+		this._mapper.map("maxStack", "maxStack");
+		this._mapper.map("supressHand", "supressHand");
+		this._mapper.map("invent", "__invent", ["maxStack"]);
 	};
 	ItemHand.prototype = Object.create(Group.prototype);
 
