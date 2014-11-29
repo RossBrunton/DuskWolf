@@ -427,9 +427,21 @@ load.provide("dusk.sgui", (function() {
 			data.alpha = 1;
 			
 			if(sgui.noCacheCanvas) {
-				_roots[c].draw(data, _ctx);
+				//_roots[c].draw(data, _ctx);
+				_roots[c].paintContainer(_ctx,
+					(new PosRect()).setWH(0, 0, sgui.width, sgui.height),
+					(new PosRect()).setWH(0, 0, sgui.width, sgui.height),
+					(new PosRect()).setWH(0, 0, sgui.width, sgui.height),
+					0, 0
+				);
 			}else{
-				_roots[c].draw(data, _cacheCtx);
+				//_roots[c].draw(data, _cacheCtx);
+				_roots[c].paintContainer(_cacheCtx,
+					(new PosRect()).setWH(0, 0, sgui.width, sgui.height),
+					(new PosRect()).setWH(0, 0, sgui.width, sgui.height),
+					(new PosRect()).setWH(0, 0, sgui.width, sgui.height),
+					0, 0
+				);
 			}
 			
 			PosRect.pool.free(data.origin);

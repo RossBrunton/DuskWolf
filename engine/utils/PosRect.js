@@ -169,6 +169,14 @@ load.provide("dusk.utils.PosRect", (function() {
 		return "[PosRect "+this.x+","+this.y+" "+this.width+"x"+this.height+"]";
 	};
 	
+	/** Returns true if both rectangles are equal (have the same width, height, x and y).
+	 * @param {PosRect} b The other rectangle.
+	 * @return {boolean} Whether this and b are equal.
+	 */
+	PosRect.prototype.equals = function(b) {
+		return this.x == b.x && this.y == b.y && this.width == b.width && this.height == b.height;
+	}
+	
 	/** A pool containing PosRects.
 	 * 
 	 * @type dusk.utils.Pool<PosRect>

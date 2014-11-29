@@ -18,9 +18,13 @@ load.provide("dusk.sgui.Root", (function() {
 	var Root = function(parent, name) {
 		Group.call(this, null, name);
 		
-		//Roots are always active and focused
+		// Roots are always active and focused
 		this.active = true;
 		this.focused = true;
+		
+		// And are in expand mode
+		this.xDisplay = "expand";
+		this.yDisplay = "expand";
 	};
 	Root.prototype = Object.create(Group.prototype);
 

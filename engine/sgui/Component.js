@@ -14,6 +14,7 @@ load.provide("dusk.sgui.Component", (function() {
 	var c = load.require("dusk.sgui.c");
 	var Root = load.suggest("dusk.sgui.Root", function(p) {Root = p});
 	var interaction = load.require("dusk.input.interaction");
+	var PosRect = load.require("dusk.utils.PosRect");
 	
 	/** A component is a single "thing" that exists in the SimpleGui system. Everything in the Simple GUI system that
 	 *  wants to be displayed should have this in its prototype chain.
@@ -585,43 +586,167 @@ load.provide("dusk.sgui.Component", (function() {
 		}
 	});
 	
-	
-	/** Requests the component to draw itself onto the specified 2D canvas context.
+	/** Used by containers, similar to `paint`, but allows you to specify what part of an image to take, and where
+	 *  exactly to put it. Also supports "expand" components.
 	 * 
-	 * You should use `{@link dusk.sgui.Component#_prepareDraw}` instead of overriding this.
-	 * 
-	 * @param {object} d An object describing where and how the conponent is to draw itself.
-	 * @param {CanvasRenderingContext2D} c The canvas context to draw onto.
+	 * @param {CanvasRenderingContext2D} ctx The canvas to draw onto.
+	 * @param {PosRect} container The dimensions of the container that this component is in. The x and y are unused.
+	 * @param {PosRect} containerSlice The slice of the container that is being rendered, anything outwith these
+	 *  dimensions will not be rendered.
+	 * @param {PosRect} display The area (on the canvas) to actually draw onto.
+	 * @param {int} xOffset How much to offset the x coordinate by (will be the same as the xOffset of the container).
+	 * @param {int} yOffset How much to offset the y coordinate by (will be the same as the yOffset of the container).
+	 * @since 0.0.21-alpha
 	 */
-	Component.prototype.draw = function(d, c) {
+	Component.prototype.paintContainer = function(ctx, container, containerSlice, display, xOffset, yOffset) {
+		// Container x,y is x y of container, width,height is that of container
+		// Display x,y is the upper left of where to start drawing, and ex,ey is the bottom right
+		// Slice is the area of the container to draw
 		if(!this.visible || this.alpha <= 0) return;
 		
+		// Transparency
 		var oldAlpha = -1;
-		var alpha = d.alpha;
-		if(this.alpha != c.globalAlpha && this.alpha != 1) {
-			oldAlpha = c.globalAlpha;
-			alpha *= this.alpha;
-			c.globalAlpha = alpha;
+		var alpha = this.alpha;
+		if(this.alpha != ctx.globalAlpha && this.alpha != 1) {
+			oldAlpha = ctx.globalAlpha;
+			ctx.globalAlpha *= this.alpha;
 		}
 		
-		var event = _prepareDrawPool.alloc();
-		event.d = d;
-		event.c = c;
-		event.alpha = alpha;
-		this.prepareDraw.fire(event);
-		_prepareDrawPool.free(event);
-
-		if(this.mark !== null) {
-			c.strokeStyle = this.mark;
-			c.strokeRect(d.dest.x, d.dest.y, d.dest.width, d.dest.height);
+		// From the component with these dimensions
+		var source = PosRect.pool.alloc();
+		// Slice this bit out of it
+		var slice = PosRect.pool.alloc();
+		// And put it here
+		var dest = PosRect.pool.alloc();
+		
+		// Calculate source
+		source.setWH(0, 0, this.width, this.height);
+		
+		if(this.xDisplay == "fixed") {
+			if(this.xOrigin == "right") source.shift(container.width - this.width, 0);
+			if(this.xOrigin == "middle") source.shift((container.width - this.width) >> 1, 0);
+			
+			source.shift(this.x, 0);
+		}else{
+			source.setXY(this.margins[3], source.y, container.width - this.margins[1], source.ey);
 		}
+		
+		if(this.yDisplay == "fixed") {
+			if(this.yOrigin == "bottom") source.shift(0, container.height - this.height);
+			if(this.yOrigin == "middle") source.shift(0, (container.height - this.height) >> 1);
+		
+			source.shift(0, this.y);
+		}else{
+			source.setXY(source.x, this.margins[0], source.ex, container.height - this.margins[2]);
+		}
+		
+		// Then calculate the slice and dest
+		dest.setWH(
+			-xOffset + source.x + display.x - containerSlice.x,
+			-yOffset + source.y + display.y - containerSlice.y,
+			source.width, source.height
+		);
+		
+		// Range check
+		if(dest.x < display.x) dest.startSize(-(display.x - dest.x), 0);
+		if(dest.y < display.y) dest.startSize(0, -(display.y - dest.y));
+		if(dest.ex > display.ex) dest.size(-(dest.ex - display.ex), 0);
+		if(dest.ey > display.ey) dest.size(0, -(dest.ey - display.ey));
+		
+		// Check if on screen
+		var skip = false;
+		if(dest.width <= 0 || dest.height <= 0) skip = true;
+		
+		if(!skip) {
+			slice.setWH(
+				dest.x + xOffset - source.x - display.x + container.x + containerSlice.x,
+				dest.y + yOffset - source.y - display.y + container.y + containerSlice.y,
+				dest.width, dest.height
+			);
+			
+			this.prepareDraw.fire({"c":ctx, "d":{"dest":dest, "slice":slice, "origin":source}});
+			if(this.activeBorder !== null && this.active) {
+				ctx.strokeStyle = this.activeBorder;
+				ctx.strokeRect(dest.x+0.5, dest.y+0.5, slice.width-1, slice.height-1);
+			}
+			
+			if(this.mark) {
+				ctx.strokeStyle = this.mark;
+				ctx.fillStyle = this.mark;
+				ctx.font = "10px sans";
+				ctx.fillText(this.name, dest.x + 1, dest.y + 10);
+				ctx.strokeRect(dest.x+0.5, dest.y+0.5, slice.width-1, slice.height-1);
+			}
+		}
+		
+		if(oldAlpha >= 0) ctx.globalAlpha = oldAlpha;
+		
+		PosRect.pool.free(source);
+		PosRect.pool.free(slice);
+		PosRect.pool.free(dest);
+	};
+	
+	/** Draws this component onto the given canvas.
+	 * 
+	 * This will change settings (such as fill colours and fonts) of the canvas, and not change them back.
+	 * 
+	 * @param {CanvasRenderingContext2D} ctx The canvas context on which to draw.
+	 * @param {x=0} The x coordinate to draw from.
+	 * @param {y=0} The y coordinate to draw from.
+	 * @param {?width} The width, defaults to the component's width.
+	 * @param {?height} The height, defaults to the component's height.
+	 * @since 0.0.21-alpha
+	 */
+	Component.prototype.paint = function(ctx, x, y, width, height) {
+		if(x === undefined) x = 0;
+		if(y === undefined) y = 0;
+		if(width === undefined) width = this.width;
+		if(height === undefined) height = this.height;
+		
+		if(!this.visible || this.alpha <= 0) return;
+		
+		// Transparency
+		var oldAlpha = -1;
+		var alpha = this.alpha;
+		if(this.alpha != ctx.globalAlpha && this.alpha != 1) {
+			oldAlpha = ctx.globalAlpha;
+			ctx.globalAlpha *= this.alpha;
+		}
+		
+		// From the component with these dimensions
+		var source = PosRect.pool.alloc();
+		// Slice this bit out of it
+		var slice = PosRect.pool.alloc();
+		// And put it here
+		var dest = PosRect.pool.alloc();
+		
+		// Calculate source
+		source.setWH(x, y, width, height);
+		
+		// Then calculate the slice and dest
+		dest.setWH(x, y, source.width, source.height);
+		slice.setWH(0, 0, dest.width, dest.height);
+		
+		this.prepareDraw.fire({"c":ctx, "d":{"dest":dest, "slice":slice, "origin":source}});
 		
 		if(this.activeBorder !== null && this.active) {
-			c.strokeStyle = this.activeBorder;
-			c.strokeRect(d.dest.x+0.5, d.dest.y+0.5, d.dest.width-1, d.dest.height-1);
+			ctx.strokeStyle = this.activeBorder;
+			ctx.strokeRect(dest.x+0.5, dest.y+0.5, slice.width-1, slice.height-1);
 		}
 		
-		if(oldAlpha >= 0) c.globalAlpha = oldAlpha;
+		if(this.mark) {
+			ctx.strokeStyle = this.mark;
+			ctx.fillStyle = this.mark;
+			ctx.font = "10px sans";
+			ctx.fillText(this.name, dest.x + 1, dest.y + 10);
+			ctx.strokeRect(dest.x+0.5, dest.y+0.5, slice.width-1, slice.height-1);
+		}
+		
+		if(oldAlpha >= 0) ctx.globalAlpha = oldAlpha;
+		
+		PosRect.pool.free(source);
+		PosRect.pool.free(slice);
+		PosRect.pool.free(dest);
 	};
 	
 	/** Alters the layer this is on.

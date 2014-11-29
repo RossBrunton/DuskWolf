@@ -34,16 +34,10 @@ load.provide("dusk.particles.particleEffects.core", (function() {
 		
 		if(what) {
 			var c = utils.createCanvas(what.width, what.height).getContext("2d");
-			var slice = PosRect.pool.alloc().setWH(0, 0, what.width, what.height);
-			var dest = PosRect.pool.alloc().setWH(0, 0, what.width, what.height);
-			var origin = PosRect.pool.alloc().setWH(0, 0, what.width, what.height);
 			
-			what.draw({"alpha":1, "slice":slice, "dest":dest, "origin":origin}, c);
+			what.paint(c);
 			
-			PosRect.pool.free(slice);
-			PosRect.pool.free(dest);
-			PosRect.pool.free(origin);
-			return c.getImageData(0, 0, dest.width, dest.height);
+			return c.getImageData(0, 0, what.width, what.height);
 		}
 	};
 

@@ -177,7 +177,7 @@ load.provide("dusk.sgui.Group", (function() {
 		this._mapper.map("mouse.focus", "mouse.focus", ["mouse"]);
 		
 		//Listeners
-		this.prepareDraw.listen(_groupDraw.bind(this));
+		this.prepareDraw.listen(this._groupDraw.bind(this));
 		this.frame.listen(_groupFrame.bind(this));
 		this.onInteract.listen(_mouseSelect.bind(this), interaction.MOUSE_MOVE);
 		this.onDelete.listen((function(e) {this.deleteAllComponents();}).bind(this));
@@ -403,124 +403,30 @@ load.provide("dusk.sgui.Group", (function() {
 		get: function() {return {};}
 	});
 	
-	/** Draws all of the children in the order described by `{@link dusk.sgui.Group._drawOrder}`.
-	 * 
-	 * @param {object} e An event from `{@link dusk.sgui.Component#_prepareDraw}`
-	 * @private
-	 */
-	var _groupDraw = function(e) {
+	Group.prototype._groupDraw = function(e) {
 		this._drawingChildren.fire(e);
+		
+		var rect = PosRect.pool.alloc();
+		var display = PosRect.pool.alloc();
+		var slice = PosRect.pool.alloc();
+		
+		rect.setWH(0, 0, e.d.origin.width, e.d.origin.height);
+		
+		display.shiftTo(e.d.dest.x, e.d.dest.y);
+		display.sizeTo(e.d.dest.width, e.d.dest.height);
+		
+		slice.setWH(e.d.slice.x, e.d.slice.y, e.d.slice.width, e.d.slice.height);
 		
 		for(var i = 0; i < this._drawOrder.length; i++) {
 			if(this._drawOrder[i] in this._components) {
-				var com = this._components[this._drawOrder[i]];
-				var data = sgui.drawDataPool.alloc();
-				data.alpha = e.alpha;
-				data.destX = e.d.dest.x;
-				data.destY = e.d.dest.y;
-				data.sourceX = 0;
-				data.sourceY = 0;
-				
-				data.origin = PosRect.pool.alloc().setWH(com.x, com.y, com.width, com.height);
-				data.slice = PosRect.pool.alloc().setWH(0, 0, com.width, com.height);
-				data.dest = PosRect.pool.alloc().setWH(e.d.dest.x, e.d.dest.y, com.width, com.height);
-				
-				// Handle display modes
-				// For X:
-				if(com.xDisplay == "expand") {
-					data.dest.shift(this._getExpandX(com, e, data, i) + com.margins[3], 0);
-					data.origin.shiftTo(com.margins[3], data.origin.y);
-					
-					var width = this._getExpandWidth(com, e, data, i);
-					
-					data.dest.sizeTo(width - com.margins[1] - com.margins[3], data.dest.height);
-					data.origin.sizeTo(width - com.margins[1] - com.margins[3], data.origin.height);
-					data.slice.sizeTo(width - com.margins[1] - com.margins[3], data.slice.height);
-				}else{
-					// Handle origins
-					if(com.xOrigin == "right") data.dest.shift(e.d.origin.width - data.origin.width, 0);
-					if(com.xOrigin == "middle") data.dest.shift((e.d.origin.width - data.origin.width) >> 1, 0);
-				
-					// Handle the component's location
-					data.dest.shift(com.x, 0);
-				}
-				
-				// For Y:
-				if(com.yDisplay == "expand") {
-					data.dest.shift(0, this._getExpandY(com, e, data, i) + com.margins[0]);
-					data.origin.shiftTo(data.origin.x, com.margins[0]);
-					
-					var height = this._getExpandHeight(com, e, data);
-					
-					data.dest.sizeTo(data.dest.width, height - com.margins[2] - com.margins[0]);
-					data.origin.sizeTo(data.origin.width, height - com.margins[2] - com.margins[0]);
-					data.slice.sizeTo(data.slice.width, height - com.margins[2] - com.margins[0]);
-				}else{
-					// Handle origins
-					if(com.yOrigin == "bottom") data.dest.shift(0, (e.d.origin.height - data.origin.height));
-					if(com.yOrigin == "middle") data.dest.shift(0, (e.d.origin.height - data.origin.height) >> 1);
-				
-					// Handle the component's location
-					data.dest.shift(0, com.y);
-				}
-				
-				// Handle offsets
-				//data.dest.shift(-this.xOffset, -this.yOffset);
-				data.slice.shift(this.xOffset, this.yOffset);
-				
-				// And slices
-				data.dest.shift(-e.d.slice.x, -e.d.slice.y);
-				
-				// Handle right
-				if(data.dest.ex > e.d.dest.ex) {
-					var ex = data.dest.ex - e.d.dest.ex;
-					data.dest.size(-ex, 0);
-					data.slice.size(-ex, 0);
-				}
-				
-				// Down
-				if(data.dest.ey > e.d.dest.ey) {
-					var ey = data.dest.ey - e.d.dest.ey;
-					data.dest.size(0, -ey);
-					data.slice.size(0, -ey);
-				}
-				
-				// Left
-				if(data.dest.x < e.d.dest.x) {
-					var x = e.d.dest.x - data.dest.x;
-					data.dest.startSize(-x, 0);
-					data.slice.startSize(-x, 0);
-				}
-				
-				// Top
-				if(data.dest.y < e.d.dest.y) {
-					var y = e.d.dest.y - data.dest.y;
-					data.dest.startSize(0, -y);
-					data.slice.startSize(0, -y);
-				}
-				
-				var skip = false;
-				
-				// Off to the right/bottom
-				if(data.slice.x >= e.d.slice.ex) skip = true;
-				if(data.slice.y >= e.d.slice.ey) skip = true;
-				
-				// Small
-				if(data.dest.width <= 0 || data.dest.height <= 0) skip = true;
-				
-				// And off the left
-				if(data.slice.x < 0 || data.slice.y < 0) skip = true;
-				
-				if(!skip) {
-					com.draw(data, e.c);
-				}
-				
-				PosRect.pool.free(data.origin);
-				PosRect.pool.free(data.slice);
-				PosRect.pool.free(data.dest);
-				sgui.drawDataPool.free(data);
+				this._components[this._drawOrder[i]].paintContainer
+					(e.c, rect, slice, display, this.xOffset, this.yOffset);
 			}
 		}
+		
+		PosRect.pool.free(rect);
+		PosRect.pool.free(display);
+		PosRect.pool.free(slice);
 	};
 	
 	/** Should return the width of a component with display set to "expand".
