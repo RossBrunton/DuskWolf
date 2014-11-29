@@ -113,7 +113,7 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 		this.onDelete.listen(_deleted.bind(this));
 		
 		//Prop masks
-		this._props.map("on", "__on");
+		this._props.map("on", [function() {return undefined;}, this.addTrigger]);
 		this._props.map("then", "then");
 		this._props.map("delay", "delay");
 		this._props.map("duration", "duration");
@@ -242,18 +242,6 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 			this._autoTrigger = true;
 		}
 	};
-	Object.defineProperty(Effect.prototype, "__on", {
-		set: function(value) {
-			this.addTrigger(value);
-		},
-		
-		get: function() {
-			return undefined;
-		}
-	});
-	
-	Object.seal(Effect);
-	Object.seal(Effect.prototype);
 	
 	return Effect;
 })());

@@ -111,8 +111,8 @@ load.provide("dusk.sgui.Grid", (function() {
 		this._mapper.map("globals", "globals");
 		this._mapper.map("recycle", "recycle");
 		this._mapper.map("multiple", "multiple");
-		this._mapper.map("populate", "__populate", ["rows", "cols", "hspacing", "vspacing", "globals",
-			"recycle", "multiple"]
+		this._mapper.map("populate", [function() {return {};}, this.populate],
+			["rows", "cols", "hspacing", "vspacing", "globals", "recycle", "multiple"]
 		);
 		
 		//Listeners
@@ -201,10 +201,6 @@ load.provide("dusk.sgui.Grid", (function() {
 		
 		this._populationEvent.fire({"action":"complete", "child":child}, "complete");
 	};
-	Object.defineProperty(Grid.prototype, "__populate", {
-		set: function(value) {this.populate(value);},
-		get: function() {return undefined;}
-	});
 	
 	/** Override to enable expand components to be in the correct locations.
 	 * 

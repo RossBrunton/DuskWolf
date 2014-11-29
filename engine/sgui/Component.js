@@ -383,10 +383,10 @@ load.provide("dusk.sgui.Component", (function() {
 		this._mapper.map("deleted", "deleted");
 		this._mapper.map("name", "name");
 		this._mapper.map("style", "style");
-		this._mapper.map("layer", "__layer");
-		this._mapper.map("extras", "__extras");
+		this._mapper.map("layer", [function() {return "";}, this.alterLayer]);
+		this._mapper.map("extras", [function() {return {};}, this.modExtras]);
 		this._mapper.map("type", "type");
-		this._mapper.map("mouse", "__mouse");
+		this._mapper.map("mouse", [function(){return this.mouse != null;}, function(v) {if(v) this.ensureMouse();}]);
 		this._mapper.map("allowMouse", "mouse.allow", ["mouse"]);
 		this._mapper.map("mouse.allow", "mouse.allow", ["mouse"]);
 		this._mapper.map("mouseAction", "mouse.action", ["mouse"]);
@@ -522,11 +522,6 @@ load.provide("dusk.sgui.Component", (function() {
 		
 		return this.mouse;
 	};
-	Object.defineProperty(Component.prototype, "__mouse", {
-		set: function(value) {if(value) this.ensureMouse()},
-		
-		get: function() {return this.mouse != null;}
-	});
 	
 	/** Given an object, this function sets the properties of this object in relation to the properties of the object.
 	 * 
@@ -762,11 +757,6 @@ load.provide("dusk.sgui.Component", (function() {
 			this.container.alterChildLayer(this.name, alteration);
 		}
 	};
-	Object.defineProperty(Component.prototype, "__layer", {
-		set: function(value) {this.alterLayer(value);},
-		
-		get: function() {return "";}
-	});
 	
 	
 	/** Resolves a path relative to the current component, or null, if it doesn't exist.
@@ -922,11 +912,6 @@ load.provide("dusk.sgui.Component", (function() {
 			}
 		}
 	};
-	Object.defineProperty(Component.prototype, "__extras", {
-		set: function(value) {this.modExtras(value);},
-		
-		get: function() {return {};}
-	});
 	
 	/** Makes this component the active one, by making all its parents make it active.
 	 * @param {?dusk.sgui.Component} child A child that wants to be made active.

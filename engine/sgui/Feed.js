@@ -67,9 +67,9 @@ load.provide("dusk.sgui.Feed", (function() {
 		this._mapper.map("spacing", "spacing");
 		this._mapper.map("appendDir", "appendDir");
 		this._mapper.map("globals", "globals");
-		this._mapper.map("append", [
-			function() {return undefined;}, function(value) {this.append(value)}
-		], ["rows", "cols", "spacing", "globals", "appendDir"]);
+		this._mapper.map("append", [function() {return undefined;}, this.append],
+			["rows", "cols", "spacing", "globals", "appendDir"]
+		);
 		
 		//Listeners
 		this.dirPress.listen(_dirAction.bind(this));
@@ -122,10 +122,6 @@ load.provide("dusk.sgui.Feed", (function() {
 		
 		this._appendEvent.firePass({"action":"complete", "child":child}, "complete");
 	};
-	Object.defineProperty(Feed.prototype, "__append", {
-		set: function(value) {this.append(value);},
-		get: function() {return undefined;}
-	});
 	
 	/** Called every frame to manage component locations.
 	 * @private

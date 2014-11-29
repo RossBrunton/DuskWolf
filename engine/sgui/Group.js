@@ -33,14 +33,14 @@ load.provide("dusk.sgui.Group", (function() {
 		 * @protected
 		 */
 		this._components = {};
-		/** All the components in this container, as an array for faster and better iteration.
+		/** All the components in this container, as an array for faster iteration.
 		 * @type array
 		 * @protected
 		 * @since 0.0.20-alpha
 		 */
 		this._componentsArr = [];
-		/** The current drawing order of all the components.
-		 *   An array of string component names, earlier entries are drawn first.
+		/** The current drawing order of all the components. An array of string component names, earlier entries are
+		 *  drawn first.
 		 * @type array
 		 * @protected
 		 */
@@ -171,8 +171,8 @@ load.provide("dusk.sgui.Group", (function() {
 		this._mapper.map("mouseFocus", "mouseFocus");
 		this._mapper.map("horScroll", "horScroll", ["children", "allChildren", "width"]);
 		this._mapper.map("verScroll", "verScroll", ["children", "allChildren", "height"]);
-		this._mapper.map("children", "__children", ["focusBehaviour"]);
-		this._mapper.map("allChildren", "__allChildren", ["focusBehaviour", "children"]);
+		this._mapper.map("children", [_childrenGetter, this.modifyComponent], ["focusBehaviour"]);
+		this._mapper.map("allChildren", [_childrenGetter, this.modifyAllChildren], ["focusBehaviour", "children"]);
 		this._mapper.map("mouseFocus", "mouse.focus", ["mouse"]);
 		this._mapper.map("mouse.focus", "mouse.focus", ["mouse"]);
 		
@@ -370,18 +370,14 @@ load.provide("dusk.sgui.Group", (function() {
 		
 		return success;
 	};
-	Object.defineProperty(Group.prototype, "__children", {
-		set: function(value) {this.modifyComponent(value);},
-		
-		get: function() {
-			var hold = [];
-			for(var i = 0; i < this._drawOrder.length; i++) {
-				hold[hold.length] = this._components[this._drawOrder[i]].bundle();
-				hold[hold.length-1].type = sgui.getTypeName(this._components[this._drawOrder[i]]);
-			}
-			return hold;
+	var _childrenGetter = function() {
+		var hold = [];
+		for(var i = 0; i < this._drawOrder.length; i++) {
+			hold[hold.length] = this._components[this._drawOrder[i]].bundle();
+			hold[hold.length-1].type = sgui.getTypeName(this._components[this._drawOrder[i]]);
 		}
-	});
+		return hold;
+	}
 	
 	/** Similar to `{@link dusk.sgui.Group.modifyChildren}`
 	 *   only it modifies the properties of all the children instead of one.
@@ -397,11 +393,6 @@ load.provide("dusk.sgui.Group", (function() {
 			this._componentsArr[c].update(data);
 		}
 	};
-	Object.defineProperty(Group.prototype, "__allChildren", {
-		set: function(value) {this.modifyAllChildren(value);},
-		
-		get: function() {return {};}
-	});
 	
 	Group.prototype._groupDraw = function(e) {
 		this._drawingChildren.fire(e);
