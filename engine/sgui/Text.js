@@ -47,6 +47,11 @@ load.provide("dusk.sgui.Label", (function() {
 		 * @private
 		 */
 		this._cachedWidth = 0;
+		/** The number of lines of text (if multiline). Please do not set this property.
+		 * @type integer
+		 * @since 0.0.21-alpha
+		 */
+		this.lines = 0;
 		/** Internal storage for the text this textbox is displaying.
 		 * @type string
 		 * @private
@@ -62,6 +67,13 @@ load.provide("dusk.sgui.Label", (function() {
 		 * @private
 		 */
 		this._width = -1;
+		/** Internal storage for the height of the component that the user has set. It is -1 if the user has set no
+		 *  height.
+		 * This value does not include the padding.
+		 * @type integer
+		 * @private
+		 */
+		this._height = -1;
 		/** The "signature" of the text box. This essentially is all the properties that would require the box to redraw
 		 * it's cache stored in a single string. If any value changes, then the generated signature will not match this sig
 		 * and thus we know to update the cache.
@@ -132,12 +144,6 @@ load.provide("dusk.sgui.Label", (function() {
 		 * @since 0.0.21-alpha
 		 */
 		this.multiline = false;
-		/** Internal storage for the current size, used only if this is multiline.
-		 * @type int
-		 * @since 0.0.21-alpha
-		 * @private
-		 */
-		this._height = 0;
 		
 		/** Event dispatcher fired when the Label changes it's content. It is in AND mode, and any listener that returns
 		 *  false will cause the new text to be "rejected".
@@ -373,8 +379,8 @@ load.provide("dusk.sgui.Label", (function() {
 		if(this.text !== "" && !this._supressTextDisplay){
 			if(this._sig != this._genSig(e)) {
 				//Rebuild the text cache
-				this._updateCache(true);
-				this._updateCache();
+				this._updateText(true, true);
+				this._updateText();
 			}
 			
 			e.c.drawImage(this._cache, e.d.slice.x, e.d.slice.x, e.d.slice.width,  e.d.slice.height,
@@ -394,24 +400,27 @@ load.provide("dusk.sgui.Label", (function() {
 		if(!this.validFilter.test(this._text)) this._text = this.validDefault;
 	};
 	
-	/** Updates the cache.
+	/** Updates the cache, as well as the dimensions the text will take up.
 	 * @param {boolean} widthOnly Will only update the width, rather than drawing the text. This function must be called
 	 * with this argument first, unless you know that the width has not changed.
+	 * @param {boolean=false} commit Whether to set the width and height of the textbox, or just return them.
 	 * @param {?string} text The text to use, defaults to the contents of this text field.
-	 * @return {integer} If this is multiline, the number of lines, else the width.
+	 * @return {Array} A [lines, width] Pair of the dimensions.
 	 * @private
 	 */
-	Label.prototype._updateCache = function(widthOnly, text) {
+	Label.prototype._updateText = function(widthOnly, commit, text) {
 		var textHold = text !== undefined?text:this._text;
 		var textBuffer = "";
 		
 		//Create the cache
 		var cache = this._widthCache;
+		
 		if(!widthOnly) {
 			cache = this._cache;
 			this._cache.width = this._cachedWidth;
-			this._cache.height = this.size + (this.padding << 1);
+			this._cache.height = (this.lines * this.size) + (this.padding << 1);
 		};
+		
 		var c = cache.getContext("2d");
 		var font = this.font;
 		
@@ -437,6 +446,7 @@ load.provide("dusk.sgui.Label", (function() {
 			}
 		}).bind(this);
 		
+		var longestLine = 0;
 		var cursor = this.padding;
 		var charData = null;
 		var line = 0;
@@ -446,6 +456,7 @@ load.provide("dusk.sgui.Label", (function() {
 				if(charData[1] == "\n" && this.multiline) {
 					drawBuff();
 					line ++;
+					if(cursor > longestLine) longestLine = cursor;
 					cursor = this.padding;
 				}else{
 					textBuffer += charData[1];
@@ -469,6 +480,7 @@ load.provide("dusk.sgui.Label", (function() {
 					drawBuff();
 					textBuffer = overflow.split("").reverse().join("");
 					line ++;
+					if(cursor > longestLine) longestLine = cursor;
 					cursor = this.padding;
 				}
 			}else{
@@ -530,7 +542,7 @@ load.provide("dusk.sgui.Label", (function() {
 						
 						cursor += charData[1][1];
 					}else{
-						charData[1][0].loadPromise().then((function(e) {this._updateCache();}).bind(this));
+						charData[1][0].loadPromise().then((function(e) {this._updateText(false, true);}).bind(this));
 						
 						textBuffer += "\ufffd";
 					}
@@ -541,17 +553,19 @@ load.provide("dusk.sgui.Label", (function() {
 			textHold = textHold.substr(charData[2]);
 		}
 		
-		//And set the width
-		this._cachedWidth = cursor + this.padding;
-		if(isNaN(this._cachedWidth)) this._cachedWidth = this.padding << 1;
-		this._cachedWidth = ~~this._cachedWidth;
-		if(!widthOnly) this._sig = this._genSig();
+		if(cursor > longestLine) longestLine = cursor;
 		
-		if(!this.multiline) {
-			return this._cachedWidth;
-		}else{
-			return line +1;
+		//And set the dimensions
+		var width = longestLine + this.padding;
+		if(isNaN(width)) width = this.padding << 1;
+		width = ~~width;
+		
+		if(commit) {
+			this._cachedWidth = width;
+			this.lines = line + 1;
 		}
+		
+		return [line + 1, this._cachedWidth];
 	};
 	
 	/** Counts the number of lines (if it is a multiline text field) that the given text takes up.
@@ -562,34 +576,35 @@ load.provide("dusk.sgui.Label", (function() {
 	Label.prototype.countLines = function(text) {
 		if(!this.multiline) return 1;
 		
-		return this._updateCache(true, text);
+		return this._updateText(true, false, text)[0];
 	};
 	
 	//width
 	Object.defineProperty(Label.prototype, "width", {
 		get: function() {
-			if(this._width >=0) {
-				return this._width+(this.padding<<1)
+			if(this._width > -1) {
+				return this._width
 			}else{
-				return this._cachedWidth;
+				return this._cachedWidth+(this.padding<<1);
 			}
 		},
 		set: function(value) {
-			this._width = value-(this.padding<<1);
+			if(value < 0) this._width = -1;
+			else this._width = value-(this.padding<<1);
 		}
 	});
 	
 	//height
 	Object.defineProperty(Label.prototype, "height", {
 		get: function() {
-			if(this.multiline) {
+			if(this._height > -1) {
 				return this._height;
 			}else{
-				return this.size + (this.padding<<1);
+				return this.lines * this.size + (this.padding<<1);
 			}
 		},
 		set: function(value) {
-			if(this.multiline) {
+			if(this.multiline || value < 0) {
 				this._height = value;
 			}else{
 				this.size = value - (this.padding<<1);
@@ -607,7 +622,7 @@ load.provide("dusk.sgui.Label", (function() {
 				if(!this.validFilter || !this.validCancel || this.validFilter.test(value)) {
 					if(this.onChange.fireAnd({"component":this, "text":""+value})) {
 						this._text = ""+value;
-						this._updateCache(true);
+						this._updateText(true, true);
 						this.postChange.fire({"component":this, "text":""+value});
 					}
 				}

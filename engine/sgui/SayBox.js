@@ -282,14 +282,12 @@ load.provide("dusk.sgui.SayBox", (function() {
 		];
 	};
 	
-	Object.seal(SayBox);
-	Object.seal(SayBox.prototype);
-	
 	sgui.registerType("SayBox", SayBox);
 	
 	sgui.addStyle("SayBox>#left", {
 		"behind":true,
 		"x":10,
+		"height":35,
 		"label":{
 			"padding":10,
 		}
@@ -308,6 +306,7 @@ load.provide("dusk.sgui.SayBox", (function() {
 		"behind":true,
 		"xOrigin":"right",
 		"x":-10,
+		"height":35,
 		"label":{
 			"padding":10,
 		}
