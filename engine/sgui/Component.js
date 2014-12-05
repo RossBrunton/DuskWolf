@@ -589,11 +589,9 @@ load.provide("dusk.sgui.Component", (function() {
 	 * @param {PosRect} containerSlice The slice of the container that is being rendered, anything outwith these
 	 *  dimensions will not be rendered.
 	 * @param {PosRect} display The area (on the canvas) to actually draw onto.
-	 * @param {int} xOffset How much to offset the x coordinate by (will be the same as the xOffset of the container).
-	 * @param {int} yOffset How much to offset the y coordinate by (will be the same as the yOffset of the container).
 	 * @since 0.0.21-alpha
 	 */
-	Component.prototype.paintContainer = function(ctx, container, containerSlice, display, xOffset, yOffset) {
+	Component.prototype.paintContainer = function(ctx, container, containerSlice, display) {
 		// Container x,y is x y of container, width,height is that of container
 		// Display x,y is the upper left of where to start drawing, and ex,ey is the bottom right
 		// Slice is the area of the container to draw
@@ -637,8 +635,8 @@ load.provide("dusk.sgui.Component", (function() {
 		
 		// Then calculate the slice and dest
 		dest.setWH(
-			-xOffset + source.x + display.x - containerSlice.x,
-			-yOffset + source.y + display.y - containerSlice.y,
+			source.x + display.x - containerSlice.x,
+			source.y + display.y - containerSlice.y,
 			source.width, source.height
 		);
 		
@@ -654,8 +652,8 @@ load.provide("dusk.sgui.Component", (function() {
 		
 		if(!skip) {
 			slice.setWH(
-				dest.x + xOffset - source.x - display.x + container.x + containerSlice.x,
-				dest.y + yOffset - source.y - display.y + container.y + containerSlice.y,
+				dest.x - source.x - display.x + container.x + containerSlice.x,
+				dest.y -source.y - display.y + container.y + containerSlice.y,
 				dest.width, dest.height
 			);
 			
@@ -671,6 +669,8 @@ load.provide("dusk.sgui.Component", (function() {
 				ctx.font = "10px sans";
 				ctx.fillText(this.name, dest.x + 1, dest.y + 10);
 				ctx.strokeRect(dest.x+0.5, dest.y+0.5, slice.width-1, slice.height-1);
+				//ctx.strokeStyle = "#0000ff";
+				//ctx.strokeRect(dest.x+0.5, dest.y+0.5, container.width-1, container.height-1);
 			}
 		}
 		

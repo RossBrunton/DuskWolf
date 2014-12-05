@@ -217,10 +217,30 @@ load.provide("guiTest", (function() {
 			},
 			
 			// Image
-			"cicont":{
+			"ei":{
 				"type":"Group",
 				"xOrigin":"middle",
 				"yOrigin":"middle",
+				"width":50,
+				"height":50,
+				"children":{
+					"img":{
+						"margins":[5, 5, 5, 5],
+						"type":"Image",
+						"xDisplay":"expand",
+						"yDisplay":"expand",
+						"src":"default/test.png"
+					}
+				}
+			},
+			
+			"eic":{
+				"type":"Group",
+				"xOrigin":"middle",
+				"yOrigin":"middle",
+				"y":100,
+				"xOffset":10,
+				"yOffset":10,
 				"width":50,
 				"height":50,
 				"children":{
@@ -248,9 +268,41 @@ load.provide("guiTest", (function() {
 					"width":20,
 					"height":20,
 					"src":"default/test.png"
-				}
+				},
+				"width":200,
+				"height":200,
+			},
+			
+			// Expand grid
+			"egridC":{
+				"type":"Group",
+				"xOffset":50,
+				"yOffset":50,
+				"xDisplay":"expand",
+				"yDisplay":"expand",
+				//"margins":[20, 20, 20, 20],
+				"children":{
+					"egrid":{
+						"mark":"#00ff00",
+						"type":"Grid",
+						"rows":11,
+						"cols":11,
+						"xDisplay":"expand",
+						"yDisplay":"expand",
+						"alpha":0.5,
+						"vspacing":5,
+						"hspacing":10,
+						//"margins":[5, 5, 5, 5],
+						"globals":{
+							"type":"Rect",
+							"xDisplay":"expand",
+							"yDisplay":"expand",
+						},
+						//"visible":false,
+						"populate":[{"colour":"#ff9999"}, {"colour":"#9999ff"}]
+					}
+				},
 			}
-					
 		}
 	});
 

@@ -181,8 +181,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 			this._layers = val;
 			if(!val.length) return;
 			
-			this.deleteAllComponents();
-			
+			this.empty();
 			this._updateLayers();
 			
 			this.get("editorLabel", "Label").update({

@@ -8,6 +8,7 @@ load.provide("dusk.sgui.Grid", (function() {
 	var c = load.require("dusk.sgui.c");
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var utils = load.require("dusk.utils");
+	var PosRect = load.require("dusk.utils.PosRect");
 	
 	/** A grid is a group of similar components arranged in a grid.
 	 * 
@@ -30,8 +31,9 @@ load.provide("dusk.sgui.Grid", (function() {
 	 *  of the grid. For example, you can create two components next to each other, and have them automatically take up
 	 *  half the grid, by setting both their displays to expand.
 	 * 
-	 * You should not change the x or y coordinates of component in a grid, and should not make anny assumptions on
-	 *  them.
+	 * The grid creates essentially a "grid" of display regions. This means that the x,y coordinate 0,0 will be the top
+	 *  left of its grid square, and the width and height of the drawing area (for expand components) will be the
+	 *  current grid square's width and height.
 	 * 
 	 * @extends dusk.sgui.Group
 	 * @param {?dusk.sgui.Group} parent The container that this component is in.
@@ -99,9 +101,6 @@ load.provide("dusk.sgui.Grid", (function() {
 		 * @since 0.0.17-alpha
 		 */
 		this._populationEvent = new EventDispatcher("dusk.sgui.Grid._populationEvent");
-		
-		this._cachedWidth = 0;
-		this._cachedHeight = 0;
 		
 		//Prop masks
 		this._mapper.map("vspacing", "vspacing");
@@ -186,106 +185,12 @@ load.provide("dusk.sgui.Grid", (function() {
 				// Give the component properties
 				if(this.globals !== null) com.update(utils.clone(this.globals));
 				com.update(utils.clone(child[p]));
-				com.update({"y":ypoint, "x":xpoint});
-				
-				// Set the location of the component
-				xpoint += com.width+this.hspacing;
-				if(com.height + this.vspacing > ypointMax) ypointMax = com.height + this.vspacing;
 			}
-			
-			ypoint += ypointMax;
-			xpoint = 0;
 		}
 		
 		this.flow("0,0");
 		
 		this._populationEvent.fire({"action":"complete", "child":child}, "complete");
-	};
-	
-	/** Override to enable expand components to be in the correct locations.
-	 * 
-	 * @param {dusk.sgui.Component} com The component added.
-	 * @param {object} event The event object for this group's draw function.
-	 * @param {object} ranges The current component's draw event object, which is incomplete.
-	 * @param {int} pos The position, elements earlier in the draw order will have lower number, and it increases by one
-	 *  each time.
-	 * @return {int} The width of the component.
-	 * @since 0.0.21-alpha
-	 * @protected
-	 */
-	Grid.prototype._getExpandWidth = function(com, event, ranges, pos) {
-		return (event.d.slice.width / this.cols) - this.hspacing;
-	};
-	
-	/** Override to enable expand components to be in the correct locations.
-	 * 
-	 * @param {dusk.sgui.Component} com The component added.
-	 * @param {object} event The event object for this group's draw function.
-	 * @param {object} ranges The current component's draw event object, which is incomplete.
-	 * @param {int} pos The position, elements earlier in the draw order will have lower number, and it increases by one
-	 *  each time.
-	 * @return {int} The height of the component.
-	 * @since 0.0.21-alpha
-	 * @protected
-	 */
-	Grid.prototype._getExpandHeight = function(com, event, ranges, pos) {
-		return (event.d.slice.height / this.rows) - this.vspacing;
-	};
-	
-	/** Override to enable expand components to be in the correct locations.
-	 * 
-	 * @param {dusk.sgui.Component} com The component added.
-	 * @param {object} event The event object for this group's draw function.
-	 * @param {object} ranges The current component's draw event object, which is incomplete.
-	 * @param {int} pos The position, elements earlier in the draw order will have lower number, and it increases by one
-	 *  each time.
-	 * @return {int} The x coordinate of the component.
-	 * @since 0.0.21-alpha
-	 * @protected
-	 */
-	Grid.prototype._getExpandX = function(com, event, ranges, pos) {
-		var cx = pos % this.cols;
-		var width = ((event.d.slice.width + this.hspacing) / this.cols) - this.hspacing;
-		
-		return cx*(width+this.hspacing);
-	};
-	
-	/** Override to enable expand components to be in the correct locations.
-	 * 
-	 * @param {dusk.sgui.Component} com The component added.
-	 * @param {object} event The event object for this group's draw function.
-	 * @param {object} ranges The current component's draw event object, which is incomplete.
-	 * @param {int} pos The position, elements earlier in the draw order will have lower number, and it increases by one
-	 *  each time.
-	 * @return {int} The y coordinate of the component.
-	 * @since 0.0.21-alpha
-	 * @protected
-	 */
-	Grid.prototype._getExpandY = function(com, event, ranges, pos) {
-		var cy = ~~(pos / this.cols);
-		var height = ((event.d.slice.height + this.vspacing) / this.rows) - this.vspacing;
-		
-		return cy*(height+this.vspacing);
-	};
-	
-	/** Updates the location of all the components, arranging them back into a grid if, for example,
-	 *  they have been moved or the spacing between them has changed.
-	 */
-	Grid.prototype.adjust = function() {
-		this._cachedWidth = 0;
-		for(var hy = 0; hy < this.rows; hy++){
-			for(var hx = 0; hx < this.cols; hx++){
-				var com = this.getComponent(hx+","+hy);
-				if(com) {
-					if(com.xDisplay == "fixed") {
-						com.update({"x":(hx*com.width+hx*this.hspacing)});
-					}
-					if(com.yDisplay == "fixed") {
-						com.update({"y":(hy*com.height+hy*this.vspacing)});
-					}
-				}
-			}
-		}
 	};
 	
 	/** Changes the focused component in a grid-y way.
@@ -330,6 +235,97 @@ load.provide("dusk.sgui.Grid", (function() {
 				console.warn("Invalid direction for relative seen: "+dir);
 				return null;
 		}
+	};
+	
+	Grid.prototype._groupDraw = function(e) {
+		this._drawingChildren.fire(e);
+		
+		var rect = PosRect.pool.alloc();
+		var display = PosRect.pool.alloc();
+		var slice = PosRect.pool.alloc();
+		
+		rect.setWH(0, 0, e.d.origin.width, e.d.origin.height);
+		
+		display.shiftTo(e.d.dest.x, e.d.dest.y);
+		display.sizeTo(e.d.dest.width, e.d.dest.height);
+		
+		slice.setWH(e.d.slice.x, e.d.slice.y, e.d.slice.width, e.d.slice.height);
+		
+		var initX = e.d.dest.x;
+		
+		var eachWidth = (e.d.origin.width - ((this.cols - 1) * this.hspacing)) / (this.cols);
+		var eachHeight = (e.d.origin.height - ((this.rows - 1) * this.vspacing)) / (this.rows);
+		
+		var widthAndSpace = eachWidth + this.hspacing;
+		var heightAndSpace = eachHeight + this.vspacing;
+		
+		// Origin is always the same size
+		rect.setWH(0, 0, eachWidth, eachHeight);
+		display.sizeTo(eachWidth, eachHeight);
+		
+		for(var x = 0; x < this.cols; x++) {
+			for(var y = 0; y < this.rows; y++) {
+				slice.setWH(0, 0, rect.width, rect.height);
+				display.setWH(
+					e.d.dest.x + (x * widthAndSpace) - e.d.slice.x,
+					e.d.dest.y + (y * heightAndSpace) - e.d.slice.y,
+					eachWidth, eachHeight
+				);
+				
+				if(e.d.slice.x > widthAndSpace * x) {
+					slice.startSize(e.d.slice.x - (widthAndSpace * x), 0);
+				}
+				if(e.d.slice.y > heightAndSpace * y) {
+					slice.startSize(0, e.d.slice.y - (heightAndSpace * y));
+				}
+				
+				this._components[x+","+y].paintContainer(e.c, rect, slice, display);
+			}
+		}
+		
+		PosRect.pool.free(rect);
+		PosRect.pool.free(display);
+		PosRect.pool.free(slice);
+	};
+	
+	/** Returns the smallest width which has all the components fully drawn inside.
+	 * 
+	 * @param {boolean} includeOffset If true, then the offset is taken into account, and removed from the figure.
+	 * @return {integer} The smallest possible width where all the components are fully inside.
+	 * @since 0.0.21-alpha
+	 */
+	Grid.prototype.getContentsWidth = function(includeOffset) {
+		var max = 0;
+		
+		for(var y = 0; y < this.rows; y ++) {
+			var sum = 0;
+			for(var x = 0; x < this.cols; x ++) {
+				if(this.get(x+","+y)) sum += this.get(x+","+y).width;
+			}
+			if(sum > max) max = sum;
+		}
+		
+		return max - (includeOffset?this.xOffset:0) + ((this.cols-1)* this.hspacing);
+	};
+	
+	/** Returns the smallest height which has all the components fully drawn inside.
+	 * 
+	 * @param {boolean} includeOffset If true, then the offset is taken into account, and removed from the figure.
+	 * @return {integer} The smallest possible height where all the components are fully inside.
+	 * @since 0.0.21-alpha
+	 */
+	Grid.prototype.getContentsHeight = function(includeOffset) {
+		var max = 0;
+		
+		for(var x = 0; x < this.cols; x ++) {
+			var sum = 0;
+			for(var y = 0; y < this.rows; y ++) {
+				if(this.get(x+","+y)) sum += this.get(x+","+y).height;
+			}
+			if(sum > max) max = sum;
+		}
+		
+		return max - (includeOffset?this.yOffset:0) + ((this.rows-1)* this.vspacing);
 	};
 	
 	sgui.registerType("Grid", Grid);

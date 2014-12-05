@@ -31,7 +31,7 @@ load.provide("dusk.rooms.quest", (function() {
 	quest.puppeteer = null;
 	
 	quest.make = function(component, name) {
-		component.modifyComponent([{"name":name, "type":"LayeredRoom", "width":-2, "height":-2}]);
+		component.modifyComponent([{"name":name, "type":"LayeredRoom"}]);
 		component.becomeActive();
 		component.flow(name);
 		quest.rooms.setLayeredRoom(component.get(name));

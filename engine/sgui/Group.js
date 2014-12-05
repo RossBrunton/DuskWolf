@@ -180,7 +180,7 @@ load.provide("dusk.sgui.Group", (function() {
 		this.prepareDraw.listen(this._groupDraw.bind(this));
 		this.frame.listen(_groupFrame.bind(this));
 		this.onInteract.listen(_mouseSelect.bind(this), interaction.MOUSE_MOVE);
-		this.onDelete.listen((function(e) {this.deleteAllComponents();}).bind(this));
+		this.onDelete.listen((function(e) {this.empty();}).bind(this));
 		
 		this.onActiveChange.listen((function(e){
 			if(this.focusBehaviour == Group.FOCUS_ALL) {
@@ -403,85 +403,20 @@ load.provide("dusk.sgui.Group", (function() {
 		
 		rect.setWH(0, 0, e.d.origin.width, e.d.origin.height);
 		
-		display.shiftTo(e.d.dest.x, e.d.dest.y);
-		display.sizeTo(e.d.dest.width, e.d.dest.height);
+		display.setWH(e.d.dest.x, e.d.dest.y, e.d.dest.width, e.d.dest.height);
 		
-		slice.setWH(e.d.slice.x, e.d.slice.y, e.d.slice.width, e.d.slice.height);
+		slice.setWH(e.d.slice.x + this.xOffset, e.d.slice.y + this.yOffset, e.d.slice.width - this.xOffset, e.d.slice.height - this.yOffset);
 		
 		for(var i = 0; i < this._drawOrder.length; i++) {
 			if(this._drawOrder[i] in this._components) {
 				this._components[this._drawOrder[i]].paintContainer
-					(e.c, rect, slice, display, this.xOffset, this.yOffset);
+					(e.c, rect, slice, display, 0, 0);
 			}
 		}
 		
 		PosRect.pool.free(rect);
 		PosRect.pool.free(display);
 		PosRect.pool.free(slice);
-	};
-	
-	/** Should return the width of a component with display set to "expand".
-	 * 
-	 * This mainly exists so that subclasses can extend it.
-	 * @param {dusk.sgui.Component} com The component added.
-	 * @param {object} event The event object for this group's draw function.
-	 * @param {object} ranges The current component's draw event object, which is incomplete.
-	 * @param {int} pos The position, elements earlier in the draw order will have lower number, and it increases by one
-	 *  each time.
-	 * @return {int} The width of the component.
-	 * @since 0.0.21-alpha
-	 * @protected
-	 */
-	Group.prototype._getExpandWidth = function(com, event, ranges, pos) {
-		return event.d.slice.width;
-	};
-	
-	/** Should return the height of a component with display set to "expand".
-	 * 
-	 * This mainly exists so that subclasses can extend it.
-	 * @param {dusk.sgui.Component} com The component added.
-	 * @param {object} event The event object for this group's draw function.
-	 * @param {object} ranges The current component's draw event object, which is incomplete.
-	 * @param {int} pos The position, elements earlier in the draw order will have lower number, and it increases by one
-	 *  each time.
-	 * @return {int} The height of the component.
-	 * @since 0.0.21-alpha
-	 * @protected
-	 */
-	Group.prototype._getExpandHeight = function(com, event, ranges, pos) {
-		return event.d.slice.height;
-	};
-	
-	/** Should return the x coordinate of a component with display set to "expand".
-	 * 
-	 * This mainly exists so that subclasses can extend it.
-	 * @param {dusk.sgui.Component} com The component added.
-	 * @param {object} event The event object for this group's draw function.
-	 * @param {object} ranges The current component's draw event object, which is incomplete.
-	 * @param {int} pos The position, elements earlier in the draw order will have lower number, and it increases by one
-	 *  each time.
-	 * @return {int} The x coordinate of the component.
-	 * @since 0.0.21-alpha
-	 * @protected
-	 */
-	Group.prototype._getExpandX = function(com, event, ranges, pos) {
-		return 0;
-	};
-	
-	/** Should return the y coordinate of a component with display set to "expand".
-	 * 
-	 * This mainly exists so that subclasses can extend it.
-	 * @param {dusk.sgui.Component} com The component added.
-	 * @param {object} event The event object for this group's draw function.
-	 * @param {object} ranges The current component's draw event object, which is incomplete.
-	 * @param {int} pos The position, elements earlier in the draw order will have lower number, and it increases by one
-	 *  each time.
-	 * @return {int} The y coordinate of the component.
-	 * @since 0.0.21-alpha
-	 * @protected
-	 */
-	Group.prototype._getExpandY = function(com, event, ranges, pos) {
-		return 0;
 	};
 	
 	/** Calls the `{@link dusk.sgui.Component.frame}` method of all components.
@@ -572,15 +507,6 @@ load.provide("dusk.sgui.Group", (function() {
 	 * @since 0.0.21-alpha
 	 */
 	Group.prototype.empty = function() {
-		for(var c = this._componentsArr.length-1; c >= 0; c --) {
-			this.deleteComponent(this._componentsArr[c].name);
-		}
-	};
-	/** Depreciated alias of `empty`.
-	 * 
-	 * @since 0.0.18-alpha
-	 */
-	Group.prototype.deleteAllComponents = function() {
 		for(var c = this._componentsArr.length-1; c >= 0; c --) {
 			this.deleteComponent(this._componentsArr[c].name);
 		}
