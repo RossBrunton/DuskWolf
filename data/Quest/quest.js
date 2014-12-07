@@ -36,7 +36,7 @@ load.provide("quest", (function() {
 		}).bind(this));
 	});
 	
-	var root = sgui.get("quest", true);
+	var root = sgui.get("default", true);
 	dquest.make(root, "quest");
 	
 	//Test
@@ -186,7 +186,7 @@ load.provide("quest", (function() {
 			),
 			[function(passedArg, qu) {
 				if(!passedArg.entity) {
-					qu(q.requestBoundPair("selectListMenu", {"path":"quest:menu/menu"}));
+					qu(q.requestBoundPair("selectListMenu", {"path":"default:menu/menu"}));
 					qu(reversiblePromiseChain.STOP);
 					
 					passedArg.options = [];
@@ -255,7 +255,7 @@ load.provide("quest", (function() {
 						
 						return pa;
 					}, undefined, "Generate weapons list"]);
-					qu(q.requestBoundPair("selectListMenu", {"path":"quest:/menu/menu"}));
+					qu(q.requestBoundPair("selectListMenu", {"path":"default:/menu/menu"}));
 					
 					return pa;
 				}});
@@ -268,7 +268,7 @@ load.provide("quest", (function() {
 				
 				return pa;
 			}, undefined, "After move menu"],
-			q.requestBoundPair("selectListMenu", {"path":"quest:menu/menu"}),
+			q.requestBoundPair("selectListMenu", {"path":"default:menu/menu"}),
 			q.requestBoundPair("uncolourRegion", {"regionsToUncolour":["attack"]}),
 			[function(pa) {
 				pa.mover.stats.addBlock(3, "moved", {"moved":true});

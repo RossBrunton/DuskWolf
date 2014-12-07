@@ -175,8 +175,13 @@ load.provide("example.plat", (function() {
 		]
 	}, "plat");
 	
-	var root = sgui.get("plat", true);
+	var root = sgui.get("default", true).get("plat2", "Group");
 	dplat.make(root, "orange");
+	
+	root.width = 728;
+	root.height = 440;
+	root.x = 20;
+	root.y = 20;
 	
 	root.get("hud", "Group").update({
 		"xDisplay":"expand",

@@ -54,7 +54,7 @@ load.provide("example.platLong", (function() {
 	entities.swidth = 32;
 	entities.sheight = 32;
 	
-	var root = sgui.get("plat", true);
+	var root = sgui.get("default", true);
 	dplat.make(root, "orange");
 	
 	var _playerAni = [

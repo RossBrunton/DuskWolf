@@ -41,13 +41,15 @@ load.provide("dusk.input.keyboard", (function() {
 	 */
 	keyboard.keyUp = new EventDispatcher("dusk.input.keyboard.keyUp");
 	
-	dusk.getElement().addEventListener("keydown", function(e){
+	var _keydown = function(rootName, e) {
+		e.root = rootName;
+		
 		if(!_keys[e.keyCode]) {
 			if(!keyboard.keyPress.fireAnd(e, e.keyCode)) false;//e.preventDefault(); //Seems to stop text input
 		}
 		
 		//Block keys from moving page
-		if(dusk.getElementTextarea() == document.activeElement) {
+		if(document.activeElement instanceof HTMLTextAreaElement) {
 			//If the textarea is active
 		}else{
 			//If the canvas is active
@@ -55,10 +57,12 @@ load.provide("dusk.input.keyboard", (function() {
 		}
 		
 		//if([9, 13].indexOf(e.keyCode) !== -1) return false; //Why is this here?
-	});
-	dusk.getElement().addEventListener("keyup", function(e){
+	};
+	
+	var _keyup = function(rootName, e) {
+		e.root = rootName;
 		keyboard.keyUp.fire(e, e.keyCode);
-	});
+	};
 	
 	/** An object describing the properties of keys relative to their keycodes.
 	 * 
@@ -227,7 +231,15 @@ load.provide("dusk.input.keyboard", (function() {
 		return -1;
 	};
 	
-	Object.seal(keyboard);
+	/** Sets an element so that it will get events.
+	 * @param {HTMLElement} element The HTML element to handle.
+	 * @param {string} rootName The name of the root. This will be set to the "root" property of the event.
+	 * @since 0.0.21-alpha
+	 */
+	keyboard.trapElement = function(element, rootName) {
+		element.addEventListener("keydown", _keydown.bind(undefined, rootName));
+		element.addEventListener("keyup", _keyup.bind(undefined, rootName));
+	}
 	
 	return keyboard;
 })());

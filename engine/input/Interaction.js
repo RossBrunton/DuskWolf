@@ -32,6 +32,7 @@ load.provide("dusk.input.interaction", (function() {
 		obj.meta = e.metaKey;
 		obj.type = interaction.KEY_DOWN;
 		obj.filter = (obj.which << 16) | obj.type;
+		obj.root = e.root;
 		
 		var toRet = interaction.on.fireAnd(obj, obj.filter);
 		_interactions.free(obj);
@@ -48,6 +49,7 @@ load.provide("dusk.input.interaction", (function() {
 		obj.meta = e.metaKey;
 		obj.type = interaction.KEY_UP;
 		obj.filter = (obj.which << 16) | obj.type;
+		obj.root = e.root;
 		
 		var toRet = interaction.on.fireAnd(obj, obj.filter);
 		_interactions.free(obj);
@@ -60,6 +62,7 @@ load.provide("dusk.input.interaction", (function() {
 		obj.which = e.which;
 		obj.axis = e.axis;
 		obj.type = interaction.BUTTON_DOWN;
+		obj.root = "*";
 		
 		if(e.axis) {
 			obj.filter = obj.type;
@@ -78,6 +81,7 @@ load.provide("dusk.input.interaction", (function() {
 		obj.which = e.which;
 		obj.axis = e.axis;
 		obj.type = interaction.BUTTON_UP;
+		obj.root = "*";
 		
 		if(e.axis) {
 			obj.filter = obj.type;
@@ -99,7 +103,8 @@ load.provide("dusk.input.interaction", (function() {
 		obj.alt = e.altKey;
 		obj.meta = e.metaKey;
 		obj.type = interaction.MOUSE_CLICK;
-		obj.filter = (obj.which << 16) | obj.type
+		obj.filter = (obj.which << 16) | obj.type;
+		obj.root = e.root;
 		
 		var toRet = interaction.on.fireAnd(obj, obj.filter);
 		_interactions.free(obj);
@@ -113,6 +118,7 @@ load.provide("dusk.input.interaction", (function() {
 		obj.y = e.y;
 		obj.type = interaction.MOUSE_MOVE;
 		obj.filter = obj.type;
+		obj.root = e.root;
 		
 		var toRet = interaction.on.fireAnd(obj, obj.filter);
 		_interactions.free(obj);

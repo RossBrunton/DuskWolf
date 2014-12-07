@@ -409,8 +409,9 @@ load.provide("dusk.sgui.Group", (function() {
 		
 		for(var i = 0; i < this._drawOrder.length; i++) {
 			if(this._drawOrder[i] in this._components) {
-				this._components[this._drawOrder[i]].paintContainer
-					(e.c, rect, slice, display, 0, 0);
+				var c = this._components[this._drawOrder[i]];
+				
+				c.paintContainer(e.c, rect, slice, display, 0, 0);
 			}
 		}
 		
@@ -833,8 +834,7 @@ load.provide("dusk.sgui.Group", (function() {
 				if(this._drawOrder[i] in this._components
 				&& this._components[this._drawOrder[i]].mouse && this._components[this._drawOrder[i]].mouse.allow) {
 					var com = this._components[this._drawOrder[i]];
-					if(!(this.mouse.x < com.x || this.mouse.x > com.x + com.width
-					|| this.mouse.y < com.y || this.mouse.y > com.y + com.height) && com.visible) {
+					if(com.mouse.hovered && com.visible) {
 						if(com != this.getFocused()) this.flow(this._drawOrder[i]);
 						break;
 					}
@@ -843,36 +843,6 @@ load.provide("dusk.sgui.Group", (function() {
 		}
 		
 		return true;
-	}
-	
-	/** Returns the actual X location, relative to the screen, that the component is at.
-	 * @param {string} name The component to find X for.
-	 * @return {integer} The X value, relative to the screen.
-	 * @since 0.0.20-alpha
-	 */
-	Group.prototype.getTrueX = function(name) {
-		var com = this._components[name];
-		
-		var destXAdder = 0;
-		if(com.xOrigin == "right") destXAdder = this.width - com.width;
-		if(com.xOrigin == "middle") destXAdder = (this.width - com.width)>>1;
-		
-		return this.container.getTrueX(this.name) + com.x - this.xOffset + destXAdder;
-	};
-	
-	/** Returns the actual Y location, relative to the screen, that the component is at.
-	 * @param {string} name The component to find X for.
-	 * @return {integer} The Y value, relative to the screen.
-	 * @since 0.0.20-alpha
-	 */
-	Group.prototype.getTrueY = function(name) {
-		var com = this._components[name];
-		
-		var destYAdder = 0;
-		if(com.yOrigin == "bottom") destYAdder = this.height - com.height;
-		if(com.yOrigin == "middle") destYAdder = (this.height - com.height)>>1;
-		
-		return this.container.getTrueY(this.name) + com.y - this.yOffset + destYAdder;
 	};
 	
 	sgui.registerType("Group", Group);

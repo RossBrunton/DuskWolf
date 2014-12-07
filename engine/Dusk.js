@@ -103,25 +103,11 @@ load.provide("dusk", (function() {
 	}
 	
 	var _elem;
-	if(document.getElementsByTagName("swo-duskwolf").length) {
-		_elem = document.getElementsByTagName("swo-duskwolf")[0];
+	if(document.getElementsByTagName("dw-settings").length) {
+		_elem = document.getElementsByTagName("dw-settings")[0];
 		if(_elem.getAttribute("data-frameRate")) dusk.frameRate = _elem.getAttribute("data-frameRate");
 		if(_elem.getAttribute("data-data")) dusk.dataDir = _elem.getAttribute("data-data");
 		if(_elem.getAttribute("data-dev") !== undefined) dusk.dev = true;
-		
-		_elem.style.display = "block";
-		if(!_elem.style.width) _elem.style.width = _toPx(_elem.getAttribute("data-width"));
-		if(!_elem.style.height) _elem.style.height = _toPx(_elem.getAttribute("data-height"));
-		
-		_elem.tabIndex = 0;
-		
-		if(!_elem.id) _elem.id = "swo-duskwolf";
-		_elem.innerHTML = "<textarea id='"+_elem.id+"-input' type='text'\
-		style='position:absolute;visibility:hidden;background:transparent;border:none;resize:none;overflow:hidden;'>";
-		_elem.innerHTML += "<canvas id='"+_elem.id+"-canvas' style='image-rendering: -webkit-optimize-contrast;'\
-		width='"+_elem.getAttribute("data-width")+"' height='"+_elem.getAttribute("data-height")+"'\
-		></canvas>";
-		dusk.elemPrefix = _elem.id;
 		
 		var pack = _elem.getAttribute("data-package");
 		if(_elem.getAttribute("data-url-override") !== undefined && utils.urlGet("dwpack")) {

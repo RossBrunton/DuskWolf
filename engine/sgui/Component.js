@@ -417,43 +417,6 @@ load.provide("dusk.sgui.Component", (function() {
 	Component.prototype.interact = function(e, nofire) {
 		this._noFlow = false;
 		
-		// If it is a mouse move, update the coordinates
-		if(this.mouse && e.type == interaction.MOUSE_MOVE) {
-			var destX = 0;
-			var destY = 0;
-			
-			var destXAdder = 0;
-			var destYAdder = 0;
-			
-			if(this.container) {
-				destX = this.container.mouse.x;
-				destY = this.container.mouse.y;
-				
-				if(this.xOrigin == "right") destXAdder = this.container.width - this.width;
-				if(this.xOrigin == "middle") destXAdder = (this.container.width - this.width)>>1;
-				
-				if(this.yOrigin == "bottom") destYAdder = this.container.height - this.height;
-				if(this.yOrigin == "middle") destYAdder = (this.container.height - this.height)>>1;
-				
-				destX += -this.x + this.container.xOffset - destXAdder;
-				destY += -this.y + this.container.yOffset - destYAdder;
-			}else{
-				destX = e.x;
-				destY = e.y;
-				
-				if(this.xOrigin == "right") destXAdder = sgui.width - this.width;
-				if(this.xOrigin == "middle") destXAdder = (sgui.width - this.width)>>1;
-				
-				if(this.yOrigin == "bottom") destYAdder = sgui.height - this.height;
-				if(this.yOrigin == "middle") destYAdder = (sgui.height - this.height)>>1;
-				
-				destX += -this.x - destXAdder;
-				destY += -this.y - destYAdder;
-			}
-			
-			this.mouse.update(destX, destY);
-		}
-		
 		if(nofire) return false;
 		
 		var dirReturn = this.onInteract.fireAnd(e, e.filter);
@@ -584,6 +547,8 @@ load.provide("dusk.sgui.Component", (function() {
 	/** Used by containers, similar to `paint`, but allows you to specify what part of an image to take, and where
 	 *  exactly to put it. Also supports "expand" components.
 	 * 
+	 * This will also update the mouse location.
+	 * 
 	 * @param {CanvasRenderingContext2D} ctx The canvas to draw onto.
 	 * @param {PosRect} container The dimensions of the container that this component is in. The x and y are unused.
 	 * @param {PosRect} containerSlice The slice of the container that is being rendered, anything outwith these
@@ -592,10 +557,8 @@ load.provide("dusk.sgui.Component", (function() {
 	 * @since 0.0.21-alpha
 	 */
 	Component.prototype.paintContainer = function(ctx, container, containerSlice, display) {
-		// Container x,y is x y of container, width,height is that of container
-		// Display x,y is the upper left of where to start drawing, and ex,ey is the bottom right
-		// Slice is the area of the container to draw
-		if(!this.visible || this.alpha <= 0) return;
+		// Check if we can skip rendering
+		if((!this.visible || this.alpha <= 0) && !this.mouse) return;
 		
 		// Transparency
 		var oldAlpha = -1;
@@ -650,14 +613,29 @@ load.provide("dusk.sgui.Component", (function() {
 		var skip = false;
 		if(dest.width <= 0 || dest.height <= 0) skip = true;
 		
-		if(!skip) {
+		// Update mouse location
+		if(this.mouse && this.getRoot().mouse) {
+			var x = this.getRoot().mouse.x - dest.x// + slice.x;
+			var y = this.getRoot().mouse.y - dest.y// + slice.y;
+			
+			if(x >= 0 && y >= 0 && x <= source.width && y <= source.height) {
+				this.mouse.hovered = true;
+			}else{
+				this.mouse.hovered = false;
+			}
+			
+			this.mouse.update(x, y);
+		}
+		
+		if(!skip && this.visible) {
 			slice.setWH(
 				dest.x - source.x - display.x + container.x + containerSlice.x,
-				dest.y -source.y - display.y + container.y + containerSlice.y,
+				dest.y - source.y - display.y + container.y + containerSlice.y,
 				dest.width, dest.height
 			);
 			
 			this.prepareDraw.fire({"c":ctx, "d":{"dest":dest, "slice":slice, "origin":source}});
+			
 			if(this.activeBorder !== null && this.active) {
 				ctx.strokeStyle = this.activeBorder;
 				ctx.strokeRect(dest.x+0.5, dest.y+0.5, slice.width-1, slice.height-1);
@@ -667,8 +645,13 @@ load.provide("dusk.sgui.Component", (function() {
 				ctx.strokeStyle = this.mark;
 				ctx.fillStyle = this.mark;
 				ctx.font = "10px sans";
-				ctx.fillText(this.name, dest.x + 1, dest.y + 10);
+				ctx.lineWidth = 1;
+				ctx.fillText(this.name + (this.mouse ? " M" : "") + (this.active ? " A" : ""), dest.x + 1, dest.y + 10);
 				ctx.strokeRect(dest.x+0.5, dest.y+0.5, slice.width-1, slice.height-1);
+				
+				if(this.mouse) {
+					ctx.strokeRect(dest.x + this.mouse.x, dest.y+this.mouse.y, 1, 1);
+				}
 				//ctx.strokeStyle = "#0000ff";
 				//ctx.strokeRect(dest.x+0.5, dest.y+0.5, container.width-1, container.height-1);
 			}
@@ -817,6 +800,17 @@ load.provide("dusk.sgui.Component", (function() {
 		return this.container.fullPath() + "/" + this.name;
 	};
 	
+	/** Creates or returns elements from inside the dw-paint HTML element that holds the root of this component.
+	 * 
+	 * If they don't exist, they will be created.
+	 * @param {string} tag The tag name of the element to get or create.
+	 * @return {array} An array of HTMLElements, one per dw-paint that this component's root is displayed on.
+	 * @since 0.0.21-alpha
+	 */
+	Component.prototype.getHtmlElements = function(tag) {
+		return this.container.getHtmlElements(tag);
+	};
+	
 	
 	/** Adds the specified extra to this component.
 	 * @param {string} type The class name of the extra to add.
@@ -922,6 +916,14 @@ load.provide("dusk.sgui.Component", (function() {
 		
 		this.container.becomeActive(this);
 	};
+	
+	/** Returns the Root that this component is in.
+	 * @return {dusk.sgui.Root} The root.
+	 * @since 0.0.21-alpha
+	 */
+	Component.prototype.getRoot = function() {
+		return this.container.getRoot();
+	}
 	
 	/** Returns a string representation of the component. 
 	 * 

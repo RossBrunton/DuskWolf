@@ -136,12 +136,6 @@ load.provide("dusk.sgui", (function() {
 	 */
 	sgui.onRender = new EventDispatcher("onRender");
 	
-	/** A cached canvas drawn to before the real one, to improve performance.
-	 * @type HTMLCanvasElement
-	 * @private
-	 */
-	var _cacheCanvas = document.createElement("canvas");
-	
 	/** An object containing all the styles, the key is the selector, and the value is the props.
 	 * @type object
 	 * @private
@@ -191,22 +185,6 @@ load.provide("dusk.sgui", (function() {
 	 */
 	var _mouseMoveQueued = false;
 	
-	/** If this is true then the canvas won't be cleaned before every draw. If your components cover all the screen, 
-	 *  this is fine, but if they don't, then this will result in graphical oddities.
-	 * 
-	 *  Setting this true will give a bit of graphical performance.
-	 * @type boolean
-	 * @since 0.0.21-alpha
-	 */
-	sgui.noCleanCanvas = false;
-	/** If this is true then the cache canvas will not be used, and the drawing will occur right on the screen.
-	 * 
-	 * This setting probably shouldn't be turned on, but it should give a boost to performance.
-	 * @type boolean
-	 * @since 0.0.21-alpha
-	 */
-	sgui.noCacheCanvas = false;
-	
 	/** Object pool containing objects for `{@link dusk.sgui._draw}` and the draw handlers of containers.
 	 * 
 	 * Properties will not be deleted when freed.
@@ -244,40 +222,6 @@ load.provide("dusk.sgui", (function() {
 	 * @private
 	 */
 	var _highFrames = 0;
-	
-	/** The context for the main canvas.
-	 * @type CanvasRenderingContext2D
-	 * @since 0.0.21-alpha
-	 * @private
-	 */
-	var _ctx = document.getElementById(dusk.elemPrefix+"-canvas").getContext("2d");
-	
-	/** The context for the cache canvas.
-	 * @type CanvasRenderingContext2D
-	 * @since 0.0.21-alpha
-	 * @private
-	 */
-	var _cacheCtx = _cacheCanvas.getContext("2d");
-	
-	/** Returns the canvas element that sgui is using.
-	 * 
-	 * @return {HTMLCanvasElement} The canvas.
-	 * @private
-	 * @since 0.0.21-alpha
-	 */
-	var _getCanvas = function() {
-		return document.getElementById(dusk.elemPrefix+"-canvas");
-	};
-
-	/** Returns the duskwolf element that contains the canvas sgui is using.
-	 * 
-	 * @return {dusk.HTMLDuskwolfElement} The element.
-	 * @private
-	 * @since 0.0.21-alpha
-	 */
-	var _getDuskwolf = function() {
-		return document.getElementById(dusk.elemPrefix);
-	};
 	
 	
 	/** Returns or creates a root.
@@ -410,49 +354,9 @@ load.provide("dusk.sgui", (function() {
 		
 		if(sgui.highRate && sgui.framesTotal % 2 == 1) return false;
 		
-		if(!sgui.noCleanCanvas) {
-			_ctx.clearRect(0, 0, sgui.width, sgui.height);
-			if(!sgui.noCacheCanvas)
-				_cacheCtx.clearRect(0, 0, sgui.width, sgui.height);
-		}
-		
 		//Draw roots
 		for(var c = 0; c < _roots.length; c ++){
-			var data = sgui.drawDataPool.alloc();
-			
-			data.origin = PosRect.pool.alloc().setWH(_roots[c].x, _roots[c].x, sgui.width, sgui.height);
-			data.slice = PosRect.pool.alloc().setWH(0, 0, sgui.width, sgui.height);
-			data.dest = PosRect.pool.alloc().setWH(0, 0, sgui.width, sgui.height);
-			
-			data.alpha = 1;
-			
-			if(sgui.noCacheCanvas) {
-				//_roots[c].draw(data, _ctx);
-				_roots[c].paintContainer(_ctx,
-					(new PosRect()).setWH(0, 0, sgui.width, sgui.height),
-					(new PosRect()).setWH(0, 0, sgui.width, sgui.height),
-					(new PosRect()).setWH(0, 0, sgui.width, sgui.height),
-					0, 0
-				);
-			}else{
-				//_roots[c].draw(data, _cacheCtx);
-				_roots[c].paintContainer(_cacheCtx,
-					(new PosRect()).setWH(0, 0, sgui.width, sgui.height),
-					(new PosRect()).setWH(0, 0, sgui.width, sgui.height),
-					(new PosRect()).setWH(0, 0, sgui.width, sgui.height),
-					0, 0
-				);
-			}
-			
-			PosRect.pool.free(data.origin);
-			PosRect.pool.free(data.slice);
-			PosRect.pool.free(data.dest);
-			
-			sgui.drawDataPool.free(data);
-		}
-		
-		if(!sgui.noCacheCanvas) {
-			_ctx.drawImage(_cacheCanvas, 0, 0, sgui.width, sgui.height);
+			_roots[c].animationFrame();
 		}
 		
 		sgui.onRender.fire({});
@@ -476,6 +380,7 @@ load.provide("dusk.sgui", (function() {
 		path = path.substr(root.length+1);
 		return this.get(root).path(path);
 	};
+	
 	
 	/** A pattern used to select styles.
 	 * @type RegExp
@@ -547,6 +452,7 @@ load.provide("dusk.sgui", (function() {
 		}
 	};
 	
+	
 	/** Adds a new type that can be added by specifying it's type. The component must be registered before use.
 	 * @param {string} name The name of the added type.
 	 * @param {class(dusk.sgui.Component, string) extends dusk.sgui.Component} type The type to add.
@@ -555,8 +461,6 @@ load.provide("dusk.sgui", (function() {
 	sgui.registerType = function(name, type) {
 		_types[name] = type;
 	};
-	
-	
 	
 	/** Returns a constructor for the specified component, 
 	 *  provided it has been registered beforehand with {@link dusk.sgui.registerType}.
@@ -587,7 +491,6 @@ load.provide("dusk.sgui", (function() {
 	};
 	
 	
-	
 	/** Adds a new extra that can be accessed using `{@link dusk.sgui.getExtra}`.
 	 * @param {string} name The name of the added extra.
 	 * @param {class(dusk.sgui.Component, string) extends dusk.sgui.extras.Extra} extra The extra to add.
@@ -608,39 +511,6 @@ load.provide("dusk.sgui", (function() {
 		if(!(name in _extras)) return null;
 		return _extras[name];
 	};
-	
-	
-	
-	//width
-	Object.defineProperty(sgui, "width", {
-		set:function(value) {
-			if(value == this.width) return;
-			
-			_getDuskwolf().setAttribute("data-width", value);
-			_getCanvas().width = value;
-			_cacheCanvas.width = this.width;
-		},
-		
-		get: function() {
-			return _getCanvas().width;
-		}
-	});
-	
-	//height
-	Object.defineProperty(sgui, "height", {
-		set:function(value) {
-			if(value == this.height) return;
-			
-			_getDuskwolf().setAttribute("data-height", value);
-			_getCanvas().height = value;
-			_cacheCanvas.height = this.height;
-		},
-		
-		get:function() {
-			return _getCanvas().height;
-		}
-	});
-	
 	
 	
 	// Listen for interaction events
@@ -695,14 +565,14 @@ load.provide("dusk.sgui", (function() {
 	});
 	
 	//Set up the cached canvas
-	_cacheCanvas.height = sgui.height;
+	/*_cacheCanvas.height = sgui.height;
 	_cacheCanvas.width = sgui.width;
 	_cacheCanvas.style.imageRendering = "-webkit-optimize-contrast";
 	
 	_cacheCtx.mozImageSmoothingEnabled = false;
 	_cacheCtx.webkitImageSmoothingEnabled = false;
 	_cacheCtx.imageSmoothingEnabled = false;
-	_cacheCtx.textBaseline = "middle";
+	_cacheCtx.textBaseline = "middle";*/
 	
 	//Controls
 	controls.addControl("sgui_up", 38, "1-");
@@ -718,8 +588,8 @@ load.provide("dusk.sgui", (function() {
 	);
 	
 	//Default dimensions
-	sgui.width = _getCanvas().width;
-	sgui.height = _getCanvas().height;
+	//sgui.width = _getCanvas().width;
+	//sgui.height = _getCanvas().height;
 	
 	//And begin
 	_draw(0);

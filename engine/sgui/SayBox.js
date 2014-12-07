@@ -4,7 +4,7 @@
 
 load.provide("dusk.sgui.SayBox", (function() {
 	var Group = load.require("dusk.sgui.Group");
-	var PlusText = load.require("dusk.sgui.PlusText");
+	var TextBack = load.require("dusk.sgui.TextBack");
 	var Image = load.require("dusk.sgui.Image");
 	var Fade = load.require("dusk.sgui.extras.Fade");
 	var sgui = load.require("dusk.sgui");
@@ -24,9 +24,9 @@ load.provide("dusk.sgui.SayBox", (function() {
 	 *  visible when the user can advance the text.
 	 * 
 	 * The components of this group may be styled, and are named as follows:
-	 * - body: The main body of the saybox of type PlusText.
-	 * - right: The right text box of type PlusText.
-	 * - left: The left text box of type PlusText.
+	 * - body: The main body of the saybox of type TextBack.
+	 * - right: The right text box of type TextBack.
+	 * - left: The left text box of type TextBack.
 	 * - continue: The image that is displayed when the user can continue of type Image.
 	 * 
 	 * Messages can be set using the method `say` or similar. The textbox will slowly type out the message
@@ -46,20 +46,20 @@ load.provide("dusk.sgui.SayBox", (function() {
 		Group.call(this, parent, name);
 		
 		/** The body component.
-		 * @type dusk.sgui.PlusText
+		 * @type dusk.sgui.TextBack
 		 * @private
 		 */
-		this._body = this.getComponent("body", "PlusText");
+		this._body = this.getComponent("body", "TextBack");
 		/** The right component.
-		 * @type dusk.sgui.PlusText
+		 * @type dusk.sgui.TextBack
 		 * @private
 		 */
-		this._right = this.getComponent("right", "PlusText");
+		this._right = this.getComponent("right", "TextBack");
 		/** The left component.
-		 * @type dusk.sgui.PlusText
+		 * @type dusk.sgui.TextBack
 		 * @private
 		 */
-		this._left = this.getComponent("left", "PlusText");
+		this._left = this.getComponent("left", "TextBack");
 		/** The continue component.
 		 * @type dusk.sgui.Image
 		 * @private
@@ -120,6 +120,8 @@ load.provide("dusk.sgui.SayBox", (function() {
 		// Prop masks
 		this._mapper.map("delay", "delay");
 		this._mapper.map("autoActive", "autoActive");
+		
+		this.xDisplay = "expand";
 	};
 	SayBox.prototype = Object.create(Group.prototype);
 	
@@ -135,27 +137,6 @@ load.provide("dusk.sgui.SayBox", (function() {
 				this._pointer ++;
 				
 				var outText = this._streaming.substring(0, this._pointer);
-				
-				if(this._streaming.charAt(this._pointer) == "[") {
-					while(this._streaming.charAt(this._pointer) != "]") {
-						this._pointer ++;
-					}
-					
-					this._pointer ++;
-				}
-				
-				// Check if newline needed
-				var wordsDone = outText.split(" ");
-				
-				if(
-					this._body.getComponent("label").countLines(wordsDone.join(" ")) != 
-					this._body.getComponent("label").countLines(
-						this._streaming.split(" ").slice(0, wordsDone.length).join(" ")
-					)
-				) {
-					wordsDone[wordsDone.length-2] += "\n";
-					outText = wordsDone.join(" ");
-				}
 				
 				if(this._pointer > this._streaming.length) {
 					this._complete();
@@ -245,6 +226,7 @@ load.provide("dusk.sgui.SayBox", (function() {
 			this._continue.visible = false;
 			
 			this._streaming = body;
+			this._body.get("label").shadowText = body;
 			this._pointer = 0;
 			
 			this._fulfill = fulfill;
@@ -295,11 +277,14 @@ load.provide("dusk.sgui.SayBox", (function() {
 	sgui.addStyle("SayBox>#body", {
 		"behind":true,
 		"height":100,
-		"width":700,
+		"xDisplay":"expand",
+		"mark":"#0000ff",
 		"y":40,
 		"label":{
 			"multiline":true,
 			"padding":10,
+			"xDisplay":"expand",
+			"mark":"#00ff00",
 		}
 	});
 	sgui.addStyle("SayBox>#right", {

@@ -84,6 +84,12 @@ load.provide("dusk.sgui.MouseAugment", (function() {
 		 * @type dusk.utils.EventDispatcher
 		 */
 		this.onClick = new EventDispatcher("dusk.sgui.MouseAugment.onClick");
+		
+		/** True if this component has the mouse hovered over it.
+		 * @type boolean
+		 * @since 0.0.21-alpha
+		 */
+		this.hovered = false;
 	};
 	
 	/** Handles a mouse click. This will fire `{@link dusk.sgui.MouseAugment.onClick}`, and possibly fire the 
@@ -127,9 +133,6 @@ load.provide("dusk.sgui.MouseAugment", (function() {
 	MouseAugment.prototype.toString = function() {
 		return "[MouseAugment for "+this._component+"]";
 	};
-	
-	Object.seal(MouseAugment);
-	Object.seal(MouseAugment.prototype);
 	
 	return MouseAugment;
 })());

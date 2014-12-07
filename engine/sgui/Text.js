@@ -61,7 +61,15 @@ load.provide("dusk.sgui.Label", (function() {
 		 * @type string
 		 */
 		this.text = "";
-		/** Internal storage for the width of the component that the user has set. It is -1 if the user has set no width.
+		/** The text this text box will eventually display. When a multiline text field has this set, it will use this
+		 *  value when determining when lines wrap, instead of the text value. This ensures that when the text is being
+		 *  entered into the label character by character, it doesn't wrap in the middle of a word.
+		 * @type string
+		 * @since 0.0.21-alpha
+		 */
+		this.shadowText = "";
+		/** Internal storage for the width of the component that the user has set. It is -1 if the user has set no
+		 *  width.
 		 * This value does not include the padding.
 		 * @type integer
 		 * @private
@@ -258,6 +266,7 @@ load.provide("dusk.sgui.Label", (function() {
 		this._mapper.map("validFilter", "validFilter");
 		this._mapper.map("validCancel", "validCancel");
 		this._mapper.map("validDefault", "validDefault");
+		this._mapper.map("shadowText", "shadowText");
 		
 		//Listeners
 		this.prepareDraw.listen(_draw.bind(this));
@@ -379,8 +388,7 @@ load.provide("dusk.sgui.Label", (function() {
 		if(this.text !== "" && !this._supressTextDisplay){
 			if(this._sig != this._genSig(e)) {
 				//Rebuild the text cache
-				this._updateText(true, true);
-				this._updateText();
+				this._processText(false, undefined, e.d.origin.width);
 			}
 			
 			e.c.drawImage(this._cache, e.d.slice.x, e.d.slice.x, e.d.slice.width,  e.d.slice.height,
@@ -400,22 +408,27 @@ load.provide("dusk.sgui.Label", (function() {
 		if(!this.validFilter.test(this._text)) this._text = this.validDefault;
 	};
 	
-	/** Updates the cache, as well as the dimensions the text will take up.
-	 * @param {boolean} widthOnly Will only update the width, rather than drawing the text. This function must be called
-	 * with this argument first, unless you know that the width has not changed.
-	 * @param {boolean=false} commit Whether to set the width and height of the textbox, or just return them.
-	 * @param {?string} text The text to use, defaults to the contents of this text field.
+	/** Either draws onto the cache, or measures some text.
+	 * @param {boolean} measure Will only update the dimensions, rather than drawing the text.
+	 * @param {?string} text The text to use, defaults to the contents of this text field. Using other text does not
+	 *  set the internal storage of this label, obviously.
+	 * @param {?integer} knownWidth For multiline text fields only, this is the width of the component (so text wrapping
+	 *  works). Defaults to the component's width, and obviously if your component is in expand mode it won't set
+	 *  correctly.
 	 * @return {Array} A [lines, width] Pair of the dimensions.
 	 * @private
 	 */
-	Label.prototype._updateText = function(widthOnly, commit, text) {
+	Label.prototype._processText = function(measure, text, knownWidth) {
 		var textHold = text !== undefined?text:this._text;
 		var textBuffer = "";
 		
 		//Create the cache
 		var cache = this._widthCache;
 		
-		if(!widthOnly) {
+		var width = knownWidth === undefined ? this.width : knownWidth;
+		
+		if(!measure) {
+			this._processText(true, undefined, knownWidth);
 			cache = this._cache;
 			this._cache.width = this._cachedWidth;
 			this._cache.height = (this.lines * this.size) + (this.padding << 1);
@@ -436,10 +449,10 @@ load.provide("dusk.sgui.Label", (function() {
 		//Loop through each character in the text, cutting off the processed characters at the end of each loop
 		var drawBuff = (function() {
 			if(textBuffer !== "") {
-				if(useBorder && !widthOnly)
+				if(useBorder && !measure)
 					c.strokeText(textBuffer, cursor, this.padding + (line * this.size) + (this.size >> 1));
 				
-				if(!widthOnly) c.fillText(textBuffer, cursor, this.padding + (line * this.size) + (this.size>>1));
+				if(!measure) c.fillText(textBuffer, cursor, this.padding + (line * this.size) + (this.size>>1));
 				
 				cursor += c.measureText(textBuffer).width;
 				textBuffer = "";
@@ -450,7 +463,8 @@ load.provide("dusk.sgui.Label", (function() {
 		var cursor = this.padding;
 		var charData = null;
 		var line = 0;
-		while(charData = this._nextChar(textHold)) {
+		var p = 0;
+		while(charData = this._nextChar(textHold, p)) {
 			if(charData[0] == null) {
 				//No formatting
 				if(charData[1] == "\n" && this.multiline) {
@@ -462,23 +476,28 @@ load.provide("dusk.sgui.Label", (function() {
 					textBuffer += charData[1];
 				}
 				
-				if(this.multiline && c.measureText(textBuffer).width + this.padding > this.width) {
-					//Wrap previous word
-					var p = textBuffer.length-1;
-					var overflow = "";
-					while(!/\s/.test(textBuffer[p]) && p >= 0) {
-						overflow += textBuffer[p];
-						p --;
+				var fullWord = "";
+				// Check if next word is longer than line
+				if(/\s/.test(charData[1]) && this.multiline) {
+					if(text === undefined && this.shadowText) {
+						var fp = p+1;
+						while(!/\s/.test(this.shadowText[fp]) && fp < this.shadowText.length) {
+							fullWord += this.shadowText[fp];
+							fp ++;
+						}
+					}else{
+						var fp = p+1;
+						while(!/\s/.test(textHold[fp]) && fp < textHold.length) {
+							fullWord += textHold[fp];
+							fp ++;
+						}
 					}
-					
-					if(textBuffer.length == overflow.length) {
-						//No words! D:
-						overflow = textBuffer[textBuffer.length - 1];
-					}
-					
-					textBuffer = textBuffer.substring(0, textBuffer.length - overflow.length);
+				}
+				
+				if(this.multiline && c.measureText(textBuffer + fullWord).width + this.padding > width) {
+					//Next world will be too long, so wrap now
 					drawBuff();
-					textBuffer = overflow.split("").reverse().join("");
+					textBuffer = "";
 					line ++;
 					if(cursor > longestLine) longestLine = cursor;
 					cursor = this.padding;
@@ -534,23 +553,30 @@ load.provide("dusk.sgui.Label", (function() {
 						charData[1][1] = (charData[1][0].width() / charData[1][0].height()) * this.size;
 					}
 					
-					if(charData[1][0].isReady() && !widthOnly) {
+					if(charData[1][0].isReady() && !measure) {
 						charData[1][0].paint(c, "", false,
 							0, 0, charData[1][0].width(), charData[1][0].height(),
 							cursor, this.padding + line * this.size, charData[1][1], this.size
 						);
 						
 						cursor += charData[1][1];
-					}else{
-						charData[1][0].loadPromise().then((function(e) {this._updateText(false, true);}).bind(this));
+					}else if(!measure) {
+						charData[1][0].loadPromise().then((function(e) {
+							if(text === undefined) {
+								this._processText(false, undefined, knownWidth);
+							}
+						}).bind(this));
 						
 						textBuffer += "\ufffd";
+					}else{
+						cursor += charData[1][1];
 					}
 				}
 			}
 			
 			//Cut off the characters we have processed
-			textHold = textHold.substr(charData[2]);
+			//textHold = textHold.substr(charData[2]);
+			p += charData[2];
 		}
 		
 		if(cursor > longestLine) longestLine = cursor;
@@ -560,7 +586,7 @@ load.provide("dusk.sgui.Label", (function() {
 		if(isNaN(width)) width = this.padding << 1;
 		width = ~~width;
 		
-		if(commit) {
+		if(text === undefined) {
 			this._cachedWidth = width;
 			this.lines = line + 1;
 		}
@@ -576,7 +602,7 @@ load.provide("dusk.sgui.Label", (function() {
 	Label.prototype.countLines = function(text) {
 		if(!this.multiline) return 1;
 		
-		return this._updateText(true, false, text)[0];
+		return this._processText(true, text)[0];
 	};
 	
 	//width
@@ -600,7 +626,7 @@ load.provide("dusk.sgui.Label", (function() {
 			if(this._height > -1) {
 				return this._height;
 			}else{
-				return this.lines * this.size + (this.padding<<1);
+				return (this.lines ? this.lines : 1) * this.size + (this.padding<<1);
 			}
 		},
 		set: function(value) {
@@ -622,7 +648,7 @@ load.provide("dusk.sgui.Label", (function() {
 				if(!this.validFilter || !this.validCancel || this.validFilter.test(value)) {
 					if(this.onChange.fireAnd({"component":this, "text":""+value})) {
 						this._text = ""+value;
-						this._updateText(true, true);
+						this._processText(true);
 						this.postChange.fire({"component":this, "text":""+value});
 					}
 				}
@@ -644,21 +670,25 @@ load.provide("dusk.sgui.Label", (function() {
 	 * @param {string} The input text. Scanning will start at the beginning of this.
 	 * @return {array} Formatting data. First element is a `_EVENT_*` constant or null, second is either an argument to
 	 * the event (if it is defined) or the string to insert (if it is null). The third element is the number of 
-	 * characters that were "consumed", and thus can be removed from the start of the text.
+	 * characters that were "consumed", and thus the pointer can be increased by p.
 	 * @private
 	 */
-	Label.prototype._nextChar = function(text) {
-		if(text.length <= 0) return [Label._EVENT_TERM, "", 0];
+	Label.prototype._nextChar = function(text, p) {
+		if(text.length <= p) return [Label._EVENT_TERM, "", 0];
 		
-		if(text.charAt(0) == "[" && text.indexOf("]") != -1 && this.format) {
-			var commandStr = text.match(/^\[([^\]]*?)\]/i);
-			var commands = commandStr[1].split(/\s/);
+		if(text.charAt(p) == "[" && this.format) {
+			var offset = text.substring(p);
 			
-			return this._command.fireOne({"command":commands[0].toLowerCase(), "args":commands},
-				commands[0].toLowerCase()).concat([commandStr[0].length]);
-		}else{
-			return [null, text.charAt(0), 1];
+			if(text.indexOf("]") != -1) {
+				var commandStr = offset.match(/^\[([^\]]*?)\]/i);
+				var commands = commandStr[1].split(/\s/);
+				
+				return this._command.fireOne({"command":commands[0].toLowerCase(), "args":commands},
+					commands[0].toLowerCase()).concat([commandStr[0].length]);
+			}
 		}
+		
+		return [null, text.charAt(p), 1];
 	};
 	
 	sgui.registerType("Label", Label);
@@ -717,7 +747,13 @@ load.provide("dusk.sgui.TextBox", (function() {
 		this.onActiveChange.listen(_activeChange.bind(this));
 		this.frame.listen((function(e) {
 			if(this.active) {
-				var e = dusk.getElementTextarea();
+				var e = this.getHtmlElements("textarea")[0];
+				
+				e.style.position = "absolute";
+				e.style.background = "transparent";
+				e.style.border = "none";
+				e.style.resize = "none";
+				e.style.overflow = "hidden";
 				
 				//I want no newlines
 				if(!this.multiline && e.value.indexOf("\n") !== -1) {
@@ -753,10 +789,17 @@ load.provide("dusk.sgui.TextBox", (function() {
 	 * @private
 	 */
 	var _draw = function(e) {
-		if(this.active) return;
 		e.c.strokeStyle = this.border;
-		
 		e.c.strokeRect(e.d.dest.x, e.d.dest.y, e.d.dest.width, e.d.dest.height);
+		
+		if(!this.active) return;
+		
+		var elem = this.getHtmlElements("textarea")[0];
+		
+		elem.style.width = (e.d.dest.width - (this.padding<<1))+"px";
+		elem.style.height = (e.d.dest.height - (this.padding<<1))+"px"; //this.size+"px";
+		elem.style.left = e.d.dest.x+"px";
+		elem.style.top = e.d.dest.y+"px";
 	};
 	
 	/** Used to handle keypresses.
@@ -766,7 +809,7 @@ load.provide("dusk.sgui.TextBox", (function() {
 	var _key = function(e) {
 		if(e.ctrl) return true;
 		var keyDat = keyboard.lookupCode(e.key);
-		var textElement = document.getElementById(dusk.elemPrefix+"-input");
+		var textElement = this.getHtmlElements("textarea");
 		
 		//Check if the user has mapped any inputs to the key...
 		if(controls.checkKey("sgui_up", e.key)) return true;
@@ -798,21 +841,18 @@ load.provide("dusk.sgui.TextBox", (function() {
 	 * @since 0.0.20-alpha
 	 */
 	var _activeChange = function(e) {
-		var elem = document.getElementById(dusk.elemPrefix+"-input");
+		var elem = this.getHtmlElements("textarea")[0];
 		
 		if(e.active) {
 			elem.style.visibility = "visible";
-			elem.focus();
 			elem.value = this.text;
 			elem.style.padding = this.padding+"px";
-			elem.style.width = (this.width-(this.padding<<1))+"px";
-			elem.style.height = (this.height-(this.padding<<1))+"px"; //this.size+"px";
-			elem.style.left = this.container.getTrueX(this.name)+"px";
-			elem.style.top = this.container.getTrueY(this.name)+"px";
 			elem.style.font = this.size + "px " + this.font;
 			elem.style.lineHeight = "100%";
 			elem.style.outline = "none";
 			elem.style.color = this.colour;
+			elem.tabIndex = 0;
+			elem.focus();
 			if(this.multiline) {
 				elem.style.whiteSpace = "normal";
 			}else{

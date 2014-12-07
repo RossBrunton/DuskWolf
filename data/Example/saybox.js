@@ -35,7 +35,7 @@ load.provide("example.saybox", (function() {
 	});
 	
 	// Draw GUI
-	sgui.get("saybox", true).update({
+	sgui.get("default", true).update({
 		"focus":"say",
 		"active":true,
 		"children":{
@@ -55,14 +55,15 @@ load.provide("example.saybox", (function() {
 			
 			"meter":{
 				"type":"FpsMeter",
-				"xOrigin":"right"
+				"xOrigin":"right",
+				"visible":false,
 			},
 		},
 	});
 	
 	// Create speakers
-	var h = sgui.path("saybox:/say").sayBoundPair.bind(sgui.path("saybox:/say"), "Lord St. Heroingston");
-	var c = sgui.path("saybox:/say").sayBoundPair.bind(sgui.path("saybox:/say"), "\"Wounded\" Child");
+	var h = sgui.path("default:/say").sayBoundPair.bind(sgui.path("default:/say"), "Lord St. Heroingston");
+	var c = sgui.path("default:/say").sayBoundPair.bind(sgui.path("default:/say"), "\"Wounded\" Child");
 	
 	// Say stuff
 	reversiblePromiseChain([

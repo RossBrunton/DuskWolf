@@ -31,7 +31,10 @@ load.provide("questScript", (function() {
 	var quest = {};
 
 	//Test
-	sgui.get("menu", true).update({
+	var root = sgui.get("default", true);
+	dquest.make(root, "quest");
+	
+	root.get("menu", "Group").update({
 	   "children":{
 			"back":{
 				"type":"FancyRect",
@@ -93,7 +96,7 @@ load.provide("questScript", (function() {
 		}
 	});
 
-	sgui.get("menu", true).update({
+	root.get("menu", "Group").update({
 		"children":{
 			"meter":{
 				"type":"FpsMeter",
@@ -103,7 +106,7 @@ load.provide("questScript", (function() {
 		}
 	});
 	
-	sgui.get("actionFeed", true).update({
+	root.get("actionFeed", "Group").update({
 		"xDisplay":"expand",
 		"children":{
 			"feed":{
@@ -138,12 +141,12 @@ load.provide("questScript", (function() {
 			}
 		}
 	});
-	var feed = sgui.get("actionFeed", true).getComponent("feed");
+	var feed = sgui.get("actionFeed", "Group").getComponent("feed");
 
 	window.q = dquest.puppeteer;
 	
 	// Apply styles
-	sgui.addStyle("SayBox>PlusText", {
+	sgui.addStyle("SayBox>TextBack", {
 		"plusType":"FancyRect",
 		"plus":{
 			"back":"fancyRect/back.png",
@@ -166,13 +169,17 @@ load.provide("questScript", (function() {
 	});
 	
 	// Draw GUI
-	sgui.get("saybox", true).update({
+	root.get("saybox", "Group").update({
 		"focus":"say",
+		"xDisplay":"expand",
+		"yDisplay":"expand",
 		"children":{
 			"say":{
 				"type":"SayBox",
 				"yOrigin":"bottom",
 				"xOrigin":"middle",
+				"xDisplay":"expand",
+				"y":-10,
 				"children":{
 					"right":{
 					},
@@ -185,7 +192,7 @@ load.provide("questScript", (function() {
 		},
 	});
 	
-	var sayBox = sgui.path("saybox:/say");
+	var sayBox = sgui.path("default:/saybox/say");
 	
 	dusk.onLoad.listen(function (e){
 		dquest.rooms.setRoom("quest.rooms.rooma", 0).then(

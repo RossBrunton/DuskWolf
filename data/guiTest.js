@@ -11,6 +11,7 @@ load.provide("guiTest", (function() {
 	load.require("dusk.sgui.FpsMeter");
 	load.require("dusk.sgui.PlusText");
 	load.require("dusk.entities.sgui.EntityWorkshop");
+	load.require("dusk.sgui.TextBack");
 	
 	var SaveSpec = load.require("dusk.save.SaveSpec");
 	var checkpoints = load.require("dusk.checkpoints");
@@ -24,7 +25,7 @@ load.provide("guiTest", (function() {
 	var frameTicker = load.require("dusk.utils.frameTicker");
 	var Range = load.require("dusk.utils.Range");
 	
-	var root = sgui.get("root", true);
+	var root = sgui.get("default", true);
 	
 	window.root = root;
 	
@@ -38,6 +39,7 @@ load.provide("guiTest", (function() {
 			"src":"default/test.png",
 			"width":20,
 			"height":20,
+			"mouse":true
 		},
 		
 		"t":{
@@ -77,10 +79,13 @@ load.provide("guiTest", (function() {
 		},
 	};
 	
+	root.noCleanCanvas = true;
+	
 	root.get("body", "Group").update({
 		"xDisplay":"expand",
 		"yDisplay":"expand",
 		"margins":[50, 50, 50, 50],
+		"focus":"tbox",
 		"children":{
 			// Text
 			"txt1":{
@@ -263,6 +268,7 @@ load.provide("guiTest", (function() {
 				"vspacing":2,
 				"xOrigin":"right",
 				"yOrigin":"bottom",
+				"mouse":true,
 				"populate":{
 					"type":"Image",
 					"width":20,
@@ -280,6 +286,7 @@ load.provide("guiTest", (function() {
 				"yOffset":50,
 				"xDisplay":"expand",
 				"yDisplay":"expand",
+				"visible":false,
 				//"margins":[20, 20, 20, 20],
 				"children":{
 					"egrid":{
@@ -302,15 +309,42 @@ load.provide("guiTest", (function() {
 						"populate":[{"colour":"#ff9999"}, {"colour":"#9999ff"}]
 					}
 				},
+			},
+			
+			// BackText
+			"btext":{
+				"type":"TextBack",
+				//"visible":false,
+				"x":100,
+				"y":20,
+				"width":100,
+				"height":40,
+				"plus":{
+					"type":"Rect",
+					"colour":"#333333",
+					"mark":"#ff9900",
+				},
+				"text":"Hai!",
+			},
+			
+			// Textbox
+			"tbox":{
+				"type":"TextBox",
+				"x":200,
+				"y":20,
+				"width":100,
+				"height":40,
 			}
 		}
 	});
-
+	
 	root.get("rate", "FpsMeter").update({
 		"type":"FpsMeter",
 		"yOrigin":"bottom",
 		"xOrigin":"right",
 	});
+	
+	root.flow("body");
 	
 	dusk.startGame();
 })());
