@@ -267,17 +267,17 @@ load.provide("dusk.entities.sgui.EntityWorkshop", (function() {
 	
 	var _frame = function(e) {
 		// Behaviour help display
-		if(this.path("bodies/behaviours/list").getFocused()
-		&& entities.getWorkshop(this.path("bodies/behaviours/list").getFocused().text)) {
+		if(this.path("bodies/behaviours/list").getFocusedChild()
+		&& entities.getWorkshop(this.path("bodies/behaviours/list").getFocusedChild().text)) {
 			this.path("bodies/behaviours/help").text = 
-				entities.getWorkshop(this.path("bodies/behaviours/list").getFocused().text).help;
+				entities.getWorkshop(this.path("bodies/behaviours/list").getFocusedChild().text).help;
 		}else{
 			this.path("bodies/behaviours/help").text = "---";
 		}
 		
 		// Data help display
-		if(this.path("bodies/data/list").getFocused()) {
-			var frags = this._deFormatData(this.path("bodies/data/list").getFocused().text);
+		if(this.path("bodies/data/list").getFocusedChild()) {
+			var frags = this._deFormatData(this.path("bodies/data/list").getFocusedChild().text);
 			
 			if(entities.getWorkshop(frags[1])) {
 				var b = entities.getWorkshop(frags[1]);

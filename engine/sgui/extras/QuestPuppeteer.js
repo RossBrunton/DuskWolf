@@ -398,7 +398,7 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 					var optm = {};
 					
 					var l = c.action.listen((function(e) {
-						var s = c.getFocused();
+						var s = c.getFocusedChild();
 						var opt = options[s.name.split(",")[1]];
 						
 						if("listSelectFunction" in opt) {

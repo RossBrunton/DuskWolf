@@ -166,7 +166,7 @@ load.provide("dusk.sgui.Feed", (function() {
 	var _dirAction = function(e) {
 		if(this.focusBehaviour == Group.FOCUS_ALL) return true;
 		
-		var current = this._drawOrder.indexOf(this.focusedCom);
+		var current = this._drawOrder.indexOf(this.focus);
 		
 		if(e.dir == c.DIR_UP && this.appendDir == c.DIR_UP)
 			current ++;
@@ -188,16 +188,13 @@ load.provide("dusk.sgui.Feed", (function() {
 		if(e.dir == c.DIR_RIGHT && this.appendDir == c.DIR_RIGHT)
 			current ++;
 		
-		if(current < 0 || current > this._drawOrder.length || current == this._drawOrder.indexOf(this.focusedCom)) {
+		if(current < 0 || current > this._drawOrder.length || current == this._drawOrder.indexOf(this.focus)) {
 			return true;
 		}
 		
 		this.flow(this._drawOrder[current]);
 		return false;
 	};
-	
-	Object.seal(Feed);
-	Object.seal(Feed.prototype);
 	
 	sgui.registerType("Feed", Feed);
 	

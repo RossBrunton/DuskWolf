@@ -35,13 +35,13 @@ load.provide("dusk.sgui.Selection", (function() {
 	Selection.prototype = Object.create(Grid.prototype);
 
 	Selection.prototype._update = function(e) {
-		if(!this.getFocused()) return false;
+		if(!this.getFocusedChild()) return false;
 		if(this.orientation == c.ORIENT_HOR) {
-			this.xOffset = this.getFocused().x;
-			this.width = this.getFocused().width;
+			this.xOffset = this.getFocusedChild().x;
+			this.width = this.getFocusedChild().width;
 		}else{
-			this.yOffset = this.getFocused().y;
-			this.height = this.getFocused().height;
+			this.yOffset = this.getFocusedChild().y;
+			this.height = this.getFocusedChild().height;
 		}
 	};
 

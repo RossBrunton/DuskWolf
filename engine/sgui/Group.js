@@ -47,9 +47,9 @@ load.provide("dusk.sgui.Group", (function() {
 		this._drawOrder = [];
 		/** The name of the currently focused component.
 		 * @type string
-		 * @protected
+		 * @private
 		 */
-		this.focusedCom = "";
+		this._focusedCom = "";
 		/** Used internally to store the current focus behaviour.
 		 * @type integer
 		 * @default FOCUS_ONE
@@ -84,7 +84,8 @@ load.provide("dusk.sgui.Group", (function() {
 		
 		/** This is the name of the currently focused component.
 		 * 
-		 * When set, this calls all the expected functions on `{@link dusk.sgui.Component}` as expected.
+		 * When set, this calls all the expected functions on `{@link dusk.sgui.Component}` as expected to make the
+		 *  specified component focused.
 		 * 
 		 * If a component returns false in `{@link dusk.sgui.Component.onLooseFocus} this will abort.
 		 * @type string
@@ -187,8 +188,8 @@ load.provide("dusk.sgui.Group", (function() {
 				for(var c = this._componentsArr.length-1; c >= 0; c --) {
 					this._componentsArr[c].onActiveChange.fire(e, e.active);
 				}
-			}else if(this.getFocused()) {
-				this.getFocused().onActiveChange.fire(e, e.active);
+			}else if(this.getFocusedChild()) {
+				this.getFocusedChild().onActiveChange.fire(e, e.active);
 			}
 		}).bind(this));
 	};
@@ -235,7 +236,7 @@ load.provide("dusk.sgui.Group", (function() {
 			}
 			if(!toReturn) return false;
 		}else{
-			if(this.getFocused() && !this.getFocused().interact(e)) return false;
+			if(this.getFocusedChild() && !this.getFocusedChild().interact(e)) return false;
 		}
 		
 		return Component.prototype.interact.call(this, e);
@@ -256,7 +257,7 @@ load.provide("dusk.sgui.Group", (function() {
 			}
 			if(!toReturn) return false;
 		}else{
-			if(this.getFocused() && !this.getFocused().control(e, controls)) return false;
+			if(this.getFocusedChild() && !this.getFocusedChild().control(e, controls)) return false;
 		}
 		
 		return Component.prototype.control.call(this, e, controls);
@@ -299,7 +300,7 @@ load.provide("dusk.sgui.Group", (function() {
 	 * @return The component that was added.
 	 * @private
 	 */
-	Group.prototype._newComponent = function(com, type) {
+	Group.prototype._newChild = function(com, type) {
 		if(type === undefined) type = "NullCom";
 		if(!sgui.getType(type)){
 			throw new TypeError(type + " is not a valid component type.");
@@ -444,7 +445,7 @@ load.provide("dusk.sgui.Group", (function() {
 			return this._components[com.toLowerCase()];
 		}
 		
-		return type?this._newComponent(com, type):undefined;
+		return type?this._newChild(com, type):undefined;
 	};
 	/** Depreciated alias for `get`.
 	 * 
@@ -485,7 +486,7 @@ load.provide("dusk.sgui.Group", (function() {
 	 */
 	Group.prototype.remove = function(com) {
 		if (this._components[com.toLowerCase()]){
-			if(this.focusedCom == com.toLowerCase()) this.focus = "";
+			if(this._focusedCom == com.toLowerCase()) this.focus = "";
 			this._components[com.toLowerCase()].onDelete.fire({"com":this._components[com.toLowerCase()]});
 			this._componentsArr.splice(this._componentsArr.indexOf(this._components[com.toLowerCase()]), 1);
 			this._components[com.toLowerCase()] = null;
@@ -509,7 +510,7 @@ load.provide("dusk.sgui.Group", (function() {
 	 */
 	Group.prototype.empty = function() {
 		for(var c = this._componentsArr.length-1; c >= 0; c --) {
-			this.deleteComponent(this._componentsArr[c].name);
+			this.remove(this._componentsArr[c].name);
 		}
 	};
 	
@@ -520,16 +521,16 @@ load.provide("dusk.sgui.Group", (function() {
 		if(value) this.flow(value);
 	});
 	Group.prototype.__defineGetter__("focus", function g_focus() {
-		return this.focusedCom;
+		return this._focusedCom;
 	});
 	
 	/** Returns the currently focused component.
 	 * 
 	 * @return {?dusk.sgui.Component} The currently focused component or null if nothing is focused.
 	 */
-	Group.prototype.getFocused = function() {
-		if(!(this.focusedCom in this._components)) return null;
-		return this._components[this.focusedCom];
+	Group.prototype.getFocusedChild = function() {
+		if(!(this._focusedCom in this._components)) return null;
+		return this._components[this._focusedCom];
 	};
 	
 	/** Sets the current focused component only if it exists,
@@ -540,31 +541,31 @@ load.provide("dusk.sgui.Group", (function() {
 	 * @return {boolean} Whether the flow was successfull.
 	 */
 	Group.prototype.flow = function(to) {
-		if(this.focusedCom !== "" && this._components[this.focusedCom]){
-			if(this._components[this.focusedCom].locked){return false;}
+		if(this._focusedCom !== "" && this._components[this._focusedCom]){
+			if(this._components[this._focusedCom].locked){return false;}
 			
 			if(this.focusBehaviour != Group.FOCUS_ALL && this.active)
-				this._components[this.focusedCom].onActiveChange.fire({"active":false}, false);
+				this._components[this._focusedCom].onActiveChange.fire({"active":false}, false);
 			if(this.focusBehaviour != Group.FOCUS_ALL)
-				this._components[this.focusedCom].onFocusChange.fire({"focus":false}, false);
+				this._components[this._focusedCom].onFocusChange.fire({"focus":false}, false);
 			
-			if(this.focusVisible) this._components[this.focusedCom].visible = false;
+			if(this.focusVisible) this._components[this._focusedCom].visible = false;
 		}
 		
 		if(this._components[to.toLowerCase()]){
-			this.focusedCom = to.toLowerCase();
+			this._focusedCom = to.toLowerCase();
 			if(this.focusBehaviour != Group.FOCUS_ALL)
-				this._components[this.focusedCom].onFocusChange.fire({"focus":true}, true);
+				this._components[this._focusedCom].onFocusChange.fire({"focus":true}, true);
 			if(this.focusBehaviour != Group.FOCUS_ALL && this.active)
-				this._components[this.focusedCom].onActiveChange.fire({"active":true}, true);
+				this._components[this._focusedCom].onActiveChange.fire({"active":true}, true);
 			
-			if(this.focusVisible) this._components[this.focusedCom].visible = true;
+			if(this.focusVisible) this._components[this._focusedCom].visible = true;
 			return true;
 		}
 		
 		console.warn(to+" was not found, couldn't set focus.");
 		
-		this.focusedCom = "";
+		this._focusedCom = "";
 	};
 	
 	//focusBehaviour
@@ -576,7 +577,7 @@ load.provide("dusk.sgui.Group", (function() {
 			switch(this._focusBehaviour) {
 				case Group.FOCUS_ONE:
 					for(var c = this._componentsArr.length-1; c >= 0; c --) {
-						if(this._components[this.focusedCom] != this._componentsArr[c]) {
+						if(this._components[this._focusedCom] != this._componentsArr[c]) {
 							if(this.active) this._componentsArr[c].onActiveChange.fire({"active":false}, false);
 							this._componentsArr[c].onFocusChange.fire({"focus":false}, false);
 						}
@@ -585,7 +586,7 @@ load.provide("dusk.sgui.Group", (function() {
 					
 				case Group.FOCUS_ALL:
 					for(var c = this._componentsArr.length-1; c >= 0; c --) {
-						if(this._components[this.focusedCom] != this._componentsArr[c]) {
+						if(this._components[this._focusedCom] != this._componentsArr[c]) {
 							this._componentsArr[c].onFocusChange.fire({"focus":true}, true);
 							if(this.active) this._componentsArr[c].onActiveChange.fire({"active":true}, true);
 						}
@@ -607,7 +608,7 @@ load.provide("dusk.sgui.Group", (function() {
 			
 			if(this._focusVisible) {
 				for(var c = this._componentsArr.length-1; c >= 0; c --) {
-					if(this.focusedCom != this._componentsArr[c].name) {
+					if(this._focusedCom != this._componentsArr[c].name) {
 						this._componentsArr[c].visible = false;
 					}else{
 						this._componentsArr[c].visible = true;
@@ -674,6 +675,32 @@ load.provide("dusk.sgui.Group", (function() {
 				o ++;
 			}
 		}
+	};
+	
+	
+	/** Returns the full path of this component.
+	 * 
+	 * This should be able to be given to `{@link dusk.sgui.path}` and will point to this component.
+	 * @return {string} A full path to this component.
+	 * @since 0.0.17-alpha
+	 */
+	Group.prototype.fullPath = function() {
+		return Component.prototype.fullPath.call(this) + "/";
+	};
+	
+	
+	/** Returns the deepest focused component.
+	 * 
+	 * If this Group has a focused component and `focusBehaviour` is `MODE_ONE`, returns the focused child's
+	 *  `getDeepestFocused` method (if it is a Group) or the focused child itself (otherwise), otherwise returns this.
+	 * 
+	 * @return {dusk.sgui.Component} The deepest component that is the focus of all its parent groups.
+	 * @since 0.0.21-alpha
+	 */
+	Group.prototype.getDeepestFocused = function() {
+		if(this.focusBehaviour != Group.FOCUS_ONE || !this.getFocusedChild()) return this;
+		if(this.getFocusedChild() instanceof Group) return this.getFocusedChild().getDeepestFocused();
+		return this.getFocusedChild();
 	};
 	
 	
@@ -835,7 +862,7 @@ load.provide("dusk.sgui.Group", (function() {
 				&& this._components[this._drawOrder[i]].mouse && this._components[this._drawOrder[i]].mouse.allow) {
 					var com = this._components[this._drawOrder[i]];
 					if(com.mouse.hovered && com.visible) {
-						if(com != this.getFocused()) this.flow(this._drawOrder[i]);
+						if(com != this.getFocusedChild()) this.flow(this._drawOrder[i]);
 						break;
 					}
 				}

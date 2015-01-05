@@ -79,7 +79,7 @@ load.provide("guiTest", (function() {
 		},
 	};
 	
-	root.noCleanCanvas = true;
+	//root.noCleanCanvas = true;
 	
 	root.get("body", "Group").update({
 		"xDisplay":"expand",
@@ -334,7 +334,16 @@ load.provide("guiTest", (function() {
 				"y":20,
 				"width":100,
 				"height":40,
-			}
+				"mouse":true
+			},
+			"tbox2":{
+				"type":"TextBox",
+				"x":300,
+				"y":20,
+				"width":100,
+				"height":40,
+				"mouse":true
+			},
 		}
 	});
 	

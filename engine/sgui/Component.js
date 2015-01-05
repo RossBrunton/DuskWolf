@@ -797,7 +797,7 @@ load.provide("dusk.sgui.Component", (function() {
 	 * @since 0.0.17-alpha
 	 */
 	Component.prototype.fullPath = function() {
-		return this.container.fullPath() + "/" + this.name;
+		return this.container.fullPath() + this.name;
 	};
 	
 	/** Creates or returns elements from inside the dw-paint HTML element that holds the root of this component.

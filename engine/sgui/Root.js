@@ -60,6 +60,13 @@ load.provide("dusk.sgui.Root", (function() {
 		 */
 		this._mmQueued = null;
 		
+		/** The stack used to store the active stack thing for `popActive` and `pushActive`.
+		 * @type {array}
+		 * @private
+		 * @since 0.0.21-alpha
+		 */
+		this._activeStack = [];
+		
 		this._mapper.map("noCleanCanvas", "noCleanCanvas");
 		this._mapper.map("noCacheCanvas", "noCacheCanvas");
 		this._mapper.map("warnIfNoElement", "warnIfNoElement");
@@ -90,7 +97,35 @@ load.provide("dusk.sgui.Root", (function() {
 	 * @return {string} A full path to this component.
 	 */
 	Root.prototype.fullPath = function() {
-		return this.name+":";
+		return this.name+":/";
+	};
+	
+	/** Pushes the currently active element to the active stack.
+	 * 
+	 * This will be the output from `getDeepestFocused`, which is usually the deepest active component. This can be used
+	 *  with `popActive` to restore that element in a FIFO fashion.
+	 * 
+	 * For example, push the active component, display a menu. When you are done with menu, remove it and pop.
+	 * 
+	 * Please don't remove the component you pushed from the group.
+	 * @since 0.0.21-alpha
+	 */
+	Root.prototype.pushActive = function() {
+		this._activeStack.push(this.getDeepestFocused());
+	};
+	
+	/** Pops the currently active element from the active stack, and makes it active.
+	 * 
+	 * Use `pushActive` to push an element to the stack.
+	 * 
+	 * Note this will change the focused component of every active (at the time of push) parent of the popee.
+	 * 
+	 * Throws an exception if the stack is empty.
+	 * @since 0.0.21-alpha
+	 */
+	Root.prototype.popActive = function() {
+		if(!this._activeStack.length) throw new Error("Active stack for "+this.name+" is empty and requested pop.");
+		this._activeStack.pop().becomeActive();
 	};
 	
 	Object.defineProperty(Root.prototype, "type", {
