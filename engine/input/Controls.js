@@ -214,6 +214,7 @@ load.provide("dusk.input.controls", (function() {
 				toFire.keyEvent = e;
 				toFire.type = controls.TYPE_KEY;
 				toFire.control = m;
+				toFire.root = e.root;
 				
 				controls.controlPressed.fire(toFire, m);
 			}
@@ -235,6 +236,7 @@ load.provide("dusk.input.controls", (function() {
 				toFire.buttonEvent = e;
 				toFire.type = controls.TYPE_BUTTON;
 				toFire.control = m;
+				toFire.root = "*";
 				
 				controls.controlPressed.fire(toFire, m);
 			}

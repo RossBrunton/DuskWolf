@@ -170,7 +170,7 @@ load.provide("dusk.utils.EventDispatcher", (function() {
 			}
 			
 			//Fire listener
-			var ret = ret && l[0](event);
+			var ret = l[0](event) && ret;
 			if(short && !ret) return false;
 		}
 		

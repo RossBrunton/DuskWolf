@@ -45,7 +45,8 @@ load.provide("dusk.input.keyboard", (function() {
 		e.root = rootName;
 		
 		if(!_keys[e.keyCode]) {
-			if(!keyboard.keyPress.fireAnd(e, e.keyCode)) false;//e.preventDefault(); //Seems to stop text input
+			//if(!keyboard.keyPress.fireAnd(e, e.keyCode)) false;//e.preventDefault(); //Seems to stop text input
+			keyboard.keyPress.fireAnd(e, e.keyCode);
 		}
 		
 		//Block keys from moving page

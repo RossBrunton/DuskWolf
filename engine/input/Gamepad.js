@@ -97,6 +97,22 @@ load.provide("dusk.input.gamepad", (function() {
 		return _axis[i];
 	};
 	
+	/** Given an entry in the button array thing is pushed.
+	 * 
+	 * Because apparently you need an object with a pressed property.
+	 * @param {GamepadButton|float} The object.
+	 * @return {boolean} Whether the button is pressed or not.
+	 * @since 0.0.21-alpha
+	 * @private
+	 */
+	var _isPressed = function(b) {
+		if (typeof(b) == "object") {
+			return b.pressed;
+		}
+		
+		return b > 0.5;
+	};
+	
 	/** Registered on `{@link dusk.utils.frameTicker.onFrame}`.
 	 * 	This checks to see if gamepad buttons or pressed, or if axises are tilted,
 	 *   and fires the relative events, and updates the relative variables.
@@ -109,16 +125,18 @@ load.provide("dusk.input.gamepad", (function() {
 		var gp = navigatorGetGamepads.call(navigator)[0];
 		
 		if(gp && options.get("gamepad.enable")) {
+			// Buttons
 			for(var i = 0; i < gp.buttons.length-1; i ++) {
-				if(!_buttons[i] && gp.buttons[i]) {
+				if(!_buttons[i] && _isPressed(gp.buttons[i])) {
 					gamepad.buttonPress.fire({"which":i, "axis":false}, i);
-				}else if(_buttons[i] && !gp.buttons[i]) {
+				}else if(_buttons[i] && !_isPressed(gp.buttons[i])) {
 					gamepad.buttonUp.fire({"which":i, "axis":false}, i);
 				}
 				
-				_buttons[i] = gp.buttons[i] > 0.2;
+				_buttons[i] = _isPressed(gp.buttons[i]);
 			}
 			
+			// Axes
 			for(var i = 0; i < gp.axes.length-1; i ++) {
 				_axes[i] = gp.axes[i];
 				

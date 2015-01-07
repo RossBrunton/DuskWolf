@@ -604,66 +604,112 @@ load.provide("dusk.sgui.pause", (function() {
 	
 	/** Simple module that allows simple pausing and unpausing of a game.
 	 * 
-	 * Consists of a root named "pause" that is made active or inactive depending on whether the game is paused or not.
-	 *  The root also is made invisible when it is not active.
+	 * When a root is paused (by input or function), it will make push the active component onto the active stack, and
+	 *  make a component named "pause" active. When unpaused, it will pop it.
 	 * 
 	 * A control is added, whith defaults to ENTER and button 9. If pausing is enabled, this will pause and unpause the
 	 *  game.
 	 * 
-	 * Likley is broken.
+	 * When pausing is enabled for a root, the "pause" component will be made invisible, but if it is disabled later,
+	 *  the component will not be made visible again.
 	 */
 	var pause = {};
 	
-	/** The name of the root that was active before the game was paused. Used to set the active root back to what it
-	 *  was. If the game is not paused, this will be an empty string.
-	 * @type string
+	/** The state of each root, either "paused", "unpaused" or "disabled".
+	 * 
+	 * Key name is root name.
 	 * @private
-	 */
-	var _previous = "";
+	 * @since 0.0.21-alpha
+	 */ 
+	var _states = {};
 	
-	/** Whether pausing is allowed, if this is false, then pausing is disabled, and nothing will happen if the user 
-	 *  attempts to pause.
-	 * @type boolean
+	/** Gets the state of the given root, either "paused", "unpaused" or "disabled".
+	 * @param {string} root The name of the root.
+	 * @return {string} The root's state.
+	 * @since 0.0.21-alpha
 	 */
-	pause.allow = false;
-	
-	/** Pauses the game. 
-	 */
-	pause.pause = function() {
-		if(!pause.allow) return;
-		if(!_previous) _previous = sgui.getActivePane().name;
-		sgui.setActivePane("paused");
-		sgui.get("paused").visible = true;
+	pause.getState = function(root) {
+		if(!(root in _states)) return "disabled";
+		return _states[root];
 	};
 	
-	/** Unpauses the game.
+	/** Enables pausing for the given root.
+	 * @param {string} root The name of the root.
+	 * @since 0.0.21-alpha
 	 */
-	pause.unpause = function() {
-		sgui.setActivePane(_previous);
-		_previous = "";
-		sgui.get("paused").visible = false;
+	pause.enable = function(root) {
+		_states[root] = "unpaused";
+		sgui.get(root).get("pause", "NullCom").visible = false;
 	};
 	
-	/** Checks if the game is paused.
-	 * @return {boolean} Whether the game is paused or not.
+	/** Disables pausing for the given root.
+	 * @param {string} root The name of the root.
+	 * @since 0.0.21-alpha
 	 */
-	pause.isPaused = function() {
-		return _previous !== "";
+	pause.disable = function(root) {
+		pause.unpause(root);
+		_states[root] = "disabled";
 	};
 	
-	/** If the game is paused, unpause it, else pause it.
+	/** Pauses the given root.
+	 * 
+	 * If the root is paused or it is not enabled, does nothing.
+	 * 
+	 * @param {string} root The name of root to pause.
 	 */
-	pause.toggle = function() {
-		if(pause.isPaused()) {
-			pause.unpause();
+	pause.pause = function(root) {
+		if(pause.getState(root) == "unpaused") {
+			_states[root] = "paused";
+			sgui.get(root).pushActive();
+			sgui.get(root).get("pause", "NullCom").visible = true;
+			sgui.get(root).get("pause").becomeActive();
+		}
+	};
+	
+	/** Unpauses the given root.
+	 * 
+	 * If the root is not paused or it is not enabled, does nothing.
+	 * 
+	 * @param {string} root The name of root to unpause.
+	 */
+	pause.unpause = function(root) {
+		if(pause.getState(root) == "paused") {
+			_states[root] = "unpaused";
+			sgui.get(root).get("pause", "NullCom").visible = false;
+			sgui.get(root).popActive();
+		}
+	};
+	
+	/** Checks if the given root is paused.
+	 * @param {string} root The root to check.
+	 * @return {boolean} Whether the root is paused or not.
+	 */
+	pause.isPaused = function(root) {
+		return pause.getState(root) == "paused";
+	};
+	
+	/** If the root is paused, unpause it, else pause it.
+	 * @param {string} root The root to toggle.
+	 */
+	pause.toggle = function(root) {
+		if(pause.isPaused(root)) {
+			pause.unpause(root);
 		}else{
-			pause.pause();
+			pause.pause(root);
 		}
 	};
 	
 	//Bind controls
 	controls.addControl("pause", 13, 9);
-	controls.controlPressed.listen(pause.toggle, "pause");
+	controls.controlPressed.listen(function(e) {
+		if(e.root == "*") {
+			for(var p in _states) {
+				pause.toggle(p);
+			}
+		}else{
+			pause.toggle(e.root);
+		}
+	}, "pause");
 	
 	return pause;
 })());
