@@ -51,7 +51,7 @@ load.provide("dusk.entities.behave.Buoyancy", (function() {
 	 * 
 	 * This behaviour uses the following behaviour properties:
 	 * - buoyancy:object = {} - Acceleration due to buoyancy; keys are 
-	 * - terminal:object = {} - Maximum speed that buoyancy applies.
+	 * - terminalBuoyancy:object = {} - Maximum speed that buoyancy applies.
 	 * 
 	 * This is a classless behaviour.
 	 */

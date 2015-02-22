@@ -549,7 +549,7 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	/** Takes the output from "verForce" or "horForce" manages acceleration and returns the new dx or dy.
 	 * @param {array} arr The output of the event.
 	 * @param {integer} base The initial dx or dy.
-	 * @param {object} accum The dyAccum or dyAccum object.
+	 * @param {object} accum The dyAccum or dxAccum object.
 	 * @param {boolean} lowCollide Whether there is a collision on the left or top.
 	 * @param {boolean} highCollide Whether there is a collision on the right or bottom.
 	 * @private
@@ -562,17 +562,23 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 		var pa = 0;
 		var na = 0;
 		
-		// Accumuluate forces
+		// Accumuluate positive forces
+		// Total sum
 		var psum = 0;
+		// Array of positive forces
 		var pforces = [];
+		
 		var pvels = [];
 		var pvelsum = 0;
 		
+		// And negative ones
 		var nsum = 0;
 		var nforces = [];
 		var nvels = [];
 		var nvelsum = 0;
 		
+		// First of all, loop through all the supplied velocities and update their accumulators, put them in the
+		// pforces or nforces array, and add them to the sum and velsum counters
 		for(var i = 0; i < arr.length; i ++) {
 			if(arr[i] && Array.isArray(arr[i])) {
 				if(!(arr[i][2] in accum)) {
@@ -598,14 +604,14 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 			} 
 		}
 		
-		// Friction!
-		if(base > 0) nsum += 0.05;
+		// Friction, apply a force to oppose the movement
+		if(base > 0) nsum -= 0.05;
 		if(base < 0) psum += 0.05;
 		
 		var pleft = psum;
 		var nleft = nsum;
 		
-		// Check collisions and remove accumulated veleration
+		// Check collisions and remove accumulated speed if there is a collision
 		if(lowCollide) {
 			for(var i = 0; i < nvels.length; i ++) {
 				if(accum[nvels[i][2]] < 0) accum[nvels[i][2]] = 0;
@@ -1336,9 +1342,9 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 		
 		var start = this.fluid.start();
 		
-		if(this.y + this.width + offset - start < 0) return 0.0;
-		if(this.y + this.width + offset - start > this.height) return 1.0;
-		return (this.y + this.width + offset - start) / this.height;
+		if(this.y + this.height + offset - start < 0) return 0.0;
+		if(this.y + this.height + offset - start > this.height) return 1.0;
+		return (this.y + this.height + offset - start) / this.height;
 	};
 	
 	
