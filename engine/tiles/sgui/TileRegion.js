@@ -46,7 +46,7 @@ load.provide("dusk.tiles.sgui.TileRegion", (function() {
 		this.onChange.fire();
 	};
 	
-	TileRegion.prototype.insert = function(region) {
+	TileRegion.prototype.copyAllInto = function(region) {
 		for(var i = 1; i < this._tiles.length; i ++) {
 			region.add(this._tiles[i][0], this._tiles[i][1],
 				this._tiles[i][2], this._tiles[i][3], this._tiles[i][4],
@@ -204,7 +204,7 @@ load.provide("dusk.tiles.sgui.TileRegion", (function() {
 											this._childRegions[e.name].colour = e.colour;
 											this._childRegions[e.name].name = e.name;
 										
-										cl[7][e.name].insert(this._childRegions[e.name]);
+										cl[7][e.name].copyAllInto(this._childRegions[e.name]);
 									}
 								}
 								
@@ -431,26 +431,6 @@ load.provide("dusk.tiles.sgui.TileRegionGenerator", (function() {
 		 */
 		this.cols = 50;
 		
-		/** Full data for all the regions, key is the region name, and value is an array of form `[x, y, parentX, parentY, 
-		 *  weight, entity, distance]`. The first entry of these arrays are always null. The origin tile has a `parentX` and
-		 *  a `parentY` of `-1`.
-		 * @type object
-		 * @private
-		 */
-		this._regions = {};
-		/** The original tile in a region. Key is the region name, and the value is a shortcut to the origin tile in 
-		 *  `{@link dusk.tiles.sgui.TileRegionGenerator#_regions}`.
-		 * @type object
-		 * @private
-		 */
-		this._regionOrigins = {};
-		/** An object containing arrays for fast lookups. Key is region name, the value is a Uint16Array. The value
-		 *  `(y * cols) + x` is the index of the tile at that location in `{@link dusk.tiles.sgui.TileRegionGenerator#_regions}` or 0
-		 *  (the tile is not in the region).
-		 * @type object
-		 * @private
-		 */
-		this._regionMaps = {};
 		/** An object containing an array of all entities in the region. How nice. Key is the region name. Value is an
 		 *  `[entity, tile]` pair.
 		 * @type object
@@ -476,7 +456,6 @@ load.provide("dusk.tiles.sgui.TileRegionGenerator", (function() {
 		
 		//Listeners
 		this.prepareDraw.listen(this._tileRegionDraw.bind(this));
-		this.frame.listen(this._tileRegionFrame.bind(this));
 	};
 	TileRegionGenerator.prototype = Object.create(Component.prototype);
 
@@ -505,14 +484,6 @@ load.provide("dusk.tiles.sgui.TileRegionGenerator", (function() {
 		}else{
 			return this.getTile(~~xpt, ~~ypt);
 		}
-	};
-
-	/** Used internally to manage frames.
-	 * @param {object} e A `frame` event object.
-	 * @private
-	 */
-	TileRegionGenerator.prototype._tileRegionFrame = function(e) {
-		
 	};
 
 	TileRegionGenerator.prototype._updateTileColourCache = function() {

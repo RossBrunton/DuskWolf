@@ -161,7 +161,7 @@ load.provide("dusk.tiles.sgui.EditableTileMap", (function() {
 		if(-e.d.slice.y + (this._cy*this.tileHeight()) > e.d.dest.height) return;
 		
 		var width = this.tileWidth()*this.frameWidth;
-		var height = this.tileWidth()*this.frameHeight;
+		var height = this.tileHeight()*this.frameHeight;
 		if(-e.d.slice.x + (this._cx*this.tileWidth()) + width > e.d.dest.width)
 			width = (e.d.dest.width) - (-e.d.slice.x + (this._cx*this.tileWidth()));
 		if(-e.d.slice.y + (this._cy*this.tileHeight()) + height > e.d.dest.height)
@@ -169,21 +169,21 @@ load.provide("dusk.tiles.sgui.EditableTileMap", (function() {
 		
 		e.c.strokeStyle = this.cursorColour;
 		e.c.lineWidth = 1;
-		e.c.strokeRect(e.d.destX - e.d.slice.x + (this._cx*this.tileWidth()),
-			e.d.destX - e.d.slice.y + (this._cy*this.tileHeight()), width, height
+		e.c.strokeRect(e.d.dest.x - e.d.slice.x + (this._cx*this.tileWidth()),
+			e.d.dest.y - e.d.slice.y + (this._cy*this.tileHeight()), width, height
 		);
 		
 		e.c.fillStyle = this.cursorColour;
 		var t = this.getTile(this._cx, this._cy);
 		e.c.fillText(t[0]+","+t[1],
-			e.d.destX - e.d.slice.x + (this._cx*this.tileWidth()) + 1,
-			e.d.destY - e.d.slice.y + (this._cy*this.tileHeight()) + 6
+			e.d.dest.x - e.d.slice.x + (this._cx*this.tileWidth()) + 1,
+			e.d.dest.y - e.d.slice.y + (this._cy*this.tileHeight()) + 6
 		);
 		
 		if(TileMap.getAnimation(this.src, t[0]+","+t[1]).length > 1) {
 			e.c.fillText("\u27F3",
-				e.d.destX - e.d.slice.x + ((this._cx+1)*this.tileWidth()) - 9,
-				e.d.destY - e.d.slice.y + ((this._cy+1)*this.tileHeight()) - 4
+				e.d.dest.x - e.d.slice.x + ((this._cx+1)*this.tileWidth()) - 9,
+				e.d.dest.y - e.d.slice.y + ((this._cy+1)*this.tileHeight()) - 4
 			);
 		}
 		
