@@ -121,10 +121,12 @@ load.provide("dusk.input.gamepad", (function() {
 	 */
 	var _frame = function(e) {
 		if(document.hidden || document.webkitHidden || document.msHidden) return;
+		if(!options.get("gamepad.enable")) return;
+		
 		var navigatorGetGamepads = navigator.getGamepads || navigator.webkitGetGamepads || function(){return [null];};
 		var gp = navigatorGetGamepads.call(navigator)[0];
 		
-		if(gp && options.get("gamepad.enable")) {
+		if(gp) {
 			// Buttons
 			for(var i = 0; i < gp.buttons.length-1; i ++) {
 				if(!_buttons[i] && _isPressed(gp.buttons[i])) {
@@ -158,8 +160,6 @@ load.provide("dusk.input.gamepad", (function() {
 		}
 	};
 	frameTicker.onFrame.listen(_frame);
-	
-	Object.seal(gamepad);
 	
 	return gamepad;
 })());

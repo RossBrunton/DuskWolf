@@ -391,8 +391,17 @@ load.provide("dusk.sgui.Label", (function() {
 				this._processText(false, undefined, e.d.origin.width);
 			}
 			
-			e.c.drawImage(this._cache, e.d.slice.x, e.d.slice.x, e.d.slice.width,  e.d.slice.height,
-				e.d.dest.x, e.d.dest.y, e.d.dest.width, e.d.dest.height
+			var xDelta = 0;
+			var yDelta = 0;
+			if(e.d.slice.width > this._cache.width) {
+				xDelta = this._cache.width - e.d.slice.width;
+			}
+			if(e.d.slice.height > this._cache.height) {
+				yDelta = this._cache.height - e.d.slice.height;
+			}	
+			
+			e.c.drawImage(this._cache, e.d.slice.x, e.d.slice.x, e.d.slice.width + xDelta,  e.d.slice.height + yDelta,
+				e.d.dest.x, e.d.dest.y, e.d.dest.width + xDelta, e.d.dest.height + yDelta
 			);
 		}
 	};
