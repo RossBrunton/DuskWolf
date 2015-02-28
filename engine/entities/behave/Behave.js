@@ -7,20 +7,23 @@ load.provide("dusk.entities.behave.Behave", (function() {
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var entities = load.require("dusk.entities");
 	
-	/** A behaviour of an entity.
+	/** A complex behaviour of an entity.
 	 * 
 	 * Objects of this class, and it's subclasses, are "attached" to `{@link dusk.entities.sgui.Entity}` instances and
 	 *  essentially provide details on how the entity should act.
 	 * 
-	 * This class is the base class of these behaviours, but does nothing on it's own.
+	 * This class is the base class of these behaviours, but does nothing on its own.
 	 * 
 	 * Entities may have multiple behaviours, but each behaviour instance can only be attached to one entity.
 	 * 
-	 * Messages are passed to the behaviour using `{@link dusk.entities.sgui.Entity.behaviourFire}`, which fires an event. The
-	 * behaviour itself should edit the entity's public properties directly.
+	 * Messages are passed to the behaviour using `{@link dusk.entities.sgui.Entity.behaviourFire}`, which fires an
+	 *  event.
+	 * 
+	 * 
 	 * 
 	 * @param {dusk.entities.sgui.Entity} entity The entity this behaviour will act with.
 	 * @constructor
+	 * @see dusk.entities.sgui.Entity
 	 */
 	var Behave = function(entity) {
 		/** The entitiy this behaviour is acting on.

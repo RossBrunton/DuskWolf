@@ -30,7 +30,7 @@ load.provide("dusk.checkpoint.behave.Checkpoint", (function() {
 		"load":function(entity, e) {Checkpoint.frame(entity, e);}
 	};
 	
-	// Store help data
+	// Help data
 	entities.registerWorkshop("Checkpoint", {
 		"help":"Detects if this is an active checkpoint or not.",
 		"data":[

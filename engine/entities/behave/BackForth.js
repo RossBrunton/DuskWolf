@@ -9,9 +9,10 @@ load.provide("dusk.entities.behave.BackForth", (function() {
 	/** An entity with this behaviour will move in one direction until it collides with something, and then head
 	 * the other direction.
 	 * 
-	 * The speed it travels at is defined by the behaviour data value `"hspeed"`. Which is `5` by default.
+	 * The speed it travels at is defined by the behaviour data value `hspeed`. Which is `5` by default.
 	 * 
-	 * If `"backforthif"` is in the behavior data, then this entity will only move back and forth if that trigger is true.
+	 * If the behaviour property `backforthif` is non-empty, then this entity will only move back and forth if that
+	 *  trigger is true.
 	 * 
 	 * This behaviour uses the following behaviour properties:
 	 * - hspeed:integer = 5 - The speed to move.
@@ -42,7 +43,8 @@ load.provide("dusk.entities.behave.BackForth", (function() {
 			}
 		}
 	};
-
+	
+	// Help data
 	entities.registerWorkshop("BackForth", {
 		"help":"Will move side to side and bounce of walls.",
 		"data":[
@@ -51,6 +53,7 @@ load.provide("dusk.entities.behave.BackForth", (function() {
 		]
 	});
 	
+	// Add the behaviour
 	entities.registerBehaviour("BackForth", BackForth);
 	
 	return BackForth;
