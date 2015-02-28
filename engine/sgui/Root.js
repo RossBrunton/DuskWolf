@@ -228,6 +228,13 @@ load.provide("dusk.sgui.Root", (function() {
 			return;
 		}
 		
+		if(this._mmQueued) {
+			this.mouseX = this._mmQueued.x;
+			this.mouseY = this._mmQueued.y;
+			Group.prototype.interact.call(this, this._mmQueued);
+			this._mmQueued = null;
+		}
+		
 		for(var i = 0; i < canvases.length; i ++) {
 			var canvas = canvases[i];
 			
@@ -247,8 +254,7 @@ load.provide("dusk.sgui.Root", (function() {
 	};
 	
 	Root.prototype.interact = function(e, nofire) {
-		if(this.mouse && e.type == interaction.MOUSE_MOVE) {
-			this.mouse.update(e.x, e.y);
+		if(e.type == interaction.MOUSE_MOVE) {
 			this._mmQueued = utils.clone(e);
 		}else{
 			return Group.prototype.interact.call(this, e, nofire);
@@ -256,10 +262,7 @@ load.provide("dusk.sgui.Root", (function() {
 	};
 	
 	var _frame = function() {
-		if(this._mmQueued) {
-			Group.prototype.interact.call(this, this._mmQueued);
-			this._mmQueued = null;
-		}
+		
 	};
 	
 	Root.prototype.getRoot = function() {

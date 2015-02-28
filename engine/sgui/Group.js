@@ -154,6 +154,14 @@ load.provide("dusk.sgui.Group", (function() {
 		 */
 		this._verChangedId = 0;
 		
+		/** If true, then you can roll over components that have their `{@link dusk.sgui.Component#allowMouse}` property
+		 *  set to true to focus them.
+		 * @type boolean
+		 * @default true
+		 * @since 0.0.20-alpha
+		 */
+		this.mouseFocus = true;
+		
 		/** An event dispatcher which is fired before children are drawn.
 		 * 
 		 * The event object is the same one given to the draw function.
@@ -174,8 +182,8 @@ load.provide("dusk.sgui.Group", (function() {
 		this._mapper.map("verScroll", "verScroll", ["children", "allChildren", "height"]);
 		this._mapper.map("children", [_childrenGetter, this.modifyComponent], ["focusBehaviour"]);
 		this._mapper.map("allChildren", [_childrenGetter, this.modifyAllChildren], ["focusBehaviour", "children"]);
-		this._mapper.map("mouseFocus", "mouse.focus", ["mouse"]);
-		this._mapper.map("mouse.focus", "mouse.focus", ["mouse"]);
+		this._mapper.map("mouseFocus", "mouseFocus");
+		this._mapper.map("mouse.focus", "mouseFocus");
 		
 		//Listeners
 		this.prepareDraw.listen(this._groupDraw.bind(this));
@@ -272,16 +280,15 @@ load.provide("dusk.sgui.Group", (function() {
 	 * @return {boolean} The return value of the focused component's keypress.
 	 */
 	Group.prototype.containerClick = function(e) {
-		if(this.mouse && this.mouse.allow) {
+		if(this.allowMouse) {
 			for(var i = this._drawOrder.length-1; i >= 0; i --) {
 				if(this._drawOrder[i] in this._components && this._components[this._drawOrder[i]].visible
-				&& this._components[this._drawOrder[i]].mouse
-				&& !this._components[this._drawOrder[i]].mouse.clickPierce) {
+				&& !this._components[this._drawOrder[i]].clickPierce) {
 					
 					var com = this._components[this._drawOrder[i]];
-					if(!(this.mouse.x < com.x || this.mouse.x > com.x + com.width
-					|| this.mouse.y < com.y || this.mouse.y > com.y + com.height)) {
-						return this._components[this._drawOrder[i]].mouse.doClick(e);
+					if(!(this.mouseX < com.x || this.mouseX > com.x + com.width
+					|| this.mouseY < com.y || this.mouseY > com.y + com.height)) {
+						return this._components[this._drawOrder[i]].doClick(e);
 					}
 				}
 			}
@@ -856,12 +863,11 @@ load.provide("dusk.sgui.Group", (function() {
 	 * @since 0.0.21-alpha
 	 */
 	var _mouseSelect = function() {
-		if(this.mouse && this.mouse.focus) {
+		if(this.mouseFocus) {
 			for(var i = this._drawOrder.length-1; i >= 0; i --) {
-				if(this._drawOrder[i] in this._components
-				&& this._components[this._drawOrder[i]].mouse && this._components[this._drawOrder[i]].mouse.allow) {
+				if(this._drawOrder[i] in this._components && this._components[this._drawOrder[i]].allowMouse) {
 					var com = this._components[this._drawOrder[i]];
-					if(com.mouse.hovered && com.visible) {
+					if(com.mouseHovered && com.visible) {
 						if(com != this.getFocusedChild()) this.flow(this._drawOrder[i]);
 						break;
 					}

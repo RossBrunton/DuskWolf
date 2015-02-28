@@ -33,7 +33,7 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 	 *  and the last two elements are the weight of this tile and an integer which is 0 iff the tile is not solid,
 	 *  otherwise it's 1.
 	 * 
-	 * TileMaps have the property `dusk.sgui.MouseAugment.mousePierce` set to true by default.
+	 * TileMaps have the property `dusk.sgui.Component#mousePierce` set to true by default.
 	 * 
 	 * @extends dusk.sgui.Component
 	 * @param {?dusk.sgui.Group} parent The container that this component is in.
@@ -193,9 +193,7 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 		this.frame.listen(_frame.bind(this));
 		
 		//Default values
-		this.augment.listen((function(e) {
-			this.mouse.clickPierce = true;
-		}).bind(this), "mouse");
+		this.clickPierce = true;
 	};
 	TileMap.prototype = Object.create(Component.prototype);
 	

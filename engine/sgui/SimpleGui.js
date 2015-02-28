@@ -528,8 +528,8 @@ load.provide("dusk.sgui", (function() {
 		
 		if(e.type == interaction.MOUSE_CLICK) {
 			for(var r in _roots) {
-				if(_roots[r].mouse) {
-					_roots[r].mouse.doClick(e);
+				if(_roots[r].mouseAllow) {
+					_roots[r].doClick(e);
 				}
 			}
 		}

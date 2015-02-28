@@ -23,6 +23,9 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 	 * 
 	 * Entities should be added using `dusk.entities.sgui.EntityGroup#dropEntity` function.
 	 * 
+	 * EntityGroups have `mouseFocus` set to false, as it is exected that some entities would like to use the mouse 
+	 * themselves.
+	 * 
 	 * @param {?dusk.sgui.IContainer} parent The container that this component is in.
 	 * @param {string} componentName The name of the component.
 	 * @extends dusk.sgui.Group
@@ -118,6 +121,9 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 		this.dirPress.listen(this._egLeftAction.bind(this), c.DIR_LEFT);
 		this.dirPress.listen(this._egUpAction.bind(this), c.DIR_UP);
 		this.dirPress.listen(this._egDownAction.bind(this), c.DIR_DOWN);
+		
+		// Initial settings
+		this.mouseFocus = false;
 	};
 	EntityGroup.prototype = Object.create(Group.prototype);
 	

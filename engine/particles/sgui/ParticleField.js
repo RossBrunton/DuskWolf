@@ -30,9 +30,7 @@ load.provide("dusk.particles.sgui.ParticleField", (function() {
 		//Prop masks
 		
 		//Default values
-		this.augment.listen((function(e) {
-			this.mouse.clickPierce = true;
-		}).bind(this), "mouse");
+		this.clickPierce = true;
 		
 		//Listeners
 		this.prepareDraw.listen(_draw.bind(this));

@@ -421,12 +421,10 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 		//Listeners
 		if(!this.isLight()) if(this.collisionMark) this.prepareDraw.listen(this._collisionDraw.bind(this));
 		if(!this.isLight()) {
-			this.augment.listen((function(e) {
-				this.onInteract.listen((function() {
-					this.behaviourFire("mouseMove", {"x":this.mouse.x, "y":this.mouse.y});
-					return true;
-				}).bind(this), interaction.MOUSE_MOVE);
-			}).bind(this), "mouse");
+			this.onInteract.listen((function() {
+				this.behaviourFire("mouseMove", {"x":this.mouseX, "y":this.mouseY});
+				return true;
+			}).bind(this), interaction.MOUSE_MOVE);
 			
 			this.onDelete.listen((function(e) {
 				this.behaviourFire("delete", e);

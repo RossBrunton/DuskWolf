@@ -38,8 +38,7 @@ load.provide("guiTest", (function() {
 			"y":30,
 			"src":"default/test.png",
 			"width":20,
-			"height":20,
-			"mouse":true
+			"height":20
 		},
 		
 		"t":{
@@ -268,7 +267,6 @@ load.provide("guiTest", (function() {
 				"vspacing":2,
 				"xOrigin":"right",
 				"yOrigin":"bottom",
-				"mouse":true,
 				"populate":{
 					"type":"Image",
 					"width":20,
@@ -333,16 +331,14 @@ load.provide("guiTest", (function() {
 				"x":200,
 				"y":20,
 				"width":100,
-				"height":40,
-				"mouse":true
+				"height":40
 			},
 			"tbox2":{
 				"type":"TextBox",
 				"x":300,
 				"y":20,
 				"width":100,
-				"height":40,
-				"mouse":true
+				"height":40
 			},
 		}
 	});

@@ -85,9 +85,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 			_addLayer.bind(this, LayeredRoom.LAYER_FLUID), controls.addControl("basicmain_add_fluid", "F")
 		);
 		
-		this.augment.listen((function(e) {
-			this.mouse.focus = false;
-		}).bind(this), "mouse");
+		this.mouseFocus = false;
 		
 		//Directions
 		this.dirPress.listen(_bmRightAction.bind(this), c.DIR_RIGHT);

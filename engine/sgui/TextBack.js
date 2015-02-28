@@ -68,13 +68,12 @@ load.provide("dusk.sgui.TextBack", (function() {
 	 * @return {boolean} The return value of the focused component's keypress.
 	 */
 	TextBack.prototype.containerClick = function(e) {
-		if(this.mouse && this.mouse.allow) {
+		if(this.allowMouse) {
 			if(!this.plusProxy) return Group.prototype.containerClick.call(this, e);
 			
-			if(this.getComponent("plus").visible && this.getComponent("plus").mouse
-			&& !this.getComponent("plus").mouse.clickPierce) {
+			if(this.getComponent("plus").visible && !this.getComponent("plus").clickPierce) {
 				
-				return this.getComponent("plus").mouse.doClick(e);
+				return this.getComponent("plus").doClick(e);
 			}
 		}
 		

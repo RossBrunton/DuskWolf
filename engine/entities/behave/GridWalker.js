@@ -370,8 +370,8 @@ load.provide("dusk.entities.behave.GridMouse", (function() {
 	 */
 	var _mouseMove = function(e) {
 		if(this._data("gmMouseMove") && options.get("controls.mouseGrid") && this._entity.active) {
-			var destX = ~~((this._entity.x + this._entity.mouse.x) / this._entity.width);
-			var destY = ~~((this._entity.y + this._entity.mouse.y) / this._entity.height);
+			var destX = ~~((this._entity.x + this._entity.mouseX) / this._entity.width);
+			var destY = ~~((this._entity.y + this._entity.mouseY) / this._entity.height);
 			
 			if(this._data("gwregion") == null || this._data("gwregion").isIn(destX, destY)) {
 				this._entity.behaviourFire("gwStartMove", {"targetX":destX, "targetY":destY});

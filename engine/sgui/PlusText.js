@@ -134,13 +134,11 @@ load.provide("dusk.sgui.PlusText", (function() {
 	 * @return {boolean} The return value of the focused component's keypress.
 	 */
 	PlusText.prototype.containerClick = function(e) {
-		if(this.mouse && this.mouse.allow) {
+		if(this.allowMouse) {
 			if(!this.plusProxy) return Group.prototype.containerClick.call(this, e);
 			
-			if(this.getComponent("plus").visible && this.getComponent("plus").mouse
-			&& !this.getComponent("plus").mouse.clickPierce) {
-				
-				return this.getComponent("plus").mouse.doClick(e);
+			if(this.getComponent("plus").visible && !this.getComponent("plus").clickPierce) {
+				return this.getComponent("plus").doClick(e);
 			}
 		}
 		

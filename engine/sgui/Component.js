@@ -247,12 +247,48 @@ load.provide("dusk.sgui.Component", (function() {
 		 */
 		this.style = "";
 		
-		/** The mouse augment, for use if the mouse is enabled. This may be null if there is no mouse augment enabled on
-		 *  this component. Use `{@link dusk.sgui.Component#ensureMouse}` to add a mouse augment.
-		 * @type ?dusk.sgui.MouseAugment
+		/** Whether focus should be changed to this component if the user rolls over it with the mouse, and the
+		 *  container allows it.
+		 * 
+		 * @type boolean
+		 * @default true
+		 * @since 0.0.20-alpha
+		 */
+		this.allowMouse = true;
+		/** Whether clicking on this component will trigger its action.
+		 * 
+		 * @type boolean
+		 * @since 0.0.20-alpha
+		 */
+		this.mouseAction = true;
+		/** If true, then this component cannot be clicked but will not block click events to any component
+		 *  underneath it.
+		 * @type boolean
 		 * @since 0.0.21-alpha
 		 */
-		this.mouse = null;
+		this.clickPierce = false;
+		/** Current x location of the mouse, relative to this component.
+		 * @type integer
+		 * @since 0.0.20-alpha
+		 */
+		this.mouseX = 0;
+		/** Current y location of the mouse, relative to this component.
+		 * @type integer
+		 * @since 0.0.20-alpha
+		 */
+		this.mouseY = 0;
+		/** True if this component has the mouse hovered over it.
+		 * @type boolean
+		 * @since 0.0.21-alpha
+		 */
+		this.mouseHovered = false;
+		/** Fired when this component is clicked on.
+		 * 
+		 * The event object has at least a property `button`, which is the number of the button clicked.
+		 * @type dusk.utils.EventDispatcher
+		 */
+		this.onClick = new EventDispatcher("dusk.sgui.Component.onClick");
+		
 		
 		/** Whether the component can become focused, if false it cannot be flowed into. 
 		 * @type boolean
@@ -355,11 +391,11 @@ load.provide("dusk.sgui.Component", (function() {
 		this.type = null;
 		
 		//Mouse digging
-		if(this.container && this.container.mouse && this.container.mouse.childrenAllow) {
+		/*if(this.container && this.container.mouse && this.container.mouse.childrenAllow) {
 			this.ensureMouse();
 			this.mouse.childrenAllow = true;
 			this.mouse.focus = true;
-		}
+		}*/
 		
 		//Prop masks
 		this._mapper.map("xDisplay", "xDisplay");
@@ -387,12 +423,12 @@ load.provide("dusk.sgui.Component", (function() {
 		this._mapper.map("extras", [function() {return {};}, this.modExtras]);
 		this._mapper.map("type", "type");
 		this._mapper.map("mouse", [function(){return this.mouse != null;}, function(v) {if(v) this.ensureMouse();}]);
-		this._mapper.map("allowMouse", "mouse.allow", ["mouse"]);
-		this._mapper.map("mouse.allow", "mouse.allow", ["mouse"]);
-		this._mapper.map("mouseAction", "mouse.action", ["mouse"]);
-		this._mapper.map("mouse.action", "mouse.action", ["mouse"]);
-		this._mapper.map("clickPierce", "mouse.clickPierce", ["mouse"]);
-		this._mapper.map("mouse.clickPierce", "mouse.clickPierce", ["mouse"]);
+		this._mapper.map("allowMouse", "allowMouse");
+		this._mapper.map("mouse.allow", "allowMouse");
+		this._mapper.map("mouseAction", "mouseAction");
+		this._mapper.map("mouse.action", "mouseAction");
+		this._mapper.map("clickPierce", "clickPierce");
+		this._mapper.map("mouse.clickPierce", "clickPierce");
 		this._mapper.map("alsoFocus", "alsoFocus");
 		this._mapper.map("actionFocus", "actionFocus");
 	};
@@ -422,6 +458,11 @@ load.provide("dusk.sgui.Component", (function() {
 		var dirReturn = this.onInteract.fireAnd(e, e.filter);
 		
 		if(dirReturn) {
+			// Mouse
+			if(this.mouseAction && e.type == interaction.MOUSE_CLICK) {
+				return this.action.fireAnd({"mouseClick":e, "component":this});
+			}
+			
 			// Directions
 			var cons = controls.interactionControl(e);
 			if(cons.indexOf("sgui_left") !== -1) {
@@ -465,6 +506,29 @@ load.provide("dusk.sgui.Component", (function() {
 		var dirReturn = this.onControl.fireAnd(e, controls);
 		
 		return dirReturn;
+	};
+	
+	/** Handles a mouse click. This will fire `{@link dusk.sgui.Component#onClick}`, and possibly fire the 
+	 *  `{@link dusk.sgui.Component#action}` handler.
+	 * 
+	 * If the component running this is a group 
+	 *  then its `{@link dusk.sgui.Group#containerClick}` function will be called.
+	 *	If that function returns true, then this shall return true without doing anything else.
+	 * 
+	 * @param {object} e The click event.
+	 * @return {boolean} Whether the parent container should run its own actions.
+	 */
+	Component.prototype.doClick = function(e) {
+		if(this instanceof Group && !this._component.containerClick(e))
+			return false;
+		
+		if(this.onClick.fireAnd(e)) {
+			if(this.mouseAction) {
+				return this.action.fireAnd({"click":e, "component":this._component});
+			}
+		}
+		
+		return true;
 	};
 	
 	
@@ -614,17 +678,18 @@ load.provide("dusk.sgui.Component", (function() {
 		if(dest.width <= 0 || dest.height <= 0) skip = true;
 		
 		// Update mouse location
-		if(this.mouse && this.getRoot().mouse) {
-			var x = this.getRoot().mouse.x - dest.x// + slice.x;
-			var y = this.getRoot().mouse.y - dest.y// + slice.y;
+		if(true) {
+			var x = this.getRoot().mouseX - dest.x// + slice.x;
+			var y = this.getRoot().mouseY - dest.y// + slice.y;
 			
 			if(x >= 0 && y >= 0 && x <= source.width && y <= source.height) {
-				this.mouse.hovered = true;
+				this.mouseHovered = true;
 			}else{
-				this.mouse.hovered = false;
+				this.mouseHovered = false;
 			}
 			
-			this.mouse.update(x, y);
+			this.mouseX = x;
+			this.mouseY = y;
 		}
 		
 		if(!skip && this.visible) {
@@ -649,9 +714,8 @@ load.provide("dusk.sgui.Component", (function() {
 				ctx.fillText(this.name + (this.mouse ? " M" : "") + (this.active ? " A" : ""), dest.x + 1, dest.y + 10);
 				ctx.strokeRect(dest.x+0.5, dest.y+0.5, slice.width-1, slice.height-1);
 				
-				if(this.mouse) {
-					ctx.strokeRect(dest.x + this.mouse.x, dest.y+this.mouse.y, 1, 1);
-				}
+				ctx.strokeRect(dest.x + this.mouseX, dest.y+this.mouseY, 1, 1);
+				
 				//ctx.strokeStyle = "#0000ff";
 				//ctx.strokeRect(dest.x+0.5, dest.y+0.5, container.width-1, container.height-1);
 			}
