@@ -13,6 +13,7 @@ load.provide("dusk.sgui.Component", (function() {
 	var c = load.require("dusk.sgui.c");
 	var Root = load.suggest("dusk.sgui.Root", function(p) {Root = p});
 	var interaction = load.require("dusk.input.interaction");
+	var mouse = load.suggest("dusk.input.mouse", function(p) {mouse = p});
 	var PosRect = load.require("dusk.utils.PosRect");
 	
 	/** A component is a single "thing" that exists in the SimpleGui system. Everything in the Simple GUI system that
@@ -271,6 +272,13 @@ load.provide("dusk.sgui.Component", (function() {
 		 * @since 0.0.21-alpha
 		 */
 		this.mouseHovered = false;
+		/** The mouse cursor to be used when this component is hovered over.
+		 * 
+		 * An empty string is the default value.
+		 * @type string
+		 * @since 0.0.21-alpha
+		 */
+		this.mouseCursor = "";
 		/** Fired when this component is clicked on.
 		 * 
 		 * The event object has at least a property `button`, which is the number of the button clicked.
@@ -408,6 +416,7 @@ load.provide("dusk.sgui.Component", (function() {
 		this._mapper.map("mouse.allow", "allowMouse");
 		this._mapper.map("mouseAction", "mouseAction");
 		this._mapper.map("mouse.action", "mouseAction");
+		this._mapper.map("mouseCursor", "mouseCursor");
 		this._mapper.map("clickPierce", "clickPierce");
 		this._mapper.map("mouse.clickPierce", "clickPierce");
 		this._mapper.map("alsoFocus", "alsoFocus");
@@ -437,6 +446,12 @@ load.provide("dusk.sgui.Component", (function() {
 		if(nofire) return false;
 		
 		var dirReturn = this.onInteract.fireAnd(e, e.filter);
+		
+		// If the mouse cursor needs to be changed, do it
+		if(this.mouseCursor && e.type == interaction.MOUSE_MOVE && this.active && this.focused
+		&& this.mouseHovered && mouse) {
+			mouse.cursor = this.mouseCursor;
+		}
 		
 		if(dirReturn) {
 			// Directions

@@ -231,6 +231,10 @@ load.provide("dusk.sgui.Root", (function() {
 		if(this._mmQueued) {
 			this.mouseX = this._mmQueued.x;
 			this.mouseY = this._mmQueued.y;
+			
+			// Components may change this, so reset it every frame
+			mouse.cursor = "initial";
+			
 			Group.prototype.interact.call(this, this._mmQueued);
 			this._mmQueued = null;
 		}

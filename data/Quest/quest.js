@@ -37,6 +37,7 @@ load.provide("quest", (function() {
 	});
 	
 	var root = sgui.get("default", true);
+	root.mouseFocus = false;
 	dquest.make(root, "quest");
 	
 	//Test
@@ -75,7 +76,7 @@ load.provide("quest", (function() {
 					"type":"PlusText",
 					"plusType":"FocusCheckerRect",
 					"behind":true,
-					"mouse":true,
+					"mouseCursor":"pointer",
 					"label":{
 						"colour":"#cccccc",
 						"size":16

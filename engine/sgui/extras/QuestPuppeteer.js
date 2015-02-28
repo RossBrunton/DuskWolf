@@ -392,6 +392,7 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 					c.rows = options.length;
 					c.cols = 1;
 					c.populate(options);
+					c.getRoot().pushActive();
 					c.becomeActive();
 					c.visible = true;
 					
@@ -410,7 +411,7 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 						c.visible = false;
 						c.action.unlisten(l);
 						c.cancel.unlisten(can);
-						this._owner.becomeActive();
+						c.getRoot().popActive();
 						
 						if("listSelectCancel" in opt) {
 							reject(new UserCancelError());
@@ -424,6 +425,7 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 						c.visible = false;
 						c.cancel.unlisten(can);
 						c.action.unlisten(l);
+						c.getRoot().popActive();
 						
 						reject(new UserCancelError());
 					}).bind(this));
