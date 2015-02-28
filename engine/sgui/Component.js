@@ -8,7 +8,6 @@ load.provide("dusk.sgui.Component", (function() {
 	var controls = load.require("dusk.input.controls");
 	var sgui = load.require("dusk.sgui");
 	var Mapper = load.require("dusk.utils.Mapper");
-	var MouseAugment = load.require("dusk.sgui.MouseAugment");
 	var Pool = load.require("dusk.utils.Pool");
 	var Group = load.suggest("dusk.sgui.Group", function(p) {Group = p});
 	var c = load.require("dusk.sgui.c");
@@ -231,16 +230,6 @@ load.provide("dusk.sgui.Component", (function() {
 		 */
 		this.onDelete = new EventDispatcher("dusk.sgui.Component.onDelete");
 		
-		/** An event dispatcher that fires when an augment is added to this component.
-		 * 
-		 * The event object has a single property named `augment` which is the name of the augment added. At the moment
-		 *  only `"mouse"` can be added.
-		 * 
-		 * @type dusk.utils.EventDispatcher
-		 * @since 0.0.21-alpha
-		 */
-		this.augment = new EventDispatcher("dusk.sgui.Component.augment");
-		
 		/** The component's "style", or an array of such values. Used for styling.
 		 * @type string|array
 		 * @default ""
@@ -390,13 +379,6 @@ load.provide("dusk.sgui.Component", (function() {
 		 */
 		this.type = null;
 		
-		//Mouse digging
-		/*if(this.container && this.container.mouse && this.container.mouse.childrenAllow) {
-			this.ensureMouse();
-			this.mouse.childrenAllow = true;
-			this.mouse.focus = true;
-		}*/
-		
 		//Prop masks
 		this._mapper.map("xDisplay", "xDisplay");
 		this._mapper.map("yDisplay", "yDisplay");
@@ -422,7 +404,6 @@ load.provide("dusk.sgui.Component", (function() {
 		this._mapper.map("layer", [function() {return "";}, this.alterLayer]);
 		this._mapper.map("extras", [function() {return {};}, this.modExtras]);
 		this._mapper.map("type", "type");
-		this._mapper.map("mouse", [function(){return this.mouse != null;}, function(v) {if(v) this.ensureMouse();}]);
 		this._mapper.map("allowMouse", "allowMouse");
 		this._mapper.map("mouse.allow", "allowMouse");
 		this._mapper.map("mouseAction", "mouseAction");
@@ -458,11 +439,6 @@ load.provide("dusk.sgui.Component", (function() {
 		var dirReturn = this.onInteract.fireAnd(e, e.filter);
 		
 		if(dirReturn) {
-			// Mouse
-			if(this.mouseAction && e.type == interaction.MOUSE_CLICK) {
-				return this.action.fireAnd({"mouseClick":e, "component":this});
-			}
-			
 			// Directions
 			var cons = controls.interactionControl(e);
 			if(cons.indexOf("sgui_left") !== -1) {
@@ -519,35 +495,16 @@ load.provide("dusk.sgui.Component", (function() {
 	 * @return {boolean} Whether the parent container should run its own actions.
 	 */
 	Component.prototype.doClick = function(e) {
-		if(this instanceof Group && !this._component.containerClick(e))
+		if(this instanceof Group && !this.containerClick(e))
 			return false;
 		
 		if(this.onClick.fireAnd(e)) {
 			if(this.mouseAction) {
-				return this.action.fireAnd({"click":e, "component":this._component});
+				return this.action.fireAnd({"click":e, "component":this});
 			}
 		}
 		
 		return true;
-	};
-	
-	
-	/** If there is no mouse augment on this component, adds one, otherwise does nothing.
-	 * 
-	 *  This will call the same function on it's container, if it has one, as well.
-	 * @return {dusk.sgui.MouseAugment} The added or existing mouse augment.
-	 * @since 0.0.21-alpha
-	 */
-	Component.prototype.ensureMouse = function() {
-		if(this.container)
-			this.container.ensureMouse();
-		
-		if(!this.mouse) {
-			this.mouse = new MouseAugment(this);
-			this.augment.fire({"augment":"mouse"}, "mouse");
-		}
-		
-		return this.mouse;
 	};
 	
 	/** Given an object, this function sets the properties of this object in relation to the properties of the object.

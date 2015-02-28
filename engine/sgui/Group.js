@@ -286,8 +286,7 @@ load.provide("dusk.sgui.Group", (function() {
 				&& !this._components[this._drawOrder[i]].clickPierce) {
 					
 					var com = this._components[this._drawOrder[i]];
-					if(!(this.mouseX < com.x || this.mouseX > com.x + com.width
-					|| this.mouseY < com.y || this.mouseY > com.y + com.height)) {
+					if(com.mouseHovered) {
 						return this._components[this._drawOrder[i]].doClick(e);
 					}
 				}

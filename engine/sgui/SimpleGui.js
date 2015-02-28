@@ -515,20 +515,20 @@ load.provide("dusk.sgui", (function() {
 	
 	// Listen for interaction events
 	interaction.on.listen(function(e) {
-		for(var r in _roots) {
+		for(var r = 0; r < _roots.length; r ++) {
 			_roots[r].interact(e);
 		}
 		
 		var a = controls.interactionControl(e);
 		if(a.length) {
-			for(var r in _roots) {
+			for(var r = 0; r < _roots.length; r ++) {
 				_roots[r].control(e, a);
 			}
 		}
 		
 		if(e.type == interaction.MOUSE_CLICK) {
-			for(var r in _roots) {
-				if(_roots[r].mouseAllow) {
+			for(var r = 0; r < _roots.length; r ++) {
+				if(_roots[r].allowMouse && _roots[r].name == e.root) {
 					_roots[r].doClick(e);
 				}
 			}

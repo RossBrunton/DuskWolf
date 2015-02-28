@@ -359,7 +359,6 @@ load.provide("dusk.entities.behave.GridMouse", (function() {
 		
 		this._data("gmMouseMove", true, true);
 		
-		this.entityEvent.listen((function(e){this._entity.ensureMouse()}).bind(this), "typeChange");
 		this.entityEvent.listen(_mouseMove.bind(this), "mouseMove");
 	};
 	GridMouse.prototype = Object.create(Behave.prototype);
