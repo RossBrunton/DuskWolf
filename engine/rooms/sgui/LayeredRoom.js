@@ -283,10 +283,10 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 		
 		var pLayers = this.getAllLayersOfType(LayeredRoom.LAYER_PARTICLES | LayeredRoom.LAYER_FLUID);
 		for(var i = pLayers.length-1; i >= 0; i --) {
-			//pLayers[i].width =
-			//	this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP).width;
-			//pLayers[i].height =
-			//	this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP).height;
+			pLayers[i].width =
+				this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP).width;
+			pLayers[i].height =
+				this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP).height;
 		}
 	};
 	
