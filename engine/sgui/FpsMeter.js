@@ -48,15 +48,12 @@ load.provide("dusk.sgui.FpsMeter", (function() {
 				+ this._readings[25]
 				+ this._readings[29]
 				+ this._readings[18]
-			) >> 3
+			) >> 3;
 			
 			this.text =  fps + "fps";
 			this._count = 0;
 		}
 	};
-	
-	Object.seal(FpsMeter);
-	Object.seal(FpsMeter.prototype);
 	
 	sgui.registerType("FpsMeter", FpsMeter);
 	

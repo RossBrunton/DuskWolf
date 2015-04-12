@@ -19,36 +19,36 @@ load.provide("dusk.sgui.c", (function() {
 	 * @constant
 	 */
 	c.DIR_UP = 0x01;
-
+	
 	/** The direction down, positive in the y axis.
 	 * @type integer
 	 * @value 0x02
 	 * @constant
 	 */
 	c.DIR_DOWN = 0x02;
-
+	
 	/** The direction left, negative in the x axis.
 	 * @type integer
 	 * @value 0x04
 	 * @constant
 	 */
 	c.DIR_LEFT = 0x04;
-
+	
 	/** The direction right, negative in the x axis.
 	 * @type integer
 	 * @value 0x08
 	 * @constant
 	 */
 	c.DIR_RIGHT = 0x08;
-
-
+	
+	
 	/** The horizontal orientation.
 	 * @type integer
 	 * @value 0x01
 	 * @constant
 	 */
 	c.ORIENT_HOR = 0x01;
-
+	
 	/** The vertical orientation.
 	 * @type integer
 	 * @value 0x02
@@ -64,7 +64,7 @@ load.provide("dusk.sgui.c", (function() {
 	 * @since 0.0.18-alpha
 	 */
 	c.ORIGIN_MIN = 0;
-
+	
 	/** The origin point of the component will be either the bottom or right of its container.
 	 * @type integer
 	 * @value 1
@@ -72,7 +72,7 @@ load.provide("dusk.sgui.c", (function() {
 	 * @since 0.0.18-alpha
 	 */
 	c.ORIGIN_MAX = 1;
-
+	
 	/** The origin point of the component will be the centre of its container.
 	 * @type integer
 	 * @value 2

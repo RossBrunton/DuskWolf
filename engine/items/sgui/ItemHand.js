@@ -6,7 +6,7 @@ load.provide("dusk.items.sgui.ItemHand", (function() {
 	var Group = load.require("dusk.sgui.Group");
 	var sgui = load.require("dusk.sgui");
 	var items = load.require("dusk.items");
-
+	
 	var ItemHand = function (parent, name) {
 		Group.call(this, parent, name);
 		
@@ -20,7 +20,7 @@ load.provide("dusk.items.sgui.ItemHand", (function() {
 		this._mapper.map("invent", "__invent", ["maxStack"]);
 	};
 	ItemHand.prototype = Object.create(Group.prototype);
-
+	
 	ItemHand.prototype.setHand = function(invent) {
 		if(!(invent instanceof items.Invent)) {
 			invent = new items.Invent(1, invent, this.maxStack);
@@ -29,7 +29,7 @@ load.provide("dusk.items.sgui.ItemHand", (function() {
 		this._hand.sendAllToInvent(invent);
 		this._hand = invent;
 	};
-
+	
 	ItemHand.prototype.getHand = function() {
 		return this._hand;
 	};
@@ -37,16 +37,13 @@ load.provide("dusk.items.sgui.ItemHand", (function() {
 		set: function(value) {this.setHand(value);},
 		get: function(){return [];}
 	});
-
+	
 	//Locking
 	Object.defineProperty(ItemHand.prototype, "locked", {
 		set: function(value) {},
 		get: function(){return this.getHand().countSlot(0) > 0;}
 	});
-
-	Object.seal(ItemHand);
-	Object.seal(ItemHand.prototype);
-
+	
 	sgui.registerType("ItemHand", ItemHand);
 	
 	return ItemHand;

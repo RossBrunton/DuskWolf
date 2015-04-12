@@ -26,10 +26,7 @@ load.provide("dusk.sgui.extras.Die", (function() {
 		this._onStart.listen(function(e){this._owner.deleted = true;}.bind(this));
 	};
 	Die.prototype = Object.create(Effect.prototype);
-
-	Object.seal(Die);
-	Object.seal(Die.prototype);
-
+	
 	sgui.registerExtra("Die", Die);
 	
 	return Die;

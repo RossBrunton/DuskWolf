@@ -8,7 +8,8 @@ load.provide("dusk.skills", (function() {
 	 * 
 	 * @description The skills namespace manages skills that the player has.
 	 * 
-	 * At the moment, this is just adding and setting values to an array, but in future it will be much better, probably.
+	 * At the moment, this is just adding and setting values to an array, but in future it will be much better,
+	 *  probably.
 	 */
 	var skills = [];
 	
@@ -18,7 +19,7 @@ load.provide("dusk.skills", (function() {
 	 * @private
 	 */
 	var _skills = [];
-
+	
 	/** Gives the player a skill.
 	 * @param {string} skillName The skill to give the player.
 	 * @return {boolean} True if the player didn't have that skill before and now does, else false.
@@ -30,7 +31,7 @@ load.provide("dusk.skills", (function() {
 		}
 		return false;
 	};
-
+	
 	/** Checks if the player has the specified skill.
 	 * @param {string} skillName The name of the skill to check.
 	 * @return {boolean} Whether the player has that skill.
@@ -38,7 +39,7 @@ load.provide("dusk.skills", (function() {
 	skills.hasSkill = function(skillName) {
 		return _skills.indexOf(skillName) !== -1;
 	};
-
+	
 	/** Removes the skill a player has.
 	 * @param {string} skillName The name of the skill to remove.
 	 * @return {boolean} False if the player doesn't have that skill, else true if it was removed.
@@ -50,8 +51,6 @@ load.provide("dusk.skills", (function() {
 		_skills.splice(_skills.indexOf(skillName), 1);
 		return true;
 	};
-
-	Object.seal(skills);
 	
 	return skills;
 })());

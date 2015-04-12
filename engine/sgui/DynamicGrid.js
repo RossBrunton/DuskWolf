@@ -7,17 +7,18 @@ load.provide("dusk.sgui.DynamicGrid", (function() {
 	var Range = load.require("dusk.utils.Range");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
-
+	
 	/** @class dusk.sgui.DynamicGrid
 	 * 
-	 * @classdesc A dynamic grid is a grid whose rows or columns are tied to a range of values, and will autoupdate itself.
+	 * @classdesc A dynamic grid is a grid whose rows or columns are tied to a range of values, and will autoupdate
+	 *  itself.
 	 * 
 	 * It is essentially a grid that an instance of `{@link dusk.utils.Range}` can be attached to.
 	 *  When the value of the range changes, the grid repopulates itself such that the number of rows/columns (depending 
 	 *   on orientation) matches the range's value.
 	 * 
-	 * The value that is different from the orientation (rows if vertical, or cols if horizontal) is used as normal, though
-	 *  as a convienience, this class sets them both to 1 when constructed.
+	 * The value that is different from the orientation (rows if vertical, or cols if horizontal) is used as normal,
+	 *  though as a convienience, this class sets them both to 1 when constructed.
 	 * 
 	 * @extends dusk.sgui.Grid
 	 * @param {?dusk.sgui.Component} parent The container that this component is in.
@@ -33,7 +34,8 @@ load.provide("dusk.sgui.DynamicGrid", (function() {
 		 * @private
 		 */
 		this._range = null;
-		/** The range used for this DynamicGrid, when the value of this changes, the number of elements changes accordingly.
+		/** The range used for this DynamicGrid, when the value of this changes, the number of elements changes
+		 *  accordingly.
 		 * @type dusk.utils.Range
 		 */
 		this.range = null;
@@ -79,7 +81,7 @@ load.provide("dusk.sgui.DynamicGrid", (function() {
 		this._mapper.map("orientation", "orientation");
 	};
 	DynamicGrid.prototype = Object.create(Grid.prototype);
-
+	
 	//range
 	Object.defineProperty(DynamicGrid.prototype, "range", {
 		set: function(value) {
@@ -94,7 +96,7 @@ load.provide("dusk.sgui.DynamicGrid", (function() {
 			return this._range;
 		}
 	});
-
+	
 	/** When the range changes, this is called. Repopulates the DynamicGrid with the new value.
 	 * @param {object} e The event object.
 	 * @private
@@ -105,10 +107,7 @@ load.provide("dusk.sgui.DynamicGrid", (function() {
 		this.populate(this._pop);
 		return e;
 	};
-
-	Object.seal(DynamicGrid);
-	Object.seal(DynamicGrid.prototype);
-
+	
 	sgui.registerType("DynamicGrid", DynamicGrid);
 	
 	return DynamicGrid;

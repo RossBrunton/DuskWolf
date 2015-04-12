@@ -33,8 +33,8 @@ load.provide("dusk.save.sources.SaveSource", (function() {
 		return Promise.reject(Error("Save Source "+this+" doesn't support saving."));
 	};
 	
-	/** Similar to `{@link dusk.save.sources.SaveSource#save}`, only this is called in cases where saving should be done without
-	 *  interrupting the user. By default, this calls the normal save function.
+	/** Similar to `{@link dusk.save.sources.SaveSource#save}`, only this is called in cases where saving should be done
+	 *  without interrupting the user. By default, this calls the normal save function.
 	 * 
 	 * @param {dusk.save.SaveData} saveData The save data to save.
 	 * @param {dusk.save.SaveSpec} spec The spec that was used to save this data.

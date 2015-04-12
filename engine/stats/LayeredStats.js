@@ -169,7 +169,7 @@ load.provide("dusk.stats", (function() {
 		var value = null;
 		untilLayer = this._lookupLayer(untilLayer);
 		
-		if(untilLayer < this._caches.length && field in this._caches[untilLayer]) return this._caches[untilLayer][field];
+		if(untilLayer < this._caches.length && field in this._caches[untilLayer])return this._caches[untilLayer][field];
 		
 		for(var i = 0; i < this._layers.length && i <= untilLayer; i ++) {
 			var list = [];
@@ -182,13 +182,13 @@ load.provide("dusk.stats", (function() {
 					
 					if(field+"_max" in d && typeof d[field+"_max"] != "function")
 						if(d[field+"_max"] < max) max = d[field+"_max"];
-					if(field+"_min" in d && typeof d[field+"_max"] != "function")
+					if(field+"_min" in d && typeof d[field+"_min"] != "function")
 						if(d[field+"_min"] > min) min = d[field+"_min"];
 					if(field in d && typeof d[field] != "function") value = d[field];
 					
 					if(field+"_max" in d && typeof d[field+"_max"] == "function")
 						if(d[field+"_max"] < max) max = d[field+"_max"](this, field, value, min, max, d);
-					if(field+"_min" in d && typeof d[field+"_max"] == "function")
+					if(field+"_min" in d && typeof d[field+"_min"] == "function")
 						if(d[field+"_min"] > min) min = d[field+"_min"](this, field, value, min, max, d);
 					if(field in d && typeof d[field] == "function") value = d[field](this, field, value, min, max, d);
 				}

@@ -92,8 +92,8 @@ load.provide("dusk.save.SaveSpec", (function() {
 	
 	/** Loads the data represented by this save spec.
 	 * 
-	 * This accepts saveData and calls all the load functions of all the relevent things with the same arguments that were
-	 *  used to save them.
+	 * This accepts saveData and calls all the load functions of all the relevent things with the same arguments that
+	 *  were used to save them.
 	 * 
 	 * @param {dusk.save.SaveData} saveData The data to load from.
 	 * @return {Promise(boolean)} A promise that resolves to true when everything is finished loading.

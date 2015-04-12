@@ -8,8 +8,8 @@ load.provide("dusk.utils.Range", (function() {
 	 * 
 	 * @class dusk.utils.Range
 	 * 
-	 * @classdesc A range is a data type that stores a value between a maximum and a minimum.
-	 *  This class will automatically ensure that the specified value is in the range.
+	 * @classdesc A range is a data type that stores a value between a maximum and a minimum. This class will
+	 *  automatically ensure that the specified value is in the range.
 	 * 
 	 * The value can be increased by specified intervals using the `up` and `down` functions.
 	 * 
@@ -33,7 +33,8 @@ load.provide("dusk.utils.Range", (function() {
 		 * @private
 		 */
 		this._value = 0;
-		/** The current value of this range, this will be between `{@link dusk.utils.Range#min}` and `{@link dusk.utils.Range#max}`.
+		/** The current value of this range, this will be between `{@link dusk.utils.Range#min}` and
+		 *  `{@link dusk.utils.Range#max}`.
 		 * @type integer|float
 		 */
 		this.value = value!==undefined?value:50;
@@ -55,7 +56,7 @@ load.provide("dusk.utils.Range", (function() {
 		 */
 		this.stepDown = down!==undefined?down:1;
 	};
-
+	
 	//value
 	Object.defineProperty(Range.prototype, "value", {
 		get: function() {
@@ -70,7 +71,7 @@ load.provide("dusk.utils.Range", (function() {
 			this._value = this.onChange.firePass({"value":this._value}, value).value;
 		}
 	});
-
+	
 	/** Increases the value by `{@link dusk.utils.Range#stepUp}`.
 	 * @return {boolean} Whether the value changed.
 	 */
@@ -79,7 +80,7 @@ load.provide("dusk.utils.Range", (function() {
 		this.value += this.stepUp;
 		return old != this.value;
 	};
-
+	
 	/** Decreases the value by `{@link dusk.utils.Range#stepDown}`. 
 	 * @return {boolean} Whether the value changed.
 	 */
@@ -88,21 +89,21 @@ load.provide("dusk.utils.Range", (function() {
 		this.value -= this.stepDown;
 		return old != this.value;
 	};
-
+	
 	/** Sets the amount that `{@link dusk.utils.Range#up}` will change to a fraction of the possible range.
 	 * @param {float} fract The fraction to set it to.
 	 */
 	Range.prototype.setUpFraction = function(fract) {
 		this.stepUp = (this.max - this.min) * fract;
 	};
-
+	
 	/** Sets the amount that `{@link dusk.utils.Range#down}` will change to a fraction of the possible range.
 	 * @param {float} fract The fraction to set it to.
 	 */
 	Range.prototype.setDownFraction = function(fract) {
 		this.stepDown = (this.max - this.min) * fract;
 	};
-
+	
 	/** Returns the fraction that the current value is between the two ranges.
 	 * 
 	 * A float between 0.0 and 1.0, higher numbers are closer to the max value.
@@ -111,23 +112,20 @@ load.provide("dusk.utils.Range", (function() {
 	Range.prototype.getFraction = function() {
 		return (this.value-this.min) / (this.max-this.min);
 	};
-
+	
 	/** Returns a string representation of this range.
 	 * @return {string} A representation of this range.
 	 */
 	Range.prototype.toString = function() {
 		return "[Range "+this.min+" > "+this.value+" > "+this.max+"]";
 	};
-
+	
 	/** Returns the current value of this range.
 	 * @return {integer|float} The current value.
 	 */
 	Range.prototype.valueOf = function() {
 		return this.value;
 	};
-
-	Object.seal(Range);
-	Object.seal(Range.prototype);
 	
 	return Range;
 })());

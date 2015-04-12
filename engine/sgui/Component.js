@@ -46,9 +46,9 @@ load.provide("dusk.sgui.Component", (function() {
 		this.visible = true;
 		/** The component's transparency. A number between 0 and 1, where 0 is fully transparent, and 1 is fully opaque. 
 		 * @type float
-		 * @default 1
+		 * @default 1.0
 		 */
-		this.alpha = 1;
+		this.alpha = 1.0;
 		
 		/** The display mode of the component in the horizontal direction.
 		 * 
@@ -163,9 +163,7 @@ load.provide("dusk.sgui.Component", (function() {
 		 * @type dusk.utils.EventDispatcher
 		 * @since 0.0.17-alpha
 		 */
-		this.dirPress = new EventDispatcher(
-			"dusk.sgui.Component.dirPress", EventDispatcher.FILTER_MULTI
-		);
+		this.dirPress = new EventDispatcher("dusk.sgui.Component.dirPress", EventDispatcher.FILTER_MULTI);
 		/** Fired when an interaction event is fired.
 		 * 
 		 * All listeners must return true if you want it to bubble up to its parent.
@@ -364,7 +362,8 @@ load.provide("dusk.sgui.Component", (function() {
 		 * 
 		 * Set this to true to delete the component.
 		 * 
-		 * This will tell the parent component to remove the child, however it will not remove any other references to it.
+		 * This will tell the parent component to remove the child, however it will not remove any other references to
+		 *  it.
 		 * @type boolean
 		 */
 		this.deleted = false;
@@ -421,6 +420,8 @@ load.provide("dusk.sgui.Component", (function() {
 		this._mapper.map("mouse.clickPierce", "clickPierce");
 		this._mapper.map("alsoFocus", "alsoFocus");
 		this._mapper.map("actionFocus", "actionFocus");
+		
+		//this.mark = "#ff0000";
 	};
 	
 	
@@ -474,6 +475,7 @@ load.provide("dusk.sgui.Component", (function() {
 			
 			}else if(cons.indexOf("sgui_action") !== -1) {
 				return this.action.fireAnd({"keyPress":e, "component":this});
+			
 			}else if(cons.indexOf("sgui_cancel") !== -1) {
 				return this.cancel.fireAnd({"keyPress":e, "component":this});
 			}
@@ -522,7 +524,7 @@ load.provide("dusk.sgui.Component", (function() {
 		return true;
 	};
 	
-	/** Given an object, this function sets the properties of this object in relation to the properties of the object.
+	/** Given an object, this function sets the properties of this component in relation to it.
 	 * 
 	 * This is used to describe the component using JSON.
 	 * 

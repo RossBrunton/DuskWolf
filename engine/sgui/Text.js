@@ -70,6 +70,7 @@ load.provide("dusk.sgui.Label", (function() {
 		this.shadowText = "";
 		/** Internal storage for the width of the component that the user has set. It is -1 if the user has set no
 		 *  width.
+		 * 
 		 * This value does not include the padding.
 		 * @type integer
 		 * @private
@@ -77,20 +78,21 @@ load.provide("dusk.sgui.Label", (function() {
 		this._width = -1;
 		/** Internal storage for the height of the component that the user has set. It is -1 if the user has set no
 		 *  height.
+		 * 
 		 * This value does not include the padding.
 		 * @type integer
 		 * @private
 		 */
 		this._height = -1;
 		/** The "signature" of the text box. This essentially is all the properties that would require the box to redraw
-		 * it's cache stored in a single string. If any value changes, then the generated signature will not match this sig
-		 * and thus we know to update the cache.
+		 *  its cache stored in a single string. If any value changes, then the generated signature will not match this
+		 *  sig and thus we know to update the cache.
 		 * @type string
 		 * @private
 		 */
 		this._sig = "";
-		/** The canvas onto which the cache is drawn. Will be null until there is initial text, and then it will store the 
-		 * formatted version of that text.
+		/** The canvas onto which the cache is drawn. Will be null until there is initial text, and then it will store
+		 *  the  formatted version of that text.
 		 * @type HTMLCanvasElement
 		 * @private
 		 */
@@ -288,8 +290,8 @@ load.provide("dusk.sgui.Label", (function() {
 	 * @protected
 	 */
 	Label._EVENT_COLOUR = 1;
-	/** A formatting constant meaning an image should be drawn. The argument is an array, the first element being an image
-	 * object to draw.
+	/** A formatting constant meaning an image should be drawn. The argument is an array, the first element being an
+	 *  image object to draw.
 	 * @type integer
 	 * @constant
 	 * @value 2

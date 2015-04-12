@@ -28,7 +28,9 @@ load.provide("dusk.sgui.extras.Radiobox", (function() {
 		 */
 		this._selected = null;
 		/** The path to the currently selected checkbox.
-		 *   You may assign this an object of type `{@link dusk.sgui.Checkbox}` and the path will be automatically detected.
+		 * 
+		 * You may assign this an object of type `{@link dusk.sgui.Checkbox}` and the path will be automatically
+		 *  detected.
 		 * @type {string}
 		 */
 		this.selected = null;
@@ -37,14 +39,14 @@ load.provide("dusk.sgui.extras.Radiobox", (function() {
 		this._props.map("selected", "selected");
 	};
 	Radiobox.prototype = Object.create(Extra.prototype);
-
+	
 	/** Returns the currently selected checkbox, or null if none are selected.
 	 * @return {?dusk.sgui.Checkbox} The current selection.
 	 */
 	Radiobox.prototype.getSelectedCheckbox = function() {
 		return this._selected;
 	};
-
+	
 	//selected
 	Object.defineProperty(Radiobox.prototype, "selected", {
 		get: function() {
@@ -66,10 +68,7 @@ load.provide("dusk.sgui.extras.Radiobox", (function() {
 			if(this._selected && !this._selected.checked) this._selected.checked = true;
 		}
 	});
-
-	Object.seal(Radiobox);
-	Object.seal(Radiobox.prototype);
-
+	
 	sgui.registerExtra("Radiobox", Radiobox);
 	
 	return Radiobox;

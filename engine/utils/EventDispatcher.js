@@ -101,7 +101,7 @@ load.provide("dusk.utils.EventDispatcher", (function() {
 		]);
 		return this._listeners.length-1;
 	};
-
+	
 	/** Removes a listener.
 	 * 
 	 * @param {integer} id The id that was given when the listener was registered.
@@ -124,7 +124,7 @@ load.provide("dusk.utils.EventDispatcher", (function() {
 		|| (this.filterType == EventDispatcher.FILTER_MULTI && (filter & test))
 		|| (this.filterType == EventDispatcher.FILTER_ISIN && filter.indexOf(test) !== -1);
 	};
-
+	
 	/** Fires an event; triggering all the listeners that apply.
 	 * 
 	 * @param {?object} event The event object to fire, and pass to all listeners. This may be undefined.

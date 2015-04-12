@@ -7,7 +7,7 @@ load.provide("dusk.sgui.RangeText", (function() {
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
 	var Range = load.require("dusk.utils.Range");
-
+	
 	/** @class dusk.sgui.RangeText
 	 * 
 	 * @classdesc A rangeText is a label that has its content linked to a `{@link dusk.utils.Range}` instance.
@@ -60,7 +60,7 @@ load.provide("dusk.sgui.RangeText", (function() {
 		this.dirPress.listen(this._changeValue.bind(this));
 	};
 	RangeText.prototype = Object.create(Label.prototype);
-
+	
 	//range
 	Object.defineProperty(RangeText.prototype, "range", {
 		set: function(value) {
@@ -76,7 +76,7 @@ load.provide("dusk.sgui.RangeText", (function() {
 			return this._range;
 		}
 	});
-
+	
 	/** When the range changes, this is called. Sets the text to it's value.
 	 * @param {object} e The event object.
 	 * @private
@@ -85,7 +85,7 @@ load.provide("dusk.sgui.RangeText", (function() {
 		this.text = e.value;
 		return e;
 	};
-
+	
 	/** An a direction press, this will change the value if needed.
 	 * @param {object} e The event object.
 	 * @private
@@ -115,10 +115,7 @@ load.provide("dusk.sgui.RangeText", (function() {
 		}
 		return true;
 	};
-
-	Object.seal(RangeText);
-	Object.seal(RangeText.prototype);
-
+	
 	sgui.registerType("RangeText", RangeText);
 	
 	return RangeText;

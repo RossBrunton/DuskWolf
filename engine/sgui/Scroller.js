@@ -8,7 +8,7 @@ load.provide("dusk.sgui.Scroller", (function() {
 	var controls = load.require("dusk.input.controls");
 	var c = load.require("dusk.sgui.c");
 	var Range = load.require("dusk.utils.Range");
-
+	
 	/** Creates a new Scroller.
 	 * 
 	 * @param {dusk.sgui.Component} parent The container that this component is in.
@@ -58,7 +58,7 @@ load.provide("dusk.sgui.Scroller", (function() {
 		this.dirPress.listen(this._sDir.bind(this));
 	};
 	Scroller.prototype = Object.create(FocusCheckerTile.prototype);
-
+	
 	/** Called every frame to update the coordianates and check for input.
 	 * @param {object} e The event object.
 	 * @private
@@ -95,7 +95,7 @@ load.provide("dusk.sgui.Scroller", (function() {
 			this.y = this.target.y + ~~(((this.target.height - this.height) * this.target.verScroll.getFraction()));
 		}
 	};
-
+	
 	/** Called on direction, supresses key behaviour if it would move the scroller.
 	 * @param {object} e The event object.
 	 * @private
@@ -113,10 +113,7 @@ load.provide("dusk.sgui.Scroller", (function() {
 		}
 		return true;
 	};
-
-	Object.seal(Scroller);
-	Object.seal(Scroller.prototype);
-
+	
 	sgui.registerType("Scroller", Scroller);
 	
 	sgui.addStyle("Scroller[orientation="+c.ORIENT_VER+"]", {

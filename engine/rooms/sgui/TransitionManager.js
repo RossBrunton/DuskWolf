@@ -15,7 +15,8 @@ load.provide("dusk.rooms.sgui.TransitionManager", (function() {
 	
 	/** @class dusk.rooms.sgui.TransitionManager
 	 * 
-	 * @classdesc A transition manager is a component that functions as a layer in a `{@link dusk.rooms.sgui.LayeredRoom}`.
+	 * @classdesc A transition manager is a component that functions as a layer in a
+	 *  `{@link dusk.rooms.sgui.LayeredRoom}`.
 	 * 
 	 * It essentially allows the passage between rooms when a mark is triggered.
 	 * 
@@ -29,8 +30,8 @@ load.provide("dusk.rooms.sgui.TransitionManager", (function() {
 	 *  and secondly the mark that the entity was spawned at.
 	 * 
 	 * `"out"` is an array describing the transition between rooms, each element is an array describing one exit.
-	 * The first element is a trigger criteria, format described in `{@link dusk.entities.sgui.Entity}`, that describes the
-	 *  entitiy  that can trigger this exit, second element is an integer describing what mark to add the exit for,
+	 * The first element is a trigger criteria, format described in `{@link dusk.entities.sgui.Entity}`, that describes
+	 *  the entitiy  that can trigger this exit, second element is an integer describing what mark to add the exit for,
 	 *  third element is a boolean indicating whether pressing "up" is needed, and the last element is an object
 	 *  describing the room to load.
 	 * 
@@ -42,8 +43,8 @@ load.provide("dusk.rooms.sgui.TransitionManager", (function() {
 	 *  being used, the functions only have the current out transition as the first argument and no second argument.
 	 * - `"supressFade"` If true, then the room will not fade out.
 	 * 
-	 * If this component is focused and `dusk.rooms.editor#active` is true then this will display all the transitions on the
-	 *  canvas, and let the user edit them. This will not respect the width and height of the component, because I'm
+	 * If this component is focused and `dusk.rooms.editor#active` is true then this will display all the transitions on
+	 *  the canvas, and let the user edit them. This will not respect the width and height of the component, because I'm
 	 *  too lazy to have that work. As such the width and height of this are both 1. The controls are as follows:
 	 * 
 	 * - `a` Add a transition, alerts will get the relevent information.

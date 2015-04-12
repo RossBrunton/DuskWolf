@@ -6,7 +6,7 @@ load.provide("dusk.stats.behave.StatLoader", (function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.entities.behave.Behave");
 	var stats = load.require("dusk.stats");
-
+	
 	/* @class dusk.stats.behave.StatLoader
 	 * 
 	 * @classdesc 
@@ -26,7 +26,7 @@ load.provide("dusk.stats.behave.StatLoader", (function() {
 		this.entityEvent.listen(this._slSaveBM.bind(this), "saveBM");
 	};
 	StatLoader.prototype = Object.create(Behave.prototype);
-
+	
 	StatLoader.prototype._slLoad = function(e) {
 		if(this._data("statsName")) {
 			var room = "*";
@@ -49,13 +49,13 @@ load.provide("dusk.stats.behave.StatLoader", (function() {
 			this._entity.src = this._entity.stats.get("image");
 		}
 	};
-
+	
 	StatLoader.prototype._slSaveBM = function(e) {
 		if(this._entity.stats) {
 			e.addDep(this._entity.stats.pack);
 		}
 	};
-
+	
 	/** Workshop data used by `{@link dusk.entities.sgui.EntityWorkshop}`.
 	 * @static
 	 */
@@ -67,10 +67,7 @@ load.provide("dusk.stats.behave.StatLoader", (function() {
 				"If the src of this entity will be set to the value of the stats field \"image\" at any level.", "false"]
 		]
 	};
-
-	Object.seal(StatLoader);
-	Object.seal(StatLoader.prototype);
-
+	
 	entities.registerBehaviour("StatLoader", StatLoader);
 	
 	return StatLoader;

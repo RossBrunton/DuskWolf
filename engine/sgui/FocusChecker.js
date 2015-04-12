@@ -5,7 +5,7 @@
 load.provide("dusk.sgui.FocusChecker", (function() {
 	var Image = load.require("dusk.sgui.Image");
 	var sgui = load.require("dusk.sgui");
-
+	
 	/** @class dusk.sgui.FocusChecker
 	 * 
 	 * @classdesc An image that changes source depending on whether it is active or focused.
@@ -51,10 +51,7 @@ load.provide("dusk.sgui.FocusChecker", (function() {
 		this.onActiveChange.listen((function(e) {if(this.focusedImg) this.src=this.focusedImg;}).bind(this), false);
 	};
 	FocusChecker.prototype = Object.create(Image.prototype);
-
-	Object.seal(FocusChecker);
-	Object.seal(FocusChecker.prototype);
-
+	
 	sgui.registerType("FocusChecker", FocusChecker);
 	
 	return FocusChecker;
@@ -133,10 +130,7 @@ load.provide("dusk.sgui.FocusCheckerTile", (function() {
 		}).bind(this), false);
 	};
 	FocusCheckerTile.prototype = Object.create(Tile.prototype);
-
-	Object.seal(FocusCheckerTile);
-	Object.seal(FocusCheckerTile.prototype);
-
+	
 	sgui.registerType("FocusCheckerTile", FocusCheckerTile);
 	
 	return FocusCheckerTile;

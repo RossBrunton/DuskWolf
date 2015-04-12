@@ -7,13 +7,14 @@ load.provide("dusk.TurnTicker", (function() {
 	 * 
 	 * @class dusk.TurnTicker
 	 * 
-	 * @classdesc Turn tickers allow LayeredStats instances (or just functions) to call one after the other, taking turns.
+	 * @classdesc Turn tickers allow LayeredStats instances (or just functions) to call one after the other, taking
+	 *  turns.
 	 * 
 	 * The turn ticker calls a function which returns a promise which fulfills when the turn is over. Once that is
 	 *  fulfilled, the next turn is taken in the same way, untill all the turns are over, and then it starts again.
 	 * 
-	 * The order of the turns is one of the `dusk.TurnTicker.ORDER_*` constants on this class. This determines the order the
-	 *  turns occur in.
+	 * The order of the turns is one of the `dusk.TurnTicker.ORDER_*` constants on this class. This determines the order
+	 *  the turns occur in.
 	 * 
 	 * The functions to call for each turn are registered using `{@link dusk.TurnTicker#register}` and removed using
 	 *  `{@link dusk.TurnTicker#remove}` (when whatever should be taking that turn no longer can do so). The turn ticker
@@ -50,7 +51,7 @@ load.provide("dusk.TurnTicker", (function() {
 		 */
 		this._stop = false;
 	};
-
+	
 	/** Turn ticker order that takes the turn in the order the takers were added, without doing anything fancy.
 	 * @type int
 	 * @default 0
@@ -58,11 +59,11 @@ load.provide("dusk.TurnTicker", (function() {
 	 * @static
 	 */
 	TurnTicker.ORDER_ADDED = 0;
-
+	
 	/** Registers a new turn function, essentially adding something that can take a turn to the ticker.
 	 * @param {string} name The name of the term to add, must be unique.
-	 * @param {function(dusk.TurnTicker):Promise(*)} onTurn The function to call when it's its turn. Should return a promise
-	 *  that fulfills when the turn is over.
+	 * @param {function(dusk.TurnTicker):Promise(*)} onTurn The function to call when it's its turn. Should return a
+	 *  promise that fulfills when the turn is over.
 	 * @param {?*} orderObj An order object used to determine turn order. It's type depends on the order system.
 	 * @return {Promise(boolean)} A promise that fulfills to true when the turn has been successfully added.
 	 */
@@ -70,7 +71,7 @@ load.provide("dusk.TurnTicker", (function() {
 		this._turnables.push([name, onTurn, orderObj]);
 		return this.ensureOrder();
 	};
-
+	
 	/** Removes a turn taker.
 	 * @param {string} name The name of the turn function to remove.
 	 * @return {Promise(true)} A promise that fulfills to true when the turn has been removed.
@@ -87,7 +88,7 @@ load.provide("dusk.TurnTicker", (function() {
 			fulfill(true);
 		}).bind(this));
 	};
-
+	
 	/** Removes a turn taker by it's index. If the current turn is higher than the id, it decreses it so the next turn stays
 	 *  the same.
 	 * @param {int} id The ID to remove.
@@ -97,7 +98,7 @@ load.provide("dusk.TurnTicker", (function() {
 		this._turnables.splice(id, 1);
 		if(this._turn > id) this._turn --;
 	};
-
+	
 	/** Ensures the order of the turn takers, called automatically when a turn function is added, but should be called
 	 *  manually if the turn order may change later.
 	 * @return {Promise(boolean}} A promise that resolves to true when the order has been reset.
@@ -110,7 +111,7 @@ load.provide("dusk.TurnTicker", (function() {
 			}
 		}).bind(this));
 	};
-
+	
 	/** Starts the turn ticker, calling the first taker.
 	 * @return {Promise(boolean)} A promise that resolves when turns stop being taken.
 	 */
@@ -122,13 +123,13 @@ load.provide("dusk.TurnTicker", (function() {
 			this._next(fulfill);
 		}).bind(this));
 	};
-
+	
 	/** Stops a currently running taker at the end of the current turn.
 	 */
 	TurnTicker.prototype.stop = function() {
 		this._stop = true;
 	};
-
+	
 	/** Called automaticaly when a turn ends, and starts the next one.
 	 * @param {function(boolean)} fulfill The function to call when the turn ticker is to stop.
 	 * @private
@@ -142,7 +143,7 @@ load.provide("dusk.TurnTicker", (function() {
 		.then(this._next.bind(this, fulfill))
 		.catch((function(e) {this._removeById(this._turn); this._next(fulfill);}).bind(this));
 	};
-
+	
 	/** Returns the number of turn takers registered.
 	 * @return {int} How many turn takers have been registered.
 	 */
@@ -156,9 +157,6 @@ load.provide("dusk.TurnTicker", (function() {
 	TurnTicker.prototype.toString = function() {
 		return "[TurnTaker]";
 	};
-	
-	Object.seal(TurnTicker);
-	Object.seal(TurnTicker.prototype);
 	
 	return TurnTicker;
 })());

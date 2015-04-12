@@ -8,9 +8,9 @@ load.provide("dusk.rooms.RoomManager", (function() {
 	
 	/** Manages rooms, which contain tilemap data and the entities in the room.
 	 * 
-	 * This is intended to be used with an instance of `{@link dusk.rooms.sgui.LayeredRoom}` and essentially serves as a storage 
-	 *  for it's rooms. Both `{@link dusk.rooms.plat}` and `{@link dusk.rooms.quest}` have their own room managers for their own types
-	 *  of rooms.
+	 * This is intended to be used with an instance of `{@link dusk.rooms.sgui.LayeredRoom}` and essentially serves as a
+	 *  storage for its rooms. Both `{@link dusk.rooms.plat}` and `{@link dusk.rooms.quest}` have their own room
+	 *  managers for their own types of rooms.
 	 * 
 	 * @param {?string} packageName The package that this room manager depends on; for generating rooms in the editor.
 	 * @param {?string} managerPath The path to this object from it's package.

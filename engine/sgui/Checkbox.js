@@ -14,18 +14,21 @@ load.provide("dusk.sgui.Checkbox", (function() {
 	 * 
 	 * @class dusk.sgui.Checkbox
 	 * 
-	 * @classdesc A checkbox has two states, on or off. This is represented by the property "checked" and its appearance.
+	 * @classdesc A checkbox has two states, on or off. This is represented by the property "checked" and its
+	 *  appearance.
 	 * 
-	 * A checkbox (eventually) inherits from `{@link dusk.tiles.sgui.Tile}`, where each tile indicates a different state:
+	 * A checkbox (eventually) inherits from `{@link dusk.tiles.sgui.Tile}`, where each tile indicates a different
+	 *  state:
 	 * - `0,0`: Not checked.
 	 * - `1,0`: Checked.
 	 * - `2,0`: Not checked, but in a radiobox.
 	 * - `3,0`: Checked, and in a radiobox.
 	 * 
-	 * Checkboxes will have slightly different behavior in a container with `{@link dusk.sgui.extras.Radiobox}` as an extra.
+	 * Checkboxes will have slightly different behavior in a container with `{@link dusk.sgui.extras.Radiobox}` as an
+	 *  extra.
 	 * 
-	 * As well as the top row, there is another row underneath it. The bottom row is used when the checkbox is the active
-	 *  component.
+	 * As well as the top row, there is another row underneath it. The bottom row is used when the checkbox is the
+	 *  active component.
 	 * 
 	 * By default, a checkbox has a src of `"default/check.png"`, a width and height of 16, and a sprite size of 4.
 	 * 
@@ -80,7 +83,7 @@ load.provide("dusk.sgui.Checkbox", (function() {
 		}).bind(this), undefined);
 	};
 	Checkbox.prototype = Object.create(FocusCheckerTile.prototype);
-
+	
 	//checked
 	Object.defineProperty(Checkbox.prototype, "checked", {
 		set: function(value) {
@@ -101,10 +104,7 @@ load.provide("dusk.sgui.Checkbox", (function() {
 			return this._checked;
 		}
 	});
-
-	Object.seal(Checkbox);
-	Object.seal(Checkbox.prototype);
-
+	
 	sgui.registerType("Checkbox", Checkbox);
 	
 	return Checkbox;

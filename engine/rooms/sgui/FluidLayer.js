@@ -32,14 +32,17 @@ load.provide("dusk.rooms.sgui.FluidLayer", (function() {
 			if(!editor.active) return;
 			this.level = +prompt("Enter new fluid level", this.level);
 		}).bind(this), controls.addControl("fluidlayer_level", "L"));
+		
 		this.onControl.listen((function(e) {
 			if(!editor.active) return;
 			this.colour = prompt("Enter new fluid colour", this.level);
 		}).bind(this), controls.addControl("fluidlayer_colour", "C"));
+		
 		this.onControl.listen((function(e) {
 			if(!editor.active) return;
 			this.fluidType = prompt("Enter new fluid type", this.fluidType);
 		}).bind(this), controls.addControl("fluidlayer_type", "T"));
+		
 		this.onControl.listen((function(e) {
 			if(!editor.active) return;
 			if(e.shift) {
@@ -60,7 +63,9 @@ load.provide("dusk.rooms.sgui.FluidLayer", (function() {
 		
 		if((fluidY - e.d.slice.y) > e.d.dest.height) return;
 		
-		e.c.fillRect(e.d.dest.x, e.d.dest.y + (fluidY - e.d.slice.y), e.d.dest.width, e.d.dest.height - (fluidY - e.d.slice.y));
+		e.c.fillRect(e.d.dest.x, e.d.dest.y + (fluidY - e.d.slice.y), e.d.dest.width,
+			e.d.dest.height - (fluidY - e.d.slice.y)
+		);
 	};
 	
 	FluidLayer.prototype.start = function() {

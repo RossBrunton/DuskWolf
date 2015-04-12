@@ -28,7 +28,7 @@ load.provide("dusk.tiles.sgui.Tile", (function() {
 	 */
 	var Tile = function(parent, name) {
 		Component.call(this, parent, name);
-
+		
 		/** The current source image.
 		 * @type dusk.utils.Image
 		 * @private

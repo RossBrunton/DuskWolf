@@ -182,7 +182,9 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 		
 		if(this._state == 0) {
 			for(var i = this._rangeTriggers.length-1; i >= 0; i--) {
-				if((this._rangeTriggers[0] >= this._rangeTriggers[1] && (!this._rangeTriggers[2]||this._rangeTriggers[2] == 1))
+				if((this._rangeTriggers[0] >= this._rangeTriggers[1]
+					&& (!this._rangeTriggers[2]||this._rangeTriggers[2] == 1)
+				)
 				|| (this._rangeTriggers[0] == this._rangeTriggers[1] && this._rangeTriggers[2] == 0)
 				|| (this._rangeTriggers[0] <= this._rangeTriggers[1] && this._rangeTriggers[2] == -1)) {
 					this.start();
@@ -215,11 +217,12 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 	 * A single trigger is an array, how the trigger works depends on what type the first element is.
 	 * 
 	 * - `{@link dusk.utils.EventDispatcher}`: The effect will start when the dispatcher fires.
-	 * - `{@link dusk.utils.Range}`: When the value reaches a threshold, the first element of the trigger is the range object to
-	 *  check, the second is the threshold, and the third is -1 (<=), 0 (==) or 1 (>=) indicating how the value needs to 
-	 *  relate to the threshold.
+	 * - `{@link dusk.utils.Range}`: When the value reaches a threshold, the first element of the trigger is the range
+	 *  object to check, the second is the threshold, and the third is -1 (<=), 0 (==) or 1 (>=) indicating how the
+	 *  value needs to relate to the threshold.
 	 * - `true`: If the value is exactly `true`, then the event will trigger on the next frame.
-	 * - `array`: Each element of the array is considered to be a trigger, and this function will be called on all of them.
+	 * - `array`: Each element of the array is considered to be a trigger, and this function will be called on all of
+	 *  them.
 	 * 
 	 * This may be used in the JSON representation using the key "on".
 	 * 

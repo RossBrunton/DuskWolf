@@ -10,8 +10,8 @@ load.provide("dusk.sgui.extras.MatchedSize", (function() {
 	 * 
 	 * @classdesc A dynamic width component changes it's width depending on the value of a range.
 	 * 
-	 * The width is changed to value between the `min` and `max` properties. The higher the value, the closer the range is
-	 *  to the `max` value.
+	 * The width is changed to value between the `min` and `max` properties. The higher the value, the closer the range
+	 *  is to the `max` value.
 	 * 
 	 * @param {dusk.sgui.Component} owner The component this extra is "attached to".
 	 * @param {string} name This extra's name.
@@ -38,7 +38,7 @@ load.provide("dusk.sgui.extras.MatchedSize", (function() {
 		this._props.map("paddingRight", "paddingRight");
 	};
 	MatchedSize.prototype = Object.create(Extra.prototype);
-
+	
 	MatchedSize.prototype._matchFrame = function(e) {
 		if(!this.base) return;
 		
@@ -54,14 +54,11 @@ load.provide("dusk.sgui.extras.MatchedSize", (function() {
 		this._owner.height = this.paddingTop + this.paddingBottom + t.height;
 		this._owner.width = this.paddingLeft + this.paddingRight + t.width;
 	};
-
+	
 	MatchedSize.prototype._matchDeleted = function(e) {
 		this._owner.frame.unlisten(this._matchFrameId);
 	};
-
-	Object.seal(MatchedSize);
-	Object.seal(MatchedSize.prototype);
-
+	
 	sgui.registerExtra("MatchedSize", MatchedSize);
 	
 	return MatchedSize;

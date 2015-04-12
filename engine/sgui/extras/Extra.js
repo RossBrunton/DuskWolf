@@ -6,7 +6,7 @@ load.provide("dusk.sgui.extras.Extra", (function() {
 	var sgui = load.require("dusk.sgui");
 	var Mapper = load.require("dusk.utils.Mapper");
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
-
+	
 	/** @namespace dusk.sgui.extras
 	 * @name dusk.sgui.extras
 	 * 
@@ -24,7 +24,7 @@ load.provide("dusk.sgui.extras.Extra", (function() {
 	 * The base class for all extras is `{@link dusk.sgui.extras.Extra}`
 	 * @since 0.0.18-alpha
 	 */
-
+	
 	/** @class dusk.sgui.extras.Extra
 	 * 
 	 * @classdesc Base class for all extras; all extras must have this in their prototype chain.
@@ -47,7 +47,7 @@ load.provide("dusk.sgui.extras.Extra", (function() {
 		 */
 		this.name = name;
 		
-		/** An event dispatcher which is fired when this extra is going to be deleted from it's component.
+		/** An event dispatcher which is fired when this extra is going to be deleted from its component.
 		 * 
 		 * The event object has no properties.
 		 * @type dusk.utils.EventDispatcher
@@ -64,9 +64,9 @@ load.provide("dusk.sgui.extras.Extra", (function() {
 		//Prop masks
 		this._props.map("name", "name");
 	};
-
-	/** This takes a JSON description of the extra (an object with key value pairs matching up to what the mapper exects),
-	 *   parses it, and applies all the properties on the extra itself.
+	
+	/** This takes a JSON description of the extra (an object with key value pairs matching up to what the mapper
+	 *  exects), parses it, and applies all the properties on the extra itself.
 	 * 
 	 * Unless otherwise stated, you can assume that all public properties of event objects are settable using this.
 	 * @param {object} props An object describing this extra.
@@ -74,16 +74,13 @@ load.provide("dusk.sgui.extras.Extra", (function() {
 	Extra.prototype.update = function(props) {
 		this._props.massSet(props);
 	};
-
+	
 	/** Returns a string representation of this extra.
 	 * @return {string} A representation of this extra.
 	 */
 	Extra.prototype.toString = function() {
 		return "[extra "+this.name+" on "+this._owner.name+"]";
 	};
-	
-	Object.seal(Extra);
-	Object.seal(Extra.prototype);
 	
 	return Extra;
 })());

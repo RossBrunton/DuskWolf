@@ -13,8 +13,8 @@ load.provide("dusk.utils.InheritableContainer", (function() {
 	 *  to ("inherited from") is checked for that property.
 	 * 
 	 * This class can create regular JavaScript objects that have all the properties that the specified type had when it
-	 *  was created. It can also can create instances of `{@link dusk.utils.Inheritable}` which update automatically, however 
-	 *  are not normal JavaScript objects.
+	 *  was created. It can also can create instances of `{@link dusk.utils.Inheritable}` which update automatically,
+	 *  however are not normal JavaScript objects.
 	 * 
 	 * The base type, that all inheritables are linked to, is named `"root"`, and can be modified as any other type.
 	 * @param {string} name A unique name for the container; used for identifying it while saving.
@@ -69,7 +69,8 @@ load.provide("dusk.utils.InheritableContainer", (function() {
 	 * This will check if any "parent" types have it as well.
 	 * @param {string} name The type to look up the property on.
 	 * @param {string} key The key of the type to look up.
-	 * @return {?*} The value of the key on the specified type, or undefined if either the type or the key was not found.
+	 * @return {?*} The value of the key on the specified type, or undefined if either the type or the key was not
+	 *  found.
 	 */
 	InheritableContainer.prototype.get = function(name, key) {
 		if(!(name in this._objectData)) return undefined;
@@ -125,7 +126,7 @@ load.provide("dusk.utils.InheritableContainer", (function() {
 		return this._objectData[name];
 	};
 	
-	/** Returns an object containing all the properties of the specified type, but none from it's parents.
+	/** Returns an object containing all the properties of the specified type, but none from its parents.
 	 * 
 	 * @param {string} name The type to get.
 	 * @return {object} An object containing all the properties that the specified type has.
@@ -153,7 +154,7 @@ load.provide("dusk.utils.InheritableContainer", (function() {
 		
 		return new Inheritable(type, this, extraData);
 	};
-
+	
 	/** Checks if the specified type exists.
 	 * 
 	 * @param {string} name The name to check.
@@ -164,7 +165,7 @@ load.provide("dusk.utils.InheritableContainer", (function() {
 		
 		return true;
 	};
-
+	
 	/** Gets the extendee of the current type.
 	 * 
 	 * @param {string} name The name to look up.
@@ -176,7 +177,7 @@ load.provide("dusk.utils.InheritableContainer", (function() {
 		
 		return this._objectChain[name];
 	};
-
+	
 	/** Returns an array of all the names of the types in this container.
 	 * 
 	 * @return {array} All the names of types in this container, as strings.
@@ -217,8 +218,8 @@ load.provide("dusk.utils.Inheritable", (function(){
 	var save = load.suggest("dusk.save", function(p) {save = p});
 	var containerUtils = load.require("dusk.utils.containerUtils");
 	
-	/** Inheritables are created by instances of `dusk.utils.InheritableContainer` and generally serve to provide dynamic
-	 *  access to a type.
+	/** Inheritables are created by instances of `dusk.utils.InheritableContainer` and generally serve to provide
+	 *  dynamic access to a type.
 	 * 
 	 * They can also contain their own "extra" data which is not linked to the type data in the container. All of the
 	 *  IContainer methods except `get` work only on the "extra data". `get` will first check if the key is in the extra
@@ -253,7 +254,7 @@ load.provide("dusk.utils.Inheritable", (function(){
 	};
 	
 	containerUtils.implementIContainer(Inheritable.prototype, "_extraData");
-
+	
 	/** Returns the value specified by the supplied key name.
 	 * 
 	 * This will be from either this inheritable's extra data, or anywhere in the type's data.
@@ -299,8 +300,8 @@ load.provide("dusk.utils.Inheritable", (function(){
 		return [this.type, this.container.name, ref(this._extraData)];
 	};
 	
-	/** Given a previously saved inventory (via `{@link dusk.utils.Inheritable#refSave}`) will create a inheritable for this 
-	 *  object.
+	/** Given a previously saved inventory (via `{@link dusk.utils.Inheritable#refSave}`) will create a inheritable for
+	 *  this object.
 	 * @param {object} data The saved data.
 	 * @return {dusk.utils.Inheritable} An inheritable from the saved data.
 	 * @since 0.0.21-alpha

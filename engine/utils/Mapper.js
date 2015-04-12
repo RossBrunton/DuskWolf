@@ -24,8 +24,8 @@ load.provide("dusk.utils.Mapper", (function() {
 		this._target = target;
 		
 		/** An object describing all the mappings.
-		 *  Keys are the property name, and the value is an array like `[to, type, depends, complex]`. Complex is true if
-		 *  the "to" value contains a ".".
+		 *  Keys are the property name, and the value is an array like `[to, type, depends, complex]`. Complex is true
+		 *  if the "to" value contains a ".".
 		 * @type object
 		 * @private
 		 */

@@ -15,11 +15,11 @@ load.provide("dusk.sgui.PlusText", (function() {
 	 * 
 	 * @class dusk.sgui.PlusText
 	 * 
-	 * @classdesc Want to put text next to a component? Tired of messing around with labels? The new and improved PlusText
-	 *  component does all that and more!
+	 * @classdesc Want to put text next to a component? Tired of messing around with labels? The new and improved
+	 *  PlusText component does all that and more!
 	 * 
-	 * Just set the `{@link dusk.sgui.PlusText.plusType}` and `{@link dusk.sgui.PlusText.plus}` properties to the type and 
-	 *  data of the object you want to attach text to, and there you go! Just like that!
+	 * Just set the `{@link dusk.sgui.PlusText.plusType}` and `{@link dusk.sgui.PlusText.plus}` properties to the type
+	 *  and data of the object you want to attach text to, and there you go! Just like that!
 	 * 
 	 * @extends dusk.sgui.Group
 	 * @constructor
@@ -170,9 +170,6 @@ load.provide("dusk.sgui.PlusText", (function() {
 			this.getComponent("plus").alterLayer("-label");
 		}
 	});
-	
-	Object.seal(PlusText);
-	Object.seal(PlusText.prototype);
 	
 	sgui.registerType("PlusText", PlusText);
 	

@@ -10,13 +10,13 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 	var utils = load.require("dusk.utils");
 	var entities = load.require("dusk.entities");
 	var TileRegion = load.require("dusk.tiles.sgui.TileRegion");
-
+	
 	/* @class dusk.sgui.extras.DynamicWidth
 	 * 
 	 * @classdesc A dynamic width component changes it's width depending on the value of a range.
 	 * 
-	 * The width is changed to value between the `min` and `max` properties. The higher the value, the closer the range is
-	 *  to the `max` value.
+	 * The width is changed to value between the `min` and `max` properties. The higher the value, the closer the range
+	 *  is to the `max` value.
 	 * 
 	 * @param {dusk.sgui.Component} owner The component this extra is "attached to".
 	 * @param {string} name This extra's name.
@@ -29,7 +29,7 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 		this.request = this.request.bind(this);
 	};
 	QuestPuppeteer.prototype = Object.create(Extra.prototype);
-
+	
 	QuestPuppeteer.prototype.ensureSelector = function() {
 		if(!this._owner.getPrimaryEntityLayer().hasEntity(this.selector)) {
 			if(this.selector) this.selector.deleted = true;
@@ -39,7 +39,7 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 			);
 		}
 	};
-
+	
 	QuestPuppeteer.prototype.request = function(type, args, passedArg, queue) {
 		if(!passedArg) passedArg = {};
 		
@@ -444,19 +444,19 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 				return Promise.reject(new TypeError("QuestPuppeteer tried to do `"+type+"` but it doesn't know how."));
 		}
 	};
-
+	
 	QuestPuppeteer.prototype.requestBound = function(type, args) {
 		return this.request.bind(this, type, args);
 	};
-
+	
 	QuestPuppeteer.prototype.requestBoundPair = function(type, args) {
 		return [this.request.bind(this, type, args), this.request.bind(this, type+"^-1", args), type];
 	};
-
+	
 	QuestPuppeteer.prototype.getLayeredRoom = function() {
 		return this._owner;
 	};
-
+	
 	//Create selector entity
 	entities.types.createNewType("puppetSelect", {
 		"behaviours":{
@@ -468,7 +468,7 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 		},
 		"animation":[["true", "0,0|1,0|2,0|1,0", {}]]
 	}, "quest");
-
+	
 	sgui.registerExtra("QuestPuppeteer", QuestPuppeteer);
 	
 	return QuestPuppeteer;

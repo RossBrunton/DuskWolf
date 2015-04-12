@@ -37,7 +37,5 @@ load.provide("dusk.utils.frameTicker", (function() {
     };
     requestAnimationFrame(_do);
     
-    Object.seal(frameTicker);
-    
     return frameTicker;
 })());

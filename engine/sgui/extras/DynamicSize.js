@@ -53,7 +53,7 @@ load.provide("dusk.sgui.extras.DynamicWidth", (function() {
 		this._props.map("max", "max");
 	};
 	DynamicWidth.prototype = Object.create(Extra.prototype);
-
+	
 	//range
 	Object.defineProperty(DynamicWidth.prototype, "range", {
 		set: function(value) {
@@ -69,7 +69,7 @@ load.provide("dusk.sgui.extras.DynamicWidth", (function() {
 			return this._range;
 		}
 	});
-
+	
 	/** Used internally to manage the range value changing.
 	 * @param {object} e An event object from `{@link dusk.utils.Range.onChange}`.
 	 * @private
@@ -78,9 +78,6 @@ load.provide("dusk.sgui.extras.DynamicWidth", (function() {
 		this._owner.width = ~~(this.min + ((this.max-this.min) * this.range.getFraction()));
 		return e;
 	};
-
-	Object.seal(DynamicWidth);
-	Object.seal(DynamicWidth.prototype);
 	
 	sgui.registerExtra("DynamicWidth", DynamicWidth);
 	
@@ -139,7 +136,7 @@ load.provide("dusk.sgui.extras.DynamicHeight", (function() {
 		this._props.map("max", "max");
 	};
 	DynamicHeight.prototype = Object.create(Extra.prototype);
-
+	
 	//range
 	Object.defineProperty(DynamicHeight.prototype, "range", {
 		set: function(value) {
@@ -155,7 +152,7 @@ load.provide("dusk.sgui.extras.DynamicHeight", (function() {
 			return this._range;
 		}
 	});
-
+	
 	/** Used internally to manage the range value changing.
 	 * @param {object} e An event object from `{@link dusk.utils.Range.onChange}`.
 	 * @private
@@ -164,10 +161,7 @@ load.provide("dusk.sgui.extras.DynamicHeight", (function() {
 		this._owner.height = ~~(this.min + ((this.max-this.min) * this.range.getFraction()));
 		return e;
 	};
-
-	Object.seal(DynamicHeight);
-	Object.seal(DynamicHeight.prototype);
-
+	
 	sgui.registerExtra("DynamicHeight", DynamicHeight);
 	
 	return DynamicHeight;

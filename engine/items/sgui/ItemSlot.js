@@ -10,7 +10,7 @@ load.provide("dusk.items.sgui.ItemSlot", (function() {
 	var Label = load.require("dusk.sgui.Label");
 	var Tile = load.require("dusk.tiles.sgui.Tile");
 	var ItemHand = load.require("dusk.items.sgui.ItemHand");
-
+	
 	var ItemSlot = function (parent, name) {
 		Group.call(this, parent, name);
 		
@@ -34,7 +34,7 @@ load.provide("dusk.items.sgui.ItemSlot", (function() {
 		this.action.listen(this._itemSlotAction.bind(this));
 	};
 	ItemSlot.prototype = Object.create(Group.prototype);
-
+	
 	ItemSlot.prototype.setInventory = function(invent) {
 		if(!(invent instanceof items.Invent)) {
 			invent = new items.Invent(1, invent, this.maxStack);
@@ -43,7 +43,7 @@ load.provide("dusk.items.sgui.ItemSlot", (function() {
 		this._invent.sendAllToInvent(invent);
 		this._invent = invent;
 	};
-
+	
 	ItemSlot.prototype.getInventory = function() {
 		return this._invent;
 	};
@@ -51,15 +51,15 @@ load.provide("dusk.items.sgui.ItemSlot", (function() {
 		set: function(value) {this.setInventory(value);},
 		get: function(){return [];}
 	});
-
+	
 	ItemSlot.prototype.putItem = function(item) {
 		return this._invent.putItemIntoSlot(item, this.slot);
 	};
-
+	
 	ItemSlot.prototype.getItem = function(item) {
 		return this._invent.getItemFromSlot(this.slot);
 	};
-
+	
 	ItemSlot.prototype._itemSlotFrame = function() {
 		if(!this._itemChild) return;
 		
@@ -93,7 +93,7 @@ load.provide("dusk.items.sgui.ItemSlot", (function() {
 			this._handTextChild.visible = false;
 		}
 	};
-
+	
 	ItemSlot.prototype._itemSlotAction = function(e) {
 		var h = this._getHand();
 		
@@ -124,7 +124,7 @@ load.provide("dusk.items.sgui.ItemSlot", (function() {
 			}
 		}
 	};
-
+	
 	ItemSlot.prototype._getHand = function() {
 		var c = this;
 		while(c = c.path("..")) {
@@ -135,12 +135,9 @@ load.provide("dusk.items.sgui.ItemSlot", (function() {
 		
 		return null;
 	};
-
-	Object.seal(ItemSlot);
-	Object.seal(ItemSlot.prototype);
-
+	
 	sgui.registerType("ItemSlot", ItemSlot);
-
+	
 	sgui.addStyle("ItemSlot", {
 		"width":32,
 		"height":32,

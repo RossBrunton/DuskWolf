@@ -7,7 +7,7 @@ load.provide("dusk.sgui.extras.SineSlide", (function() {
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
 	var Range = load.require("dusk.utils.Range");
-
+	
 	/** @class dusk.sgui.extras.SineSlide
 	 * 
 	 * @classdesc Moves a component in a sine curve. This means that component will start moving at a high speed, but
@@ -33,8 +33,9 @@ load.provide("dusk.sgui.extras.SineSlide", (function() {
 		 * @default dusk.sgui.Component#DIR_UP
 		 */
 		this.dir = c.DIR_UP;
-		/** The modifier; n where x or y = sin(nx). Typically between 0.0 and 2.0, higher numbers (>1.0) make the component
-		 *  come back down once it has reached the peak, while smaler numers (<1.0) makes the component end prematurley.
+		/** The modifier; n where x = sin(nx) and likewise with y. Typically between 0.0 and 2.0, higher numbers (>1.0)
+		 *  make the component come back down once it has reached the peak, while smaler numers (<1.0) makes the
+		 *  component end prematurley.
 		 * @type float
 		 * @default 1.0
 		 */
@@ -61,7 +62,7 @@ load.provide("dusk.sgui.extras.SineSlide", (function() {
 		this._props.map("modifier", "modifier");
 	};
 	SineSlide.prototype = Object.create(Effect.prototype);
-
+	
 	/** Used internally to start the effect.
 	 * @private
 	 */
@@ -75,7 +76,7 @@ load.provide("dusk.sgui.extras.SineSlide", (function() {
 			this._base = this._owner.x;
 		}
 	};
-
+	
 	/** Used internally to do a single tick of the effect.
 	 * @private
 	 */
@@ -100,7 +101,7 @@ load.provide("dusk.sgui.extras.SineSlide", (function() {
 				break;
 		}
 	};
-
+	
 	/** Used internally once the effect has ended to set the end location correctly.
 	 * @private
 	 */
@@ -108,10 +109,7 @@ load.provide("dusk.sgui.extras.SineSlide", (function() {
 		this._range.value = this._range.max;
 		this._tick.fire();
 	};
-
-	Object.seal(SineSlide);
-	Object.seal(SineSlide.prototype);
-
+	
 	sgui.registerExtra("SineSlide", SineSlide);
 	
 	return SineSlide;

@@ -6,7 +6,7 @@ load.provide("dusk.sgui.Selection", (function() {
 	var Grid = load.require("dusk.sgui.Grid");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
-
+	
 	var Selection = function (parent, name) {
 		Grid.call(this, parent, name);
 		
@@ -33,7 +33,7 @@ load.provide("dusk.sgui.Selection", (function() {
 		this.dirPress.listen(this._update.bind(this));
 	};
 	Selection.prototype = Object.create(Grid.prototype);
-
+	
 	Selection.prototype._update = function(e) {
 		if(!this.getFocusedChild()) return false;
 		if(this.orientation == c.ORIENT_HOR) {
@@ -44,10 +44,7 @@ load.provide("dusk.sgui.Selection", (function() {
 			this.height = this.getFocusedChild().height;
 		}
 	};
-
-	Object.seal(Selection);
-	Object.seal(Selection.prototype);
-
+	
 	sgui.registerType("Selection", Selection);
 	
 	return Selection;

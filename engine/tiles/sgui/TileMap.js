@@ -79,7 +79,7 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 		
 		/** The actual map to draw. Setting this will cause the map to update.
 		 * 
-		 * This requires  a string that describes the TileMap, this can be acquired from `getMap`, or as a whitespace
+		 * This requires a string that describes the TileMap, this can be acquired from `getMap`, or as a whitespace
 		 *  seperated list of all the tile coordinates in order.
 		 * 
 		 * This can be an object with the following properties:
@@ -410,7 +410,7 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 	 * 
 	 * @param {integer} x The x exact coordinate to check.
 	 * @param {integer} y The y exact coordinate to check.
-	 * @param {boolean=false} shiftRight If true, then the entitiy will be shifted right/down, else left/up.
+	 * @param {boolean=false} shiftRightDown If true, then the entitiy will be shifted right/down, else left/up.
 	 * @param {boolean=false} shiftVer If true, then this will return the shift for vertical, rather than horizontal.
 	 * @return {integer} The number of pixels to shift this. This will be negative for left or up shifts.
 	 * @since 0.0.20-alpha
@@ -472,7 +472,7 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 	
 	/** Returns the tile data of the tile at the specified tilemap coordinates.
 	 * 
-	 * Please return the output to `tileData` when you are done.
+	 * Please return the output to the `tileData` pool when you are done.
 	 * @param {integer} x The x coordinate.
 	 * @param {integer} y The y coordinate.
 	 * @return {array} Tiledata of the specified tile.

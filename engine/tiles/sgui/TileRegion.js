@@ -55,11 +55,11 @@ load.provide("dusk.tiles.sgui.TileRegion", (function() {
 			);
 		}
 	};
-
+	
 	TileRegion.prototype.get = function(x, y) {
 		return this._tiles[this._map[(y * this._tileMap.cols) + x]];
 	};
-
+	
 	TileRegion.prototype.getAll = function(x, y) {
 		var out = [];
 		
@@ -83,7 +83,7 @@ load.provide("dusk.tiles.sgui.TileRegion", (function() {
 	TileRegion.prototype.lookup = function(id) {
 		return this._tiles[id];
 	};
-
+	
 	TileRegion.prototype.isIn = function(x, y) {
 		return this._map[(y * this._tileMap.cols) + x] != 0;
 	};
@@ -372,9 +372,6 @@ load.provide("dusk.tiles.sgui.TileRegion", (function() {
 		}
 	};
 	
-	Object.seal(TileRegion);
-	Object.seal(TileRegion.prototype);
-	
 	return TileRegion;
 })());
 
@@ -396,9 +393,9 @@ load.provide("dusk.tiles.sgui.TileRegionGenerator", (function() {
 	 * them coloured, as well.
 	 * 
 	 * Tiles can be added to regions individually, but it is more usefull to use
-	 *  `{@link dusk.tiles.sgui.TileRegionGenerator#expandRegion}` to create a region that, essentially, says "Every tile
-	 *  that is n tiles away from a given tile". If you use `expandRegion`, you get paths to and from the "origin" tile
-	 *  for free.
+	 *  `{@link dusk.tiles.sgui.TileRegionGenerator#expandRegion}` to create a region that, essentially, says "Every
+	 *  tile that is n tiles away from a given tile". If you use `expandRegion`, you get paths to and from the "origin"
+	 *  tile for free.
 	 * 
 	 * @extends dusk.sgui.Component
 	 * @param {?dusk.sgui.Component} parent The container that this component is in.
@@ -458,7 +455,7 @@ load.provide("dusk.tiles.sgui.TileRegionGenerator", (function() {
 		this.prepareDraw.listen(this._tileRegionDraw.bind(this));
 	};
 	TileRegionGenerator.prototype = Object.create(Component.prototype);
-
+	
 	/** Returns the location of the source tile on the origin image
 	 *  (as in, the one that was drawn to here) that the specified coordinate is in.
 	 * 
@@ -485,11 +482,11 @@ load.provide("dusk.tiles.sgui.TileRegionGenerator", (function() {
 			return this.getTile(~~xpt, ~~ypt);
 		}
 	};
-
+	
 	TileRegionGenerator.prototype._updateTileColourCache = function() {
 		this._needsCacheUpdating = true;
 	};
-
+	
 	/** Used internally to draw the tilemap.
 	 * @param {object} e A `prepareDraw` event object.
 	 * @private
@@ -651,8 +648,8 @@ load.provide("dusk.tiles.sgui.TileRegionGenerator", (function() {
 			fulfill(region);
 		});
 	};
-
-
+	
+	
 	TileRegionGenerator.prototype.colourRegion = function(region, path) {
 		var fullpath = region.name + "." + path;
 		if(!path) fullpath = region.name;
@@ -665,7 +662,9 @@ load.provide("dusk.tiles.sgui.TileRegionGenerator", (function() {
 			}
 		}
 		
-		this._tagColours.push([region, fullpath, region.onChange.listen(this._updateTileColourCache.bind(this)), parent]);
+		this._tagColours.push(
+			[region, fullpath, region.onChange.listen(this._updateTileColourCache.bind(this)), parent]
+		);
 		this._updateTileColourCache();
 	};
 	
@@ -682,7 +681,7 @@ load.provide("dusk.tiles.sgui.TileRegionGenerator", (function() {
 		}
 		this._updateTileColourCache();
 	};
-
+	
 	TileRegionGenerator.prototype.getRegionColour = function(region) {
 		for(var i = 0; i < this._tagColours.length; i ++) {
 			if(this._tagColours[i][0] == region) {
@@ -700,40 +699,40 @@ load.provide("dusk.tiles.sgui.TileRegionGenerator", (function() {
 	TileRegionGenerator.prototype.tileWidth = function() {
 		return this.twidth;
 	};
-
+	
 	/** Returns the height of a single tile.
 	 * @return {integer} The height of a tile.
 	 */
 	TileRegionGenerator.prototype.tileHeight = function() {
 		return this.theight;
 	};
-
+	
 	/** Returns the number of visible columns.
 	 * @return {integer} The number of visible columns.
 	 */
 	TileRegionGenerator.prototype.visibleCols = function() {
 		return Math.floor(this.width/this.tileWidth());
 	};
-
+	
 	/** Returns the number of visible rows.
 	 * @return {integer} The number of visible columns.
 	 */
 	TileRegionGenerator.prototype.visibleRows = function() {
 		return Math.floor(this.height/this.tileHeight());
 	};
-
+	
 	//width
 	Object.defineProperty(TileRegionGenerator.prototype, "width", {
 		get: function() {return this.cols*this.twidth;},
 		set: function(value) {if(value > 0) console.warn("TileRegionGenerator setting width is not supported.");}
 	});
-
+	
 	//height
 	Object.defineProperty(TileRegionGenerator.prototype, "height", {
 		get: function() {return this.rows*this.theight;},
 		set: function(value) {if(value > 0) console.warn("TileRegionGenerator setting height is not supported.");}
 	});
-
+	
 	/** Returns the map for `{@link dusk.rooms.sgui.LayeredRoom}` to save it.
 	 * 
 	 * @return {object} The current map.
@@ -742,7 +741,7 @@ load.provide("dusk.tiles.sgui.TileRegionGenerator", (function() {
 	TileRegionGenerator.prototype.saveBM = function() {
 		return {"rows":this.rows, "cols":this.cols};
 	};
-
+	
 	/* Loads a map from an object. This is used by `{@link dusk.rooms.sgui.LayeredRoom}`.
 	 * 
 	 * @param {object} map The map to load, will be assigned to `{@link dusk.tiles.sgui.EditableTileMap#map}`.
@@ -752,10 +751,7 @@ load.provide("dusk.tiles.sgui.TileRegionGenerator", (function() {
 		this.rows = data.rows;
 		this.cols = data.cols;
 	};
-
-	Object.seal(TileRegionGenerator);
-	Object.seal(TileRegionGenerator.prototype);
-
+	
 	sgui.registerType("TileRegionGenerator", TileRegionGenerator);
 	
 	return TileRegionGenerator;

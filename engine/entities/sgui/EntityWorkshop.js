@@ -34,8 +34,7 @@ load.provide("dusk.entities.sgui.EntityWorkshop", (function() {
 		this._loading = false;
 		this.width = sgui.width;
 		this.height = sgui.height;
-		this.ensureMouse();
-		this.mouse.childrenAllow = true;
+		//this.mouse.childrenAllow = true;
 		
 		//Set up UI
 		this.modifyComponent({

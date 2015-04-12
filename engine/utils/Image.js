@@ -131,7 +131,9 @@ load.provide("dusk.utils.Image", (function() {
 				ctx, this.transform.concat(extraTrans),true, 0, 0, this.width(), this.height(), dx, dy, dwidth, dheight
 			);
 		}else{
-			ctx.drawImage(this.asCanvas(extraTrans, ino), 0, 0, this.width(), this.height(), ~~dx, ~~dy, dwidth, dheight);
+			ctx.drawImage(
+				this.asCanvas(extraTrans, ino), 0, 0, this.width(), this.height(), ~~dx, ~~dy, dwidth, dheight
+			);
 		}
 	};
 	

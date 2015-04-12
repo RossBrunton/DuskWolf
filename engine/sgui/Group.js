@@ -412,7 +412,9 @@ load.provide("dusk.sgui.Group", (function() {
 		
 		display.setWH(e.d.dest.x, e.d.dest.y, e.d.dest.width, e.d.dest.height);
 		
-		slice.setWH(e.d.slice.x + this.xOffset, e.d.slice.y + this.yOffset, e.d.slice.width - this.xOffset, e.d.slice.height - this.yOffset);
+		slice.setWH(e.d.slice.x + this.xOffset, e.d.slice.y + this.yOffset, e.d.slice.width - this.xOffset,
+			e.d.slice.height - this.yOffset
+		);
 		
 		for(var i = 0; i < this._drawOrder.length; i++) {
 			if(this._drawOrder[i] in this._components) {
@@ -674,7 +676,6 @@ load.provide("dusk.sgui.Group", (function() {
 			}else{
 				if(old[o] !== com) {
 					this._drawOrder[i] = old[o];
-					
 				}else{
 					i --;
 				}

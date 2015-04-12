@@ -17,7 +17,7 @@ load.provide("dusk", (function() {
 	 * @type string
 	 */
 	dusk.ver = "0.0.21-alpha";
-
+	
 	/** The frame rate, in frames per second.
 	 * 
 	 * If it exists, this is set the value of the DuskWolf element's "frameRate" property.
@@ -27,7 +27,7 @@ load.provide("dusk", (function() {
 	 * @default 60
 	 */
 	dusk.frameRate = 60; 
-
+	
 	/** The path to the data directory,
 	 *   this is where the game will look for all it's data (like images) if given a relative URL.
 	 * 
@@ -36,7 +36,7 @@ load.provide("dusk", (function() {
 	 * @defualt "Data/"
 	 */
 	dusk.dataDir = "data/";
-
+	
 	/** The id of the DuskWolf element, used for referencing it's children.
 	 * 
 	 * This is set automatically.
@@ -44,19 +44,19 @@ load.provide("dusk", (function() {
 	 * @see dusk.sgui
 	 */
 	dusk.elemPrefix = "";
-
+	
 	/** If true, then some features for developers are added, such as no caching for scripts and FPS info.
 	 * 
 	 * If it exists, this is set the value of the DuskWolf element's "dev" property.
 	 * @type boolean
 	 */
 	dusk.dev = false;
-
+	
 	/** If true, then the game has been started (`{@link dusk.startGame}` has been called).
 	 * @type boolean
 	 */
 	dusk.started = false;
-
+	
 	/** An event dispatcher which fires when the game engine is ready to go.
 	 * 
 	 * The events fired have no properties.
@@ -65,7 +65,7 @@ load.provide("dusk", (function() {
 	 * @since 0.0.14-alpha
 	 */
 	dusk.onLoad = new EventDispatcher("dusk.onLoad");
-
+	
 	/** Call this to start the game, and fire the dusk.onLoad EventDispatcher. */
 	dusk.startGame = function() {
 		if(dusk.started) return;
@@ -73,7 +73,7 @@ load.provide("dusk", (function() {
 		dusk.started = true;
 		dusk.onLoad.fire();
 	};
-
+	
 	dusk.HTMLDuskwolfElement = null;
 	if("register" in document) {
 		dusk.HTMLDuskwolfElement = document.register("swo-duskwolf", {
@@ -95,7 +95,7 @@ load.provide("dusk", (function() {
 			}
 		});
 	}
-
+	
 	//We seem to be already loaded here
 	var _toPx = function(a) {
 		if((""+a).slice(-2) != "px") return a+"px";

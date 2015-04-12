@@ -38,7 +38,7 @@ load.provide("dusk.items", (function() {
 	
 	//Create the default item.
 	items.items.createNewType("root", {"maxStack":64});
-
+	
 	/** Creates a new inventory. 
 	 * 
 	 * @class dusk.items.Invent
@@ -146,7 +146,7 @@ load.provide("dusk.items", (function() {
 		
 		return this._restriction(item);
 	};
-
+	
 	/** Checks if the specified item can be addet to an item slot.
 	 *   This does not do anything that `{@link dusk.items.Invent#isValidAddition}` does,
 	 *   and should not be used to replace it.
@@ -174,7 +174,7 @@ load.provide("dusk.items", (function() {
 		
 		return false;
 	};
-
+	
 	/** Attempts to add multiple copies of the specified item, if possible.
 	 * @param {string|dusk.utils.Inheritable} item An item from `{@link dusk.items.items}`,
 	 *  or a string type name, that should be added.
@@ -197,7 +197,7 @@ load.provide("dusk.items", (function() {
 		this.contentsChanged.fire();
 		return out;
 	};
-
+	
 	/** Attempts to remove multiple copies of the specified item, if possible.
 	 * @param {string} type The type of item to be removed.
 	 * @param {integer=1} amount The number of items that should be removed, defaults to `1` if not specified.
@@ -225,7 +225,7 @@ load.provide("dusk.items", (function() {
 		
 		return amount;
 	};
-
+	
 	/** Returns an item of the specified type, if it exists in the inventory. The item will remain in the inventory.
 	 * @param {string} type The type of item to look up.
 	 * @return {?dusk.utils.Inheritable} An item from `{@link dusk.items.items}` that was previously added of the specified type, 
@@ -240,7 +240,7 @@ load.provide("dusk.items", (function() {
 		
 		return null;
 	};
-
+	
 	/** Returns any item if it exists in the inventory. The item will remain in the inventory.
 	 * @return {?dusk.utils.Inheritable} An item from `{@link dusk.items.items}` that was previously added,
 	 *  or null if the inventory is empty.
@@ -254,7 +254,7 @@ load.provide("dusk.items", (function() {
 		
 		return null;
 	};
-
+	
 	/** Removes and returns an item of the specified type. The item will no longer remain in the inventory.
 	 * @param {string} type The type of item to take.
 	 * @return {?dusk.utils.Inheritable} An item from `{@link dusk.items.items}` that was previously added
@@ -277,7 +277,7 @@ load.provide("dusk.items", (function() {
 		
 		return null;
 	};
-
+	
 	/** Counts the total number of items in the inventory.
 	 * @return {integer} The number of items in the inventory.
 	 */
@@ -292,7 +292,7 @@ load.provide("dusk.items", (function() {
 		
 		return count;
 	};
-
+	
 	/** Counts the total number of occupied slots in the inventory.
 	 * @return {integer} The number of occupied slots in the inventory.
 	 */
@@ -307,7 +307,7 @@ load.provide("dusk.items", (function() {
 		
 		return count;
 	};
-
+	
 	/** Returns the number of items of the specified type in the inventory.
 	 * @param {string} type The type to count.
 	 * @return {integer} The total number of items of that type in the inventory.
@@ -323,7 +323,7 @@ load.provide("dusk.items", (function() {
 		
 		return count;
 	};
-
+	
 	/** Sends the specified amount of items of a specified type to another inventory.
 	 * 
 	 * If not all of the items can be added, then they will remain in this inventory.
@@ -346,7 +346,7 @@ load.provide("dusk.items", (function() {
 		dest.contentsChanged.fire();
 		return 0;
 	};
-
+	
 	/** Sends the specified amount of items to another inventory in the specified slot.
 	 * 
 	 * If not all of the items can be added, then they will remain in this inventory.
@@ -377,7 +377,7 @@ load.provide("dusk.items", (function() {
 		dest.contentsChanged.fire();
 		return 0;
 	};
-
+	
 	/** Sends the specified amount of items from a specified slot to another inventory.
 	 * 
 	 * If not all of the items can be added, then they will remain in their original slot.
@@ -401,7 +401,7 @@ load.provide("dusk.items", (function() {
 		dest.contentsChanged.fire();
 		return 0;
 	};
-
+	
 	/** Attempts to send every item in this inventory to the specified other one.
 	 * 
 	 * If they cannot all be added to that inventory, they will remain in this one.
@@ -414,7 +414,7 @@ load.provide("dusk.items", (function() {
 			}
 		}
 	};
-
+	
 	/** Returns an item that is in the specified slot.
 	 * @param {integer} slot The slot to check for the item.
 	 * @return {?dusk.utils.Inheritable} An item from `{@link dusk.items.items}` that is in this slot, 
@@ -424,7 +424,7 @@ load.provide("dusk.items", (function() {
 		if(!this._items[slot]) return null;
 		return this._items[slot][0];
 	};
-
+	
 	/** Returns and removes an item that is in the specified slot.
 	 * @param {integer} slot The slot to remove the item from.
 	 * @return {?dusk.utils.Inheritable} An item from `{@link dusk.items.items}` that is in this slot,
@@ -444,7 +444,7 @@ load.provide("dusk.items", (function() {
 		this.contentsChanged.fire();
 		return toReturn;
 	};
-
+	
 	/** Puts an item into the specified slot.
 	 * @param {integer} slot The slot to check for the item.
 	 * @param {string|dusk.utils.Inheritable} item The item to add to this slot, or the type name.
@@ -465,7 +465,7 @@ load.provide("dusk.items", (function() {
 		this.contentsChanged.fire();
 		return true;
 	};
-
+	
 	/** Counts the number of items in the specified slot.
 	 * @param {integer} slot The slot to count.
 	 * @return {integer} The number of items in the slot.
@@ -474,7 +474,7 @@ load.provide("dusk.items", (function() {
 		if(!this._items[slot]) return 0;
 		return this._items[slot].length;
 	};
-
+	
 	/** Finds a non-full, non-empty slot that the item can be dumped into.
 	 * @param {string} type The type of the item to insert.
 	 * @return {integer} The number of the slot, or -1 if it was not found.
@@ -488,7 +488,7 @@ load.provide("dusk.items", (function() {
 		
 		return -1;
 	};
-
+	
 	/** Finds a slot that contains no items.
 	 * @return {integer} The number of the slot, or -1 if it was not found.
 	 */
@@ -501,7 +501,7 @@ load.provide("dusk.items", (function() {
 		
 		return -1;
 	};
-
+	
 	/** Calls the given function once for each item in the invent.
 	 * @param {function(dusk.utils.Inheritable, int):undefined} funct The function to call. Second argument is the slot.
 	 * @since 0.0.21-alpha
@@ -515,7 +515,7 @@ load.provide("dusk.items", (function() {
 			}
 		}
 	};
-
+	
 	/** Calls the given function once for each slot in the invent. For each slot, the top item in it will be the argument.
 	 * @param {function(dusk.utils.Inheritable, int):undefined} funct The function to call. Second argument is the slot.
 	 * @since 0.0.21-alpha
@@ -527,7 +527,7 @@ load.provide("dusk.items", (function() {
 			}
 		}
 	};
-
+	
 	/** Saves this inventory to an object that can then be loaded with `{@link dusk.items.Invent#refLoad}`.
 	 * 
 	 * This requires `{@link dusk.save}` to be imported.
@@ -549,7 +549,7 @@ load.provide("dusk.items", (function() {
 		
 		return [out, this._capacity, this._restrictionText, this.maxStack];
 	};
-
+	
 	/** Given a previously saved inventory (via `{@link items.Invent#refSave}`) will create a new inventory matching
 	 *  the data that was saved.
 	 * 
@@ -571,7 +571,7 @@ load.provide("dusk.items", (function() {
 		
 		return invent;
 	};
-
+	
 	/** Returns the name of the class for use in saving.
 	 * @return {string} The string "dusk.items.Invent".
 	 * @since 0.0.21-alpha
@@ -579,7 +579,7 @@ load.provide("dusk.items", (function() {
 	items.Invent.prototype.refClass = items.Invent.refClass = function() {
 		return "dusk.items.Invent";
 	};
-
+	
 	/** Returns a string representation of the inventory, and all it's items.
 	 * @return {string} A string representation of the inventory.
 	 */

@@ -8,7 +8,7 @@ load.provide("dusk.items.sgui.ItemGrid", (function() {
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
 	var items = load.require("dusk.items");
-
+	
 	var ItemGrid = function (parent, name) {
 		Grid.call(this, parent, name);
 		
@@ -27,7 +27,7 @@ load.provide("dusk.items.sgui.ItemGrid", (function() {
 		this._populationEvent.listen(this._igCreate.bind(this), "create");
 	};
 	ItemGrid.prototype = Object.create(Grid.prototype);
-
+	
 	ItemGrid.prototype.setInventory = function(invent) {
 		if(!(invent instanceof items.Invent)) {
 			invent = new items.Invent(this.rows*this.cols, invent, this.maxStack);
@@ -40,7 +40,7 @@ load.provide("dusk.items.sgui.ItemGrid", (function() {
 		set: function(value) {this.setInventory(value);},
 		get: function(){return [];}
 	});
-
+	
 	ItemGrid.prototype._igBefore = function(e) {
 		if("slot" in e.child) delete e.child.slot;
 		if("invent" in e.child) delete e.child.invent;
@@ -48,7 +48,7 @@ load.provide("dusk.items.sgui.ItemGrid", (function() {
 		this._counter = 0;
 		return e;
 	};
-
+	
 	ItemGrid.prototype._igCreate = function(e) {
 		if(e.component instanceof ItemSlot) {
 			e.component.setInventory(this._invent);
@@ -57,9 +57,6 @@ load.provide("dusk.items.sgui.ItemGrid", (function() {
 		
 		return e;
 	};
-
-	Object.seal(ItemGrid);
-	Object.seal(ItemGrid.prototype);
-
+	
 	sgui.registerType("ItemGrid", ItemGrid);
 })());

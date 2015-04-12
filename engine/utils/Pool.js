@@ -27,7 +27,7 @@ load.provide("dusk.utils.Pool", (function() {
 		this.inWild = 0;
 		this._mlWarning = false;
 	};
-
+	
 	/** Allocates an object from this pool.
 	 * @param {?*} args The first argument to the `onAlloc` function.
 	 * @return {*} The object that was alocated, please return it later.
@@ -49,7 +49,7 @@ load.provide("dusk.utils.Pool", (function() {
 			return this._onAlloc?this._onAlloc(this._objects[this._inPool], args):this._objects[this._inPool];
 		}
 	};
-
+	
 	/** Frees a previously allocated object. 
 	 * @param {*} object The allocated object.
 	 */
@@ -61,8 +61,5 @@ load.provide("dusk.utils.Pool", (function() {
 		this._objects[this._inPool-1] = object;
 	};
 	
-	Object.seal(Pool);
-	Object.seal(Pool.prototype);
-
 	return Pool;
 })());

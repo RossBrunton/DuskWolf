@@ -11,11 +11,11 @@ load.provide("dusk.sgui.extras.Fade", (function() {
 	 * 
 	 * @classdesc A fade effect fades it's component from one alpha value to another over it's duration.
 	 * 
-	 * It fades from the `{@link dusk.sgui.extras.Fade#from}` value to the `{@link dusk.sgui.extras.Fade#to}` value over a
-	 *  time of `{@link dusk.sgui.extras.Effect#duration}`.
+	 * It fades from the `{@link dusk.sgui.extras.Fade#from}` value to the `{@link dusk.sgui.extras.Fade#to}` value over
+	 *  a time of `{@link dusk.sgui.extras.Effect#duration}`.
 	 * 
-	 * When this effect stats, it sets the components alpha to the `from` value, and likewise when it ends (even manually)
-	 *  it will set the alpha to the `to` value.
+	 * When this effect stats, it sets the components alpha to the `from` value, and likewise when it ends (even
+	 *  manually) it will set the alpha to the `to` value.
 	 * 
 	 * @param {dusk.sgui.Component} owner The component this extra is "attached to".
 	 * @param {string} name This extra's name.
@@ -91,10 +91,6 @@ load.provide("dusk.sgui.extras.Fade", (function() {
 	Fade.prototype._fdeOnEnd = function(e) {
 		this._owner.alpha = this.to;
 	};
-	
-	
-	Object.seal(Fade);
-	Object.seal(Fade.prototype);
 	
 	sgui.registerExtra("Fade", Fade);
 	

@@ -6,7 +6,7 @@
 //window.Promise = null;
 
 if("load" in window) {
-	console.warn("window.load already exists! It will be clobbered. Carefull.");
+	console.warn("window.load already exists! It will be clobbered. Careful.");
 }
 
 window.load = (function() {
@@ -522,8 +522,8 @@ window.load = (function() {
 		}
 	};
 	
-	/** Looks through the import set, sees if any can be imported (have no unsatisfied dependancies), generates the batch
-	 *  set, then calls `{@link load._doImportFile}` to import them.
+	/** Looks through the import set, sees if any can be imported (have no unsatisfied dependancies), generates the
+	 *  batch set, then calls `{@link load._doImportFile}` to import them.
 	 * @param {?boolean} trace If true, then more information is given.
 	 * @private
 	 * @since 0.0.21-alpha

@@ -88,7 +88,8 @@ load.provide("dusk.sgui.Rect", (function() {
 			
 			e.c.lineTo(e.d.dest.x + e.d.slice.width, e.d.dest.y + e.d.slice.height - this.radius);
 			e.c.quadraticCurveTo(
-				e.d.dest.x + e.d.slice.width, e.d.dest.y + e.d.slice.height, e.d.dest.x + e.d.slice.width - this.radius, e.d.dest.y+e.d.slice.height
+				e.d.dest.x + e.d.slice.width, e.d.dest.y + e.d.slice.height, e.d.dest.x + e.d.slice.width - this.radius,
+				e.d.dest.y+e.d.slice.height
 			);
 			
 			e.c.lineTo(e.d.dest.x + this.radius, e.d.dest.y + e.d.slice.height);

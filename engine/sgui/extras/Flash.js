@@ -30,7 +30,8 @@ load.provide("dusk.sgui.extras.Flash", (function() {
 		 * @default 0.0
 		 */
 		this.min = 0.0;
-		/** The number of frames it takes to flash between the maximum and minimum. Higher numbers slow the animation down.
+		/** The number of frames it takes to flash between the maximum and minimum. Higher numbers slow the animation
+		 *  down.
 		 * @type integer
 		 * @default 16
 		 */
@@ -57,7 +58,7 @@ load.provide("dusk.sgui.extras.Flash", (function() {
 		this._props.map("speed", "speed");
 	};
 	Flash.prototype = Object.create(Effect.prototype);
-
+	
 	/** Used internally to start the effect.
 	 * @private
 	 */
@@ -68,7 +69,7 @@ load.provide("dusk.sgui.extras.Flash", (function() {
 		
 		this._decreasing = true;
 	};
-
+	
 	/** Used internally to do a single tick of the effect.
 	 * @private
 	 */
@@ -83,17 +84,14 @@ load.provide("dusk.sgui.extras.Flash", (function() {
 		
 		this._owner.alpha = this._range.value;
 	};
-
+	
 	/** Used internally once the effect has ended to set the end alpha correctly.
 	 * @private
 	 */
 	Flash.prototype._flsOnEnd = function(e) {
 		this._owner.alpha = this.max;
 	};
-
-	Object.seal(Flash);
-	Object.seal(Flash.prototype);
-
+	
 	sgui.registerExtra("Flash", Flash);
 	
 	return Flash;

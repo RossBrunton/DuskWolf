@@ -6,7 +6,7 @@ load.provide("dusk.sgui.extras.SmoothSlide", (function() {
 	var Effect = load.require("dusk.sgui.extras.Effect");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
-
+	
 	/** @class dusk.sgui.extras.SmoothSlide
 	 * 
 	 * @classdesc This simply slides the component in a direction throughout it's duration.
@@ -50,7 +50,7 @@ load.provide("dusk.sgui.extras.SmoothSlide", (function() {
 		this._props.map("dir", "dir");
 	};
 	SmoothSlide.prototype = Object.create(Effect.prototype);
-
+	
 	/** Used internally to start the effect.
 	 * @private
 	 */
@@ -84,7 +84,7 @@ load.provide("dusk.sgui.extras.SmoothSlide", (function() {
 				console.warn("Unrecognised direction "+this.dir+" for SmoothSlide effect.");
 		}
 	};
-
+	
 	/** Used internally to do a single tick of the effect.
 	 * @private
 	 */
@@ -101,7 +101,7 @@ load.provide("dusk.sgui.extras.SmoothSlide", (function() {
 			this._owner.x = this._range.value;
 		}
 	};
-
+	
 	/** Used internally once the effect has ended to set the end location correctly.
 	 * @private
 	 */
@@ -124,10 +124,7 @@ load.provide("dusk.sgui.extras.SmoothSlide", (function() {
 				break;
 		}
 	};
-
-	Object.seal(SmoothSlide);
-	Object.seal(SmoothSlide.prototype);
-
+	
 	sgui.registerExtra("SmoothSlide", SmoothSlide);
 	
 	return SmoothSlide;

@@ -419,11 +419,13 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 			
 			if(seekCoords[0] + (seekCoords[2] >> 1) < this.xOffset + (e.d.origin.width >> 1) * this.scrollRegion)
 				this.xOffset -= this.scrollSpeed;
-			if(seekCoords[0] + (seekCoords[2] >> 1) > this.xOffset + e.d.origin.width - ((e.d.origin.width >> 1)*this.scrollRegion))
+			if(seekCoords[0] + (seekCoords[2] >> 1)
+				> this.xOffset + e.d.origin.width - ((e.d.origin.width >> 1)*this.scrollRegion))
 				this.xOffset += this.scrollSpeed;
 			if(seekCoords[1] + (seekCoords[3] >> 1) < this.yOffset + (e.d.origin.height >> 1) * this.scrollRegion)
 				this.yOffset -= this.scrollSpeed;
-			if(seekCoords[1] + (seekCoords[3] >> 1) > this.yOffset+e.d.origin.height - ((e.d.origin.height >> 1)*this.scrollRegion))
+			if(seekCoords[1] + (seekCoords[3] >> 1)
+				> this.yOffset+e.d.origin.height - ((e.d.origin.height >> 1)*this.scrollRegion))
 				this.yOffset += this.scrollSpeed;
 		}
 		
