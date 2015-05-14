@@ -64,8 +64,8 @@ load.provide("dusk.input.gamepad", (function() {
 	gamepad.buttonUp = new EventDispatcher("gamepad.buttonUp");
 	
 	//Add gamepad option
-	options.register("gamepad.enable", "boolean", true, "Whether gamepads will be used.");
-	options.register("gamepad.threshold", "positiveFloat", 0.5,
+	options.register("gamepad.enable", options.boolean, true, "Whether gamepads will be used.");
+	options.register("gamepad.threshold", options.positiveOrZeroFloat, 0.5,
 		"The angle that axis should be tilted to be treated as a button."
 	);
 	

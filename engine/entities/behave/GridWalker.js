@@ -391,7 +391,7 @@ load.provide("dusk.entities.behave.GridMouse", (function() {
 		]
 	};
 	
-	options.register("controls.mouseGrid", "boolean", true,
+	options.register("controls.mouseGrid", options.boolean, true,
 		"Whether moving the mouse changes the location of grid selectors."
 	);
 	

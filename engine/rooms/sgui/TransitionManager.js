@@ -339,7 +339,7 @@ load.provide("dusk.rooms.sgui.TransitionManager", (function() {
 	};
 
 	//Add prefetch option
-	options.register("net.prefetchRooms", "boolean", true, 
+	options.register("net.prefetchRooms", options.boolean, true, 
 		"Whether connecting rooms shound be automatically downloaded when a room is loaded."
 	);
 	

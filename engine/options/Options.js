@@ -2,7 +2,54 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
+load.provide("dusk.options.OptionType", (function() {
+	/** An OptionType is a handler for an option key which handles validation and casting
+	 * 
+	 * It has two main methods, `validate` which returns whether the value is valid or not, and `cast` which converts
+	 *  an arbitary valid value to the appropriate type to be stored in the option.
+	 * 
+	 * @param {string} name The name of the type, as displayed to the user if needed.
+	 * @param {function(*, *):boolean} validate The validation function, takes a potential new option value and an
+	 *  argument set at register, and should return true iff it is a valid value for this option.
+	 * @param {function(*, *):*} cast The casting function, takes the same arguments as `validate` and should return a 
+	 *  value cast to the appropriate type for the option.
+	 * @constructor
+	 * @since 0.0.21-alpha
+	 */
+	var OptionType = function(name, validate, cast) {
+		this._validator = validate;
+		this.name = name;
+		this._cast = cast;
+	};
+	
+	/** Returns true iff the given value is a valid value.
+	 * @param {*} value The value to check.
+	 * @param {*} arg A value stored when the option is registered.
+	 * @return {boolean} Whether this value is valid.
+	 */
+	OptionType.prototype.validate = function(value, arg) {
+		return this._validator(value, arg);
+	};
+	
+	/** Converts the value to the correct type for this option.
+	 * @param {*} value The value to convert.
+	 * @param {*} arg A value stored when the option is registered.
+	 * @return {*} The appropriate value in its correct type.
+	 */
+	OptionType.prototype.cast = function(value, arg) {
+		return this._cast(value, arg);
+	};
+	
+	OptionType.prototype.toString = function() {
+		return "[OptionType "+this.name+"]";
+	};
+	
+	return OptionType;
+})());
+
 load.provide("dusk.options", (function() {
+	var OptionType = load.require("dusk.options.OptionType");
+	
 	/** Options provide a simple way to allow user or per-game configurable settings on how DuskWolf runs
 	 * 
 	 * Options are identified by a string name in "category.key" format, where category is generally something like
@@ -12,14 +59,16 @@ load.provide("dusk.options", (function() {
 	 * Options may be set by the user, or by the engine. Settings set by the user take priority, so you should not
 	 *  assume that just because you set a specific option it will actually be that value.
 	 * 
-	 * The possible types available are:
-	 * - positiveInteger: An integer >= 0, non integer values will be converted to ints.
-	 * - positiveFloat: A number >= 0.
+	 * The possible types available are defined as OptionTypes, members of this namespace are as follows:
+	 * - positiveInteger: An integer > 0, non-integer values will be converted to ints.
+	 * - natural: An integer >= 0, again, non-integer values will be converted.
+	 * - positiveOrZeroFloat: A number >= 0.
 	 * - integer: An integer, non-integer values will be converted to ints.
 	 * - float: A number.
 	 * - string: A string.
 	 * - boolean: A boolean, the string "false" evaluates to false for the purposes of this type.
-	 * - selection: A string value from a list provided when the option was registered.
+	 * - select: A string value from a list provided (as the `values` parameter to the register function) when the
+	 *  option was registered.
 	 * 
 	 * Trying to set an option to an invalid value will log a warning and do nothing.
 	 * 
@@ -84,10 +133,11 @@ load.provide("dusk.options", (function() {
 	 * Any existing option will be replaced.
 	 * 
 	 * @param {string} name The name of the option.
-	 * @param {string} type The type of the option, as described in the module docs.
+	 * @param {dusk.options.OptionType} type The type of the option.
 	 * @param {*} def The default value of the option.
 	 * @param {string} desc The description of the option, this will be shown to the user.
-	 * @param {?array<string>} values The possible values of the option if it is a "selection" type.
+	 * @param {?*} values An argument for the OptionType instance, provided as the second argument to `validate` and
+	 *  `cast`.
 	 */
 	options.register = function(name, type, def, desc, values) {
 		_options[name] = [type, def, desc, values];
@@ -144,69 +194,13 @@ load.provide("dusk.options", (function() {
 		
 		if(priority < _optionSetPriority) return;
 		
-		var invalid = false;
-		
-		switch(_options[name][0]) {
-			case "positiveInteger":
-				if(!isNaN(+value) && value >= 0) {
-					_optionSelected[name] = ~~+value;
-					_optionSetPriority[name] = priority;
-				}else{
-					invalid = true;
-				}
-				break;
-			
-			case "positiveFloat":
-				if(!isNaN(+value) && value >= 0) {
-					_optionSelected[name] = +value;
-					_optionSetPriority[name] = priority;
-				}
-				break;
-			
-			case "integer":
-				if(!isNaN(+value)) {
-					_optionSelected[name] = ~~+value;
-					_optionSetPriority[name] = priority;
-				}else{
-					invalid = true;
-				}
-				break;
-			
-			case "float":
-				if(!isNaN(+value)) {
-					_optionSelected[name] = +value;
-					_optionSetPriority[name] = priority;
-				}else{
-					invalid = true;
-				}
-				break;
-			
-			case "string":
-				_optionSelected[name] = ""+value;
-				_optionSetPriority[name] = priority;
-				break;
-			
-			case "boolean":
-				_optionSelected[name] = value && value !== "false";
-				_optionSetPriority[name] = priority;
-				break;
-			
-			case "selection":
-				if(_options[name][3].indexOf(value) !== -1) {
-					_optionSelected[name] = value;
-					_optionSetPriority[name] = priority;
-				}else{
-					invalid = true;
-				}
-				break;
-			
-			default:
-				invalid = true;
-		}
-		
-		//Option invalid, do nothing and warn
-		if(invalid) {
+		if(_options[name][0].validate(value, _options[name][3])) {
+			_optionSelected[name] = _options[name][0].cast(value, _options[name][3]);
+			_optionSetPriority[name] = priority;
+			return;
+		}else{
 			console.warn("Option invalid for "+name+": "+value);
+			return;
 		}
 	};
 	
@@ -246,13 +240,65 @@ load.provide("dusk.options", (function() {
 	};
 	
 	var _listLine = function(name) {
-		var tstr = " {type:"+_options[name][0]+"; default:"+_options[name][1];
-		if(_options[name][0] == "selection") tstr += "; values: "+_options[name][3].join(", ");
+		var tstr = " {type:"+_options[name][0].name+"; default:"+_options[name][1];
+		if(_options[name][3]) {
+			tstr += "; options: "+_options[name][3];
+		}
 		tstr += "; current:"+_optionSelected[name]; 
 		tstr += "}";
 		
 		console.log(name+": "+_options[name][2]+tstr);
 	};
+	
+	// Here are the option types
+	/** Type for an integer > 0.
+	 * @type dusk.options.OptionType
+	 * @since 0.0.21-alpha
+	 */
+	options.positiveInteger =
+		new OptionType("positiveInteger", function(x, a) {return ~~+x > 0}, function(x, a) {return ~~+x});
+	
+	/** Type for an integer >= 0.
+	 * @type dusk.options.OptionType
+	 * @since 0.0.21-alpha
+	 */
+	options.natural =
+		new OptionType("natural", function(x, a) {return ~~+x >= 0}, function(x, a) {return ~~+x});
+	
+	/** Type for any integer.
+	 * @type dusk.options.OptionType
+	 * @since 0.0.21-alpha
+	 */
+	options.integer =
+		new OptionType("integer", function(x, a) {return ~~+x != NaN}, function(x, a) {return ~~+x});
+	
+	/** Type for a number >= 0.
+	 * @type dusk.options.OptionType
+	 * @since 0.0.21-alpha
+	 */
+	options.positiveOrZeroFloat =
+		new OptionType("positiveOrZeroFloat", function(x, a) {return +x >= 0}, function(x, a) {return +x});
+	
+	/** Type for a boolean.
+	 * @type dusk.options.OptionType
+	 * @since 0.0.21-alpha
+	 */
+	options.boolean =
+		new OptionType("boolean", function(x, a) {return true}, function(x, a) {return x != "false" && x});
+	
+	/** Type for a string.
+	 * @type dusk.options.OptionType
+	 * @since 0.0.21-alpha
+	 */
+	options.string =
+		new OptionType("string", function(x, a) {return typeof a !== "symbol"}, function(x, a) {return ""+x});
+	
+	/** Type for a selection.
+	 * @type dusk.options.OptionType
+	 * @since 0.0.21-alpha
+	 */
+	options.select =
+		new OptionType("select", function(x, a) {return a.includes(x)}, function(x, a) {return x});
 	
 	return options;
 })());

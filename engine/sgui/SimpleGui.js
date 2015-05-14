@@ -583,7 +583,7 @@ load.provide("dusk.sgui", (function() {
 	controls.addControl("sgui_cancel", 27, 1);
 	
 	//Options
-	options.register("graphics.highRate", "selection", "detect", "Skip every other frame, for 120Hz displays.",
+	options.register("graphics.highRate", options.select, "detect", "Skip every other frame, for 120Hz displays.",
 		["on", "off", "detect"]
 	);
 	

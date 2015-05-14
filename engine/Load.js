@@ -205,6 +205,16 @@ window.load = (function() {
 			}
 		}
 		
+		if(!("includes" in Array.prototype)) {
+			console.warn("Array.includes not found, doing workaround.");
+			Array.prototype.includes = function(searchElement, fromIndex) {
+				for(var i = +fromIndex || 0; i < this.length; i ++) {
+					if(this[i] === searchElement) return true;
+				}
+				return false;
+			};
+		}
+		
 		if((function() {"use strict";return this;})() !== undefined) return "Strict mode not supported!";
 		
 		if(!(navigator.getGamepads || navigator.webkitGetGamepads)) return "Gamepad API not supported!";
