@@ -141,7 +141,7 @@ load.provide("questScript", (function() {
 			}
 		}
 	});
-	var feed = sgui.get("actionFeed", "Group").getComponent("feed");
+	var feed = sgui.get("actionFeed", "Group").get("feed");
 
 	window.q = dquest.puppeteer;
 	

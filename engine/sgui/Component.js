@@ -815,9 +815,9 @@ load.provide("dusk.sgui.Component", (function() {
 			
 			default:
 				if(Group && this instanceof Group){
-					if(!path.length) return this.getComponent(p);
-					if(this.getComponent(p)) {
-						return this.getComponent(p).path(path);
+					if(!path.length) return this.get(p);
+					if(this.get(p)) {
+						return this.get(p).path(path);
 					}else{
 						return null;
 					}
@@ -982,8 +982,8 @@ load.provide("dusk.sgui.Component", (function() {
 				data.type = value;
 				data.deleted = false;
 				
-				this.container.getComponent(this.name, value).update(data);
-				sgui.applyStyles(this.container.getComponent(this.name));
+				this.container.get(this.name, value).update(data);
+				sgui.applyStyles(this.container.get(this.name));
 			}
 		},
 		

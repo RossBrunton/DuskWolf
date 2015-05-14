@@ -455,16 +455,6 @@ load.provide("dusk.sgui.Group", (function() {
 		
 		return type?this._newChild(com, type):undefined;
 	};
-	/** Depreciated alias for `get`.
-	 * 
-	 * @param {string} com The name of the component to get.
-	 * @param {?string} type The type of component to create.
-	 * @return {?dusk.sgui.Component} The component, or undefined if it doesn't exist and `type` is undefined.
-	 * @depreciated
-	 */
-	Group.prototype.getComponent = function(com, type) {
-		return this.get(com, type);
-	};
 	
 	/** Sets a component in this group from either a component or raw JSON data.
 	 * 

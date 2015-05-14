@@ -18,11 +18,11 @@ load.provide("dusk.items.sgui.ItemSlot", (function() {
 		this.maxStack = 0xffffffff;
 		this.slot = 0;
 		
-		this._itemChild = this.getComponent("item", "Tile");
-		this._handItemChild = this.getComponent("handitem", "Tile");
-		this._textChild = this.getComponent("count", "Label");
-		this._handTextChild = this.getComponent("handcount", "Label");
-		this._selectChild = this.getComponent("select", "Image");
+		this._itemChild = this.get("item", "Tile");
+		this._handItemChild = this.get("handitem", "Tile");
+		this._textChild = this.get("count", "Label");
+		this._handTextChild = this.get("handcount", "Label");
+		this._selectChild = this.get("select", "Image");
 		this.alterChildLayer("count", "+");
 		
 		//Prop masks

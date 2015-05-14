@@ -12,8 +12,8 @@ load.provide("dusk.sgui.TextBack", (function() {
 		Group.call(this, parent, name);
 		
 		//Set up components
-		this.getComponent("plus", "NullCom");
-		this.getComponent("label", "Label");
+		this.get("plus", "NullCom");
+		this.get("label", "Label");
 		
 		/** The text that will be displayed in front of the back. Label formatting is allowed.
 		 * @type string
@@ -71,9 +71,9 @@ load.provide("dusk.sgui.TextBack", (function() {
 		if(this.allowMouse) {
 			if(!this.plusProxy) return Group.prototype.containerClick.call(this, e);
 			
-			if(this.getComponent("plus").visible && !this.getComponent("plus").clickPierce) {
+			if(this.get("plus").visible && !this.get("plus").clickPierce) {
 				
-				return this.getComponent("plus").doClick(e);
+				return this.get("plus").doClick(e);
 			}
 		}
 		
@@ -82,12 +82,12 @@ load.provide("dusk.sgui.TextBack", (function() {
 	
 	//Plus
 	Object.defineProperty(TextBack.prototype, "plus", {
-		get: function() {return this.getComponent("plus").bundle();},
+		get: function() {return this.get("plus").bundle();},
 		set: function(value) {
-			this.getComponent("plus").update(value);
-			this.getComponent("plus").xDisplay = "expand";
-			this.getComponent("plus").yDisplay = "expand";
-			this.getComponent("plus").alterLayer("-label");
+			this.get("plus").update(value);
+			this.get("plus").xDisplay = "expand";
+			this.get("plus").yDisplay = "expand";
+			this.get("plus").alterLayer("-label");
 		}
 	});
 	
@@ -101,25 +101,25 @@ load.provide("dusk.sgui.TextBack", (function() {
 	
 	//Label
 	Object.defineProperty(TextBack.prototype, "label", {
-		get: function() {return this.getComponent("label").bundle();},
+		get: function() {return this.get("label").bundle();},
 		
 		set: function(value) {
-			this.getComponent("label").update(value);
-			this.getComponent("plus").alterLayer("-label");
-			this.getComponent("label").xDisplay = "expand";
-			this.getComponent("label").yDisplay = "expand";
+			this.get("label").update(value);
+			this.get("plus").alterLayer("-label");
+			this.get("label").xDisplay = "expand";
+			this.get("label").yDisplay = "expand";
 		}
 	});
 	
 	//plusType
 	Object.defineProperty(TextBack.prototype, "plusType", {
-		get: function() {return this.getComponent("plus").type;},
+		get: function() {return this.get("plus").type;},
 		
 		set: function(value) {
-			this.getComponent("plus").type = value;
-			this.getComponent("plus").alterLayer("-label");
-			this.getComponent("plus").xDisplay = "expand";
-			this.getComponent("plus").yDisplay = "expand";
+			this.get("plus").type = value;
+			this.get("plus").alterLayer("-label");
+			this.get("plus").xDisplay = "expand";
+			this.get("plus").yDisplay = "expand";
 		}
 	});
 	

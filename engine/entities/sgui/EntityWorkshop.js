@@ -335,7 +335,7 @@ load.provide("dusk.entities.sgui.EntityWorkshop", (function() {
 		ent.data = {};
 		
 		this.path("bodies/data/list").forEach(function(c) {
-			if(!c.getComponent("plus").text) return;
+			if(!c.get("plus").text) return;
 			
 			var frags = this._deFormatData(c.text);
 			
@@ -349,7 +349,7 @@ load.provide("dusk.entities.sgui.EntityWorkshop", (function() {
 				}
 			}
 			
-			var toSet = c.getComponent("plus").text;
+			var toSet = c.get("plus").text;
 			
 			switch(ewd[1]) {
 				case "integer":

@@ -49,22 +49,22 @@ load.provide("dusk.sgui.SayBox", (function() {
 		 * @type dusk.sgui.TextBack
 		 * @private
 		 */
-		this._body = this.getComponent("body", "TextBack");
+		this._body = this.get("body", "TextBack");
 		/** The right component.
 		 * @type dusk.sgui.TextBack
 		 * @private
 		 */
-		this._right = this.getComponent("right", "TextBack");
+		this._right = this.get("right", "TextBack");
 		/** The left component.
 		 * @type dusk.sgui.TextBack
 		 * @private
 		 */
-		this._left = this.getComponent("left", "TextBack");
+		this._left = this.get("left", "TextBack");
 		/** The continue component.
 		 * @type dusk.sgui.Image
 		 * @private
 		 */
-		this._continue = this.getComponent("continue", "Image");
+		this._continue = this.get("continue", "Image");
 		
 		/** The number of frames to wait between each character being printed.
 		 * @type integer

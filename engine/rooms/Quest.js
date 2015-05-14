@@ -35,7 +35,7 @@ load.provide("dusk.rooms.quest", (function() {
 		component.becomeActive();
 		component.flow(name);
 		quest.rooms.setLayeredRoom(component.get(name));
-		component.getComponent(name).addExtra("QuestPuppeteer", "questPuppeteer", {});
+		component.get(name).addExtra("QuestPuppeteer", "questPuppeteer", {});
 		quest.puppeteer = component.get(name).getExtra("questPuppeteer");
 	}
 	

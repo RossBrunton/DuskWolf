@@ -170,9 +170,9 @@ load.provide("dusk.sgui.Grid", (function() {
 				// Generate the component
 				var com = null;
 				if(!("type" in child[p]) && this.globals !== null && "type" in this.globals) {
-					com = this.getComponent(hx + "," + hy, this.globals.type);
+					com = this.get(hx + "," + hy, this.globals.type);
 				}else if("type" in child[p]) {
-					com = this.getComponent(hx + "," + hy, child[p].type);
+					com = this.get(hx + "," + hy, child[p].type);
 				}else{
 					console.warn("Grid tried to populate element with no type.");
 				}
@@ -220,16 +220,16 @@ load.provide("dusk.sgui.Grid", (function() {
 		
 		switch(dir) {
 			case c.DIR_LEFT:
-				return this.getComponent((+cx-1)+","+cy);
+				return this.get((+cx-1)+","+cy);
 			
 			case c.DIR_RIGHT:
-				return this.getComponent((+cx+1)+","+cy);
+				return this.get((+cx+1)+","+cy);
 			
 			case c.DIR_UP:
-				return this.getComponent(cx+","+(+cy-1));
+				return this.get(cx+","+(+cy-1));
 			
 			case c.DIR_DOWN:
-				return this.getComponent(cx+","+(+cy+1));
+				return this.get(cx+","+(+cy+1));
 			
 			default:
 				console.warn("Invalid direction for relative seen: "+dir);

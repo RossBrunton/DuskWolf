@@ -98,15 +98,15 @@ load.provide("dusk.sgui.Feed", (function() {
 			var name = child[i].name;
 			if(!name) {
 				name = "0";
-				while(this.getComponent(name)) {
+				while(this.get(name)) {
 					name = ""+ (+name + 1);
 				}
 			}
 			
 			if(!("type" in child[i]) && this.globals !== null && "type" in this.globals) {
-				com = this.getComponent(name, this.globals.type);
+				com = this.get(name, this.globals.type);
 			}else if("type" in child[i]) {
-				com = this.getComponent(name, child[p].type);
+				com = this.get(name, child[p].type);
 			}else{
 				console.warn("Feed tried to append element with no type.");
 			}
@@ -131,7 +131,7 @@ load.provide("dusk.sgui.Feed", (function() {
 		
 		if(this.appendDir & (c.DIR_UP | c.DIR_LEFT)) {
 			for(var i = this._drawOrder.length-1; i >= 0; i --) {
-				var com = this.getComponent(this._drawOrder[i]);
+				var com = this.get(this._drawOrder[i]);
 				if(this.appendDir == c.DIR_UP) {
 					com.y = space;
 					com.x = 0;
@@ -144,7 +144,7 @@ load.provide("dusk.sgui.Feed", (function() {
 			}
 		}else{
 			for(var i = 0; i < this._drawOrder.length; i ++) {
-				var com = this.getComponent(this._drawOrder[i]);
+				var com = this.get(this._drawOrder[i]);
 				if(this.appendDir == c.DIR_DOWN) {
 					com.y = space;
 					com.x = 0;

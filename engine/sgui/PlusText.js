@@ -29,8 +29,8 @@ load.provide("dusk.sgui.PlusText", (function() {
 		Group.call(this, parent, name);
 		
 		//Set up components
-		this.getComponent("plus", "NullCom");
-		this.getComponent("label", "Label");
+		this.get("plus", "NullCom");
+		this.get("label", "Label");
 		
 		/** The text that will be displayed beside the plus object. Label formatting is allowed.
 		 * @type string
@@ -97,35 +97,35 @@ load.provide("dusk.sgui.PlusText", (function() {
 	 * @private
 	 */
 	var _frame = function(e) {
-		this.getComponent("label").width = this.width - this.getComponent("plus").width - this.spacing;
+		this.get("label").width = this.width - this.get("plus").width - this.spacing;
 		
 		if(this.onLeft) {
-			this.getComponent("plus").x = 0;
-			this.getComponent("label").x = this.getComponent("plus").width + this.spacing;
+			this.get("plus").x = 0;
+			this.get("label").x = this.get("plus").width + this.spacing;
 		}else{
-			this.getComponent("plus").x = this.width - this.getComponent("plus").width;
-			this.getComponent("label").x = 0;
+			this.get("plus").x = this.width - this.get("plus").width;
+			this.get("label").x = 0;
 		}
 		
 		if(this.behind) {
-			if(!this.getComponent("label").multiline) {
-				this.getComponent("label").width = -1;
+			if(!this.get("label").multiline) {
+				this.get("label").width = -1;
 			}else{
-				this.getComponent("label").width = this.width - this.spacing;
+				this.get("label").width = this.width - this.spacing;
 			}
 			
-			this.getComponent("plus").x = 0;
-			this.getComponent("label").xOrigin = "middle";
-			this.getComponent("label").x = 0;
+			this.get("plus").x = 0;
+			this.get("label").xOrigin = "middle";
+			this.get("label").x = 0;
 			
-			this.getComponent("plus").width = this.width;
-			this.getComponent("plus").height = this.height;
+			this.get("plus").width = this.width;
+			this.get("plus").height = this.height;
 		}
 		
-		this.getComponent("label").text = this.text;
+		this.get("label").text = this.text;
 		
-		if(!this.height) this.height = this.getComponent("plus").height;
-		this.getComponent("label").height = this.height;
+		if(!this.height) this.height = this.get("plus").height;
+		this.get("label").height = this.height;
 	};
 	
 	/** Override to enable `{@link dusk.sgui.PlusText.plusProxy}`.
@@ -137,8 +137,8 @@ load.provide("dusk.sgui.PlusText", (function() {
 		if(this.allowMouse) {
 			if(!this.plusProxy) return Group.prototype.containerClick.call(this, e);
 			
-			if(this.getComponent("plus").visible && !this.getComponent("plus").clickPierce) {
-				return this.getComponent("plus").doClick(e);
+			if(this.get("plus").visible && !this.get("plus").clickPierce) {
+				return this.get("plus").doClick(e);
 			}
 		}
 		
@@ -147,27 +147,27 @@ load.provide("dusk.sgui.PlusText", (function() {
 	
 	//Plus
 	Object.defineProperty(PlusText.prototype, "plus", {
-		get: function() {return this.getComponent("plus").bundle();},
-		set: function(value) {this.getComponent("plus").update(value);}
+		get: function() {return this.get("plus").bundle();},
+		set: function(value) {this.get("plus").update(value);}
 	});
 	
 	//Label
 	Object.defineProperty(PlusText.prototype, "label", {
-		get: function() {return this.getComponent("label").bundle();},
+		get: function() {return this.get("label").bundle();},
 		
 		set: function(value) {
-			this.getComponent("label").update(value);
-			this.getComponent("plus").alterLayer("-label");
+			this.get("label").update(value);
+			this.get("plus").alterLayer("-label");
 		}
 	});
 	
 	//plusType
 	Object.defineProperty(PlusText.prototype, "plusType", {
-		get: function() {return this.getComponent("plus").type;},
+		get: function() {return this.get("plus").type;},
 		
 		set: function(value) {
-			this.getComponent("plus").type = value;
-			this.getComponent("plus").alterLayer("-label");
+			this.get("plus").type = value;
+			this.get("plus").alterLayer("-label");
 		}
 	});
 	

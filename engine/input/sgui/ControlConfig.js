@@ -31,8 +31,8 @@ load.provide("dusk.input.sgui.ControlConfig", (function() {
 		this.setting = false;
 		this.control = "";
 		
-		this._keyChild = this.getComponent("key", "Label");
-		this._buttonChild = this.getComponent("button", "Tile");
+		this._keyChild = this.get("key", "Label");
+		this._buttonChild = this.get("button", "Tile");
 		
 		this.border = "#cccccc";
 		this.borderActive = "#ff5555";

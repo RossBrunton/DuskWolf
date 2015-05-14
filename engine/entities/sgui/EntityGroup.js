@@ -489,10 +489,10 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 			do {
 				i ++;
 				entity.name = "#"+i;
-			} while(this.getComponent("#"+i));
+			} while(this.get("#"+i));
 		}
 		
-		var dropped = this.getComponent(entity.name, "Entity");
+		var dropped = this.get(entity.name, "Entity");
 		dropped.x = entity.x;
 		dropped.y = entity.y;
 		dropped.entType = entity.type;
@@ -577,7 +577,7 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 	
 	EntityGroup.prototype.loadBM = function(ents) {
 		this.clear();
-		this.getComponent("_noselectedentity", "NullCom");
+		this.get("_noselectedentity", "NullCom");
 		for(var i = ents.length-1; i >= 0; i --){
 			this.dropEntity(ents[i]);
 		}
