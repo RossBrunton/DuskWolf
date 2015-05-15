@@ -97,6 +97,14 @@ load.provide("dusk.input.gamepad", (function() {
 		return _axis[i];
 	};
 	
+	/** Returns whether the gamepad API is supported on this platform.
+	 * @return {boolean} Whether the gamepad API is supported.
+	 * @since 0.0.21-alpha
+	 */
+	gamepad.isSupported = function() {
+		return navigator.getGamepads || navigator.webkitGetGamepads;
+	};
+	
 	/** Given an entry in the button array thing is pushed.
 	 * 
 	 * Because apparently you need an object with a pressed property.

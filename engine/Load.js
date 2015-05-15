@@ -3,7 +3,7 @@
 "use strict";
 
 //Testing; remove this
-//window.Promise = null;
+//delete window.Promise;
 
 if("load" in window) {
 	console.warn("window.load already exists! It will be clobbered. Careful.");
@@ -129,109 +129,6 @@ window.load = (function() {
 	 * @since 0.0.14-alpha
 	 */
 	load.onProvide = null;
-	
-	/** Checks capability of the user agent.
-	 * 
-	 * If there is any issue, then this returns a string description of the problem.
-	 *  It will only return one problem; the first one found.
-	 * 	DuskWolf will ignore any problems, "just in case".
-	 * 
-	 * @return {string} A problem description, or an empty string.
-	 * @private
-	 * @since 0.0.17-alpha
-	 */
-	var _capability = function() {
-		if(!("getContext" in document.createElement("canvas"))) return "Canvas not supported!";
-		
-		if(!(window.requestAnimationFrame
-		|| window.mozRequestAnimationFrame
-		|| window.webkitRequestAnimationFrame
-		|| window.msRequestAnimationFrame
-		|| null))
-			return "requestAnimationFrame not supported!";
-		
-		if(!("defineProperty" in Object)) {
-			console.warn("Object.defineProperty is not defined! Doing a workaround...");
-			Object.defineProperty = function(obj, prop, descriptor) {
-				if("get" in descriptor) obj.__defineGetter__(prop, descriptor.get);
-				if("set" in descriptor) obj.__defineSetter__(prop, descriptor.set);
-				if("value" in descriptor) obj[prop] = descriptor.value;
-				return obj;
-			};
-		}
-		
-		if(!("seal" in Object)) {
-			console.warn("Object.seal is not defined! Doing a workaround...");
-			Object.seal = function(obj) {return obj;};
-		}
-		
-		if(!("create" in Object)) return "Object.create not supported!";
-		
-		if(!("ArrayBuffer" in window)) return "Typed arrays not supported!";
-		
-		if(!("Promise" in window) || typeof Promise != "function") {
-			console.warn("Promise not available, importing polyfill.");
-			var js = document.createElement("script");
-			js.src = "DuskWolf/lib/promise.js";
-			document.head.appendChild(js);
-		}else if(!("resolve" in Promise)) {
-			console.warn("Promise.resolve does not exist, using Promise.resolved.");
-			Promise.resolve = Promise.resolved;
-			Promise.reject = Promise.rejected;
-		}
-		
-		if (!("slice" in ArrayBuffer.prototype)) {
-			console.warn("ArrayBuffer.prototype.slice not supported, doing workaround.");
-			ArrayBuffer.prototype.slice = function (start, end) {
-				var that = new Uint8Array(this);
-				if (end == undefined) end = that.length;
-				var result = new ArrayBuffer(end - start);
-				var resultArray = new Uint8Array(result);
-				for (var i = 0; i < resultArray.length; i++)
-					resultArray[i] = that[i + start];
-				return result;
-			}
-		}
-		
-		if(!("endsWith" in String.prototype)) {
-			console.warn("String.endsWith not found, doing workaround.");
-			String.prototype.endsWith = function(pattern) {
-				for (var i = pattern.length, l = this.length; i--;) {
-					if (this.charAt(--l) != pattern.charAt(i)) {
-						return false;
-					}
-				}
-				return true;
-			}
-		}
-		
-		if(!("includes" in Array.prototype)) {
-			console.warn("Array.includes not found, doing workaround.");
-			Array.prototype.includes = function(searchElement, fromIndex) {
-				for(var i = +fromIndex || 0; i < this.length; i ++) {
-					if(this[i] === searchElement) return true;
-				}
-				return false;
-			};
-		}
-		
-		if((function() {"use strict";return this;})() !== undefined) return "Strict mode not supported!";
-		
-		if(!(navigator.getGamepads || navigator.webkitGetGamepads)) return "Gamepad API not supported!";
-		
-		return "";
-	};
-	
-	/** This is any detected issue with the capabilities of the client.
-	 * 
-	 * This will be a description of only one issue, such as lack of canvas or strict mode support.
-	 * 	If there are no issues this will be an empty string.
-	 * 
-	 * If there is any issue, then DuskWolf will continue to run.
-	 * @type string
-	 * @since 0.0.17-alpha
-	 */
-	load.capabilityIssue = _capability();
 	
 	/** Marks that the namespace `name` has been provided, and associates a given object with it.
 	 *   This tells the engine to download the next file in the list,
@@ -431,12 +328,11 @@ window.load = (function() {
 	 * 
 	 * Each entry of the array must itself be an array of the form `[file, provided, required]`.
 	 * 
-	 * If Promise is available (almost always) this returns a promise that resolves when the file is downloaded or fails
-	 *  to download.
+	 * This returns a promise that resolves when the file is downloaded or fails to download.
 	 * @param {string} path The path to the JSON file.
 	 * @param {function()} callback Will be called when the file load is completed.
 	 * @param {function()} errorCallback Will be called if there is an error.
-	 * @returns {undefined|Promise(object)} Undefined or a promise.
+	 * @returns {Promise(object)} A promise.
 	 * @since 0.0.15-alpha
 	 */
 	load.importList = function(path, callback, errorCallback) {
@@ -496,12 +392,7 @@ window.load = (function() {
 			xhr.send();
 		}
 		
-		if("Promise" in window) {
-			return new Promise(pfunct);
-		}else{
-			pfunct();
-			return null;
-		}
+		return new Promise(pfunct);
 	};
 
 	/** Given a package, if it has not been imported, it is added to `{@link load._importSet}` and this function is
@@ -760,18 +651,13 @@ window.load = (function() {
 					"You have no internet connection; good luck with that.", 5, textY+=15
 				);
 			}
-			if(load.capabilityIssue) {
-				canvas.getContext("2d").fillText(load.capabilityIssue, 5, textY+=15);
-			}
 		}
 		
 		if(!dusk || !dusk.started) {
-			raf(_displayLoad);
+			window.requestAnimationFrame(_displayLoad);
 		}
 	};
-	var raf = window.requestAnimationFrame || window.mozRequestAnimationFrame
-	|| window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
-	raf(_displayLoad);
+	window.requestAnimationFrame(_displayLoad);
 	
 	var dusk = load.suggest("dusk", function(p) {dusk = p});
 	var EventDispatcher = load.suggest("dusk.utils.EventDispatcher", function(p) {

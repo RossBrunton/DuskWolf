@@ -5,6 +5,7 @@
 load.provide("dusk", (function() {
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var utils = load.require("dusk.utils");
+	var polyfills = load.require("dusk.utils.polyfills");
 	
 	/** @namespace dusk
 	 * 
