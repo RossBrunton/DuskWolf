@@ -30,7 +30,7 @@ load.provide("dusk.save.sources.SaveSource", (function() {
 	 */
 	SaveSource.prototype.save = function(saveData, spec, identifier) {
 		console.warn("Save Source "+this+" doesn't support saving.");
-		return Promise.reject(Error("Save Source "+this+" doesn't support saving."));
+		return Promise.reject(new save.SaveSourceError("Save Source "+this+" doesn't support saving."));
 	};
 	
 	/** Similar to `{@link dusk.save.sources.SaveSource#save}`, only this is called in cases where saving should be done
@@ -53,7 +53,7 @@ load.provide("dusk.save.sources.SaveSource", (function() {
 	 */
 	SaveSource.prototype.load = function(spec, identifier) {
 		console.warn("Save Source "+this+" doesn't support loading.");
-		return Promise.reject(Error("Save Source "+this+" doesn't support loading."));
+		return Promise.reject(new save.SaveSourceError("Save Source "+this+" doesn't support loading."));
 	};
 	
 	/** Returns a string representation of this object.

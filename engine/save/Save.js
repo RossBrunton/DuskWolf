@@ -184,5 +184,19 @@ load.provide("dusk.save", (function() {
 	};
 	save.SaveIntegrityError.prototype = Object.create(Error.prototype);
 	
+	/** Exception representing some error loading from or saving to a source.
+	 * 
+	 * @extends Error
+	 * @constructor
+	 * @since 0.0.21-alpha
+	 */
+	save.SaveSourceError = function(msg) {
+		Error.call(this);
+		
+		this.name = "SaveSourceError";
+		this.message = msg;
+	};
+	save.SaveSourceError.prototype = Object.create(Error.prototype);
+	
 	return save;
-})(), {"alsoSeal":["SaveIntegrityError", "ISavable", "IRefSavable", "IRefSavableInstance"]});
+})(), {"alsoSeal":["SaveIntegrityError", "SaveSourceError", "ISavable", "IRefSavable", "IRefSavableInstance"]});

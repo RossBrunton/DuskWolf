@@ -26,8 +26,8 @@ load.provide("dusk.save.sources.DropboxSource", (function() {
 				],
 				
 				"success": function(){fullfill(true);},
-				"cancel": function(){reject(new Error("User canceled"));},
-				"error": function(){reject(new Error("Unknown error"));}
+				"cancel": function(){reject(new save.SaveSourceError("DropboxSource: User canceled"));},
+				"error": function(){reject(new save.SaveSourceError("DropboxSource: Unknown error"));}
 			});
 		}).bind(this));
 	};
@@ -50,7 +50,7 @@ load.provide("dusk.save.sources.DropboxSource", (function() {
 					});
 				},
 				
-				"cancel": function() {reject(new Error("Load from Dropbox canceled."));},
+				"cancel": function() {reject(new save.SaveSourceError("DropboxSource: Load from Dropbox canceled."));},
 			});
 		}).bind(this));
 	};
