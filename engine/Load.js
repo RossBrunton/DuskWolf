@@ -67,41 +67,13 @@ window.load = (function() {
 	 */
 	var _files = {};
 	
-	/** If this is true, then the batching is happening. Packages are being imported, and when they are all done, the
-	 *  next batch of packages will be imported.
-	 * @type boolean
-	 * @private
-	 * @since 0.0.21-alpha
-	 */
-	var _batching = false;
-	
-	/** The number of packages that still need to be provided in the current batch. When this becomes zero, the next
-	 *  batch of packages will be imported.
-	 * 
-	 * The default is 1 since the package `load` will be provided later.
-	 * @type int
-	 * @private
-	 * @default 1
-	 * @since 0.0.21-alpha
-	 */
-	var _provideCount = 1;
-	
 	/** The set of all package names that need to be imported. This is all the packages that have not been imported, but
 	 *  have to be imported to satisfy a package that has been imported by `{@link load.import}`.
-	 * 
-	 * Packages are moved out of here and into `{@link load._batchSet}` when they are about to be imported.
 	 * @type array
 	 * @private
 	 * @since 0.0.21-alpha
 	 */
 	var _importSet = [];
-	
-	/** The set of package names that are in the current "import batch" and will be added to the document head soon.
-	 * @type array
-	 * @private
-	 * @since 0.0.21-alpha
-	 */
-	var _batchSet = [];
 	
 	/** All the dependency files that have been imported. Key is filename, value is data.
 	 * @type object
@@ -181,11 +153,8 @@ window.load = (function() {
 			setTimeout(load.onProvide.fire.bind(load.onProvide, {"package":name}, name), 1);
 		}
 		
-		//And carry on providing
-		_provideCount --;
-		if(!_provideCount && _batching) {
-			_doBatchSet();
-		}
+		// And try to import more if possible
+		_tryImport();
 	};
 	
 	/** Adds a dependency.
@@ -285,11 +254,6 @@ window.load = (function() {
 		return new Promise(function(fulfill, reject) {
 			if(!load.isImported(name)) {
 				_addToImportSet(name);
-				
-				if(!_batching) {
-					_batching = true;
-					_doBatchSet();
-				}
 				
 				if(name.charAt(0) == ">") name = name.substring(1);
 				
@@ -421,6 +385,8 @@ window.load = (function() {
 				_addToImportSet(p[2][i]);
 			}
 		}
+		
+		_tryImport();
 	};
 	
 	/** Looks through the import set, sees if any can be imported (have no unsatisfied dependancies), generates the
@@ -429,18 +395,17 @@ window.load = (function() {
 	 * @private
 	 * @since 0.0.21-alpha
 	 */
-	var _doBatchSet = function(trace) {
+	var _tryImport = function(trace) {
 		if(!_importSet.length) {
-			_batching = false;
 			return;
 		}
 		
-		_batchSet = [];
+		var _packagesToImport = [];
 		
 		//Generate the batch set
 		for(var i = 0; i < _importSet.length; i ++) {
 			if(_importSet[i].charAt(0) == "@") {
-				_batchSet.push(_importSet[i]);
+				_packagesToImport.push(_importSet[i]);
 				_importSet.splice(i, 1);
 				i --;
 				continue;
@@ -469,40 +434,25 @@ window.load = (function() {
 			}
 			
 			if(okay) {
-				if(now[1] == 0) 
-					_batchSet.push(_importSet[i]);
+				if(now[1] == 0) _packagesToImport.push(_importSet[i]);
 				_importSet.splice(i, 1);
 				i --;
 			}
 		}
 		
-		//Check for errors
-		if(_batchSet.length == 0 && !trace) {
-			_doBatchSet(true);
-			throw new load.DependencyError("Dependency issue; see console for details");
-		}else if(_batchSet.length == 0) {
-			return;
-		}
-		
 		//And then import them all
-		console.log("%cImporting: "+_batchSet.join(", "), "color:#999999");
+		if(_packagesToImport.length) console.log("%cImporting: "+_packagesToImport.join(", "), "color:#999999");
 		
-		for(var i = _batchSet.length-1; i >= 0; i --) {
-			if(_batchSet[i].charAt(0) == "@") {
-				_doImportFile(_batchSet[i]);
+		for(var i = _packagesToImport.length-1; i >= 0; i --) {
+			if(_packagesToImport[i].charAt(0) == "@") {
+				_doImportFile(_packagesToImport[i]);
 			}else{
-				_doImportFile(_names[_batchSet[i]][0]);
+				_doImportFile(_names[_packagesToImport[i]][0]);
 			}
 		}
-		
-		if(!_provideCount) {
-			setTimeout(_doBatchSet, 100);
-		}
-	};
+	}
 	
 	/** Adds the file to the HTML documents head in a script tag, actually importing the file.
-	 * 
-	 * `{@link load._provideCount}` is incremented by the amount of packages the file provides.
 	 * @param {string} file The file to add. If it starts with "@" that character is stripped.
 	 * @private
 	 * @since 0.0.21-alpha
@@ -519,7 +469,6 @@ window.load = (function() {
 		if(f[2]) return;
 		f[2] = true;
 		
-		_provideCount += f[0].length;
 		for(var i = 0; i < f[0].length; i ++) {
 			_names[f[0][i]][1] = 1;
 		}
@@ -539,7 +488,6 @@ window.load = (function() {
 	load.abort = function() {
 		_batching = false;
 		_importSet = [];
-		_batchSet = [];
 	};
 	
 	/** Checks if the specified package is imported.
