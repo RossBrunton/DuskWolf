@@ -486,7 +486,6 @@ window.load = (function() {
 	 * @since 0.0.20-alpha
 	 */
 	load.abort = function() {
-		_batching = false;
 		_importSet = [];
 	};
 	
