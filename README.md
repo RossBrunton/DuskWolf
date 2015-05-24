@@ -3,6 +3,8 @@ The DuskWolf engine is basically a game engine thing; a collection of libraries 
 
 It is mainly designed for RPGs and platformers, but it should work for pretty much any 2D game in theory.
 
+THIS DOES NOT RUN ON ANY VERSION OF IE. I hope you understand.
+
 ## Installing and Running ##
 Clone the repo to somewhere:
 > git clone https://github.com/RossBrunton/DuskWolf.git DuskWolf

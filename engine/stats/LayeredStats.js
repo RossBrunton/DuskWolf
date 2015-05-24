@@ -11,60 +11,6 @@ load.provide("dusk.stats", (function() {
 	
 	var stats = {};
 	
-	var _stats = {};
-	
-	stats.addStats = function(name, stats, replace) {
-		if(name in _stats && !replace) {
-			return;
-		}
-		_stats[name] = [stats, false];
-	};
-	
-	stats.addStatsGenerator = function(name, stats, replace) {
-		if(name in _stats && !replace) {
-			return;
-		}
-		_stats[name] = [stats, true];
-	};
-	
-	stats.getStats = function(name) {
-		if(!_stats[name]) return null;
-		if(_stats[name][1]) {
-			return _stats[name][0]();
-		}
-		return _stats[name][0];
-	};
-	
-	stats.save = function(type, arg, ref) {
-		if(type != "stats") return {};
-		
-		var out = [];
-		
-		if(!("names" in arg)) {
-			for(var p in this._stats) {
-				if(!_stats[p][1]) {
-					out.push([p, ref(_stats[p][0])]);
-				}
-			}
-		}else{
-			for(var p in arg.names) {
-				if(!_stats[p][1]) {
-					out.push([p, ref(_stats[p][0])]);
-				}
-			}
-		}
-		
-		return out;
-	};
-	
-	stats.load = function(data, type, arg, unref) {
-		if(type != "stats") return;
-		
-		for(var i = 0; i < data.length; i ++) {
-			_stats[data[i][0]] = unref(data[i][1]);
-		}
-	};
-	
 	/** Creates a new LayeredStats instance. 
 	 * 
 	 * @class dusk.stats.LayeredStats

@@ -41,7 +41,9 @@ load.provide("dusk.utils.polyfills", (function() {
 	var fail = function(feature, versions) {
 		var msg = "Sorry, your browser doesn't support ";
 		msg += feature;
-		if(browser === "unknown") {
+		if(!versions[browser]) {
+			msg += ". \n\nYou will have to switch browser to Firefox or Chrome";
+		}else if(browser === "unknown") {
 			msg += ". \n\nPlease update your browser.";
 			alert(msg);
 		}else{
@@ -159,6 +161,13 @@ load.provide("dusk.utils.polyfills", (function() {
 		Array.prototype.find = function(callback, thisArg) {
 			return this.findIndex(callback, thisArg) !== -1;
 		};
+	}
+	
+	// Iterators
+	try {
+		eval("for(x of []);");
+	} catch(e) {
+		fail("for..of", {"Chrome":38, "firefox":13, "ie":null, "opera":25, "safari":"7.1"});
 	}
 	
 	// Maps

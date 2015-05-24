@@ -10,6 +10,7 @@ load.provide("quest.ents", (function() {
 	load.require("dusk.entities.behave.Scriptable");
 	var items = load.require("dusk.items");
 	var stats = load.require("dusk.stats");
+	var store = load.require("dusk.stats.store");
 	
 	entities.swidth = 32;
 	entities.sheight = 32;
@@ -39,7 +40,7 @@ load.provide("quest.ents", (function() {
 		"behaviours":{"GridWalker":true, "StatLoader":true, "Scriptable":true}
 	}, "quest");
 
-	stats.addStatsGenerator("ally", function() {
+	store.addGenerator("ally", function() {
 		var l = new stats.LayeredStats("ally", "quest.ents");
 		
 		_basic(l);
@@ -56,7 +57,7 @@ load.provide("quest.ents", (function() {
 		"behaviours":{"GridWalker":true, "StatLoader":true}
 	}, "quest");
 
-	stats.addStatsGenerator("evil", function() {
+	store.addGenerator("evil", function() {
 		var l = new stats.LayeredStats("evil", "quest.ents");
 		
 		_basic(l);

@@ -6,6 +6,7 @@ load.provide("dusk.stats.behave.StatLoader", (function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.entities.behave.Behave");
 	var stats = load.require("dusk.stats");
+	var store = load.require("dusk.stats.store");
 	
 	/* @class dusk.stats.behave.StatLoader
 	 * 
@@ -32,17 +33,17 @@ load.provide("dusk.stats.behave.StatLoader", (function() {
 			var room = "*";
 			if(this._entity.path("..")) room = this._entity.path("../..").roomName;
 			
-			if(stats.getStats("putback_"+room+"_"+this._entity.name)) {
-				this._entity.stats = stats.getStats("putback_"+room+"_"+this._entity.name)
+			if(store.getStats("putback_"+room+"_"+this._entity.name)) {
+				this._entity.stats = store.getStats("putback_"+room+"_"+this._entity.name)
 			}else{
-				this._entity.stats = stats.getStats(this._data("statsName"));
+				this._entity.stats = store.getGenerator(this._data("statsName"))();
 				
 				if(this._data("statsPutBack")) {
-					stats.addStats("putback_"+room+"_"+this._entity.name, this._entity.stats);
+					store.addStats("putback_"+room+"_"+this._entity.name, this._entity.stats);
 				}
 			}
 		}else{
-			this._entity.stats = stats.getStats(this._entity.stats.name);
+			this._entity.stats = store.getGenerator(this._entity.name)();
 		}
 		
 		if(this._data("statsLoadImage")) {
