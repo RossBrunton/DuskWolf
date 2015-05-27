@@ -14,7 +14,7 @@ load.provide("dusk.utils.polyfills", (function() {
 		"chrome":["Chrome", "https://support.google.com/chrome/answer/95414"],
 		"ie":["Internet Explorer", "http://windows.microsoft.com/en-us/internet-explorer/download-ie"],
 		"safari":["Safari", "https://support.apple.com/en-gb/HT204416"],
-		"opera":["Opera", "http://www.opera.com/computer/linux"]
+		"opera":["Opera", "http://www.opera.com/computer/"]
 	};
 	
 	// String.includes
