@@ -64,7 +64,7 @@ load.provide("dusk.utils.reversiblePromiseChain", (function() {
 				if(!this.inverse) {
 					this.p ++;
 					if(this.p > 0) {
-						this.promises[this.p - 1][3] = utils.clone(value);
+						this.promises[this.p - 1][3] = utils.copy(value);
 					}
 				}
 				

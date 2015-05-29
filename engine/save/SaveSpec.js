@@ -85,7 +85,7 @@ load.provide("dusk.save.SaveSpec", (function() {
 			}
 		}
 		
-		saveData.meta().refs = utils.clone(refs);
+		saveData.meta().refs = utils.copy(refs, true);
 		
 		return saveData;
 	};
@@ -202,7 +202,7 @@ load.provide("dusk.save.SaveSpec", (function() {
 			this.push(obj.refSave(_saveRef.bind(this)));
 			return [this.length-1, obj.refClass()];
 		}else{
-			this.push(utils.clone(obj));
+			this.push(utils.copy(obj, true));
 			return this.length-1;
 		}
 	};

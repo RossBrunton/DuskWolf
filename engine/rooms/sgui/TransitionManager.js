@@ -156,7 +156,7 @@ load.provide("dusk.rooms.sgui.TransitionManager", (function() {
 	 * @return {object} The transitions this TransitionManager has edited.
 	 */
 	TransitionManager.prototype.saveBM = function() {
-		var copy = utils.clone(this._transitions);
+		var copy = utils.copy(this._transitions, true);
 		
 		var count = 0;
 		if("in" in copy) {
@@ -310,7 +310,7 @@ load.provide("dusk.rooms.sgui.TransitionManager", (function() {
 	 * @private
 	 */
 	TransitionManager.prototype._tmPretty = function() {
-		var copy = utils.clone(this._transitions);
+		var copy = utils.copy(this._transitions, true);
 		var hold = "{\n";
 		var count = 0;
 		if("in" in copy) {

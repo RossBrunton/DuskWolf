@@ -287,7 +287,7 @@ load.provide("dusk.utils.Inheritable", (function(){
 	 * @return {dusk.utils.Inheritable} A copy of this inheritable.
 	 */
 	Inheritable.prototype.copy = function() {
-		return new Inheritable(this.type, this.container, utils.clone(this._extraData));
+		return new Inheritable(this.type, this.container, utils.copy(this._extraData, true));
 	};
 	
 	/** Saves this to an object that can then be loaded with `{@link dusk.utils.Inheritable#refLoad}`.

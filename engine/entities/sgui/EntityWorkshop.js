@@ -311,7 +311,7 @@ load.provide("dusk.entities.sgui.EntityWorkshop", (function() {
 			return;
 		}
 		
-		this._workingWith = utils.clone(entities.types.getRaw(name));
+		this._workingWith = utils.copy(entities.types.getRaw(name), true);
 		
 		this.path("top/name").text = name;
 		this.path("top/extends").text = entities.types.getExtendee(name);
@@ -330,7 +330,7 @@ load.provide("dusk.entities.sgui.EntityWorkshop", (function() {
 	};
 	
 	EntityWorkshop.prototype.saveEntity = function() {
-		var ent = utils.clone(this._workingWith);
+		var ent = utils.copy(this._workingWith, true);
 		
 		ent.data = {};
 		

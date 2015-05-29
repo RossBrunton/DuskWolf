@@ -115,8 +115,8 @@ load.provide("dusk.sgui.Feed", (function() {
 				"globals":this.globals
 			}, "create").component;
 			
-			if(this.globals !== null) com.update(utils.clone(this.globals));
-			com.update(utils.clone(child[i]));
+			if(this.globals !== null) com.update(utils.copy(this.globals, true));
+			com.update(utils.copy(child[i]), true);
 			this.alterChildLayer(name, "+");
 		}
 		

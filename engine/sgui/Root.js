@@ -259,7 +259,7 @@ load.provide("dusk.sgui.Root", (function() {
 	
 	Root.prototype.interact = function(e, nofire) {
 		if(e.type == interaction.MOUSE_MOVE) {
-			this._mmQueued = utils.clone(e);
+			this._mmQueued = utils.copy(e);
 		}else{
 			return Group.prototype.interact.call(this, e, nofire);
 		}

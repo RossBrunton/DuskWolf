@@ -42,7 +42,7 @@ load.provide("dusk.entities.behave.Scriptable", (function() {
 			
 			case "gridWalk":
 				return new Promise((function(fulfill, reject) {
-					var moves = utils.cloneArray(args.moves?args.moves:passedArg.moves);
+					var moves = utils.copy(args.moves?args.moves:passedArg.moves);
 					
 					var listener = this.entityEvent.listen((function() {
 						if(!this._data("gwmoves").length) {

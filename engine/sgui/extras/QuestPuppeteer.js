@@ -358,7 +358,7 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 			
 			case "moveViaPath":
 				return new Promise((function(fulfill, reject) {
-					passedArg.entity.eProp("gwmoves", utils.cloneArray(passedArg.path));
+					passedArg.entity.eProp("gwmoves", utils.copy(passedArg.path, true));
 					var oldX = passedArg.entity.x;
 					var oldY = passedArg.entity.y;
 					

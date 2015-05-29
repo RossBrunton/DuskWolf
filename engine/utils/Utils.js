@@ -11,41 +11,37 @@ load.provide("dusk.utils", (function() {
 	 *  anything with prototypes and such like. Anything which isn't a basic object will have its reference copied,
 	 *  rather than its value.
 	 * @param {*} o The source object to copy.
+	 * @param {boolean=false} deep If true, then this function will be called on all the values in arrays or objects, instead
+	 *  of copying them by reference.
 	 * @return {object} A copy of the source object.
 	 */
-	utils.clone = function(o) {
+	utils.copy = function(o, deep) {
 		if(o == null || typeof(o) != 'object') return o;
 		
-		var tmp = o.constructor();
-		for(var p in o) {
-			if(!o[p] || (typeof o[p] == "object" && Object.getPrototypeOf(o[p]) != Object.prototype
-				&& !Array.isArray(o[p]))
-			) {
-				tmp[p] = o[p];
-			}else if(Array.isArray(o[p])) {
-				tmp[p] = [];
-				for(var i = 0; i < o[p].length; i ++) {
-					tmp[p][i] = this.clone(o[p][i]);
+		console.log("Copying... "+deep);
+		console.log(o);
+		var copy = o.constructor();
+		if(Array.isArray(o)) {
+			for(var i = 0; i < o.length; i ++) {
+				if(deep) {
+					copy[i] = utils.copy(o[i]);
+				}else{
+					copy[i] = o[i];
 				}
-			}else{
-				tmp[p] = this.clone(o[p]);
 			}
+		}else if(o instanceof Object) {
+			for(var p in o) {
+				if(deep) {
+					copy[p] = utils.copy(o[p]);
+				}else{
+					copy[p] = o[p];
+				}
+			}
+		}else{
+			return o;
 		}
 
-		return tmp;
-	};
-	
-	/** Makes a simple copy of the array. Anything which isn't a basic object will have it's reference copied, rather
-	 *  than its value.
-	 * @param {array} a The source array to copy.
-	 * @return {array} A copy of the source object.
-	 */
-	utils.cloneArray = function(a) {
-		var out = [];
-		for(var i = 0; i < a.length; i ++) {
-			out[i] = a[i];
-		}
-		return out;
+		return copy;
 	};
 	
 	/** Merges two objects together, combining their properties.
@@ -57,7 +53,7 @@ load.provide("dusk.utils", (function() {
 	 * @return {object} A new object, containing all the properties of the two source objects.
 	 */
 	utils.merge = function(a, b) {
-		a = utils.clone(a);
+		a = utils.copy(a, true);
 		
 		if(typeof a != "object") return b;
 		

@@ -138,7 +138,7 @@ load.provide("dusk.particles.particleEffects.core.image", (function() {
 			for(var x = 0; x < id.width; x ++) {
 				var base = ((y * id.width) + x) * 4;
 				if(id.data[base + 3] > 0 && (!("chance" in data) || Math.random() > data.chance)) {
-					var d = utils.clone(data);
+					var d = utils.copy(data, true);
 					
 					if("alterL" in d) core.applyAlteration(d, d.alterL, (id.width-x)/id.width);
 					if("alterR" in d) core.applyAlteration(d, d.alterR, (x)/id.width);

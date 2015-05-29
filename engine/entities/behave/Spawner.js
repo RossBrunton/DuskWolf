@@ -230,15 +230,15 @@ load.provide("dusk.entities.behave.Spawner", (function() {
 		
 		//Apply dx and dy effects to the spawner
 		if("controlLimitDx" in spawn) {
-			this._data("Spawner:_dxLimits").push(utils.cloneArray(_resolve(dir, spawn["controlLimitDx"])));
+			this._data("Spawner:_dxLimits").push(utils.copy(_resolve(dir, spawn["controlLimitDx"]), true));
 		}
 		
 		if("applyDx" in spawn) {
-			this._data("Spawner:_dxApply").push(utils.cloneArray(_resolve(dir, spawn["applyDx"])));
+			this._data("Spawner:_dxApply").push(utils.copy(_resolve(dir, spawn["applyDx"]), true));
 		}
 		
 		if("applyDy" in spawn) {
-			this._data("Spawner:_dyApply").push(utils.cloneArray(_resolve(dir, spawn["applyDy"])));
+			this._data("Spawner:_dyApply").push(utils.copy(_resolve(dir, spawn["applyDy"]), true));
 		}
 		
 		//Animate until we can spawn it

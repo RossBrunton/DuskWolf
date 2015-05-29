@@ -7,20 +7,20 @@ load.provide("test.dusk.utils", (function() {
 	var utils = load.require("dusk.utils");
 	
 	test.registerTestFunction("test.dusk.utils", function(tester) {
-		tester.start("dusk.utils.clone");
+		tester.start("dusk.utils.copy");
 		
-		tester.assertEqual(1, utils.clone(1));
-		tester.assertEqual({}, utils.clone({}));
-		tester.assertEqual([], utils.clone([]));
+		tester.assertEqual(1, utils.copy(1));
+		tester.assertEqual({}, utils.copy({}));
+		tester.assertEqual([], utils.copy([]));
 		
-		tester.assertEqual({"tester":"tester"}, utils.clone({"tester":"tester"}));
-		tester.assertEqual({"tester":{}}, utils.clone({"tester":{}}));
-		tester.assertEqual({"testerA":{}, "testerB":{}}, utils.clone({"testerA":{}, "testerB":{}}));
-		tester.assertEqual({"testerA":{"p":1}, "testerB":{}},utils.clone({"testerA":{"p":1}, "testerB":{}}));
+		tester.assertEqual({"tester":"tester"}, utils.copy({"tester":"tester"}));
+		tester.assertEqual({"tester":{}}, utils.copy({"tester":{}}));
+		tester.assertEqual({"testerA":{}, "testerB":{}}, utils.copy({"testerA":{}, "testerB":{}}));
+		tester.assertEqual({"testerA":{"p":1}, "testerB":{}},utils.copy({"testerA":{"p":1}, "testerB":{}}));
 		
-		tester.assertEqual([1, 2, 3], utils.clone([1, 2, 3]));
-		tester.assertEqual([[1], [2], [3]], utils.clone([[1], [2], [3]]));
-		tester.assertEqual([[[[[1]]]]], utils.clone([[[[[1]]]]]));
+		tester.assertEqual([1, 2, 3], utils.copy([1, 2, 3]));
+		tester.assertEqual([[1], [2], [3]], utils.copy([[1], [2], [3]]));
+		tester.assertEqual([[[[[1]]]]], utils.copy([[[[[1]]]]]));
 		
 		
 		tester.start("dusk.utils.merge");

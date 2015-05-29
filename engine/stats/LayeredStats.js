@@ -47,7 +47,7 @@ load.provide("dusk.stats", (function() {
 	
 	stats.LayeredStats.prototype.addBlock = function(layer, name, block, copy) {
 		layer = this._lookupLayer(layer);
-		if(copy) block = utils.clone(block);
+		if(copy) block = utils.copy(block, true);
 		if(!this._layers[layer]) this._layers[layer] = {};
 		if(!this._inventListeners[layer]) this._inventListeners[layer] = {};
 		if(!this._caches[layer]) this._caches[layer] = {};
@@ -232,7 +232,7 @@ load.provide("dusk.stats", (function() {
 			var out = [];
 			value.forEach((function(item, slot) {
 				if(item.get("stats")) {
-					var block = utils.clone(item.get("stats"));
+					var block = utils.copy(item.get("stats"), true);
 					block.item = item;
 					block.slot = slot;
 					this.push(block);

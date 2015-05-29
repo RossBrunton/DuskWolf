@@ -183,8 +183,8 @@ load.provide("dusk.sgui.Grid", (function() {
 				}, "create").component;
 				
 				// Give the component properties
-				if(this.globals !== null) com.update(utils.clone(this.globals));
-				com.update(utils.clone(child[p]));
+				if(this.globals !== null) com.update(utils.copy(this.globals, true));
+				com.update(utils.copy(child[p], true));
 			}
 		}
 		

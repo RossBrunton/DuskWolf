@@ -478,9 +478,9 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 			this._type = type;
 			
 			if(entities.types.isValidType(type)) {
-				this.behaviourData = utils.clone(entities.types.getAll(type).data);
-				this._animationData = utils.clone(entities.types.getAll(type).animation);
-				this._particleData = utils.clone(entities.types.getAll(type).particles);
+				this.behaviourData = utils.copy(entities.types.getAll(type).data, true);
+				this._animationData = utils.copy(entities.types.getAll(type).animation, true);
+				this._particleData = utils.copy(entities.types.getAll(type).particles, true);
 			}else{
 				this.behaviourData = {"headingLeft":false, "headingUp":false, "img":"nosuchimage.png",
 					"solid":true, "collides":true
@@ -1504,9 +1504,9 @@ load.provide("dusk.entities.LightEntity", (function() {
 		set: function(type) {
 			// Get data
 			this._type = type;
-			this.behaviourData = utils.clone(entities.types.getAll(type).data);
-			this._animationData = utils.clone(entities.types.getAll(type).animation);
-			this._particleData = utils.clone(entities.types.getAll(type).particles);
+			this.behaviourData = utils.copy(entities.types.getAll(type).data, true);
+			this._animationData = utils.copy(entities.types.getAll(type).animation, true);
+			this._particleData = utils.copy(entities.types.getAll(type).particles, true);
 			
 			//Set up animation
 			this._currentAni = -1;
