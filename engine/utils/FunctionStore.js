@@ -3,6 +3,8 @@
 "use strict";
 
 load.provide("dusk.utils.functionStore", (function() {
+    var utils = load.require("dusk.utils");
+    
     /** Function stores provide a way to store functions and refer to them as strings.
      * 
      * You register functions on this namespace (with the `register`) function, and then whenever you need to use them
@@ -27,6 +29,7 @@ load.provide("dusk.utils.functionStore", (function() {
      * 
      * There are a few built in functions as follows:
      * - list: Returns its arguments as an array.
+     * - fn: Returns the function from the store with this name.
      * - print: Uses console.log to display its arguments.
      * - if: If the first argument is true, then returns the second argument, otherwise returns the third. Note that
      * both will be fully evaluated.
@@ -45,6 +48,9 @@ load.provide("dusk.utils.functionStore", (function() {
      * - getf, setf: Same as get and set, only calls a get and set function rather than using the square brackets.
      * - callf: Calls a[b] with the rest of the arguments.
      * - global: Takes no arguments and returns the global object (which is probably window).
+     * - let: When called like (let a b c), it will bind the value of a to c when evaluating b. This means that whenever
+     *  the token `a` is found in any of b's sexprs, it will have the value of c. `a` must not be surrounded by quotes,
+     *  nor should its occurences in b.
      * 
      * @since 0.0.21-alpha
      */
@@ -70,11 +76,49 @@ load.provide("dusk.utils.functionStore", (function() {
         _raws.set(name, fn);
     };
     
+    /** Simple wrapper to indicate a value is a token rather than a raw string, used when parsing
+     * @param {string} val The value to wrap
+     * @private
+     * @constructor
+     */
+    var _fsToken = function(val) {
+        /** The value being wrapped, as a string
+         * @type string
+         */
+        this.val = ""+val;
+    }
+    _fsToken.prototype.toString = function() {
+        return this.val;
+    }
+    /** Resolves the token into either its value or a function
+     * 
+     * It first checks the let stack to see if the token is bound by a "let" expression, if so it returns that value,
+     *  otherwise it returns the function with the appropriate name from the store.
+     * @return {function(**):*|*} What this token refers to.
+     */
+    _fsToken.prototype.resolve = function() {
+        for(var i = _letStack.length-1; i >= 0; i --) {
+            if(_letStack[i][0] == this.val) {
+                return _letStack[i][1];
+            }
+        }
+        
+        return _raws.get(this.val);
+    }
+    
     /** Used while parsing, stores the offset of the current character
      * @type integer
      * @private
      */
     var _parsePointer = 0;
+    
+    /** The stack for let values, as a [key, value] array
+     * 
+     * This is used while parsing and while calling the let function (if it is the root sexpr).
+     * @type array<array<string, string|number|function(**):*|array>
+     * @private
+     */
+    var _letStack = [];
     
     /** Converts a string to an s expression for one term starting at the offset `_parsePointer`.
      * 
@@ -151,7 +195,8 @@ load.provide("dusk.utils.functionStore", (function() {
             while(!expr.charAt(++_parsePointer).match(/[\s()]/) && _parsePointer < expr.length) {
                 buff += ""+expr.charAt(_parsePointer);
             }
-            return _raws.get(buff);
+            
+            return new _fsToken(buff);
         }
     }
     
@@ -161,15 +206,38 @@ load.provide("dusk.utils.functionStore", (function() {
      */
     functionStore.eval = function(expr) {
         _parsePointer = 0;
+        _letStack = [];
         var sexpr = _toSexpr(expr);
+        
+        var _letfn = function(bind, expr, val) {
+            _letStack.push([bind.val, val]);
+            var output = _bindSexpr(true, expr);
+            _letStack.pop();
+            return output;
+        }
         
         var _bindSexpr = function(call, sexpr) {
             if(Array.isArray(sexpr)) {
-                var fn = sexpr[0].bind.apply(
-                    sexpr[0], [undefined].concat(sexpr.splice(1).map(_bindSexpr.bind(undefined, true)))
-                );
-                if(call) return fn.call(undefined);
-                return fn;
+                if(sexpr[0].val == "let") {
+                    if(call) {
+                        // If we should call it, that means it must have all arguments
+                        _letStack.push([sexpr[1].val, _bindSexpr(true, sexpr[3])]);
+                        var val = _bindSexpr(true, sexpr[2]);
+                        _letStack.pop();
+                        return val;
+                    }else{
+                        // Otherwise bind the letfn as appropriate
+                        return Function.prototype.bind.apply(_letfn, [undefined].concat(sexpr.splice(1)));
+                    }
+                }else{
+                    var fn = Function.prototype.bind.apply(
+                        sexpr[0].resolve(), [undefined].concat(sexpr.splice(1).map(_bindSexpr.bind(undefined, true)))
+                    );
+                    if(call) return fn.call(undefined);
+                    return fn;
+                }
+            }else if(sexpr instanceof _fsToken){
+                return sexpr.resolve();
             }else{
                 return sexpr;
             }
@@ -180,6 +248,7 @@ load.provide("dusk.utils.functionStore", (function() {
     
     // Builtin functions
     functionStore.register("list", function(){return Array.prototype.slice.call(arguments);});
+    functionStore.register("fn", function(x){return _raws.get(x)});
     functionStore.register("print", function(){console.log.apply(console, arguments);});
     functionStore.register("if", function(c, t, f){return c ? t : f});
     functionStore.register("+", function(){
