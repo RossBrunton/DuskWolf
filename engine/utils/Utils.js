@@ -18,8 +18,6 @@ load.provide("dusk.utils", (function() {
 	utils.copy = function(o, deep) {
 		if(o == null || typeof(o) != 'object') return o;
 		
-		console.log("Copying... "+deep);
-		console.log(o);
 		var copy = o.constructor();
 		if(Array.isArray(o)) {
 			for(var i = 0; i < o.length; i ++) {
