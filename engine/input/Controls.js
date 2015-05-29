@@ -202,6 +202,27 @@ load.provide("dusk.input.controls", (function() {
 		return keyboard.isKeyPressed(_mappings[name][0]) || gamepad.isButtonPressed(_mappings[name][1]);
 	};
 	
+	/** Given an event from `{@link dusk.input.interaction.on}` it will check if it matches a control, and return an
+	 *  array of all controls that match.
+	 * 
+	 * @param {object} e The event object.
+	 * @return {array} All controls that match this event.
+	 * @since 0.0.21-alpha
+	 */
+	controls.interactionControl = function(inter) {
+		var out = [];
+		for(var m in _mappings) {
+			if(inter.type == interaction.KEY_DOWN) {
+				if(inter.which == _mappings[m][0]) out.push(m);
+			}
+			
+			if(inter.type == interaction.BUTTON_DOWN) {
+				if(inter.which == _mappings[m][1]) out.push(m);
+			}
+		}
+		return out;
+	};
+	
 	/** Used internally to handle the `{@link keyboard.keyPress}` event.
 	 *	This will check to see if a control is fired from the keypress.
 	 * @param {object} e The keyPress event object.
@@ -215,6 +236,7 @@ load.provide("dusk.input.controls", (function() {
 				toFire.type = controls.TYPE_KEY;
 				toFire.control = m;
 				toFire.root = e.root;
+				toFire.which = e.keyCode;
 				
 				controls.controlPressed.fire(toFire, m);
 			}
@@ -237,33 +259,14 @@ load.provide("dusk.input.controls", (function() {
 				toFire.type = controls.TYPE_BUTTON;
 				toFire.control = m;
 				toFire.root = "*";
+				toFire.which = e.which;
+				toFire.axis = e.axis;
 				
 				controls.controlPressed.fire(toFire, m);
 			}
 		}
 	};
 	gamepad.buttonPress.listen(_buttonPressed);
-	
-	/** Given an event from `{@link dusk.input.interaction.on}` it will check if it matches a control, and return an
-	 *  array of all controls that match.
-	 * 
-	 * @param {object} e The event object.
-	 * @return {array} All controls that match this event.
-	 * @since 0.0.21-alpha
-	 */
-	controls.interactionControl = function(inter) {
-		var out = [];
-		for(var m in _mappings) {
-			if(inter.type == interaction.KEY_DOWN) {
-				if(inter.which == _mappings[m][0]) out.push(m);
-			}
-			
-			if(inter.type == interaction.BUTTON_DOWN) {
-				if(inter.which == _mappings[m][1]) out.push(m);
-			}
-		}
-		return out;
-	};
 	
 	/** Saves the bindings to a save source.
 	 * 
