@@ -45,7 +45,7 @@ load.provide("quest.ents", (function() {
 		
 		_basic(l);
 		
-		l.addBlock(1, "allegiance", {"faction":"ALLY"}, true);
+		l.layer(1).addBlock("allegiance", {"faction":"ALLY"}, true);
 		
 		return l;
 	});
@@ -62,31 +62,31 @@ load.provide("quest.ents", (function() {
 		
 		_basic(l);
 		
-		l.addBlock(1, "allegiance", {"faction":"ENEMY"}, true);
+		l.layer(1).addBlock("allegiance", {"faction":"ENEMY"}, true);
 		
 		return l;
 	});
 
 	var _basic = function(l) {
-		l.addBlock(1, "baseRange", {"possibleRange":[]});
-		l.addBlock(1, "initialMoved", {"moved":false});
+		l.layer(1).addBlock("baseRange", {"possibleRange":[]});
+		l.layer(1).addBlock("initialMoved", {"moved":false});
 		
-		var inv = new items.Invent(4, "item.weapon", 1);
-		l.addBlock(2, "weapons", inv);
+		var inv = new items.Invent(4, "1", 1);
+		l.layer(2).addBlock("weapons", inv);
 		if(Math.random() > 0.3) inv.addItem("sword");
 		if(Math.random() > 0.3) inv.addItem("bow");
 		if(Math.random() > 0.3) inv.addItem("theLongblade");
 		if(Math.random() > 0.3) inv.addItem("snipersBow");
 		
 		if(Math.random() > 0.5) {
-			l.addBlock(1, "image", {"image":"Quest/images/shaman.png"});
-			l.addBlock(1, "class", {"move":5});
+			l.layer(1).addBlock("image", {"image":"Quest/images/shaman.png"});
+			l.layer(1).addBlock("class", {"move":5});
 		}else if(Math.random() > 0.5){
-			l.addBlock(1, "image", {"image":"Quest/images/knight.png"});
-			l.addBlock(1, "class", {"move":3});
+			l.layer(1).addBlock("image", {"image":"Quest/images/knight.png"});
+			l.layer(1).addBlock("class", {"move":3});
 		}else{
-			l.addBlock(1, "image", {"image":"Quest/images/dino.png"});
-			l.addBlock(1, "class", {"move":6});
+			l.layer(1).addBlock("image", {"image":"Quest/images/dino.png"});
+			l.layer(1).addBlock("class", {"move":6});
 		}
 	};
 
@@ -94,7 +94,12 @@ load.provide("quest.ents", (function() {
 	items.items.createNewType("weapon", {
 		"weapon":true,
 		"stats":{
-			"possibleRange_mod":"X @ sl ((block.item).minRange, (block.item).maxRange)",
+			"possibleRange_mod":
+				"(concat (list (list \
+					(getf (get layeredstats-block 'item') 'minRange') \
+					(getf (get layeredstats-block 'item') 'maxRange')\
+				)))"
+			//"possibleRange":"X @ sl ((block.item).minRange, (block.item).maxRange)",
 		}
 	});
 

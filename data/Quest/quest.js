@@ -249,7 +249,7 @@ load.provide("quest", (function() {
 				pa.options.push({"text":"Items", "listValue":"items", "listSelectFunction":function(pa, qu) {
 					qu([function(pa) {
 						pa.options = [];
-						var i = pa.entity.stats.getBlock(2, "weapons");
+						var i = pa.entity.stats.layer(2).getBlock("weapons");
 						i.forEach(function(item, slot) {
 							pa.options.push({"text":item.get("displayName"), "listValue":item.type});
 						});
@@ -272,7 +272,7 @@ load.provide("quest", (function() {
 			q.requestBoundPair("selectListMenu", {"path":"default:menu/menu"}),
 			q.requestBoundPair("uncolourRegion", {"regionsToUncolour":["attack"]}),
 			[function(pa) {
-				pa.mover.stats.addBlock(3, "moved", {"moved":true});
+				pa.mover.stats.layer(3).addBlock("moved", {"moved":true});
 				
 				return pa;
 			}, undefined, "Add moved block"]
@@ -297,7 +297,7 @@ load.provide("quest", (function() {
 				var ents = q.getLayeredRoom().getPrimaryEntityLayer().filter("stat(moved, 3)");
 				
 				for(var i = 0; i < ents.length; i ++) {
-					ents[i].stats.removeBlock(3, "moved");
+					ents[i].stats.layer(3).removeBlock("moved");
 				}
 				
 				oFulfill(true);

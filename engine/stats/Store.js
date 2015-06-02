@@ -62,7 +62,7 @@ load.provide("dusk.stats.store", (function() {
 		if(type != "stats") return;
 		
 		for(var d of data) {
-			_stats.set(d[0]) = unref(d[1]);
+			_stats.set(d[0], unref(d[1]));
 		}
 	};
 	

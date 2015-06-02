@@ -6,26 +6,24 @@ load.provide("dusk.items", (function() {
 	var utils = load.require("dusk.utils");
 	var Inheritable = load.require("dusk.utils.Inheritable");
 	var InheritableContainer = load.require("dusk.utils.InheritableContainer");
-	var parseTree = load.require("dusk.utils.parseTree");
+	var functionStore = load.require("dusk.utils.functionStore");
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	
-	/** @namespace dusk.items
-	 * @name dusk.items
+	/** Contains methods of managing items.
 	 * 
-	 * @description Contains methods of managing items.
+	 * Items are essentially just instances of `dusk.utils.Inheritable`, which are from `dusk.items.items`.	These
+	 * objects describe the items and their effects.
 	 * 
-	 * Items are essentially just instances of `{@link dusk.utils.Inheritable}`, which are from `{@link dusk.items.items}`.
-	 * 	These objects describe the items, and what they do.
+	 * Extra data is specific to one individial item, and not to its type. This contains things such as how many usages
+	 * it has left, if it is cursed or not, that kind of thing.
 	 * 
-	 * Extra data is specific to one individial item, and not to it's type.
-	 *  This contains things such as how many usages it has left, if it is cursed or not, that kind of thing.
+	 * Items can be stored in instances of `dusk.items.Invent`, where they can be added or removed. This provides a lot
+	 * of convinience methods for adding items and transfering them to another inventory. For example, a shop could be
+	 * an inventory, and when you buy something, it is transfered into your inventory.
 	 * 
-	 * Items are stored in instances of `{@link dusk.items.Invent}`, where they can be added or removed.
-	 *  This is used so that items can be transferred from one place to another easily,
-	 *  but the item will remain in it's old place if it cannot be sent to the other item.
-	 * 
-	 * The item Inheritable has a property called `"makStack"` which is the maximum number of the items
-	 *  that can be placed in an inventory, by default this is 0.
+	 * The item Inheritable has a property called `"makStack"` which is the maximum number of the items that can be
+	 * placed in an inventory, by default this is 0. This is the only property that has meaning to this system,
+	 * although other parts of the engine may use other properties.
 	 * 
 	 * @since 0.0.17-alpha
 	 */
@@ -39,26 +37,22 @@ load.provide("dusk.items", (function() {
 	//Create the default item.
 	items.items.createNewType("root", {"maxStack":64});
 	
-	/** Creates a new inventory. 
+	/** An inventory manages items, and has the ability to add or remove items.
 	 * 
-	 * @class dusk.items.Invent
+	 * It is recommended that this be used whenever multiple items need to be stored, rather than in an array or the
+	 * like.
 	 * 
-	 * @classdesc An inventory manages items, and has the ability to add or remove items.
+	 * An inventory carries restrictions on what items can be stored in it, this is done by specifying a function string
+	 * for `dusk.utils.functionStore`. The item to be add will be passed as an argument to this function.
 	 * 
-	 * It is recommended that this be used whenever multiple items need to be stored, rather than in an array or the like.
-	 * 
-	 * An inventory carries restrictions on what items can be stored in it, this is done by specifying a string for a 
-	 *  `{@link dusk.sgui.parseTree`}. An "item" operator is added, which is the item to be added, and you can do things
-	 *  like `"item.itemType = Sword"` to allow only swords.
-	 * 
-	 * Items are arranged in "slots", and are not sorted automatically.
-	 *  The number of slots the inventory has is defined when it is created, and each slot can contain one type of item.
-	 *	Multiple items of the same type can be stored in the same slot, up to the item's `"maxStack"` value,
-	 *   or the Invent's `"maxStack"` value, whichever is lower.
+	 * Items are arranged in "slots", and are not sorted automatically. The number of slots the inventory has is defined
+	 * when it is created, and each slot can contain one type of item. Multiple items of the same type can be stored in
+	 * the same slot, up to the item's `"maxStack"` value, or the Invent's `"maxStack"` value, whichever is lower.
 	 * 
 	 * @param {integer} capacity The number of inventory slots this inventory should have.
 	 * @param {string} restriction The restriction on what items can be added to this inventory.
-	 * @param {integer=0xffffffff} maxStack The maximum number of items that can be stored in one single slot.
+	 * @param {integer=Number.MAX_SAFE_INTEGER} maxStack The maximum number of items that can be stored in one single
+	 *  slot.
 	 * @since 0.0.17-alpha
 	 * @constructor
 	 */
@@ -78,14 +72,14 @@ load.provide("dusk.items", (function() {
 		 */
 		this._items = [];
 		
-		var c = _tree.compile(restriction);
-		/** The compiled node for the restriction tree.
+		/** The function for the restriction.
 		 * 
 		 * @type function
 		 * @private
 		 * @since 0.0.21-alpha
 		 */
-		this._restriction = c.eval.bind(c);
+		this._restriction = functionStore.eval(restriction);
+		
 		/** The restriction, as unprocessed text.
 		 * 
 		 * @type string
@@ -98,7 +92,7 @@ load.provide("dusk.items", (function() {
 		 * No item stack will have larger than this number of elements.
 		 * @type integer
 		 */
-		this.maxStack = maxStack>=0?maxStack:0xffffffff;
+		this.maxStack = maxStack>=0?maxStack:Number.MAX_SAFE_INTEGER;
 		
 		/** This will be fired when the contents of this inventory change. There is no event object.
 		 * 
@@ -109,17 +103,6 @@ load.provide("dusk.items", (function() {
 		this.contentsChanged = new EventDispatcher("dusk.items.Invent.contentsChanged");
 	};
 	
-	/** The tree used for restrictions.
-	 * 
-	 * @type dusk.utils.parseTree.Compiler
-	 * @private
-	 * @static
-	 * @since 0.0.21-alpha
-	 */
-	var _tree = new parseTree.Compiler([], [], [
-		["item", function(o, c) {return c}],
-	]);
-	
 	/** Checks if the specified item can be added into the inventory.
 	 * @param {dusk.utils.Inheritable} item An item from `{@link dusk.items.items}` that should be checked.
 	 * @return {boolean} Whether it can be added or not.
@@ -127,31 +110,14 @@ load.provide("dusk.items", (function() {
 	items.Invent.prototype.isValidAddition = function(item) {
 		if(!item || (this.countOccupiedSlots() >= this._capacity && this.findSlot(item.type) === -1)) return false;
 		
-		/*for(var i = this._restrictions.length-1; i >= 0; i --) {
-			switch(this._restrictions[i][1]) {
-				case items.REST_ISEQ:
-					if(item.get(this._restrictions[i][0]) != this._restrictions[i][2]) return false;break;
-				case items.REST_ISNEQ:
-					if(item.get(this._restrictions[i][0]) == this._restrictions[i][2]) return false;break;
-				
-				case items.REST_ISIN:
-					if(item.get(this._restrictions[i][0]) in this._restrictions[i][2]) return false;break;
-				case items.REST_ISNIN:
-					if(!(item.get(this._restrictions[i][0]) in this._restrictions[i][2])) return false;break;
-				
-				default:
-					console.warn(this.toString()+" has invalid restrictions.");
-			}
-		}*/
-		
 		return this._restriction(item);
 	};
 	
-	/** Checks if the specified item can be addet to an item slot.
-	 *   This does not do anything that `{@link dusk.items.Invent#isValidAddition}` does,
-	 *   and should not be used to replace it.
-	 * @param {string|dusk.utils.Inheritable} item An item type that should be checked,
-	 *  either an item from `{@link dusk.items.items}` or a string type name.
+	/** Checks if the specified item can be added to an item slot.
+	 * 
+	 * This does not do anything that `isValidAddition` does, and that function should be called before this.
+	 * @param {string|dusk.utils.Inheritable} item An item type that should be checked, either an item from
+	 *  `dusk.items.items` or a string type name.
 	 * @param {integer} slot The slot to check.
 	 * @return {boolean} Whether it can be added or not.
 	 */
@@ -176,8 +142,8 @@ load.provide("dusk.items", (function() {
 	};
 	
 	/** Attempts to add multiple copies of the specified item, if possible.
-	 * @param {string|dusk.utils.Inheritable} item An item from `{@link dusk.items.items}`,
-	 *  or a string type name, that should be added.
+	 * @param {string|dusk.utils.Inheritable} item An item from `dusk.items.items`, or a string type name, that should
+	 *  be added.
 	 * @param {integer=1} amount The number of items that should be added, defaults to `1` if not specified.
 	 * @param {boolean=false} noFire If true, then the `itemsUpdated` event will not fire.
 	 * @return {integer} The number of items that are left after all possible items were added.
@@ -228,8 +194,8 @@ load.provide("dusk.items", (function() {
 	
 	/** Returns an item of the specified type, if it exists in the inventory. The item will remain in the inventory.
 	 * @param {string} type The type of item to look up.
-	 * @return {?dusk.utils.Inheritable} An item from `{@link dusk.items.items}` that was previously added of the specified type, 
-	 *  or null if it doesn't exist.
+	 * @return {?dusk.utils.Inheritable} An item from `{@link dusk.items.items}` that was previously added of the
+	 *  specified type or null if it doesn't exist.
 	 */
 	items.Invent.prototype.getAnItem = function(type) {
 		for(var i = 0; i < this._items.length; i ++) {
@@ -242,8 +208,8 @@ load.provide("dusk.items", (function() {
 	};
 	
 	/** Returns any item if it exists in the inventory. The item will remain in the inventory.
-	 * @return {?dusk.utils.Inheritable} An item from `{@link dusk.items.items}` that was previously added,
-	 *  or null if the inventory is empty.
+	 * @return {?dusk.utils.Inheritable} An item from `{@link dusk.items.items}` that was previously added or null if
+	 *  the inventory is empty.
 	 */
 	items.Invent.prototype.getAnyItem = function() {
 		for(var i = 0; i < this._items.length; i ++) {
@@ -257,8 +223,8 @@ load.provide("dusk.items", (function() {
 	
 	/** Removes and returns an item of the specified type. The item will no longer remain in the inventory.
 	 * @param {string} type The type of item to take.
-	 * @return {?dusk.utils.Inheritable} An item from `{@link dusk.items.items}` that was previously added
-	 *  and has just been removed of the specified type, or null if it doesn't exist.
+	 * @return {?dusk.utils.Inheritable} An item from `{@link dusk.items.items}` that was previously added and has just
+	 *  been removed of the specified type, or null if it doesn't exist.
 	 */
 	items.Invent.prototype.takeAnItem = function(type) {
 		for(var i = 0; i < this._items.length; i ++) {
@@ -516,7 +482,8 @@ load.provide("dusk.items", (function() {
 		}
 	};
 	
-	/** Calls the given function once for each slot in the invent. For each slot, the top item in it will be the argument.
+	/** Calls the given function once for each slot in the invent. For each slot, the top item in it will be the
+	 * argument.
 	 * @param {function(dusk.utils.Inheritable, int):undefined} funct The function to call. Second argument is the slot.
 	 * @since 0.0.21-alpha
 	 */
@@ -528,7 +495,7 @@ load.provide("dusk.items", (function() {
 		}
 	};
 	
-	/** Saves this inventory to an object that can then be loaded with `{@link dusk.items.Invent#refLoad}`.
+	/** Saves this inventory to an object that can then be loaded with `dusk.items.Invent#refLoad`.
 	 * 
 	 * This requires `{@link dusk.save}` to be imported.
 	 * @return {object} This inventory, as an object.
@@ -550,10 +517,10 @@ load.provide("dusk.items", (function() {
 		return [out, this._capacity, this._restrictionText, this.maxStack];
 	};
 	
-	/** Given a previously saved inventory (via `{@link items.Invent#refSave}`) will create a new inventory matching
-	 *  the data that was saved.
+	/** Given a previously saved inventory (via `items.Invent#refSave`) will create a new inventory matching the data
+	 * that was saved.
 	 * 
-	 * This requires `{@link save}` to be imported.
+	 * This requires `dusk.save` to be imported.
 	 * @param {object} data The saved data.
 	 * @return {items.Invent} An inventory from the saved data.
 	 * @since 0.0.21-alpha
@@ -596,10 +563,6 @@ load.provide("dusk.items", (function() {
 		return holdStr + "]";
 	};
 	
-	Object.seal(items);
-	Object.seal(items.Invent);
-	Object.seal(items.Invent.prototype);
-	
 	//Testing
 	items.items.createNewType("sword", {"itemType":"Sword"});
 	items.items.createNewType("stabbySword", {"damage":12}, "sword");
@@ -609,11 +572,11 @@ load.provide("dusk.items", (function() {
 	items.items.createNewType("blood", {"restore":50, "tile":"1,0"}, "potion");
 	items.items.createNewType("magic", {"restore":50, "tile":"3,0"}, "potion");
 	
-	window.swords = new items.Invent(5, "item.itemType = Sword");
+	window.swords = new items.Invent(5, "(let item (== (getf item 'itemType') 'Sword'))");
 	swords.addItem(items.items.create("sword"), 5);
 	swords.addItem(items.items.create("stabbySword"), 1);
 	
-	window.extraInvent = new items.Invent(5, "true");
+	window.extraInvent = new items.Invent(5, "1");
 	
 	return items;
-})());
+})(), {"alsoSeal":["Invent"]});

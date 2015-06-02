@@ -56,6 +56,16 @@ load.provide("dusk.utils.functionStore", (function() {
      */
 	var functionStore = {};
 	
+    /** Variable list
+     * 
+     * Set a key on here, and a token will evaluate to the value when encountered and not bound to a let statement.
+     * Please have the name be of the form "namespace-name". If you wish, you may set this before you call the
+     * function returned from eval to pass data that you can't pass as arguments.
+     * 
+     * @type Map<string, *>
+     */
+    functionStore.vars = new Map();
+    
     /** Stores the raw functions
      * 
      * @type Map<string, function(**):*>
@@ -103,7 +113,15 @@ load.provide("dusk.utils.functionStore", (function() {
             }
         }
         
-        return _raws.get(this.val);
+        if(functionStore.vars.has(this.val)) {
+            return functionStore.vars.get(this.val);
+        }
+        
+        if(_raws.has(this.val)) {
+            return _raws.get(this.val);
+        }
+        
+        throw TypeError("Token "+this.val+" is not a stored function or variable");
     }
     
     /** Used while parsing, stores the offset of the current character
@@ -237,9 +255,17 @@ load.provide("dusk.utils.functionStore", (function() {
                     return fn;
                 }
             }else if(sexpr instanceof _fsToken){
-                return sexpr.resolve();
+                if(call) {
+                    return sexpr.resolve();
+                }else{
+                    return function() {return sexpr.resolve();}
+                }
             }else{
-                return sexpr;
+                if(call) {
+                    return sexpr;
+                }else{
+                    return function() {return sexpr;}
+                }
             }
         }
         

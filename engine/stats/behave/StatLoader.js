@@ -47,7 +47,7 @@ load.provide("dusk.stats.behave.StatLoader", (function() {
 		}
 		
 		if(this._data("statsLoadImage")) {
-			this._entity.src = this._entity.stats.get("image");
+			this._entity.src = this._entity.stats.getValue("image");
 		}
 	};
 	
