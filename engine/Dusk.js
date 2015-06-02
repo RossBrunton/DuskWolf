@@ -19,16 +19,6 @@ load.provide("dusk", (function() {
 	 */
 	dusk.ver = "0.0.21-alpha";
 	
-	/** The frame rate, in frames per second.
-	 * 
-	 * If it exists, this is set the value of the DuskWolf element's "frameRate" property.
-	 * 
-	 * Currently unused, always the refresh rate of the monitor (60fps).
-	 * @type integer
-	 * @default 60
-	 */
-	dusk.frameRate = 60; 
-	
 	/** The path to the data directory,
 	 *   this is where the game will look for all it's data (like images) if given a relative URL.
 	 * 
@@ -75,28 +65,6 @@ load.provide("dusk", (function() {
 		dusk.onLoad.fire();
 	};
 	
-	dusk.HTMLDuskwolfElement = null;
-	if("register" in document) {
-		dusk.HTMLDuskwolfElement = document.register("swo-duskwolf", {
-			prototype: Object.create(HTMLDivElement.prototype),
-			extends: "div",
-			attributeChangedCallback:function(attrName, oldVal, newVal) {
-				function toPx(a) {
-					if((""+a).slice(-2) != "px") return a+"px";
-					return ""+a;
-				}
-				
-				switch(attrName) {
-					case "data-width":
-					case "data-height":
-						this.style[attrName] = toPx(newVal);
-						document.getElementById(this.id+"-canvas").style[attrName] = toPx(newVal);
-						break;
-				}
-			}
-		});
-	}
-	
 	//We seem to be already loaded here
 	var _toPx = function(a) {
 		if((""+a).slice(-2) != "px") return a+"px";
@@ -106,7 +74,6 @@ load.provide("dusk", (function() {
 	var _elem;
 	if(document.getElementsByTagName("dw-settings").length) {
 		_elem = document.getElementsByTagName("dw-settings")[0];
-		if(_elem.getAttribute("data-frameRate")) dusk.frameRate = _elem.getAttribute("data-frameRate");
 		if(_elem.getAttribute("data-data")) dusk.dataDir = _elem.getAttribute("data-data");
 		if(_elem.getAttribute("data-dev") !== undefined) dusk.dev = true;
 		
@@ -121,28 +88,5 @@ load.provide("dusk", (function() {
 		});
 	}
 	
-	/** Returns the DuskWolf element.
-	 * @return dusk.HTMLDuskWolfElement
-	 * @since 0.0.21-alpha
-	 */
-	dusk.getElement = function() {
-		return document.getElementsByTagName("swo-duskwolf")[0];
-	};
-	
-	/** Returns the DuskWolf element's canvas.
-	 * @return HTMLCanvasElement
-	 * @since 0.0.21-alpha
-	 */
-	dusk.getElementCanvas = function() {
-		return document.getElementsByTagName("swo-duskwolf")[0].getElementsByTagName("canvas")[0];
-	};
-	
-	/** Returns the DuskWolf element's textarea.
-	 * @return HTLMTextareaElement
-	 * @since 0.0.21-alpha
-	 */
-	dusk.getElementTextarea = function() {
-		return document.getElementsByTagName("swo-duskwolf")[0].getElementsByTagName("textarea")[0];
-	};
 	return dusk;
 })());

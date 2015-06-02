@@ -18,15 +18,14 @@ load.provide("dusk.utils.frameTicker", (function() {
     
     /** An event dispatcher which fires once every frame.
      * 
-     * There are `{@link dusk.frameRate}` frames in a second, although it may be less due to the system's performance.
+     * This system attempts to fire 60 frames in a second, although it may be less due to the system's performance or
+     * more due to wierd refresh rates.
      * 
      * The events fired have no properties.
      * 
      * @type dusk.utils.EventDispatcher
      */
     frameTicker.onFrame = new EventDispatcher("dusk.utils.frameTicker.onFrame");
-    
-    //setInterval(dusk.utils.frameTicker.onFrame.fire.bind(dusk.utils.frameTicker.onFrame), 1000/dusk.frameRate);
     
     var _do = function() {
         requestAnimationFrame(_do);
