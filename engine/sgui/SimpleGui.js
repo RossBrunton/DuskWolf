@@ -527,17 +527,19 @@ load.provide("dusk.sgui", (function() {
 		}
 	});
 	
-	/** Returns a fancy representation of all panes.
-	 * 
-	 * @return {string} A string representation of all components.
+	/** Displays a fancy representation of all panes to the console.
 	 */
 	sgui.describe = function() {
+		var logarr = [];
+		
 		var holdstr = "";
 		for(var r of _roots) {
-			holdstr += "\n"+r.name+":\n"+r.describe()+"\n";
+			logarr.push("color:#660000;");
+			holdstr += "%c"+r.describe(logarr)+"\n";
 		}
 		
-		return holdstr;
+		console.log.apply(console, [holdstr].concat(logarr));
+		return undefined;
 	};
 	
 	//Set up the cached canvas

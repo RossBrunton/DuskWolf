@@ -870,27 +870,28 @@ load.provide("dusk.sgui.Group", (function() {
 	
 	/** Returns a fancy representation of this element, groups overload this and make it look prettier.
 	 * 
-	 * @param {integer=0} indent How much to indent the description. Should be indented with `\u2551`.
+	 * @param {?array<dusk.sgui.Component>} logarr Arguments to pass to console.log. Append anything to this if needed.
 	 * @return {string} A string representation of this component.
 	 */
-	Group.prototype.describe = function(indent) {
-		if(!indent) indent = 0;
-		
-		var holdstr = "\u2551".repeat(indent)+"\u2554\u2550 ";
-		holdstr += sgui.getTypeName(this)+": "+this.name;
+	Group.prototype.describe = function(logarr) {
+		var holdstr = "\u2554\u2550\u2550\u2550\u2550 ";
+		holdstr += this.name;
 		if(this.active) holdstr += "*";
 		if(this.allowMouse && !this.mouseAction) holdstr += "'";
 		if(this.allowMouse && this.mouseAction) holdstr += "\"";
-		holdstr += " " + "\u2550".repeat(50 - holdstr.length);
+		
+		logarr.push(this);
+		holdstr += " %o\n%c";
+		logarr.push("color:#660000;");
 		
 		for(var c of this._componentsArr) {
-			holdstr += "\n"+c.describe(indent+1);
+			holdstr += "\u2551"+c.describe(logarr).replace(/\n%c/gi, "\n%c\u2551")+"\n%c";
+			logarr.push("color:#660000;");
 		}
 		
-		var endln = "\u2551".repeat(indent)+"\u255A";
-		endln += "\u2550".repeat(50 - endln.length);
+		var endln = "\u255A" + "\u2550".repeat(4);
 		
-		return holdstr+"\n"+endln;
+		return holdstr+endln;
 	};
 	
 	sgui.registerType("Group", Group);

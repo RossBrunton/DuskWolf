@@ -973,15 +973,17 @@ load.provide("dusk.sgui.Component", (function() {
 	
 	/** Returns a fancy representation of this element, groups overload this and make it look prettier.
 	 * 
-	 * @param {integer} indent How much to indent the description. Should be indented with `\u2551`.
+	 * @param {array<dusk.sgui.Component>} logarr Arguments to pass to console.log. Append anything to this if needed.
 	 * @return {string} A string representation of this component.
 	 */
-	Component.prototype.describe = function(indent) {
-		var holdstr = "\u2551".repeat(indent);
-		holdstr += " "+sgui.getTypeName(this)+": "+this.name;
+	Component.prototype.describe = function(logarr) {
+		var holdstr = "%c "+this.name;
+		logarr.push("color:#333333;");
 		if(this.active) holdstr += "*";
 		if(this.allowMouse && !this.mouseAction) holdstr += "m";
 		if(this.allowMouse && this.mouseAction) holdstr += "M";
+		logarr.push(this);
+		holdstr += " %o";
 		return holdstr;
 	};
 	
