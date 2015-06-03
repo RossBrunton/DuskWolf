@@ -135,6 +135,12 @@ load.provide("dusk.sgui", (function() {
 	 * @type dusk.utils.EventDispatcher
 	 */
 	sgui.onRender = new EventDispatcher("onRender");
+	/** Set to true when the drawing has started.
+	 * @type boolean
+	 * @since 0.0.21-alpha
+	 * @private
+	 */
+	var _drawingStarted = false;
 	
 	/** An object containing all the styles, the key is the selector, and the value is the props.
 	 * @type object
@@ -193,36 +199,6 @@ load.provide("dusk.sgui", (function() {
 	 * @since 0.0.21-alpha
 	 */
 	sgui.drawDataPool = new Pool(Object);
-	
-	/** The current frame rate. Maybe some strange value for the first few frames.
-	 * @type float
-	 * @since 0.0.21-alpha
-	 */
-	sgui.frameRate = 0;
-	/** The timestamp of the last render event.
-	 * @type float
-	 * @since 0.0.21-alpha
-	 * @private
-	 */
-	var _lastFrame = 0;
-	/** True if the screen is running at higher than 90Hz.
-	 * @type boolean
-	 * @since 0.0.21-alpha
-	 */
-	sgui.highRate = false;
-	/** The number of frames that have elapsed, in total.
-	 * @type int
-	 * @since 0.0.21-alpha
-	 */
-	sgui.framesTotal = 0;
-	/** If five consecutive frames have a frame rate of higher than 60fps, then `{@link dusk.sgui.highRate}` is set to
-	 *  true. This is the current count.
-	 * @type int
-	 * @since 0.0.21-alpha
-	 * @private
-	 */
-	var _highFrames = 0;
-	
 	
 	/** Returns or creates a root.
 	 * @param {string} name The name of the root to get or create.
@@ -333,26 +309,11 @@ load.provide("dusk.sgui", (function() {
 	 * @private
 	 */
 	var _draw = function(time) {
-		var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame 
-		|| window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 		requestAnimationFrame(_draw);
 		
 		if(!dusk.started || document.hidden) return;
 		
-		//Frame rate
-		sgui.frameRate = 1000 / (time - _lastFrame);
-		_lastFrame = time;
-		if(sgui.frameRate > 90 && options.get("graphics.highRate") == "detect") {
-			_highFrames ++;
-			if(_highFrames >= 5) {
-				sgui.highRate = true;
-			}
-		}else{
-			_highFrames = 0;
-		}
-		sgui.framesTotal ++;
-		
-		if(sgui.highRate && sgui.framesTotal % 2 == 1) return false;
+		if(frameTicker.frameRate == 120 && frameTicker.totalFrames % 2 == 1) return false;
 		
 		//Draw roots
 		for(var c = 0; c < _roots.length; c ++){
@@ -537,10 +498,6 @@ load.provide("dusk.sgui", (function() {
 	
 	//Listen for frame events
 	frameTicker.onFrame.listen(function(e) {
-		//Check if high rate overrided
-		if(options.get("graphics.highRate") !== "detect")
-			sgui.highRate = options.get("graphics.highRate") == "on";
-		
 		if(sgui.displayMode == sgui.MODE_FULL) {
 			//dusk.sgui.width = $("#"+dusk.elemPrefix).parent().width();
 			
@@ -562,6 +519,12 @@ load.provide("dusk.sgui", (function() {
 		for(var p = _roots.length-1; p >= 0; p --){
 			_roots[p].frame.fire();
 		}
+		
+		//And begin, done here so the frameTicker RAF begins first in each frame
+		if(!_drawingStarted) {
+			_draw(0);
+			_drawingStarted = true;
+		}
 	});
 	
 	//Set up the cached canvas
@@ -582,17 +545,9 @@ load.provide("dusk.sgui", (function() {
 	controls.addControl("sgui_action", 65, 0);
 	controls.addControl("sgui_cancel", 27, 1);
 	
-	//Options
-	options.register("graphics.highRate", options.select, "detect", "Skip every other frame, for 120Hz displays.",
-		["on", "off", "detect"]
-	);
-	
 	//Default dimensions
 	//sgui.width = _getCanvas().width;
 	//sgui.height = _getCanvas().height;
-	
-	//And begin
-	_draw(0);
 	
 	return sgui;
 })());

@@ -6,6 +6,7 @@ load.provide("dusk.sgui.FpsMeter", (function() {
 	var Label = load.require("dusk.sgui.Label");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
+	var frameTicker = load.require("dusk.utils.frameTicker");
 	
 	/** Creates a new FpsMeter component.
 	 * 
@@ -35,7 +36,7 @@ load.provide("dusk.sgui.FpsMeter", (function() {
 	 * @private
 	 */
 	var _frame = function(e) {
-		this._readings[this._count] = ~~(sgui.frameRate);
+		this._readings[this._count] = ~~(frameTicker.trueFrameRate);
 		this._count ++;
 		
 		if(this._count == 30) {
