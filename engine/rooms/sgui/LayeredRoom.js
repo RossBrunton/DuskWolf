@@ -41,13 +41,13 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 		
 		//Prop masks
 		this._mapper.map("spawn", "spawn");
-		this._mapper.map("layers", "layers");
+		this._mapper.map("layers", "layers", ["allowMouse"]);
 		this._mapper.map("scrollSpeed", "scrollSpeed");
 		this._mapper.map("scrollRegion", "scrollRegion");
 		this._mapper.map("editorColour", "editorColour");
 		this._mapper.map("editorColor", "editorColor");
 		this._mapper.map("scrollInstantly", "scrollInstantly");
-		this._mapper.map("room", "room", ["spawn"]);
+		this._mapper.map("room", "room", ["spawn", "allowMouse"]);
 		
 		//Listeners
 		this.frame.listen(_basicMainFrame.bind(this));
@@ -237,7 +237,8 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 					{"name":"entities", "type":"EntityGroup",
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
 						"twidth":entities.twidth, "theight":entities.theight,
-						"swidth":entities.swidth, "sheight":entities.sheight, "globalCoords":true, "layer":"+"
+						"swidth":entities.swidth, "sheight":entities.sheight, "globalCoords":true, "layer":"+",
+						"allowMouse":this.allowMouse
 					});
 					
 					if("primary" in val[i] && val[i].primary) this._primaryEntityGroup = val[i].name;

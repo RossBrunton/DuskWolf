@@ -38,11 +38,13 @@ load.provide("quest", (function() {
 	
 	var root = sgui.get("default", true);
 	root.mouseFocus = false;
+	root.allowMouse = true;
 	dquest.make(root, "quest");
 	
 	//Test
 	root.get("menu", "Group").update({
-	   "children":{
+		"allowMouse":true,
+		"children":{
 			"back":{
 				"type":"FancyRect",
 				"width":0,
@@ -72,11 +74,13 @@ load.provide("quest", (function() {
 			},
 			"menu":{
 				"type":"Grid",
+				"allowMouse":true,
 				"globals":{
 					"type":"PlusText",
 					"plusType":"FocusCheckerRect",
 					"behind":true,
 					"mouseCursor":"pointer",
+					"allowMouse":true,
 					"label":{
 						"colour":"#cccccc",
 						"size":16

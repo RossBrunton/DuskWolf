@@ -242,7 +242,7 @@ load.provide("dusk.sgui.Component", (function() {
 		 * @default true
 		 * @since 0.0.20-alpha
 		 */
-		this.allowMouse = true;
+		this.allowMouse = false;
 		/** Whether clicking on this component will trigger its action.
 		 * 
 		 * @type boolean
