@@ -527,6 +527,19 @@ load.provide("dusk.sgui", (function() {
 		}
 	});
 	
+	/** Returns a fancy representation of all panes.
+	 * 
+	 * @return {string} A string representation of all components.
+	 */
+	sgui.describe = function() {
+		var holdstr = "";
+		for(var r of _roots) {
+			holdstr += "\n"+r.name+":\n"+r.describe()+"\n";
+		}
+		
+		return holdstr;
+	};
+	
 	//Set up the cached canvas
 	/*_cacheCanvas.height = sgui.height;
 	_cacheCanvas.width = sgui.width;

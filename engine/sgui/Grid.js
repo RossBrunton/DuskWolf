@@ -102,6 +102,13 @@ load.provide("dusk.sgui.Grid", (function() {
 		 */
 		this._populationEvent = new EventDispatcher("dusk.sgui.Grid._populationEvent");
 		
+		/** The last array of objects used to populate this grid.
+		 * @type array<object>
+		 * @private
+		 * @since 0.0.21-alpha
+		 */
+		this._lastPopulation = null;
+		
 		//Prop masks
 		this._mapper.map("vspacing", "vspacing");
 		this._mapper.map("hspacing", "hspacing");
@@ -126,7 +133,8 @@ load.provide("dusk.sgui.Grid", (function() {
 	 * 
 	 * The x and y coordinates will be set automatically.
 	 * 
-	 * This may take an array as it's argument, in which case it will alternate between the components as it places them.
+	 * This may take an array as it's argument, in which case it will alternate between the components as it places
+	 * them.
 	 * 
 	 * This may be used in the JSON representation with the property `populate`.
 	 * 
@@ -135,6 +143,7 @@ load.provide("dusk.sgui.Grid", (function() {
 	Grid.prototype.populate = function(child) {
 		if(child === undefined) return;
 		if(!Array.isArray(child)) child = [child];
+		this._lastPopulation = child;
 		
 		//Fire before event
 		child = this._populationEvent.firePass({"action":"before", "child":child}, "before").child;
@@ -326,6 +335,44 @@ load.provide("dusk.sgui.Grid", (function() {
 		}
 		
 		return max - (includeOffset?this.yOffset:0) + ((this.rows-1)* this.vspacing);
+	};
+	
+	/** Returns a fancy representation of this element, groups overload this and make it look prettier.
+	 * 
+	 * @param {integer=0} indent How much to indent the description. Should be indented with `\u2551`.
+	 * @return {string} A string representation of this component.
+	 */
+	Grid.prototype.describe = function(indent) {
+		if(!indent) indent = 0;
+		
+		var holdstr = "\u2551".repeat(indent)+"\u2554\u2550 ";
+		holdstr += sgui.getTypeName(this)+": "+this.name;
+		if(this.active) holdstr += "*";
+		if(this.allowMouse && !this.mouseAction) holdstr += "m";
+		if(this.allowMouse && this.mouseAction) holdstr += "M";
+		holdstr += " ";
+		holdstr += " " + "\u2550".repeat(50 - holdstr.length);
+		
+		holdstr += "\n"+"\u2551".repeat(indent+1)+" "+this.cols+"x"+this.rows;
+		
+		if(!this._lastPopulation) {
+			holdstr += "\n"+"\u2551".repeat(indent+1)+" (unpopulated)";
+		}else{
+			for(var c of this._lastPopulation) {
+				if("type" in c) {
+					holdstr += "\n"+"\u2551".repeat(indent+1)+" "+c.type;
+				}else if("type" in this.globals) {
+					holdstr += "\n"+"\u2551".repeat(indent+1)+" "+this.globals.type;
+				}else{
+					holdstr += "\n"+"\u2551".repeat(indent+1)+" (undefined type)";
+				}
+			}
+		}
+		
+		var endln = "\u2551".repeat(indent)+"\u255A";
+		endln += "\u2550".repeat(50 - endln.length);
+		
+		return holdstr+"\n"+endln;
 	};
 	
 	sgui.registerType("Grid", Grid);

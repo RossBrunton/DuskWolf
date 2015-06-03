@@ -868,6 +868,31 @@ load.provide("dusk.sgui.Group", (function() {
 		return true;
 	};
 	
+	/** Returns a fancy representation of this element, groups overload this and make it look prettier.
+	 * 
+	 * @param {integer=0} indent How much to indent the description. Should be indented with `\u2551`.
+	 * @return {string} A string representation of this component.
+	 */
+	Group.prototype.describe = function(indent) {
+		if(!indent) indent = 0;
+		
+		var holdstr = "\u2551".repeat(indent)+"\u2554\u2550 ";
+		holdstr += sgui.getTypeName(this)+": "+this.name;
+		if(this.active) holdstr += "*";
+		if(this.allowMouse && !this.mouseAction) holdstr += "'";
+		if(this.allowMouse && this.mouseAction) holdstr += "\"";
+		holdstr += " " + "\u2550".repeat(50 - holdstr.length);
+		
+		for(var c of this._componentsArr) {
+			holdstr += "\n"+c.describe(indent+1);
+		}
+		
+		var endln = "\u2551".repeat(indent)+"\u255A";
+		endln += "\u2550".repeat(50 - endln.length);
+		
+		return holdstr+"\n"+endln;
+	};
+	
 	sgui.registerType("Group", Group);
 	
 	return Group;

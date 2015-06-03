@@ -971,6 +971,20 @@ load.provide("dusk.sgui.Component", (function() {
 		return "[sgui "+sgui.getTypeName(this)+" "+this.name+"]";
 	};
 	
+	/** Returns a fancy representation of this element, groups overload this and make it look prettier.
+	 * 
+	 * @param {integer} indent How much to indent the description. Should be indented with `\u2551`.
+	 * @return {string} A string representation of this component.
+	 */
+	Component.prototype.describe = function(indent) {
+		var holdstr = "\u2551".repeat(indent);
+		holdstr += " "+sgui.getTypeName(this)+": "+this.name;
+		if(this.active) holdstr += "*";
+		if(this.allowMouse && !this.mouseAction) holdstr += "m";
+		if(this.allowMouse && this.mouseAction) holdstr += "M";
+		return holdstr;
+	};
+	
 	
 	//type
 	Object.defineProperty(Component.prototype, "type", {
