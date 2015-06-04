@@ -151,12 +151,12 @@ load.provide("dusk.sgui.Grid", (function() {
 		//Delete all the existing ones, or all the out of range one
 		if(!this.recycle) {
 			for(var x in this._components){
-				this.deleteComponent(x);
+				this.delete(x);
 			}
 		}else{
 			for(var x in this._components){
 				if(x.split(",")[0] > this.cols-1 || x.split(",")[1] > this.rows-1)
-					this.deleteComponent(x);
+					this.delete(x);
 			}
 		}
 		

@@ -479,7 +479,7 @@ load.provide("dusk.sgui.Group", (function() {
 	 * @return {boolean} If the delete was successful, this will return false if the component doesn't exist.
 	 * @since 0.0.21-alpha
 	 */
-	Group.prototype.remove = function(com) {
+	Group.prototype.delete = function(com) {
 		if (this._components[com.toLowerCase()]){
 			if(this._focusedCom == com.toLowerCase()) this.focus = "";
 			this._components[com.toLowerCase()].onDelete.fire({"com":this._components[com.toLowerCase()]});
@@ -489,15 +489,6 @@ load.provide("dusk.sgui.Group", (function() {
 			return true;
 		}
 	};
-	/** Depreciated alias for `remove`.
-	 * 
-	 * @param {string} com The name of the component to delete.
-	 * @return {boolean} If the delete was successful, this will return false if the component doesn't exist.
-	 * @depreciated
-	 */
-	Group.prototype.deleteComponent = function(com) {
-		return this.remove(com);
-	};
 	
 	/** Deletes all the components in this group.
 	 * 
@@ -505,7 +496,7 @@ load.provide("dusk.sgui.Group", (function() {
 	 */
 	Group.prototype.empty = function() {
 		for(var c = this._componentsArr.length-1; c >= 0; c --) {
-			this.remove(this._componentsArr[c].name);
+			this.delete(this._componentsArr[c].name);
 		}
 	};
 	

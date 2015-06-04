@@ -569,7 +569,7 @@ load.provide("dusk.sgui.Component", (function() {
 		set: function (value) {
 			if(value && !this._deleted) {
 				this._deleted = true;
-				this.container.deleteComponent(this.name);
+				this.container.delete(this.name);
 			}
 		},
 		

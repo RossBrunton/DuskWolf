@@ -247,7 +247,7 @@ load.provide("dusk.sgui", (function() {
 	 * @return {boolean} True if successfull.
 	 * @since 0.0.21-alpha
 	 */
-	sgui.remove = function(name) {
+	sgui.delete = function(name) {
 		var com = this.get(com);
 		if(com) {
 			com.onDelete.fire({"com":com});

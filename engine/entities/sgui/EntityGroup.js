@@ -606,7 +606,7 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 	EntityGroup.prototype.clear = function() {
 		for(var c = this._componentsArr.length-1; c >= 0; c --) {
 			if(this._componentsArr[c].name != "blank") {
-				this.deleteComponent(this._componentsArr[c].name);
+				this.delete(this._componentsArr[c].name);
 			}
 		}
 		
@@ -708,7 +708,7 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 		for(var c = this._componentsArr.length-1; c >= 0; c --) {
 			if(this._componentsArr[c] == this._selectedEntity) {
 				this._entities.splice(this._entities.indexOf(this._componentsArr[c]), 1);
-				this.deleteComponent(this._componentsArr[c].name);
+				this.delete(this._componentsArr[c].name);
 				this._selectedEntity = null;
 			}
 		}
