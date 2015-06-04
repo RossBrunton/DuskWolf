@@ -4,10 +4,7 @@
 
 load.provide("dusk.sgui.Root", (function() {
 	var Group = load.require("dusk.sgui.Group");
-	var Component = load.require("dusk.sgui.Component");
 	var sgui = load.require("dusk.sgui");
-	var c = load.require("dusk.sgui.c");
-	var PosRect = load.require("dusk.utils.PosRect");
 	var keyboard = load.require("dusk.input.keyboard");
 	var mouse = load.require("dusk.input.mouse");
 	var interaction = load.require("dusk.input.interaction");
@@ -78,8 +75,6 @@ load.provide("dusk.sgui.Root", (function() {
 		// And are in expand mode
 		this.xDisplay = "expand";
 		this.yDisplay = "expand";
-		
-		this.frame.listen(_frame.bind(this));
 	};
 	Root.prototype = Object.create(Group.prototype);
 	
@@ -189,7 +184,6 @@ load.provide("dusk.sgui.Root", (function() {
 				this._cacheCanvases[i].style.imageRendering = "-webkit-optimize-contrast";
 				
 				this._cacheCanvases[i].getContext("2d").mozImageSmoothingEnabled = false;
-				this._cacheCanvases[i].getContext("2d").webkitImageSmoothingEnabled = false;
 				this._cacheCanvases[i].getContext("2d").imageSmoothingEnabled = false;
 				this._cacheCanvases[i].getContext("2d").textBaseline = "middle";
 				
@@ -263,10 +257,6 @@ load.provide("dusk.sgui.Root", (function() {
 		}else{
 			return Group.prototype.interact.call(this, e, nofire);
 		}
-	};
-	
-	var _frame = function() {
-		
 	};
 	
 	Root.prototype.getRoot = function() {
