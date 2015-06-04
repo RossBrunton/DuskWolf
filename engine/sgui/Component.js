@@ -437,14 +437,10 @@ load.provide("dusk.sgui.Component", (function() {
 	 *  container.
 	 * 
 	 * @param {object} e The interaction event.
-	 * @param {boolean} nofire If true then the event listeners for interactions, dir presses, action and cancel won't
-	 *  be fired and this returns false.
 	 * @return {boolean} Whether the parent container should run its own actions.
 	 */
-	Component.prototype.interact = function(e, nofire) {
+	Component.prototype.interact = function(e) {
 		this._noFlow = false;
-		
-		if(nofire) return false;
 		
 		var dirReturn = this.onInteract.fireAnd(e, e.filter);
 		

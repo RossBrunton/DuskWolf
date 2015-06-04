@@ -234,9 +234,6 @@ load.provide("dusk.sgui.Group", (function() {
 	 * @return {boolean} True if the event should bubble, else false.
 	 */
 	Group.prototype.interact = function(e) {
-		// Calling this twice, I need to think up a better way, blegh
-		Component.prototype.interact.call(this, e, true);
-		
 		if(this.focusBehaviour == Group.FOCUS_ALL) {
 			var toReturn = true;
 			for(var c = this._componentsArr.length-1; c >= 0; c --) {
