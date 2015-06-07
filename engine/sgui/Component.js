@@ -533,7 +533,7 @@ load.provide("dusk.sgui.Component", (function() {
 	 * @param {object} props The object to read the properties from.
 	 */
 	Component.prototype.update = function(props) {
-		this._mapper.massSet(props);
+		this._mapper.update(props);
 	};
 	
 	/** Returns or sets a single property of the component.

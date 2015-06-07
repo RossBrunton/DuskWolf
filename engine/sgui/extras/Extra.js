@@ -72,7 +72,7 @@ load.provide("dusk.sgui.extras.Extra", (function() {
 	 * @param {object} props An object describing this extra.
 	 */
 	Extra.prototype.update = function(props) {
-		this._props.massSet(props);
+		this._props.update(props);
 	};
 	
 	/** Returns a string representation of this extra.

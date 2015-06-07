@@ -95,7 +95,7 @@ load.provide("dusk.utils.Mapper", (function() {
 	 * 
 	 * @param {object} props The object to read the properties from.
 	 */
-	Mapper.prototype.massSet = function(props) {
+	Mapper.prototype.update = function(props) {
 		var toProcess = [];
 		for(var p in props) {
 			toProcess[toProcess.length] = p;
