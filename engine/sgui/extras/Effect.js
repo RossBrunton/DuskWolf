@@ -7,18 +7,17 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var Range = load.require("dusk.utils.Range");
 	
-	/** @class dusk.sgui.extras.Effect
-	 * 
-	 * @classdesc An effect is a type of extra that does the following:
+	/** An effect is a type of extra that does the following:
 	 * 
 	 * - Stays idle until it is triggered.
 	 * - When triggered, waits a specified number of frames.
 	 * - Then does something (an effect, like fading in or out, or moving) for a specified number of frames.
 	 * - Then deletes itself.
 	 * 
-	 * This class does nothing on its own, it is expected that other subclasses of this provide the actuall effects.
-	 *  They should use the `{@link dusk.sgui.extras.Effect#_tick}`, `{@link dusk.sgui.extras.Effect#_onStart}`
-	 *   and `{@link dusk.sgui.extras.Effect#_onEnd}` handlers to act.
+	 * This class does nothing on its own, it is expected that other subclasses of this provide the actual effects.
+	 * They should use the `_tick}`, `_onStart}` and `_onEnd}` handlers to act.
+	 * 
+	 * See the `addTrigger` function to see how to automatically trigger an effect.
 	 * 
 	 * @param {dusk.sgui.Component} owner The component this extra is "attached to".
 	 * @param {string} name This extra's name.
@@ -29,9 +28,9 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 	var Effect = function(owner, name) {
 		Extra.call(this, owner, name);
 		
-		/** A string, or array of strings, indicating the name(s) of an effect in the container.
-		 *  This effect will start once this is finished.
-		 * @type string|array
+		/** A string, or array of strings or functions, indicating the name(s) of an effect in the owner which will
+		 *  start once or a functino to call when this is finished.
+		 * @type string|function()|array<string|function()>
 		 */
 		this.then = "";
 		/** How long the body of the effect will play, in frames.
@@ -51,7 +50,7 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 		/** The state of the effect, from 0 to 3, higher numbers indicate later states.
 		 * 
 		 * - 0: Idle, the effect hasn't started yet.
-		 * - 1: Waititng, the effect is counting down until it has started.
+		 * - 1: Waititng, the effect is counting down until it starts.
 		 * - 2: Running, the effect is currently running.
 		 * - 3: Ended, the effect has ended and is deleting itself.
 		 * 
@@ -66,13 +65,30 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 		 * @protected
 		 */
 		this._left = -1;
-		/** An array of all the range triggers, each element is an array with the first element being the range to check,
-		 *  the second being the threshold, and the third being -1 (<=), 0 (==) or 1 (>=) indicating how the value needs to 
-		 *  relate to the threshold.
+		/** If true, then the next time the effect runs, its "then" properties won't be processed.
+		 * @type boolean
+		 * @since 0.0.21-alpha
+		 * @private
+		 */
+		this._stopLoop = false;
+		
+		/** An array of all the range triggers, each element is an array with the first element being the range to
+		 *  check, the second being the threshold, and the third being -1 (<=), 0 (==) or 1 (>=) indicating how the
+		 *  value needs to relate to the threshold.
 		 * @type array
 		 * @private
 		 */
 		this._rangeTriggers = [];
+		/** An array of all the promise functions that have been assigned to this effect.
+		 * @type array<function(*):*>
+		 * @private
+		 */
+		this._promiseFns = [];
+		/** An array of all the promise functions that have been assigned to the effect chain.
+		 * @type array<function(*):*>
+		 * @private
+		 */
+		this._promiseChainFns = [];
 		
 		/** If true, then the next frame will start the action.
 		 * 
@@ -88,6 +104,12 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 		 * @since 0.0.20-alpha
 		 */
 		this._effectFrameId = 0;
+		/** Event IDs, as `[listener, id]` pairs so they can be removed.
+		 * @type array<array>
+		 * @private
+		 * @since 0.0.21-alpha
+		 */
+		this._eventIds = [];
 		
 		/** Fired when the effect should do one frame of whatever it is doing.
 		 * 
@@ -121,11 +143,23 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 	};
 	Effect.prototype = Object.create(Extra.prototype);
 	
-	/** Starts the effect if it has not already been started. */
-	Effect.prototype.start = function() {
-		if(this._state > 0) return;
-		this._state = 1;
-		this._left = this.delay;
+	/** Starts the effect if it has not already been started.
+	 * @param {boolean=false} If true, then the promise that this function will return resolves once the entire chain
+	 *  (following "then" effects) is resolved, rather than just this effect.
+	 * @return {Promise<dusk.sgui.Component|array<dusk.sgui.Component>>} A promise that resolves when either this effect
+	 *  resolves, or all following effects resolve.
+	 */
+	Effect.prototype.start = function(chain) {
+		return new Promise((function(fulfill, reject) {
+			if(this._state > 0) return;
+			this._state = 1;
+			this._left = this.delay;
+			if(chain) {
+				this._promiseChainFns.push(fulfill);
+			}else{
+				this._promiseFns.push(fulfill);
+			}
+		}).bind(this));
 	};
 	
 	/** Added to listener triggers, will call `{@link dusk.sgui.extras.Effect#start}`.
@@ -143,24 +177,54 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 		
 		if(this.then) {
 			var then = this.then;
-			if(typeof this.then == "string" || "call" in this.then) {
+			if(!Array.isArray(then)) {
 				then = [this.then];
 			}
 			
-			for(var i = 0; i < then.length; i ++) {
-				if(this._owner.getExtra(then[i]) instanceof Effect) {
-					this._owner.getExtra(then[i]).start();
-				}else if("call" in then[i]) {
-					then[i](this._owner);
-				} 
+			var pfuncts = [];
+			if(!this._stopLoop) {
+				for(var t of then) {
+					if(this._owner.getExtra(t) instanceof Effect) {
+						pfuncts.push(this._owner.getExtra(t).start(true));
+					}else if("call" in t) {
+						t(this._owner);
+					} 
+				}
 			}
+			
+			var chainFns = this._promiseChainFns;
+			Promise.all(pfuncts).then(function(o) {
+				for(p of chainFns) {
+					p(o);
+				}
+			});
+		}else{
+			for(var p of this._promiseChainFns) {
+				p([this._owner]);
+			}
+		}
+		
+		for(var p of this._promiseFns) {
+			p(this._owner);
 		}
 		
 		if(this.noDelete) {
 			this._state = 0;
+			this._promiseFns = [];
+			this._promiseChainFns = [];
 		}else{
 			this._owner.removeExtra(this.name);
 		}
+		
+		this._stopLoop = false;
+	};
+	
+	/** The next time this effect ends, it will not call the "then" effects or functions.
+	 * 
+	 * Usefull for terminating loops.
+	 */
+	Effect.prototype.stopLoop = function() {
+		this._stopLoop = true;
 	};
 	
 	/** Added to the `{@link dusk.sgui.extras.Extra#_onDelete}` listener; removes the frame listener from it's owner.
@@ -169,6 +233,9 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 	 */
 	var _deleted = function(e) {
 		this._owner.frame.unlisten(this._effectFrameId);
+		for(id of this._eventIds) {
+			id[0].unlisten(id[1]);
+		}
 	};
 	
 	/** Called every frame by it's owner, this does effect stuff.
@@ -181,6 +248,7 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 		}
 		
 		if(this._state == 0) {
+			// Waiting, looking for triggers
 			for(var i = this._rangeTriggers.length-1; i >= 0; i--) {
 				if((this._rangeTriggers[0] >= this._rangeTriggers[1]
 					&& (!this._rangeTriggers[2]||this._rangeTriggers[2] == 1)
@@ -197,6 +265,7 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 		}
 		
 		if(this._left == 0 && this._state == 1) {
+			// Effect started
 			this._state = 2;
 			this._onStart.fire();
 			this._left = this.duration;
@@ -204,10 +273,12 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 		}
 			
 		if(this._left != 0 && this._state == 2) {
+			// Effect running
 			this._tick.fire();
 		}
 		
 		if(this._left == 0 && this._state == 2) {
+			// Effect ended
 			this.end();
 		}
 	};
@@ -220,6 +291,7 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 	 * - `{@link dusk.utils.Range}`: When the value reaches a threshold, the first element of the trigger is the range
 	 *  object to check, the second is the threshold, and the third is -1 (<=), 0 (==) or 1 (>=) indicating how the
 	 *  value needs to relate to the threshold.
+	 * - `Promise`: The effect will start when this promise resolves.
 	 * - `true`: If the value is exactly `true`, then the event will trigger on the next frame.
 	 * - `array`: Each element of the array is considered to be a trigger, and this function will be called on all of
 	 *  them.
@@ -238,9 +310,11 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 		}
 		
 		if(trigger[0] instanceof EventDispatcher) {
-			trigger[0].listen(this._startEvent.bind(this));
+			this._eventIds.push([trigger[0], trigger[0].listen(this._startEvent.bind(this))]);
 		}else if(trigger[0] instanceof Range) {
 			this._rangeTriggers.push(trigger);
+		}else if(trigger[0] instanceof Promise) {
+			trigger[0].then(this._startEvent.bind(this));
 		}else if(trigger === true) {
 			this._autoTrigger = true;
 		}
