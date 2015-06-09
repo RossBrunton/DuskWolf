@@ -44,114 +44,130 @@ load.provide("dusk.script.Runner", (function() {
 	 */
 	Runner.prototype.start = function(init) {
 		return new Promise((function(fulfill, reject) {
-			var actionStack = [[-1, this._script.map(function(e) {return [{}, e];})]];
-			var goneBack = false;
+			var currentAction = _scriptToLL(this._script)[0];
 			
-			var pushStack = function(actions, loopif) {
-				actionStack.push([-1, actions.map(function(e) {return [{}, e];}), loopif]);
-			};
+			var addActions = function(actions, loopif) {
+				var all = _scriptToLL(actions);
+				
+				all[1].next = currentAction.next;
+				if(currentAction.next) currentAction.next.prev = all[1];
+				
+				all[0].prev = currentAction.next;
+				currentAction.next = all[0];
+				
+				// Looping
+				if(loopif) {
+					all[1].loopCond = loopif;
+					all[1].loopBack = all[0];
+				}
+			}
 			
 			var next = function(value) {
-				var top = actionStack[actionStack.length-1];
-				
-				var p = top[0];
-				if(goneBack) {
-					if(p) {
-						value = top[1][p-1][0];
+				if(Runner.log) {
+					if("name" in currentAction.action && currentAction.action.name) {
+						console.log("%cRunning action "+currentAction.action.name+" with %o", "color:#999999", value);
 					}else{
-						value = init;
+						console.log("%cRunning unnamed action with %o", "color:#999999", value);
 					}
-					goneBack = false;
-				}else{
-					var p = ++top[0];
 				}
 				
-				if(p < top[1].length) {
-					if(p) {
-						top[1][p-1][0] = utils.copy(value, true); // Actions are paired with their output
-					}
+				var ret = undefined;
+				
+				if(typeof currentAction.action == "function") {
+					ret = currentAction.action(value, addActions);
+				}else{
+					ret = currentAction.action.forward(value, addActions);
+				}
+				
+				if(!(ret instanceof Promise)) ret = Promise.resolve(ret);
+				
+				ret.then(function(x) {
+					currentAction.output = utils.copy(x);
+					var hold = currentAction;
 					
-					if(Runner.log) {
-						if("name" in top[1][p][1] && top[1][p][1].name) {
-							console.log("%cRunning action "+top[1][p][1].name+" with %o", "color:#999999", value);
+					if(currentAction.loopCond && currentAction.loopCond(x)) {
+						currentAction = currentAction.loopBack;
+						currentAction.forcedInput = true; // Have it read the input specified here
+						currentAction.forceInputValue = x;
+						next(x);
+					}else{
+						currentAction = currentAction.next;
+						if(currentAction) {
+							currentAction.prev = hold;
+							currentAction.forcedInput = false; // Have it read the output from the previous action
+							next(x);
 						}else{
-							console.log("%cRunning unnamed action with %o", "color:#999999", value);
+							fulfill(x);
 						}
 					}
-					
-					var ret = undefined;
-					
-					if(typeof top[1][p][1] == "function") {
-						ret = top[1][p][1](value, pushStack);
-					}else{
-						ret = top[1][p][1].forward(value, pushStack);
-					}
-					
-					if(!(ret instanceof Promise)) ret = Promise.resolve(ret);
-					ret.then(next, prev);
-				}else{
-					if(top[2] && top[2](value)) {
-						top[0] = -1;
-						next(value);
-					}else if(actionStack.length > 1) {
-						actionStack.pop();
-						next(value);
-					}else{
-						fulfill(value);
-					}
-				}
-			};
+				}, prev);
+			}
 			
-			var prev = function(err) {
-				var top = actionStack[actionStack.length-1];
-				var p = --top[0];
-				goneBack = true;
-				
-				if(!(err instanceof Runner.Cancel)) {
-					// A real error
-					reject(err);
+			var prev = function(error) {
+				if(!(error instanceof Runner.Cancel)) {
+					reject(error);
 					return;
 				}
 				
-				if(p >= 0) {
-					var lastOutput = top[1][p][0]; // Actions are paired with their output
-					
-					var ret = undefined;
-					
-					if(Runner.log) {
-						if(typeof top[1][p][1] == "function" || !("inverse" in top[1][p][1])) {
-							console.log(
-								"%cRunning inverse of unnamed action with %o, but it lacks an inverse function",
-								"color:#999999", lastOutput
-							);
-						}else if("name" in top[1][p][1] && top[1][p][1].name) {
-							console.log(
-								"%cRunning inverse of action "+top[1][p][1].name+" with %o", "color:#999999",
-								lastOutput
-							);
-						}else{
-							console.log("%cRunning inverse of unnamed action with %o", "color:#999999", lastOutput);
-						}
-					}
-					
-					if(typeof top[1][p][1] == "function" || !("inverse" in top[1][p][1])) {
-						ret = Promise.reject(new Runner.Cancel());
+				// Go back one
+				currentAction = currentAction.prev;
+				if(!currentAction) reject(error);
+				currentAction.next = currentAction.originalNext;
+				
+				if(Runner.log) {
+					if("name" in currentAction.action && currentAction.action.name) {
+						console.log("%cRunning inverse action "+currentAction.action.name+"", "color:#999999");
 					}else{
-						ret = top[1][p][1].inverse(lastOutput, err);
+						console.log("%cRunning unnamed inverse action", "color:#999999");
+					}
+				}
+				
+				var ret = undefined;
+				if(typeof currentAction.action == "function" || !("inverse" in currentAction.action)) {
+					ret = Promise.reject(new Runner.Cancel());
+				}else{
+					ret = currentAction.action.inverse(currentAction.output);
+				}
+				
+				if(!(ret instanceof Promise)) ret = Promise.resolve(ret);
+				
+				ret.then(function(x) {
+					var input;
+					if(currentAction.forcedInput) {
+						input = currentAction.forceInputValue;
+					}else{
+						input = currentAction.prev ? currentAction.prev.output : init;
 					}
 					
-					if(!(ret instanceof Promise)) ret = Promise.resolve(ret);
-					ret.then(next, prev);
-				}else if(actionStack.length > 1) {
-					actionStack.pop();
-					prev(err);
-				}else{
-					reject(err);
-				}
-			};
+					next(input);
+				}, prev);
+			}
 			
 			next(init);
 		}).bind(this));
+	}
+	
+	/** Converts an array of actions to a linked list.
+	 * @param {array} script The script to create.
+	 * @return {array} A [first, last] array of linked list nodes.
+	 * @private
+	 */
+	var _scriptToLL = function(script) {
+		var head = undefined;
+		var now = undefined;
+		var node = undefined;
+		
+		for(var a of script) {
+			node = {};
+			node.action = a;
+			node.prev = now;
+			if(now) now.next = node;
+			if(now) now.originalNext = node;
+			now = node;
+			if(!head) head = now;
+		}
+		
+		return [head, now];
 	}
 	
 	/** Whether script runners should describe each action they perfrom.

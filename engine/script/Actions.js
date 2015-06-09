@@ -72,5 +72,17 @@ load.provide("dusk.script.Actions", (function() {
 		});
 	};
 	
+	/** Simply calls "addActions" with it's body.
+	 * @param {array=[]} thenClause An array of actions to do.
+	 * @return {object} The action object.
+	 */
+	Actions.actions = function(body) {
+		return Runner.action("actions", function(x, add) {
+			add(singleArr(body));
+			
+			return x;
+		});
+	};
+	
 	return Actions;
 })());
