@@ -28,6 +28,7 @@ load.provide("example.plat", (function() {
 	load.require("dusk.sgui.FpsMeter");
 	load.require("dusk.sgui.PlusText");
 	load.require("dusk.entities.sgui.EntityWorkshop");
+	var EntityGroup = load.require("dusk.entities.sgui.EntityGroup");
 	
 	var SaveSpec = load.require("dusk.save.SaveSpec");
 	var checkpoints = load.require("dusk.checkpoints");
@@ -176,7 +177,8 @@ load.provide("example.plat", (function() {
 	}, "plat");
 	
 	var root = sgui.get("default", true).get("plat2", "Group");
-	dplat.make(root, "orange");
+	window.dplatOut = dplat.make(root, "orange");
+	dplatOut.tileProperties.add(1, 0, EntityGroup.SOLID_TILE);
 	
 	root.width = 728;
 	root.height = 440;

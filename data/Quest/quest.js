@@ -32,7 +32,7 @@ load.provide("quest", (function() {
 		dquest.rooms.setRoom("quest.rooms.rooma", 0).then((function(e) {
 			_turns.register("ally", quest.allyTurn);
 			_turns.register("enemy", quest.enemyTurn);
-			_turns.start();
+			//_turns.start();
 		}).bind(this));
 	});
 	

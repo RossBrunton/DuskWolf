@@ -117,9 +117,9 @@ load.provide("dusk.tiles.sgui.EditableTileMap", (function() {
 		// Copy/paste
 		this.onControl.listen(_copy.bind(this), controls.addControl("editabletm_copy", "C"));
 		this.onControl.listen(_paste.bind(this), controls.addControl("editabletm_paste", "P"));
-		this.onControl.listen(_solid.bind(this), controls.addControl("editabletm_solid", "X"));
-		this.onControl.listen(_weight.bind(this), controls.addControl("editabletm_weight", "W"));
-		this.onControl.listen(_addWeight.bind(this), controls.addControl("editabletm_add_weight", "K"));
+		//this.onControl.listen(_solid.bind(this), controls.addControl("editabletm_solid", "X"));
+		//this.onControl.listen(_weight.bind(this), controls.addControl("editabletm_weight", "W"));
+		//this.onControl.listen(_addWeight.bind(this), controls.addControl("editabletm_add_weight", "K"));
 		
 		//Directions
 		this.dirPress.listen(_rightAction.bind(this), c.DIR_RIGHT);
@@ -187,7 +187,7 @@ load.provide("dusk.tiles.sgui.EditableTileMap", (function() {
 			);
 		}
 		
-		if(this.weights) {
+		/*if(this.weights) {
 			var wstr = "";
 			
 			if(this.weights.getWeight(t[0], t[1])) {
@@ -204,7 +204,7 @@ load.provide("dusk.tiles.sgui.EditableTileMap", (function() {
 				e.d.destX - e.d.slice.x + ((this._cx)*this.tileWidth()) + 2,
 				e.d.destY - e.d.slice.y + ((this._cy+1)*this.tileHeight()) - 6
 			);
-		}
+		}*/
 		
 		TileMap.tileData.free(t);
 	};
@@ -285,64 +285,6 @@ load.provide("dusk.tiles.sgui.EditableTileMap", (function() {
 			}
 		}
 		this.drawAll();
-		
-		return false;
-	};
-	
-	/** Toggles the solidness of the current tile (given by its TileMapWeights).
-	 * @param {object} e An event object.
-	 * @private
-	 * @since 0.0.21-alpha
-	 */
-	var _solid = function(e) {
-		if(e.ctrl || !editor.active || !this.weights) return true;
-		
-		var t = this.getTile(this._cx, this._cy);
-		if(this.weights.getSolid(t[0], t[1])) {
-			this.weights.addSolid(t[0], t[1], false);
-		}else{
-			this.weights.addSolid(t[0], t[1], true);
-		}
-		TileMap.tileData.free(t);
-		
-		return false;
-	};
-	
-	/** Sets the weight of the current tile for TileMapWeights.
-	 * @param {object} e An event object.
-	 * @private
-	 * @since 0.0.21-alpha
-	 */
-	var _weight = function(e) {
-		if(e.ctrl || !editor.active || !this.weights) return true;
-		
-		var t = this.getTile(this._cx, this._cy);
-		var w = this.weights.getWeight(t[0], t[1]);
-		if(e.shift) {
-			w --;
-		}else{
-			w ++;
-		}
-		this.weights.addWeight(t[0], t[1], w);
-		TileMap.tileData.free(t);
-		return false;
-	};
-	
-	/** Adds or removes a TileMapWeights instance from this TileMap.
-	 * @param {object} e An event object.
-	 * @private
-	 * @since 0.0.21-alpha
-	 */
-	var _addWeight = function(e) {
-		if(e.ctrl || !editor.active) return true;
-		
-		if(this.weights) {
-			if(confirm("Really delete weights?")) {
-				this.weights = null;
-			}
-		}else{
-			this.weights = new TileMapWeights(this._img.height()/this.tileHeight(), this._img.width()/this.tileWidth());
-		}
 		
 		return false;
 	};

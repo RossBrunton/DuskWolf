@@ -10,6 +10,7 @@ load.provide("weightsTest", (function() {
 	window.terrainModifier = load.require("dusk.tiles.TerrainModifier");
 	window.entityModifier = load.require("dusk.tiles.EntityModifier");
 	window.entityValidator = load.require("dusk.tiles.EntityValidator");
+	window.Properties = load.require("dusk.tiles.Properties");
 	window.dirs = load.require("dusk.utils.dirs");
 	load.require("quest");
 	
@@ -26,6 +27,8 @@ load.provide("weightsTest", (function() {
 	var tm = terrainModifier(w, [w.translate(map, cols, rows)], cols, rows, 1);
 	var em = entityModifier(sgui.path("default:/quest").getPrimaryEntityLayer(), [], function() {return 100;});
 	var ev = entityValidator(sgui.path("default:/quest").getPrimaryEntityLayer(), [], function() {return false;});
+	
+	window.p = new Properties(sgui.path("default:/quest/scheme"));
 	
 	window.testRegion = new Region(rows, cols, 1);
 	testRegion.addWeightModifier(tm);

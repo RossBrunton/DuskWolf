@@ -55,6 +55,7 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 		
 		this._scheme = null;
 		this.scheme = null;
+		this.tileProperties = null;
 		
 		this.particles = null;
 		this.fluid = null;
@@ -72,6 +73,8 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 		
 		this._mapper.map("theight", "theight");
 		this._mapper.map("twidth", "twidth");
+		
+		this._mapper.map("tileProperties", "tileProperties");
 		
 		//Listeners
 		for(var i = 48; i <= 57; i++) {
@@ -126,6 +129,8 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 		this.mouseFocus = false;
 	};
 	EntityGroup.prototype = Object.create(Group.prototype);
+	
+	EntityGroup.SOLID_TILE = "SOLID_TILE";
 	
 	EntityGroup.prototype.doFrame = function(active) {
 		if(editor.active) {
@@ -390,8 +395,25 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 		
 		if(ent.scheme) {
 			if(destX >= ent.x){
-				var altera =ent.scheme.mapSolidIn(destX+ent.collisionWidth, ent.y+ent.collisionOffsetY+1, false, false);
-				var alterb =ent.scheme.mapSolidIn(destX+ent.collisionWidth, ent.y+ent.collisionHeight-1, false, false);
+				//var altera =ent.scheme.mapSolidIn(destX+ent.collisionWidth, ent.y+ent.collisionOffsetY+1, false, false);
+				//var alterb =ent.scheme.mapSolidIn(destX+ent.collisionWidth, ent.y+ent.collisionHeight-1, false, false);
+				
+				var altera = 0;
+				var alterb = 0;
+				
+				if(this.tileProperties.has(
+					destX+ent.collisionWidth, ent.y+ent.collisionOffsetY+1, EntityGroup.SOLID_TILE,
+					this.twidth, this.theight
+				)) {
+					altera = -((destX+ent.collisionWidth) % this.twidth);
+				}
+				
+				if(this.tileProperties.has(
+					destX+ent.collisionWidth, ent.y+ent.collisionHeight-1, EntityGroup.SOLID_TILE,
+					this.twidth, this.theight
+				)) {
+					alterb = -((destX+ent.collisionWidth) % this.twidth);
+				}
 				
 				var alter = 
 				alterb == altera ? alterb :
@@ -407,8 +429,25 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 			}
 			
 			if(destX < ent.x){
-				var altera =ent.scheme.mapSolidIn(destX+ent.collisionOffsetX, ent.y+ent.collisionOffsetY+1, true,false);
-				var alterb =ent.scheme.mapSolidIn(destX+ent.collisionOffsetX, ent.y+ent.collisionHeight-1, true, false);
+				//var altera =ent.scheme.mapSolidIn(destX+ent.collisionOffsetX, ent.y+ent.collisionOffsetY+1, true,false);
+				//var alterb =ent.scheme.mapSolidIn(destX+ent.collisionOffsetX, ent.y+ent.collisionHeight-1, true, false);
+				
+				var altera = 0;
+				var alterb = 0;
+				
+				if(this.tileProperties.has(
+					destX+ent.collisionOffsetX, ent.y+ent.collisionOffsetY+1, EntityGroup.SOLID_TILE,
+					this.twidth, this.theight
+				)) {
+					altera = -((destX+ent.collisionOffsetX) % this.twidth) + this.twidth;
+				}
+				
+				if(this.tileProperties.has(
+					destX+ent.collisionOffsetX, ent.y+ent.collisionHeight-1, EntityGroup.SOLID_TILE,
+					this.twidth, this.theight
+				)) {
+					alterb = -((destX+ent.collisionOffsetX) % this.twidth) + this.twidth;
+				}
 				
 				var alter = 
 				alterb == altera ? alterb :
@@ -424,8 +463,25 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 			}
 			
 			if(destY > ent.y){
-				var altera =ent.scheme.mapSolidIn(ent.x+ent.collisionOffsetX+1, destY+ent.collisionHeight, false, true);
-				var alterb =ent.scheme.mapSolidIn(ent.x+ent.collisionWidth-1, destY + ent.collisionHeight, false, true);
+				//var altera =ent.scheme.mapSolidIn(ent.x+ent.collisionOffsetX+1, destY+ent.collisionHeight, false, true);
+				//var alterb =ent.scheme.mapSolidIn(ent.x+ent.collisionWidth-1, destY + ent.collisionHeight, false, true);
+				
+				var altera = 0;
+				var alterb = 0;
+				
+				if(this.tileProperties.has(
+					ent.x+ent.collisionOffsetX+1, destY+ent.collisionHeight, EntityGroup.SOLID_TILE,
+					this.twidth, this.theight
+				)) {
+					altera = -((destY+ent.collisionHeight) % this.theight);
+				}
+				
+				if(this.tileProperties.has(
+					ent.x+ent.collisionWidth-1, destY+ent.collisionHeight, EntityGroup.SOLID_TILE,
+					this.twidth, this.theight
+				)) {
+					alterb = -((destY+ent.collisionHeight) % this.theight);
+				}
 				
 				var alter = 
 				alterb == altera ? alterb :
@@ -441,8 +497,25 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 			}
 			
 			if(destY < ent.y){
-				var altera =ent.scheme.mapSolidIn(ent.x+ent.collisionOffsetX+1, destY+ent.collisionOffsetY, true, true);
-				var alterb =ent.scheme.mapSolidIn(ent.x+ent.collisionWidth-1, destY + ent.collisionOffsetY, true, true);
+				//var altera =ent.scheme.mapSolidIn(ent.x+ent.collisionOffsetX+1, destY+ent.collisionOffsetY, true, true);
+				//var alterb =ent.scheme.mapSolidIn(ent.x+ent.collisionWidth-1, destY + ent.collisionOffsetY, true, true);
+				
+				var altera = 0;
+				var alterb = 0;
+				
+				if(this.tileProperties.has(
+					ent.x+ent.collisionOffsetX+1, destY+ent.collisionOffsetY, EntityGroup.SOLID_TILE,
+					this.twidth, this.theight
+				)) {
+					altera = -((destY+ent.collisionOffsetY) % this.theight) + this.theight;
+				}
+				
+				if(this.tileProperties.has(
+					ent.x+ent.collisionWidth-1, destY+ent.collisionOffsetY, EntityGroup.SOLID_TILE,
+					this.twidth, this.theight
+				)) {
+					alterb = -((destY+ent.collisionOffsetY) % this.theight) + this.theight;
+				}
 				
 				var alter = 
 				alterb == altera ? alterb :

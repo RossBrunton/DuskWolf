@@ -42,6 +42,9 @@ load.provide("dusk.rooms.plat", (function() {
 		component.becomeActive();
 		component.flow(name);
 		plat.rooms.setLayeredRoom(component.get(name));
+		
+		var out = {"tileProperties":component.get(name).tileProperties};
+		return out;
 	}
 	
 	plat.save = function(type, args, ref) {

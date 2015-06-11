@@ -3,6 +3,8 @@
 "use strict";
 
 load.provide("dusk.sgui.c", (function() {
+	var dirs = load.require("dusk.utils.dirs");
+	
 	/** @namespace dusk.sgui.c
 	 * @name dusk.sgui.c
 	 * 
@@ -18,28 +20,28 @@ load.provide("dusk.sgui.c", (function() {
 	 * @value 0x01
 	 * @constant
 	 */
-	c.DIR_UP = 0x01;
+	c.DIR_UP = dirs.N;
 	
 	/** The direction down, positive in the y axis.
 	 * @type integer
 	 * @value 0x02
 	 * @constant
 	 */
-	c.DIR_DOWN = 0x02;
+	c.DIR_DOWN = dirs.S;
 	
 	/** The direction left, negative in the x axis.
 	 * @type integer
 	 * @value 0x04
 	 * @constant
 	 */
-	c.DIR_LEFT = 0x04;
+	c.DIR_LEFT = dirs.W;
 	
 	/** The direction right, negative in the x axis.
 	 * @type integer
 	 * @value 0x08
 	 * @constant
 	 */
-	c.DIR_RIGHT = 0x08;
+	c.DIR_RIGHT = dirs.E;
 	
 	
 	/** The horizontal orientation.

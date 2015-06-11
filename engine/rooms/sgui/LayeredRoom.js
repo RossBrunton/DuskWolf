@@ -21,6 +21,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 	var keyboard = load.require("dusk.input.keyboard");
 	var controls = load.require("dusk.input.controls");
 	var TileMapWeights = load.require("dusk.tiles.sgui.TileMapWeights");
+	var Properties = load.require("dusk.tiles.Properties");
 	var utils = load.require("dusk.utils");
 	
 	var LayeredRoom = function(parent, name) {
@@ -39,6 +40,10 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 		this.roomManager = null;
 		this.editorColour = "#000000";
 		
+		this._tileProperties = new Properties();
+		this.tileProperties;
+		this.tilePropertiesAuto = "*";
+		
 		//Prop masks
 		this._mapper.map("spawn", "spawn");
 		this._mapper.map("layers", "layers", ["allowMouse"]);
@@ -48,6 +53,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 		this._mapper.map("editorColor", "editorColor");
 		this._mapper.map("scrollInstantly", "scrollInstantly");
 		this._mapper.map("room", "room", ["spawn", "allowMouse"]);
+		this._mapper.map("tileProperties", "tileProperties");
 		
 		//Listeners
 		this.frame.listen(_basicMainFrame.bind(this));
@@ -216,8 +222,8 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 						"layer":"+"
 					});
 					
-					if("weights" in val[i] && val[i].weights instanceof TileMapWeights) 
-						this.get(val[i].name, mapType).weights = val[i].weights;
+					//if("weights" in val[i] && val[i].weights instanceof TileMapWeights) 
+					//	this.get(val[i].name, mapType).weights = val[i].weights;
 					
 					break;
 				
@@ -238,7 +244,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
 						"twidth":entities.twidth, "theight":entities.theight,
 						"swidth":entities.swidth, "sheight":entities.sheight, "globalCoords":true, "layer":"+",
-						"allowMouse":this.allowMouse
+						"allowMouse":this.allowMouse, "tileProperties":this.tileProperties
 					});
 					
 					if("primary" in val[i] && val[i].primary) this._primaryEntityGroup = val[i].name;
@@ -289,7 +295,36 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 			pLayers[i].height =
 				this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME | LayeredRoom.LAYER_TILEMAP).height;
 		}
+		
+		// Tile properties
+		if(this.tilePropertiesAuto && !this.tileProperties) {
+			this.tileProperties = new Properties();
+		}
+		
+		if(this.tilePropertiesAuto) {
+			if(this.tilePropertiesAuto == "*") {
+				this.tileProperties.associate(this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME));
+			}else{
+				this.tileProperties.associate(this.get(this.tilePropertiesAuto));
+			}
+		}
 	};
+	
+	//tileProperties
+	Object.defineProperty(LayeredRoom.prototype, "tileProperties", {
+		get: function() {
+			return this._tileProperties;
+		},
+		
+		set: function(value) {
+			this._tileProperties = value;
+			
+			var entLayers = this.getAllLayersOfType(LayeredRoom.LAYER_ENTITIES);
+			for(var l of entLayers) {
+				l.tileProperties = value;
+			}
+		}
+	});
 	
 	LayeredRoom.prototype.getFirstLayerOfType = function(type) {
 		for(var i = 0; i < this._layers.length; i ++) {

@@ -254,13 +254,13 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 			this.cols = map.cols;
 			
 			// Get the weights
-			if("weights" in map && map.weights) {
+			/*if("weights" in map && map.weights) {
 				this._img.loadPromise().then((function(value) {
 					this.weights = new TileMapWeights(this._img.height()/singleH, this._img.width()/singleW);
 					this.weights.import(map.weights);
 				}).bind(this));
 				this.weights = new TileMapWeights(0, 0);
-			}
+			}*/
 			
 			// Draw it
 			this.drawAll();
@@ -282,7 +282,7 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 			}
 			
 			hold.map = utils.dataToString(this._tileBuffer[0], utils.SD_BC16);
-			hold.weights = this.weights ? this.weights.export() : "";
+			//hold.weights = this.weights ? this.weights.export() : "";
 			
 			return hold;
 		}
@@ -400,44 +400,6 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 			return this.getTile(~~xpt, ~~ypt);
 		}
 	};
-
-	/** Assumes this TileMap is a schematic, and returns whether the specified coordinates are in a solid place.
-	 * 
-	 * If they are in a solid place, it returns the number of pixels to add to the x or y coordinate such that there is
-	 *  no collision.
-	 * 
-	 * This TileMap must have a `weights` value to use make use of this.
-	 * 
-	 * @param {integer} x The x exact coordinate to check.
-	 * @param {integer} y The y exact coordinate to check.
-	 * @param {boolean=false} shiftRightDown If true, then the entitiy will be shifted right/down, else left/up.
-	 * @param {boolean=false} shiftVer If true, then this will return the shift for vertical, rather than horizontal.
-	 * @return {integer} The number of pixels to shift this. This will be negative for left or up shifts.
-	 * @since 0.0.20-alpha
-	 */
-	TileMap.prototype.mapSolidIn = function(x, y, shiftRightDown, shiftVer) {
-		if(!this.weights) {
-			return 0;
-		}
-		
-		var tileNow = this.tilePointIn(x, y);
-		var toRet = 0;
-		
-		if(this.weights.getSolid(tileNow[0], tileNow[1])) {
-			if(!shiftRightDown && !shiftVer)
-				toRet = -(x % this.tileWidth());
-			if(shiftRightDown && !shiftVer)
-				toRet = -(x % this.tileWidth()) + this.tileWidth();
-			if(!shiftRightDown && shiftVer)
-				toRet = -(y % this.tileHeight());
-			if(shiftRightDown && shiftVer)
-				toRet = -(y % this.tileHeight()) + this.tileHeight();
-		}
-		
-		TileMap.tileData.free(tileNow);
-		
-		return toRet;
-	};
 	
 	/** Used internally to manage frames.
 	 * @param {object} e A `frame` event object.
@@ -486,13 +448,13 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 			t[0] = this._tiles[0][((y*this.cols)+x)<<1];
 			t[1] = this._tiles[0][(((y*this.cols)+x)<<1)+1];
 			
-			if(this.weights) {
+			/*if(this.weights) {
 				t[4] = this.weights.getWeight(t[0], t[1]);
 				t[5] = this.weights.getSolid(t[0], t[1])?1:0;
 			}else{
 				t[4] = 1;
 				t[5] = 0;
-			}
+			}*/
 		}
 		
 		//console.warn("Tile "+x+","+y+" not found on "+this.name+".");
@@ -527,13 +489,13 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 			t[1] = this._tiles[0][(((t[3]*this.cols)+t[2])<<1)+1];
 		}
 		
-		if(this.weights) {
+		/*if(this.weights) {
 			t[4] = this.weights.getWeight(t[0], t[1]);
 			t[5] = this.weights.getSolid(t[0], t[1])?1:0;
 		}else{
 			t[4] = 1;
 			t[5] = 0;
-		}
+		}*/
 		
 		return t;
 	};
