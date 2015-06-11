@@ -58,7 +58,9 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 		//Listeners
 		this.frame.listen(_basicMainFrame.bind(this));
 		this._drawingChildren.listen(_updateScroll.bind(this));
-		this.onControl.listen(this.saveRoomToConsole.bind(this), controls.addControl("basicmain_save", "S"));
+		this.onControl.listen((function(e) {this.basicMain.export()}).bind(this),
+			controls.addControl("basicmain_save", "S")
+		);
 		this.onControl.listen((function(e) {
 			if(editor.active) {
 				if(!e.shift) {
@@ -713,22 +715,8 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 		this.get(name).loadBM(layer, -1);
 	};
 	
-	LayeredRoom.prototype.saveRoomToConsole = function(e, returnRoom) {
+	LayeredRoom.prototype.saveRoom = function(addDep) {
 		if(!editor.active) return true;
-		
-		if(e !== undefined && e.alt) return true;
-		if(e === undefined || typeof e == "object") e = prompt("Please enter a package name.", this.roomName);
-		
-		console.log("----- Exported Room Data "+e+" -----");
-		var deps = [this.roomManager.packageName, "dusk.entities"];
-		var out = "";
-		out += "\"use strict\";\n\n";
-		
-		out += "load.provide(\""+e+"\", (function() {\n\t";
-		
-		var addDep = (function(str) {
-			if(deps.indexOf(str) === -1) deps.push(str);
-		}).bind(out);
 		
 		var room = {};
 		room.contents = [];
@@ -737,30 +725,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 			room.contents.push(this.get(this._layers[i].name).saveBM(addDep));
 		}
 		
-		out += "var manager = ";
-		for(var i = 0; i < deps.length; i ++) {
-			out += "load.require(\""+deps[i]+"\");\n\t";
-		}
-		
-		out += "\n\t";
-		out += "var room = "+JSON.stringify(room, undefined, 0)+";\n\t\n\t";
-		out += "manager."+this.roomManager.managerPath+".createRoom(\""+this.roomName+"\", room);\n\t\n\t";
-		out += "//Remember to add extra code!\n\t";
-		
-		var count = 0;
-		while(out.indexOf('"%'+count+'"') !== -1) {
-			out = out.replace('"%'+count+'"', prompt("Please enter a replacement for %"+count));
-			count ++;
-		}
-		
-		out += "return room;\n";
-		out += "})());";
-		
-		console.log(out);
-		console.log("----- End Exported Room Data -----");
-		
-		if(returnRoom) return out;
-		return false;
+		return room;
 	};
 	
 	sgui.registerType("LayeredRoom", LayeredRoom);
