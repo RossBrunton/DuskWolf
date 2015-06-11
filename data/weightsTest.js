@@ -12,6 +12,7 @@ load.provide("weightsTest", (function() {
 	window.entityValidator = load.require("dusk.tiles.EntityValidator");
 	window.Properties = load.require("dusk.tiles.Properties");
 	window.dirs = load.require("dusk.utils.dirs");
+	window.SelectorManager = load.require("dusk.tiles.SelectorManager");
 	load.require("quest");
 	
 	window.map = sgui.path("default:/quest/scheme")._tiles[0];
@@ -40,6 +41,13 @@ load.provide("weightsTest", (function() {
 		"weightModifiers":[uniformModifier()],
 		"ranges":[2, 2],
 	};
+	
+	window.sm = new SelectorManager(sgui.path("default:/quest"));
+	testRegion.expand({"x":5, "y":5, "z":0, "ranges":[0, 6]});
+	window.p = testRegion.getPath(5, 5, 0);
+	p.backPop = true;
+	p.clamp = 6;
+	sm.performTask({"path":p}).then(console.log.bind(console), console.warn.bind(console));
 	
 	return undefined;
 })());

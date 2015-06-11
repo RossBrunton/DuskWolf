@@ -14,19 +14,59 @@ load.provide("dusk.tiles.Path", (function() {
 		this._path = [];
 		
 		this.find(x, y, z);
-	};
-	
-	Path.prototype.toString = function() {
-		return "[Path ("+this.start+") "+(this._path.map(function(e) {return dirs.toArrow(e[3]);}))+" ("+this.end+")]";
+		this.clamp = -1;
+		this.backPop = false;
+		this.validPath = false;
+		this.completePath = true;
 	};
 	
 	Path.prototype.append = function(dir) {
-		this._path.push(dirs.translateDir(this.end[0], this.end[1], this.end[2], dir).concat(dir));
-		this.end = dirs.translateDir(this.end[0], this.end[1], this.end[2], dir);
+		if(!this.validPath) return;
+		
+		if(this._path.length > 0 && dirs.invertDir(dir) == this._path[this._path.length-1][3]) {
+			this._path.pop();
+			if(this._path.length) {
+				this.end = [
+					this._path[this._path.length-1][0], this._path[this._path.length-1][1],
+					this._path[this._path.length-1][2]
+				];
+			}else{
+				this.end = this.start;
+			}
+			return;
+		}
+		
+		var t = this.region.get.apply(this.region, dirs.translateDir(this.end[0], this.end[1], this.end[2], dir));
+		
+		if(!t) {
+			this.validPath = false;
+			return;
+		}
+		
+		this._path.push([
+			t[Region.tfields.x], t[Region.tfields.y], t[Region.tfields.z],
+			dir, t[Region.tfields.singleWeight], t[Region.tfields.stoppable], 
+		]);
+		
+		this.end = [t[Region.tfields.x], t[Region.tfields.y], t[Region.tfields.z]];
+		
+		if((this.clamp >= 0 && this.lengthWeight() > this.clamp)) {
+			this.optimise();
+		};
+		
+		this.completePath = this._path[this._path.length-1][5];
 	};
 	
 	Path.prototype.length = function() {
 		return this._path.length;
+	};
+	
+	Path.prototype.lengthWeight = function() {
+		var w = 0;
+		for(var p of this._path) {
+			w += p[4];
+		}
+		return w;
 	};
 	
 	Path.prototype.find = function(x, y, z) {
@@ -36,14 +76,28 @@ load.provide("dusk.tiles.Path", (function() {
 		while(t && t[Region.tfields.parentDir] != dirs.NONE) {
 			this._path.push([
 				t[Region.tfields.x], t[Region.tfields.y], t[Region.tfields.z],
-				dirs.invertDir(t[Region.tfields.parentDir])
+				dirs.invertDir(t[Region.tfields.parentDir]), t[Region.tfields.singleWeight],
+				t[Region.tfields.stoppable]
 			]);
 			
 			t = this.region.get.apply(this.region, dirs.translateDir(t[0], t[1], t[2], t[Region.tfields.parentDir]));
 		}
 		
-		this.start = [t[Region.tfields.x], t[Region.tfields.y], t[Region.tfields.z]];
+		if(t) {
+			this.start = [t[Region.tfields.x], t[Region.tfields.y], t[Region.tfields.z]];
+			this.validPath = true;
+		}else{
+			this.validPath = false;
+		}
+		
+		this.end = [x, y, z];
+		
 		this._path = this._path.reverse();
+		if(this._path.length) {
+			this.completePath = this._path[this._path.length-1][5];
+		}else{
+			this.completePath = true;
+		}
 	};
 	
 	Path.prototype.follow = function(path) {
@@ -60,6 +114,13 @@ load.provide("dusk.tiles.Path", (function() {
 			if(p[0] == x && p[1] == y & p[2] == z) return true;
 		}
 		return false;
+	};
+	
+	Path.prototype.toString = function() {
+		return "[Path ("+this.start+") "+(this._path.map(function(e) {return dirs.toArrow(e[3]);}))+
+		" ["+this.length()+","+this.lengthWeight()+"]"
+		+(!this.validPath ? " !invalid!" : "") + (!this.completePath ? " !incomplete!" : "")
+		+" ("+this.end+")]";
 	};
 	
 	return Path;
@@ -85,15 +146,16 @@ load.provide("dusk.tiles.Region", (function() {
 		this.parentNode = parentNode;
 	};
 	
-	const STRUCT_SIZE = 7;
+	const STRUCT_SIZE = 8;
 	Region.tfields = {
 		"x":0,
 		"y":1,
 		"z":2,
 		"weight":3,
-		"parentDir":4,
-		"childRegions":5,
-		"stoppable":6,
+		"singleWeight":4,
+		"parentDir":5,
+		"childRegions":6,
+		"stoppable":7,
 	};
 	
 	Region.prototype.addWeightModifier = function(wm) {
@@ -104,8 +166,8 @@ load.provide("dusk.tiles.Region", (function() {
 		this._validators.push(v);
 	};
 	
-	Region.prototype.addTile = function(x, y, z, w, pd, stop) {
-		var t = [x, y, z, w, pd, new Map(), stop];
+	Region.prototype.addTile = function(x, y, z, w, sw, pd, stop) {
+		var t = [x, y, z, w, sw, pd, new Map(), stop];
 		this._tiles.push(t);
 		if(this._parentPool) this._addToPool(t);
 	};
@@ -164,7 +226,7 @@ load.provide("dusk.tiles.Region", (function() {
 		if(!Array.isArray(options.ranges[0])) options.ranges = [options.ranges];
 		
 		// Cloud format:
-		// [x, y, z, weight, parentdir, processed]
+		// [x, y, z, weight, single weight, parentdir, processed]
 		
 		// Read any weight modifiers/validators, and replace the current ones if we do
 		if("weightModifiers" in options) {
@@ -184,7 +246,7 @@ load.provide("dusk.tiles.Region", (function() {
 		var cloud = [];
 		
 		// Add this to the cloud
-		cloud.push([options.x, options.y, options.z, 0, dirs.NONE, false]);
+		cloud.push([options.x, options.y, options.z, 0, 0, dirs.NONE, false]);
 		
 		// Check we can actually generate a region
 		if(!this._weightModifiers.length)
@@ -217,7 +279,7 @@ load.provide("dusk.tiles.Region", (function() {
 				};
 				
 				// Add it
-				this.addTile(e[0], e[1], e[2], e[3], e[4], stoppable);
+				this.addTile(e[0], e[1], e[2], e[3], e[4], e[5], stoppable);
 				
 				// Now calculate all the childnodes
 				if(options.children && stoppable) {
@@ -241,15 +303,15 @@ load.provide("dusk.tiles.Region", (function() {
 			
 			// Check children
 			for(var t of this._getAllSides(e[0], e[1], e[2], options.includeNone)) {
-				var newEntry = [
-					t[0], t[1], t[2], this._calculateWeight(e[3], options, t[3], e, t), dirs.invertDir(t[3]), false
-				];
+				var sw = this._calculateWeight(options, t[3], e, t);
+				
+				var newEntry = [t[0], t[1], t[2], e[3]+sw, sw, dirs.invertDir(t[3]), false];
 				if(newEntry[3] <= maxRange) {
 					var existing = _getFromCloud(cloud, t[0], t[1], t[2]);
 					if(existing) {
 						if(newEntry[3] <= existing[3]) {
 							existing[3] = newEntry[3];
-							existing[4] = dirs.invertDir(t[3])
+							existing[5] = dirs.invertDir(t[3])
 						}
 					}else{
 						cloud.push(newEntry);
@@ -263,7 +325,7 @@ load.provide("dusk.tiles.Region", (function() {
 		var min = -1;
 		var minValue = Infinity;
 		for(var i = 0; i < cloud.length; i ++) {
-			if(cloud[i] && cloud[i][3] < minValue && !cloud[i][5]) {
+			if(cloud[i] && cloud[i][3] < minValue && !cloud[i][6]) {
 				min = i;
 				minValue = cloud[i][3];
 			}
@@ -271,7 +333,7 @@ load.provide("dusk.tiles.Region", (function() {
 		
 		if(min == -1) return null;
 		
-		cloud[min][5] = true;
+		cloud[min][6] = true;
 		return cloud[min];
 	};
 	
@@ -298,12 +360,12 @@ load.provide("dusk.tiles.Region", (function() {
 		return out;
 	};
 	
-	Region.prototype._calculateWeight = function(pweight, settings, dir, origin, dest) {
+	Region.prototype._calculateWeight = function(settings, dir, origin, dest) {
 		var w = 0;
 		for(var f of this._weightModifiers) {
 			w = f(w, settings, dir, origin[0], origin[1], origin[2], dest[0], dest[1], dest[2], dest[3]);
 		}
-		return pweight + w;
+		return w;
 	};
 	
 	Region.prototype._addToPool = function(node) {
@@ -317,7 +379,7 @@ load.provide("dusk.tiles.Region", (function() {
 		this._parentPool.push([node[0], node[1], node[2], [node]]);
 	};
 	
-	Region.prototype.describe = function(sub) {
+	Region.prototype.describe = function(single, sub) {
 		var outstr = "";
 		for(var z = 0; z < this.layers; z ++) {
 			outstr += "\n";
@@ -358,7 +420,14 @@ load.provide("dusk.tiles.Region", (function() {
 								outstr += "#";
 							}
 							outstr += dirs.toArrow(this.get(x, y, z)[Region.tfields.parentDir]);
-							var w = ""+this.get(x, y, z)[Region.tfields.weight];
+							
+							
+							var w = "";
+							if(!single) {
+								w = ""+this.get(x, y, z)[Region.tfields.weight];
+							}else{
+								w = ""+this.get(x, y, z)[Region.tfields.singleWeight];
+							}
 							if(w.length < 2) w = " "+w;
 							outstr += w;
 						}

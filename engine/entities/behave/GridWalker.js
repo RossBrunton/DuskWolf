@@ -341,6 +341,7 @@ load.provide("dusk.entities.behave.GridMouse", (function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.entities.behave.Behave");
 	var options = load.require("dusk.options");
+	var dirs = load.require("dusk.utils.dirs");
 	
 	/** Allows mouse control for `dusk.entities.behave.GridWalker`.
 	 * 
@@ -374,9 +375,13 @@ load.provide("dusk.entities.behave.GridMouse", (function() {
 			
 			if(this._data("gwregion") == null || this._data("gwregion").isIn(destX, destY)) {
 				this._entity.behaviourFire("gwStartMove", {"targetX":destX, "targetY":destY});
+				var dir = dirs.findDir(
+					~~(this._entity.x/this._entity.width), ~~(this._entity.y/this._entity.height), 0,
+					destX, destY, 0
+				);
 				this._entity.x = destX * this._entity.width;
 				this._entity.y = destY * this._entity.height;
-				this._entity.behaviourFire("gwStopMove", {"targetX":destX, "targetY":destY});
+				this._entity.behaviourFire("gwStopMove", {"targetX":destX, "targetY":destY, "dir":dir});
 			}
 		}
 	};

@@ -62,6 +62,29 @@ load.provide("dusk.utils.dirs", (function() {
 		throw new TypeError(dir+" is not a valid direction");
 	};
 	
+	/** Given two sets of x, y, z coordinates, returns either the direction taken.
+	 * @param {integer} ox The original x coordinate.
+	 * @param {integer} oy The original y coordinate.
+	 * @param {integer} oz The original z coordinate.
+	 * @param {integer} dx The destination x coordinate.
+	 * @param {integer} dy The destination y coordinate.
+	 * @param {integer} dz The destination z coordinate.
+	 * @param {integer=1} n The number of units to travel.
+	 * @return {integer} The direction taken, or `NONE` if it couldn't be found.
+	 */
+	dirs.findDir = function(ox, oy, oz, dx, dy, dz, n) {
+		if(n === undefined) n = 1;
+		
+		if(ox + n == dx && oy == dy && oz == dz) return dirs.E;
+		if(ox - n == dx && oy == dy && oz == dz) return dirs.W;
+		if(ox == dx && oy + n == dy && oz == dz) return dirs.S;
+		if(ox == dx && oy - n == dy && oz == dz) return dirs.N;
+		if(ox == dx && oy == dy && oz + n == dz) return dirs.U;
+		if(ox == dx && oy == dy && oz - n == dz) return dirs.D;
+		
+		return dirs.NONE;
+	};
+	
 	/** Returns a single character which is an arrow facing in the given direction.
 	 * 
 	 * The direction NONE returns ".", U returns "o" and D returns "x". All others return unicode arrows.
