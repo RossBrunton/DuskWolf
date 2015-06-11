@@ -25,13 +25,13 @@ load.provide("dusk.tiles.Weights", (function() {
 		this.weights = new Uint8Array(this.rows * this.cols * STRUCT_SIZE);
 	};
 	
-	const STRUCT_SIZE = 11;
+	const STRUCT_SIZE = 12;
 	
 	Weights.fields = {
 		"enterW":0,
 		"enterE":1,
 		"enterN":2,
-		"enterB":3,
+		"enterS":3,
 		"enterU":4,
 		"enterD":5,
 		"exitW":6,

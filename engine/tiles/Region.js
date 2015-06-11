@@ -78,13 +78,14 @@ load.provide("dusk.tiles.Region", (function() {
 		
 		this._tiles = [];
 		this._weightModifiers = [];
+		this._validators = [];
 		
 		this._subTiles = new Map();
 		this._parentPool = parentPool;
 		this.parentNode = parentNode;
 	};
 	
-	const STRUCT_SIZE = 6;
+	const STRUCT_SIZE = 7;
 	Region.tfields = {
 		"x":0,
 		"y":1,
@@ -92,14 +93,19 @@ load.provide("dusk.tiles.Region", (function() {
 		"weight":3,
 		"parentDir":4,
 		"childRegions":5,
+		"stoppable":6,
 	};
 	
 	Region.prototype.addWeightModifier = function(wm) {
 		this._weightModifiers.push(wm);
 	};
 	
-	Region.prototype.addTile = function(x, y, z, w, pd) {
-		var t = [x, y, z, w, pd, new Map()];
+	Region.prototype.addValidator = function(v) {
+		this._validators.push(v);
+	};
+	
+	Region.prototype.addTile = function(x, y, z, w, pd, stop) {
+		var t = [x, y, z, w, pd, new Map(), stop];
 		this._tiles.push(t);
 		if(this._parentPool) this._addToPool(t);
 	};
@@ -147,15 +153,25 @@ load.provide("dusk.tiles.Region", (function() {
 		return null;
 	};
 	
+	Region.prototype.clear = function() {
+		this._tiles = [];
+		
+		this._subTiles = new Map();
+		// In future have it clean out the parent pool
+	};
+	
 	Region.prototype.expand = function(options) {
 		if(!Array.isArray(options.ranges[0])) options.ranges = [options.ranges];
 		
 		// Cloud format:
 		// [x, y, z, weight, parentdir, processed]
 		
-		// Read any weight modifiers, and replace the current ones if we do
+		// Read any weight modifiers/validators, and replace the current ones if we do
 		if("weightModifiers" in options) {
 			this._weightModifiers = options.weightModifiers;
+		}
+		if("validators" in options) {
+			this._validators = options.validators;
 		}
 		
 		// Calculate maximum range
@@ -178,6 +194,8 @@ load.provide("dusk.tiles.Region", (function() {
 		for(var e = _removeCheapestFromCloud(cloud); e; e = _removeCheapestFromCloud(cloud)) {
 			// Check if it can be added
 			do {
+				var stoppable = true;
+				
 				// Range check
 				var rcheck = false;
 				for(var r of options.ranges) {
@@ -188,13 +206,21 @@ load.provide("dusk.tiles.Region", (function() {
 				if(!rcheck) break;
 				
 				// Fail if it already exists
-				if(this.has(e[0], e[1], [2])) break;
+				if(this.has(e[0], e[1], e[2])) break;
+				
+				// Run the validators
+				for(var f of this._validators) {
+					if(!f(e[0], e[1], e[2], options)) {
+						stoppable = false;
+						break;
+					}
+				};
 				
 				// Add it
-				this.addTile(e[0], e[1], e[2], e[3], e[4]);
+				this.addTile(e[0], e[1], e[2], e[3], e[4], stoppable);
 				
 				// Now calculate all the childnodes
-				if(options.children) {
+				if(options.children && stoppable) {
 					var t = _getFromCloud(cloud, e[0], e[1], e[2]);
 					t[Region.tfields.childRegions] = new Map();
 					
@@ -299,12 +325,12 @@ load.provide("dusk.tiles.Region", (function() {
 			for(var y = 0; y < this.rows; y ++) {
 				if(y == 0) {
 					outstr += "\u250c";
-					outstr += "\u2500\u2500\u2500\u252c".repeat(this.cols-1);
-					outstr += "\u2500\u2500\u2500\u2510";
+					outstr += "\u2500\u2500\u2500\u2500\u252c".repeat(this.cols-1);
+					outstr += "\u2500\u2500\u2500\u2500\u2510";
 				} else {
 					outstr += "\u251c";
-					outstr += "\u2500\u2500\u2500\u253c".repeat(this.cols-1);
-					outstr += "\u2500\u2500\u2500\u2524";
+					outstr += "\u2500\u2500\u2500\u2500\u253c".repeat(this.cols-1);
+					outstr += "\u2500\u2500\u2500\u2500\u2524";
 				}
 				
 				outstr += "\n";
@@ -318,14 +344,19 @@ load.provide("dusk.tiles.Region", (function() {
 						}
 						
 						if(!this.subHas(sub, x, y, z)) {
-							outstr += "  ";
+							outstr += "   ";
 						}else{
-							outstr += "XX";
+							outstr += "XXX";
 						}
 					}else{
 						if(!this.has(x, y, z)) {
-							outstr += "   ";
+							outstr += "    ";
 						}else{
+							if(this.get(x, y, z)[Region.tfields.stoppable]) {
+								outstr += " ";
+							}else{
+								outstr += "#";
+							}
 							outstr += dirs.toArrow(this.get(x, y, z)[Region.tfields.parentDir]);
 							var w = ""+this.get(x, y, z)[Region.tfields.weight];
 							if(w.length < 2) w = " "+w;
@@ -337,8 +368,8 @@ load.provide("dusk.tiles.Region", (function() {
 			}
 			
 			outstr += "\u2514";
-			outstr += "\u2500\u2500\u2500\u2534".repeat(this.cols-1);
-			outstr += "\u2500\u2500\u2500\u2518\n";
+			outstr += "\u2500\u2500\u2500\u2500\u2534".repeat(this.cols-1);
+			outstr += "\u2500\u2500\u2500\u2500\u2518\n";
 		}
 		
 		console.log(outstr);
