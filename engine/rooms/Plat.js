@@ -7,8 +7,8 @@ load.provide("dusk.rooms.plat", (function() {
 	var LayeredRoom = load.require("dusk.rooms.sgui.LayeredRoom");
 	var entities = load.require("dusk.entities");
 	var RoomManager = load.require("dusk.rooms.RoomManager");
-	var TileMapWeights = load.require("dusk.tiles.sgui.TileMapWeights");
 	var skills = load.require("dusk.skills");
+	var StandardActor = load.require("dusk.rooms.actors.Standard");
 	
 	/** Plat is a simple platforming engine that uses `dusk.sgui`.
 	 * 
@@ -43,7 +43,9 @@ load.provide("dusk.rooms.plat", (function() {
 		component.flow(name);
 		plat.rooms.setLayeredRoom(component.get(name));
 		
-		var out = {"tileProperties":component.get(name).tileProperties};
+		var out = {};
+		out.tileProperties = component.get(name).tileProperties;
+		out.standardActor = new StandardActor(component.get(name));
 		return out;
 	}
 	

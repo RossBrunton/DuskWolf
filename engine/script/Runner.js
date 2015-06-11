@@ -111,7 +111,10 @@ load.provide("dusk.script.Runner", (function() {
 				
 				// Go back one
 				currentAction = currentAction.prev;
-				if(!currentAction) reject(error);
+				if(!currentAction) {
+					reject(error);
+					return;
+				}
 				currentAction.next = currentAction.originalNext;
 				
 				if(Runner.log) {

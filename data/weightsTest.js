@@ -3,6 +3,8 @@
 "use strict";
 
 load.provide("weightsTest", (function() {
+	window.Runner = load.require("dusk.script.Runner");
+	window.Actions = load.require("dusk.script.Actions");
 	window.sgui = load.require("dusk.sgui");
 	window.Weights = load.require("dusk.tiles.Weights");
 	window.Region = load.require("dusk.tiles.Region");
@@ -14,6 +16,8 @@ load.provide("weightsTest", (function() {
 	window.dirs = load.require("dusk.utils.dirs");
 	window.SelectorManager = load.require("dusk.tiles.SelectorManager");
 	window.TileDisplay = load.require("dusk.tiles.sgui.RegionDisplay");
+	window.RegionActor = load.require("dusk.rooms.actors.Regions");
+	window.menu = load.require("dusk.script.actors.menu");
 	load.require("quest");
 	
 	window.map = sgui.path("default:/quest/scheme")._tiles[0];
@@ -66,6 +70,50 @@ load.provide("weightsTest", (function() {
 	}).then(console.log.bind(console), console.warn.bind(console));
 	
 	window.regions = sgui.path("default:/quest/regions");
+	
+	window.menuScript = new Runner([
+		menu.gridMenu([
+			[{"text":"a"}, [
+				Actions.print("A %"),
+			]],
+			
+			[{"text":"b"}, [
+				Actions.print("B %"),
+			]],
+			
+			[{"text":"c"}, [
+				Actions.print("C %"),
+			]],
+			
+			[{"text":"Kill Everyone"}, [
+				Actions.print("Are you sure?"),
+				menu.gridMenu([
+					[{"text":"Yes"}, [
+						Actions.print("Blargh. Everyone is dead!"),
+					]],
+					
+					[{"text":"No"}, false],
+					
+					], sgui.path("default:/menu/menu"), {}
+				),
+			]], 
+			
+			[{"text":"Cancel"}, false],
+			
+			], sgui.path("default:/menu/menu"), {}
+		),
+	]);
+	
+	window.ra = new RegionActor(sgui.path("default:/quest"));
+	window.regionScript = new Runner([
+		ra.generate({
+			"x":5, "y":5, "z":0, "weightModifiers":[tm], "validators":[ev], "ranges":[0, 6],
+			"children":{"attack":sampleSub}
+		}, {}),
+		ra.display("test", "#ff00ff", {"sub":"attack"}),
+		ra.display("test", "#ffff00", {}),
+		function() {return Promise.reject(new Runner.Cancel());}
+	]);
 	
 	return undefined;
 })());
