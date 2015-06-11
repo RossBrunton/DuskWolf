@@ -13,6 +13,7 @@ load.provide("weightsTest", (function() {
 	window.Properties = load.require("dusk.tiles.Properties");
 	window.dirs = load.require("dusk.utils.dirs");
 	window.SelectorManager = load.require("dusk.tiles.SelectorManager");
+	window.TileDisplay = load.require("dusk.tiles.sgui.RegionDisplay");
 	load.require("quest");
 	
 	window.map = sgui.path("default:/quest/scheme")._tiles[0];
@@ -43,7 +44,7 @@ load.provide("weightsTest", (function() {
 	};
 	
 	window.sm = new SelectorManager(sgui.path("default:/quest"));
-	testRegion.expand({"x":5, "y":5, "z":0, "ranges":[0, 6]});
+	testRegion.expand({"x":5, "y":5, "z":0, "ranges":[0, 6], "children":{"attack":sampleSub}});
 	window.p = testRegion.getPath(5, 5, 0);
 	p.backPop = true;
 	p.clamp = 6;
@@ -63,6 +64,8 @@ load.provide("weightsTest", (function() {
 			console.log(state.path.toString());
 		},
 	}).then(console.log.bind(console), console.warn.bind(console));
+	
+	window.regions = sgui.path("default:/quest/regions");
 	
 	return undefined;
 })());

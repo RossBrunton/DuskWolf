@@ -11,7 +11,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 	var ParticleField = load.require("dusk.particles.sgui.ParticleField");
 	var TransitionManager = load.require("dusk.rooms.sgui.TransitionManager");
 	var FluidLayer = load.require("dusk.rooms.sgui.FluidLayer");
-	var TileRegionGenerator = load.require("dusk.tiles.sgui.TileRegionGenerator");
+	var RegionDisplay = load.require("dusk.tiles.sgui.RegionDisplay");
 	var Label = load.require("dusk.sgui.Label");
 	var editor = load.require("dusk.rooms.editor");
 	var RoomManager = load.require("dusk.rooms.RoomManager");
@@ -230,7 +230,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 					break;
 				
 				case LayeredRoom.LAYER_REGION:
-					this.get(val[i].name, "TileRegionGenerator").update(
+					this.get(val[i].name, "RegionDisplay").update(
 					{
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
 						"twidth":entities.twidth, "theight":entities.theight,
@@ -493,7 +493,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 				if(this.get(this._layers[i].name) instanceof EntityGroup) {
 					this.get(this._layers[i].name).adjustAll(0, entities.theight);
 				}
-				if(this.get(this._layers[i].name) instanceof TileRegionGenerator) {
+				if(this.get(this._layers[i].name) instanceof RegionDisplay) {
 					this.get(this._layers[i].name).rows ++;
 				}
 			}
@@ -508,7 +508,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 				if(this.get(this._layers[i].name) instanceof EntityGroup) {
 					this.get(this._layers[i].name).adjustAll(0, -entities.theight);
 				}
-				if(this.get(this._layers[i].name) instanceof TileRegionGenerator) {
+				if(this.get(this._layers[i].name) instanceof RegionDisplay) {
 					this.get(this._layers[i].name).rows --;
 				}
 			}
@@ -538,7 +538,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 				if(this.get(this._layers[i].name) instanceof TileMap) {
 					this.get(this._layers[i].name).graftBottom();
 				}
-				if(this.get(this._layers[i].name) instanceof TileRegionGenerator) {
+				if(this.get(this._layers[i].name) instanceof RegionDisplay) {
 					this.get(this._layers[i].name).rows ++;
 				}
 			}
@@ -550,7 +550,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 				if(this.get(this._layers[i].name) instanceof TileMap) {
 					this.get(this._layers[i].name).carveBottom();
 				}
-				if(this.get(this._layers[i].name) instanceof TileRegionGenerator) {
+				if(this.get(this._layers[i].name) instanceof RegionDisplay) {
 					this.get(this._layers[i].name).rows --;
 				}
 			}
@@ -583,7 +583,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 				if(this.get(this._layers[i].name) instanceof EntityGroup) {
 					this.get(this._layers[i].name).adjustAll(entities.twidth, 0);
 				}
-				if(this.get(this._layers[i].name) instanceof TileRegionGenerator) {
+				if(this.get(this._layers[i].name) instanceof RegionDisplay) {
 					this.get(this._layers[i].name).cols ++;
 				}
 			}
@@ -598,7 +598,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 				if(this.get(this._layers[i].name) instanceof EntityGroup) {
 					this.get(this._layers[i].name).adjustAll(-entities.twidth, 0);
 				}
-				if(this.get(this._layers[i].name) instanceof TileRegionGenerator) {
+				if(this.get(this._layers[i].name) instanceof RegionDisplay) {
 					this.get(this._layers[i].name).cols --;
 				}
 			}
@@ -628,7 +628,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 				if(this.get(this._layers[i].name) instanceof TileMap) {
 					this.get(this._layers[i].name).graftRight();
 				}
-				if(this.get(this._layers[i].name) instanceof TileRegionGenerator) {
+				if(this.get(this._layers[i].name) instanceof RegionDisplay) {
 					this.get(this._layers[i].name).cols ++;
 				}
 			}
@@ -642,7 +642,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 				if(this.get(this._layers[i].name) instanceof TileMap) {
 					this.get(this._layers[i].name).carveRight();
 				}
-				if(this.get(this._layers[i].name) instanceof TileRegionGenerator) {
+				if(this.get(this._layers[i].name) instanceof RegionDisplay) {
 					this.get(this._layers[i].name).cols --;
 				}
 			}

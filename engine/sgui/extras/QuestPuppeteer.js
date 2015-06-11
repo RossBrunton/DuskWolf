@@ -9,7 +9,7 @@ load.provide("dusk.sgui.extras.QuestPuppeteer", (function(){
 	var quest = load.require(">dusk.rooms.quest", function(p) {quest = p});
 	var utils = load.require("dusk.utils");
 	var entities = load.require("dusk.entities");
-	var TileRegion = load.require("dusk.tiles.sgui.TileRegion");
+	//var TileRegion = load.//require("dusk.tiles.sgui.TileRegion");
 	
 	/* @class dusk.sgui.extras.DynamicWidth
 	 * 
