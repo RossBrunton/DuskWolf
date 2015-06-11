@@ -9,6 +9,8 @@ load.provide("dusk.tiles.SelectorManager", (function() {
 	var entities = load.require("dusk.entities");
 	var dirs = load.require("dusk.utils.dirs");
 	var frameTicker = load.require("dusk.utils.frameTicker");
+	var controls = load.require("dusk.input.controls");
+	var mouse = load.require("dusk.input.mouse");
 	
 	var SelectorManager = function(com, type) {
 		this._com = com;
@@ -24,6 +26,8 @@ load.provide("dusk.tiles.SelectorManager", (function() {
 		this._path = null;
 		
 		frameTicker.onFrame.listen(_onFrame.bind(this));
+		
+		this._endMoveHandlers = [];
 		
 		this.selectorType = type ? type : "stdSelector";
 	};
@@ -77,32 +81,50 @@ load.provide("dusk.tiles.SelectorManager", (function() {
 	
 	SelectorManager.prototype.performTask = function(options) {
 		return new Promise((function(fulfillFn, rejectFn) {
-			var fulfill = function(x) {
-				this.done();
-				this._taskRunning = false;
-				fulfillFn(x);
-			};
+			var scope = {};
 			
-			var reject = function(x) {
+			scope.options = options;
+			scope.x = -1;
+			scope.y = -1;
+			
+			scope.fulfill = (function(x) {
 				this.done();
 				this._taskRunning = false;
+				this._endMoveHandlers.splice(p, 1);
+				controls.controlPressed.unlisten(controlListener);
+				mouse.onClick.unlisten(controlListener);
+				fulfillFn(x);
+			}).bind(this);
+			
+			scope.reject = (function(x) {
+				this.done();
+				this._taskRunning = false;
+				this._endMoveHandlers.splice(p, 1);
+				controls.controlPressed.unlisten(controlListener);
+				mouse.onClick.unlisten(controlListener);
 				rejectFn(x);
-			};
+			}).bind(this);
+			
+			var controlListener = controls.controlPressed.listen(_control.bind(scope));
+			var clickListener = mouse.onClick.listen(_click.bind(scope));
+			var p = this._endMoveHandlers.push(_innerEndMove.bind(scope)) - 1;
 			
 			this._taskRunning = true;
 			
 			if(options.path) {
-				this._path = options.path;
+				scope.path = options.path;
 			}else{
-				this._path = null;
+				scope.path = null;
 			}
+			
+			this.begin();
 		}).bind(this));
 	};
 	
 	var _onFrame = function(e) {
 		if(this._taskRunning) {
 			this.getSelector();
-			if(!this.getSelector().active) {
+			if(!this.getSelector().focused) {
 				this.getSelector().container.flow(this.getSelector().name);
 			}
 		
@@ -112,24 +134,47 @@ load.provide("dusk.tiles.SelectorManager", (function() {
 		}
 	};
 	
+	var _control = function(e) {
+		if(this.options.controlHandlers) {
+			if(this.options.controlHandlers[e.control]) {
+				this.options.controlHandlers[e.control](this, this.options);
+			}
+		}
+	};
+	
+	var _click = function(e) {
+		if(this.options.clickHandlers) {
+			if(this.options.clickHandlers[""+e.which]) {
+				this.options.clickHandlers[""+e.which](this, this.options);
+			}
+		}
+	};
+	
 	var _handleEndMove = function(e) {
-		if(e.targetX != this._oldX || e.targetY != this._oldY && this._taskRunning) {
-			this._oldX = e.targetX;
-			this._oldY = e.targetY;
+		for(var h of this._endMoveHandlers) {
+			h(e);
+		}
+	};
+	
+	var _innerEndMove = function(e) {
+		if(e.targetX != this.x || e.targetY != this.y) {
+			this.x = e.targetX;
+			this.y = e.targetY;
 			
-			if(this._path) {
+			if(this.path) {
 				if(e.dir == dirs.NONE) {
-					this._path.find(e.targetX, e.targetY, 0);
+					this.path.find(e.targetX, e.targetY, 0);
 				}else{
-					this._path.append(e.dir);
-					if(!this._path.validPath) {
-						this._path.find(e.targetX, e.targetY, 0);
+					this.path.append(e.dir);
+					if(!this.path.validPath) {
+						this.path.find(e.targetX, e.targetY, 0);
 					}
 				}
 			}
 			
-			console.log(e);
-			console.log(this._path.toString());
+			if(this.options.onMove) {
+				this.options.onMove(this, this.options);
+			}
 		}
 	};
 	

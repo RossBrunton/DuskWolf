@@ -47,7 +47,22 @@ load.provide("weightsTest", (function() {
 	window.p = testRegion.getPath(5, 5, 0);
 	p.backPop = true;
 	p.clamp = 6;
-	sm.performTask({"path":p}).then(console.log.bind(console), console.warn.bind(console));
+	sm.performTask({
+		"path":p,
+		"controlHandlers":{
+			"sgui_action":function(state, options) {
+				console.log("Woo");
+			}
+		},
+		"clickHandlers":{
+			"1":function(state, options) {
+				console.log("Click");
+			}
+		},
+		"onMove":function(state, options) {
+			console.log(state.path.toString());
+		},
+	}).then(console.log.bind(console), console.warn.bind(console));
 	
 	return undefined;
 })());
