@@ -7,7 +7,6 @@ load.provide("dusk.rooms.quest", (function() {
 	var LayeredRoom = load.require("dusk.rooms.sgui.LayeredRoom");
 	var entities = load.require("dusk.entities");
 	var RoomManager = load.require("dusk.rooms.RoomManager");
-	var QuestPuppeteer = load.require("dusk.sgui.extras.QuestPuppeteer");
 	var StandardActor = load.require("dusk.rooms.actors.Standard");
 	var SelectActor = load.require("dusk.rooms.actors.Select");
 	var RegionsActor = load.require("dusk.rooms.actors.Regions");
@@ -38,8 +37,6 @@ load.provide("dusk.rooms.quest", (function() {
 		component.becomeActive();
 		component.flow(name);
 		quest.rooms.setLayeredRoom(component.get(name));
-		//component.get(name).addExtra("QuestPuppeteer", "questPuppeteer", {});
-		//quest.puppeteer = component.get(name).getExtra("questPuppeteer");
 		
 		var out = {};
 		out.standardActor = new StandardActor(component.get(name));
