@@ -47,12 +47,18 @@ load.provide("dusk.script.Runner", (function() {
 			var currentAction = _scriptToLL(this._script)[0];
 			
 			var addActions = function(actions, loopif) {
+				if(!actions.length) {
+					actions = [Runner.action("nop", function(x) {return x})];
+				}else if(loopif) {
+					actions.push(Runner.action("nop", function(x) {return x}));
+				}
+				
 				var all = _scriptToLL(actions);
 				
 				all[1].next = currentAction.next;
 				if(currentAction.next) currentAction.next.prev = all[1];
 				
-				all[0].prev = currentAction.next;
+				all[0].prev = currentAction;
 				currentAction.next = all[0];
 				
 				// Looping
@@ -93,6 +99,7 @@ load.provide("dusk.script.Runner", (function() {
 					}else{
 						currentAction = currentAction.next;
 						if(currentAction) {
+							currentAction.prev.next = currentAction.prev.originalNext;
 							currentAction.prev = hold;
 							currentAction.forcedInput = false; // Have it read the output from the previous action
 							next(x);

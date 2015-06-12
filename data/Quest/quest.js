@@ -22,6 +22,17 @@ load.provide("quest", (function() {
 	var sgui = load.require("dusk.sgui");
 	var TileMapWeights = load.require("dusk.tiles.sgui.TileMapWeights");
 	var reversiblePromiseChain = load.require("dusk.utils.reversiblePromiseChain");
+	var menu = load.require("dusk.script.actors.menu");
+	var Runner = load.require("dusk.script.Runner");
+	var Actions = load.require("dusk.script.Actions");
+	var uniformModifier = load.require("dusk.tiles.UniformModifier");
+	var terrainModifier = load.require("dusk.tiles.TerrainModifier");
+	var lrTerrainModifier = load.require("dusk.tiles.lrTerrainModifier");
+	
+	
+	var entityModifier = load.require("dusk.tiles.EntityModifier");
+	var entityValidator = load.require("dusk.tiles.EntityValidator");
+	var Weights = load.require("dusk.tiles.Weights");
 	
 	var ents = load.require("quest.ents");
 	load.require("quest.rooms.rooma");
@@ -32,14 +43,15 @@ load.provide("quest", (function() {
 		dquest.rooms.setRoom("quest.rooms.rooma", 0).then((function(e) {
 			_turns.register("ally", quest.allyTurn);
 			_turns.register("enemy", quest.enemyTurn);
-			//_turns.start();
+			_turns.start();
 		}).bind(this));
 	});
 	
 	var root = sgui.get("default", true);
 	root.mouseFocus = false;
 	root.allowMouse = true;
-	dquest.make(root, "quest");
+	window.qo = dquest.make(root, "quest");
+	
 	
 	//Test
 	root.get("menu", "Group").update({
@@ -106,6 +118,8 @@ load.provide("quest", (function() {
 			}
 		}
 	});
+	
+	var menuCom = root.path("menu/menu");
 	
 	root.get("fps", "FpsMeter").update({
 		"type":"FpsMeter",
@@ -175,16 +189,31 @@ load.provide("quest", (function() {
 	
 	window.q = dquest.puppeteer;
 	
+	var weights = new Weights(9, 2);
+	weights.addSimpleWeight(0, 0, 1, 0);
+	weights.addSimpleWeight(1, 0, 100, 0);
+	weights.addSimpleWeight(2, 0, 100, 0);
+	weights.addSimpleWeight(3, 0, 2, 0);
+	
+	var lrtm = lrTerrainModifier(weights, qo.layeredRoom);
+	var lrem = entityModifier(qo.layeredRoom, [], function(v, e, opt, dir) {
+			if(e.meetsTrigger("stat(faction, 1) = ENEMY")) {
+				return 100;
+			}
+			return v;
+		}
+	);
+	var ev = entityValidator(qo.layeredRoom, [], function(){return false;});
+	
 	window.aarg =
-		{"name":"attack", "colour":"#990000", "los":true, "entFilter":"stat(faction, 1) = ENEMY"};
+		{"name":"attack", "los":true, "entFilter":"stat(faction, 1) = ENEMY", "weightModifiers":[uniformModifier()]};
 	window.targ = 
-		{"region":"r", "los":true, "forEach":[aarg], "colour":"#000099", "entBlock":"stat(faction, 1) = ENEMY",
-			"name":"move"
-		};
+		{"los":true, "entBlock":"stat(faction, 1) = ENEMY"};
+	
 
 	var _turns = new TurnTicker();
 	
-	quest.allyTurnInner = function() {
+	/*quest.allyTurnInner = function() {
 		return reversiblePromiseChain([
 			q.requestBoundPair("selectEntity", 
 				{"allowNone":true, "filter":"stat(faction, 1) = ALLY & stat(moved, 3) = false"}
@@ -307,7 +336,70 @@ load.provide("quest", (function() {
 				oFulfill(true);
 			});
 		});
+	}*/
+	
+	var turnEnded = false;
+	var turnOpen = function(x) {
+		if(turnEnded) return false;
+		return true;
 	}
+	
+	quest.allyTurn = function(x) {
+		turnEnded = false;
+		feed.append({"text":"Player Phase", "colour":"#000099"});
+		
+		return new Runner([
+			Actions.while(turnOpen, [
+				Actions.print("Test"),
+				
+				qo.selectActor.pickEntity(function(e) {
+					return e.meetsTrigger("stat(faction, 1) = ALLY & stat(moved, 3) = false");
+				}, {}, {"allowNone":true}),
+				
+				Actions.if(function(x) {return x.entity}, [
+					function(passedArg) {
+						var ranges = passedArg.entity.stats.get("possibleRange", 2);
+						var rmap = [];
+						
+						for(var i = 0; i < ranges.length; i ++) {
+							for(var a = ranges[i][0]; a <= ranges[i][1]; a ++) {
+								rmap[a] = true;
+							}
+						}
+						
+						//aarg.rangeMap = rmap;
+						aarg.ranges = ranges;
+						passedArg.aarg = aarg;
+						passedArg.children = {"attack":aarg};
+						passedArg.ranges = [0, passedArg.entity.stats.get("move", 1)];
+						
+						return passedArg;
+					},
+					
+					qo.regionsActor.generate({"z":0, "weightModifiers":[lrem, lrtm], "validators":[ev]}, {"copy":[
+						["ranges", "ranges"], ["children", "children"], ["x", "x"], ["y", "y"]
+					]}),
+					
+					qo.regionsActor.display("atk", "#ffffff", {"sub":"attack"}),
+					qo.regionsActor.display("mov", "#000000", {}),
+					qo.regionsActor.makePath("", {}),
+					qo.regionsActor.displayPath("movePath", "default/arrows32.png", {}),
+					qo.selectActor.pickTile({}, {}),
+					qo.regionsActor.unDisplay(["atk", "mov", "movePath"], {}),
+					qo.selectActor.followPath({}),
+				], [
+					Actions.print("Here"),
+					menu.gridMenu([
+						[{"text":"Done"}, [
+							function(x) {turnEnded = true; return x}
+						]], [{"text":"Cancel"}, false]
+					], menuCom, {}),
+				]),
+				
+				//Actions.print("End of while"),
+			]),
+		]).start({});
+	};
 	
 	quest.enemyTurn = function() {
 		feed.append({"text":"Enemy Phase", "colour":"#990000"});
@@ -316,12 +408,12 @@ load.provide("quest", (function() {
 		});
 	};
 	
-	targ.weights = new TileMapWeights(2, 10);
-	targ.weights.addWeight(1, 0, 100);
-	targ.weights.addWeight(2, 0, 100);
+	//targ.weights = new TileMapWeights(2, 10);
+	//targ.weights.addWeight(1, 0, 100);
+	//targ.weights.addWeight(2, 0, 100);
 	
-	targ.forEach[0].weights = new TileMapWeights(2, 10);
-	targ.forEach[0].weights.addWeight(1, 0, 100);
+	//targ.forEach[0].weights = new TileMapWeights(2, 10);
+	//targ.forEach[0].weights.addWeight(1, 0, 100);
 	
 	dusk.startGame();
 	//quest.go();

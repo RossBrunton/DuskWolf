@@ -17,6 +17,7 @@ load.provide("weightsTest", (function() {
 	window.SelectorManager = load.require("dusk.tiles.SelectorManager");
 	window.TileDisplay = load.require("dusk.tiles.sgui.RegionDisplay");
 	window.RegionActor = load.require("dusk.rooms.actors.Regions");
+	window.SelectActor = load.require("dusk.rooms.actors.Select");
 	window.menu = load.require("dusk.script.actors.menu");
 	load.require("quest");
 	
@@ -52,7 +53,7 @@ load.provide("weightsTest", (function() {
 	window.p = testRegion.getPath(5, 5, 0);
 	p.backPop = true;
 	p.clamp = 6;
-	sm.performTask({
+	/*sm.performTask({
 		"path":p,
 		"controlHandlers":{
 			"sgui_action":function(state, options) {
@@ -67,7 +68,7 @@ load.provide("weightsTest", (function() {
 		"onMove":function(state, options) {
 			console.log(state.path.toString());
 		},
-	}).then(console.log.bind(console), console.warn.bind(console));
+	}).then(console.log.bind(console), console.warn.bind(console));*/
 	
 	window.regions = sgui.path("default:/quest/regions");
 	
@@ -105,13 +106,23 @@ load.provide("weightsTest", (function() {
 	]);
 	
 	window.ra = new RegionActor(sgui.path("default:/quest"));
+	window.sa = new SelectActor(sgui.path("default:/quest"));
 	window.regionScript = new Runner([
-		ra.generate({
-			"x":5, "y":5, "z":0, "weightModifiers":[tm], "validators":[ev], "ranges":[0, 6],
-			"children":{"attack":sampleSub}
-		}, {}),
-		ra.display("test", "#ff00ff", {"sub":"attack"}),
-		ra.display("test", "#ffff00", {}),
+		Actions.while(function() {return true}, [
+			sa.pickEntity(function() {return true}, {}, {}),
+			ra.generate({
+				"x":5, "y":5, "z":0, "weightModifiers":[tm], "validators":[ev], "ranges":[0, 6],
+				"children":{"attack":sampleSub}
+			}, {"copy":[["x", "x"], ["y", "y"]]}),
+			ra.display("atk", "#ffffff", {"sub":"attack"}),
+			ra.display("mov", "#000000", {}),
+			ra.makePath("", {}),
+			ra.displayPath("movePath", "default/arrows32.png", {}),
+			sa.pickTile({}, {}),
+			ra.unDisplay(["atk", "mov", "movePath"], {}),
+			sa.followPath({}),
+		]),
+		
 		function() {return Promise.reject(new Runner.Cancel());}
 	]);
 	

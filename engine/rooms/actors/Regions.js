@@ -82,6 +82,71 @@ load.provide("dusk.rooms.actors.Regions", (function() {
 		}).bind(this));
 	};
 	
+	RegionActor.prototype.makePath = function(options) {
+		return Runner.action("dusk.rooms.actors.Regions.makePath", (function(x, add) {
+			var region;
+			
+			if(options.which) {
+				region = x[options.dest];
+			}else{
+				region = x.region;
+			}
+			
+			x.path = region.emptyPath(!options.noClamp);
+			
+			return x;
+		}).bind(this));
+	};
+	
+	RegionActor.prototype.displayPath = function(name, image, options) {
+		return Runner.action("dusk.rooms.actors.Regions.displayPath", (function(x, add) {
+			var region;
+			
+			if(options.which) {
+				region = x[options.dest];
+			}else{
+				region = x.path;
+			}
+			
+			var iValue = image.startsWith("*") ? x[image.substring(1)] : image;
+			var nValue = name.startsWith("*") ? x[name.substring(1)] : name;
+			var sValue = "";
+			
+			this.getDisplay().display(nValue, RegionDisplay.MODE_PATH, iValue, options, region);
+			
+			return x;
+		}).bind(this),
+		
+		(function(x) {
+			var nValue = name.startsWith("*") ? x[name.substring(1)] : name;
+			this.getDisplay().undisplay(nValue);
+			
+			return Promise.reject(new Runner.Cancel());
+		}).bind(this));
+	};
+	
+	RegionActor.prototype.unDisplay = function(regions, options) {
+		return Runner.action("dusk.rooms.actors.Regions.unDisplay", (function(x, add) {
+			x.removedRegions = regions.map((function(name) {return this.getDisplay().getDisplay(name);}).bind(this));
+			var region;
+			
+			for(var r of regions) {
+				this.getDisplay().unDisplay(r);
+			}
+			
+			
+			return x;
+		}).bind(this),
+		
+		(function(x) {
+			for(var r of x.removedRegions) {
+				this.getDisplay().display.apply(this.getDisplay(), r);
+			}
+			
+			return Promise.reject(new Runner.Cancel());
+		}).bind(this));
+	};
+	
 	
 	return RegionActor;
 })());

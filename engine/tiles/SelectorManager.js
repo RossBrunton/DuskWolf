@@ -86,6 +86,7 @@ load.provide("dusk.tiles.SelectorManager", (function() {
 			scope.options = options;
 			scope.x = -1;
 			scope.y = -1;
+			scope.selector = this.getSelector.bind(this);
 			
 			scope.fulfill = (function(x) {
 				this.done();

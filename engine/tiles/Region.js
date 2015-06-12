@@ -6,7 +6,7 @@ load.provide("dusk.tiles.Path", (function() {
 	var Region = load.suggest("dusk.tiles.Region", function(p) {Region = p;});
 	var dirs = load.require("dusk.utils.dirs");
 	
-	var Path = function(region, x, y, z) {
+	var Path = function(region, x, y, z, clamp) {
 		this.start = [];
 		this.end = [x, y, z];
 		this.region = region;
@@ -15,7 +15,7 @@ load.provide("dusk.tiles.Path", (function() {
 		this._path = [];
 		
 		this.find(x, y, z);
-		this.clamp = -1;
+		this.clamp = clamp ? clamp : -1;
 		this.backPop = false;
 		this.validPath = false;
 		this.completePath = true;
@@ -39,6 +39,7 @@ load.provide("dusk.tiles.Path", (function() {
 					this._path[this._path.length-1][0], this._path[this._path.length-1][1],
 					this._path[this._path.length-1][2]
 				];
+				this.completePath = this._path[this._path.length-1][5];
 			}else{
 				this.end = this.start;
 			}
@@ -125,6 +126,10 @@ load.provide("dusk.tiles.Path", (function() {
 		return false;
 	};
 	
+	Path.prototype.dirs = function() {
+		return this._path.map(function(e) {return e[3];});
+	};
+	
 	Path.prototype.toString = function() {
 		return "[Path ("+this.start+") "+(this._path.map(function(e) {return dirs.toArrow(e[3]);}))+
 		" ["+this.length()+","+this.lengthWeight()+"]"
@@ -153,6 +158,11 @@ load.provide("dusk.tiles.Region", (function() {
 		this._subTiles = new Map();
 		this._parentPool = parentPool;
 		this.parentNode = parentNode;
+		
+		this.x = -1;
+		this.y = -1;
+		this.z = -1;
+		this.maxRange = 0;
 	};
 	
 	const STRUCT_SIZE = 8;
@@ -220,8 +230,12 @@ load.provide("dusk.tiles.Region", (function() {
 		}
 	};
 	
-	Region.prototype.getPath = function(x, y, z) {
-		return new Path(this, x, y, z);
+	Region.prototype.getPath = function(x, y, z, clamp) {
+		return new Path(this, x, y, z, clamp ? this.maxRange : undefined);
+	};
+	
+	Region.prototype.emptyPath = function(clamp) {
+		return new Path(this, this.x, this.y, this.z, clamp ? this.maxRange : undefined);
 	};
 	
 	Region.prototype.get = function(x, y, z) {
@@ -246,6 +260,10 @@ load.provide("dusk.tiles.Region", (function() {
 	Region.prototype.expand = function(options) {
 		if(!Array.isArray(options.ranges[0])) options.ranges = [options.ranges];
 		
+		this.x = options.x;
+		this.y = options.y;
+		this.z = options.z;
+		
 		// Cloud format:
 		// [x, y, z, weight, single weight, parentdir, processed]
 		
@@ -262,6 +280,8 @@ load.provide("dusk.tiles.Region", (function() {
 		for(var r of options.ranges) {
 			if(r[1] > maxRange) maxRange = r[1];
 		}
+		
+		this.maxRange = maxRange;
 		
 		// Create the cloud
 		var cloud = [];

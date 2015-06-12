@@ -10,6 +10,7 @@ load.provide("dusk.tiles.sgui.RegionDisplay", (function() {
 	var utils = load.require("dusk.utils");
 	var Image = load.require("dusk.utils.Image");
 	var Region = load.require("dusk.tiles.Region");
+	var dirs = load.require("dusk.utils.dirs");
 
 	/** @class dusk.tiles.sgui.RegionDisplay
 	 * 
@@ -236,7 +237,7 @@ load.provide("dusk.tiles.sgui.RegionDisplay", (function() {
 		this._updateTileColourCache();
 	};
 	
-	RegionDisplay.prototype.undisplay = function(name) {
+	RegionDisplay.prototype.unDisplay = function(name) {
 		for(var i = 0; i < this._paint.length; i ++) {
 			if(this._paint[i][0] == name) {
 				this._paint.splice(i, 1);
@@ -245,6 +246,16 @@ load.provide("dusk.tiles.sgui.RegionDisplay", (function() {
 		}
 		
 		this._updateTileColourCache();
+	};
+	
+	RegionDisplay.prototype.getDisplay = function(name) {
+		for(var p of this._paint) {
+			if(p[0] == name) {
+				return p;
+			}
+		}
+		
+		return undefined;
 	};
 	
 	

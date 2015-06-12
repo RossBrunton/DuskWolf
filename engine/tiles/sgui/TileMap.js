@@ -462,6 +462,15 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 		return t;
 	};
 	
+	/** Returns an array consisting of every tile in this map. Each entry is two elements long, and consists of an x, y
+	 * coordinate.
+	 * 
+	 * @return {Uint8ClampedArray} Tiledata of the specified tile.
+	 */
+	TileMap.prototype.getAllTiles = function() {
+		return this._tiles[0];
+	};
+	
 	/** Given a tileData and a `dusk.sgui.c.DIR_*` direction, updates the tile data such that it refers to an adjacent
 	 *  tile.
 	 * 
