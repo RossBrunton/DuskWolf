@@ -21,7 +21,6 @@ load.provide("questScript", (function() {
 	var c = load.require("dusk.sgui.c");
 	var dquest = load.require("dusk.rooms.quest");
 	var sgui = load.require("dusk.sgui");
-	var TileMapWeights = load.require("dusk.tiles.sgui.TileMapWeights");
 	var reversiblePromiseChain = load.require("dusk.utils.reversiblePromiseChain");
 	var Scriptable = load.require("dusk.entities.behave.Scriptable");
 

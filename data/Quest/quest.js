@@ -20,7 +20,6 @@ load.provide("quest", (function() {
 	var c = load.require("dusk.sgui.c");
 	var dquest = load.require("dusk.rooms.quest");
 	var sgui = load.require("dusk.sgui");
-	var TileMapWeights = load.require("dusk.tiles.sgui.TileMapWeights");
 	var reversiblePromiseChain = load.require("dusk.utils.reversiblePromiseChain");
 	var menu = load.require("dusk.script.actors.menu");
 	var Runner = load.require("dusk.script.Runner");
@@ -476,13 +475,6 @@ load.provide("quest", (function() {
 			setTimeout(fulfill, 500);
 		});
 	};
-	
-	//targ.weights = new TileMapWeights(2, 10);
-	//targ.weights.addWeight(1, 0, 100);
-	//targ.weights.addWeight(2, 0, 100);
-	
-	//targ.forEach[0].weights = new TileMapWeights(2, 10);
-	//targ.forEach[0].weights.addWeight(1, 0, 100);
 	
 	dusk.startGame();
 	//quest.go();

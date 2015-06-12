@@ -10,7 +10,6 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 	var utils = load.require("dusk.utils");
 	var Image = load.require("dusk.utils.Image");
 	var Pool = load.require("dusk.utils.Pool");
-	var TileMapWeights = load.require("dusk.tiles.sgui.TileMapWeights", function(p){TileMapWeights = p;});
 	
 	/** This is a grid of tiles.
 	 * 
@@ -88,7 +87,6 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 		 * - cols: Number of cols in the TileMap.
 		 * - src: Set to the src image of the tilemap.
 		 * - ani: An array of animations which are fed to `setAnimation`.
-		 * - weights: An object from `TileMapWeights.export` to use as the tile map weights.
 		 * 
 		 * In addition, the `map` string can be set directly.
 		 * 
@@ -169,12 +167,6 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 		 */
 		this.animating = true;
 		
-		/** If set, this is the weights of a given tile. This can be changed often, and incurs no performance problems.
-		 * @type ?dusk.tiles.sgui.TileMapWeights
-		 * @since 0.0.21-alpha
-		 */
-		this.weights = null;
-		
 		//Prop masks
 		this._mapper.map("map", "map", ["src", "swidth", "sheight", "theight", "twidth", "tsize"]);
 		this._mapper.map("src", "src");
@@ -253,15 +245,6 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 			this.rows = map.rows;
 			this.cols = map.cols;
 			
-			// Get the weights
-			/*if("weights" in map && map.weights) {
-				this._img.loadPromise().then((function(value) {
-					this.weights = new TileMapWeights(this._img.height()/singleH, this._img.width()/singleW);
-					this.weights.import(map.weights);
-				}).bind(this));
-				this.weights = new TileMapWeights(0, 0);
-			}*/
-			
 			// Draw it
 			this.drawAll();
 			
@@ -282,7 +265,6 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 			}
 			
 			hold.map = utils.dataToString(this._tileBuffer[0], utils.SD_BC16);
-			//hold.weights = this.weights ? this.weights.export() : "";
 			
 			return hold;
 		}
@@ -447,14 +429,6 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 		if(this._tiles[0][((y*this.cols)+x)<<1] !== undefined) {
 			t[0] = this._tiles[0][((y*this.cols)+x)<<1];
 			t[1] = this._tiles[0][(((y*this.cols)+x)<<1)+1];
-			
-			/*if(this.weights) {
-				t[4] = this.weights.getWeight(t[0], t[1]);
-				t[5] = this.weights.getSolid(t[0], t[1])?1:0;
-			}else{
-				t[4] = 1;
-				t[5] = 0;
-			}*/
 		}
 		
 		//console.warn("Tile "+x+","+y+" not found on "+this.name+".");
@@ -497,14 +471,6 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 			t[0] = this._tiles[0][((t[3]*this.cols)+t[2])<<1];
 			t[1] = this._tiles[0][(((t[3]*this.cols)+t[2])<<1)+1];
 		}
-		
-		/*if(this.weights) {
-			t[4] = this.weights.getWeight(t[0], t[1]);
-			t[5] = this.weights.getSolid(t[0], t[1])?1:0;
-		}else{
-			t[4] = 1;
-			t[5] = 0;
-		}*/
 		
 		return t;
 	};
@@ -726,86 +692,4 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 	sgui.registerType("TileMap", TileMap);
 	
 	return TileMap;
-})());
-
-
-load.provide("dusk.tiles.sgui.TileMapWeights", (function() {
-	var utils = load.require("dusk.utils");
-	
-	/** Stores weights of tilemap schematic layers.
-	 * 
-	 * Essentially, it maps a given tile on the schematic layer to a weight.
-	 * 
-	 * Tiles not set have a weight of 1. Tiles cannot have a weight of less than 1 or larger than 127.
-	 * 
-	 * Tiles can also be either solid or not solid.
-	 * 
-	 * @param {integer} rows The number of rows in the source image.
-	 * @param {integer} cols The number of columns in the source image.
-	 * @constructor
-	 * @since 0.0.21-alpha
-	 */
-	var TileMapWeights = function(rows, cols) {
-		this.rows = rows;
-		this.cols = cols;
-		
-		this._weights = new Uint8Array(this.rows * this.cols);
-	};
-
-	/** Sets the weight of a given tile.
-	 * @param {integer} x The x coordinate of the tile on the tilesheet.
-	 * @param {integer} y The y coordinate of the tile on the tilesheet.
-	 * @param {integer} w The weight to set the tile.
-	 */
-	TileMapWeights.prototype.addWeight = function(x, y, w) {
-		this._weights[(y * this.cols) + x] = w | (this._weights[(y * this.cols) + x] & 0x80);
-	};
-
-	/** Gets the weight of a given tile.
-	 * @param {integer} x The x coordinate of the tile on the tilesheet.
-	 * @param {integer} y The y coordinate of the tile on the tilesheet.
-	 * @return {integer} The weight of the given tile.
-	 */
-	TileMapWeights.prototype.getWeight = function(x, y) {
-		if(!(this._weights[(y * this.cols) + x] & 0x7f)) return 1;
-		return this._weights[(y * this.cols) + x] & 0x7f;
-	};
-
-	/** Sets whether the tile is solid or not.
-	 * @param {integer} x The x coordinate of the tile on the tilesheet.
-	 * @param {integer} y The y coordinate of the tile on the tilesheet.
-	 * @param {boolean} solid Whether to set the tile as solid or not.
-	 */
-	TileMapWeights.prototype.addSolid = function(x, y, solid) {
-		this._weights[(y * this.cols) + x] = (solid?0x80:0x00) | (this._weights[(y * this.cols) + x] & 0x7f);
-	};
-
-	/** Sets whether the tile is solid or not.
-	 * @param {integer} x The x coordinate of the tile on the tilesheet.
-	 * @param {integer} y The y coordinate of the tile on the tilesheet.
-	 * @return {boolean} Whether the given tile is solid or not.
-	 */
-	TileMapWeights.prototype.getSolid = function(x, y) {
-		return (this._weights[(y * this.cols) + x] & 0x80) == 0x80;
-	};
-	
-	/** Returns the weights as a string.
-	 * @return {string} The weights.
-	 */
-	TileMapWeights.prototype.export = function() {
-		return utils.dataToString(this._weights, utils.SD_HEX);
-	};
-	
-	/** Loads weights from a string previously generated by `export`. This will replace all existing weights.
-	 * @param {string} The weights to import.
-	 */
-	TileMapWeights.prototype.import = function(str) {
-		this._weights = new Uint8Array(utils.stringToData(str));
-		if(this._weights.length != this.cols * this.rows) {
-			console.warn("Weights dimensions loaded do not match, removing.");
-			this._weights = new Uint8Array(this.rows * this.cols);
-		}
-	};
-	
-	return TileMapWeights;
 })());

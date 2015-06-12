@@ -20,7 +20,6 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 	var dusk = load.require("dusk");
 	var keyboard = load.require("dusk.input.keyboard");
 	var controls = load.require("dusk.input.controls");
-	var TileMapWeights = load.require("dusk.tiles.sgui.TileMapWeights");
 	var Properties = load.require("dusk.tiles.Properties");
 	var utils = load.require("dusk.utils");
 	
@@ -223,9 +222,6 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 						"swidth":entities.swidth, "sheight":entities.sheight, "alpha":0, "globalCoords":true,
 						"layer":"+"
 					});
-					
-					//if("weights" in val[i] && val[i].weights instanceof TileMapWeights) 
-					//	this.get(val[i].name, mapType).weights = val[i].weights;
 					
 					break;
 				

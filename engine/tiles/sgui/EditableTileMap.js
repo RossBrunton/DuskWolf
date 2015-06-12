@@ -9,7 +9,6 @@ load.provide("dusk.tiles.sgui.EditableTileMap", (function() {
 	var editor = load.require("dusk.rooms.editor");
 	var keyboard = load.require("dusk.input.keyboard");
 	var controls = load.require("dusk.input.controls");
-	var TileMapWeights = load.require("dusk.tiles.sgui.TileMapWeights");
 	
 	/** Extends the regular tilemap to add the ability to edit them.
 	 * 
@@ -186,25 +185,6 @@ load.provide("dusk.tiles.sgui.EditableTileMap", (function() {
 				e.d.dest.y - e.d.slice.y + ((this._cy+1)*this.tileHeight()) - 4
 			);
 		}
-		
-		/*if(this.weights) {
-			var wstr = "";
-			
-			if(this.weights.getWeight(t[0], t[1])) {
-				wstr += this.weights.getWeight(t[0], t[1]);
-			}
-			
-			if(this.weights.getSolid(t[0], t[1])) {
-				wstr += "S";
-			}else{
-				wstr += "-";
-			}
-			
-			e.c.fillText(wstr,
-				e.d.destX - e.d.slice.x + ((this._cx)*this.tileWidth()) + 2,
-				e.d.destY - e.d.slice.y + ((this._cy+1)*this.tileHeight()) - 6
-			);
-		}*/
 		
 		TileMap.tileData.free(t);
 	};
