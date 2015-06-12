@@ -84,5 +84,18 @@ load.provide("dusk.script.Actions", (function() {
 		});
 	};
 	
+	/** Copies x[from] to x[to]..
+	 * @param {string} from The original name.
+	 * @param {string} to The new name.
+	 * @return {object} The action object.
+	 */
+	Actions.copy = function(from, to) {
+		return Runner.action("copy", function(x, add) {
+			x[to] = x[from];
+			
+			return x;
+		});
+	};
+	
 	return Actions;
 })());

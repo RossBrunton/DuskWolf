@@ -357,6 +357,8 @@ load.provide("quest", (function() {
 				}, {}, {"allowNone":true}),
 				
 				Actions.if(function(x) {return x.entity}, [
+					Actions.copy("entity", "selected"),
+					
 					function(passedArg) {
 						var ranges = passedArg.entity.stats.get("possibleRange", 2);
 						var rmap = [];
@@ -387,6 +389,63 @@ load.provide("quest", (function() {
 					qo.selectActor.pickTile({}, {}),
 					qo.regionsActor.unDisplay(["atk", "mov", "movePath"], {}),
 					qo.selectActor.followPath({}),
+					qo.regionsActor.getSubRegion("attack", {}),
+					qo.regionsActor.display("myattack", "#990000", {}),
+					qo.selectActor.entitiesInRegion({}),
+					
+					Actions.print("Value is %"),
+					
+					function(x) {
+						x.menuChoices = [];
+						
+						if(x.entities.length) {
+							x.menuChoices.push([{"text":"Attack!"}, [
+								qo.selectActor.pickEntityInRegion(function(e) {
+									return e.meetsTrigger("stat(faction, 1) = ENEMY");
+								}, {}, {}),
+								
+								function(x) {
+									feed.append({"text":"You killed them!"});
+									x.entity.terminate();
+									
+									return x;
+								}
+							]]);
+						}
+						
+						x.menuChoices.push([{"text":"Items"}, [
+							function(x) {
+								x.menuChoices = [];
+								
+								var i = x.entity.stats.layer(2).getBlock("weapons");
+								i.forEach(function(item, slot) {
+									x.menuChoices.push([{"text":item.get("displayName")}, []]);
+								});
+								
+								x.menuChoices.push([{"text":"Cancel"}, false]);
+								
+								return x;
+							},
+							
+							menu.gridMenu([], menuCom, {"copyChoices":true}),
+						]]);
+						
+						x.menuChoices.push([{"text":"Wait"}, []]);
+						
+						x.menuChoices.push([{"text":"Cancel"}, false]);
+						
+						return x;
+					},
+					
+					menu.gridMenu([], menuCom, {"copyChoices":true}),
+					
+					qo.regionsActor.unDisplay(["myattack"], {}),
+					
+					function(pa) {
+						pa.selected.stats.layer(3).addBlock("moved", {"moved":true});
+						
+						return pa;
+					},
 				], [
 					Actions.print("Here"),
 					menu.gridMenu([
@@ -398,6 +457,16 @@ load.provide("quest", (function() {
 				
 				//Actions.print("End of while"),
 			]),
+			
+			function(x) {
+				var ents = qo.layeredRoom.getPrimaryEntityLayer().filter("stat(moved, 3)");
+				
+				for(var e of ents) {
+					e.stats.layer(3).removeBlock("moved");
+				}
+				
+				return x;
+			}
 		]).start({});
 	};
 	

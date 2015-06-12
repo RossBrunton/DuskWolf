@@ -76,7 +76,7 @@ load.provide("dusk.rooms.actors.Regions", (function() {
 		
 		(function(x) {
 			var nValue = name.startsWith("*") ? x[name.substring(1)] : name;
-			this.getDisplay().undisplay(nValue);
+			this.getDisplay().unDisplay(nValue);
 			
 			return Promise.reject(new Runner.Cancel());
 		}).bind(this));
@@ -119,7 +119,7 @@ load.provide("dusk.rooms.actors.Regions", (function() {
 		
 		(function(x) {
 			var nValue = name.startsWith("*") ? x[name.substring(1)] : name;
-			this.getDisplay().undisplay(nValue);
+			this.getDisplay().unDisplay(nValue);
 			
 			return Promise.reject(new Runner.Cancel());
 		}).bind(this));
@@ -144,6 +144,26 @@ load.provide("dusk.rooms.actors.Regions", (function() {
 			}
 			
 			return Promise.reject(new Runner.Cancel());
+		}).bind(this));
+	};
+	
+	RegionActor.prototype.getSubRegion = function(name, options) {
+		return Runner.action("dusk.rooms.actors.Regions.getSubRegion", (function(x, add) {
+			var region;
+			
+			if(options.from) {
+				region = x[options.from];
+			}else{
+				region = x.region;
+			}
+			
+			var to = options.to ? options.to : "region";
+			
+			var nValue = name.startsWith("*") ? x[name.substring(1)] : name;
+			
+			x[to] = region.getChild(x.x, x.y, 0, nValue);
+			
+			return x;
 		}).bind(this));
 	};
 	

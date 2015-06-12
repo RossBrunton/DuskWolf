@@ -555,6 +555,14 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 		return false;
 	};
 	
+	EntityGroup.prototype.allInRegion = function(region, sub) {
+		if(sub) {
+			return this._entities.filter(function(e) {return region.subHas(sub, e.tileX(), e.tileY(), 0);});
+		}else{
+			return this._entities.filter(function(e) {return region.has(e.tileX(), e.tileY(), 0);});
+		}
+	};
+	
 	//Runs in O(1) time
 	EntityGroup.prototype.dropEntity = function(entity, takeFocus) {
 		if(!("name" in entity)) {

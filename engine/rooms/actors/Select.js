@@ -65,6 +65,33 @@ load.provide("dusk.rooms.actors.Select", (function() {
 		function() {});
 	};
 	
+	SelectActor.prototype.pickEntityInRegion = function(filter, task, options) {
+		return Runner.action("dusk.rooms.actors.Select.pickEntityInRegion", (function(x, add) {
+			var region;
+			if(options.region) {
+				region = x[options.region];
+			}else{
+				region = x.region;
+			}
+			
+			var eg = this.layeredRoom.getPrimaryEntityLayer();
+			if(options.layer) {
+				eg = this.layeredRoom.get(options.layer);
+			}
+			
+			var ents = eg.allInRegion(region, options.sub);
+			
+			var newFilter = function(e) {
+				if(!ents.includes(e)) return false;
+				return filter(e);
+			};
+			
+			return this.pickEntity(newFilter, task, options).forward(x, add);
+		}).bind(this), 
+		
+		function() {});
+	};
+	
 	SelectActor.prototype.pickTile = function(task, options) {
 		return Runner.action("dusk.rooms.actors.Select.pickTile", (function(x, add) {
 			var tobj = utils.copy(task);
@@ -129,6 +156,27 @@ load.provide("dusk.rooms.actors.Select", (function() {
 			x.entity.y = x.oldY;
 			
 			return Promise.reject(new Runner.Cancel());
+		}).bind(this));
+	};
+	
+	SelectActor.prototype.entitiesInRegion = function(options) {
+		return Runner.action("dusk.rooms.actors.Select.entitiesInRegion", (function(x, add) {
+			var region;
+			if(options.region) {
+				region = x[options.region];
+			}else{
+				region = x.region;
+			}
+			
+			var eg = this.layeredRoom.getPrimaryEntityLayer();
+			if(options.layer) {
+				eg = this.layeredRoom.get(options.layer);
+			}
+			
+			var dest = options.dest ? options.dest : "entities";
+			
+			x[dest] = eg.allInRegion(region, options.sub);
+			return x;
 		}).bind(this));
 	};
 	

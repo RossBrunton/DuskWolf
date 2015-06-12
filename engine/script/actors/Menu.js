@@ -25,7 +25,7 @@ load.provide("dusk.script.actors.menu", (function() {
 				var nowChoices = utils.copy(choices);
 				
 				if(options.copyChoices) {
-					nowChoices.concat(x.menuChoices);
+					nowChoices = nowChoices.concat(x.menuChoices);
 				}
 				
 				com.rows = nowChoices.length;
@@ -39,7 +39,7 @@ load.provide("dusk.script.actors.menu", (function() {
 					var s = com.getFocusedChild();
 					var choice = nowChoices[s.name.split(",")[1]];
 					
-					x.menuChoice = choice;
+					x.menuChoice = choice[1];
 					
 					com.visible = false;
 					com.action.unlisten(l);
@@ -49,7 +49,9 @@ load.provide("dusk.script.actors.menu", (function() {
 					if(!choice[1]) {
 						reject(new Runner.Cancel());
 					}else{
-						add(choice[1]);
+						if(!options.noAdd) {
+							add(choice[1]);
+						}
 					}
 					
 					fulfill(x);

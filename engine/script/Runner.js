@@ -136,7 +136,7 @@ load.provide("dusk.script.Runner", (function() {
 				if(typeof currentAction.action == "function" || !("inverse" in currentAction.action)) {
 					ret = Promise.reject(new Runner.Cancel());
 				}else{
-					ret = currentAction.action.inverse(currentAction.output);
+					ret = currentAction.action.inverse(utils.copy(currentAction.output));
 				}
 				
 				if(!(ret instanceof Promise)) ret = Promise.resolve(ret);
@@ -149,7 +149,7 @@ load.provide("dusk.script.Runner", (function() {
 						input = currentAction.prev ? currentAction.prev.output : init;
 					}
 					
-					next(input);
+					next(utils.copy(input));
 				}, prev);
 			}
 			

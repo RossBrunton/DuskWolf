@@ -185,8 +185,8 @@ load.provide("dusk.tiles.Region", (function() {
 		this._validators.push(v);
 	};
 	
-	Region.prototype.addTile = function(x, y, z, w, sw, pd, stop) {
-		var t = [x, y, z, w, sw, pd, new Map(), stop];
+	Region.prototype.addTile = function(x, y, z, w, sw, pd, children, stop) {
+		var t = [x, y, z, w, sw, pd, children, stop];
 		this._tiles.push(t);
 		if(this._parentPool) this._addToPool(t);
 	};
@@ -236,6 +236,10 @@ load.provide("dusk.tiles.Region", (function() {
 	
 	Region.prototype.emptyPath = function(clamp) {
 		return new Path(this, this.x, this.y, this.z, clamp ? this.maxRange : undefined);
+	};
+	
+	Region.prototype.getChild = function(x, y, z, name) {
+		return this.get(x, y, z)[Region.tfields.childRegions].get(name);
 	};
 	
 	Region.prototype.get = function(x, y, z) {
@@ -320,7 +324,8 @@ load.provide("dusk.tiles.Region", (function() {
 				};
 				
 				// Add it
-				this.addTile(e[0], e[1], e[2], e[3], e[4], e[5], stoppable);
+				var m = new Map();
+				this.addTile(e[0], e[1], e[2], e[3], e[4], e[5], m, stoppable);
 				
 				// Now calculate all the childnodes
 				if(options.children && stoppable) {
@@ -330,14 +335,14 @@ load.provide("dusk.tiles.Region", (function() {
 					for(var c in options.children) {
 						if(!this._subTiles.has(c)) this._subTiles.set(c, []);
 						
-						t[Region.tfields.childRegions].set(c, new Region(
+						m.set(c, new Region(
 							this.cols, this.rows, this.layers, this._subTiles.get(c), t
 						));
 						
 						options.children[c].x = e[0];
 						options.children[c].y = e[1];
 						options.children[c].z = e[2];
-						t[Region.tfields.childRegions].get(c).expand(options.children[c]);
+						m.get(c).expand(options.children[c]);
 					}
 				}
 			} while(false);
