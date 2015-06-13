@@ -53,10 +53,15 @@ load.provide("dusk.rooms.actors.Select", (function() {
 				}
 			}).bind(this);
 			
+			var _cancel = function(state, sopts) {
+				state.reject(new Runner.Cancel());
+			};
+			
 			if(!("controlHandlers" in tobj)) tobj.controlHandlers = {};
 			if(!("clickHandlers" in tobj)) tobj.clickHandlers = {};
 			
 			tobj.controlHandlers["sgui_action"] = _selected;
+			tobj.controlHandlers["sgui_cancel"] = _cancel;
 			tobj.clickHandlers["1"] = _selected;
 			
 			return this.selectorManager.performTask(tobj);
@@ -116,11 +121,16 @@ load.provide("dusk.rooms.actors.Select", (function() {
 				}
 			}).bind(this);
 			
+			var _cancel = function(state, sopts) {
+				state.reject(new Runner.Cancel());
+			};
+			
 			if(!("controlHandlers" in tobj)) tobj.controlHandlers = {};
 			if(!("clickHandlers" in tobj)) tobj.clickHandlers = {};
 			
 			tobj.controlHandlers["sgui_action"] = _selected;
 			tobj.clickHandlers["1"] = _selected;
+			tobj.controlHandlers["sgui_cancel"] = _cancel;
 			
 			return this.selectorManager.performTask(tobj);
 		}).bind(this), 
