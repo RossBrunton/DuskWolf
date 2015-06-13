@@ -62,7 +62,6 @@ load.provide("dusk.script.actors.menu", (function() {
 					com.visible = false;
 					com.cancel.unlisten(can);
 					com.action.unlisten(l);
-					com.getRoot().popActive();
 					
 					reject(new Runner.Cancel());
 				}).bind(this));
