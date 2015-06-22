@@ -35,21 +35,6 @@ load.provide("dusk.entities", (function() {
 	 */
 	var entities = {};
 	
-	/** Sprite width of entities and tilemap tiles.
-	 * 
-	 * This is the width of tiles when reading them from the image.
-	 * @type integer
-	 * @default 16
-	 */
-	entities.swidth = 16;
-	/** Sprite height of entities and tilemap tiles.
-	 * 
-	 * This is the height of tiles when reading them from the image.
-	 * @type number
-	 * @default 16
-	 */
-	entities.sheight = 16;
-	
 	/** Tile width of entities and tilemap tiles.
 	 * 
 	 * This is the width of tiles when drawing them to the canvas.

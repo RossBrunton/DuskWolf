@@ -53,17 +53,6 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 		 */
 		this.theight = 32;
 		
-		/** The width of the tiles in the source image.
-		 * @type integer
-		 * @default 16
-		 */
-		this.swidth = 16;
-		/** The height of the tiles in the source image.
-		 * @type integer
-		 * @default 16
-		 */
-		this.sheight = 16;
-		
 		
 		/** The number of rows in this TileMap.
 		 * @type integer
@@ -168,14 +157,11 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 		this.animating = true;
 		
 		//Prop masks
-		this._mapper.map("map", "map", ["src", "swidth", "sheight", "theight", "twidth", "tsize"]);
+		this._mapper.map("map", "map", ["src", "theight", "twidth", "tsize"]);
 		this._mapper.map("src", "src");
 		this._mapper.map("rows", "rows");
 		this._mapper.map("cols", "cols");
 		this._mapper.map("animated", "animated");
-		
-		this._mapper.map("sheight", "sheight");
-		this._mapper.map("swidth", "swidth");
 		
 		this._mapper.map("theight", "theight");
 		this._mapper.map("twidth", "twidth");
@@ -307,8 +293,8 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 			for (var yi = 0; yi < this.rows; yi++) {
 				for (var xi = 0; xi < this.cols; xi++) {
 					this._img.paint(this._all[f].getContext("2d"), "", false,
-						this._tiles[f][i]*this.swidth, this._tiles[f][i+1]*this.sheight, this.swidth, this.sheight, 
-						xi*this.swidth, yi*this.sheight, this.swidth, this.sheight
+						this._tiles[f][i]*this._img.tileWidth, this._tiles[f][i+1]*this._img.tileHeight, this._img.tileWidth, this._img.tileHeight, 
+						xi*this._img.tileWidth, yi*this._img.tileHeight, this._img.tileWidth, this._img.tileHeight
 					);
 					i+=2;
 				}
@@ -337,7 +323,7 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 			this._tileBuffer[offset] = origin.buffer.slice(0);
 			this._tiles[offset] = new Uint8Array(this._tileBuffer[offset]);
 			this._all[offset] = 
-				utils.createCanvas((this.cols*this.swidth)+this.width, (this.rows*this.sheight)+this.height);
+				utils.createCanvas((this.cols*this._img.tileWidth)+this.width, (this.rows*this._img.tileHeight)+this.height);
 		}
 		
 		for(var i = origin.length-2; i >= 0; i -= 2) {
@@ -406,8 +392,8 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 		if(!this._img) return;
 		if(!this._drawn) this.drawAll();
 		
-		var hscale = this.swidth/this.twidth;
-		var vscale = this.sheight/this.theight;
+		var hscale = this._img.tileWidth/this.twidth;
+		var vscale = this._img.tileHeight/this.theight;
 		e.c.drawImage(this._all[this._currentFrame],
 			e.d.slice.x*hscale, e.d.slice.y*vscale, e.d.slice.width*hscale, e.d.slice.height*vscale, 
 			e.d.dest.x, e.d.dest.y, e.d.dest.width, e.d.dest.height

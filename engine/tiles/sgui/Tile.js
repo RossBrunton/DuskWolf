@@ -34,20 +34,6 @@ load.provide("dusk.tiles.sgui.Tile", (function() {
 		 * @private
 		 */
 		this._img = null;
-		/** Origin sprite width.
-		 * 
-		 * This is considered to be the width of the sprites when reading them from the image.
-		 * @type integer
-		 * @default 16
-		 */
-		this.swidth = 16;
-		/** Origin sprite height.
-		 * 
-		 * This is considered to be the height of the sprites when reading them from the image.
-		 * @type integer
-		 * @default 16
-		 */
-		this.sheight = 16;
 		
 		/** X coordinate of the current image on the source.
 		 * @type integer
@@ -90,8 +76,6 @@ load.provide("dusk.tiles.sgui.Tile", (function() {
 		this._mapper.map("src", "src");
 		this._mapper.map("imageTrans", "imageTrans");
 		this._mapper.map("tile", "tileStr");
-		this._mapper.map("swidth", "swidth");
-		this._mapper.map("sheight", "sheight");
 		
 		//Listeners
 		this.prepareDraw.listen(_draw.bind(this));
@@ -110,9 +94,7 @@ load.provide("dusk.tiles.sgui.Tile", (function() {
 				e.d.destX, e.d.destY, e.d.width, e.d.height,
 				this.swidth/this.width, this.sheight/this.height
 			);*/
-			var t = PosRect.pool.alloc().setWH(this._tx * this.swidth, this._ty * this.sheight, this.swidth, this.sheight);
-			this._img.paintRangesTile(e.c, this.imageTrans, false, e.d.origin, e.d.slice, e.d.dest, t);
-			PosRect.pool.free(t);
+			this._img.paintRangesTile(e.c, this.imageTrans, false, e.d.origin, e.d.slice, e.d.dest, this._tx, this._ty);
 		}
 	};
 	

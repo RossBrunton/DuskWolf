@@ -53,8 +53,6 @@ load.provide("example.plat", (function() {
 	
 	entities.twidth = 32;
 	entities.theight = 32;
-	entities.swidth = 32;
-	entities.sheight = 32;
 	
 	plat.health = new Range(0, 5, 0);
 	
@@ -147,6 +145,7 @@ load.provide("example.plat", (function() {
 		},
 		"data":{
 			"hp":5, "maxHp":5, "collisionOffsetX":10, "collisionWidth":22, "collisionOffsetY":3, "hspeed":5,
+			"src":"pimg/hero.png tiles:32x32",
 			"spawns":{
 				"shot":{
 					"type":"shot", "horBase":"facing", "verBase":"middle", "cooldown":10,
@@ -154,9 +153,9 @@ load.provide("example.plat", (function() {
 				"slash":{"type":"slash", "horBase":"facing", "cooldown":30, "multDx":[0.5, 10, []],
 					"onlyIf":"#dx<1 & #dx>-1",
 					"data":[{
-						"src":"Example/Slashl.png"
+						"src":"Example/Slashl.png tiles:32x32"
 					}, {
-						"src":"Example/Slash.png"
+						"src":"Example/Slash.png tiles:32x32"
 					}]
 				}
 			}
@@ -166,13 +165,13 @@ load.provide("example.plat", (function() {
 	
 	entities.types.createNewType("bad", {
 		"behaviours":{"HitDam":true},
-		"data":{"gravity":0, "damage":1, "types":["electric", "fire"], "src":"pimg/techBad.png"},
+		"data":{"gravity":0, "damage":1, "types":["electric", "fire"], "src":"pimg/techBad.png tiles:32x32"},
 		"animation":[["default", [[0,0], [1,0]], {"trigger":function() {return true}}]]
 	}, "plat");
 	
 	entities.types.createNewType("coin", {
 		"behaviours":{"Pickup":true},
-		"data":{"gravity":0, "solid":false, "src":"Example/Coin.png", "collisionOffsetX":8, "collisionOffsetY":8,
+		"data":{"gravity":0, "solid":false, "src":"Example/Coin.png tiles:32x32", "collisionOffsetX":8, "collisionOffsetY":8,
 			"collisionWidth":26, "collisionHeight":26, "type":"coin", "pickupBy":".entType=player"
 		},
 		"animation":[]
@@ -180,7 +179,7 @@ load.provide("example.plat", (function() {
 	
 	entities.types.createNewType("heart", {
 		"behaviours":{"Pickup":true, "HealthRestore":true, "Gravity":true},
-		"data":{"gravity":1, "terminal":2, "solid":false, "collides": true, "src":"Example/BigHeart.png",
+		"data":{"gravity":1, "terminal":2, "solid":false, "collides": true, "src":"Example/BigHeart.png tiles:32x32",
 			"collisionOffsetX":9, "collisionOffsetY":9, "collisionWidth":25, "collisionHeight":25, "type":"heart",
 			"pickupHealth":1
 		},
@@ -189,20 +188,20 @@ load.provide("example.plat", (function() {
 	
 	entities.types.createNewType("block", {"behaviours":{}, "data":{"anchor":true, "gravity":0}}, "plat");
 	entities.types.createNewType("fall", {"behaviours":{"Fall":true, "InteractableTarget":true}, 
-		"data":{"gravity":0, "fallSpeed":3, "src":"pimg/techFallBlock.png", "interactType":"Falli"},
+		"data":{"gravity":0, "fallSpeed":3, "src":"pimg/techFallBlock.png tiles:32x32", "interactType":"Falli"},
 		"animation":[
 			["default", [[0,0]], {"trigger":function() {return true}}],
 			["fall", [[1,0]], {"trigger":function(st, ent) {return ent.dy > 0 && !ent.touchers(c.DIR_DOWN).length}}]
 		]
 	}, "plat");
 	entities.types.createNewType("push", {"behaviours":{"Push":true},
-		"data":{"gravity":0, "src":"pimg/techFreeMove.png"}
+		"data":{"gravity":0, "src":"pimg/techFreeMove.png tiles:32x32"}
 	}, "plat");
 	
 	entities.types.createNewType("slash", {"behaviours":{"HitDam":true, "LimitedLife":true},
 		"data":{
-			"gravity":0, "collides":false, "solid":false, "src":"Example/Slash.png", "damages":".entType != player",
-			"lifespan":6*5
+			"gravity":0, "collides":false, "solid":false, "src":"Example/Slash.png tiles:32x32",
+			"damages":".entType != player", "lifespan":6*5
 		},
 		"animation":[
 			["default", [[0,0],[1,0],[2,0],[3,0],[4,0]], {"trigger":function() {return true}}]
@@ -211,7 +210,7 @@ load.provide("example.plat", (function() {
 	
 	entities.types.createNewType("shot", {
 		"behaviours":{"HitDam":true, "BackForth":true, "Volatile":true},
-		"data":{"solid":false, "src":"Example/Shot.png", "collisionOffsetX":12, "collisionOffsetY":12,
+		"data":{"solid":false, "src":"Example/Shot.png tiles:32x32", "collisionOffsetX":12, "collisionOffsetY":12,
 			"collisionWidth":20, "collisionHeight":20, "hspeed":5, "damages":".entType != player",
 			"killedBy":".entType != player"
 		},
@@ -219,7 +218,7 @@ load.provide("example.plat", (function() {
 	}, "plat");
 	
 	entities.types.createNewType("checkpoint", {"behaviours":{"InteractableTarget":true, "Checkpoint":true},
-		"data":{"gravity":0, "solid":false, "src":"pimg/checkpoint.png", "interactType":"checkpoint",
+		"data":{"gravity":0, "solid":false, "src":"pimg/checkpoint.png tiles:32x32", "interactType":"checkpoint",
 			"checkpointName":"plat"
 		},
 		"animation":[

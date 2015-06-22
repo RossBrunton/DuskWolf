@@ -185,7 +185,7 @@ load.provide("dusk.tiles.SelectorManager", (function() {
 			"PlayerGridWalker":true, "GridWalker":true, "GridMouse":true 
 		},
 		"data":{
-			"solid":false, "collides":false, "src":"default/selector32.png", "noSave":true, "noRegion":true,
+			"solid":false, "collides":false, "src":"default/selector32.png tiles:32x32", "noSave":true, "noRegion":true,
 			"gmMouseMove":false
 		},
 		"animation":[

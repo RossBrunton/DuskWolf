@@ -209,7 +209,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 					{"cursorColour":_LAYER_COLOURS[colour++],
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
 						"twidth":entities.twidth, "theight":entities.theight,
-						"swidth":entities.swidth, "sheight":entities.sheight, "globalCoords":true, "layer":"+"
+						"globalCoords":true, "layer":"+"
 					});
 					
 					break;
@@ -219,7 +219,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 					{"cursorColour":_LAYER_COLOURS[colour++],
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
 						"twidth":entities.twidth, "theight":entities.theight,
-						"swidth":entities.swidth, "sheight":entities.sheight, "alpha":0, "globalCoords":true,
+						"alpha":0, "globalCoords":true,
 						"layer":"+"
 					});
 					
@@ -230,7 +230,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 					{
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
 						"twidth":entities.twidth, "theight":entities.theight,
-						"swidth":entities.swidth, "sheight":entities.sheight, "globalCoords":true,
+						"globalCoords":true,
 						"alpha":0.50, "layer":"+"
 					});
 					
@@ -241,7 +241,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 					{"name":"entities", "type":"EntityGroup",
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
 						"twidth":entities.twidth, "theight":entities.theight,
-						"swidth":entities.swidth, "sheight":entities.sheight, "globalCoords":true, "layer":"+",
+						"globalCoords":true, "layer":"+",
 						"allowMouse":this.allowMouse, "tileProperties":this.tileProperties
 					});
 					

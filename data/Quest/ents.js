@@ -13,8 +13,6 @@ load.provide("quest.ents", (function() {
 	var store = load.require("dusk.stats.store");
 	var at = load.require("dusk.tiles.sgui.extras.animationTypes");
 	
-	entities.swidth = 32;
-	entities.sheight = 32;
 	entities.twidth = 32;
 	entities.theight = 32;
 	entities.frameDelay = 20;
@@ -92,13 +90,13 @@ load.provide("quest.ents", (function() {
 		if(Math.random() > 0.3) inv.addItem("snipersBow");
 		
 		if(Math.random() > 0.5) {
-			l.layer(1).addBlock("image", {"image":"Quest/images/shaman.png"});
+			l.layer(1).addBlock("image", {"image":"Quest/images/shaman.png tiles:32x32"});
 			l.layer(1).addBlock("class", {"move":5});
 		}else if(Math.random() > 0.5){
-			l.layer(1).addBlock("image", {"image":"Quest/images/knight.png"});
+			l.layer(1).addBlock("image", {"image":"Quest/images/knight.png tiles:32x32"});
 			l.layer(1).addBlock("class", {"move":3});
 		}else{
-			l.layer(1).addBlock("image", {"image":"Quest/images/dino.png"});
+			l.layer(1).addBlock("image", {"image":"Quest/images/dino.png tiles:32x32"});
 			l.layer(1).addBlock("class", {"move":6});
 		}
 	};

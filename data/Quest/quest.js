@@ -250,7 +250,7 @@ load.provide("quest", (function() {
 				}
 			}, undefined, "Handle Entity Selection"],
 			q.requestBoundPair("generateRegion", targ),
-			q.requestBoundPair("getTilePathInRange", {"colour":":default/arrows32.png", "colourChildrenUnder":["attack"],
+			q.requestBoundPair("getTilePathInRange", {"colour":":default/arrows32.png tiles:32x32", "colourChildrenUnder":["attack"],
 				"destName":"path", "regionToUse":"move"
 			}),
 			q.requestBoundPair("moveViaPath"),
@@ -384,7 +384,7 @@ load.provide("quest", (function() {
 					qo.regionsActor.display("atk", "#ffffff", {"sub":"attack"}),
 					qo.regionsActor.display("mov", "#000000", {}),
 					qo.regionsActor.makePath("", {}),
-					qo.regionsActor.displayPath("movePath", "default/arrows32.png", {}),
+					qo.regionsActor.displayPath("movePath", "default/arrows32.png tiles:32x32", {}),
 					qo.selectActor.pickTile({}, {}),
 					qo.regionsActor.unDisplay(["atk", "mov", "movePath"], {}),
 					qo.selectActor.followPath({}),

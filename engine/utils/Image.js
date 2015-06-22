@@ -22,7 +22,11 @@ load.provide("dusk.utils.Image", (function() {
 		this.providedSrc = src;
 		
 		this.transform = transform?_parseTransString(transform):[];
-		if(frags.length > 1) this.transform += frags[1];
+		if(frags.length > 1) this.transform = this.transform.concat(_parseTransString(frags[1]));
+		
+		// Check transform string for spritesheet dimensions
+		this.tileWidth = -1;
+		this.tileHeight = -1;
 		
 		this._proxy = null;
 		if(this.src in _images) {
@@ -58,6 +62,15 @@ load.provide("dusk.utils.Image", (function() {
 				this._img = null;
 			}).bind(this));
 		}
+		
+		// Check transformations for tilesheet dimensions
+		for(var t of this.transform) {
+			if(t[0] == "tiles") {
+				var frags = t[1].split("x");
+				this.tileWidth = +frags[0];
+				this.tileHeight = +frags[1];
+			}
+		}
 	};
 	
 	Image.prototype.loadPromise = function() {
@@ -74,7 +87,7 @@ load.provide("dusk.utils.Image", (function() {
 		
 		if(!opts.us) {
 			return this._base;
-		}else if(opts.us in this._transformCache) {
+		}else if(opts.us in this._transformCache && !(opts.us.includes("#"))) {
 			return this._transformCache[opts.us];
 		}else{
 			var can = utils.createCanvas(this._base.width, this._base.height);
@@ -151,15 +164,21 @@ load.provide("dusk.utils.Image", (function() {
 		}
 	};
 	
-	Image.prototype.paintRangesTile = function(ctx, extraTrans, ino, origin, slice, dest, tile) {
+	Image.prototype.paintRangesTile = function(ctx, extraTrans, ino, origin, slice, dest, tx, ty, twidth, theight) {
+		if(twidth === undefined) twidth = this.tileWidth < 0 ? this.width() : this.tileWidth;
+		if(theight === undefined) theight = this.tileHeight < 0 ? this.height() : this.tileHeight;
+		
 		if(this._proxy) {
-			this._proxy.paintRangesTile(ctx, this.transform.concat(extraTrans), true, origin, slice, dest, tile);
+			this._proxy.paintRangesTile
+				(ctx, this.transform.concat(extraTrans), true, origin, slice, dest, tx, ty, twidth, theight);
 		}else{
-			var w = origin.width / tile.width;
-			var h = origin.height / tile.height;
+			var w = origin.width / twidth;
+			var h = origin.height / theight;
+			
 			ctx.drawImage(
 				this.asCanvas(extraTrans, ino),
-				(slice.x) / w + tile.x, (slice.y) / h + tile.y, slice.width / w, slice.height / h,
+				(slice.x) / w + (tx * twidth), (slice.y) / h + (ty * theight),
+				slice.width / w, slice.height / h,
 				dest.x, dest.y, dest.width, dest.height
 			);
 		}

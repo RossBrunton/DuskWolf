@@ -50,9 +50,6 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 		this.twidth = 0;
 		this.theight = 0;
 		
-		this.sheight = 0;
-		this.swidth = 0;
-		
 		this._scheme = null;
 		this.scheme = null;
 		this.tileProperties = null;
@@ -68,9 +65,6 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 		this._priorEntity = "";
 		
 		//Prop masks
-		this._mapper.map("sheight", "sheight");
-		this._mapper.map("swidth", "swidth");
-		
 		this._mapper.map("theight", "theight");
 		this._mapper.map("twidth", "twidth");
 		

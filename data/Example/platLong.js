@@ -51,8 +51,6 @@ load.provide("example.platLong", (function() {
 	
 	entities.twidth = 32;
 	entities.theight = 32;
-	entities.swidth = 32;
-	entities.sheight = 32;
 	
 	var root = sgui.get("default", true);
 	dplat.make(root, "orange");

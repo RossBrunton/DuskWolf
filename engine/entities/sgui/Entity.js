@@ -328,8 +328,6 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 		this.stats = null;
 		
 		//Default sizes
-		this.sheight = entities.sheight;
-		this.swidth = entities.swidth;
 		this.width = entities.twidth;
 		this.height = entities.theight;
 		

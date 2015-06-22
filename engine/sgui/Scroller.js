@@ -120,18 +120,14 @@ load.provide("dusk.sgui.Scroller", (function() {
 		"height":32,
 		"width":16,
 		"focusOrient":c.ORIENT_HOR,
-		"swidth":16,
-		"sheight":32,
-		"src":"default/scrollerVer.png"
+		"src":"default/scrollerVer.png tiles:32x16"
 	});
 	
 	sgui.addStyle("Scroller[orientation="+c.ORIENT_HOR+"]", {
 		"height":16,
 		"width":32,
 		"focusOrient":c.ORIENT_VER,
-		"swidth":32,
-		"sheight":16,
-		"src":"default/scrollerHor.png"
+		"src":"default/scrollerHor.png tiles:16x32"
 	});
 	
 	return Scroller;
