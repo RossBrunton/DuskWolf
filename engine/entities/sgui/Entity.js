@@ -206,50 +206,6 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 		 */
 		this.entityEvent = new EventDispatcher("dusk.entities.sgui.Entity.entityEvent");
 		
-		/** The animation data for the entity, in the same format as described in the entity type
-		 *  description. For speed, the second element of the value will be sliced once, and so will be
-		 *  an array after the first time it is used.
-		 * @type array
-		 * @private
-		 */
-		this._animationData = [];
-		/** The index of the currently running animation.
-		 * @type integer
-		 * @private
-		 */
-		this._currentAni = 0;
-		/** The index of the current frame in the current animation.
-		 * @type integer
-		 * @private
-		 */
-		this._aniPointer = 0;
-		/** Whether the current animation is locked or not.
-		 * @type boolean
-		 * @private
-		 */
-		this._aniLock = false;
-		/** Animation variables. Key is var name, value is var value.
-		 * @type object
-		 * @private
-		 */
-		this._aniVars = {};
-		/** The functions set by `{@link dusk.entities.sgui.Entity#animationWait}` for calling when the event is
-		 *  terminated. Keys are event names, while values are the functions to call.
-		 * @type object
-		 * @private
-		 */
-		this._aniWaits = {};
-		/** The delay between two frames of animation, in frames.
-		 * @type integer
-		 * @default {@link dusk.entities.frameDelay}
-		 */
-		this.frameDelay = entities.frameDelay;
-		/** The amount of time left before the next frame event is ran.
-		 * @type integer
-		 * @private
-		 */
-		this._frameCountdown = 0;
-		
 		/** The particle effect data for the entity, in the same format as described in the entity type
 		 *  description. For speed, the second element of the value will be sliced once, and so will be
 		 *  an array after the first time it is used.
@@ -357,14 +313,6 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 		this.ittb = 0;
 		this.ibtt = 0;
 		
-		/** Used on triggers. If it is true, then the last trigger tree to be evaluated used the `on`
-		 *  operator to successfully match against an event. This is used, for example, in 
-		 *  `{@link dusk.entities.sgui.Entity#animationWait}` to check if an event was specifically "noticed".
-		 * @type boolean
-		 * @private
-		 */
-		this._eventTriggeredMark = false;
-		
 		/** Internal storage of this entity's type's name.
 		 * @type string
 		 * @private
@@ -463,7 +411,6 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 				this.behaviourData = {"headingLeft":false, "headingUp":false, "img":"nosuchimage.png",
 					"solid":true, "collides":true
 				};
-				this._animationData = ["true", "0,0", {}];
 				this._particleData = [];
 			}
 			
@@ -934,9 +881,6 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	Entity.prototype.startFrame = function(active) {
 		this.behaviourFire("frame", {"active":active});
 		
-		//Animation
-		//this._frameCountdown--;
-		
 		if(this._particleData) for(var i = this._particleCriteria.length-1; i >= 0; i --) {
 			if(this._particleCriteria[i] && "cooldown" in this._particleCriteria[i] 
 			&& this._particleCriteria[i].cooldown) {
@@ -944,7 +888,7 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 			}
 		}
 		
-		this.performAnimation(null, this._frameCountdown <= 0);
+		this.performAnimation(null, false);
 	};
 	
 	/** Performs an animation or particle effect. This is called at least once per frame and once per
@@ -960,7 +904,7 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	Entity.prototype.performAnimation = function(event, advance) {
 		//Particles
 		if(this._particleData) for(var i = this._particleData.length-1; i >= 0; i --) {
-			if(this.meetsTrigger(this._particleData[i][0], event)) {
+			if(this.meetsTrigger(this._particleData[i][0])) {
 				if(!this._particleCriteria[i]) this._particleCriteria[i] = {};
 				if("cooldown" in this._particleCriteria[i] && this._particleCriteria[i].cooldown > 0) {
 					continue;
@@ -1006,7 +950,7 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	 */
 	Entity.prototype._aniAction = function(event, action) {
 		var cont = action == undefined;
-		if(!action) action = this._animationData[this._currentAni][1][this._aniPointer];
+		if(!action) return;
 		
 		switch(action.charAt(0)) {
 			case "$":
@@ -1060,8 +1004,8 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	 * @return {*} The result of the evaluated parse tree.
 	 * @depreciated
 	 */
-	Entity.prototype.meetsTrigger = function(trigger, event) {
-		return this.evalTrigger(trigger, event);
+	Entity.prototype.meetsTrigger = function(trigger) {
+		return this.evalTrigger(trigger);
 	};
 
 	/** Using the parse tree described in the class docs, will evaluate it, and return the value.
@@ -1072,14 +1016,12 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	 * @param {?string} event The name of the event, if appropriate.
 	 * @return {*} The result of the evaluated parse tree.
 	 */
-	Entity.prototype.evalTrigger = function(trigger, event) {
+	Entity.prototype.evalTrigger = function(trigger) {
 		if(typeof trigger != "string") return trigger;
 		if(trigger.trim() == "") return true;
-		this._eventTriggeredMark = false;
-		this._currentEvent = event;
 		
 		//var t = performance.now();
-		var e = _triggerTree.compile(trigger).eval({"ent":this, "currentEvent":event});
+		var e = _triggerTree.compile(trigger).eval({"ent":this});
 		//var ta = performance.now() - t;
 		//t = performance.now();
 		////var f = this._triggerTree.compileToFunct(trigger)();
@@ -1094,14 +1036,6 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	 * @private
 	 */
 	var _triggerTree = new parseTree.Compiler([], [
-		["on", function(o, v, c) {
-				if(c.currentEvent == v) {
-					c.ent._eventTriggeredMark = true;
-					return true;
-				}
-				return false;
-			}, false
-		],
 		["#", function(o, v, ctx) {
 				switch(v) {
 					case "dx": return ctx.ent.dx;
@@ -1353,14 +1287,13 @@ load.provide("dusk.entities.LightEntity", (function() {
 			// Get data
 			this._type = type;
 			this.behaviourData = utils.copy(entities.types.getAll(type).data, true);
-			this._animationData = utils.copy(entities.types.getAll(type).animation, true);
 			this._particleData = utils.copy(entities.types.getAll(type).particles, true);
 			
 			//Set up animation
 			this._currentAni = -1;
 			this._particleCriteria = [];
 			this._aniWaits = {};
-			this.performAnimation("construct", true);
+			this.animate("ent_construct");
 			
 			if("collisionWidth" in this.behaviourData) {
 				this.collisionWidth = this.behaviourData.collisionWidth;
