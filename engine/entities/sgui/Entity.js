@@ -12,11 +12,12 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	var sgui = load.require("dusk.sgui");
 	var interaction = load.require("dusk.input.interaction");
 	var editor = load.suggest("dusk.rooms.editor", function(p){editor = p;});
+	var AnimatedTile = load.require("dusk.tiles.sgui.extras.AnimatedTile");
 	
 	/** An entity is a component that has "behaviours" and can do certain activites, possibly in response to another
 	 *  entity or user input.
 	 * 
-	 * It is a normal tile with a movement system, an animation system, a collision system and a behaviour system added
+	 * It is a normal tile with a movement system, a collision system and a behaviour system added
 	 *  onto it.
 	 * 
 	 * Entities have a type, which describes how they look and what behaviours they have. This is set by the `entType`
@@ -28,62 +29,33 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	 *  and "verForce" entity events. The event handlers supply either a constant speed to move at that frame or a
 	 *  `[acceleration, max, name]` triple.
 	 * 
-	 * The animation system works based on choosing the highest priority animation and using it, unless it is no lorger
-	 *  applicable or a higher priority animation needs to be run. The entity's type determines the animations it
-	 *  performs. In the entity's type data there is an `animation` key, which is an array of arrays.
+	 * The particle system works using an array of particles to be run at certain times. The entity's type determines
+	 * the particle effects it performs. In the entity's type data there is an `particles` key, which is an array of
+	 * arrays.
 	 * 
-	 * Each array in this data is a single animation, the last one in the array that can be used will be the one that is
-	 *  used. The first element is a trigger critera such that `evalTrigger` is true if and only if the animation should
-	 *  run. The second is a string with "animation actions" as described below seperated by a "|" character. The third
-	 *  element is an option which describes additional flags and settings for the animation.
+	 * Each array in this data is a single particle effect. The first element is a trigger critera such that
+	 * `evalTrigger` is true if and only if the particle effect should run. The second is a string with "animation
+	 * actions" as described below seperated by a "|" character. The third element is an option which describes
+	 * additional flags and settings for the effect.
 	 * 
-	 * The animation starts at the first animation frame, and then every `frameDelay` frames, it will move onto the next
-	 *  one, and execute it. Some animation events cause the next one to be executed immediatley.
+	 * All actions for a particle effect run at the same time.
 	 * 
-	 * The animation actions are determined by the first character in the string, as follows:
+	 * The particle actions are determined by the first character in the string, as follows:
 	 * 
 	 * - `$var=value`: Sets an animation variable to the specified value. This can be used for evaling
 	 *  triggers using the `$` operator.
-	 * - `+time`: Waits `time` frames before moving onto the next action.
-	 * - `?trigger?yes?no`: Evaluates the trigger and skips forward `yes` actions if it is true, and `no` actions if it
-	 *  is false, and executes that action.
-	 * - `>animation`: Switches the current animation to the one with the name `animation`, and executes the first
-	 *  action.
-	 * - `!event`: Fires the behaviour event `event` and then moves onto the next animation action and executes it.
-	 * - `/event`: If this animation event is blocking some other event `event`, then this will terminate that event,
-	 *  and cause the block to be removed. This also releases a lock.
-	 * - `\event`: Same as `/event` but does not release the lock.
 	 * - `*pname data`: Does the particle effect named `pname` with the data `data`. Data should be a 
 	 *  json string, and each of it's keys will be fed through `{@link dusk.entities.sgui.Entity#evalTrigger}`.
 	 *  The next event is executed.
-	 * - `L`: Locks the current animation, so it can't change until the lock is released, and then move onto and execute
-	 *  the next animation action.
-	 * - `l`: Removes any lock, and then move onto and execute the next action.
-	 * - `x,y`: Where x and y are integers, sets the current tile to the tile specified.
 	 * - `#+trans;`: Adds the transformation `trans` to this entity's image, replacing it if it already exists.
 	 * - `#-trans;`: Removes the transformation `trans` from this entity's image.
 	 * 
 	 * The third element has the following possible keys:
 	 * 
-	 * - `name`: a string; the name of the animation, for use with the `>` event.
-	 * - `suppressSmooth`: a boolean; if false or ommited, then if the entity's current frame is anywhere in this
-	 *  animation's action list, then it will be skipped to. 
-	 * 
-	 * A particle effects system is also provided, which works on almost the same way as the animation system. In the
-	 *  entity's data, there is also a "particles" property, which has the same format.
-	 * 
-	 * The difference is that only one animation can run at a time, yet more than one particle effect can also run.
-	 *  Also, while animations step through their action, particle effects run them all at once. The same animation
-	 *  events are used for particle effects, although only `$`, `*` and `t` should be used.
-	 * 
-	 * Additional "third element properties" can be set on particle effects:
-	 * 
+	 * - `name`: a string; the name of the particle effect.
 	 * - `onlyOnce`: A boolean; if true, then the effect will run only after if it's criteria has been false between the
 	 *  last time it ran and now.
 	 * - `cooldown`: An integer; the time in frames the effect must wait until it is ran again.
-	 * 
-	 * Due to the nature of animations, at least one of `onlyOnce` or `cooldown` must be specified, as the function that
-	 *  resolves animations may be called more than once a frame.
 	 * 
 	 * Entities can collide with each other, if they are in a `dusk.entities.sgui.EntityGroup`. The collision hit box is a
 	 *  rectangle from the coordinates (`x+collisionOffestX`, `y+collisionOffestY`) to (`x+collisionWidth`,
@@ -94,11 +66,10 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	 *  entity type description. Each key of this object is the name of a behaviour, while the value is a boolean for
 	 *  whether the entity should have this behaviour.
 	 * 
-	 * Behaviours are subclasses of `Behave`, and must be registered using 
-	 *  `dusk.entities.registerBehaviour` before they can be used. Entity behaviours share an object `behaviourData`
-	 *  which is used for storing and retrieving values, and can be accessed using `eProp` or
-	 *  `dusk.entities.behave.Behave._data`. By convention, the keys are of the form `"behaviourName:varName"` or
-	 *  `"_behaviourName:_privateVarName"`.
+	 * Behaviours are subclasses of `Behave`, and must be registered using `dusk.entities.registerBehaviour` before they
+	 * can be used. Entity behaviours share an object `behaviourData` which is used for storing and retrieving values,
+	 * and can be accessed using `eProp` or `dusk.entities.behave.Behave._data`. By convention, the keys are of the form
+	 * `"behaviourName:varName"` or `"_behaviourName:_privateVarName"`.
 	 * 
 	 * A number of "built in" entity data properties are available:
 	 * 
@@ -111,6 +82,8 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	 * - `controlsOn`: An array of controls that are always on.
 	 * - `img`: A string, the path to the source image.
 	 * - `collisionWidth`,`collisionHeight`,`collisionOffsetX`,`collisionOffsetY`: Mapping to the respective properties.
+	 * - `animations`: The animations for this entity, as per `dusk.tiles.sgui.extras.AnimatedTile`.
+	 * - `animationRate`: The value for the `rate` property of the animation.
 	 * 
 	 * Behaviours may also fire and listen to events between themselves and their entity. Events are fired using
 	 *  `behaviourFire` and listened to on each behaviour's `Behave.entityEvent` dispatcher.
@@ -171,6 +144,8 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	 * - `.var`: The value of the component property `var`.
 	 * - `:var`: The value of the entity data property `var`.
 	 * 
+	 * All entities have an `dusk.tile.sgui.extras.AnimatedTile` object attached to them, called `animation`.
+	 * 
 	 * @extends dusk.tiles.sgui.Tile
 	 * @param {dusk.sgui.Component} parent The container that this component is in.
 	 * @param {string} name The name of the component.
@@ -178,6 +153,9 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	 */
 	var Entity = function(parent, name) {
 		if(!this.isLight()) Tile.call(this, parent, name);
+		
+		//Settings
+		if(!this.isLight()) this.addExtra("AnimatedTile", "animation", {});
 		
 		/** The current horizontal speed. This may be read, but not set directly; use the `horForce` behaviour event.
 		 * @type integer
@@ -479,7 +457,7 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 			
 			if(entities.types.isValidType(type)) {
 				this.behaviourData = utils.copy(entities.types.getAll(type).data, true);
-				this._animationData = utils.copy(entities.types.getAll(type).animation, true);
+				this.getExtra("animation").setAnimations(utils.copy(entities.types.getAll(type).animation, true));
 				this._particleData = utils.copy(entities.types.getAll(type).particles, true);
 			}else{
 				this.behaviourData = {"headingLeft":false, "headingUp":false, "img":"nosuchimage.png",
@@ -493,7 +471,7 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 			this._currentAni = -1;
 			this._particleCriteria = [];
 			this._aniWaits = {};
-			this.performAnimation("construct", true);
+			this.animate("ent_construct");
 			
 			//Basic properties
 			if(!this.isLight()) this.prop("src", this.behaviourData.src);
@@ -513,6 +491,10 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 			if("collisionOffsetY" in this.behaviourData) {
 				this.collisionOffsetY = this.behaviourData.collisionOffsetY;
 			} else this.collisionOffsetY = 0;
+			
+			if("animationRate" in this.behaviourData) {
+				this.getExtra("animation").rate = this.behaviourData.animationRate;
+			}
 			
 			//Behaviours
 			if(entities.types.isValidType(type)) {
@@ -953,7 +935,7 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 		this.behaviourFire("frame", {"active":active});
 		
 		//Animation
-		this._frameCountdown--;
+		//this._frameCountdown--;
 		
 		if(this._particleData) for(var i = this._particleCriteria.length-1; i >= 0; i --) {
 			if(this._particleCriteria[i] && "cooldown" in this._particleCriteria[i] 
@@ -1010,59 +992,10 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 				}
 			}
 		}
-		
-		//Locked animation
-		if(this._aniLock) {
-			if(advance) this._aniForward(event);
-			if(this._frameCountdown <= 0) this._frameCountdown = this.frameDelay+1;
-			return false;
-		}
-		
-		//Look through animations
-		for(var i = this._animationData.length-1; i >= 0; i --) {
-			if(typeof this._animationData[i][1] == "string") {
-				this._animationData[i][1] = this._animationData[i][1].split("|");
-			}
-			
-			if(this.meetsTrigger(this._animationData[i][0], event)) {
-				if(i == this._currentAni || (this._aniLock && !event)) {
-					//Forward one frame
-					if(advance) {
-						this._aniPointer = (this._aniPointer + 1) % this._animationData[i][1].length;
-						this._aniAction(event);
-					}
-				}else if(i != this._currentAni && !this._aniLock) {
-					//Change animation
-					this._setNewAni(i, event);
-				}
-				
-				if(this._eventTriggeredMark) {
-					//Lock animation if triggered by event
-					this._aniLock = true;
-				}
-				
-				if(this._frameCountdown <= 0) this._frameCountdown = this.frameDelay+1;
-				return this._eventTriggeredMark;
-			}
-		}
 	};
 	
-	/** Starts a new animation with the specified ID.
-	 * @param {integer} id The index of the new animation.
-	 * @param {?string} event The event that triggered this animation, if any.
-	 * @private
-	 */
-	Entity.prototype._setNewAni = function(id, event) {
-		this._currentAni = id;
-		
-		if(!this._animationData[id][2].supressSmooth
-		&& this._animationData[id][1].indexOf(this.tileStr) !== -1) {
-			this._aniPointer = this._animationData[id][1].indexOf(this.tileStr);
-		}else{
-			this._aniPointer = 0;
-		}
-		
-		this._aniAction(event);
+	Entity.prototype.animate = function(name) {
+		return this.getExtra("animation").changeAnimation(name);
 	};
 	
 	/** Does a single action for an animation. If none is specified, it will run the next one in the
@@ -1080,50 +1013,6 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 				var frags = action.substr(1).split("=");
 				this._aniVars[frags[0]] = frags[1];
 				if(cont) this._aniForward(event);
-				break;
-			
-			case "+":
-				if(cont) this._frameCountdown = +action.substr(1);
-				break;
-			
-			case "?":
-				var frags = action.substr(1).split("?");
-				if(this.meetsTrigger(frags[0])) {
-					if(cont) this._aniForward(event, frags[1]);
-				}else{
-					if(cont) this._aniForward(event, frags[2]);
-				}
-				break;
-			
-			case ">":
-				for(var i = this._animationData.length -1; i >= 0; i --) {
-					if(this._animationData[i][2].name == action.substr(1)) {
-						this._setNewAni(i, name);
-						break;
-					}
-				}
-				break;
-			
-			case "!":
-				this.behaviourFire("animation", {"given":action.substr(1)});
-				if(this.terminated && action.substr(1) == "terminate") this.deleted = true;
-				if(cont) this._aniForward(event);
-				break;
-			
-			case "\\":
-			case "/":
-				if(action.substr(1) in this._aniWaits) {
-					this._aniWaits[action.substr(1)]();
-				}
-				
-				if(action.charAt(0) == "/") {
-					this._aniLock = false;
-					//if(cont) this._aniForward(event);
-					if(cont) this.performAnimation(undefined, true);
-				}else {
-					if(cont) this._aniForward(event);
-				}
-				
 				break;
 			
 			case "*":
@@ -1144,22 +1033,6 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 				if(cont) this._aniForward(event);
 				break;
 			
-			case "l":
-				this._aniLock = false;
-				//if(cont) this._aniForward(event);
-				if(cont) this.performAnimation(undefined, true);
-				break;
-			
-			case "L":
-				this._aniLock = true;
-				if(cont) this._aniForward(event);
-				break;
-			
-			case "t":
-				this.terminate();
-				if(cont) this._aniForward(event);
-				break;
-			
 			case "#":
 				for(var i = 0; i < this.imageTrans.length; i ++) {
 					if(this.imageTrans[i][0] == action.substr(2)) {
@@ -1176,21 +1049,9 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 				break;
 			
 			default:
-				if(!this.isLight()) this.tileStr = action;
+				throw new TypeError("Unknown particle action "+action);
 		}
 	};
-	
-	/** Moves the animation pointer forward (looping if needed), and then does that action.
-	 * @param {?string} event The event that provoked this.
-	 * @param {integer=1} by The number of actions to skip past.
-	 */
-	Entity.prototype._aniForward = function(event, by) {
-		if(by === undefined) by = 1;
-		this._aniPointer = (this._aniPointer + by) % this._animationData[this._currentAni][1].length;
-		this._aniAction(event);
-	};
-	
-	
 	
 	//Triggers
 	/** Alias to `{@link dusk.entities.sgui.Entity#evalTrigger}`.
@@ -1393,28 +1254,15 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	 */
 	Entity.prototype.terminate = function() {
 		return new Promise((function(f, r) {
-			this.terminated = true;
-			if(this.behaviourFireWithReturn("terminate", {}).indexOf(true) === -1) {
-				this.animationWait("terminate", (function() {
+			if(!this.behaviourFireWithReturn("terminate", {}).includes(true)) {
+				this.animate("ent_terminate").then((function() {
+					this.eProp("terminated", true);
+					this.terminated = true;
 					this.deleted = true;
+					f(true);
 				}).bind(this));
 			}
 		}).bind(this));
-	};
-	
-	/** Fires an animation event, listened to with the trigger `on name`. If this doesn't specifically
-	 *  target any animation, the function is called with no arguments, otherwise, the function will be
-	 *  called when the animation action `/name` is ran.
-	 * @param {string} name The animation event to wait for.
-	 * @param {function():undefined} funct The function to call once the animation has terminated, or 
-	 *  if there is no such animation.
-	 */
-	Entity.prototype.animationWait = function(name, funct) {
-		if(!this.performAnimation(name)) {
-			funct();
-		}else{
-			this._aniWaits[name] = funct;
-		}
 	};
 	
 	/** Returns if this is a light entity rather than an sgui entity.

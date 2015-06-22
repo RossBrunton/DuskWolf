@@ -242,7 +242,7 @@ load.provide("dusk.entities.behave.Spawner", (function() {
 		}
 		
 		//Animate until we can spawn it
-		this._entity.animationWait("spawn_"+name, (function() {
+		this._entity.animate("ent_spawn_"+name).then((function() {
 			//Generate a light entity to calculate coordinates based on collision offsets and dimensions
 			var ent = {};
 			ent.x = this._entity.x;
@@ -328,7 +328,7 @@ load.provide("dusk.entities.behave.Spawner", (function() {
 			dropped.behaviourFire("spawned", {"spawner":this._entity, "data":spawn, "dir":dir});
 			
 			//And animate
-			this._entity.performAnimation("spawn_after_"+name);
+			this._entity.animate("ent_spawn_after_"+name);
 		}).bind(this));
 	};
 	

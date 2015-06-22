@@ -11,6 +11,7 @@ load.provide("dusk.tiles.SelectorManager", (function() {
 	var frameTicker = load.require("dusk.utils.frameTicker");
 	var controls = load.require("dusk.input.controls");
 	var mouse = load.require("dusk.input.mouse");
+	var at = load.require("dusk.tiles.sgui.extras.animationTypes");
 	
 	var SelectorManager = function(com, type) {
 		this._com = com;
@@ -187,7 +188,11 @@ load.provide("dusk.tiles.SelectorManager", (function() {
 			"solid":false, "collides":false, "src":"default/selector32.png", "noSave":true, "noRegion":true,
 			"gmMouseMove":false
 		},
-		"animation":[["true", "0,0|1,0|2,0|1,0", {}]]
+		"animation":[
+			["default", [
+				at.setTile(0,0), at.setTile(1,0), at.setTile(2,0), at.setTile(1,0)
+			], {"trigger":function(){return true}}]
+		]
 	}, "quest");
 	
 	return SelectorManager;

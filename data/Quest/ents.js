@@ -11,6 +11,7 @@ load.provide("quest.ents", (function() {
 	var items = load.require("dusk.items");
 	var stats = load.require("dusk.stats");
 	var store = load.require("dusk.stats.store");
+	var at = load.require("dusk.tiles.sgui.extras.animationTypes");
 	
 	entities.swidth = 32;
 	entities.sheight = 32;
@@ -25,15 +26,20 @@ load.provide("quest.ents", (function() {
 			"Persist":true, "PlayerGridWalker":true, "MarkTrigger":true, "GridWalker":true
 		},
 		"data":{
-			"solid":false,
+			"solid":false
 		}
 	}, "quest");
 
 
 	entities.types.createNewType("questTest", {
-		"data":{"solid":false, "collides":false, "statsName":"ally", "statsLoadImage":true, "statsPutBack":true},
+		"data":{
+			"solid":false, "collides":false, "statsName":"ally", "statsLoadImage":true, "statsPutBack":true,
+			"animationRate":20,
+		},
 		"animation":[
-			["true", "1,2|2,2|1,2|3,2", {}],
+			["default", [
+				at.setTile(1,2), at.setTile(2,2), at.setTile(1,2), at.setTile(3,2)
+			], {"trigger":function(){return true;}}],
 			["on panic", "2,2|3,2|2,2|3,2|2,2|/panic", {}]
 		],
 		"particles":[["stat(moved, 3)", "#+mono", {}], ["!stat(moved, 3)", "#-mono", {}]],
@@ -51,8 +57,15 @@ load.provide("quest.ents", (function() {
 	});
 
 	entities.types.createNewType("questEvil", {
-		"data":{"solid":false, "collides":false, "statsName":"evil", "statsLoadImage":true},
-		"animation":[["true", "1,3|2,3|1,3|3,3", {}]],
+		"data":{
+			"solid":false, "collides":false, "statsName":"evil", "statsLoadImage":true,
+			"animationRate":20,
+		},
+		"animation":[["default", [
+				at.setTile(1,3), at.setTile(2,3), at.setTile(1,3), at.setTile(3,3)
+				], {"trigger":function(){return true;}}
+			]
+		],
 		"particles":[["stat(moved, 3)", "#+mono", {}], ["!stat(moved, 3)", "#-mono", {}]],
 		"behaviours":{"GridWalker":true, "StatLoader":true}
 	}, "quest");

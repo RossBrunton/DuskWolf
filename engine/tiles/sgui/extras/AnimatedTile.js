@@ -82,6 +82,13 @@ load.provide("dusk.tiles.sgui.extras.animationTypes", (function() {
 		return {"type":"pass"};
 	};
 	
+	/** Shortcut to set a key on the state object.
+	 * @return {object} An action.
+	 */
+	types.setState = function(key, value) {
+		return {"type":"setState", "key":key, "value":value};
+	};
+	
 	return types;
 })());
 
@@ -107,6 +114,8 @@ load.provide("dusk.tiles.sgui.extras.AnimatedTile", (function() {
 	 * - trigger:function(object, dusk.tiles.sgui.Tile) - This function will be called for each animation with a higher
 	 * priority than the current animation every frame. If it returns true, then the tile will switch to that animation
 	 * immediately. The function will be given the animation state and the tile this is attached to.
+	 * - holds:boolean - If this boolean is true (by default it is false), the animation will only run while the trigger
+	 * is true. If it stops being true, then the animation will stop.
 	 * - loops:boolean - Normaly, when the end of an animation is reached, it is stopped and the highest priority
 	 * animation is used (even if it is lower than the stoped one). If this is true, instead the animation will restart
 	 * from the first action.
@@ -150,10 +159,10 @@ load.provide("dusk.tiles.sgui.extras.AnimatedTile", (function() {
 		
 		/** The delay between frames, in "real" frames. Higher numbers indicate a slower animation, with 60 being one
 		 * frame a second.
-		 * @default 30
+		 * @default 5
 		 * @type integer
 		 */
-		this.rate = 30;
+		this.rate = 5;
 		
 		/** The array of fullfill functions to call when the animation changes.
 		 * @type array<function(object)>
@@ -266,8 +275,8 @@ load.provide("dusk.tiles.sgui.extras.AnimatedTile", (function() {
 		this._frame ++;
 		
 		// Check if we need to change/loop
-		if(this._frame >= this._animations[this._current][1].length) {
-			if(this._animations[this._current][2].loops) {
+		if(this._current < 0 || this._frame >= this._animations[this._current][1].length) {
+			if(this._current >= 0 && this._animations[this._current][2].loops) {
 				this._frame = 0;
 			}else{
 				this._fullfills.forEach(function(e) {e({"interrupted":false, "manual":false, "exists":true});});
@@ -278,63 +287,82 @@ load.provide("dusk.tiles.sgui.extras.AnimatedTile", (function() {
 			}
 		}
 		
-		// Handle the current action
-		var now = this._animations[this._current][1][this._frame];
-		if(typeof now == "function") {
-			now(this._state, this._owner);
-			this._nextAction();
-		}else{
-			switch(now.type) {
-				case "switchTo":
-					this.changeAnimation(now.name);
-					break;
-				
-				case "stop":
-					this._fullfills.forEach(function(e) {e({"interrupted":false, "manual":false, "exists":true});});
-					this._fullfills = [];
-					this._current = -1;
-					this._checkNew();
-					break;
-				
-				case "setTile":
-					this._owner.tile = [now.x, now.y];
-					break;
-				
-				case "fullfill":
-					this._fullfills.forEach(function(e) {e({"interrupted":false, "manual":true, "exists":true});});
-					this._fullfills = [];
-					this._checkNew();
-					break;
-				
-				case "addTrans":
-				case "removeTrans":
-					for(var i = 0; i < this._owner.imageTrans.length; i ++) {
-						if(this._owner.imageTrans[i][0] == now.trans.split(":")[0]) {
-							this._owner.imageTrans.splice(i, 1);
-							i --;
+		if(this._current >= 0) {
+			// Check holds status
+			if(this._animations[this._current][2].holds
+			&& !this._animations[this._current][2].trigger(this._state, this._owner)) {
+				this._fullfills.forEach(function(e) {e({"interrupted":false, "manual":false, "exists":true});});
+				this._fullfills = [];
+				this._current = -1;
+				this._checkNew();
+				return;
+			}
+			
+			// Handle the current action
+			var now = this._animations[this._current][1][this._frame];
+			if(typeof now == "function") {
+				now(this._state, this._owner);
+				this._nextAction();
+			}else if(Array.isArray(now)) {
+				this._owner.tile = now;
+			}else{
+				switch(now.type) {
+					case "switchTo":
+						this.changeAnimation(now.name);
+						break;
+					
+					case "stop":
+						this._fullfills.forEach(function(e) {e({"interrupted":false, "manual":false, "exists":true});});
+						this._fullfills = [];
+						this._current = -1;
+						this._checkNew();
+						break;
+					
+					case "setTile":
+						this._owner.tile = [now.x, now.y];
+						break;
+					
+					case "fullfill":
+						this._fullfills.forEach(function(e) {e({"interrupted":false, "manual":true, "exists":true});});
+						this._fullfills = [];
+						this._checkNew();
+						break;
+					
+					case "addTrans":
+					case "removeTrans":
+						for(var i = 0; i < this._owner.imageTrans.length; i ++) {
+							if(this._owner.imageTrans[i][0] == now.trans.split(":")[0]) {
+								this._owner.imageTrans.splice(i, 1);
+								i --;
+							}
 						}
-					}
+						
+						if(now.type == "addTrans") {
+							this._owner.imageTrans.push(now.trans.split(":"));
+						}
+						
+						if(!now.block) this._nextAction();
+						break;
 					
-					if(now.type == "addTrans") {
-						this._owner.imageTrans.push(now.trans.split(":"));
-					}
+					case "cond":
+						if(now.cond(this.state, this._owner)) {
+							this._frame += now.advance;
+						}
+						
+						this._nextAction();
+						break;
 					
-					if(!now.block) this._nextAction();
-					break;
-				
-				case "cond":
-					if(now.cond(this.state, this._owner)) {
-						this._frame += now.advance;
-					}
+					case "pass":
+						break;
 					
-					this._nextAction();
-					break;
-				
-				case "pass":
-					break;
-				
-				default:
-					throw new TypeError("Animation action" + now.type + " not appropriate");
+					case "setState":
+						this._state[now.key] = now.value;
+						this._nextAction();
+						break;
+					
+					default:
+						throw new TypeError("Animation action" + now.type + " not appropriate");
+				}
 			}
 		}
 	};

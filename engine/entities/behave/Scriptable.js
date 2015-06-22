@@ -89,7 +89,7 @@ load.provide("dusk.entities.behave.Scriptable", (function() {
 			
 			case "animate":
 				return new Promise((function(f, r) {
-					this._entity.animationWait(args.animation, f.bind(undefined, passedArg));
+					this._entity.animate(args.animation).then(f.bind(undefined, passedArg));
 				}).bind(this));
 			
 			case "animate^-1":

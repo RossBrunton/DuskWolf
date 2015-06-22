@@ -45,7 +45,7 @@ load.provide("dusk.entities.behave.Pickup", (function() {
 		&& this._entity.behaviourFireWithReturn("pickup",
 		  {"type":this._data("type"), "value":this._data("value"), "target":e.target}).indexOf(true) === -1
 		) {
-			this._entity.animationWait("pickup", (function() {
+			this._entity.animate("ent_pickup").then((function() {
 				Pickup.collect(this._data("type"), this._data("value"), name, room);
 				
 				this._entity.terminate();

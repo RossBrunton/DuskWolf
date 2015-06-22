@@ -49,9 +49,9 @@ load.provide("dusk.entities.behave.Jumper", (function() {
 			) {
 				if(!this._entity.touchers(c.DIR_DOWN).length) {
 					this._jumps ++;
-					this._entity.performAnimation("airjump");
+					this._entity.animate("ent_airjump");
 				}else{
-					this._entity.performAnimation("groundjump");
+					this._entity.animate("ent_groundjump");
 				}
 				
 				this._jumping = 30;

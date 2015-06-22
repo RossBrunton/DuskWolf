@@ -16,10 +16,12 @@ load.provide("example.plat", (function() {
 	load.require("dusk.entities.behave.Fall");
 	load.require("dusk.entities.behave.Push");
 	load.require("dusk.entities.behave.Gravity");
+	load.require("dusk.entities.behave.LimitedLife");
 	var Pickup = load.require("dusk.entities.behave.Pickup");
 	load.require("dusk.entities.behave.HealthRestore");
 	var InteractableTarget = load.require("dusk.entities.behave.InteractableTarget");
-		
+	var at = load.require("dusk.tiles.sgui.extras.animationTypes");
+	
 	load.require("dusk.sgui.DynamicGrid");
 	load.require("dusk.input.sgui.ControlConfig");
 	load.require("dusk.sgui.Label");
@@ -57,6 +59,52 @@ load.provide("example.plat", (function() {
 	plat.health = new Range(0, 5, 0);
 	
 	var _playerAni = [
+		["standRight", [at.setTile(0,0)], {"trigger":function(){return true;}}],
+		["standLeft", [at.setTile(0,1)], {"trigger":function(st){return st.headingLeft;}}],
+		
+		["walkRight", [
+			at.setState("headingLeft", false), at.setTile(0,0), at.setTile(1,0), at.setTile(0,0), at.setTile(2,0)
+		], {"holds":true, "trigger":function(st, ent) {
+			return ent.dx > 0 && !ent.touchers(c.DIR_RIGHT).length;
+		}}],
+		
+		["walkLeft", [
+			at.setState("headingLeft", true), at.setTile(0,1), at.setTile(1,1), at.setTile(0,1), at.setTile(2,1)
+		], {"holds":true, "trigger":function(st, ent) {
+			return ent.dx < 0 && !ent.touchers(c.DIR_LEFT).length;
+		}}],
+		
+		["jumpUpRight", [
+			at.setTile(3,0)
+		], {"holds":true, "trigger":function(st, ent) {
+			return ent.dy < 0
+		}}],
+		
+		["jumpUpLeft", [
+			at.setTile(3,1)
+		], {"holds":true, "trigger":function(st, ent) {
+			return ent.dy < 0 && st.headingLeft
+		}}],
+		
+		["jumpDownRight", [
+			at.setTile(4,0)
+		], {"holds":true, "trigger":function(st, ent) {
+			return ent.dy >= 0 && !ent.touchers(c.DIR_DOWN).length
+		}}],
+		
+		["jumpDownLeft", [
+			at.setTile(4,1)
+		], {"holds":true, "trigger":function(st, ent) {
+			return ent.dy >= 0  && !ent.touchers(c.DIR_DOWN).length && st.headingLeft
+		}}],
+		
+		["ent_terminate", [
+			at.setTile(0,1), at.setTile(0,2), at.setTile(1,2), at.setTile(2,2), at.setTile(3,2), at.setTile(4,2),
+			at.setTile(5,2), at.setTile(6,2), at.setTile(7,2), 
+		], {}],
+	];
+	
+	var __playerAni = [
 		["true", "0,0", {}],
 		[":headingLeft", "0,1", {}],
 		["#dx != 0", '0,0|1,0|0,0|2,0', {"name":"walkRight"}],
@@ -119,7 +167,7 @@ load.provide("example.plat", (function() {
 	entities.types.createNewType("bad", {
 		"behaviours":{"HitDam":true},
 		"data":{"gravity":0, "damage":1, "types":["electric", "fire"], "src":"pimg/techBad.png"},
-		"animation":[["", "0,0|1,0|+30", {}]]
+		"animation":[["default", [[0,0], [1,0]], {"trigger":function() {return true}}]]
 	}, "plat");
 	
 	entities.types.createNewType("coin", {
@@ -142,16 +190,22 @@ load.provide("example.plat", (function() {
 	entities.types.createNewType("block", {"behaviours":{}, "data":{"anchor":true, "gravity":0}}, "plat");
 	entities.types.createNewType("fall", {"behaviours":{"Fall":true, "InteractableTarget":true}, 
 		"data":{"gravity":0, "fallSpeed":3, "src":"pimg/techFallBlock.png", "interactType":"Falli"},
-		"animation":[["", "0,0", {}], ["#dy>0 & #tb=0", "1,0", {}]]
+		"animation":[
+			["default", [[0,0]], {"trigger":function() {return true}}],
+			["fall", [[1,0]], {"trigger":function(st, ent) {return ent.dy > 0 && !ent.touchers(c.DIR_DOWN).length}}]
+		]
 	}, "plat");
 	entities.types.createNewType("push", {"behaviours":{"Push":true},
 		"data":{"gravity":0, "src":"pimg/techFreeMove.png"}
 	}, "plat");
 	
-	entities.types.createNewType("slash", {"behaviours":{"HitDam":true},
-		"data":{"gravity":0, "collides":false, "solid":false, "src":"Example/Slash.png", "damages":".entType != player"},
+	entities.types.createNewType("slash", {"behaviours":{"HitDam":true, "LimitedLife":true},
+		"data":{
+			"gravity":0, "collides":false, "solid":false, "src":"Example/Slash.png", "damages":".entType != player",
+			"lifespan":6*5
+		},
 		"animation":[
-			["", "0,0|1,0|2,0|3,0|4,0|t", {}]
+			["default", [[0,0],[1,0],[2,0],[3,0],[4,0]], {"trigger":function() {return true}}]
 		],
 	}, "plat");
 	
@@ -161,9 +215,7 @@ load.provide("example.plat", (function() {
 			"collisionWidth":20, "collisionHeight":20, "hspeed":5, "damages":".entType != player",
 			"killedBy":".entType != player"
 		},
-		"animation":[
-			["", "0,0|1,0", {}]
-		]
+		"animation":[["default", [[0,0], [1,0]], {"trigger":function() {return true}}]]
 	}, "plat");
 	
 	entities.types.createNewType("checkpoint", {"behaviours":{"InteractableTarget":true, "Checkpoint":true},
@@ -171,8 +223,8 @@ load.provide("example.plat", (function() {
 			"checkpointName":"plat"
 		},
 		"animation":[
-			["", "0,0", {}],
-			[":checkpointActive", "1,0", {}]
+			["default", [[0,0]], {"trigger":function() {return true}}],
+			["active", [[1,0]], {"trigger":function(st, ent) {return ent.eProp("checkpointActive");}}]
 		]
 	}, "plat");
 	
@@ -315,7 +367,7 @@ load.provide("example.plat", (function() {
 	frameTicker.onFrame.listen(function(e) {
 		if(Persist.getPersist("hero")) {
 			plat.health.value = Persist.getPersist("hero").hp;
-			if(Persist.getPersist("hero").hp <= 0 && gameActive) {
+			if(gameActive && Persist.getPersist("hero").terminated) {
 				if(!checkpoints.loadCheckpoint("plat", {})) {
 					alert("Lol! Game Over!");
 					gameActive = false;
@@ -347,7 +399,7 @@ load.provide("example.plat", (function() {
 	
 	checkpoints.set("plat", {
 		"loadType":"plat", "saveType":"checkpoint", "priority":0, "spec":checkSS,
-		"postLoad":function(e) {lives --;}, "checkLoad":function(e) {return lives > 0;}
+		"postLoad":function(e) {lives --; Persist.getPersist("hero").hp = 5;}, "checkLoad":function(e) {return lives > 0;}
 	});
 	
 	var lives = 3;
