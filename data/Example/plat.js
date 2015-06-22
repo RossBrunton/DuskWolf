@@ -231,11 +231,6 @@ load.provide("example.plat", (function() {
 	window.dplatOut = dplat.make(root, "orange");
 	dplatOut.tileProperties.add(1, 0, EntityGroup.SOLID_TILE);
 	
-	root.width = 728;
-	root.height = 440;
-	root.x = 20;
-	root.y = 20;
-	
 	root.get("hud", "Group").update({
 		"xDisplay":"expand",
 		"yDisplay":"expand",
@@ -270,7 +265,7 @@ load.provide("example.plat", (function() {
 				"sheight":32,
 				"x":5,
 				"y":24,
-				"src":"Example/Coin.png"
+				"src":"Example/Coin.png tiles:32x32"
 			},
 			"coinCount":{
 				"type":"Label",

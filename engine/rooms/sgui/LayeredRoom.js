@@ -359,7 +359,8 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 	
 	LayeredRoom.prototype.getSeek = function() {
 		if(!this.get(this._primaryEntityGroup)) return null;
-		return this.get(this._primaryEntityGroup).get(entities.seek);
+		if(!this.get(this._primaryEntityGroup).getFocusedChild()) return null;
+		return this.get(this._primaryEntityGroup).getFocusedChild();
 	};
 	
 	var _basicMainFrame = function(e) {

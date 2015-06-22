@@ -25,7 +25,7 @@ load.provide("dusk.rooms.plat", (function() {
 	entities.types.createNewType("plat", {
 		"data":{
 			"headingLeft":false, "headingUp":false,
-			"src":"pimg/hero.png", "solid":true, "collides":true
+			"src":"pimg/hero.png tiles:32x32", "solid":true, "collides":true
 		},
 		"animation":{"stationary":"0,0"},
 		"behaviours":{}
@@ -35,7 +35,7 @@ load.provide("dusk.rooms.plat", (function() {
 	
 	plat.make = function(component, name) {
 		component.modifyComponent(
-			[{"name":name, "type":"LayeredRoom", "scrollInstantly":true, "margins":[10, 10, 10, 10], "mark":"#00ffff",
+			[{"name":name, "type":"LayeredRoom", "scrollInstantly":true,
 				"allowMouse":true
 			}]
 		);
