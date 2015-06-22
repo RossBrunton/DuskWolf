@@ -42,8 +42,6 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	 * 
 	 * The particle actions are determined by the first character in the string, as follows:
 	 * 
-	 * - `$var=value`: Sets an animation variable to the specified value. This can be used for evaling
-	 *  triggers using the `$` operator.
 	 * - `*pname data`: Does the particle effect named `pname` with the data `data`. Data should be a 
 	 *  json string, and each of it's keys will be fed through `{@link dusk.entities.sgui.Entity#evalTrigger}`.
 	 *  The next event is executed.
@@ -140,7 +138,6 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	 * - `#tr`: The number of entities touching the right of this.
 	 * - `#path`: The path to this entity.
 	 * - `#edit`: True if the editor is on, otherwise false.
-	 * - `$var`: The value of the animation variable `var`.
 	 * - `.var`: The value of the component property `var`.
 	 * - `:var`: The value of the entity data property `var`.
 	 * 
@@ -953,12 +950,6 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 		if(!action) return;
 		
 		switch(action.charAt(0)) {
-			case "$":
-				var frags = action.substr(1).split("=");
-				this._aniVars[frags[0]] = frags[1];
-				if(cont) this._aniForward(event);
-				break;
-			
 			case "*":
 				var name = action.substr(1).split(" ")[0];
 				var data = utils.jsonParse(action.substr(name.length+1));
@@ -1050,7 +1041,6 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 				}
 			}, false
 		],
-		["$", function(o, v, c) {return c.ent._aniVars[v];}, false],
 		[".", function(o, v, c) {
 				if(c.ent.isLight()) return undefined;
 				return c.ent.prop(v);
