@@ -14,11 +14,11 @@ load.provide("dusk.tiles.Path", (function() {
 		// [x, y, z, entrydir, singleweight, stoppable]
 		this._path = [];
 		
-		this.find(x, y, z);
-		this.clamp = clamp ? clamp : -1;
 		this.backPop = false;
 		this.validPath = false;
 		this.completePath = true;
+		this.find(x, y, z);
+		this.clamp = clamp ? clamp : -1;
 	};
 	
 	Path.prototype.forEach = function(f) {
@@ -41,6 +41,7 @@ load.provide("dusk.tiles.Path", (function() {
 				];
 				this.completePath = this._path[this._path.length-1][5];
 			}else{
+				this.completePath = this.region.get.apply(this.region, this.start)[Region.tfields.stoppable];
 				this.end = this.start;
 			}
 			return;
@@ -95,6 +96,7 @@ load.provide("dusk.tiles.Path", (function() {
 		
 		if(t) {
 			this.start = [t[Region.tfields.x], t[Region.tfields.y], t[Region.tfields.z]];
+			this.completePath = t[Region.tfields.stoppable];
 			this.validPath = true;
 		}else{
 			this.validPath = false;
@@ -103,11 +105,6 @@ load.provide("dusk.tiles.Path", (function() {
 		this.end = [x, y, z];
 		
 		this._path = this._path.reverse();
-		if(this._path.length) {
-			this.completePath = this._path[this._path.length-1][5];
-		}else{
-			this.completePath = true;
-		}
 	};
 	
 	Path.prototype.follow = function(path) {

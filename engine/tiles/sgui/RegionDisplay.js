@@ -130,12 +130,29 @@ load.provide("dusk.tiles.sgui.RegionDisplay", (function() {
 				continue;
 			}
 			
-			e.c.fillStyle = c[1];
-			e.c.fillRect(
-				e.d.dest.x + ((x * this.tileWidth()) - e.d.slice.x) + 1,
-				e.d.dest.y + ((y * this.tileHeight()) - e.d.slice.y) + 1,
-				this.tileWidth() - 2, this.tileHeight() - 2
-			);
+			var destx = e.d.dest.x + ((x * this.twidth) - e.d.slice.x) + 1;
+			var desty = e.d.dest.y + ((y * this.theight) - e.d.slice.y) + 1;
+			
+			var dwidth = this.twidth -2;
+			var dheight = this.theight -2;
+			
+			if(destx < e.d.dest.x) {
+				dwidth -= e.d.dest.x - destx;
+				destx = e.d.dest.x;
+			}
+			
+			if(desty < e.d.dest.y) {
+				dheight -= e.d.dest.y - desty;
+				desty = e.d.dest.y;
+			}
+			
+			if(destx + dwidth > e.d.dest.x + e.d.slice.width) dwidth = (e.d.dest.x + e.d.slice.width) - destx;
+			if(desty + dheight > e.d.dest.y + e.d.slice.height) dheight = (e.d.dest.y + e.d.slice.height) - desty;
+			
+			if(dwidth > 0 && dheight > 0) {
+				e.c.fillStyle = c[1];
+				e.c.fillRect(destx, desty, dwidth, dheight);
+			}
 		}
 		
 		
@@ -164,17 +181,39 @@ load.provide("dusk.tiles.sgui.RegionDisplay", (function() {
 			var img = new Image(a[1][0]);
 			
 			if(img.isReady()) {
-				var hscale = 1//this.swidth/this.width;
-				var vscale = 1//this.sheight/this.height;
-				img.paintScaled(e.c, [], false,
-					a[1][1][0] * this.tileWidth(), a[1][1][1] * this.tileHeight(), 
-					this.tileWidth()*hscale, this.tileWidth()*vscale,
-					
-					e.d.dest.x + ((x * this.tileWidth()) - e.d.slice.x),
-					e.d.dest.y + ((y * this.tileHeight()) - e.d.slice.y),
-					this.tileWidth(), this.tileHeight(),
-					1, 1
-				);
+				var destx = e.d.dest.x + ((x * this.twidth) - e.d.slice.x) + 1;
+				var desty = e.d.dest.y + ((y * this.theight) - e.d.slice.y) + 1;
+				
+				var dwidth = this.twidth -2;
+				var dheight = this.theight -2;
+				
+				var xoff = 0;
+				var yoff = 0;
+				
+				if(destx < e.d.dest.x) {
+					xoff = e.d.dest.x - destx;
+					destx = e.d.dest.x;
+				}
+				
+				if(desty < e.d.dest.y) {
+					yoff = e.d.dest.y - desty;
+					desty = e.d.dest.y;
+				}
+				
+				if(destx + dwidth > e.d.dest.x + e.d.slice.width) dwidth = (e.d.dest.x + e.d.slice.width) - destx;
+				if(desty + dheight > e.d.dest.y + e.d.slice.height) dheight = (e.d.dest.y + e.d.slice.height) - desty;
+				
+				var hscale = img.tileWidth / this.twidth;
+				var vscale = img.tileHeight / this.theight;
+				
+				if(dwidth-xoff > 0 && dheight-yoff > 0) {
+					img.paint(e.c, [], false,
+						a[1][1][0] * img.tileWidth + (xoff * hscale), a[1][1][1] * img.tileHeight + (yoff * vscale), 
+						(dwidth - xoff) * hscale, (dheight - yoff) * vscale,
+						
+						destx, desty, dwidth - xoff, dheight - yoff
+					);
+				}
 			}
 		}
 	};

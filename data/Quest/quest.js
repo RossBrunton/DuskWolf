@@ -49,7 +49,7 @@ load.provide("quest", (function() {
 	var root = sgui.get("default", true);
 	root.mouseFocus = false;
 	root.allowMouse = true;
-	window.qo = dquest.make(root, "quest");
+	window.qo = dquest.make(root, "quest", 32, 32);
 	
 	
 	//Test
@@ -202,7 +202,11 @@ load.provide("quest", (function() {
 			return v;
 		}
 	);
-	var ev = entityValidator(qo.layeredRoom, [], function(){return false;});
+	var ev = function(exclude) {
+		return entityValidator(qo.layeredRoom, [], function(e){
+			//return e == exclude || e.entType == "stdSelector";
+		});
+	};
 	
 	window.aarg =
 		{"name":"attack", "los":true, "entFilter":"stat(faction, 1) = ENEMY", "weightModifiers":[uniformModifier()]};
@@ -373,16 +377,18 @@ load.provide("quest", (function() {
 						passedArg.aarg = aarg;
 						passedArg.children = {"attack":aarg};
 						passedArg.ranges = [0, passedArg.entity.stats.get("move", 1)];
+						passedArg.validators = [ev(passedArg.entity)];
 						
 						return passedArg;
 					},
 					
-					qo.regionsActor.generate({"z":0, "weightModifiers":[lrem, lrtm], "validators":[ev]}, {"copy":[
-						["ranges", "ranges"], ["children", "children"], ["x", "x"], ["y", "y"]
+					qo.regionsActor.generate({"z":0, "weightModifiers":[lrem, lrtm]}, {"copy":[
+						["ranges", "ranges"], ["children", "children"], ["x", "x"], ["y", "y"],
+						["validators", "validators"]
 					]}),
 					
-					qo.regionsActor.display("atk", "#ffffff", {"sub":"attack"}),
-					qo.regionsActor.display("mov", "#000000", {}),
+					qo.regionsActor.display("atk", "#990000", {"sub":"attack"}),
+					qo.regionsActor.display("mov", "#000099", {}),
 					qo.regionsActor.makePath("", {}),
 					qo.regionsActor.displayPath("movePath", "default/arrows32.png tiles:32x32", {}),
 					qo.selectActor.pickTile({}, {}),

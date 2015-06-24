@@ -43,6 +43,12 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 		this.tileProperties;
 		this.tilePropertiesAuto = "*";
 		
+		this.seek = "";
+		this.seekType = "";
+		
+		this.twidth = 32;
+		this.theight = 32;
+		
 		//Prop masks
 		this._mapper.map("spawn", "spawn");
 		this._mapper.map("layers", "layers", ["allowMouse"]);
@@ -51,8 +57,12 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 		this._mapper.map("editorColour", "editorColour");
 		this._mapper.map("editorColor", "editorColor");
 		this._mapper.map("scrollInstantly", "scrollInstantly");
-		this._mapper.map("room", "room", ["spawn", "allowMouse"]);
+		this._mapper.map("room", "room", ["spawn", "allowMouse", "seek", "seekType", "twidth", "theight"]);
 		this._mapper.map("tileProperties", "tileProperties");
+		this._mapper.map("seek", "seek");
+		this._mapper.map("seekType", "seekType");
+		this._mapper.map("twidth", "twidth");
+		this._mapper.map("theight", "theight");
 		
 		//Listeners
 		this.frame.listen(_basicMainFrame.bind(this));
@@ -154,15 +164,15 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 				}else{
 					crd = this.getFirstLayerOfType(LayeredRoom.LAYER_SCHEME).lookTile(spawn, 1);
 					if(crd) {
-						crd[0] *= entities.twidth;
-						crd[1] *= entities.theight;
+						crd[0] *= this.twidth;
+						crd[1] *= this.theight;
 					}
 				}
 				
-				if(crd && entities.seek){
+				if(crd && this.seek){
 					var playerData = {};
-					playerData.name = entities.seek;
-					playerData.type = entities.seekType;
+					playerData.name = this.seek;
+					playerData.type = this.seekType;
 					playerData.x = crd[0];
 					playerData.y = crd[1];
 				
@@ -208,7 +218,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 					this.get(val[i].name, mapType).update(
 					{"cursorColour":_LAYER_COLOURS[colour++],
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
-						"twidth":entities.twidth, "theight":entities.theight,
+						"twidth":this.twidth, "theight":this.theight,
 						"globalCoords":true, "layer":"+"
 					});
 					
@@ -218,7 +228,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 					this.get(val[i].name, mapType).update(
 					{"cursorColour":_LAYER_COLOURS[colour++],
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
-						"twidth":entities.twidth, "theight":entities.theight,
+						"twidth":this.twidth, "theight":this.theight,
 						"alpha":0, "globalCoords":true,
 						"layer":"+"
 					});
@@ -229,7 +239,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 					this.get(val[i].name, "RegionDisplay").update(
 					{
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
-						"twidth":entities.twidth, "theight":entities.theight,
+						"twidth":this.twidth, "theight":this.theight,
 						"globalCoords":true,
 						"alpha":0.50, "layer":"+"
 					});
@@ -240,7 +250,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 					this.get(val[i].name, "EntityGroup").update(
 					{"name":"entities", "type":"EntityGroup",
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
-						"twidth":entities.twidth, "theight":entities.theight,
+						"twidth":this.twidth, "theight":this.theight,
 						"globalCoords":true, "layer":"+",
 						"allowMouse":this.allowMouse, "tileProperties":this.tileProperties
 					});
@@ -359,6 +369,11 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 	
 	LayeredRoom.prototype.getSeek = function() {
 		if(!this.get(this._primaryEntityGroup)) return null;
+		return this.get(this._primaryEntityGroup).get(this.seek);
+	};
+	
+	LayeredRoom.prototype.getFocusedEntity = function() {
+		if(!this.get(this._primaryEntityGroup)) return null;
 		if(!this.get(this._primaryEntityGroup).getFocusedChild()) return null;
 		return this.get(this._primaryEntityGroup).getFocusedChild();
 	};
@@ -433,13 +448,18 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 		var seekCoords = [];
 		if(editor.active) {
 			seekCoords = [
-				(EditableTileMap.globalEditX)*(entities.twidth),
-				(EditableTileMap.globalEditY)*(entities.theight),
+				(EditableTileMap.globalEditX)*(this.twidth),
+				(EditableTileMap.globalEditY)*(this.theight),
 				32,
 				32
 			];
 		}else if(this.getSeek()) {
 			seekCoords = [this.getSeek().x, this.getSeek().y, this.getSeek().width, this.getSeek().height];
+		}else if(this.getFocusedEntity()) {
+			seekCoords = [
+				this.getFocusedEntity().x, this.getFocusedEntity().y,
+				this.getFocusedEntity().width, this.getFocusedEntity().height
+			];
 		}else{
 			//seekCoords = [0, 0];
 			return;
@@ -488,7 +508,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 					this.get(this._layers[i].name).graftTop();
 				}
 				if(this.get(this._layers[i].name) instanceof EntityGroup) {
-					this.get(this._layers[i].name).adjustAll(0, entities.theight);
+					this.get(this._layers[i].name).adjustAll(0, this.theight);
 				}
 				if(this.get(this._layers[i].name) instanceof RegionDisplay) {
 					this.get(this._layers[i].name).rows ++;
@@ -503,7 +523,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 					this.get(this._layers[i].name).carveTop();
 				}
 				if(this.get(this._layers[i].name) instanceof EntityGroup) {
-					this.get(this._layers[i].name).adjustAll(0, -entities.theight);
+					this.get(this._layers[i].name).adjustAll(0, -this.theight);
 				}
 				if(this.get(this._layers[i].name) instanceof RegionDisplay) {
 					this.get(this._layers[i].name).rows --;
@@ -578,7 +598,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 					this.get(this._layers[i].name).graftLeft();
 				}
 				if(this.get(this._layers[i].name) instanceof EntityGroup) {
-					this.get(this._layers[i].name).adjustAll(entities.twidth, 0);
+					this.get(this._layers[i].name).adjustAll(this.twidth, 0);
 				}
 				if(this.get(this._layers[i].name) instanceof RegionDisplay) {
 					this.get(this._layers[i].name).cols ++;
@@ -593,7 +613,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 					this.get(this._layers[i].name).carveLeft();
 				}
 				if(this.get(this._layers[i].name) instanceof EntityGroup) {
-					this.get(this._layers[i].name).adjustAll(-entities.twidth, 0);
+					this.get(this._layers[i].name).adjustAll(-this.twidth, 0);
 				}
 				if(this.get(this._layers[i].name) instanceof RegionDisplay) {
 					this.get(this._layers[i].name).cols --;

@@ -134,7 +134,6 @@ load.provide("dusk.rooms.actors.Regions", (function() {
 				this.getDisplay().unDisplay(r);
 			}
 			
-			
 			return x;
 		}).bind(this),
 		

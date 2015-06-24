@@ -33,9 +33,9 @@ load.provide("dusk.rooms.plat", (function() {
 	
 	plat.rooms = new RoomManager("dusk.rooms.plat", "rooms");
 	
-	plat.make = function(component, name) {
+	plat.make = function(component, name, twidth, theight) {
 		component.modifyComponent(
-			[{"name":name, "type":"LayeredRoom", "scrollInstantly":true,
+			[{"name":name, "type":"LayeredRoom", "scrollInstantly":true, "twidth":twidth, "theight":theight,
 				"allowMouse":true
 			}]
 		);
@@ -46,6 +46,7 @@ load.provide("dusk.rooms.plat", (function() {
 		var out = {};
 		out.tileProperties = component.get(name).tileProperties;
 		out.standardActor = new StandardActor(component.get(name));
+		out.layeredRoom = component.get(name);
 		return out;
 	}
 	

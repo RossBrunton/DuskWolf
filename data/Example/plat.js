@@ -228,8 +228,11 @@ load.provide("example.plat", (function() {
 	}, "plat");
 	
 	var root = sgui.get("default", true).get("plat2", "Group");
-	window.dplatOut = dplat.make(root, "orange");
+	window.dplatOut = dplat.make(root, "orange", 32, 32);
 	dplatOut.tileProperties.add(1, 0, EntityGroup.SOLID_TILE);
+	
+	dplatOut.layeredRoom.seek = "hero";
+	dplatOut.layeredRoom.seekType = "player";
 	
 	root.get("hud", "Group").update({
 		"xDisplay":"expand",

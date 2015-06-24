@@ -570,6 +570,9 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 		var dropped = this.get(entity.name, "Entity");
 		dropped.x = entity.x;
 		dropped.y = entity.y;
+		// Set dimensions before type, if type specifies dimensions it will override these defaults
+		dropped.width = this.twidth;
+		dropped.height = this.theight;
 		dropped.entType = entity.type;
 		
 		if(this.scheme) dropped.scheme = this.scheme;
