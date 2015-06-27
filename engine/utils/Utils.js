@@ -133,6 +133,43 @@ load.provide("dusk.utils", (function() {
 		return null;
 	};
 	
+	/** Converts a URI query string to an object of key/value pairs.
+	 * 
+	 * The query must be in the format `?var1=val1&var2=val2`. The question mark at the start is optional, and if
+	 * present will be removed. The amperstands may be replaced by semicolons.
+	 * @param {string} query The query string.
+	 * @return {object} An object representing the query string.
+	 * 
+	 * @since 0.0.21-alpha
+	 */
+	utils.query = function(query) {
+		var outobj = {};
+		if(query.startsWith("?")) query = query.substring(1);
+		
+		var name = "";
+		var value = "";
+		var mode = 0;
+		
+		for(var c of query) {
+			if(c == "&" || c == ";") {
+				mode = 0;
+				outobj[name] = value;
+				name = "";
+				value = "";
+			}else if(c == "=") {
+				mode = 1;
+			}else if(mode == 0) {
+				name += c;
+			}else{
+				value += c;
+			}
+		}
+		
+		outobj[name] = value;	
+		
+		return outobj;
+	};
+	
 	/** Returns if the object can be parsed as a JSON string. If it returns true, then it can be assumed that
 	 *  `JSON.parse` will not throw any error when trying to parse the string.
 	 * @param {string} str The string to test.

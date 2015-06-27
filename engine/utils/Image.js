@@ -5,6 +5,7 @@
 load.provide("dusk.utils.Image", (function() {
 	var utils = load.require("dusk.utils");
 	var dusk = load.require("dusk");
+	var sgui = load.suggest("dusk.sgui", function(p) {sgui=p});
 	
 	/* @class dusk.utils.Image
 	 * 
@@ -18,13 +19,16 @@ load.provide("dusk.utils.Image", (function() {
 	var Image = function(src, transform) {
 		var frags = src.split(" ");
 		
-		this.src = utils.resolveRelative(frags[0], dusk.dataDir);
+		if(!src.startsWith("duskwolf:")) {
+			this.src = utils.resolveRelative(frags[0], dusk.dataDir);
+		}else{
+			this.src = frags[0];
+		}
 		this.providedSrc = src;
 		
 		this.transform = transform?_parseTransString(transform):[];
 		if(frags.length > 1) this.transform = this.transform.concat(_parseTransString(frags[1]));
 		
-		// Check transform string for spritesheet dimensions
 		this.tileWidth = -1;
 		this.tileHeight = -1;
 		
@@ -35,32 +39,51 @@ load.provide("dusk.utils.Image", (function() {
 			_images[this.src] = this;
 		}
 		
+		this._isDuskWolf = false;
+		this._dwWidth = 0;
+		this._dwHeight = 0;
+		this._dwPath = "";
+		
 		this._img = null;
 		this._loadPromise = null;
 		this._base = null;
 		this._transformCache = {};
 		if(!this._proxy) {
-			this._img = new window.Image();
-			this._img.src = this.src;
-			var img = this._img;
-			
-			this._loadPromise = new Promise(function(resolve, reject) {
-				img.onload = function() {
-					resolve(true);
-				}
+			if(this.src.startsWith("duskwolf:")) {
+				this._isDuskWolf = true;
+				var frags = this.src.substring("duskwolf:".length).split("?");
+				this._dwPath = frags[0];
 				
-				img.onerror = function(e) {
-					reject(e);
-				}
-			});
-			
-			this._loadPromise.then((function(value) {
-				this._base = utils.createCanvas(this._img.width, this._img.height);
-				this._base.getContext("2d").drawImage(this._img, 0, 0, this._img.width, this._img.height,
-					0, 0, this._img.width, this._img.height
-				);
-				this._img = null;
-			}).bind(this));
+				var params = utils.query(frags[1]);
+				this._dwWidth = +params.w;
+				this._dwHeight = +params.h;
+				
+				this._loadPromise = Promise.resolve(true);
+				
+				this._base = utils.createCanvas(this._dwWidth, this._dwHeight);
+			}else{
+				this._img = new window.Image();
+				this._img.src = this.src;
+				var img = this._img;
+				
+				this._loadPromise = new Promise(function(resolve, reject) {
+					img.onload = function() {
+						resolve(true);
+					}
+					
+					img.onerror = function(e) {
+						reject(e);
+					}
+				});
+				
+				this._loadPromise.then((function(value) {
+					this._base = utils.createCanvas(this._img.width, this._img.height);
+					this._base.getContext("2d").drawImage(this._img, 0, 0, this._img.width, this._img.height,
+						0, 0, this._img.width, this._img.height
+					);
+					this._img = null;
+				}).bind(this));
+			}
 		}
 		
 		// Check transformations for tilesheet dimensions
@@ -84,6 +107,11 @@ load.provide("dusk.utils.Image", (function() {
 		var opts = _parseTags((ignoreNormalTrans?[]:this.transform).concat(extraTrans?extraTrans:[]));
 		
 		if(!this._base) return null;
+		
+		if(this._isDuskWolf) {
+			var c = sgui.path(this._dwPath);
+			c.paint(this._base.getContext("2d"), 0, 0, this._dwWidth, this._dwHeight);
+		}
 		
 		if(!opts.us) {
 			return this._base;
@@ -200,12 +228,14 @@ load.provide("dusk.utils.Image", (function() {
 	
 	Image.prototype.width = function() {
 		if(this._proxy) return this._proxy.width();
+		if(this._isDuskWolf) return this._dwWidth;
 		if(!this._base) return 0;
 		return this._base.width;
 	};
 	
 	Image.prototype.height = function() {
 		if(this._proxy) return this._proxy.height();
+		if(this._isDuskWolf) return this._dwHeight;
 		if(!this._base) return 0;
 		return this._base.height;
 	};
@@ -253,6 +283,8 @@ load.provide("dusk.utils.Image", (function() {
 	};
 	
 	var _images = {};
+	
+	window.I = Image;
 	
 	return Image;
 })());

@@ -96,8 +96,16 @@ load.provide("dusk.tiles.sgui.extras.AnimatedTile", (function() {
 	var Extra = load.require("dusk.sgui.extras.Extra");
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var sgui = load.require("dusk.sgui");
-	var frameTicker = load.require("dusk.utils.frameTicker");
 	var animationTypes = load.require("dusk.tiles.sgui.extras.animationTypes");
+	var frameTicker = load.require("dusk.utils.frameTicker");
+	
+	/** The total number of frames ran. Using this instead of frameTicker.framesTotal so it takes into effect different
+	 * refresh rates.
+	 * @type integer
+	 * @private
+	 */
+	var _totalFrames = 0;
+	frameTicker.onFrame.listen(function() {_totalFrames ++;});
 	
 	/** An animated tile simply animates a tile.
 	 * 
@@ -119,6 +127,14 @@ load.provide("dusk.tiles.sgui.extras.AnimatedTile", (function() {
 	 * - loops:boolean - Normaly, when the end of an animation is reached, it is stopped and the highest priority
 	 * animation is used (even if it is lower than the stoped one). If this is true, instead the animation will restart
 	 * from the first action.
+	 * - unsettable:boolean - If this is true, then the animation cannot be set as an active animation. Every frame its
+	 * trigger will be checked and if true, then its actions will run only for that frame. The regular animation
+	 * continues as if this didn't trigger at all. This is useful for conditional image transformations and particle
+	 * effects that are independent from animations. All actions will run on the same frame.
+	 * - cooldown:integer - If present and this animation is unsettable, it will not run until this many frames have
+	 * passed since it's last run. Settable animations do not use this property.
+	 * - waitFalse:boolean - If true and this animation is unsettable, it will wait for the trigger to turn false
+	 * between running. Settable animations do not use this property.
 	 * 
 	 * Once an animation is started, it will run to completion unless a higher priority animation is triggered or a new
 	 * one is specified via `changeAnimation`.
@@ -176,6 +192,18 @@ load.provide("dusk.tiles.sgui.extras.AnimatedTile", (function() {
 		 */
 		this._state = {};
 		
+		/** A mapping of animation names to their current cooldown counters.
+		 * @type Map<string, integer>
+		 * @private
+		 */
+		this._animationCooldowns = new Map();
+		
+		/** A mapping of whether a trigger on a "waitFalse" is eligible yet.
+		 * @type Map<string, boolean>
+		 * @private
+		 */
+		this._eligibleWaitFalse = new Map();
+		
 		//Listeners
 		this._atFrameId = this._owner.frame.listen(_frame.bind(this));
 		this.onDelete.listen(_deleted.bind(this));
@@ -210,12 +238,45 @@ load.provide("dusk.tiles.sgui.extras.AnimatedTile", (function() {
 	 */
 	AnimatedTile.prototype._checkNew = function() {
 		for(var i = this._animations.length-1; i > this._current; i --) {
-			if("trigger" in this._animations[i][2] && this._animations[i][2].trigger(this._state, this._owner)) {
+			if(!this._animations[i][2].unsettable
+			&& "trigger" in this._animations[i][2] && this._animations[i][2].trigger(this._state, this._owner)) {
 				this.changeAnimation(this._animations[i][0]);
 				return true;
 			}
 		}
 		return false;
+	};
+	
+	/** Checks for and executes unsettable animations.
+	 * 
+	 * @private
+	 */
+	AnimatedTile.prototype._execUnsettable = function() {
+		for(var i = this._animations.length-1; i >= 0; i --) {
+			var a = this._animations[i];
+			if(i > this._current && a[2].unsettable && "trigger" in a[2] && a[2].trigger(this._state, this._owner)
+			&& (!this._animationCooldowns.has(a[0]) || this._animationCooldowns.get(a[0]) <= 0)
+			&& (!a[2].waitFalse || this._eligibleWaitFalse.get(a[0]))) {
+				
+				for(var act of a[1]) {
+					this._performAction(act);
+				}
+				
+				if("cooldown" in a[2]) {
+					this._animationCooldowns.set(a[0], a[2].cooldown);
+				}
+				
+				if("waitFalse" in a[2]) {
+					this._eligibleWaitFalse.set(a[0], false);
+				}
+			}else if(a[2].waitFalse && !a[2].trigger(this._state, this._owner)) {
+				this._eligibleWaitFalse.set(a[0], true);
+			}
+			
+			if(this._animationCooldowns.has(a[0]) && this._animationCooldowns.get(a[0]) > 0) {
+				this._animationCooldowns.set(a[0], this._animationCooldowns.get(a[0])-1);
+			}
+		}
 	};
 	
 	/** Changes the animation to the one with the provided name, even if it has a lower priority.
@@ -300,71 +361,86 @@ load.provide("dusk.tiles.sgui.extras.AnimatedTile", (function() {
 			
 			// Handle the current action
 			var now = this._animations[this._current][1][this._frame];
-			if(typeof now == "function") {
-				now(this._state, this._owner);
-				this._nextAction();
-			}else if(Array.isArray(now)) {
-				this._owner.tile = now;
-			}else{
-				switch(now.type) {
-					case "switchTo":
-						this.changeAnimation(now.name);
-						break;
-					
-					case "stop":
-						this._fullfills.forEach(function(e) {e({"interrupted":false, "manual":false, "exists":true});});
-						this._fullfills = [];
-						this._current = -1;
-						this._checkNew();
-						break;
-					
-					case "setTile":
-						this._owner.tile = [now.x, now.y];
-						break;
-					
-					case "fullfill":
-						this._fullfills.forEach(function(e) {e({"interrupted":false, "manual":true, "exists":true});});
-						this._fullfills = [];
-						this._checkNew();
-						break;
-					
-					case "addTrans":
-					case "removeTrans":
-						for(var i = 0; i < this._owner.imageTrans.length; i ++) {
-							if(this._owner.imageTrans[i][0] == now.trans.split(":")[0]) {
-								this._owner.imageTrans.splice(i, 1);
-								i --;
-							}
+			
+			if(this._performAction(now)) this._nextAction();
+		}
+	};
+	
+	/** Performs a single animation action.
+	 * 
+	 * @param {object|array<integer>|function(object, dusk.sgui.Tile):*} The action object.
+	 * @return {boolean} true iff the next action should be ran now, or delayed until the next animation frame.
+	 * @private
+	 */
+	AnimatedTile.prototype._performAction = function(act) {
+		if(typeof act == "function") {
+			act = act(this._state, this._owner);
+			if(!act) {
+				// Fn did not return an action
+				return true;
+			}
+		}else if(Array.isArray(act)) {
+			this._owner.tile = act;
+			return false;
+		}
+		
+		if(act) {
+			switch(act.type) {
+				case "switchTo":
+					this.changeAnimation(act.name);
+					return false;
+				
+				case "stop":
+					this._fullfills.forEach(function(e) {e({"interrupted":false, "manual":false, "exists":true});});
+					this._fullfills = [];
+					this._current = -1;
+					this._checkNew();
+					return false;
+				
+				case "setTile":
+					this._owner.tile = [act.x, act.y];
+					return false;
+				
+				case "fullfill":
+					this._fullfills.forEach(function(e) {e({"interrupted":false, "manual":true, "exists":true});});
+					this._fullfills = [];
+					this._checkNew();
+					return false;
+				
+				case "addTrans":
+				case "removeTrans":
+					for(var i = 0; i < this._owner.imageTrans.length; i ++) {
+						if(this._owner.imageTrans[i][0] == act.trans.split(":")[0]) {
+							this._owner.imageTrans.splice(i, 1);
+							i --;
 						}
-						
-						if(now.type == "addTrans") {
-							this._owner.imageTrans.push(now.trans.split(":"));
-						}
-						
-						if(!now.block) this._nextAction();
-						break;
+					}
 					
-					case "cond":
-						if(now.cond(this.state, this._owner)) {
-							this._frame += now.advance;
-						}
-						
-						this._nextAction();
-						break;
+					if(act.type == "addTrans") {
+						this._owner.imageTrans.push(act.trans.split(":"));
+					}
 					
-					case "pass":
-						break;
-					
-					case "setState":
-						this._state[now.key] = now.value;
-						this._nextAction();
-						break;
-					
-					default:
-						throw new TypeError("Animation action" + now.type + " not appropriate");
-				}
+					return !act.block;
+				
+				case "cond":
+					if(act.cond(this.state, this._owner)) {
+						this._frame += act.advance;
+					}
+					return true;
+				
+				case "pass":
+					return false;
+				
+				case "setState":
+					this._state[act.key] = act.value;
+					return true;
+				
+				default:
+					throw new TypeError("Animation action" + act.type + " not appropriate");
 			}
 		}
+		
+		return false;
 	};
 	
 	/** Added to the `_onDelete` listener; removes the frame listener from its owner.
@@ -381,8 +457,10 @@ load.provide("dusk.tiles.sgui.extras.AnimatedTile", (function() {
 	 * @private
 	 */
 	var _frame = function(e) {
+		this._execUnsettable();
+		
 		if(!this._checkNew()) {
-			if(frameTicker.totalFrames % this.rate == 0) {
+			if(_totalFrames % this.rate == 0) {
 				this._nextAction();
 			}
 		}

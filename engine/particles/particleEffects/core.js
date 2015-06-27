@@ -16,19 +16,13 @@ load.provide("dusk.particles.particleEffects.core", (function() {
 	
 	core.imageData = function(what, field) {
 		if(typeof what == "string") {
-			if(what.charAt(0) == "I") {
-				if(!(what.substr(1) in _images)) {
-					var img = (new Image(what.substr(1))).asCanvas();
-					
-					_images[what.substr(1)] = img.getImageData(0, 0, img.width, img.height);
-					return _images[what.substr(1)];
-				}else{
-					return _images[what.substr(1)];
-				}
-			}
-			
-			if(what.charAt(0) == "C") {
-				what = field.path(what.substr(1));
+			if(!(what in _images)) {
+				var img = (new Image(what)).asCanvas();
+				
+				_images[what] = img.getContext("2d").getImageData(0, 0, img.width, img.height);
+				return _images[what];
+			}else{
+				return _images[what];
 			}
 		}
 		
@@ -41,10 +35,10 @@ load.provide("dusk.particles.particleEffects.core", (function() {
 		}
 	};
 
-	core.applyAlteration = function(obj, props, alter) {
+	core.applyAlteration = function(origin, obj, props, alter) {
 		for(var p in props) {
 			if(p in obj) {
-				obj[p] += alter * props[p];
+				obj[p] = origin[p] + alter * props[p];
 			}
 		}
 	};
@@ -132,26 +126,28 @@ load.provide("dusk.particles.particleEffects.core.image", (function() {
 		var id = core.imageData(data.source, field);
 		var baseX = (data.x?data.x:0) - (id.width/2);
 		var baseY = (data.y?data.y:0) - (id.height/2);
-		if(!("count" in data)) data.count = 1;
+		
+		if(!("child" in data)) data.child = {};
+		if(!("count" in data.child)) data.child.count = 1;
+		
+		var c = utils.copy(data.child, true);
 		
 		for(var y = 0; y < id.height; y ++) {
 			for(var x = 0; x < id.width; x ++) {
 				var base = ((y * id.width) + x) * 4;
 				if(id.data[base + 3] > 0 && (!("chance" in data) || Math.random() > data.chance)) {
-					var d = utils.copy(data, true);
+					if("alterL" in data) core.applyAlteration(data.child, c, data.alterL, (id.width-x)/id.width);
+					if("alterR" in data) core.applyAlteration(data.child, c, data.alterR, (x)/id.width);
+					if("alterU" in data) core.applyAlteration(data.child, c, data.alterU, (id.height-y)/id.height);
+					if("alterD" in data) core.applyAlteration(data.child, c, data.alterD, (y)/id.height);
 					
-					if("alterL" in d) core.applyAlteration(d, d.alterL, (id.width-x)/id.width);
-					if("alterR" in d) core.applyAlteration(d, d.alterR, (x)/id.width);
-					if("alterU" in d) core.applyAlteration(d, d.alterU, (id.height-y)/id.height);
-					if("alterD" in d) core.applyAlteration(d, d.alterD, (y)/id.height);
-					
-					d.x = baseX + x;
-					d.y = baseY + y;
-					d.r = id.data[base+0];
-					d.g = id.data[base+1];
-					d.b = id.data[base+2];
-					d.a = id.data[base+3];
-					field.applyEffect(d.effect, d);
+					c.x = baseX + x;
+					c.y = baseY + y;
+					c.r = id.data[base+0];
+					c.g = id.data[base+1];
+					c.b = id.data[base+2];
+					c.a = id.data[base+3];
+					field.applyEffect(c.effect, c);
 				}
 			}
 			//r, g, b, a, x, y, dx, dy, ddx, ddy, dxlimit, dylimit, lifespan, decay

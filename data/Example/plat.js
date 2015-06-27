@@ -21,6 +21,7 @@ load.provide("example.plat", (function() {
 	load.require("dusk.entities.behave.HealthRestore");
 	var InteractableTarget = load.require("dusk.entities.behave.InteractableTarget");
 	var at = load.require("dusk.tiles.sgui.extras.animationTypes");
+	var ta = load.require("dusk.rooms.tileAnimations");
 	
 	load.require("dusk.sgui.DynamicGrid");
 	load.require("dusk.input.sgui.ControlConfig");
@@ -56,8 +57,17 @@ load.provide("example.plat", (function() {
 	
 	plat.health = new Range(0, 5, 0);
 	
+	var root = sgui.get("default", true).get("plat2", "Group");
+	window.dplatOut = dplat.make(root, "orange", 32, 32);
+	dplatOut.tileProperties.add(1, 0, EntityGroup.SOLID_TILE);
+	
+	dplatOut.layeredRoom.seek = "hero";
+	dplatOut.layeredRoom.seekType = "player";
+	
 	var _playerAni = [
-		["standRight", [at.setTile(0,0)], {"trigger":function(){return true;}}],
+		["standRight", [
+			at.setTile(0,0),
+		], {"trigger":function(){return true;}}],
 		["standLeft", [at.setTile(0,1)], {"trigger":function(st){return st.headingLeft;}}],
 		
 		["walkRight", [
@@ -100,6 +110,20 @@ load.provide("example.plat", (function() {
 			at.setTile(0,1), at.setTile(0,2), at.setTile(1,2), at.setTile(2,2), at.setTile(3,2), at.setTile(4,2),
 			at.setTile(5,2), at.setTile(6,2), at.setTile(7,2), 
 		], {}],
+		
+		["groundparts", [
+			ta.particle(dplatOut.layeredRoom, function(state, ent) {
+				return {"name":"spew", "x":[ent.x, ent.x+32], "y":[ent.y, ent.y+32], "r":[0, 255], "g":[0, 255], "b":[0, 255], "count":100, "lifespan":60};
+			})
+		], {"unsettable":true, "trigger":function(){return true;}, "cooldown":60}],
+		
+		["landsmash", [
+			ta.particle(dplatOut.layeredRoom, function(state, ent) {
+				return {"name":"image", "source":"duskwolf:"+ent.fullPath()+"?w=32;h=32", "x":ent.x+16, "y":ent.y+16, "child":{
+					"effect":"spew", "lifespan":10, "dx":0, "dy":0
+				}, "alterU":{"dy":0.5}};
+			})
+		], {"unsettable":true, "trigger":function(state, ent){return ent.touchers(c.DIR_DOWN).length;}, "waitFalse":true}],
 	];
 	
 	var __playerAni = [
@@ -120,9 +144,8 @@ load.provide("example.plat", (function() {
 			{"cooldown":30, "initial":false, "onlyOnce":true}
 		],
 		["#tb>0",
-			'*image {"source":"C^#path", "effect":"spew", "count":1, "x":".x+16", "y":".y+16",\
-			"lifespan":10, "dx":0, "dy":0,\
-			"alterU":{"dy":0.5}}',
+			'*image {"source":"Iduskwolf:^#path^?w=32;h=32", "x":".x+16", "y":".y+16", "child":{"effect":"spew", "lifespan":10, "dx":0,\
+			"dy":0}, "alterU":{"dy":0.5}}',
 			{"cooldown":30, "initial":false, "onlyOnce":true}
 		],
 		["on airjump",
@@ -135,7 +158,7 @@ load.provide("example.plat", (function() {
 	entities.types.createNewType("walk", {
 		"behaviours":{"BackForth":true, "Persist":true, /*"HitDam":true,*/ "Killable":true, "Gravity":true, "Spawner":true}, 
 		"data":{"dx":5, "slowdown":0, "hp":1, "collisionOffsetX":10, "collisionWidth":22, "collisionOffsetY":3},
-		"animation":_playerAni, "particles":_playerParts
+		"animation":_playerAni//, "particles":_playerParts
 	}, "plat");
 	
 	entities.types.createNewType("player", {
@@ -160,7 +183,7 @@ load.provide("example.plat", (function() {
 				}
 			}
 		},
-		"animation":_playerAni, "particles":_playerParts
+		"animation":_playerAni//, "particles":_playerParts
 	}, "plat");
 	
 	entities.types.createNewType("bad", {
@@ -226,13 +249,6 @@ load.provide("example.plat", (function() {
 			["active", [[1,0]], {"trigger":function(st, ent) {return ent.eProp("checkpointActive");}}]
 		]
 	}, "plat");
-	
-	var root = sgui.get("default", true).get("plat2", "Group");
-	window.dplatOut = dplat.make(root, "orange", 32, 32);
-	dplatOut.tileProperties.add(1, 0, EntityGroup.SOLID_TILE);
-	
-	dplatOut.layeredRoom.seek = "hero";
-	dplatOut.layeredRoom.seekType = "player";
 	
 	root.get("hud", "Group").update({
 		"xDisplay":"expand",
