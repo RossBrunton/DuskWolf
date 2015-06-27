@@ -38,6 +38,14 @@ load.provide("quest.ents", (function() {
 			["default", [
 				at.setTile(1,2), at.setTile(2,2), at.setTile(1,2), at.setTile(3,2)
 			], {"trigger":function(){return true;}}],
+			
+			["waiting", [at.addTrans("mono")],
+				{"unsettable":true, "trigger":function(s, e) {return e.stats.get("moved")}, "waitFalse":true}
+			],
+			
+			["notWaiting", [at.removeTrans("mono")],
+				{"unsettable":true, "trigger":function(s, e) {return !e.stats.get("moved")}, "waitFalse":true}
+			],
 			["on panic", "2,2|3,2|2,2|3,2|2,2|/panic", {}]
 		],
 		"particles":[["stat(moved, 3)", "#+mono", {}], ["!stat(moved, 3)", "#-mono", {}]],

@@ -15,7 +15,7 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	var AnimatedTile = load.require("dusk.tiles.sgui.extras.AnimatedTile");
 	
 	/** An entity is a component that has "behaviours" and can do certain activites, possibly in response to another
-	 *  entity or user input.
+	 *  entities or user input.
 	 * 
 	 * It is a normal tile with a movement system, a collision system and a behaviour system added
 	 *  onto it.
@@ -29,34 +29,8 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	 *  and "verForce" entity events. The event handlers supply either a constant speed to move at that frame or a
 	 *  `[acceleration, max, name]` triple.
 	 * 
-	 * The particle system works using an array of particles to be run at certain times. The entity's type determines
-	 * the particle effects it performs. In the entity's type data there is an `particles` key, which is an array of
-	 * arrays.
-	 * 
-	 * Each array in this data is a single particle effect. The first element is a trigger critera such that
-	 * `evalTrigger` is true if and only if the particle effect should run. The second is a string with "animation
-	 * actions" as described below seperated by a "|" character. The third element is an option which describes
-	 * additional flags and settings for the effect.
-	 * 
-	 * All actions for a particle effect run at the same time.
-	 * 
-	 * The particle actions are determined by the first character in the string, as follows:
-	 * 
-	 * - `*pname data`: Does the particle effect named `pname` with the data `data`. Data should be a 
-	 *  json string, and each of it's keys will be fed through `{@link dusk.entities.sgui.Entity#evalTrigger}`.
-	 *  The next event is executed.
-	 * - `#+trans;`: Adds the transformation `trans` to this entity's image, replacing it if it already exists.
-	 * - `#-trans;`: Removes the transformation `trans` from this entity's image.
-	 * 
-	 * The third element has the following possible keys:
-	 * 
-	 * - `name`: a string; the name of the particle effect.
-	 * - `onlyOnce`: A boolean; if true, then the effect will run only after if it's criteria has been false between the
-	 *  last time it ran and now.
-	 * - `cooldown`: An integer; the time in frames the effect must wait until it is ran again.
-	 * 
-	 * Entities can collide with each other, if they are in a `dusk.entities.sgui.EntityGroup`. The collision hit box is a
-	 *  rectangle from the coordinates (`x+collisionOffestX`, `y+collisionOffestY`) to (`x+collisionWidth`,
+	 * Entities can collide with each other, if they are in a `dusk.entities.sgui.EntityGroup`. The collision hit box is
+	 * a rectangle from the coordinates (`x+collisionOffestX`, `y+collisionOffestY`) to (`x+collisionWidth`,
 	 *  `y+collisionHeight`). The function `touchers` can be used to get a list of components touching this one on the
 	 *  specified side.
 	 * 
@@ -203,24 +177,6 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 		 */
 		this.entityEvent = new EventDispatcher("dusk.entities.sgui.Entity.entityEvent");
 		
-		/** The particle effect data for the entity, in the same format as described in the entity type
-		 *  description. For speed, the second element of the value will be sliced once, and so will be
-		 *  an array after the first time it is used.
-		 * @type array
-		 * @private
-		 */
-		this._particleData = [];
-		/** Data used for storing how particle effects have acted. Each element is an object matching 
-		 *  the corresponding particle data.
-		 * 
-		 * They have the following properties:
-		 * - `cooldown`: The number of frames we are waiting until we can run the effect again.
-		 * - `falsified`: Whether the critera has been false since it was last ran.
-		 * @type object
-		 * @private
-		 */
-		this._particleCriteria = [];
-		
 		/** The arrays of entities touching this entity. Keys are directions, while values are arrays 
 		 *  of entities that are touching it, or the string `"wall"`.
 		 * @type object
@@ -277,14 +233,6 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 		 * @type string
 		 */
 		this.schemePath = null;
-		/** The `dusk.particles.sgui.ParticleField` instance that this will insert its particle effects into.
-		 * @type ?dusk.particles.sgui.ParticleField
-		 */
-		this.particles = null;
-		/** The path to the particle field instance. Setting this will update it.
-		 * @type string
-		 */
-		this.particlesPath = null;
 		/** The `dusk.rooms.sgui.FluidLayer` instance that this will use.
 		 * @type ?dusk.rooms.sgui.FluidLayer
 		 */
@@ -366,17 +314,6 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 		}
 	});
 	
-	//particlesPath
-	Object.defineProperty(Entity.prototype, "particlesPath", {
-		get: function() {
-			return this.particles?this.particles.fullPath():undefined;
-		},
-		
-		set: function(value) {
-			if(value) this.particles = this.path(value);
-		}
-	});
-	
 	//fluidPath
 	Object.defineProperty(Entity.prototype, "fluidPath", {
 		get: function() {
@@ -401,18 +338,13 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 			if(entities.types.isValidType(type)) {
 				this.behaviourData = utils.copy(entities.types.getAll(type).data, true);
 				this.getExtra("animation").setAnimations(utils.copy(entities.types.getAll(type).animation, true));
-				this._particleData = utils.copy(entities.types.getAll(type).particles, true);
 			}else{
 				this.behaviourData = {"headingLeft":false, "headingUp":false, "img":"nosuchimage.png",
 					"solid":true, "collides":true
 				};
-				this._particleData = [];
 			}
 			
 			//Set up animation
-			this._currentAni = -1;
-			this._particleCriteria = [];
-			this._aniWaits = {};
 			this.animate("ent_construct");
 			
 			//Basic properties
@@ -875,115 +807,10 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	 */
 	Entity.prototype.startFrame = function(active) {
 		this.behaviourFire("frame", {"active":active});
-		
-		if(this._particleData) for(var i = this._particleCriteria.length-1; i >= 0; i --) {
-			if(this._particleCriteria[i] && "cooldown" in this._particleCriteria[i] 
-			&& this._particleCriteria[i].cooldown) {
-				this._particleCriteria[i].cooldown --;
-			}
-		}
-		
-		this.performAnimation(null, false);
-	};
-	
-	/** Performs an animation or particle effect. This is called at least once per frame and once per
-	 *  animation event, and looks through all possible animations and particle effects.
-	 * 
-	 * This can be used by behaviours, if they want to specify their own animation events.
-	 * @param {?string} event If this is an event, then this is the name of the event.
-	 * @param {boolean=false} advance Should only be used internally, if true, and there is no change in
-	 *  animation, then the next action should be used.
-	 * @return {boolean} Whether a new animation started as a result of an "on" clause appearing in the
-	 *  animation trigger.
-	 */
-	Entity.prototype.performAnimation = function(event, advance) {
-		//Particles
-		if(this._particleData) for(var i = this._particleData.length-1; i >= 0; i --) {
-			if(this.meetsTrigger(this._particleData[i][0])) {
-				if(!this._particleCriteria[i]) this._particleCriteria[i] = {};
-				if("cooldown" in this._particleCriteria[i] && this._particleCriteria[i].cooldown > 0) {
-					continue;
-				}
-				if("falsified" in this._particleCriteria[i] && !this._particleCriteria[i].falsified) {
-					continue;
-				}
-				
-				if(this._particleData[i][2].initial === false
-				&& !("falsified" in this._particleCriteria[i])) {
-					// Do nothing
-				}else{
-					var frags = this._particleData[i][1].split("|");
-					for(var j = 0; j < frags.length; j ++) {
-						this._aniAction(event, frags[j]);
-					}
-				}
-				
-				if("cooldown" in this._particleData[i][2]) {
-					this._particleCriteria[i].cooldown = this._particleData[i][2].cooldown;
-				}
-				
-				if("onlyOnce" in this._particleData[i][2]) {
-					this._particleCriteria[i].falsified = false;
-				}
-			}else{
-				if(this._particleCriteria[i] && "falsified" in this._particleCriteria[i]) {
-					this._particleCriteria[i].falsified = true;
-				}
-			}
-		}
 	};
 	
 	Entity.prototype.animate = function(name) {
 		return this.getExtra("animation").changeAnimation(name);
-	};
-	
-	/** Does a single action for an animation. If none is specified, it will run the next one in the
-	 *  current animation, and skip to the next action if needed. Otherwise, it will run the provided
-	 *  one.
-	 * @param {?string} event The event that provoked this, if appropriate.
-	 * @param {?string} action The action to use, otherwise the current animation is used instead.
-	 */
-	Entity.prototype._aniAction = function(event, action) {
-		var cont = action == undefined;
-		if(!action) return;
-		
-		switch(action.charAt(0)) {
-			case "*":
-				var name = action.substr(1).split(" ")[0];
-				var data = utils.jsonParse(action.substr(name.length+1));
-				var keys = Object.keys(data);
-				var p = "";
-				for(var i = 0; i < keys.length; i ++) {
-					p = keys[i];
-					if(Array.isArray(data[p])) {
-						data[p] = [this.evalTrigger(data[p][0]), this.evalTrigger(data[p][1])];
-					}else{
-						if(typeof data[p] == "string") data[p] = this.evalTrigger(data[p]);
-					}
-				}
-				
-				if(this.particles) this.particles.applyEffect(name, data);
-				if(cont) this._aniForward(event);
-				break;
-			
-			case "#":
-				for(var i = 0; i < this.imageTrans.length; i ++) {
-					if(this.imageTrans[i][0] == action.substr(2)) {
-						this.imageTrans.splice(i, 1);
-						i --;
-					}
-				}
-				
-				if(action.charAt(1) == "+") {
-					this.imageTrans.push(action.substr(2).split(":"));
-				}
-				
-				if(cont) this._aniForward(event);
-				break;
-			
-			default:
-				throw new TypeError("Unknown particle action "+action);
-		}
 	};
 	
 	//Triggers
@@ -1230,7 +1057,7 @@ load.provide("dusk.entities.LightEntity", (function() {
 	
 	for(var p in Entity.prototype) {
 		if(Entity.prototype.hasOwnProperty(p)
-		&& ["className", "schemePath", "particlesPath", "entType"].indexOf(p) === -1)
+		&& ["className", "schemePath", "entType"].indexOf(p) === -1)
 			LightEntity.prototype[p] = Entity.prototype[p];
 	}
 	
@@ -1254,17 +1081,6 @@ load.provide("dusk.entities.LightEntity", (function() {
 		}
 	});
 	
-	//particlesPath
-	Object.defineProperty(LightEntity.prototype, "particlesPath", {
-		get: function() {
-			return this.particles?this.particles.fullPath():undefined;
-		},
-		
-		set: function(value) {
-			if(value) this.particles = this.path(value);
-		}
-	});
-	
 	//entType
 	Object.defineProperty(LightEntity.prototype, "entType", {
 		get: function() {
@@ -1275,14 +1091,8 @@ load.provide("dusk.entities.LightEntity", (function() {
 			// Get data
 			this._type = type;
 			this.behaviourData = utils.copy(entities.types.getAll(type).data, true);
-			this._particleData = utils.copy(entities.types.getAll(type).particles, true);
 			
 			//Set up animation
-			this._currentAni = -1;
-			this._particleCriteria = [];
-			this._aniWaits = {};
-			this.animate("ent_construct");
-			
 			if("collisionWidth" in this.behaviourData) {
 				this.collisionWidth = this.behaviourData.collisionWidth;
 			} else this.collisionWidth = this.width;
