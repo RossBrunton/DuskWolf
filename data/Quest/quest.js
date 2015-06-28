@@ -180,8 +180,8 @@ load.provide("quest", (function() {
 					]}),
 					
 					// Display the regions
-					qo.regionsActor.display("atk", "#990000", {"sub":"attack"}),
-					qo.regionsActor.display("mov", "#000099", {}),
+					qo.regionsActor.display("atk", "#990000", {"sub":"attack", "alpha":0.5}),
+					qo.regionsActor.display("mov", "#000099", {"alpha":0.5}),
 					
 					// Create a new path for storing the steps taken
 					qo.regionsActor.makePath("", {}),
@@ -198,7 +198,7 @@ load.provide("quest", (function() {
 					
 					// Display the attack range for the tile the entity is on only
 					qo.regionsActor.getSubRegion("attack", {}),
-					qo.regionsActor.display("myattack", "#990000", {}),
+					qo.regionsActor.display("myattack", "#990000", {"alpha":0.5}),
 					
 					// And calculate a list of all entities in the region
 					qo.selectActor.entitiesInRegion({}),

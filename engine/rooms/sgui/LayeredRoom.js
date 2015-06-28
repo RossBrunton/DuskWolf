@@ -185,7 +185,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
 						"twidth":this.twidth, "theight":this.theight,
 						"globalCoords":true,
-						"alpha":0.50, "layer":"+",
+						"layer":"+",
 						"rows":this.rows, "cols":this.cols
 					});
 					

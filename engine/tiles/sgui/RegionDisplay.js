@@ -184,8 +184,13 @@ load.provide("dusk.tiles.sgui.RegionDisplay", (function() {
 			if(desty + dheight > e.d.dest.y + e.d.slice.height) dheight = (e.d.dest.y + e.d.slice.height) - desty;
 			
 			if(dwidth > 0 && dheight > 0) {
+				var alpha = "alpha" in c[1][1] ? c[1][1].alpha : 1.0;
+				
+				var oldAlpha = e.c.globalAlpha;
+				e.c.globalAlpha *= alpha;
 				e.c.fillStyle = c[1][0];
 				e.c.fillRect(destx, desty, dwidth, dheight);
+				e.c.globalAlpha = oldAlpha;
 			}
 		}
 		
