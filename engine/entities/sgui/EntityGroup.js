@@ -571,13 +571,21 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 			} while(this.get("#"+i));
 		}
 		
-		var dropped = this.get(entity.name, "Entity");
+		var dropped;
+		if("instance" in entity) {
+			dropped = entity.instance;
+			if(!dropped.name) dropped.name = entity.name;
+			this.set(dropped.name, dropped);
+		}else{
+			dropped = this.get(entity.name, "Entity");
+		}
+		
 		dropped.x = entity.x;
 		dropped.y = entity.y;
 		// Set dimensions before type, if type specifies dimensions it will override these defaults
 		dropped.width = this.twidth;
 		dropped.height = this.theight;
-		dropped.entType = entity.type;
+		if(!("instance" in entity)) dropped.entType = entity.type;
 		
 		if(this.scheme) dropped.scheme = this.scheme;
 		if(this.fluid) dropped.fluid = this.fluid;

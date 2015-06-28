@@ -5,7 +5,7 @@
 load.provide("dusk.entities.behave.Spawner", (function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.entities.behave.Behave");
-	var LightEntity = load.require("dusk.entities.LightEntity");
+	var Entity = load.require("dusk.entities.sgui.Entity");
 	var utils = load.require("dusk.utils");
 	var EntityGroup = load.suggest("dusk.entities.sgui.EntityGroup", function(p) {EntityGroup = p});
 
@@ -249,35 +249,37 @@ load.provide("dusk.entities.behave.Spawner", (function() {
 			ent.y = this._entity.y;
 			
 			ent.type = _resolve(dir, spawn.type);
-			var light = new LightEntity(ent.type);
+			var toDrop = new Entity();
+			toDrop.entType = ent.type;
+			ent.instance = toDrop;
 			
 			if(!("horOffset" in spawn)) spawn.horOffset = 0;
 			if(!("verOffset" in spawn)) spawn.verOffset = 0;
 			
 			if(horFacing == "right") {
-				ent.x += this._entity.collisionWidth + spawn.horOffset - light.collisionOffsetX;
+				ent.x += this._entity.collisionWidth + spawn.horOffset - toDrop.collisionOffsetX;
 			}
 			
 			if(horFacing == "left") {
-				ent.x += this._entity.collisionOffsetX - spawn.horOffset - light.collisionWidth;
+				ent.x += this._entity.collisionOffsetX - spawn.horOffset - toDrop.collisionWidth;
 			}
 			
 			if(horFacing == "middle") {
-				ent.x += (this._entity.collisionWidth/2) + (light.collisionWidth/2) + (light.collisionOffsetX/2)
+				ent.x += (this._entity.collisionWidth/2) + (toDrop.collisionWidth/2) + (toDrop.collisionOffsetX/2)
 				 + spawn.horOffset;
 			}
 			
 			
 			if(verFacing == "bottom") {
-				ent.y += this._entity.collisionHeight + spawn.verOffset - light.collisionOffsetY;
+				ent.y += this._entity.collisionHeight + spawn.verOffset - toDrop.collisionOffsetY;
 			}
 			
 			if(verFacing == "top") {
-				ent.y += this._entity.collisionOffsetY - spawn.verOffset - light.collisionHeight;
+				ent.y += this._entity.collisionOffsetY - spawn.verOffset - toDrop.collisionHeight;
 			}
 			
 			if(verFacing == "middle") {
-				ent.y += (this._entity.collisionHeight/2) - (light.collisionHeight/2) - (light.collisionOffsetY/2)
+				ent.y += (this._entity.collisionHeight/2) - (toDrop.collisionHeight/2) - (toDrop.collisionOffsetY/2)
 				 + spawn.verOffset;
 			}
 			

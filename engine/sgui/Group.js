@@ -463,7 +463,20 @@ load.provide("dusk.sgui.Group", (function() {
 	Group.prototype.set = function(name, data) {
 		if(data instanceof Component) {
 			this._components[name.toLowerCase()] = data;
-			return true;
+			this._componentsArr.push(data);
+			this._drawOrder.push(name.toLowerCase());
+			sgui.applyStyles(data);
+			if(this.focusBehaviour == Group.FOCUS_ALL) {
+				data.onFocusChange.fire({"focus":true}, true);
+				if(this.active) data.onActiveChange.fire({"active":true}, true);
+			}
+			
+			if(data.container) {
+				throw TypeError("Tried to add component "+data+" to "+this+" but it is already in "+data.container);
+			}
+			
+			data.container = this;
+			return data;
 		}
 		
 		data.name = name;
