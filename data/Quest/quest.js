@@ -46,10 +46,20 @@ load.provide("quest", (function() {
 		}).bind(this));
 	});
 	
+	var layers = [
+		{"name":"back","type":1},
+		{"name":"scheme","type":2},
+		{"name":"regions","type":32},
+		{"name":"entities","type":4,"primary":true},
+		{"name":"parts","type":8},
+		{"name":"over","type":1},
+		{"name":"transitions","type":16}
+	];
+	
 	var root = sgui.get("default", true);
 	root.mouseFocus = false;
 	root.allowMouse = true;
-	window.qo = dquest.make(root, "quest", 32, 32);
+	window.qo = dquest.make(root, "quest", layers, 32, 32);
 	
 	
 	//Test

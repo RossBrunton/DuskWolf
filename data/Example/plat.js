@@ -57,8 +57,17 @@ load.provide("example.plat", (function() {
 	
 	plat.health = new Range(0, 5, 0);
 	
+	var layers = [
+		{"name":"back","type":1},
+		{"name":"scheme","type":2},
+		{"name":"entities","type":4,"primary":true},
+		{"name":"parts","type":8},
+		{"name":"over","type":1},
+		{"name":"transitions","type":16}
+	];
+	
 	var root = sgui.get("default", true).get("plat2", "Group");
-	window.dplatOut = dplat.make(root, "orange", 32, 32);
+	window.dplatOut = dplat.make(root, "orange", layers, 32, 32);
 	dplatOut.tileProperties.add(1, 0, EntityGroup.SOLID_TILE);
 	
 	dplatOut.layeredRoom.seek = "hero";

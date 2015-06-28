@@ -654,6 +654,11 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 	 * @since 0.0.18-alpha
 	 */
 	TileMap.prototype.loadBM = function(map) {
+		this._all = [];
+		this._drawn = false;
+		this._tileBuffer = [];
+		this._tiles = [];
+		
 		this.map = map;
 	};
 	

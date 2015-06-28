@@ -49,6 +49,9 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 		this.twidth = 32;
 		this.theight = 32;
 		
+		this.rows = 0;
+		this.cols = 0;
+		
 		//Prop masks
 		this._mapper.map("spawn", "spawn");
 		this._mapper.map("layers", "layers", ["allowMouse"]);
@@ -138,24 +141,12 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 				
 				this.roomName = name;
 				
-				if(Array.isArray(room)) {
-					// Old style
-					
-					//Yes.
-					this.layers = this.layers;
-					
-					for(var i = 0; i < room.length; i ++) {
-						this.get(this._layers[i].name).loadBM(room[i], spawn);
-					}
-				}else{
-					// New style
-					this.layers = room.layers;
-					
-					for(var i = 0; i < room.contents.length; i ++) {
-						this.get(this._layers[i].name).loadBM(room.contents[i], spawn);
-					}
-					
-					this._updateLayers();
+				this.rows = room.rows;
+				this.cols = room.cols;
+				this._updateLayers();
+				
+				for(var i = 0; i < room.contents.length; i ++) {
+					this.get(this._layers[i].name).loadBM(room.contents[i], spawn);
 				}
 				
 				var crd = [0, 0];
@@ -219,7 +210,8 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 					{"cursorColour":_LAYER_COLOURS[colour++],
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
 						"twidth":this.twidth, "theight":this.theight,
-						"globalCoords":true, "layer":"+"
+						"globalCoords":true, "layer":"+",
+						"rows":this.rows, "cols":this.cols
 					});
 					
 					break;
@@ -230,7 +222,8 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
 						"twidth":this.twidth, "theight":this.theight,
 						"alpha":0, "globalCoords":true,
-						"layer":"+"
+						"layer":"+",
+						"rows":this.rows, "cols":this.cols
 					});
 					
 					break;
@@ -241,7 +234,8 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 						"downFlow":"", "upFlow":(i > 0?val[i-1].name:""),
 						"twidth":this.twidth, "theight":this.theight,
 						"globalCoords":true,
-						"alpha":0.50, "layer":"+"
+						"alpha":0.50, "layer":"+",
+						"rows":this.rows, "cols":this.cols
 					});
 					
 					break;
@@ -503,6 +497,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 		if(!editor.active) return true;
 		if(keyboard.isKeyPressed(187)) {
 			//+
+			this.rows ++;
 			for(var i = this._layers.length-1; i >= 0; i --) {
 				if(this.get(this._layers[i].name) instanceof TileMap) {
 					this.get(this._layers[i].name).graftTop();
@@ -518,6 +513,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 		
 		if(keyboard.isKeyPressed(189)) {
 			//-
+			this.rows --;
 			for(var i = this._layers.length-1; i >= 0; i --) {
 				if(this.get(this._layers[i].name) instanceof TileMap) {
 					this.get(this._layers[i].name).carveTop();
@@ -551,6 +547,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 		if(!editor.active) return true;
 		if(keyboard.isKeyPressed(187)) {
 			//+
+			this.rows ++;
 			for(var i = this._layers.length-1; i >= 0; i --) {
 				if(this.get(this._layers[i].name) instanceof TileMap) {
 					this.get(this._layers[i].name).graftBottom();
@@ -563,6 +560,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 		
 		if(keyboard.isKeyPressed(189)) {
 			//-
+			this.rows --;
 			for(var i = this._layers.length-1; i >= 0; i --) {
 				if(this.get(this._layers[i].name) instanceof TileMap) {
 					this.get(this._layers[i].name).carveBottom();
@@ -593,6 +591,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 		if(!editor.active) return true;
 		if(keyboard.isKeyPressed(187)) {
 			//+
+			this.cols ++;
 			for(var i = this._layers.length-1; i >= 0; i --) {
 				if(this.get(this._layers[i].name) instanceof TileMap) {
 					this.get(this._layers[i].name).graftLeft();
@@ -608,6 +607,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 		
 		if(keyboard.isKeyPressed(189)) {
 			//-
+			this.cols --;
 			for(var i = this._layers.length-1; i >= 0; i --) {
 				if(this.get(this._layers[i].name) instanceof TileMap) {
 					this.get(this._layers[i].name).carveLeft();
@@ -641,6 +641,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 		if(!editor.active) return true;
 		if(keyboard.isKeyPressed(187)) {
 			//+
+			this.cols ++;
 			for(var i = this._layers.length-1; i >= 0; i --) {
 				if(this.get(this._layers[i].name) instanceof TileMap) {
 					this.get(this._layers[i].name).graftRight();
@@ -655,6 +656,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 		
 		if(keyboard.isKeyPressed(189)) {
 			//-
+			this.cols --;
 			for(var i = this._layers.length-1; i >= 0; i --) {
 				if(this.get(this._layers[i].name) instanceof TileMap) {
 					this.get(this._layers[i].name).carveRight();
@@ -737,7 +739,8 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 		
 		var room = {};
 		room.contents = [];
-		room.layers = this.layers;
+		room.cols = this.cols;
+		room.rows = this.rows;
 		for(var i = 0; i < this._layers.length; i ++) {
 			room.contents.push(this.get(this._layers[i].name).saveBM(addDep));
 		}

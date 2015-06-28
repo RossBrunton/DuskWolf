@@ -32,13 +32,14 @@ load.provide("dusk.rooms.quest", (function() {
 	
 	quest.puppeteer = null;
 	
-	quest.make = function(component, name, twidth, theight) {
+	quest.make = function(component, name, layers, twidth, theight) {
 		component.modifyComponent([{
 			"name":name, "type":"LayeredRoom", "allowMouse":true, "twidth":twidth, "theight":theight
 		}]);
 		component.becomeActive();
 		component.flow(name);
 		quest.rooms.setLayeredRoom(component.get(name));
+		component.get(name).layers = layers;
 		
 		var out = {};
 		out.standardActor = new StandardActor(component.get(name));
