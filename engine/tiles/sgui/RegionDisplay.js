@@ -65,6 +65,7 @@ load.provide("dusk.tiles.sgui.RegionDisplay", (function() {
 		this._cachedArrows = new Map();
 		this._needsCacheUpdating = false;
 		this._paint = [];
+		this._invertStyle = null;
 		
 		//Prop masks
 		this._mapper.map("rows", "rows");
@@ -101,17 +102,48 @@ load.provide("dusk.tiles.sgui.RegionDisplay", (function() {
 			for(var n of this._paint) {
 				if(n[1] != RegionDisplay.MODE_PATH) {
 					var tiles = null;
-					if(n[1] == RegionDisplay.MODE_REGION) {
-						tiles = n[4].all();
-					}else if(n[1] == RegionDisplay.MODE_SUBREGION) {
-						tiles = n[4].allSub(n[5]);
-					}
 					
-					for(var t of tiles) {
-						if(n[1] != RegionDisplay.MODE_REGION || t[Region.tfields.stoppable] || n[2].allowUnstoppable) {
-							this._cachedTileColours.set(t[1] * this.cols + t[0], n[2]);
+					if(n[3].invert) {
+						var dontColour = [];
+						
+						for(var ts of n[4]) {
+							if(n[1] == RegionDisplay.MODE_REGION) {
+								tiles = ts.all();
+							}else if(n[1] == RegionDisplay.MODE_SUBREGION) {
+								tiles = ts.allSub(n[5]);
+							}
+							
+							for(var t of tiles) {
+								if(n[1] != RegionDisplay.MODE_REGION || t[Region.tfields.stoppable]
+								|| n[3].allowUnstoppable) {
+									dontColour.push(t[1] * this.cols + t[0]);
+								}
+							}
+						}
+						
+						for(var i = 0; i < this.cols*this.rows; i ++) {
+							if(!dontColour.includes(i)) {
+								this._cachedTileColours.set(i, [n[2], n[3]]);
+							}
+						}
+					}else{
+						for(var ts of n[4]) {
+							if(n[1] == RegionDisplay.MODE_REGION) {
+								tiles = ts.all();
+							}else if(n[1] == RegionDisplay.MODE_SUBREGION) {
+								tiles = ts.allSub(n[5]);
+							}
+							
+							for(var t of tiles) {
+								if(n[1] != RegionDisplay.MODE_REGION || t[Region.tfields.stoppable]
+								|| n[2].allowUnstoppable) {
+									this._cachedTileColours.set(t[1] * this.cols + t[0], [n[2], n[3]]);
+								}
+							}
 						}
 					}
+					
+					
 				}
 			}
 			
@@ -130,11 +162,13 @@ load.provide("dusk.tiles.sgui.RegionDisplay", (function() {
 				continue;
 			}
 			
-			var destx = e.d.dest.x + ((x * this.twidth) - e.d.slice.x) + 1;
-			var desty = e.d.dest.y + ((y * this.theight) - e.d.slice.y) + 1;
+			var margin = "margin" in c[1][1] ? c[1][1].margin : 1;
 			
-			var dwidth = this.twidth -2;
-			var dheight = this.theight -2;
+			var destx = e.d.dest.x + ((x * this.twidth) - e.d.slice.x) + margin;
+			var desty = e.d.dest.y + ((y * this.theight) - e.d.slice.y) + margin;
+			
+			var dwidth = this.twidth - margin * 2;
+			var dheight = this.theight - margin * 2;
 			
 			if(destx < e.d.dest.x) {
 				dwidth -= e.d.dest.x - destx;
@@ -150,7 +184,7 @@ load.provide("dusk.tiles.sgui.RegionDisplay", (function() {
 			if(desty + dheight > e.d.dest.y + e.d.slice.height) dheight = (e.d.dest.y + e.d.slice.height) - desty;
 			
 			if(dwidth > 0 && dheight > 0) {
-				e.c.fillStyle = c[1];
+				e.c.fillStyle = c[1][0];
 				e.c.fillRect(destx, desty, dwidth, dheight);
 			}
 		}
@@ -272,6 +306,7 @@ load.provide("dusk.tiles.sgui.RegionDisplay", (function() {
 	};
 	
 	RegionDisplay.prototype.display = function(name, mode, colour, options, obj1, obj2) {
+		if(mode != RegionDisplay.MODE_PATH && !Array.isArray(obj1)) obj1 = [obj1];
 		this._paint.push([name, mode, colour, options, obj1, obj2]);
 		this._updateTileColourCache();
 	};
@@ -343,10 +378,7 @@ load.provide("dusk.tiles.sgui.RegionDisplay", (function() {
 	 * @param {object} map The map to load, will be assigned to `{@link dusk.tiles.sgui.EditableTileMap#map}`.
 	 * @since 0.0.18-alpha
 	 */
-	RegionDisplay.prototype.loadBM = function(data) {
-		this.rows = data.rows;
-		this.cols = data.cols;
-	};
+	RegionDisplay.prototype.loadBM = function(data) {};
 	
 	sgui.registerType("RegionDisplay", RegionDisplay);
 	

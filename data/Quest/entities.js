@@ -1,6 +1,6 @@
 "use strict";
 
-load.provide("quest.ents", (function() {
+load.provide("quest.entities", (function() {
 	var entities = load.require("dusk.entities");
 	load.require("dusk.entities.behave.BackForth");
 	load.require("dusk.entities.behave.GridWalker");
@@ -13,12 +13,13 @@ load.provide("quest.ents", (function() {
 	var store = load.require("dusk.stats.store");
 	var at = load.require("dusk.tiles.sgui.extras.animationTypes");
 	
+	
+	// Entities
 	entities.twidth = 32;
 	entities.theight = 32;
-	entities.frameDelay = 20;
 	entities.seek = "";
 	entities.seekType = "";
-
+	
 	entities.types.createNewType("hero", {
 		"behaviours":{
 			"Persist":true, "PlayerGridWalker":true, "MarkTrigger":true, "GridWalker":true
@@ -27,8 +28,8 @@ load.provide("quest.ents", (function() {
 			"solid":false
 		}
 	}, "quest");
-
-
+	
+	
 	entities.types.createNewType("questTest", {
 		"data":{
 			"solid":false, "collides":false, "statsName":"ally", "statsLoadImage":true, "statsPutBack":true,
@@ -51,17 +52,7 @@ load.provide("quest.ents", (function() {
 		"particles":[["stat(moved, 3)", "#+mono", {}], ["!stat(moved, 3)", "#-mono", {}]],
 		"behaviours":{"GridWalker":true, "StatLoader":true, "Scriptable":true}
 	}, "quest");
-
-	store.addGenerator("ally", function() {
-		var l = new stats.LayeredStats("ally", "quest.ents");
-		
-		_basic(l);
-		
-		l.layer(1).addBlock("allegiance", {"faction":"ALLY"}, true);
-		
-		return l;
-	});
-
+	
 	entities.types.createNewType("questEvil", {
 		"data":{
 			"solid":false, "collides":false, "statsName":"evil", "statsLoadImage":true,
@@ -75,19 +66,12 @@ load.provide("quest.ents", (function() {
 		"particles":[["stat(moved, 3)", "#+mono", {}], ["!stat(moved, 3)", "#-mono", {}]],
 		"behaviours":{"GridWalker":true, "StatLoader":true}
 	}, "quest");
-
-	store.addGenerator("evil", function() {
-		var l = new stats.LayeredStats("evil", "quest.ents");
-		
-		_basic(l);
-		
-		l.layer(1).addBlock("allegiance", {"faction":"ENEMY"}, true);
-		
-		return l;
-	});
-
+	
+	
+	
+	// Stats
 	var _basic = function(l) {
-		l.layer(1).addBlock("baseRange", {"possibleRange":[]});
+		l.layer(1).addBlock("baseRange", {"possibleRange":[], "vis":2});
 		l.layer(1).addBlock("initialMoved", {"moved":false});
 		
 		var inv = new items.Invent(4, "1", 1);
@@ -108,7 +92,29 @@ load.provide("quest.ents", (function() {
 			l.layer(1).addBlock("class", {"move":6});
 		}
 	};
-
+	
+	store.addGenerator("evil", function() {
+		var l = new stats.LayeredStats("evil", "quest.ents");
+		
+		_basic(l);
+		
+		l.layer(1).addBlock("allegiance", {"faction":"ENEMY"}, true);
+		
+		return l;
+	});
+	
+	store.addGenerator("ally", function() {
+		var l = new stats.LayeredStats("ally", "quest.ents");
+		
+		_basic(l);
+		
+		l.layer(1).addBlock("allegiance", {"faction":"ALLY"}, true);
+		
+		return l;
+	});
+	
+	
+	
 	//Items
 	items.items.createNewType("weapon", {
 		"weapon":true,
@@ -121,7 +127,7 @@ load.provide("quest.ents", (function() {
 			//"possibleRange":"X @ sl ((block.item).minRange, (block.item).maxRange)",
 		}
 	});
-
+	
 	items.items.createNewType("bow", {
 		"minRange":2, "maxRange":2, "displayName":"[img Quest/images/bow.png] Bow"
 	}, "weapon");

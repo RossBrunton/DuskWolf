@@ -257,7 +257,11 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 		var out = [];
 		
 		for(var c = this._entities.length-1; c >= 0; c --){
-			if(this._entities[c].evalTrigger(filter)) out.push(this._entities[c]);
+			if(typeof filter == "function") {
+				if(filter(this._entities[c])) out.push(this._entities[c]);
+			}else{
+				if(this._entities[c].evalTrigger(filter)) out.push(this._entities[c]);
+			}
 		}
 		
 		return out;
@@ -576,7 +580,6 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 		dropped.entType = entity.type;
 		
 		if(this.scheme) dropped.scheme = this.scheme;
-		if(this.particles) dropped.particles = this.particles;
 		if(this.fluid) dropped.fluid = this.fluid;
 		
 		this._entities.push(dropped);

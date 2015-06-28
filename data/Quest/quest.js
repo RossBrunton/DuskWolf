@@ -1,16 +1,8 @@
 "use strict";
 
 load.provide("quest", (function() {
-	load.require("dusk.sgui.FancyRect");
-	load.require("dusk.sgui.Grid");
-	load.require("dusk.sgui.PlusText");
-	load.require("dusk.sgui.FocusChecker");
-	load.require("dusk.sgui.extras.MatchedSize");
-	load.require("dusk.sgui.FpsMeter");
-	load.require("dusk.sgui.Feed");
-	
-	load.require("dusk.sgui.extras.Die");
-	load.require("dusk.sgui.extras.Fade");
+	var LayeredRoom = load.require("dusk.rooms.sgui.LayeredRoom");
+	var RegionDisplay = load.require("dusk.tiles.sgui.RegionDisplay");
 	
 	var dusk = load.require("dusk");
 	var items = load.require("dusk.items");
@@ -20,24 +12,24 @@ load.provide("quest", (function() {
 	var c = load.require("dusk.sgui.c");
 	var dquest = load.require("dusk.rooms.quest");
 	var sgui = load.require("dusk.sgui");
-	var reversiblePromiseChain = load.require("dusk.utils.reversiblePromiseChain");
 	var menu = load.require("dusk.script.actors.menu");
 	var Runner = load.require("dusk.script.Runner");
 	var Actions = load.require("dusk.script.Actions");
+	
+	var Region = load.require("dusk.tiles.Region");
 	var uniformModifier = load.require("dusk.tiles.UniformModifier");
 	var terrainModifier = load.require("dusk.tiles.TerrainModifier");
 	var lrTerrainModifier = load.require("dusk.tiles.lrTerrainModifier");
-	
-	
 	var entityModifier = load.require("dusk.tiles.EntityModifier");
 	var entityValidator = load.require("dusk.tiles.EntityValidator");
 	var Weights = load.require("dusk.tiles.Weights");
 	
-	var ents = load.require("quest.ents");
-	load.require("quest.rooms.rooma");
+	var ents = load.require("quest.entities");
+	var ui = load.require("quest.ui");
 	
 	var quest = {};
 	
+	// Add load handler
 	dusk.onLoad.listen(function (e){
 		dquest.rooms.setRoom("quest.rooms.rooma", 0).then((function(e) {
 			_turns.register("ally", quest.allyTurn);
@@ -46,6 +38,8 @@ load.provide("quest", (function() {
 		}).bind(this));
 	});
 	
+	
+	// Set up quest
 	var layers = [
 		{"name":"back","type":1},
 		{"name":"scheme","type":2},
@@ -56,157 +50,27 @@ load.provide("quest", (function() {
 		{"name":"transitions","type":16}
 	];
 	
-	var root = sgui.get("default", true);
-	root.mouseFocus = false;
-	root.allowMouse = true;
-	window.qo = dquest.make(root, "quest", layers, 32, 32);
+	window.qo = dquest.make(ui, "quest", layers, 32, 32);
+	
+	// Move the layered room behind other components
+	qo.layeredRoom.alterLayer("-");
+	
+	var menuCom = ui.path("menu/menu");
+	var feed = ui.get("actionFeed").get("feed");
 	
 	
-	//Test
-	root.get("menu", "Group").update({
-		"allowMouse":true,
-		"children":{
-			"back":{
-				"type":"FancyRect",
-				"width":0,
-				"height":0,
-				"x":50,
-				"y":50,
-				"back":"fancyRect/back.png",
-				"top":"fancyRect/top.png",
-				"bottom":"fancyRect/bottom.png",
-				"left":"fancyRect/left.png",
-				"right":"fancyRect/right.png",
-				"topLeft":"fancyRect/topLeft.png",
-				"topRight":"fancyRect/topRight.png",
-				"bottomLeft":"fancyRect/bottomLeft.png",
-				"bottomRight":"fancyRect/bottomRight.png",
-				"radius":2,
-				"extras":{
-					"size":{
-						"type":"MatchedSize",
-						"paddingTop":10,
-						"paddingBottom":10,
-						"paddingRight":10,
-						"paddingLeft":10,
-						"base":"../menu",
-					}
-				}
-			},
-			"menu":{
-				"type":"Grid",
-				"allowMouse":true,
-				"globals":{
-					"type":"PlusText",
-					"plusType":"FocusCheckerRect",
-					"behind":true,
-					"mouseCursor":"pointer",
-					"allowMouse":true,
-					"label":{
-						"colour":"#cccccc",
-						"size":16
-					},
-					"plus":{
-						"width":150,
-						"height":24,
-						"active":"",
-						"focused":"",
-						"inactive":"",
-						"colour":"",
-						"bInactive":"#000000",
-						"bFocused":"#000000",
-						"bActive":"#999900",
-						"bwActive":3,
-						"radius":3
-					}
-				},
-				"x":50,
-				"y":50,
-				"hspacing":5,
-				"visible":false
-			}
-		}
-	});
-	
-	var menuCom = root.path("menu/menu");
-	
-	root.get("fps", "FpsMeter").update({
-		"type":"FpsMeter",
-		"xOrigin":"right",
-		"yOrigin":"bottom"
-	});
-	
-	root.get("actionFeed", "Group").update({
-		"xDisplay":"expand",
-		"children":{
-			"feed":{
-				"type":"Feed",
-				"xOrigin":"right",
-				"x":-5,
-				"y":5,
-				"globals":{
-					"size":16,
-					"borderColour":"#ffffff",
-					"borderSize":3,
-					"type":"Label",
-					"colour":"#000000",
-					"extras":{
-						"fade":{
-							"type":"Fade",
-							"delay":60,
-							"on":true,
-							"then":"die",
-							"from":1.0,
-							"to":0.0,
-							"duration":30
-						},
-						"die":{
-							"type":"Die"
-						}
-					}
-				},
-				"append":[
-					{"text":"Started!"}
-				]
-			}
-		}
-	});
-	var feed = root.get("actionFeed").get("feed");
-	
-	/*dusk.sgui.getPane("test").update({
-		"active":true,
-		"focus":"text",
-		"children":{
-			"text":{
-				"type":"Grid",
-				"rows":1,
-				"cols":5,
-				"x":100,
-				"y":100,
-				"populate":{
-					"type":"TextBox",
-					"width":200,
-					"height":200,
-					"mouse":true,
-					"padding":5,
-					"multiline":true,
-					"format":true,
-				}
-			},
-		}
-	});*/
-	
-	window.q = dquest.puppeteer;
-	
+	// Weights for region generation
 	var weights = new Weights(9, 2);
 	weights.addSimpleWeight(0, 0, 1, 0);
 	weights.addSimpleWeight(1, 0, 100, 0);
 	weights.addSimpleWeight(2, 0, 100, 0);
 	weights.addSimpleWeight(3, 0, 2, 0);
 	
+	
+	// Modifiers and validors for regions
 	var lrtm = lrTerrainModifier(weights, qo.layeredRoom);
 	var lrem = entityModifier(qo.layeredRoom, [], function(v, e, opt, dir) {
-			if(e.meetsTrigger("stat(faction, 1) = ENEMY")) {
+			if(e.stats && e.stats.get("faction") == "ENEMY") {
 				return 100;
 			}
 			return v;
@@ -214,165 +78,82 @@ load.provide("quest", (function() {
 	);
 	var ev = function(exclude) {
 		return entityValidator(qo.layeredRoom, [], function(e){
-			//return e == exclude || e.entType == "stdSelector";
+			return e == exclude || e.entType == "stdSelector";
 		});
 	};
 	
+	// Built in region generator functions
 	window.aarg =
 		{"name":"attack", "los":true, "entFilter":"stat(faction, 1) = ENEMY", "weightModifiers":[uniformModifier()]};
 	window.targ = 
 		{"los":true, "entBlock":"stat(faction, 1) = ENEMY"};
 	
-
-	var _turns = new TurnTicker();
-	
-	/*quest.allyTurnInner = function() {
-		return reversiblePromiseChain([
-			q.requestBoundPair("selectEntity", 
-				{"allowNone":true, "filter":"stat(faction, 1) = ALLY & stat(moved, 3) = false"}
-			),
-			[function(passedArg, qu) {
-				if(!passedArg.entity) {
-					qu(q.requestBoundPair("selectListMenu", {"path":"default:menu/menu"}));
-					qu(reversiblePromiseChain.STOP);
-					
-					passedArg.options = [];
-					
-					passedArg.options.push({"text":"End", "listSelectValue":"test", "listSelectFunction":function(pa, qu) {
-						pa.endTurn = true;
-						return pa;
-					}});
-					passedArg.options.push({"text":"Cancel", "listSelectCancel":true});
-					
-					return passedArg;
-				}else{
-					var ranges = passedArg.entity.stats.get("possibleRange", 2);
-					var rmap = [];
-					
-					for(var i = 0; i < ranges.length; i ++) {
-						for(var a = ranges[i][0]; a <= ranges[i][1]; a ++) {
-							rmap[a] = true;
-						}
-					}
-					
-					aarg.rangeMap = rmap;
-					passedArg.aarg = aarg;
-					targ.forEach[0] = aarg;
-					passedArg.range = passedArg.entity.stats.get("move", 1);
-					
-					return passedArg;
-				}
-			}, undefined, "Handle Entity Selection"],
-			q.requestBoundPair("generateRegion", targ),
-			q.requestBoundPair("getTilePathInRange", {"colour":":default/arrows32.png tiles:32x32", "colourChildrenUnder":["attack"],
-				"destName":"path", "regionToUse":"move"
-			}),
-			q.requestBoundPair("moveViaPath"),
-			q.requestBoundPair("uncolourRegion", {"regionsToUncolour":["move", "move.attack", "path"]}),
-			q.requestBoundPair("generateRegion", aarg),
-			q.requestBoundPair("colourRegion", {"regionsToColour":["attack"]}),
-			[function(pa) {
-				pa.options = [];
-				
-				pa.mover = pa.entity;
-				
-				//Attack option
-				if(pa.regions["attack"].entities().length) {
-					pa.options.push({"text":"Attack!", "listValue":"attack", "listSelectFunction":function(pa, qu) {
-						qu(q.requestBoundPair("selectEntity", {"filter":"stat(faction, 1) = ENEMY", "regionToUse":"attack"}));
-						qu([function(pa) {
-							feed.append({"text":"You killed them!"});
-							pa.entity.terminate();
-							
-							return pa;
-						}, undefined, "Kill entity"]);
-						
-						return pa;
-					}});
-				}
-				
-				//Items option
-				pa.options.push({"text":"Items", "listValue":"items", "listSelectFunction":function(pa, qu) {
-					qu([function(pa) {
-						pa.options = [];
-						var i = pa.entity.stats.layer(2).getBlock("weapons");
-						i.forEach(function(item, slot) {
-							pa.options.push({"text":item.get("displayName"), "listValue":item.type});
-						});
-						
-						return pa;
-					}, undefined, "Generate weapons list"]);
-					qu(q.requestBoundPair("selectListMenu", {"path":"default:/menu/menu"}));
-					
-					return pa;
-				}});
-				
-				//Wait option
-				pa.options.push({"text":"Wait", "listValue":"wait"});
-				
-				//Cancel option
-				pa.options.push({"text":"Cancel", "listSelectCancel":true});
-				
-				return pa;
-			}, undefined, "After move menu"],
-			q.requestBoundPair("selectListMenu", {"path":"default:menu/menu"}),
-			q.requestBoundPair("uncolourRegion", {"regionsToUncolour":["attack"]}),
-			[function(pa) {
-				pa.mover.stats.layer(3).addBlock("moved", {"moved":true});
-				
-				return pa;
-			}, undefined, "Add moved block"]
-		], false)
-	//	.then(console.log.bind(console), console.error.bind(console))
-		.then(function(pa) {
-			if(!pa.endTurn || !q.getLayeredRoom().getPrimaryEntityLayer().filter(
-				"stat(faction, 1) = ALLY & stat(moved, 3) = false").length
-			) {
-				return quest.allyTurnInner();
-			}else{
-				return pa;
-			}
-		});
+	// FOW vision update function
+	var updateVision = function(x) {
+		return x; // Comment for crappy FOW
+		
+		var rd = qo.layeredRoom.getFirstLayerOfType(LayeredRoom.LAYER_REGION);
+		var r = new Region(rd.rows, rd.cols, 1);
+		var eg = qo.layeredRoom.getPrimaryEntityLayer();
+		
+		// Make all enemies invisible
+		var invfilterfn = function(e) {return e.stats && e.stats.get("faction") == "ENEMY";}
+		eg.filter(invfilterfn).forEach(function(e) {e.visible = false;});
+		
+		var filterfn = function(e) {return e.stats && e.stats.get("faction") == "ALLY";}
+		
+		for(var e of eg.filter(filterfn)) {
+			r.expand({
+				z: 0,
+				x: e.tileX(),
+				y: e.tileY(),
+				ranges: [0, e.stats.get("vis")],
+				weightModifiers: [uniformModifier(1)]
+			});
+		}
+		eg.allInRegion(r).forEach(function(e) {e.visible = true;});
+		x.visionRegion = r;
+		
+		rd.unDisplay("vis");
+		rd.display("vis", RegionDisplay.MODE_REGION, "#333333", {"invert":true, "margin":0}, r);
+		
+		return x;
 	};
 	
-	quest.allyTurn = function() {
-		feed.append({"text":"Player Phase", "colour":"#000099"});
-		return new Promise(function(oFulfill, oReject) {
-			quest.allyTurnInner()
-			.then(function(pa) {
-				var ents = q.getLayeredRoom().getPrimaryEntityLayer().filter("stat(moved, 3)");
-				
-				for(var i = 0; i < ents.length; i ++) {
-					ents[i].stats.layer(3).removeBlock("moved");
-				}
-				
-				oFulfill(true);
-			});
-		});
-	}*/
 	
+	// Turn ticker
+	var _turns = new TurnTicker();
+	
+	
+	// Turn handling functions
 	var turnEnded = false;
 	var turnOpen = function(x) {
 		if(turnEnded) return false;
 		return true;
 	}
 	
+	
+	// Do this on the player's turn
 	quest.allyTurn = function(x) {
 		turnEnded = false;
 		feed.append({"text":"Player Phase", "colour":"#000099"});
 		
 		return new Runner([
 			Actions.while(turnOpen, [
-				Actions.print("Test"),
+				// Keep looking until the player ends their turn
+				
+				updateVision,
 				
 				qo.selectActor.pickEntity(function(e) {
-					return e.meetsTrigger("stat(faction, 1) = ALLY & stat(moved, 3) = false");
+					return e.stats.get("faction") == "ALLY" && !e.stats.get("moved");
 				}, {}, {"allowNone":true}),
 				
 				Actions.if(function(x) {return x.entity}, [
+					// If an entity was selected
 					Actions.copy("entity", "selected"),
 					
 					function(passedArg) {
+						// Generate the settings for the region to generate
 						var ranges = passedArg.entity.stats.get("possibleRange", 2);
 						var rmap = [];
 						
@@ -392,33 +173,53 @@ load.provide("quest", (function() {
 						return passedArg;
 					},
 					
+					// And then actually generate the region
 					qo.regionsActor.generate({"z":0, "weightModifiers":[lrem, lrtm]}, {"copy":[
 						["ranges", "ranges"], ["children", "children"], ["x", "x"], ["y", "y"],
 						["validators", "validators"]
 					]}),
 					
+					// Display the regions
 					qo.regionsActor.display("atk", "#990000", {"sub":"attack"}),
 					qo.regionsActor.display("mov", "#000099", {}),
+					
+					// Create a new path for storing the steps taken
 					qo.regionsActor.makePath("", {}),
 					qo.regionsActor.displayPath("movePath", "default/arrows32.png tiles:32x32", {}),
+					
+					// And then get the path to the pile the player chooses
 					qo.selectActor.pickTile({}, {}),
+					
+					// Hide all these regions
 					qo.regionsActor.unDisplay(["atk", "mov", "movePath"], {}),
+					
+					// Move the entity to it's destination
 					qo.selectActor.followPath({}),
+					
+					// Display the attack range for the tile the entity is on only
 					qo.regionsActor.getSubRegion("attack", {}),
 					qo.regionsActor.display("myattack", "#990000", {}),
+					
+					// And calculate a list of all entities in the region
 					qo.selectActor.entitiesInRegion({}),
 					
 					Actions.print("Value is %"),
 					
 					function(x) {
+						// Here, build a menu
 						x.menuChoices = [];
 						
 						if(x.entities.length) {
+							// If there are entities, create an attack option in the menu
 							x.menuChoices.push([{"text":"Attack!"}, [
+								// If selected
+								
+								// Select an entity in this region that is an enemy
 								qo.selectActor.pickEntityInRegion(function(e) {
 									return e.meetsTrigger("stat(faction, 1) = ENEMY");
 								}, {}, {}),
 								
+								// And then terminate it
 								function(x) {
 									feed.append({"text":"You killed them!"});
 									x.entity.terminate();
@@ -428,8 +229,10 @@ load.provide("quest", (function() {
 							]]);
 						}
 						
+						// And an items option
 						x.menuChoices.push([{"text":"Items"}, [
 							function(x) {
+								// Create another menu displaying items and their icons
 								x.menuChoices = [];
 								
 								var i = x.entity.stats.layer(2).getBlock("weapons");
@@ -437,6 +240,7 @@ load.provide("quest", (function() {
 									x.menuChoices.push([{"text":item.get("displayName")}, []]);
 								});
 								
+								// And also a cancel option
 								x.menuChoices.push([{"text":"Cancel"}, false]);
 								
 								return x;
@@ -445,24 +249,31 @@ load.provide("quest", (function() {
 							menu.gridMenu([], menuCom, {"copyChoices":true}),
 						]]);
 						
+						// Tell the entity to wait
 						x.menuChoices.push([{"text":"Wait"}, []]);
 						
+						// And cancel
 						x.menuChoices.push([{"text":"Cancel"}, false]);
 						
 						return x;
 					},
 					
+					// And actually display the menu
 					menu.gridMenu([], menuCom, {"copyChoices":true}),
 					
+					// Hide the region displayed
 					qo.regionsActor.unDisplay(["myattack"], {}),
 					
+					// And set the "moved" stat on this entity to true
 					function(pa) {
 						pa.selected.stats.layer(3).addBlock("moved", {"moved":true});
 						
 						return pa;
 					},
 				], [
-					Actions.print("Here"),
+					// If the player doesn't select an entity at all
+					
+					// Create a simple menu that ends the turn or cancels
 					menu.gridMenu([
 						[{"text":"Done"}, [
 							function(x) {turnEnded = true; return x}
@@ -473,6 +284,7 @@ load.provide("quest", (function() {
 				//Actions.print("End of while"),
 			]),
 			
+			// And just before we end the turn, remove all the "moved" blocks from entities
 			function(x) {
 				var ents = qo.layeredRoom.getPrimaryEntityLayer().filter("stat(moved, 3)");
 				
@@ -485,6 +297,9 @@ load.provide("quest", (function() {
 		]).start({});
 	};
 	
+	
+	// And this on the enemies turn
+	// It just waits half a second and then ends.
 	quest.enemyTurn = function() {
 		feed.append({"text":"Enemy Phase", "colour":"#990000"});
 		return new Promise(function(fulfill) {
@@ -492,8 +307,8 @@ load.provide("quest", (function() {
 		});
 	};
 	
+	// Now start the game
 	dusk.startGame();
-	//quest.go();
 	
 	window.ss = new SaveSpec("ss", "ss");
 	ss.add("dusk.stats", "stats", {});

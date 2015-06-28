@@ -231,6 +231,16 @@ load.provide("dusk.tiles.Region", (function() {
 		return new Path(this, x, y, z, clamp ? this.maxRange : undefined);
 	};
 	
+	Region.prototype.followPath = function(path, clamp) {
+		var p = new Path(this, path.start[0], path.start[1], path.start[2], clamp ? this.maxRange : undefined);
+		
+		for(var d of path.dirs()) {
+			p.append(d);
+		}
+		
+		return p;
+	};
+	
 	Region.prototype.emptyPath = function(clamp) {
 		return new Path(this, this.x, this.y, this.z, clamp ? this.maxRange : undefined);
 	};
