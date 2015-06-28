@@ -16,14 +16,14 @@ load.provide("dusk.particles.particleEffects.core", (function() {
 	
 	core.imageData = function(what, field) {
 		if(typeof what == "string") {
-			if(!(what in _images)) {
+			//if(!(what in _images)) {
 				var img = (new Image(what)).asCanvas();
 				
 				_images[what] = img.getContext("2d").getImageData(0, 0, img.width, img.height);
 				return _images[what];
-			}else{
-				return _images[what];
-			}
+			//}else{
+				//return _images[what];
+			//}
 		}
 		
 		if(what) {

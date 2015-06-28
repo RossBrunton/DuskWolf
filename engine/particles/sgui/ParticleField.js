@@ -27,7 +27,10 @@ load.provide("dusk.particles.sgui.ParticleField", (function() {
 		this._pixels = 0;
 		this.stat = false;
 		
-		//Prop masks
+		this._openSlots = null;
+		this._osp = 0;
+		
+		this._rand = ~~(Math.random() * Number.MAX_SAFE_INTEGER);
 		
 		//Default values
 		this.clickPierce = true;
@@ -82,8 +85,11 @@ load.provide("dusk.particles.sgui.ParticleField", (function() {
 				if(this._field[i+9] > 0) {
 					this._field[i+9] --;
 				}else{
-					if(this._field[i+10] > (this._field[i+1] & 0xff)) {
+					var s = this._field[i+1] & 0x00ff;
+					if(s <= this._field[i+10]) {
 						this._field[i+1] = 0;
+						this._openSlots[++this._osp] = i;
+						if(i == this._highest) this._highest -= 11;
 					}else{
 						this._field[i+1] -= this._field[i+10];
 					}
@@ -132,9 +138,9 @@ load.provide("dusk.particles.sgui.ParticleField", (function() {
 		
 		// Pointless fancy effect
 		if(editor && editor.active && this.focused) {
-			for(var i = (e.d.origin.width * e.d.origin.height) / 2000; i > 0; i --) {
+			for(var j = (e.d.origin.width * e.d.origin.height) / 2000; j > 0; j --) {
 				this.inject(
-					0, 0, 0, 100, ~~(Math.random() * e.d.origin.width), ~~(Math.random() * e.d.origin.height),
+					0, 0, 0, 100, this.random(0, e.d.origin.width), this.random(0, e.d.origin.height),
 					1, 1, 0, 0, 0, 0, 0, 5
 				);
 			}
@@ -149,34 +155,45 @@ load.provide("dusk.particles.sgui.ParticleField", (function() {
 		function(r, g, b, a, x, y, dx, dy, ddx, ddy, dxlimit, dylimit, lifespan, decay) {
 		if(a == 0) return;
 		
-		for(var i = 0; i < this._pixels; i += 11) {
-			if((this._field[i+1] & 0x00ff) == 0) {
-				if(i > this._highest) this._highest = i;
-				this._field[i] = (r << 8) | g;
-				this._field[i+1] = (b << 8) | a;
-				this._field[i+2] = x;
-				this._field[i+3] = y;
-				this._field[i+4] = (dx * 0x20) + 0x80;
-				this._field[i+5] = (dy * 0x20) + 0x80;
-				this._field[i+6] = (ddx * 0x40) + 0x80;
-				this._field[i+7] = (ddy * 0x40) + 0x80;
-				this._field[i+8] = (((dxlimit * 0x20) + 0x80) << 8) + ((dylimit * 0x20) + 0x80);
-				this._field[i+9] = lifespan;
-				this._field[i+10] = decay;
-				break;
-			}
+		var i = -1;
+		if(this._osp >= 0) {
+			i = this._openSlots[this._osp--];
+		}else{
+			i = this._highest + 11;
+			this._highest = i;
 		}
+		
+		// Drop pixels we can't add
+		if(i >= this._field.length) return;
+		
+		this._field[i] = (r << 8) | g;
+		this._field[i+1] = (b << 8) | a;
+		this._field[i+2] = x;
+		this._field[i+3] = y;
+		this._field[i+4] = (dx * 0x20) + 0x80;
+		this._field[i+5] = (dy * 0x20) + 0x80;
+		this._field[i+6] = (ddx * 0x40) + 0x80;
+		this._field[i+7] = (ddy * 0x40) + 0x80;
+		this._field[i+8] = (((dxlimit * 0x20) + 0x80) << 8) + ((dylimit * 0x20) + 0x80);
+		this._field[i+9] = lifespan;
+		this._field[i+10] = decay;
 	}
 	
 	ParticleField.prototype.createField = function(pixels) {
 		this._field = new Uint16Array(pixels * 11);
 		this._highest = 0;
 		this._pixels = pixels * 11;
+		if(this._field.length >= (1 << 16)) {
+			this._openSlots = new Uint32Array(pixels);
+		}else{
+			this._openSlots = new Uint16Array(pixels);
+		}
+		this._osp = -1;
 	};
 	
 	ParticleField.prototype.deRange = function(val, def) {
 		if(Array.isArray(val)) {
-			return (Math.random()*(val[1]-val[0])) + val[0];
+			return (this.random(val[0], val[1]));
 		}else if(val === null || val === undefined) {
 			return this.deRange(def);
 		}
@@ -191,6 +208,13 @@ load.provide("dusk.particles.sgui.ParticleField", (function() {
 		}else{
 			console.warn("Effect "+name+" not found!");
 		}
+	};
+	
+	ParticleField.prototype.random = function(min, max) {
+		this._rand ^= this._rand << 27;
+		this._rand ^= this._rand >>> 25;
+		this._rand ^= this._rand << 12;
+		return ~~Math.abs(this._rand % (max - min) + min);
 	};
 	
 	ParticleField.prototype.loadBM = function(data) {};
