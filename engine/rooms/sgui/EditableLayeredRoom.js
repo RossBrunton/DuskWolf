@@ -41,28 +41,6 @@ load.provide("dusk.rooms.sgui.EditableLayeredRoom", (function() {
 			}
 		}).bind(this), controls.addControl("basicmain_goto", "G"));
 		
-		this.onControl.listen(
-			_addLayer.bind(this, EditableLayeredRoom.LAYER_TILEMAP), controls.addControl("basicmain_add_tilemap", "M")
-		);
-		this.onControl.listen(
-			_addLayer.bind(this, EditableLayeredRoom.LAYER_SCHEME), controls.addControl("basicmain_add_scheme", "S")
-		);
-		this.onControl.listen(
-			_addLayer.bind(this, EditableLayeredRoom.LAYER_ENTITIES), controls.addControl("basicmain_add_entities", "N")
-		);
-		this.onControl.listen(
-			_addLayer.bind(this, EditableLayeredRoom.LAYER_PARTICLES), controls.addControl("basicmain_add_particles", "P")
-		);
-		this.onControl.listen(
-			_addLayer.bind(this, EditableLayeredRoom.LAYER_TRANSITIONS), controls.addControl("basicmain_add_transitions", "T")
-		);
-		this.onControl.listen(
-			_addLayer.bind(this, EditableLayeredRoom.LAYER_REGION), controls.addControl("basicmain_add_region", "R")
-		);
-		this.onControl.listen(
-			_addLayer.bind(this, EditableLayeredRoom.LAYER_FLUID), controls.addControl("basicmain_add_fluid", "F")
-		);
-		
 		//Directions
 		this.dirPress.listen(_bmRightAction.bind(this), c.DIR_RIGHT);
 		this.dirPress.listen(_bmLeftAction.bind(this), c.DIR_LEFT);
@@ -341,56 +319,6 @@ load.provide("dusk.rooms.sgui.EditableLayeredRoom", (function() {
 		}
 		
 		return true;
-	};
-	
-	var _addLayer = function(type, e) {
-		if(!e.alt) return true;
-		
-		var name = prompt("What is the name of this new layer?");
-		
-		var i = -1;
-		for(i = 0; i < this._layers.length; i ++) {
-			if(this._layers[i].name == this.focus) break;
-		}
-		
-		var layer = {"type":type, "name":name};
-		
-		if(type == EditableLayeredRoom.LAYER_ENTITIES) layer.primary = e.shift;
-		
-		if(type & (EditableLayeredRoom.LAYER_SCHEME | EditableLayeredRoom.LAYER_TILEMAP)){
-			// Rows and cols, copy from any existing layer
-			var firstMap = this.getFirstLayerOfType(EditableLayeredRoom.LAYER_SCHEME | EditableLayeredRoom.LAYER_TILEMAP);
-			if(firstMap) {
-				layer.cols = firstMap.cols;
-				layer.rows = firstMap.rows;
-			}else{
-				layer.cols = 1;
-				layer.rows = 1;
-			}
-			
-			layer.map = utils.dataToString(new ArrayBuffer((layer.cols * layer.rows) << 1), utils.SC_HEX);
-			
-			layer.src = prompt("What will be the image for this tilemap?", firstMap?firstMap.src:"");
-		}
-		
-		if(type == EditableLayeredRoom.LAYER_REGION){
-			// Rows and cols, copy from any existing layer
-			var firstMap = this.getFirstLayerOfType(EditableLayeredRoom.LAYER_SCHEME | EditableLayeredRoom.LAYER_TILEMAP);
-			if(firstMap) {
-				layer.cols = firstMap.cols;
-				layer.rows = firstMap.rows;
-			}else{
-				layer.cols = 1;
-				layer.rows = 1;
-			}
-		}
-		
-		this._layers.splice(i, 0, layer);
-		
-		this._updateLayers();
-		
-		// Load the new layer
-		this.get(name).loadBM(layer, -1);
 	};
 	
 	EditableLayeredRoom.prototype.saveRoom = function(addDep) {
