@@ -20,7 +20,7 @@ load.provide("dusk.rooms.sgui.FluidLayer", (function() {
 	var FluidLayer = function(parent, name) {
 		Component.call(this, parent, name);
 		
-		this.level = 50;
+		this.level = -1;
 		this.colour = "#6699ff";
 		this.alpha = 0.5;
 		this.fluidType = "water";
@@ -30,7 +30,7 @@ load.provide("dusk.rooms.sgui.FluidLayer", (function() {
 		
 		this.onControl.listen((function(e) {
 			if(!editor.active) return;
-			this.level = +prompt("Enter new fluid level", this.level);
+			this.level = +prompt("Enter new fluid level (-1 for none)", this.level);
 		}).bind(this), controls.addControl("fluidlayer_level", "L"));
 		
 		this.onControl.listen((function(e) {
@@ -57,6 +57,8 @@ load.provide("dusk.rooms.sgui.FluidLayer", (function() {
 	FluidLayer.prototype = Object.create(Component.prototype);
 	
 	var _draw = function(e) {
+		if(this.level < 0) return;
+		
 		e.c.fillStyle = this.colour;
 		
 		var fluidY = this.start();
@@ -69,6 +71,7 @@ load.provide("dusk.rooms.sgui.FluidLayer", (function() {
 	};
 	
 	FluidLayer.prototype.start = function() {
+		if(this.level < 0) return -1;
 		return this.height - this.level;
 	}
 	
@@ -77,10 +80,6 @@ load.provide("dusk.rooms.sgui.FluidLayer", (function() {
 		this.colour = data.colour;
 		this.alpha = data.alpha;
 		this.fluidType = data.type;
-	};
-	
-	FluidLayer.prototype.saveBM = function() {
-		return {"level":this.level, "colour":this.colour, "alpha":this.alpha, "type":this.fluidType};
 	};
 	
 	sgui.registerType("FluidLayer", FluidLayer);

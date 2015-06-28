@@ -949,6 +949,7 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 		if(offset === undefined) offset = 0;
 		
 		var start = this.fluid.start();
+		if(start == -1) return 0.0;
 		
 		if(this.y + this.height + offset - start < 0) return 0.0;
 		if(this.y + this.height + offset - start > this.height) return 1.0;

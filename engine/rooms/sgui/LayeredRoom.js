@@ -99,8 +99,14 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 				this.cols = room.cols;
 				this._updateLayers();
 				
-				for(var i = 0; i < room.contents.length; i ++) {
-					this.get(this._layers[i].name).loadBM(room.contents[i], spawn);
+				if(Array.isArray(room.contents)) {
+					for(var i = 0; i < room.contents.length; i ++) {
+						this.get(this._layers[i].name).loadBM(room.contents[i], spawn);
+					}
+				}else{
+					for(var p in room.contents) {
+						this.get(p).loadBM(room.contents[p], spawn);
+					}
 				}
 				
 				var crd = [0, 0];

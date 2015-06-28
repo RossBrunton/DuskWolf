@@ -325,11 +325,43 @@ load.provide("dusk.rooms.sgui.EditableLayeredRoom", (function() {
 		if(!editor.active) return true;
 		
 		var room = {};
-		room.contents = [];
+		room.contents = {};
 		room.cols = this.cols;
 		room.rows = this.rows;
-		for(var i = 0; i < this._layers.length; i ++) {
-			room.contents.push(this.get(this._layers[i].name).saveBM(addDep));
+		
+		for(var l of this._layers) {
+			var outobj = {};
+			switch(l.type) {
+				case LayeredRoom.LAYER_TILEMAP:
+				case LayeredRoom.LAYER_SCHEME:
+					outobj = this.get(l.name).map;
+					
+					break;
+				
+				case LayeredRoom.LAYER_REGION:
+				case LayeredRoom.LAYER_PARTICLES:
+					// Pass
+					
+					break;
+				
+				case LayeredRoom.LAYER_ENTITIES:
+					outobj = this.get(l.name).saveBM(addDep);
+					
+					break;
+				
+				case LayeredRoom.LAYER_FLUID:
+					var c = this.get(l.name);
+					outobj = {"level":c.level, "colour":c.colour, "alpha":c.alpha, "type":c.fluidType};
+					
+					break;
+				
+				case LayeredRoom.LAYER_TRANSITIONS:
+					outobj = this.get(l.name).saveBM(addDep);
+					
+					break;
+			}
+			
+			room.contents[l.name] = outobj;
 		}
 		
 		return room;

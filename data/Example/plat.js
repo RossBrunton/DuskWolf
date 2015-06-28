@@ -17,6 +17,7 @@ load.provide("example.plat", (function() {
 	load.require("dusk.entities.behave.Push");
 	load.require("dusk.entities.behave.Gravity");
 	load.require("dusk.entities.behave.LimitedLife");
+	var LayeredRoom = load.require("dusk.rooms.sgui.LayeredRoom");
 	var Pickup = load.require("dusk.entities.behave.Pickup");
 	load.require("dusk.entities.behave.HealthRestore");
 	var InteractableTarget = load.require("dusk.entities.behave.InteractableTarget");
@@ -63,7 +64,8 @@ load.provide("example.plat", (function() {
 		{"name":"entities","type":4,"primary":true},
 		{"name":"parts","type":8},
 		{"name":"over","type":1},
-		{"name":"transitions","type":16}
+		{"name":"transitions","type":16},
+		{"name":"fluid","type":LayeredRoom.LAYER_FLUID}
 	];
 	
 	var root = sgui.get("default", true).get("plat2", "Group");

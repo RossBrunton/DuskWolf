@@ -338,15 +338,6 @@ load.provide("dusk.tiles.sgui.RegionDisplay", (function() {
 		set: function(value) {if(value > 0) console.warn("RegionDisplay setting height is not supported.");}
 	});
 	
-	/** Returns the map for `{@link dusk.rooms.sgui.LayeredRoom}` to save it.
-	 * 
-	 * @return {object} The current map.
-	 * @since 0.0.18-alpha
-	 */
-	RegionDisplay.prototype.saveBM = function() {
-		return {"rows":this.rows, "cols":this.cols};
-	};
-	
 	/* Loads a map from an object. This is used by `{@link dusk.rooms.sgui.LayeredRoom}`.
 	 * 
 	 * @param {object} map The map to load, will be assigned to `{@link dusk.tiles.sgui.EditableTileMap#map}`.

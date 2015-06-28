@@ -218,7 +218,6 @@ load.provide("dusk.particles.sgui.ParticleField", (function() {
 	};
 	
 	ParticleField.prototype.loadBM = function(data) {};
-	ParticleField.prototype.saveBM = function() {return {}};
 	
 	sgui.registerType("ParticleField", ParticleField);
 	

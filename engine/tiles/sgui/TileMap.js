@@ -636,16 +636,6 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 	};
 	
 	
-	
-	/** Returns the map for `{@link dusk.rooms.sgui.LayeredRoom}` to save it.
-	 * 
-	 * @return {object} The current map.
-	 * @since 0.0.18-alpha
-	 */
-	TileMap.prototype.saveBM = function() {
-		return this.map;
-	};
-	
 	/** Loads a map from an object. This is used by `dusk.rooms.sgui.LayeredRoom`.
 	 * 
 	 * @param {object} map The map to load, will be assigned to `map`.
