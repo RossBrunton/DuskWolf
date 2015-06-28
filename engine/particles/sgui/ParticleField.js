@@ -36,7 +36,7 @@ load.provide("dusk.particles.sgui.ParticleField", (function() {
 		this.clickPierce = true;
 		
 		//Listeners
-		this.prepareDraw.listen(_draw.bind(this));
+		this.onPaint.listen(_draw.bind(this));
 		this.frame.listen(_frame.bind(this));
 		
 		this.createField(1 << 16);

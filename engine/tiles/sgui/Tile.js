@@ -78,7 +78,7 @@ load.provide("dusk.tiles.sgui.Tile", (function() {
 		this._mapper.map("tile", "tileStr");
 		
 		//Listeners
-		this.prepareDraw.listen(_draw.bind(this));
+		this.onPaint.listen(_draw.bind(this));
 	};
 	Tile.prototype = Object.create(Component.prototype);
 	

@@ -186,7 +186,7 @@ load.provide("dusk.sgui.Group", (function() {
 		this._mapper.map("mouse.focus", "mouseFocus");
 		
 		//Listeners
-		this.prepareDraw.listen(this._groupDraw.bind(this));
+		this.onPaint.listen(this._groupDraw.bind(this));
 		this.frame.listen(_groupFrame.bind(this));
 		this.onInteract.listen(_mouseSelect.bind(this), interaction.MOUSE_MOVE);
 		this.onDelete.listen((function(e) {this.empty();}).bind(this));

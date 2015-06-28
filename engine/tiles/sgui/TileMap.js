@@ -167,7 +167,7 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 		this._mapper.map("twidth", "twidth");
 		
 		//Listeners
-		this.prepareDraw.listen(_draw.bind(this));
+		this.onPaint.listen(_draw.bind(this));
 		this.frame.listen(_frame.bind(this));
 		
 		//Default values
@@ -383,7 +383,7 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 	};
 	
 	/** Used internally to draw the tilemap.
-	 * @param {object} e A `prepareDraw` event object.
+	 * @param {object} e An `onPaint` event object.
 	 * @private
 	 */
 	var _draw = function(e) {

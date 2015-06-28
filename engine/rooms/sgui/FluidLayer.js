@@ -26,7 +26,7 @@ load.provide("dusk.rooms.sgui.FluidLayer", (function() {
 		this.fluidType = "water";
 		
 		// Listeners
-		this.prepareDraw.listen(_draw.bind(this));
+		this.onPaint.listen(_draw.bind(this));
 		
 		this.onControl.listen((function(e) {
 			if(!editor.active) return;

@@ -288,7 +288,7 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 		if(!this.isLight()) this._mapper.map("entType", "entType");
 		
 		//Listeners
-		if(!this.isLight()) if(this.collisionMark) this.prepareDraw.listen(this._collisionDraw.bind(this));
+		if(!this.isLight()) if(this.collisionMark) this.onPaint.listen(this._collisionPaint.bind(this));
 		if(!this.isLight()) {
 			this.onInteract.listen((function() {
 				this.behaviourFire("mouseMove", {"x":this.mouseX, "y":this.mouseY});
@@ -981,9 +981,9 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	
 	//Misc
 	/** Registered with the draw handler to draw a rectangle around this entity's hitbox.
-	 * @param {object} e An event from `{@link dusk.sgui.Component#prepareDraw}`.
+	 * @param {object} e An event from `{@link dusk.sgui.Component#onPaint}`.
 	 */
-	Entity.prototype._collisionDraw = function(e) {
+	Entity.prototype._collisionPaint = function(e) {
 		e.c.strokeStyle = this.collisionMark;
 		e.c.lineWidth = 1;
 		e.c.strokeRect(

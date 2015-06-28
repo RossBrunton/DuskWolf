@@ -110,7 +110,7 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 			}
 		}).bind(this), controls.addControl("entitygroup_workshop", "W"));
 		
-		this.prepareDraw.listen(_entityGroupDraw.bind(this));
+		this.onPaint.listen(_entityGroupDraw.bind(this));
 		this.action.listen(this._entityGroupAction.bind(this));
 		
 		//Directions

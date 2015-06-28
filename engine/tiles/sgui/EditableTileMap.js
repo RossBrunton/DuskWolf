@@ -80,7 +80,7 @@ load.provide("dusk.tiles.sgui.EditableTileMap", (function() {
 		this._mapper.map("frameHeight", "frameHeight");
 		
 		//Listeners
-		this.prepareDraw.listen(_draw.bind(this));
+		this.onPaint.listen(_draw.bind(this));
 		this.frame.listen(_frame.bind(this));
 		
 		// Set image path

@@ -50,7 +50,7 @@ load.provide("dusk.sgui.Image", (function() {
 		this._mapper.map("imageTrans", "imageTrans");
 		
 		//Listeners
-		this.prepareDraw.listen(this._imageDraw.bind(this));
+		this.onPaint.listen(this._imageDraw.bind(this));
 	};
 	Image.prototype = Object.create(Component.prototype);
 	

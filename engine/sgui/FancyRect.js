@@ -62,7 +62,7 @@ load.provide("dusk.sgui.FancyRect", (function() {
 		this._mapper.map("bottomRight", "bottomRight");
 		
 		//Listeners
-		this.prepareDraw.listen(this._fancyRectDraw.bind(this));
+		this.onPaint.listen(this._fancyRectDraw.bind(this));
 	};
 	FancyRect.prototype = Object.create(Rect.prototype);
 	

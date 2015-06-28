@@ -67,7 +67,10 @@ load.provide("dusk.sgui.Component", (function() {
 		 */
 		this.yDisplay = "fixed";
 		
-		/** The components x coordinate when the display mode is "fixed".
+		/** The components x coordinate when the display mode is "fixed". Note that this is relative to where the
+		 * component would ordinarily have been placed. For most groups this is the upper left corner, but with for
+		 * example grids, it is relative to the upper left corner of the grid cell.
+		 * 
 		 * @type integer
 		 */
 		this.x = 0;
@@ -79,7 +82,10 @@ load.provide("dusk.sgui.Component", (function() {
 		 * @since 0.0.18-alpha
 		 */
 		this.xOrigin = "left";
-		/** The components y coordinate when the display mode is "fixed".
+		/** The components y coordinate when the display mode is "fixed". Note that this is relative to where the
+		 * component would ordinarily have been placed. For most groups this is the upper left corner, but with for
+		 * example grids, it is relative to the upper left corner of the grid cell.
+		 * 
 		 * @type integer
 		 */
 		this.y = 0;
@@ -213,7 +219,7 @@ load.provide("dusk.sgui.Component", (function() {
 		 * @type dusk.utils.EventDispatcher
 		 * @since 0.0.17-alpha
 		 */
-		this.prepareDraw = new EventDispatcher("dusk.sgui.Component.prepareDraw");
+		this.onPaint = new EventDispatcher("dusk.sgui.Component.onPaint");
 		
 		/** A mapper used to map JSON properties to the properties on this object.
 		 * @type dusk.utils.Mapper
@@ -409,7 +415,7 @@ load.provide("dusk.sgui.Component", (function() {
 		this._mapper.map("name", "name");
 		this._mapper.map("style", "style");
 		this._mapper.map("layer", [function() {return "";}, this.alterLayer]);
-		this._mapper.map("extras", [function() {return {};}, this.modExtras]);
+		this._mapper.map("extras", [function() {return {};}, this.updateMultipleExtras]);
 		this._mapper.map("type", "type");
 		this._mapper.map("allowMouse", "allowMouse");
 		this._mapper.map("mouse.allow", "allowMouse");
@@ -669,7 +675,7 @@ load.provide("dusk.sgui.Component", (function() {
 				dest.width, dest.height
 			);
 			
-			this.prepareDraw.fire({"c":ctx, "d":{"dest":dest, "slice":slice, "origin":source}});
+			this.onPaint.fire({"c":ctx, "d":{"dest":dest, "slice":slice, "origin":source}});
 			
 			if(this.activeBorder !== null && this.active) {
 				ctx.strokeStyle = this.activeBorder;
@@ -739,7 +745,7 @@ load.provide("dusk.sgui.Component", (function() {
 		dest.setWH(x, y, source.width, source.height);
 		slice.setWH(0, 0, dest.width, dest.height);
 		
-		this.prepareDraw.fire({"c":ctx, "d":{"dest":dest, "slice":slice, "origin":source}});
+		this.onPaint.fire({"c":ctx, "d":{"dest":dest, "slice":slice, "origin":source}});
 		
 		if(this.activeBorder !== null && this.active) {
 			ctx.strokeStyle = this.activeBorder;
@@ -879,7 +885,7 @@ load.provide("dusk.sgui.Component", (function() {
 	 * @param {object} data The data to use to modify.
 	 * @since 0.0.18-alpha
 	 */
-	Component.prototype.modExtra = function(name, data) {
+	Component.prototype.updateExtra = function(name, data) {
 		if(name in this._extras) {
 			this._extras[name].update(data);
 		}else if("type" in data) {
@@ -931,10 +937,10 @@ load.provide("dusk.sgui.Component", (function() {
 	 * @param {object} data Data to describe the extras, as described above.
 	 * @since 0.0.18-alpha
 	 */
-	Component.prototype.modExtras = function(data) {
+	Component.prototype.updateMultipleExtras = function(data) {
 		for(var p in data) {
 			if(data[p]) {
-				this.modExtra(p, data[p]);
+				this.updateExtra(p, data[p]);
 			}else{
 				this.removeExtra(p);
 			}
@@ -1004,12 +1010,12 @@ load.provide("dusk.sgui.Component", (function() {
 		}
 	});
 	
-	/** Pool of event objects for `{@link dusk.sgui.Component#prepareDraw}`.
+	/** Pool of event objects for `{@link dusk.sgui.Component#onPaint}`.
 	 * @type dusk.utils.Pool<Object>
 	 * @private
 	 * @since 0.0.21-alpha
 	 */
-	var _prepareDrawPool = new Pool(Object);
+	var _onPaintPool = new Pool(Object);
 	
 	return Component;
 })());

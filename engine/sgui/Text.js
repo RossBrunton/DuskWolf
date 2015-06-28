@@ -271,7 +271,7 @@ load.provide("dusk.sgui.Label", (function() {
 		this._mapper.map("shadowText", "shadowText");
 		
 		//Listeners
-		this.prepareDraw.listen(_draw.bind(this));
+		this.onPaint.listen(_draw.bind(this));
 		this.onActiveChange.listen(_activeChange.bind(this), false);
 	};
 	Label.prototype = Object.create(Component.prototype);
@@ -383,7 +383,7 @@ load.provide("dusk.sgui.Label", (function() {
 	Label.VALID_ALPHANUMERIC_SPACE = /^[a-zA-Z0-9_ ]*$/;
 	
 	/** Draws the current label, updating the cache if needed.
-	 * @param {object} e An event object from `{@link dusk.sgui.Component#prepareDraw}`.
+	 * @param {object} e An event object from `{@link dusk.sgui.Component#onPaint}`.
 	 * @private
 	 */
 	var _draw = function(e) {
@@ -753,7 +753,7 @@ load.provide("dusk.sgui.TextBox", (function() {
 		this._mapper.map("border", "border");
 		
 		//Listeners
-		this.prepareDraw.listen(_draw.bind(this));
+		this.onPaint.listen(_draw.bind(this));
 		this.onInteract.listen(_key.bind(this), interaction.KEY_DOWN);
 		this.onActiveChange.listen(_activeChange.bind(this));
 		this.frame.listen((function(e) {
@@ -796,7 +796,7 @@ load.provide("dusk.sgui.TextBox", (function() {
 	TextBox.prototype = Object.create(Label.prototype);
 	
 	/** Draws the border around the text when it is not active.
-	 * @param {object} e An event object from `{@link dusk.sgui.Component#prepareDraw}`.
+	 * @param {object} e An event object from `{@link dusk.sgui.Component#onPaint}`.
 	 * @private
 	 */
 	var _draw = function(e) {

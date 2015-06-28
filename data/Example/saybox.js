@@ -78,7 +78,7 @@ load.provide("example.saybox", (function() {
 		},
 		h("You are now [b]{{no}}[/b] in the healing queue! That is [b]{{no}}[/b]!\nThanks for waiting!"),
 		function() {
-			sgui.path("saybox:/say").modExtra("fadeOut", {
+			sgui.path("saybox:/say").updateExtra("fadeOut", {
 				"type":"Fade",
 				"on":true,
 				"duration":60,

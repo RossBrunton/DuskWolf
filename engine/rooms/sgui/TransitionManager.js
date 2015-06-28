@@ -94,7 +94,7 @@ load.provide("dusk.rooms.sgui.TransitionManager", (function() {
 		this.height = 1;
 		
 		//Listeners
-		this.prepareDraw.listen(this._tmDraw.bind(this));
+		this.onPaint.listen(this._tmDraw.bind(this));
 		this.frame.listen(this._tmFrame.bind(this));
 		this.onControl.listen((function(e) {
 			if(editor.active) this.add(
@@ -288,7 +288,7 @@ load.provide("dusk.rooms.sgui.TransitionManager", (function() {
 	};
 	
 	/** Draws the text that this displays when editing.
-	 * @param {object} e An event object from `{@link dusk.sgui.Component#prepareDraw}`.
+	 * @param {object} e An event object from `{@link dusk.sgui.Component#onPaint}`.
 	 * @private
 	 */
 	TransitionManager.prototype._tmDraw = function(e) {

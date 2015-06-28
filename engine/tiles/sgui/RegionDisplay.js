@@ -76,7 +76,7 @@ load.provide("dusk.tiles.sgui.RegionDisplay", (function() {
 		this._mapper.map("paint", "paint");
 		
 		//Listeners
-		this.prepareDraw.listen(this._tileRegionDraw.bind(this));
+		this.onPaint.listen(this._tileRegionPaint.bind(this));
 	};
 	RegionDisplay.prototype = Object.create(Component.prototype);
 	
@@ -89,10 +89,10 @@ load.provide("dusk.tiles.sgui.RegionDisplay", (function() {
 	RegionDisplay.MODE_PATH = 2;
 	
 	/** Used internally to draw the tilemap.
-	 * @param {object} e A `prepareDraw` event object.
+	 * @param {object} e An `onPaint` event object.
 	 * @private
 	 */
-	RegionDisplay.prototype._tileRegionDraw = function(e) {
+	RegionDisplay.prototype._tileRegionPaint = function(e) {
 		//Update the colour cache if needed
 		if(this._needsCacheUpdating) {
 			this._cachedTileColours = new Map();

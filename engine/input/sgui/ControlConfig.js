@@ -45,7 +45,7 @@ load.provide("dusk.input.sgui.ControlConfig", (function() {
 		//Listeners
 		this.frame.listen(this._ccFrame.bind(this));
 		this.onInteract.listen(this._ccKey.bind(this), interaction.KEY_DOWN);
-		this.prepareDraw.listen(this._ccDraw.bind(this));
+		this.onPaint.listen(this._ccDraw.bind(this));
 		this.action.listen(
 			(function(e) {this.setting = !this.setting; this.locked = this.setting; return false;}).bind(this)
 		);
