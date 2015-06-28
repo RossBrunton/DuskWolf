@@ -182,10 +182,12 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 			if(typeof value == "string") value = {"map":value};
 			var map = value;
 			
-			//Set width and height
+			// Set the rows and columns
 			if(!("rows" in map)) map.rows = this.rows;
 			if(!("cols" in map)) map.cols = this.cols;
-			
+			this.rows = map.rows;
+			this.cols = map.cols;
+
 			// Set src, if it exists
 			if("src" in map) {
 				this.src = map.src;
@@ -226,10 +228,6 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 					this._all[i] = utils.createCanvas((this.cols*singleW)+this.width, (this.rows*singleH)+this.height);
 				}
 			}
-			
-			// Set the rows and columns
-			this.rows = map.rows;
-			this.cols = map.cols;
 			
 			// Draw it
 			this.drawAll();
