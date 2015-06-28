@@ -43,10 +43,10 @@ load.provide("quest", (function() {
 	var layers = [
 		{"name":"back","type":1},
 		{"name":"scheme","type":2},
-		{"name":"regions","type":32},
-		{"name":"entities","type":4,"primary":true},
 		{"name":"parts","type":8},
 		{"name":"over","type":1},
+		{"name":"regions","type":32},
+		{"name":"entities","type":4,"primary":true},
 		{"name":"transitions","type":16}
 	];
 	
@@ -69,6 +69,8 @@ load.provide("quest", (function() {
 	
 	// Modifiers and validors for regions
 	var lrtm = lrTerrainModifier(weights, qo.layeredRoom);
+	
+	// LayeredRoomEntityModifiers
 	var lrem = entityModifier(qo.layeredRoom, [], function(v, e, opt, dir) {
 			if(e.stats && e.stats.get("faction") == "ENEMY") {
 				return 100;
@@ -76,24 +78,38 @@ load.provide("quest", (function() {
 			return v;
 		}
 	);
+	var flrem = entityModifier(qo.layeredRoom, [], function(v, e, opt, dir) {
+			if(e.stats && e.stats.get("faction") == "ENEMY"
+			&& (!visibilityRegion || visibilityRegion.has(e.tileX(), e.tileY(), 1))) {
+				return 100;
+			}
+			return v;
+		}
+	);
+	
 	var ev = function(exclude) {
 		return entityValidator(qo.layeredRoom, [], function(e){
 			return e == exclude || e.entType == "stdSelector";
 		});
 	};
+	var fev = function(exclude) {
+		return entityValidator(qo.layeredRoom, [], function(e){
+			return e == exclude || e.entType == "stdSelector"
+			|| (visibilityRegion && !visibilityRegion.has(e.tileX(), e.tileY(), 1));
+		});
+	};
 	
 	// Built in region generator functions
 	window.aarg =
-		{"name":"attack", "los":true, "entFilter":"stat(faction, 1) = ENEMY", "weightModifiers":[uniformModifier()]};
-	window.targ = 
-		{"los":true, "entBlock":"stat(faction, 1) = ENEMY"};
+		{"name":"attack", "weightModifiers":[uniformModifier()]};
 	
 	// FOW vision update function
+	var visibilityRegion = null;
 	var updateVision = function(x) {
 		return x; // Comment for crappy FOW
 		
 		var rd = qo.layeredRoom.getFirstLayerOfType(LayeredRoom.LAYER_REGION);
-		var r = new Region(rd.rows, rd.cols, 1);
+		visibilityRegion = new Region(rd.rows, rd.cols, 1);
 		var eg = qo.layeredRoom.getPrimaryEntityLayer();
 		
 		// Make all enemies invisible
@@ -103,7 +119,7 @@ load.provide("quest", (function() {
 		var filterfn = function(e) {return e.stats && e.stats.get("faction") == "ALLY";}
 		
 		for(var e of eg.filter(filterfn)) {
-			r.expand({
+			visibilityRegion.expand({
 				z: 0,
 				x: e.tileX(),
 				y: e.tileY(),
@@ -111,11 +127,11 @@ load.provide("quest", (function() {
 				weightModifiers: [uniformModifier(1)]
 			});
 		}
-		eg.allInRegion(r).forEach(function(e) {e.visible = true;});
-		x.visionRegion = r;
+		eg.allInRegion(visibilityRegion).forEach(function(e) {e.visible = true;});
+		x.visionRegion = visibilityRegion;
 		
 		rd.unDisplay("vis");
-		rd.display("vis", RegionDisplay.MODE_REGION, "#333333", {"invert":true, "margin":0}, r);
+		rd.display("vis", RegionDisplay.MODE_REGION, "#333333", {"invert":true, "margin":0, "alpha":1}, visibilityRegion);
 		
 		return x;
 	};
@@ -169,19 +185,29 @@ load.provide("quest", (function() {
 						passedArg.children = {"attack":aarg};
 						passedArg.ranges = [0, passedArg.entity.stats.get("move", 1)];
 						passedArg.validators = [ev(passedArg.entity)];
+						passedArg.fogValidators = [fev(passedArg.entity)];
 						
 						return passedArg;
 					},
 					
 					// And then actually generate the region
-					qo.regionsActor.generate({"z":0, "weightModifiers":[lrem, lrtm]}, {"copy":[
-						["ranges", "ranges"], ["children", "children"], ["x", "x"], ["y", "y"],
+					qo.regionsActor.generate({"z":0, "weightModifiers":[lrem, lrtm], "children":{"attack":aarg}},
+					{"copy":[
+						["ranges", "ranges"], ["x", "x"], ["y", "y"],
 						["validators", "validators"]
+					], "dest":"trueRegion"}),
+					
+					// And then actually generate the region
+					qo.regionsActor.generate({"z":0, "weightModifiers":[flrem, lrtm], "children":{"attack":aarg}},
+					{"copy":[
+						["ranges", "ranges"], ["x", "x"], ["y", "y"],
+						["fogValidators", "validators"]
 					]}),
 					
+					
 					// Display the regions
-					qo.regionsActor.display("atk", "#990000", {"sub":"attack", "alpha":0.5}),
-					qo.regionsActor.display("mov", "#000099", {"alpha":0.5}),
+					qo.regionsActor.display("atk", "#990000", {"sub":"attack", "alpha":0.5, "overlaps":["vis"]}),
+					qo.regionsActor.display("mov", "#000099", {"alpha":0.5, "overlaps":["vis"]}),
 					
 					// Create a new path for storing the steps taken
 					qo.regionsActor.makePath("", {}),
@@ -193,76 +219,95 @@ load.provide("quest", (function() {
 					// Hide all these regions
 					qo.regionsActor.unDisplay(["atk", "mov", "movePath"], {}),
 					
-					// Move the entity to it's destination
-					qo.selectActor.followPath({}),
-					
-					// Display the attack range for the tile the entity is on only
-					qo.regionsActor.getSubRegion("attack", {}),
-					qo.regionsActor.display("myattack", "#990000", {"alpha":0.5}),
-					
-					// And calculate a list of all entities in the region
-					qo.selectActor.entitiesInRegion({}),
-					
-					Actions.print("Value is %"),
-					
+					// FOW collision logic!
 					function(x) {
-						// Here, build a menu
-						x.menuChoices = [];
+						var truePath = x.trueRegion.followPath(x.path);
+						x.collision = x.path.length() != truePath.length();
 						
-						if(x.entities.length) {
-							// If there are entities, create an attack option in the menu
-							x.menuChoices.push([{"text":"Attack!"}, [
-								// If selected
-								
-								// Select an entity in this region that is an enemy
-								qo.selectActor.pickEntityInRegion(function(e) {
-									return e.meetsTrigger("stat(faction, 1) = ENEMY");
-								}, {}, {}),
-								
-								// And then terminate it
-								function(x) {
-									feed.append({"text":"You killed them!"});
-									x.entity.terminate();
-									
-									return x;
-								}
-							]]);
-						}
-						
-						// And an items option
-						x.menuChoices.push([{"text":"Items"}, [
-							function(x) {
-								// Create another menu displaying items and their icons
-								x.menuChoices = [];
-								
-								var i = x.entity.stats.layer(2).getBlock("weapons");
-								i.forEach(function(item, slot) {
-									x.menuChoices.push([{"text":item.get("displayName")}, []]);
-								});
-								
-								// And also a cancel option
-								x.menuChoices.push([{"text":"Cancel"}, false]);
-								
-								return x;
-							},
-							
-							menu.gridMenu([], menuCom, {"copyChoices":true}),
-						]]);
-						
-						// Tell the entity to wait
-						x.menuChoices.push([{"text":"Wait"}, []]);
-						
-						// And cancel
-						x.menuChoices.push([{"text":"Cancel"}, false]);
-						
+						x.path = truePath;
+						x.x = truePath.end[0];
+						x.y = truePath.end[1];
 						return x;
 					},
 					
-					// And actually display the menu
-					menu.gridMenu([], menuCom, {"copyChoices":true}),
+					// Move the entity to it's destination
+					qo.selectActor.followPath({}),
 					
-					// Hide the region displayed
-					qo.regionsActor.unDisplay(["myattack"], {}),
+					// Collision? To bad, turn over
+					Actions.if(function(x) {return !x.collision;}, [
+						// Display the attack range for the tile the entity is on only
+						qo.regionsActor.getSubRegion("attack", {}),
+						qo.regionsActor.display("myattack", "#990000", {"alpha":0.5, "overlaps":["vis"]}),
+						
+						// And calculate a list of all entities in the region
+						qo.selectActor.entitiesInRegion({}),
+						
+						Actions.print("Value is %"),
+						
+						function(x) {
+							// Here, build a menu
+							x.menuChoices = [];
+							
+							if(x.entities.length) {
+								// If there are entities, create an attack option in the menu
+								x.menuChoices.push([{"text":"Attack!"}, [
+									// If selected
+									
+									// Select an entity in this region that is an enemy
+									qo.selectActor.pickEntityInRegion(function(e) {
+										return e.meetsTrigger("stat(faction, 1) = ENEMY");
+									}, {}, {}),
+									
+									// And then terminate it
+									function(x) {
+										feed.append({"text":"You killed them!"});
+										x.entity.terminate();
+										
+										return x;
+									}
+								]]);
+							}
+							
+							// And an items option
+							x.menuChoices.push([{"text":"Items"}, [
+								function(x) {
+									// Create another menu displaying items and their icons
+									x.menuChoices = [];
+									
+									var i = x.entity.stats.layer(2).getBlock("weapons");
+									i.forEach(function(item, slot) {
+										x.menuChoices.push([{"text":item.get("displayName")}, []]);
+									});
+									
+									// And also a cancel option
+									x.menuChoices.push([{"text":"Cancel"}, false]);
+									
+									return x;
+								},
+								
+								menu.gridMenu([], menuCom, {"copyChoices":true}),
+							]]);
+							
+							// Tell the entity to wait
+							x.menuChoices.push([{"text":"Wait"}, []]);
+							
+							// And cancel
+							x.menuChoices.push([{"text":"Cancel"}, false]);
+							
+							return x;
+						},
+						
+						// And actually display the menu
+						menu.gridMenu([], menuCom, {"copyChoices":true}),
+						
+						// Hide the region displayed
+						qo.regionsActor.unDisplay(["myattack"], {}),
+					], [
+						function(x) {
+							feed.append({"text":"NO!"});
+							return x;
+						}
+					]),
 					
 					// And set the "moved" stat on this entity to true
 					function(pa) {

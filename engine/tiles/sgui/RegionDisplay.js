@@ -98,6 +98,31 @@ load.provide("dusk.tiles.sgui.RegionDisplay", (function() {
 		if(this._needsCacheUpdating) {
 			this._cachedTileColours = new Map();
 			
+			var update = function(i, n) {
+				if(this._cachedTileColours.has(i)) {
+					if("overlaps" in n[3]) {
+						var a = this._cachedTileColours.get(i);
+						
+						var na = [];
+						
+						for(var ent of a) {
+							if(n[3].overlaps.includes(ent[2])) {
+								na.push(ent);
+							}
+						}
+						
+						na.push([n[2], n[3], n[0]]);
+						this._cachedTileColours.set(i, na);
+						
+						return;
+					}
+					
+					this._cachedTileColours.set(i, [[n[2], n[3], n[0]]]);
+				}else{
+					this._cachedTileColours.set(i, [[n[2], n[3], n[0]]]);
+				}
+			}.bind(this);
+			
 			//Loop through all regions
 			for(var n of this._paint) {
 				if(n[1] != RegionDisplay.MODE_PATH) {
@@ -123,7 +148,7 @@ load.provide("dusk.tiles.sgui.RegionDisplay", (function() {
 						
 						for(var i = 0; i < this.cols*this.rows; i ++) {
 							if(!dontColour.includes(i)) {
-								this._cachedTileColours.set(i, [n[2], n[3]]);
+								update(i, n);
 							}
 						}
 					}else{
@@ -137,7 +162,7 @@ load.provide("dusk.tiles.sgui.RegionDisplay", (function() {
 							for(var t of tiles) {
 								if(n[1] != RegionDisplay.MODE_REGION || t[Region.tfields.stoppable]
 								|| n[2].allowUnstoppable) {
-									this._cachedTileColours.set(t[1] * this.cols + t[0], [n[2], n[3]]);
+									update(t[1] * this.cols + t[0], n);
 								}
 							}
 						}
@@ -151,46 +176,48 @@ load.provide("dusk.tiles.sgui.RegionDisplay", (function() {
 		}
 		
 		
-		for(c of this._cachedTileColours) {
-			var x = c[0] % this.cols;
-			var y = ~~(c[0] / this.cols);
-			
-			if((x+1) * this.tileWidth() < e.d.slice.x
-			|| x * this.tileWidth() > e.d.slice.x + e.d.width
-			|| (y+1) * this.tileHeight() < e.d.slice.y
-			|| y * this.tileHeight() > e.d.slice.y + e.d.height) {
-				continue;
-			}
-			
-			var margin = "margin" in c[1][1] ? c[1][1].margin : 1;
-			
-			var destx = e.d.dest.x + ((x * this.twidth) - e.d.slice.x) + margin;
-			var desty = e.d.dest.y + ((y * this.theight) - e.d.slice.y) + margin;
-			
-			var dwidth = this.twidth - margin * 2;
-			var dheight = this.theight - margin * 2;
-			
-			if(destx < e.d.dest.x) {
-				dwidth -= e.d.dest.x - destx;
-				destx = e.d.dest.x;
-			}
-			
-			if(desty < e.d.dest.y) {
-				dheight -= e.d.dest.y - desty;
-				desty = e.d.dest.y;
-			}
-			
-			if(destx + dwidth > e.d.dest.x + e.d.slice.width) dwidth = (e.d.dest.x + e.d.slice.width) - destx;
-			if(desty + dheight > e.d.dest.y + e.d.slice.height) dheight = (e.d.dest.y + e.d.slice.height) - desty;
-			
-			if(dwidth > 0 && dheight > 0) {
-				var alpha = "alpha" in c[1][1] ? c[1][1].alpha : 1.0;
+		for(var c of this._cachedTileColours) {
+			for(var t of c[1]) {
+				var x = c[0] % this.cols;
+				var y = ~~(c[0] / this.cols);
 				
-				var oldAlpha = e.c.globalAlpha;
-				e.c.globalAlpha *= alpha;
-				e.c.fillStyle = c[1][0];
-				e.c.fillRect(destx, desty, dwidth, dheight);
-				e.c.globalAlpha = oldAlpha;
+				if((x+1) * this.tileWidth() < e.d.slice.x
+				|| x * this.tileWidth() > e.d.slice.x + e.d.width
+				|| (y+1) * this.tileHeight() < e.d.slice.y
+				|| y * this.tileHeight() > e.d.slice.y + e.d.height) {
+					continue;
+				}
+				
+				var margin = "margin" in t[1] ? t[1].margin : 1;
+				
+				var destx = e.d.dest.x + ((x * this.twidth) - e.d.slice.x) + margin;
+				var desty = e.d.dest.y + ((y * this.theight) - e.d.slice.y) + margin;
+				
+				var dwidth = this.twidth - margin * 2;
+				var dheight = this.theight - margin * 2;
+				
+				if(destx < e.d.dest.x) {
+					dwidth -= e.d.dest.x - destx;
+					destx = e.d.dest.x;
+				}
+				
+				if(desty < e.d.dest.y) {
+					dheight -= e.d.dest.y - desty;
+					desty = e.d.dest.y;
+				}
+				
+				if(destx + dwidth > e.d.dest.x + e.d.slice.width) dwidth = (e.d.dest.x + e.d.slice.width) - destx;
+				if(desty + dheight > e.d.dest.y + e.d.slice.height) dheight = (e.d.dest.y + e.d.slice.height) - desty;
+				
+				if(dwidth > 0 && dheight > 0) {
+					var alpha = "alpha" in t[1] ? t[1].alpha : 1.0;
+					
+					var oldAlpha = e.c.globalAlpha;
+					e.c.globalAlpha *= alpha;
+					e.c.fillStyle = t[0];
+					e.c.fillRect(destx, desty, dwidth, dheight);
+					e.c.globalAlpha = oldAlpha;
+				}
 			}
 		}
 		
