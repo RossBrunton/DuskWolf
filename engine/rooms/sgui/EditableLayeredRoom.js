@@ -149,7 +149,7 @@ load.provide("dusk.rooms.sgui.EditableLayeredRoom", (function() {
 			}
 		}
 		
-		this.get("editorLabel").alterLayer("+");
+		if(this.get("editorLabel")) this.get("editorLabel").alterLayer("+");
 	};
 	
 	var _bmUpAction = function(e) {
