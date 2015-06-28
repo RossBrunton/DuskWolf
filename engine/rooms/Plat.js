@@ -5,6 +5,7 @@
 load.provide("dusk.rooms.plat", (function() {
 	var sgui = load.require("dusk.sgui");
 	var LayeredRoom = load.require("dusk.rooms.sgui.LayeredRoom");
+	load.require("dusk.rooms.sgui.EditableLayeredRoom");
 	var entities = load.require("dusk.entities");
 	var RoomManager = load.require("dusk.rooms.RoomManager");
 	var skills = load.require("dusk.skills");
@@ -35,7 +36,7 @@ load.provide("dusk.rooms.plat", (function() {
 	
 	plat.make = function(component, name, layers, twidth, theight) {
 		component.modifyComponent(
-			[{"name":name, "type":"LayeredRoom", "scrollInstantly":true, "twidth":twidth, "theight":theight,
+			[{"name":name, "type":"EditableLayeredRoom", "scrollInstantly":true, "twidth":twidth, "theight":theight,
 				"allowMouse":true
 			}]
 		);

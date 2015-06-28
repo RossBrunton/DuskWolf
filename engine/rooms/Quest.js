@@ -5,6 +5,7 @@
 load.provide("dusk.rooms.quest", (function() {
 	var sgui = load.require("dusk.sgui");
 	var LayeredRoom = load.require("dusk.rooms.sgui.LayeredRoom");
+	load.require("dusk.rooms.sgui.EditableLayeredRoom");
 	var entities = load.require("dusk.entities");
 	var RoomManager = load.require("dusk.rooms.RoomManager");
 	var StandardActor = load.require("dusk.rooms.actors.Standard");
@@ -34,7 +35,7 @@ load.provide("dusk.rooms.quest", (function() {
 	
 	quest.make = function(component, name, layers, twidth, theight) {
 		component.modifyComponent([{
-			"name":name, "type":"LayeredRoom", "allowMouse":true, "twidth":twidth, "theight":theight
+			"name":name, "type":"EditableLayeredRoom", "allowMouse":true, "twidth":twidth, "theight":theight
 		}]);
 		component.becomeActive();
 		component.flow(name);
