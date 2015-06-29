@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("animationTest", (function() {
+load.provide("tests.animation", (function() {
 	load.require("dusk.sgui.DynamicGrid");
 	load.require("dusk.input.sgui.ControlConfig");
 	load.require("dusk.sgui.Label");

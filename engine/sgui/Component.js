@@ -518,7 +518,7 @@ load.provide("dusk.sgui.Component", (function() {
 			return false;
 		
 		if(this.onClick.fireAnd(e)) {
-			if(this.mouseAction) {
+			if(this.mouseAction && this.allowMouse) {
 				return this.action.fireAnd({"click":e, "component":this});
 			}
 		}

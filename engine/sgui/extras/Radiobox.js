@@ -6,12 +6,10 @@ load.provide("dusk.sgui.extras.Radiobox", (function() {
 	var Extra = load.require("dusk.sgui.extras.Extra");
 	var sgui = load.require("dusk.sgui");
 	
-	/** @class dusk.sgui.extras.Radiobox
+	/** This extra can be attached to a group and makes any checkboxes inside function like radiobuttons.
 	 * 
-	 * @classdesc This extra can be attached to a group and makes any checkboxes inside function like radiobuttons.
-	 * 
-	 * This means that, for all the checkboxes in the group, only one or zero may be selected,
-	 *  attempting to select more than one will uncheck the other checkbox.
+	 * This means that, for all the checkboxes in the group, only one or zero may be selected, attempting to select more
+	 * than one will uncheck the other checkbox.
 	 * 
 	 * @param {dusk.sgui.Component} owner The component this extra is "attached to".
 	 * @param {string} name This extra's name.

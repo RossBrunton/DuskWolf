@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("ike", (function() {
+load.provide("tests.ike", (function() {
 	var stats = load.require("dusk.stats");
 	var store = load.require("dusk.stats.store");
 	var SaveSpec = load.require("dusk.save.SaveSpec");
