@@ -94,7 +94,7 @@ load.provide("quest.entities", (function() {
 	};
 	
 	store.addGenerator("evil", function() {
-		var l = new stats.LayeredStats("evil", "quest.ents");
+		var l = new stats.LayeredStats("evil", "quest.entities");
 		
 		_basic(l);
 		
@@ -104,7 +104,7 @@ load.provide("quest.entities", (function() {
 	});
 	
 	store.addGenerator("ally", function() {
-		var l = new stats.LayeredStats("ally", "quest.ents");
+		var l = new stats.LayeredStats("ally", "quest.entities");
 		
 		_basic(l);
 		
