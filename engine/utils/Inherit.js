@@ -172,7 +172,7 @@ load.provide("dusk.utils.InheritableContainer", (function() {
 	 * @return {string} The type the specified type is linked to.
 	 * @since 0.0.20-alpha
 	 */
-	InheritableContainer.prototype.getExtendee = function(name) {
+	InheritableContainer.prototype.getBase = function(name) {
 		if(!(name in this._objectData)) return "";
 		
 		return this._objectChain[name];

@@ -65,7 +65,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 		
 		//Listeners
 		this.frame.listen(_basicMainFrame.bind(this));
-		this._drawingChildren.listen(_updateScroll.bind(this));
+		this._onBeforePaintChildren.listen(_updateScroll.bind(this));
 		
 		this.mouseFocus = false;
 		

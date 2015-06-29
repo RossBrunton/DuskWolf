@@ -247,7 +247,7 @@ load.provide("dusk.sgui.Grid", (function() {
 	};
 	
 	Grid.prototype._groupDraw = function(e) {
-		this._drawingChildren.fire(e);
+		this._onBeforePaintChildren.fire(e);
 		
 		var rect = PosRect.pool.alloc();
 		var display = PosRect.pool.alloc();

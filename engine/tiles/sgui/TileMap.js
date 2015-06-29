@@ -285,7 +285,7 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 		this._framesRemaining = this._frameDelay;
 		
 		for(var f = 0; f < this._frames; f ++) {
-			this._editAnimation(this._tiles[0], f);
+			this._translateAnimation(this._tiles[0], f);
 			var i = 0;
 			this._all[f].getContext("2d").clearRect(0, 0, this._all[f].width, this._all[f].height);
 			for (var yi = 0; yi < this.rows; yi++) {
@@ -312,7 +312,7 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 	 * @private
 	 * @since 0.0.19-alpha
 	 */
-	TileMap.prototype._editAnimation = function(origin, offset) {
+	TileMap.prototype._translateAnimation = function(origin, offset) {
 		var ani = TileMap.getAllAnimation(this.src);
 		var hold = [];
 		var changed = false;

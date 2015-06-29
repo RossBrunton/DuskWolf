@@ -169,7 +169,7 @@ load.provide("dusk.sgui.Group", (function() {
 		 * @protected
 		 * @since 0.0.21-alpha
 		 */
-		this._drawingChildren = new EventDispatcher("dusk.sgui.Group._drawingChildren");
+		this._onBeforePaintChildren = new EventDispatcher("dusk.sgui.Group._onBeforePaintChildren");
 		
 		//Prop masks
 		this._mapper.map("focus", "focus", ["children"]);
@@ -399,7 +399,7 @@ load.provide("dusk.sgui.Group", (function() {
 	};
 	
 	Group.prototype._groupDraw = function(e) {
-		this._drawingChildren.fire(e);
+		this._onBeforePaintChildren.fire(e);
 		
 		var rect = PosRect.pool.alloc();
 		var display = PosRect.pool.alloc();

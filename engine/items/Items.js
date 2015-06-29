@@ -298,7 +298,7 @@ load.provide("dusk.items", (function() {
 	 * @param {integer=1} howMany The number of items to send. Defaults to `1` if not specified.
 	 * @return {integer} The number of items that were not sent to the other inventory, and hence remain in this one.
 	 */
-	items.Invent.prototype.sendToInvent = function(dest, type, howMany) {
+	items.Invent.prototype.transferToInvent = function(dest, type, howMany) {
 		if(howMany === undefined) howMany = 1;
 		for(var i = howMany; i > 0; i --) {
 			if(this.countItemsOfType(type) > 0 && dest.isValidAddition(this.getAnItem(type))) {
@@ -321,7 +321,7 @@ load.provide("dusk.items", (function() {
 	 * @param {integer=1} howMany The number of items to send. Defaults to `1` if not specified.
 	 * @return {integer} The number of items that were not sent to the other inventory, and hence remain in this one.
 	 */
-	items.Invent.prototype.sendToInventSlot = function(dest, slot, howMany) {
+	items.Invent.prototype.transferToInventSlot = function(dest, slot, howMany) {
 		if(howMany === undefined) howMany = 1;
 		var type = "";
 		if(dest.getItemFromSlot(slot) === null) {
@@ -352,7 +352,7 @@ load.provide("dusk.items", (function() {
 	 * @param {integer=1} howMany The number of items to send. Defaults to `1` if not specified.
 	 * @return {integer} The number of items that were not sent to the other inventory, and hence remain in this one.
 	 */
-	items.Invent.prototype.sendSlotToInvent = function(dest, slot, howMany) {
+	items.Invent.prototype.transferSlotToInvent = function(dest, slot, howMany) {
 		if(howMany === undefined) howMany = 1;
 		if(slot >= this._capacity) return howMany;
 		for(var i = howMany; i > 0; i --) {
@@ -373,10 +373,10 @@ load.provide("dusk.items", (function() {
 	 * If they cannot all be added to that inventory, they will remain in this one.
 	 * @param {dusk.items.Invent} dest The destination inventory.
 	 */
-	items.Invent.prototype.sendAllToInvent = function(dest) {
+	items.Invent.prototype.transferAllToInvent = function(dest) {
 		for(var i = 0; i < this._items.length; i ++) {
 			if(this._items[i] !== null) {
-				this.sendToInvent(dest, this._items[i][0].type, 0xffffffff);
+				this.transferToInvent(dest, this._items[i][0].type, 0xffffffff);
 			}
 		}
 	};

@@ -56,9 +56,9 @@ load.provide("test.dusk.Inherit", (function() {
 		tester.assertTrue(cont.isValidType("child"));
 		tester.assertFalse(cont.isValidType("noSuchType"));
 		
-		tester.assertEqual(cont.getExtendee("parent"), "root");
-		tester.assertEqual(cont.getExtendee("child"), "parent");
-		tester.assertEqual(cont.getExtendee("noSuchType"), "");
+		tester.assertEqual(cont.getBase("parent"), "root");
+		tester.assertEqual(cont.getBase("child"), "parent");
+		tester.assertEqual(cont.getBase("noSuchType"), "");
 		
 		tester.assertEqual(utils.arrayIntersect(cont.getAllNames(), ["root", "child", "parent"]).length, 3);
 		tester.assertEqual(InheritableContainer.getContainer("Test Container"), cont);

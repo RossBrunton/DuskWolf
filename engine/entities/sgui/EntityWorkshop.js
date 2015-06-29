@@ -314,7 +314,7 @@ load.provide("dusk.entities.sgui.EntityWorkshop", (function() {
 		this._workingWith = utils.copy(entities.types.getRaw(name), true);
 		
 		this.path("top/name").text = name;
-		this.path("top/extends").text = entities.types.getExtendee(name);
+		this.path("top/extends").text = entities.types.getBase(name);
 		if(this.path("top/extends").text == "null") this.path("top/extends").text = "";
 		
 		this.path("bodies/behaviours/list").forEach(function(c) {
