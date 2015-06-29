@@ -188,7 +188,6 @@ load.provide("dusk.sgui.Group", (function() {
 		//Listeners
 		this.onPaint.listen(this._groupDraw.bind(this));
 		this.frame.listen(_groupFrame.bind(this));
-		this.onInteract.listen(_mouseSelect.bind(this), interaction.MOUSE_MOVE);
 		this.onDelete.listen((function(e) {this.empty();}).bind(this));
 		
 		this.onActiveChange.listen((function(e){
@@ -234,6 +233,8 @@ load.provide("dusk.sgui.Group", (function() {
 	 * @return {boolean} True if the event should bubble, else false.
 	 */
 	Group.prototype.interact = function(e) {
+		this._mouseSelect();
+		
 		if(this.focusBehaviour == Group.FOCUS_ALL) {
 			var toReturn = true;
 			for(var c = this._componentsArr.length-1; c >= 0; c --) {
@@ -853,7 +854,7 @@ load.provide("dusk.sgui.Group", (function() {
 	 * 
 	 * @since 0.0.21-alpha
 	 */
-	var _mouseSelect = function() {
+	Group.prototype._mouseSelect = function() {
 		if(this.mouseFocus) {
 			for(var i = this._drawOrder.length-1; i >= 0; i --) {
 				if(this._drawOrder[i] in this._components && this._components[this._drawOrder[i]].allowMouse) {
