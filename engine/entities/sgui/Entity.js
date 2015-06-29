@@ -123,10 +123,10 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	 * @constructor
 	 */
 	var Entity = function(parent, name) {
-		if(!this.isLight()) Tile.call(this, parent, name);
+		Tile.call(this, parent, name);
 		
 		//Settings
-		if(!this.isLight()) this.addExtra("AnimatedTile", "animation", {});
+		this.addExtra("AnimatedTile", "animation", {});
 		
 		/** The current horizontal speed. This may be read, but not set directly; use the `horForce` behaviour event.
 		 * @type integer
@@ -282,23 +282,21 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 		//Prop masks
 		//this._mapper.map("dx", "dx");
 		//this._mapper.map("dy", "dy");
-		if(!this.isLight()) this._mapper.map("scheme", "schemePath");
-		if(!this.isLight()) this._mapper.map("particles", "particlesPath");
-		if(!this.isLight()) this._mapper.map("fluid", "fluidPath");
-		if(!this.isLight()) this._mapper.map("entType", "entType");
+		this._mapper.map("scheme", "schemePath");
+		this._mapper.map("particles", "particlesPath");
+		this._mapper.map("fluid", "fluidPath");
+		this._mapper.map("entType", "entType");
 		
 		//Listeners
-		if(!this.isLight()) if(this.collisionMark) this.onPaint.listen(this._collisionPaint.bind(this));
-		if(!this.isLight()) {
-			this.onInteract.listen((function() {
-				this.behaviourFire("mouseMove", {"x":this.mouseX, "y":this.mouseY});
-				return true;
-			}).bind(this), interaction.MOUSE_MOVE);
-			
-			this.onDelete.listen((function(e) {
-				this.behaviourFire("delete", e);
-			}).bind(this));
-		}
+		if(this.collisionMark) this.onPaint.listen(this._collisionPaint.bind(this));
+		this.onInteract.listen((function() {
+			this.behaviourFire("mouseMove", {"x":this.mouseX, "y":this.mouseY});
+			return true;
+		}).bind(this), interaction.MOUSE_MOVE);
+		
+		this.onDelete.listen((function(e) {
+			this.behaviourFire("delete", e);
+		}).bind(this));
 	};
 	Entity.prototype = Object.create(Tile.prototype);
 	
@@ -348,26 +346,13 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 			this.animate("ent_construct");
 			
 			//Basic properties
-			if(!this.isLight()) this.prop("src", this.behaviourData.src);
+			this.collisionWidth = this.width;
+			this.collisionHeight = this.height;
+			this.collisionOffsetX = 0;
+			this.collisionOffsetY = 0;
 			
-			if("collisionWidth" in this.behaviourData) {
-				this.collisionWidth = this.behaviourData.collisionWidth;
-			} else this.collisionWidth = this.width;
-			
-			if("collisionHeight" in this.behaviourData) {
-				this.collisionHeight = this.behaviourData.collisionHeight;
-			} else this.collisionHeight = this.height;
-			
-			if("collisionOffsetX" in this.behaviourData) {
-				this.collisionOffsetX = this.behaviourData.collisionOffsetX;
-			} else this.collisionOffsetX = 0;
-			
-			if("collisionOffsetY" in this.behaviourData) {
-				this.collisionOffsetY = this.behaviourData.collisionOffsetY;
-			} else this.collisionOffsetY = 0;
-			
-			if("animationRate" in this.behaviourData) {
-				this.getExtra("animation").rate = this.behaviourData.animationRate;
+			for(var p in this.behaviourData) {
+				this._handleSpecialEProp(p, this.behaviourData[p]);
 			}
 			
 			//Behaviours
@@ -750,29 +735,38 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	 * @return {*} The value of the specified property.
 	 */
 	Entity.prototype.eProp = function(prop, set, init) {
-		if(prop == "src" && set && !init) {
-			this.src = set;
-		}
-		if(prop == "collisionWidth" && set !== undefined && !init) {
-			this.collisionWidth = set;
-		}
-		if(prop == "collisionHeight" && set !== undefined && !init) {
-			this.collisionHeight = set;
-		}
-		if(prop == "collisionOffsetX" && set !== undefined && !init) {
-			this.collisionOffsetX = set;
-		}
-		if(prop == "collisionOffsetY" && set !== undefined && !init) {
-			this.collisionOffsetY = set;
-		}
-		
 		if(set !== undefined && (!init || !(prop in this.behaviourData))) {
+			this._handleSpecialEProp(prop, set);
 			this.behaviourData[prop] = set;
 			return set;
 		}
 		
 		if(this.behaviourData && prop in this.behaviourData) {
 			return this.behaviourData[prop];
+		}
+	};
+	
+	/** Given a key and value, handles special entity properties, like those to set collisionOffsets and image srcs.
+	 * 
+	 * If the key isn't a special type, this does nothing.
+	 * 
+	 * @param {string} key The key of the special property.
+	 * @param {*} * The value that has been set.
+	 * @private
+	 */
+	Entity.prototype._handleSpecialEProp = function(key, value) {
+		switch(key) {
+			case "src":
+			case "collisionWidth":
+			case "collisionHeight":
+			case "collisionOffsetX":
+			case "collisionOffsetY":
+				this[key] = value;
+				break;
+			
+			case "animationRate":
+				this.getExtra("animation").rate = value;
+				break;
 		}
 	};
 	
@@ -867,7 +861,6 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 			}, false
 		],
 		[".", function(o, v, c) {
-				if(c.ent.isLight()) return undefined;
 				return c.ent.prop(v);
 			}, false],
 		[":", function(o, v, c) {return c.ent.eProp(v);}, false],
@@ -890,7 +883,7 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	/** Returns an array of either `Entity` instances or the string `"wall"` which are touching this entity on any side.
 	 * @return {array} The things touching this entity.
 	 */
-	Entity.prototype.allTouchers = function(dir) {
+	Entity.prototype.allTouchers = function() {
 		var out = [];
 		
 		out = this.touchers(c.DIR_UP);
@@ -917,7 +910,7 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	 * @return {array} The things touching this entity.
 	 * @since 0.0.21-alpha
 	 */
-	Entity.prototype.allTouchersNonSolid = function(dir) {
+	Entity.prototype.allTouchersNonSolid = function() {
 		var out = [];
 		
 		out = this.touchersNonSolid(c.DIR_UP);
@@ -957,28 +950,6 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	};
 	
 	
-	/*dusk.entities.sgui.Entity.prototype.teather = function(target, dir) {
-		this._teatherClients[this._teatherClients.length] = [target, dir];
-		target.receiveTeather(this, dir);
-	};
-
-	dusk.entities.sgui.Entity.prototype.unteather = function(target) {
-		target.receiveTeather(null, null);
-		for(var i = this._teatherClients.length-1; i >= 0; i--) {
-			if(this._teatherClients[i][0] == target) this._teatherClients.splice(i, 1);
-		}
-	};
-
-	dusk.entities.sgui.Entity.prototype.receiveTeather = function(host, dir) {
-		if(!host) this._teatherHost = null; else this._teatherHost = [host, dir];
-		
-	};
-
-	dusk.entities.sgui.Entity.prototype.teatherClients = function() {
-		return this._teatherClients;
-	};*/
-	
-	
 	
 	//Misc
 	/** Registered with the draw handler to draw a rectangle around this entity's hitbox.
@@ -1013,14 +984,6 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 				}).bind(this));
 			}
 		}).bind(this));
-	};
-	
-	/** Returns if this is a light entity rather than an sgui entity.
-	 * @return {boolean} True if this is an instance of `{@link dusk.entities.Entity}`, false if it is
-	 *  an instance of `{@link dusk.entities.sgui.Entity}`.
-	 */
-	Entity.prototype.isLight = function() {
-		return false;
 	};
 	
 	sgui.registerType("Entity", Entity);
