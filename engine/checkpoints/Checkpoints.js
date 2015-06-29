@@ -86,6 +86,8 @@ load.provide("dusk.checkpoints", (function() {
 	
 	// Listen for the interactable event and possibly save a checkpoint
 	InteractableTarget.interact.listen(function(e) {
+		if(e.interacter.eProp("terminated")) return;
+		
 		var it = checkpoints.iterate();
 		for(var p = it.next(); !p.done; p = it.next()) {
 			if(e.type == p.value.saveType) {

@@ -164,11 +164,18 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 		 * @since 0.0.21-alpha
 		 */
 		this._behaviourListeners = {};
-		/** The entity's behaviour data. This is data used by the entity's behaviour objects. It
-		 *  it contains stuff such as HP and gravity.
+		/** The entity's behaviour data. This is data used by the entity's behaviour objects. It contains stuff such as
+		 * gravity. This is set with the entity's type.
 		 * @type object
+		 * @private
 		 */
-		this.behaviourData = {};
+		this._behaviourData = {};
+		/** The entity's behaviour state, this contains the value of changed entity types.
+		 * @type Map<string, *>
+		 * @private
+		 * @since 0.0.21-alpha
+		 */
+		this._behaviourState = new Map();
 		/** An event disptacher that fires when an entity event happens.
 		 * 
 		 * Firing this event does nothing, use `{@link dusk.entities.sgui.Entity#behaviourFire}` instead.
@@ -334,10 +341,10 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 			this._type = type;
 			
 			if(entities.types.isValidType(type)) {
-				this.behaviourData = utils.copy(entities.types.getAll(type).data, true);
+				this._behaviourData = entities.types.getAll(type).data;
 				this.getExtra("animation").setAnimations(utils.copy(entities.types.getAll(type).animation, true));
 			}else{
-				this.behaviourData = {"headingLeft":false, "headingUp":false, "img":"nosuchimage.png",
+				this._behaviourData = {"headingLeft":false, "headingUp":false, "img":"nosuchimage.png",
 					"solid":true, "collides":true
 				};
 			}
@@ -351,8 +358,8 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 			this.collisionOffsetX = 0;
 			this.collisionOffsetY = 0;
 			
-			for(var p in this.behaviourData) {
-				this._handleSpecialEProp(p, this.behaviourData[p]);
+			for(var p in this._behaviourData) {
+				this._handleSpecialEProp(p, this._behaviourData[p]);
 			}
 			
 			//Behaviours
@@ -735,14 +742,45 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	 * @return {*} The value of the specified property.
 	 */
 	Entity.prototype.eProp = function(prop, set, init) {
-		if(set !== undefined && (!init || !(prop in this.behaviourData))) {
+		if(set !== undefined && (!init || (!(prop in this._behaviourData) && !this._behaviourState.has(prop)))) {
 			this._handleSpecialEProp(prop, set);
-			this.behaviourData[prop] = set;
+			this._behaviourState.set(prop, set);
 			return set;
 		}
 		
-		if(this.behaviourData && prop in this.behaviourData) {
-			return this.behaviourData[prop];
+		if(this._behaviourState.has(prop)) {
+			return this._behaviourState.get(prop);
+		}
+		
+		if(this._behaviourData && prop in this._behaviourData) {
+			return this._behaviourData[prop];
+		}
+	};
+	
+	/** Gets an object representing the behaviour state, this will be an object with all the values that have been
+	 * changed by setting entity properties.
+	 * 
+	 * @return {object} The entity state.
+	 * @since 0.0.21-alpha
+	 */
+	Entity.prototype.getState = function() {
+		var out = {};
+		
+		for(var d of this._behaviourState) {
+			out[d[0]] = d[1];
+		}
+		
+		return out;
+	};
+	
+	/** Given an object, reads all the keys from it and set the entity property for it to the appropriate value.
+	 * 
+	 * @param {object} state The entity state to read properties from.
+	 * @since 0.0.21-alpha
+	 */
+	Entity.prototype.setState = function(state) {
+		for(var p in state) {
+			this.eProp(p, state[p]);
 		}
 	};
 	
@@ -965,19 +1003,21 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	};
 	
 	/** This terminates the entity, which is a way to "gracefully delete" it. First, a behaviour event
-	 *  `terminate` is fired, if none of the listeners to that return true, 
-	 *  `{@link dusk.entities.sgui.Entity#animationWait}` is called with a `terminate` event with the callback 
-	 *  deleting this element.
+	 * `terminating` is fired, and the "terminated" proprety is set to 1. Then the animation "ent_terminate" is run.
+	 * When that completes, "terminated" is set to 2 and the "terminated" event is fired.
 	 * 
-	 * This should be used if you want the entity to animate it's death, otherwise, if you just want it
-	 *  gone without any effects, set it's `{@link dusk.sgui.Component#deleted}` property to true.
+	 * This should be used if you want the entity to animate its death, otherwise, if you just want it
+	 *  gone without any effects, set it's `deleted` property to true.
 	 * @return {promise()} A promise that fulfills when the entity is deleted.
 	 */
 	Entity.prototype.terminate = function() {
 		return new Promise((function(f, r) {
+			this.eProp("terminated", 1);
+			this.behaviourFire("terminating", {});
 			if(!this.behaviourFireWithReturn("terminate", {}).includes(true)) {
 				this.animate("ent_terminate").then((function() {
-					this.eProp("terminated", true);
+					this.eProp("terminated", 2);
+					this.behaviourFire("terminated", {});
 					this.terminated = true;
 					this.deleted = true;
 					f(true);

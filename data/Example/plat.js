@@ -388,20 +388,23 @@ load.provide("example.plat", (function() {
 	controls.addControl("entity_spawn_shot", "E", 2, "dvorak");
 	
 	var gameActive = true;
-	frameTicker.onFrame.listen(function(e) {
-		if(Persist.getPersist("hero")) {
-			plat.health.value = Persist.getPersist("hero").hp;
-			if(gameActive && Persist.getPersist("hero").terminated) {
-				if(!checkpoints.loadCheckpoint("plat", {})) {
-					alert("Lol! Game Over!");
-					gameActive = false;
-					if(root) root.visible = false;
-				}
+	dplatOut.layeredRoom.getPrimaryEntityLayer().onDrop.listen(function(e) {
+		var hero = e.entity;
+		
+		plat.health.value = hero.eProp("hp");
+		
+		hero.entityEvent.listen(function(e) {
+			plat.health.value = hero.eProp("hp");
+		}, "damageApplied");
+		
+		hero.entityEvent.listen(function(e) {
+			if(gameActive && !checkpoints.loadCheckpoint("plat", {})) {
+				alert("Lol! Game Over!");
+				gameActive = false;
+				if(root) root.visible = false;	
 			}
-		}
-		if(root.path("hud/coinCount")) root.path("hud/coinCount").text = ""+Pickup.count("coin");
-		if(root.path("hud/livesCount")) root.path("hud/livesCount").text = ""+lives;
-	}, this);
+		}, "terminated");
+	}, "player");
 	
 	
 	dusk.onLoad.listen(function (e) {

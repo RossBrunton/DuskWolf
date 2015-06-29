@@ -13,6 +13,7 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 	var EntityWorkshop = load.suggest("dusk.entities.sgui.EntityWorkshop", function(p) {EntityWorkshop = p});
 	var interaction = load.require("dusk.input.interaction");
 	var controls = load.require("dusk.input.controls");
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	
 	/** An entity group is a group that stores `{@link dusk.entities.sgui.Entity}` and provides the ability to move them 
 	 * and have them collide with each other.
@@ -63,6 +64,8 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 		this._showEntities = false;
 		
 		this._priorEntity = "";
+		
+		this.onDrop = new EventDispatcher("dusk.entities.sgui.EntityGroup.onDrop");
 		
 		//Prop masks
 		this._mapper.map("theight", "theight");
@@ -594,6 +597,8 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 		dropped.onDelete.listen(EntityGroup.prototype._entityDeleted.bind(this));
 		if(takeFocus) this.flow(entity.name);
 		this._singleMoveAndCollide(dropped, true);
+		
+		this.onDrop.fire({"entity":dropped, "type":dropped.entType, "name":dropped.name}, dropped.entType);
 		
 		//Insert all the entities!
 		if(this._eltr.length === 0) {

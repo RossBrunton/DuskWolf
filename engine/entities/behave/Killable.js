@@ -41,6 +41,7 @@ load.provide("dusk.entities.behave.Killable", (function() {
 			if(!ent.eProp("currentMercy")) {
 				if(ent.behaviourFireWithReturn("performDamage", e).indexOf(true) === -1) {
 					ent.eProp("hp", ent.eProp("hp")-e.damage);
+					ent.behaviourFire("damageApplied");
 					
 					if(ent.eProp("hp") <= 0) {
 						ent.terminate();
