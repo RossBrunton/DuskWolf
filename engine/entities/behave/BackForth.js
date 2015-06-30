@@ -16,16 +16,16 @@ load.provide("dusk.entities.behave.BackForth", (function() {
 	 * 
 	 * This behaviour uses the following behaviour properties:
 	 * - hspeed:integer = 5 - The speed to move.
-	 * - backforthif:string = "" - If this trigger is true for this entity, the entity won't switch direction.
+	 * - backforthif:function(dusk.entities.sgui.Entity) - If this function exists, it must return true given the entity
+	 *  for it to move.
 	 * 
 	 * This is a classless behaviour.
 	 */
 	var BackForth = {
 		"hspeed":5,
-		"backforthif":"",
 		
 		"horForce":function(entity, e) {
-			if(entity.evalTrigger(entity.eProp("backforthif"))) {
+			if(!entity.eProp("backforthif") || entity.eProp("backforthif")(entity)) {
 				if(entity.eProp("headingLeft")) {
 					return -entity.eProp("hspeed");
 				}else{

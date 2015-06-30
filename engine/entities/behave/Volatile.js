@@ -11,8 +11,8 @@ load.provide("dusk.entities.behave.Volatile", (function() {
 	 * 
 	 * @classdesc An entity with this behaviour will be terminated when it collides with a specific entity or a wall.
 	 * 
-	 * The entity it collides with must match a trigger specified by the behaviour property `"killedBy"`, which by default
-	 * is an empty string.
+	 * The entity it collides with must match a function (i.e. make it return true) specified by the behaviour property
+	 * `"killedBy"`. If this function is absent, then any collision will terminate it.
 	 * 
 	 * @extends dusk.entities.behave.Behave
 	 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
@@ -20,8 +20,6 @@ load.provide("dusk.entities.behave.Volatile", (function() {
 	 */
 	var Volatile = function(entity) {
 		Behave.call(this, entity);
-		
-		this._data("killedBy", "", true);
 		
 		this.entityEvent.listen(this._vCollide.bind(this), "collide");
 	};
@@ -32,9 +30,8 @@ load.provide("dusk.entities.behave.Volatile", (function() {
 	 * @private
 	 */
 	Volatile.prototype._vCollide = function(e) {
-		if(e.target !== "wall") {
-			if(!e.target.meetsTrigger(this._data("killedBy"))) return;
-		}
+		if(this._data("killedBy") && !this._data("killedBy")(e.target, this._entity)) return;
+		
 		this._entity.terminate();
 	};
 

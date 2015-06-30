@@ -185,7 +185,7 @@ load.provide("example.plat", (function() {
 					"type":"shot", "horBase":"facing", "verBase":"middle", "cooldown":10,
 					"horOffset":1, "controlLimitDx":[0, 0, 60], "applyDx":[[1, 5, 1], [-1, 5, 1]]}, //value, duration, accel, limit
 				"slash":{"type":"slash", "horBase":"facing", "cooldown":30, "multDx":[0.5, 10, []],
-					"onlyIf":"#dx<1 & #dx>-1",
+					"onlyIf":function(e) {return e.dx < 1 && e.dx > -1;},
 					"data":[{
 						"src":"Example/Slashl.png tiles:32x32"
 					}, {
@@ -206,7 +206,8 @@ load.provide("example.plat", (function() {
 	entities.types.createNewType("coin", {
 		"behaviours":{"Pickup":true},
 		"data":{"gravity":0, "solid":false, "src":"Example/Coin.png tiles:32x32", "collisionOffsetX":8, "collisionOffsetY":8,
-			"collisionWidth":26, "collisionHeight":26, "type":"coin", "pickupBy":".entType=player"
+			"collisionWidth":26, "collisionHeight":26, "type":"coin",
+			"pickupBy":function(e) {return e.entType == "player"}
 		},
 		"animation":[]
 	}, "plat");
@@ -235,7 +236,7 @@ load.provide("example.plat", (function() {
 	entities.types.createNewType("slash", {"behaviours":{"HitDam":true, "LimitedLife":true},
 		"data":{
 			"gravity":0, "collides":false, "solid":false, "src":"Example/Slash.png tiles:32x32",
-			"damages":".entType != player", "lifespan":6*5
+			"damages":function(e) {return e.entType != "player"}, "lifespan":6*5
 		},
 		"animation":[
 			["default", [[0,0],[1,0],[2,0],[3,0],[4,0]], {"trigger":function() {return true}}]
@@ -245,8 +246,8 @@ load.provide("example.plat", (function() {
 	entities.types.createNewType("shot", {
 		"behaviours":{"HitDam":true, "BackForth":true, "Volatile":true},
 		"data":{"solid":false, "src":"Example/Shot.png tiles:32x32", "collisionOffsetX":12, "collisionOffsetY":12,
-			"collisionWidth":20, "collisionHeight":20, "hspeed":5, "damages":".entType != player",
-			"killedBy":".entType != player"
+			"collisionWidth":20, "collisionHeight":20, "hspeed":5, "damages":function(e) {return e.entType != "player"},
+			"killedBy":function(e) {return e.entType != "player";}
 		},
 		"animation":[["default", [[0,0], [1,0]], {"trigger":function() {return true}}]]
 	}, "plat");
@@ -406,6 +407,10 @@ load.provide("example.plat", (function() {
 		}, "terminated");
 	}, "player");
 	
+	frameTicker.onFrame.listen(function(e) {
+		if(root.path("hud/coinCount")) root.path("hud/coinCount").text = ""+Pickup.count("coin");
+		if(root.path("hud/livesCount")) root.path("hud/livesCount").text = ""+lives;
+	}, this);
 	
 	dusk.onLoad.listen(function (e) {
 		reversiblePromiseChain([

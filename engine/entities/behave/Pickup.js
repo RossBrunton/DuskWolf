@@ -21,7 +21,6 @@ load.provide("dusk.entities.behave.Pickup", (function() {
 		this._data("type", "coin", true);
 		this._data("value", 1, true);
 		this._data("roomLinked", true, true);
-		this._data("pickupBy", "", true);
 		this._data("pickupName", "", true);
 		
 		this.entityEvent.listen(this._pickCollided.bind(this), "collidedInto");
@@ -36,7 +35,7 @@ load.provide("dusk.entities.behave.Pickup", (function() {
 	Pickup.prototype._pickCollided = function(e) {
 		var name = this._entity.name;
 		if(this._data("pickupName")) name = this._data("pickupName");
-		if(!e.target.meetsTrigger(this._data("pickupBy"))) return;
+		if(this._data("pickupBy") && !this._data("pickupBy")(e.target, e._entity, e)) return;
 		
 		var room = "*";
 		if(this._data("roomLinked") && this._entity.path("..")) room = this._entity.path("../..").roomName;

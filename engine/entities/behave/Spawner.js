@@ -45,7 +45,7 @@ load.provide("dusk.entities.behave.Spawner", (function() {
 	 *  string `"up"` or `"down"`. If omited, then this is determined by the spawn direction or (if that is `"middle"`),
 	 *  this entity's `headingUp` property.
 	 * - `cooldown`: An integer; The amount of frames that be waited until another spawn with the same name can spawn.
-	 * - `onlyIf`: A string; The entity will only spawn if `Entity#evalTrigger` is true with this trigger.
+	 * - `onlyIf`: A function; The entity will only spawn if this function returns true given the entity.
 	 * - `applyDx`, `applyDy`: A `[accel, limit, duration]` triplet. Will apply an acceleration of `accel` px/frame to a
 	 *  maximum of `limit` and a minimum of -`limit` for `duration` frames.
 	 * - `applyDxDrop`, `applyDyDrop`, `multDxDrop`, `multDyDrop`: An array of arguments without the first one to call
@@ -222,7 +222,7 @@ load.provide("dusk.entities.behave.Spawner", (function() {
 		
 		//Check if we can spawn it
 		if("onlyIf" in spawn) {
-			if(!this._entity.meetsTrigger(spawn.onlyIf)) return;
+			if(!spawn.onlyIf(this._entity)) return;
 		}
 		
 		//Cooldowns

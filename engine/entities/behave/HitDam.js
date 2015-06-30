@@ -10,9 +10,9 @@ load.provide("dusk.entities.behave.HitDam", (function() {
 	 * 
 	 * @classdesc An entity with this behaviour, on colliding into or with another entity will attempt to damage it.
 	 * 
-	 * The target must match the behaviour property trigger string `"damages"` (default empty) for it to try to be damaged.
-	 * The type of damage is given by the behaviour property `"types"` which is an array (default []) and the amount of
-	 * damage is given by the behaviour property `"damage"` (default 1).
+	 * The target must make the function in the entity data `"damages"` (if it exists) return true for it to try to be
+	 * damaged. The type of damage is given by the behaviour property `"types"` which is an array (default []) and the
+	 * amount of damage is given by the behaviour property `"damage"` (default 1).
 	 * 
 	 * Understandably, the target must have the behaviour `{@link dusk.entities.behave.Killable}` to react to this.
 	 * 
@@ -25,7 +25,6 @@ load.provide("dusk.entities.behave.HitDam", (function() {
 		
 		this._data("types", [], true);
 		this._data("damage", 1, true);
-		this._data("damages", "", true);
 		
 		this.entityEvent.listen(this._hdCollide.bind(this), "collide");
 		this.entityEvent.listen(this._hdCollide.bind(this), "collidedInto");
@@ -38,7 +37,8 @@ load.provide("dusk.entities.behave.HitDam", (function() {
 	 */
 	HitDam.prototype._hdCollide = function(e) {
 		if(e.target === "wall") return;
-		if(!e.target.meetsTrigger(this._data("damages"))) return;
+		if(this._data("damages") && !this._data("damages")(e.target, this._entity, e)) return;
+		
 		e.target.behaviourFire("takeDamage", {
 			"damage":this._data("damage"), "source":this._entity, "types":this._data("types")
 		});

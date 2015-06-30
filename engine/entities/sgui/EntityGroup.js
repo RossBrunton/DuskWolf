@@ -257,17 +257,7 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 	};
 	
 	EntityGroup.prototype.filter = function(filter) {
-		var out = [];
-		
-		for(var c = this._entities.length-1; c >= 0; c --){
-			if(typeof filter == "function") {
-				if(filter(this._entities[c])) out.push(this._entities[c]);
-			}else{
-				if(this._entities[c].evalTrigger(filter)) out.push(this._entities[c]);
-			}
-		}
-		
-		return out;
+		return this._entities.filter(filter);
 	};
 	
 	//Runs in O(n) time

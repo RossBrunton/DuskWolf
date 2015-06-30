@@ -255,7 +255,7 @@ load.provide("quest", (function() {
 									
 									// Select an entity in this region that is an enemy
 									qo.selectActor.pickEntityInRegion(function(e) {
-										return e.meetsTrigger("stat(faction, 1) = ENEMY");
+										return e.stats.get(faction) == "ENEMY";
 									}, {}, {}),
 									
 									// And then terminate it
@@ -331,7 +331,9 @@ load.provide("quest", (function() {
 			
 			// And just before we end the turn, remove all the "moved" blocks from entities
 			function(x) {
-				var ents = qo.layeredRoom.getPrimaryEntityLayer().filter("stat(moved, 3)");
+				var ents = qo.layeredRoom.getPrimaryEntityLayer().filter(
+					function(e) {return e.stats && e.stats.get("moved")}
+				);
 				
 				for(var e of ents) {
 					e.stats.layer(3).removeBlock("moved");
