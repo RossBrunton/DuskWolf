@@ -9,7 +9,6 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 	var TileMap = load.require("dusk.tiles.sgui.TileMap");
 	var EntityGroup = load.require("dusk.entities.sgui.EntityGroup");
 	var ParticleField = load.require("dusk.particles.sgui.ParticleField");
-	var TransitionManager = load.require("dusk.rooms.sgui.TransitionManager");
 	var FluidLayer = load.require("dusk.rooms.sgui.FluidLayer");
 	var RegionDisplay = load.require("dusk.tiles.sgui.RegionDisplay");
 	var editor = load.require("dusk.rooms.editor");
@@ -80,7 +79,6 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 	LayeredRoom.LAYER_SCHEME = 0x02;
 	LayeredRoom.LAYER_ENTITIES = 0x04;
 	LayeredRoom.LAYER_PARTICLES = 0x08;
-	LayeredRoom.LAYER_TRANSITIONS = 0x10;
 	LayeredRoom.LAYER_REGION = 0x20;
 	LayeredRoom.LAYER_FLUID = 0x40;
 	
@@ -213,12 +211,6 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 					this.get(val[i].name, "FluidLayer").update({"upFlow":(i > 0?val[i-1].name:""), "layer":"+"});
 					
 					break;
-				
-				case LayeredRoom.LAYER_TRANSITIONS:
-					this.get(val[i].name, "TransitionManager")
-						.update({"upFlow":(i > 0?val[i-1].name:""), "layer":"+"});
-					
-					break;
 			}
 			
 			if(i > 0) this.get(val[i-1].name).downFlow = val[i].name;
@@ -295,10 +287,6 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 	
 	LayeredRoom.prototype.getPrimaryEntityLayer = function() {
 		return this.get(this._primaryEntityGroup);
-	};
-	
-	LayeredRoom.prototype.getTransitionManager = function() {
-		return this.getAllLayersOfType(LayeredRoom.LAYER_TRANSITIONS)[0];
 	};
 	
 	LayeredRoom.prototype.getScheme = function() {
