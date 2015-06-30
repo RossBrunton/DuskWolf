@@ -5,7 +5,6 @@
 load.provide("dusk.entities.sgui.Entity", (function() {
 	var Tile = load.require("dusk.tiles.sgui.Tile");
 	var utils = load.require("dusk.utils");
-	var parseTree = load.require("dusk.utils.parseTree");
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var entities = load.require("dusk.entities");
 	var c = load.require("dusk.sgui.c");

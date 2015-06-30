@@ -4,7 +4,6 @@
 
 load.provide("dusk.stats", (function() {
 	var utils = load.require("dusk.utils");
-	var parseTree = load.require("dusk.utils.parseTree");
 	var Range = load.require("dusk.utils.Range");
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var LayeredStatsLayer = load.require("dusk.stats.LayeredStatsLayer");

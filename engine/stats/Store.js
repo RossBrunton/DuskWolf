@@ -4,7 +4,6 @@
 
 load.provide("dusk.stats.store", (function() {
 	var utils = load.require("dusk.utils");
-	var parseTree = load.require("dusk.utils.parseTree");
 	var Range = load.require("dusk.utils.Range");
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var items = load.suggest("dusk.items", function(p) {items = p});
