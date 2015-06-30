@@ -12,7 +12,7 @@ load.provide("dusk.entities.behave.MarkTrigger", (function() {
 	 * 
 	 * Simply put, whenever an entity with this behaviour enters a tile with a source y coordinate of 1 on the schematic
 	 * layer, `MarkTrigger.onTrigger` will fire. This event can also be fired again by pressing the up key. This can
-	 * be used, for example, by `dusk.rooms.TransitionManager` to switch rooms.
+	 * be used, for example, by `dusk.rooms.RoomTransitions` to switch rooms.
 	 * 
 	 * The event object contains the following properties:
 	 * - up:boolean - Whether the up key was pressed.

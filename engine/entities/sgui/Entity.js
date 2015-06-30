@@ -13,6 +13,7 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	var interaction = load.require("dusk.input.interaction");
 	var editor = load.suggest("dusk.rooms.editor", function(p){editor = p;});
 	var AnimatedTile = load.require("dusk.tiles.sgui.extras.AnimatedTile");
+	var functionStore = load.require("dusk.utils.functionStore");
 	
 	/** An entity is a component that has "behaviours" and can do certain activites, possibly in response to another
 	 *  entities or user input.
@@ -94,26 +95,6 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	 * 
 	 * The events go in the order every frame: `verForce`, `affectVerForce`, `horForce`, `affectHorForce`, `beforeMove`,
 	 *  any collision events, `frame`.
-	 * 
-	 * There are "triggers", which are essentially strings that evaluate into a constant value according to rules. They
-	 *  are used in animation and particle effects, as the first element of the array where they are checked if they are
-	 *  true or false. They are also used in behaviours, to allow a more fine control on what they interact with.
-	 * 
-	 * They are essentially fed to a parse tree from `dusk.utils.parseTree`, and support the following operators, low to high
-	 *  priority, in addition to the basic ones:
-	 * 
-	 * - `on event`: True iff this trigger is being evaluated because of the animation event `event`. This will cause a
-	 *  lock to be set on the current animation if it's in that context.
-	 * - `#dx`: The entity's horizontal speed.
-	 * - `#dy`: The entity's vertical speed.
-	 * - `#tb`: The number of entities touching the bottom of this.
-	 * - `#tu`: The number of entities touching the top of this.
-	 * - `#tl`: The number of entities touching the left of this.
-	 * - `#tr`: The number of entities touching the right of this.
-	 * - `#path`: The path to this entity.
-	 * - `#edit`: True if the editor is on, otherwise false.
-	 * - `.var`: The value of the component property `var`.
-	 * - `:var`: The value of the entity data property `var`.
 	 * 
 	 * All entities have an `dusk.tile.sgui.extras.AnimatedTile` object attached to them, called `animation`.
 	 * 
@@ -845,67 +826,6 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 		return this.getExtra("animation").changeAnimation(name);
 	};
 	
-	//Triggers
-	/** Alias to `{@link dusk.entities.sgui.Entity#evalTrigger}`.
-	 * @param {*} trigger The trigger.
-	 * @param {?string} event The name of the event, if appropriate.
-	 * @return {*} The result of the evaluated parse tree.
-	 * @depreciated
-	 */
-	Entity.prototype.meetsTrigger = function(trigger) {
-		return this.evalTrigger(trigger);
-	};
-
-	/** Using the parse tree described in the class docs, will evaluate it, and return the value.
-	 * 
-	 * If the trigger isn't a string, it is returned exactly, if it is an empty string, true is
-	 *  returned.
-	 * @param {*} trigger The trigger.
-	 * @param {?string} event The name of the event, if appropriate.
-	 * @return {*} The result of the evaluated parse tree.
-	 */
-	Entity.prototype.evalTrigger = function(trigger) {
-		if(typeof trigger != "string") return trigger;
-		if(trigger.trim() == "") return true;
-		
-		//var t = performance.now();
-		var e = _triggerTree.compile(trigger).eval({"ent":this});
-		//var ta = performance.now() - t;
-		//t = performance.now();
-		////var f = this._triggerTree.compileToFunct(trigger)();
-		//var tb = performance.now() - t;
-		//console.log(ta + " vs " + tb);
-		
-		return e;
-	};
-	
-	/** The parse tree used for evaluating triggers.
-	 * @type dusk.utils.parseTree
-	 * @private
-	 */
-	var _triggerTree = new parseTree.Compiler([], [
-		["#", function(o, v, ctx) {
-				switch(v) {
-					case "dx": return ctx.ent.dx;
-					case "dy": return ctx.ent.dy;
-					case "tb": return ctx.ent.touchers(c.DIR_DOWN).length;
-					case "tu": return ctx.ent.touchers(c.DIR_UP).length;
-					case "tl": return ctx.ent.touchers(c.DIR_LEFT).length;
-					case "tr": return ctx.ent.touchers(c.DIR_RIGHT).length;
-					case "path": return ctx.ent.fullPath();
-					case "edit": return editor && editor.active;
-					default: return "#"+v;
-				}
-			}, false
-		],
-		[".", function(o, v, c) {
-				return c.ent.prop(v);
-			}, false],
-		[":", function(o, v, c) {return c.ent.eProp(v);}, false],
-		["stat", function(o, v, c) {return c.ent.stats?c.ent.stats.get(v[0], v[1]):undefined;}, false],
-		["stati", function(o, v, c) {return c.ent.stats?c.ent.stats.geti(v[0], v[1]):undefined;}, false],
-	], []);
-	
 	
 	//Touchers
 	/** Returns an array of either `Entity` instances or the string `"wall"` which are touching this entity on the
@@ -1027,5 +947,9 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	};
 	
 	sgui.registerType("Entity", Entity);
+	
+	// Stored functions
+	functionStore.register("entity-eprop", function(p, e) {return e.eProp(p);});
+	
 	return Entity;
 })());
