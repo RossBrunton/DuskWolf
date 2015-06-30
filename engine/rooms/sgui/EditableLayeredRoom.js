@@ -33,11 +33,11 @@ load.provide("dusk.rooms.sgui.EditableLayeredRoom", (function() {
 		);
 		this.onControl.listen((function(e) {
 			if(editor.active) {
-				if(!e.shift) {
-					this.createRoom(prompt("Enter a room to go to.", this.roomName), 0);
-				}else{
+				//if(!e.shift) {
+				//	this.createRoom(prompt("Enter a room to go to.", this.roomName), 0);
+				//}else{
 					this.roomManager.setRoom(prompt("Enter a room to go to via the room manager.", this.roomName), 0);
-				}
+				//}
 			}
 		}).bind(this), controls.addControl("basicmain_goto", "G"));
 		

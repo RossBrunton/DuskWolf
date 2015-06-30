@@ -46,8 +46,7 @@ load.provide("quest", (function() {
 		{"name":"parts","type":8},
 		{"name":"over","type":1},
 		{"name":"regions","type":32},
-		{"name":"entities","type":4,"primary":true},
-		{"name":"transitions","type":16}
+		{"name":"entities","type":4,"primary":true}
 	];
 	
 	window.qo = dquest.make(ui, "quest", layers, 32, 32);

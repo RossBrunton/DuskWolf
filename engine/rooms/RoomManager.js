@@ -46,6 +46,7 @@ load.provide("dusk.rooms.RoomManager", (function() {
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var editor = load.require("dusk.rooms.editor");
 	var dusk = load.require("dusk");
+	var RoomTransitions = load.require("dusk.rooms.RoomTransitions");
 	
 	/** Manages rooms, which contain tilemap data and the entities in the room.
 	 * 
@@ -90,6 +91,12 @@ load.provide("dusk.rooms.RoomManager", (function() {
 		 * @type ?string
 		 */
 		this.managerPath = managerPath;
+		
+		/** The transitions for the current room.
+		 * @type dusk.rooms.RoomTransitions
+		 * @since 0.0.21-alpha
+		 */
+		this.currentTransitions = null;
 	};
 	
 	/** Stores a room.
@@ -121,10 +128,12 @@ load.provide("dusk.rooms.RoomManager", (function() {
 	 * 
 	 * @param {string} room The name of the room to load.
 	 * @param {?integer} spawn The mark ID for the seek entity to appear at.
+	 * @param {boolean=false} callNewRoom Whether to call the "newRoom" method of the room transitions, which may be
+	 *  required to do effects.
 	 * @return {promise(object)} A promise that fulfills when the room has finished loading. The value is an object
 	 *  containing `room` and `spawn`.
 	 */
-	RoomManager.prototype.setRoom = function(room, spawn) {
+	RoomManager.prototype.setRoom = function(room, spawn, callNewRoom) {
 		if(!room) {
 			console.error("No room specified to set!");
 			return;
@@ -135,9 +144,20 @@ load.provide("dusk.rooms.RoomManager", (function() {
 		}
 		console.log("Setting room "+room);
 		
-		return this.basicMain.createRoom(room, spawn).then((function(e) {
-			this.roomLoaded.fire({"room":room, "spawn":spawn}, room);
-			return {"room":room, "spawn":spawn};
+		return this.getRoomData(room).then((function(roomData) {
+			if(this.currentTransitions) this.currentTransitions.destroy();
+			this.currentTransitions = new RoomTransitions(roomData.transitions, room, this);
+			
+			var prom = this.basicMain.createRoom(room, spawn);
+			
+			if(callNewRoom) {
+				prom = prom.then(this.currentTransitions.newRoom.bind(this.currentTransitions));
+			}
+			
+			return prom.then((function(e) {
+				this.roomLoaded.fire({"room":room, "spawn":spawn}, room);
+				return {"room":room, "spawn":spawn};
+			}).bind(this));
 		}).bind(this));
 	};
 	
@@ -174,6 +194,7 @@ load.provide("dusk.rooms.RoomManager", (function() {
 		};
 		
 		var room = this.basicMain.saveRoom(addDep);
+		room.transitions = this.currentTransitions.export();
 		
 		out += "\n\tvar manager = load.require(\""+this.packageName+"\")";
 		if(this.managerPath) out += "."+this.managerPath;

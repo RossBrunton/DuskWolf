@@ -65,6 +65,11 @@ load.provide("dusk.utils.functionStore", (function() {
      * @type Map<string, *>
      */
     functionStore.vars = new Map();
+    functionStore.vars.set("true", true);
+    functionStore.vars.set("false", false);
+    functionStore.vars.set("undefined", undefined);
+    functionStore.vars.set("null", null);
+    functionStore.vars.set("NaN", NaN);
     
     /** Stores the raw functions
      * 

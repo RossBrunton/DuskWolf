@@ -105,7 +105,7 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 					}
 				}else{
 					for(var p in room.contents) {
-						this.get(p).loadBM(room.contents[p], spawn);
+						if(this.get(p)) this.get(p).loadBM(room.contents[p], spawn);
 					}
 				}
 				

@@ -6,12 +6,13 @@ load.provide("dusk.entities.behave.MarkTrigger", (function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.entities.behave.Behave");
 	var TileMap = load.require("dusk.tiles.sgui.TileMap");
+	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	
 	/** Allows interacting with marks.
 	 * 
 	 * Simply put, whenever an entity with this behaviour enters a tile with a source y coordinate of 1 on the schematic
-	 *  layer, `entities.markTrigger` will fire. This event can also be fired again by pressing the up key. This can be
-	 *  used, for example, by `dusk.rooms.sgui.TransitionManager` to switch rooms.
+	 * layer, `MarkTrigger.onTrigger` will fire. This event can also be fired again by pressing the up key. This can
+	 * be used, for example, by `dusk.rooms.TransitionManager` to switch rooms.
 	 * 
 	 * The event object contains the following properties:
 	 * - up:boolean - Whether the up key was pressed.
@@ -78,10 +79,12 @@ load.provide("dusk.entities.behave.MarkTrigger", (function() {
 			this._markAt = t[0];
 			
 			if(!this._coolDown) {
-				entities.markTrigger.fire({
+				var eob = {
 					"up":false, "mark":this._markAt, "activator":this._entity.name, "entity":this._entity,
 					"room":this._entity.path("../..").roomName
-				}, this._markAt);
+				}
+				entities.markTrigger.fire(eob, this._markAt);
+				MarkTrigger.onTrigger.fire(eob, this._markAt);
 				this._coolDown = 5;
 			}
 		}
@@ -89,6 +92,12 @@ load.provide("dusk.entities.behave.MarkTrigger", (function() {
 		// Free the tile
 		TileMap.tileData.free(t);
 	};
+	
+	/** The event dispatcher fired when a mark is triggered.
+	 * @type dusk.utils.EventDispatcher
+	 * @since 0.0.21-alpha
+	 */
+	MarkTrigger.onTrigger = new EventDispatcher("dusk.entities.behave.MarkTrigger.onTrigger");
 	
 	/** Workshop data used by `dusk.entities.sgui.EntityWorkshop`.
 	 * @static

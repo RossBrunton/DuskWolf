@@ -10,6 +10,7 @@ load.provide("dusk.rooms.plat", (function() {
 	var RoomManager = load.require("dusk.rooms.RoomManager");
 	var skills = load.require("dusk.skills");
 	var StandardActor = load.require("dusk.rooms.actors.Standard");
+	load.require("dusk.sgui.extras.Fade");
 	
 	/** Plat is a simple platforming engine that uses `dusk.sgui`.
 	 * 
@@ -37,7 +38,23 @@ load.provide("dusk.rooms.plat", (function() {
 	plat.make = function(component, name, layers, twidth, theight) {
 		component.modifyComponent(
 			[{"name":name, "type":"EditableLayeredRoom", "scrollInstantly":true, "twidth":twidth, "theight":theight,
-				"allowMouse":true
+				"allowMouse":true,
+				extras:{
+					fadeOut:{
+						type:"Fade",
+						noDelete:true,
+						from:1.0,
+						to:0.0,
+						duration:30,
+					},
+					fadeIn:{
+						type:"Fade",
+						noDelete:true,
+						from:0.0,
+						to:1.0,
+						duration:30,
+					}
+				}
 			}]
 		);
 		component.becomeActive();

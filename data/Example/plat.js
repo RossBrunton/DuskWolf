@@ -64,7 +64,6 @@ load.provide("example.plat", (function() {
 		{"name":"entities","type":4,"primary":true},
 		{"name":"parts","type":8},
 		{"name":"over","type":1},
-		{"name":"transitions","type":16},
 		{"name":"fluid","type":LayeredRoom.LAYER_FLUID}
 	];
 	
@@ -413,11 +412,7 @@ load.provide("example.plat", (function() {
 	}, this);
 	
 	dusk.onLoad.listen(function (e) {
-		reversiblePromiseChain([
-			dplat.rooms.setRoom.bind(dplat.rooms, "example.plat.rooms.exhall", 0),
-			//Scriptable.requestBoundPair("hero", "rawInput", {"inputs":[[30, "right"], [30, "left", "jump"]]}),
-		], false, {})
-		.then(console.log.bind(console), console.error.bind(console));
+		dplat.rooms.setRoom("example.plat.rooms.exhall", 0, true);
 	});
 	
 	dusk.startGame();
