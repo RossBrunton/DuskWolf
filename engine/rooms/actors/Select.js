@@ -141,17 +141,20 @@ load.provide("dusk.rooms.actors.Select", (function() {
 	SelectActor.prototype.followPath = function(options) {
 		return Runner.action("dusk.rooms.actors.Select.followPath", (function(x, add) {
 			return new Promise((function(fulfill, reject) {
-					x.entity.eProp("gwmoves", utils.copy(x.path.dirs().reverse()));
-					var oldX = x.entity.x;
-					var oldY = x.entity.y;
+					var ent = x.entity;
+					if("which" in options) ent = x[options.which];
+					
+					ent.eProp("gwmoves", utils.copy(x.path.dirs().reverse()));
+					var oldX = ent.x;
+					var oldY = ent.y;
 					
 					x.oldX = oldX;
 					x.oldY = oldY;
 					
 					if(x.path.length()){ 
-						var l = x.entity.entityEvent.listen((function(e) {
-							if(!x.entity.eProp("gwmoves").length) {
-								x.entity.entityEvent.unlisten(l);
+						var l = ent.entityEvent.listen((function(e) {
+							if(!ent.eProp("gwmoves").length) {
+								ent.entityEvent.unlisten(l);
 								fulfill(x);
 							}
 						}).bind(this), "gwStopMove");
@@ -185,11 +188,46 @@ load.provide("dusk.rooms.actors.Select", (function() {
 			
 			var dest = options.dest ? options.dest : "entities";
 			
-			x[dest] = eg.allInRegion(region, options.sub);
+			if(options.withSub) {
+				x[dest] = eg.allInRegionWithSub(region, options.sub);
+			}else{
+				x[dest] = eg.allInRegion(region, options.sub);
+			}
 			
 			if("filter" in options) x[dest] = x[dest].filter(options.filter);
 			
 			return x;
+		}).bind(this));
+	};
+	
+	SelectActor.prototype.showSelector = function(options) {
+		return Runner.action("dusk.rooms.actors.Select.showSelector", (function(x, add) {
+			this.selectorManager.show();
+			
+			if(!options.noCopyCoord) {
+				this.selectorManager.getSelector().x = x.fullX;
+				this.selectorManager.getSelector().y = x.fullY;
+			}
+			
+			return x;
+		}).bind(this), 
+		
+		(function(x) {
+			this.selectorManager.hide();
+			return Promise.reject(new Runner.Cancel());
+		}).bind(this));
+	};
+	
+	SelectActor.prototype.hideSelector = function(options) {
+		return Runner.action("dusk.rooms.actors.Select.showSelector", (function(x, add) {
+			this.selectorManager.hide();
+			
+			return x;
+		}).bind(this), 
+		
+		(function(x) {
+			this.selectorManager.show();
+			return Promise.reject(new Runner.Cancel());
 		}).bind(this));
 	};
 	

@@ -215,6 +215,16 @@ load.provide("dusk.tiles.Region", (function() {
 		return false;
 	};
 	
+	Region.prototype.subWith = function(name, x, y, z) {
+		for(var t of this._subTiles.get(name)) {
+			if(t[0] == x && t[1] == y && t[2] == z) {
+				return t[3];
+			}
+		}
+		
+		return [];
+	};
+	
 	Region.prototype.all = function() {
 		return this._tiles;
 	};
@@ -243,6 +253,10 @@ load.provide("dusk.tiles.Region", (function() {
 	
 	Region.prototype.emptyPath = function(clamp) {
 		return new Path(this, this.x, this.y, this.z, clamp ? this.maxRange : undefined);
+	};
+	
+	Region.prototype.pathToRegion = function(region, clamp) {
+		return new Path(this, region.x, region.y, region.z, clamp ? this.maxRange : undefined);
 	};
 	
 	Region.prototype.getChild = function(x, y, z, name) {
@@ -424,12 +438,12 @@ load.provide("dusk.tiles.Region", (function() {
 	Region.prototype._addToPool = function(node) {
 		for(var n of this._parentPool) {
 			if(n[0] == node[0] && n[1] == node[1] && n[2] == node[2]) {
-				n[3].push(node);
+				n[3].push(this);
 				return;
 			}
 		}
 		
-		this._parentPool.push([node[0], node[1], node[2], [node]]);
+		this._parentPool.push([node[0], node[1], node[2], [this]]);
 	};
 	
 	Region.prototype.describe = function(single, sub) {

@@ -72,6 +72,58 @@ load.provide("dusk.script.Actions", (function() {
 		});
 	};
 	
+	/** Given an iterable, run the body once for each element. The value of the element will be set to the `bind`
+	 * property on the passed argument.
+	 * 
+	 * Iterable may be a string, in which case the object specified by that name on the passed argument will be used.
+	 * It also may be a function, in which case it is called and should return an iterable.
+	 * 
+	 * @param {iterable|string|function(object):iterable} iterable The object, name of object or a function that returns
+	 *  an object to iterate.
+	 * @param {string} bind The iterable element will be bound to this value.
+	 * @param {array=[]} body An array of actions to do with each element.
+	 * @return {object} The action object.
+	 */
+	Actions.forEach = function(iterable, bind, body) {
+		return Runner.action("forEach", function(x, add) {
+			var literable = iterable;
+			if(typeof literable == "string") literable = x[literable];
+			if(typeof literable == "function") literable = literable(x);
+			
+			var it = literable[Symbol.iterator]();
+			
+			var update = {"name":"forEachUpdate", 
+				"forward":function(x) {
+					x[bind] = ob.value;
+					ob = it.next();
+					return x;
+				},
+				"inverse":id,
+			};
+			
+			var ob = it.next();
+			
+			if(!ob.done) {
+				add([update].concat(singleArr(body)), function(x) {return !ob.done;});
+			}
+			
+			return x;
+		});
+	};
+	
+	/** Returns an action that fullfills after `duration` milliseconds.
+	 * 
+	 * @param {int} How long to wait.
+	 * @return {object} The action object.
+	 */
+	Actions.wait = function(duration) {
+		return Runner.action("forEach", function(x, add) {
+			return new Promise(function(f, r) {
+				setTimeout(f.bind(undefined, x), duration);
+			});
+		});
+	};
+	
 	/** Simply calls "addActions" with it's body.
 	 * @param {array=[]} thenClause An array of actions to do.
 	 * @return {object} The action object.
