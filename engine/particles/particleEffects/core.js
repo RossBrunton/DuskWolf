@@ -124,8 +124,13 @@ load.provide("dusk.particles.particleEffects.core.image", (function() {
 	
 	var image = function(field, data) {
 		var id = core.imageData(data.source, field);
-		var baseX = (data.x?data.x:0) - (id.width/2);
-		var baseY = (data.y?data.y:0) - (id.height/2);
+		var baseX = (data.x?data.x:0);
+		var baseY = (data.y?data.y:0);
+		
+		if(!data.noCentre) {
+			baseX -= (id.width/2);
+			baseY -= (id.height/2);
+		}
 		
 		if(!("child" in data)) data.child = {};
 		if(!("count" in data.child)) data.child.count = 1;
@@ -140,6 +145,8 @@ load.provide("dusk.particles.particleEffects.core.image", (function() {
 					if("alterR" in data) core.applyAlteration(data.child, c, data.alterR, (x)/id.width);
 					if("alterU" in data) core.applyAlteration(data.child, c, data.alterU, (id.height-y)/id.height);
 					if("alterD" in data) core.applyAlteration(data.child, c, data.alterD, (y)/id.height);
+					if("alterHor" in data) core.applyAlteration(data.child, c, data.alterHor, (x/id.width)-0.5);
+					if("alterVer" in data) core.applyAlteration(data.child, c, data.alterVer, (y/id.height)-0.5);
 					
 					c.x = baseX + x;
 					c.y = baseY + y;
@@ -147,6 +154,14 @@ load.provide("dusk.particles.particleEffects.core.image", (function() {
 					c.g = id.data[base+1];
 					c.b = id.data[base+2];
 					c.a = id.data[base+3];
+					
+					if("scatter" in data) {
+						for(var p of data.scatter) {
+							var scFactor = Math.random()*data.scatterFactor*2;
+							c[p] *= scFactor;
+						}
+					}
+					
 					field.applyEffect(c.effect, c);
 				}
 			}

@@ -14,10 +14,14 @@ load.provide("dusk.particles.particleAnimation", (function() {
 	 */
 	var particleAnimation = function(field, data, name) {
 		return function(state, owner) {
-			if(typeof data == "function") data = data(state, owner);
-			if(name === undefined) name = data.name;
+			var lfield = field;
+			var ldata = data;
+			var lname = name;
+			if(typeof field == "function") lfield = field(state, owner);
+			if(typeof data == "function") ldata = data(state, owner);
+			if(lname === undefined) lname = ldata.name;
 			
-			field.applyEffect(name, data);
+			lfield.applyEffect(lname, ldata);
 		};
 	};
 	

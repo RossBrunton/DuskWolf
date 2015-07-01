@@ -160,11 +160,17 @@ load.provide("dusk.particles.sgui.ParticleField", (function() {
 			i = this._openSlots[this._osp--];
 		}else{
 			i = this._highest + 11;
+		}
+		
+		if(i > this._highest) {
 			this._highest = i;
 		}
 		
 		// Drop pixels we can't add
-		if(i >= this._field.length) return;
+		if(i >= this._field.length) {
+			console.log("Can't fit pixel");
+			return;
+		}
 		
 		this._field[i] = (r << 8) | g;
 		this._field[i+1] = (b << 8) | a;
