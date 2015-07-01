@@ -140,10 +140,10 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 				this._cy = EditableTileMap.globalEditY;
 			}
 			
-			if(this.focus != "_noselectedentity") {
+			/*if(this.focus != "_noselectedentity") {
 				this._priorFocus = "_noselectedentity";
 				this.focus = "_noselectedentity";
-			}
+			}*/
 			
 			if(this._selectedEntity){
 				this._selectedEntity.x = (this._cx*this.twidth)+this._offsetX;
@@ -156,11 +156,11 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 			}
 			
 			//Call every entities' beforeMove function
-			if(active) for(var i = this._entities.length-1; i >= 0; i --) this._entities[i].beforeMove();
+			for(var i = this._entities.length-1; i >= 0; i --) this._entities[i].beforeMove();
 			
 			//Call every entities' moveAndCollide function
 			//for(var i = this._entities.length-1; i >= 0; i --) this._entities[i].moveAndCollide();
-			if(active) this.moveEverything();
+			this.moveEverything();
 			
 			//Call every entities' startFrame function
 			for(var i = this._entities.length-1; i >= 0; i --) this._entities[i].startFrame(active);

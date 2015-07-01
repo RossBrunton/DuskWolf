@@ -254,7 +254,7 @@ load.provide("quest", (function() {
 									
 									// Select an entity in this region that is an enemy
 									qo.selectActor.pickEntityInRegion(function(e) {
-										return e.stats.get(faction) == "ENEMY";
+										return e.stats.get("faction") == "ENEMY";
 									}, {}, {}),
 									
 									// And then terminate it

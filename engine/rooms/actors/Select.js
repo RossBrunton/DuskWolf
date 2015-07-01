@@ -186,6 +186,9 @@ load.provide("dusk.rooms.actors.Select", (function() {
 			var dest = options.dest ? options.dest : "entities";
 			
 			x[dest] = eg.allInRegion(region, options.sub);
+			
+			if("filter" in options) x[dest] = x[dest].filter(options.filter);
+			
 			return x;
 		}).bind(this));
 	};
