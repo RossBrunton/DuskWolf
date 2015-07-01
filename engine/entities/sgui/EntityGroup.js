@@ -326,6 +326,7 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 	
 	EntityGroup.prototype._singleMoveAndCollide = function(ent, noMove) {
 		if(!noMove && !ent.dx && !ent.dy) return;
+		if(ent.attachParent) return;
 		
 		var destX = ent.x;
 		var destY = ent.y;
@@ -345,10 +346,10 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 				var diffX = 0;
 				if(ent.y + ent.collisionOffsetY < testee.y + testee.collisionHeight
 				&& ent.y + ent.collisionHeight > testee.y + testee.collisionOffsetY) {
-					if(testee.eProp("solid")
+					if(testee.eProp("solid") && (testee != ent.attachParent)
 					&& destX + ent.collisionOffsetX < testee.x + testee.collisionOffsetX && ent.dx) {
 						diffX = testee.x + testee.collisionOffsetX - destX - ent.collisionWidth;
-					}else if(testee.eProp("solid")
+					}else if(testee.eProp("solid") && (testee != ent.attachParent)
 					&& destX + ent.collisionWidth > testee.x + testee.collisionWidth && ent.dx) {
 						diffX = testee.x + testee.collisionWidth - destX - ent.collisionOffsetX;
 					}
@@ -364,10 +365,10 @@ load.provide("dusk.entities.sgui.EntityGroup", (function() {
 				var diffY = 0;
 				if(ent.x + ent.collisionOffsetX < testee.x + testee.collisionWidth
 				&& ent.x + ent.collisionWidth > testee.x + testee.collisionOffsetX) {
-					if(testee.eProp("solid")
+					if(testee.eProp("solid") && (testee != ent.attachParent)
 					&& destY + ent.collisionOffsetY < testee.y + testee.collisionOffsetY && ent.dy) {
 						diffY = testee.y + testee.collisionOffsetY - destY - ent.collisionHeight;
-					}else if(testee.eProp("solid")
+					}else if(testee.eProp("solid") && (testee != ent.attachParent)
 					&& destY + ent.collisionHeight > testee.y + testee.collisionHeight && ent.dy) {
 						diffY = testee.y + testee.collisionHeight - destY - ent.collisionOffsetY;
 					}

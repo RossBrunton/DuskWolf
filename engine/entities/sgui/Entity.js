@@ -34,6 +34,9 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	 *  `y+collisionHeight`). The function `touchers` can be used to get a list of components touching this one on the
 	 *  specified side.
 	 * 
+	 * An entity may be attached to at most one other entity. In this case, this entity will always ensure that it is
+	 *  in the same location as the "parent".
+	 * 
 	 * Entities can have behaviours on them. Behaviours available are as an object on the `behaviours` property of the
 	 *  entity type description. Each key of this object is the name of a behaviour, while the value is a boolean for
 	 *  whether the entity should have this behaviour.
@@ -54,6 +57,7 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	 * - `controlsOn`: An array of controls that are always on.
 	 * - `img`: A string, the path to the source image.
 	 * - `collisionWidth`,`collisionHeight`,`collisionOffsetX`,`collisionOffsetY`: Mapping to the respective properties.
+	 * - `width`,`height`,`attachOffsetX`,`attachOffsetY`: Likewise.
 	 * - `animations`: The animations for this entity, as per `dusk.tiles.sgui.extras.AnimatedTile`.
 	 * - `animationRate`: The value for the `rate` property of the animation.
 	 * 
@@ -75,10 +79,10 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	 * - `terminate`: Called when the entity is about to be terminated, the listener should return true if they don't
 	 *  want the entity to terminate. The event object has no properties.
 	 * - `delete`: Called when the entity is deleted.
-	 * - `collide`: Fired by `{@link dusk.entities.sgui.EntityGroup}` when this entity collides into another entity or a wall.
+	 * - `collide`: Fired by `dusk.entities.sgui.EntityGroup` when this entity collides into another entity or a wall.
 	 *  The event object has two properties; `dir` a dusk.sgui.c.DIR_* constant representing the side that collided, and
 	 *  `target`, the entity that it collided into, or the string `"wall"`.
-	 * - `collidedInto`: Fired by `{@link dusk.entities.sgui.EntityGroup}` when this is collided into by another entity. The
+	 * - `collidedInto`: Fired by `dusk.entities.sgui.EntityGroup` when this is collided into by another entity. The
 	 *  event object has two properties; `dir` a dusk.sgui.c.DIR_* constant representing the side that collided, and
 	 *  `target`, the entity that collided into this one.
 	 * - `controlActive`: Fired by all behaviours when they want to check a control is active. A listener should return
@@ -91,6 +95,13 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	 * - `affectHorForce`: The event object has a property `forces` which is an array of outputs from `horForce` or
 	 *  undefineds which can be modified by other behaviours if they wish.
 	 * - `affectVerForce`: Similar to `affectHorForce`.
+	 * - `attach`: Fired when an entity is attached to this. The event object has `child`, which is the new child.
+	 * - `becomeAttached`: Fired when this entity is attached to another one. The event object has a `parent` property
+	 *  which is the entity this is attached to.
+	 * - `detach`, `becomeDetached`: Fired when an entity is detached or this is detached from an entity. Same event
+	 *  object properties as their attach events.
+	 * - `attachPaprentDie`: Fired when the parent that this entity is attached to is deleted. The `becomeDetached`
+	 *  event will NOT fire in this case. The event object has a `parent` property.
 	 * 
 	 * The events go in the order every frame: `verForce`, `affectVerForce`, `horForce`, `affectHorForce`, `beforeMove`,
 	 *  any collision events, `frame`.
@@ -229,15 +240,37 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 		 */
 		this.fluidPath = null;
 		
+		/** The parent this is attached to, or null if it doesn't exist.
+		 * 
+		 * Please do not set this to attach a child, use `attach` and `detach` instead.
+		 * @type dusk.entities.sgui.Entity
+		 * @since 0.0.21-alpha
+		 */
+		this.attachParent = null;
+		/** An array of all the children attached to this entity.
+		 * @type array<dusk.entities.sgui.Entity>
+		 * @since 0.0.21-alpha
+		 * @private
+		 */
+		this._attachChildren = [];
+		
+		/** Added to the x value of the attached parent (if it exists) to get this entity's x location.
+		 * @type integer
+		 * @since 0.0.21-alpha
+		 */
+		this.attachOffsetX = 0;
+		/** Added to the y value of the attached parent (if it exists) to get this entity's y location.
+		 * @type integer
+		 * @since 0.0.21-alpha
+		 */
+		this.attachOffestY = 0;
+		
 		/** Use this to check if the entity is terminated or not, this is set to true by
 		 *  `{@link dusk.entities.sgui.Entity#terminate}`, and means the entity is set for deleting when an
 		 *  animation is finished. Please do not set this property directly.
 		 * @type boolean
 		 */
 		this.terminated = false;
-		
-		//this._teatherClients = [];
-		//this._teatherHost = null;
 		
 		//Not implemented yet
 		this.iltr = 0;
@@ -282,6 +315,11 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 		}).bind(this), interaction.MOUSE_MOVE);
 		
 		this.onDelete.listen((function(e) {
+			for(var c of this._attachChildren) {
+				c.behaviourFire("attachParentDie", {"parent":this});
+				c.attachParent = null;
+			}
+			
 			this.behaviourFire("delete", e);
 		}).bind(this));
 	};
@@ -333,14 +371,16 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 			this.animate("ent_construct");
 			
 			//Basic properties
-			this.collisionWidth = this.width;
-			this.collisionHeight = this.height;
+			this.collisionWidth = -1;
+			this.collisionHeight = -1;
 			this.collisionOffsetX = 0;
 			this.collisionOffsetY = 0;
 			
 			for(var p in this._behaviourData) {
 				this._handleSpecialEProp(p, this._behaviourData[p]);
 			}
+			if(this.collisionWidth < 0) this.collisionWidth = this.width;
+			if(this.collisionHeight < 0) this.collisionHeight = this.height;
 			
 			//Behaviours
 			if(entities.types.isValidType(type)) {
@@ -779,6 +819,10 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 			case "collisionHeight":
 			case "collisionOffsetX":
 			case "collisionOffsetY":
+			case "attachOffsetX":
+			case "attachOffsetY":
+			case "width":
+			case "height":
 				this[key] = value;
 				break;
 			
@@ -818,6 +862,12 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	 * decrements all cooldowns.
 	 */
 	Entity.prototype.startFrame = function(active) {
+		// If we are attached to something, update our location
+		if(this.attachParent) {
+			this.x = this.attachParent.x + this.attachOffsetX;
+			this.y = this.attachParent.y + this.attachOffsetY;
+		}
+		
 		this.behaviourFire("frame", {"active":active});
 	};
 	
@@ -885,6 +935,40 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	Entity.prototype.addToucher = function(dir, entity) {
 		if(entity === "wall" || entity.eProp("solid")) this._touchers[dir].push(entity);
 		this._touchersNonSolid[dir].push(entity);
+	};
+	
+	// Attaching
+	/** Attaches the given entity to this entity.
+	 * @param {dusk.entities.sgui.Entity} entity The entity to attach.
+	 * @since 0.0.21-alpha
+	 */
+	Entity.prototype.attach = function(entity) {
+		entity.attachParent = this;
+		this._attachChildren.push(entity);
+		this.behaviourFire("attach", {"child":entity});
+		entity.behaviourFire("becomeAttached", {"parent":this});
+	};
+	
+	/** Detaches a given entity from this one, if it is attached.
+	 * @param {dusk.entities.sgui.Entity} entity The entity to remove.
+	 * @since 0.0.21-alpha
+	 */
+	Entity.prototype.detach = function(entity) {
+		var i = this._attachChildren.indexOf(entity);
+		if(i >= 0) {
+			this.behaviourFire("detach", {"child":entity});
+			entity.behaviourFire("becomeDetached", {"parent":this});
+			entity.attachParent = null;
+			this._attachChildren.splice(i, 1);
+		}
+	};
+	
+	/** Returns all the children attached to this entity.
+	 * @reutrn {array<dusk.entities.sgui.Entity} entity The children attached to this entity.
+	 * @since 0.0.21-alpha
+	 */
+	Entity.prototype.getAttached = function() {
+		return this._attachChildren;
 	};
 	
 	
