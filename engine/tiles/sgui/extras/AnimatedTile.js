@@ -127,6 +127,9 @@ load.provide("dusk.tiles.sgui.extras.AnimatedTile", (function() {
 	 * - loops:boolean - Normaly, when the end of an animation is reached, it is stopped and the highest priority
 	 * animation is used (even if it is lower than the stoped one). If this is true, instead the animation will restart
 	 * from the first action.
+	 * - globalSync:boolean - Ensures that every tile doing this animation is always on the same frame. This removes the
+	 * guarantee that the animation will start at the first frame, and manipulating the current frame (e.g. via cond)
+	 * will not work. Default is false.
 	 * - unsettable:boolean - If this is true, then the animation cannot be set as an active animation. Every frame its
 	 * trigger will be checked and if true, then its actions will run only for that frame. The regular animation
 	 * continues as if this didn't trigger at all. This is useful for conditional image transformations and particle
@@ -357,6 +360,11 @@ load.provide("dusk.tiles.sgui.extras.AnimatedTile", (function() {
 				this._current = -1;
 				this._checkNew();
 				return;
+			}
+			
+			// Handle gobalSync
+			if(this._animations[this._current][2].globalSync) {
+				this._frame = (_totalFrames / this.rate) % this._animations[this._current][1].length;
 			}
 			
 			// Handle the current action
