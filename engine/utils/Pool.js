@@ -3,9 +3,9 @@
 "use strict";
 
 load.provide("dusk.utils.Pool", (function() {
-	/** @class dusk.utils.Pool
-	 * 
-	 * @classdesc Object pools, for static memory allocation.
+	var dusk = load.require("dusk");
+	
+	/** Object pools, for static memory allocation.
 	 * 
 	 * Objects are taken from this pool when allocated, and returned when freed. This means that the object that is
 	 *  allocated is not a new one, but it cuts down on memory allocations and garbadge collection.
@@ -57,9 +57,32 @@ load.provide("dusk.utils.Pool", (function() {
 		this._inPool ++;
 		this.inWild --;
 		
+		if(dusk.dev) {
+			// Check pool for double frees
+			for(var i = 0; i < this._inPool-1; i ++) {
+				// Less than becasue we already have incremented the value
+				if(this._objects[i] == object) {
+					throw new Pool.DoubleFreeError();
+				}
+			}
+		}
+		
 		if(this._onFree) object = this._onFree(object);
 		this._objects[this._inPool-1] = object;
 	};
+	
+	/** Exception raised on double free.
+	 * @extends Error
+	 * @constructor
+	 * @since 0.0.21-alpha
+	 */
+	Pool.DoubleFreeError = function() {
+		Error.call(this);
+		
+		this.name = "DoubleFreeError";
+		this.message = "Pool.free() called on same object multiple times";
+	};
+	Pool.DoubleFreeError.prototype = Object.create(Error.prototype);
 	
 	return Pool;
 })());
