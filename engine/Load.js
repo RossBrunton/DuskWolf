@@ -5,11 +5,13 @@
 //Testing; remove this
 //delete window.Promise;
 
-if("load" in window) {
-	console.warn("window.load already exists! It will be clobbered. Careful.");
+var global = this;
+
+if("load" in global) {
+	console.warn("global.load already exists! It will be clobbered. Careful.");
 }
 
-window.load = (function() {
+global.load = (function(global) {
 	/** This namespace provides the functions required to import files and resolve dependencies.
 	 * 
 	 * JavaScript files imported by DuskWolf consist of adding them to the page's head tag, one after the other.
@@ -88,6 +90,97 @@ window.load = (function() {
 	 * @since 0.0.21-alpha
 	 */
 	var _uncaughtErrors = [];
+	
+	// Set up multithreading
+	load.worker = !("document" in global) && !("window" in global)
+	
+	if(load.worker) {
+		// A worker
+		
+		global.onmessage = function(e) {
+			if(e.data[0] == "_load_packs") {
+				// Add package information
+				load.addDependency.apply(load, e.data[1]);
+			}else{
+				load.import(e.data[1]).then(function(pack) {
+					var data = pack(e.data[2]);
+					global.postMessage([e.data[0], data[0]], data[1]);
+				});
+			}
+		}
+	}else{
+		// Not a worker
+		
+		/** An array of work orders currently waiting to be processed.
+		 * 
+		 * New ones are added to the end, and old ones are sliced from the front. Each entry is an `[id, worker package
+		 *  name, order object, transfer array]` array.
+		 * 
+		 * @type array
+		 * @private
+		 * @since 0.0.21-alpha
+		 */
+		var _workOrders = [];
+		
+		/** The array of workers.
+		 * @type array
+		 * @private
+		 * @since 0.0.21-alpha
+		 */
+		var _workers = [];
+		
+		/** A map from workers to a boolean indicating that the worker is processing an order.
+		 * @type Map<Worker, boolean>
+		 * @private
+		 */
+		var _workerStates = new Map();
+		
+		/** A counter, it will be increased every time a work order is produced, and is used as the id.
+		 * @type integer
+		 * @private
+		 */
+		var _workCounter = 0;
+        
+        /** A map from work ids to their promise fulfill functions.
+         * @type Map<integer, function(*)>
+         * @private
+         */
+		var _workPromises = new Map();
+		
+		// Create workers
+		var threads = Math.max(navigator.hardwareConcurrency/2, 1);
+		for(var i = threads; i > 0; i--) {
+			var w = new Worker(document.currentScript.src);
+			_workers.push(w);
+			_workerStates.set(w, false);
+			
+			w.onmessage = function(e) {
+				_workerStates.set(w, false);
+				
+				var f = _workPromises.get(e.data[0]);
+				_workPromises.delete(e.data[0]);
+				f(e.data[1]);
+			}
+		}
+		
+		// Check for work
+		setInterval(function() {
+			if(_workOrders.length) {
+				for(var worker of _workerStates.entries()) {
+					if(worker[1]) {
+						continue;
+					}
+					
+					var task = _workOrders.splice(0, 1)[0];
+					
+					worker[0].postMessage(task);
+					_workerStates.set(worker[0], true);
+					
+					if(!_workOrders.length) return;
+				}
+			}
+		}, 10);
+	}
 	
 	/** An event dispatcher which is fired when a package is imported and then calls `{@link load.provide}`.
 	 * 
@@ -182,6 +275,13 @@ window.load = (function() {
 			}
 		}
 		
+		// Add them to the workers as well
+		if(!this.worker) {
+			for(var w of _workers) {
+				w.postMessage(["_load_packs", Array.prototype.slice.call(arguments)]);
+			}
+		}
+		
 		_files[file] = [provided, required, false];
 	};
 	
@@ -253,12 +353,13 @@ window.load = (function() {
 	load.import = function(name) {
 		return new Promise(function(fulfill, reject) {
 			if(!load.isImported(name)) {
-				_addToImportSet(name);
-				
+				var oldname = name;
 				if(name.charAt(0) == ">") name = name.substring(1);
 				
 				if(!(name in _readies)) _readies[name] = [];
 				_readies[name].push(fulfill);
+				
+				_addToImportSet(oldname);
 			}else{
 				if(name.charAt(0) == ">") name = name.substring(1);
 				
@@ -271,7 +372,6 @@ window.load = (function() {
 	 * @since 0.0.15-alpha
 	 */
 	load.importAll = function() {
-		console.log("Importing everything!");
 		for(var f in _names) {
 			load.import(f);
 		}
@@ -319,9 +419,12 @@ window.load = (function() {
 		
 			xhr.onreadystatechange = function() {
 				if(xhr.readyState == 4 && xhr.status > 100 && xhr.status < 400) {
-					var relativePath = path.split("/");
-					relativePath.splice(-1, 1);
-					relativePath = relativePath.join("/")+"/";
+					var relativePath = path.split("/").slice(0, -1).join("/")+"/";
+					
+					// Hack to get the absolute path
+					var a = document.createElement("a");
+					a.href = relativePath;
+					var absolutePath = a.href;
 					
 					var data = xhr.response;
 					
@@ -334,7 +437,7 @@ window.load = (function() {
 					
 					var deps = data.packages;
 					for(var i = deps.length-1; i >= 0; i--) {
-						if(deps[i][0].indexOf(":") === -1 && deps[i][0][0] != "/") deps[i][0] = relativePath+deps[i][0];
+						if(deps[i][0].indexOf(":") === -1 && deps[i][0][0] != "/") deps[i][0] = absolutePath+deps[i][0];
 						load.addDependency(deps[i][0], deps[i][1], deps[i][2], deps[i][3]);
 					}
 					
@@ -473,13 +576,17 @@ window.load = (function() {
 			_names[f[0][i]][1] = 1;
 		}
 		
-		var js = document.createElement("script");
-		js.src = file;
-		js.async = true;
-		js.addEventListener("error", function(e) {
-			throw new load.ImportError(file+" failed to import.");
-		});
-		document.head.appendChild(js);
+		if(!("document" in global) && !("window" in global)) {
+			importScripts(file);
+		}else{
+			var js = document.createElement("script");
+			js.src = file;
+			js.async = true;
+			js.addEventListener("error", function(e) {
+				throw new load.ImportError(file+" failed to import.");
+			});
+			document.head.appendChild(js);
+		}
 	};
 	
 	/** Stops all currently importing packages, but will not interrupt any currently running files.
@@ -500,6 +607,37 @@ window.load = (function() {
 		}
 		
 		return false;
+	};
+	
+	/** Submits a work order which will run on the next worker that becomes available.
+	 * 
+	 * The worker is the name of a package; this package must return a function which takes the "order" as input, and 
+	 *  returns the output in the form of a [object, properties to transfer] pair. This function will be run on a web
+	 *  worker and will be separate to the main page.
+	 * 
+	 * If `submitWorkOrder` is called from a worker, it just does it synchronously, rather than deferring it to another
+	 *  thread.
+	 * 
+	 * @param {string} worker The name of the worker package to do the work.
+	 * @param {*} order The data to send to this worker package's function.
+	 * @param {?array} copy An optional array of objects to transfer, rather than copy.
+	 * @return {Promise(*)} A promise that resolves to the output of the work order.
+	 * @since 0.0.21-alpha
+	 */
+	load.submitWorkOrder = function(worker, order, transfer) {
+		if(load.worker) {
+            return new Promise(function(f, r) {
+				load.import(worker).then(function(pack) {
+					var data = pack(order);
+					f(data[0]);
+				});
+			});
+		}else{
+			return new Promise(function(f, r) {
+				_workOrders.push([_workCounter++, worker, order, transfer]);
+				_workPromises.set(_workCounter-1, f);
+			});
+		}
 	};
 	
 	/** Returns an array of errors; each element is a pair `[error object, errorEvent]`. `errorEvent` is an event object
@@ -601,10 +739,10 @@ window.load = (function() {
 		}
 		
 		if(!dusk || !dusk.started) {
-			window.requestAnimationFrame(_displayLoad);
+			global.requestAnimationFrame(_displayLoad);
 		}
 	};
-	window.requestAnimationFrame(_displayLoad);
+	if("requestAnimationFrame" in global) global.requestAnimationFrame(_displayLoad);
 	
 	var dusk = load.suggest("dusk", function(p) {dusk = p});
 	var EventDispatcher = load.suggest("dusk.utils.EventDispatcher", function(p) {
@@ -612,14 +750,14 @@ window.load = (function() {
 		load.onProvide = new EventDispatcher("dusk.load.onProvide");
 	});
 	
-	window.addEventListener("error", function(e) {
+	global.addEventListener("error", function(e) {
 		if(!e.error) return;
 		_uncaughtErrors.push([e.error, e]);
 		load.abort();
 	});
 	
 	return load;
-})();
+})(global);
 
 load.addDependency("", ["load"], []);
 load.provide("load", load);
