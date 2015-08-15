@@ -49,6 +49,7 @@ load.provide("tests.animation", (function() {
 					"extras":{
 						"animation":{
 							"type":"AnimatedTile",
+							"rate":30,
 							"animations":[
 								["default", [
 									atTypes.setTile(0, 0), atTypes.setTile(1, 0)
