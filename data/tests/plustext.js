@@ -133,6 +133,32 @@ load.provide("tests.plustext", (function() {
 					{text:"Option4"},
 					{text:"Option5"},
 				]
+			},
+			
+			expandrects:{
+				allowMouse:true,
+				type:"Grid",
+				x:500,
+				y:10,
+				rows:5,
+				cols:1,
+				globals:{
+					type:"PlusText",
+					behind:true,
+					plusType:"Rect",
+					plusProxy:false,
+					plus:{
+						xDisplay:"expand",
+						yDisplay:"expand",
+					}
+				},
+				populate:[
+					{text:"MMM"},
+					{text:"MMMMMM"},
+					{text:"MMMMMMMMM"},
+					{text:"MMMMMMMMMMMM"},
+					{text:"MMMMMMMMMMMMMMM"},
+				]
 			}
 		}
 	});

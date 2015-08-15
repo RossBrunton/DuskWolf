@@ -300,16 +300,18 @@ load.provide("dusk.sgui.Grid", (function() {
 	/** Returns the smallest width which has all the components fully drawn inside.
 	 * 
 	 * @param {boolean} includeOffset If true, then the offset is taken into account, and removed from the figure.
+	 * @param {boolean} rendering If true, use their rendering width rather than their stated width.
 	 * @return {integer} The smallest possible width where all the components are fully inside.
 	 * @since 0.0.21-alpha
 	 */
-	Grid.prototype.getContentsWidth = function(includeOffset) {
+	Grid.prototype.getContentsWidth = function(includeOffset, rendering) {
 		var max = 0;
 		
 		for(var y = 0; y < this.rows; y ++) {
 			var sum = 0;
 			for(var x = 0; x < this.cols; x ++) {
-				if(this.get(x+","+y)) sum += this.get(x+","+y).width;
+				if(this.get(x+","+y))
+					sum += rendering ? this.get(x+","+y).getRenderingWidth() : this.get(x+","+y).width;
 			}
 			if(sum > max) max = sum;
 		}
@@ -320,16 +322,18 @@ load.provide("dusk.sgui.Grid", (function() {
 	/** Returns the smallest height which has all the components fully drawn inside.
 	 * 
 	 * @param {boolean} includeOffset If true, then the offset is taken into account, and removed from the figure.
+	 * @param {boolean} rendering If true, use their rendering width rather than their stated width.
 	 * @return {integer} The smallest possible height where all the components are fully inside.
 	 * @since 0.0.21-alpha
 	 */
-	Grid.prototype.getContentsHeight = function(includeOffset) {
+	Grid.prototype.getContentsHeight = function(includeOffset, rendering) {
 		var max = 0;
 		
 		for(var x = 0; x < this.cols; x ++) {
 			var sum = 0;
 			for(var y = 0; y < this.rows; y ++) {
-				if(this.get(x+","+y)) sum += this.get(x+","+y).height;
+				if(this.get(x+","+y))
+					sum += rendering ? this.get(x+","+y).getRenderingHeight() : this.get(x+","+y).height;
 			}
 			if(sum > max) max = sum;
 		}

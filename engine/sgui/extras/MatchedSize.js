@@ -51,8 +51,8 @@ load.provide("dusk.sgui.extras.MatchedSize", (function() {
 		this._owner.x = t.x - this.paddingTop;
 		this._owner.y = t.y - this.paddingLeft;
 		
-		this._owner.height = this.paddingTop + this.paddingBottom + t.height;
-		this._owner.width = this.paddingLeft + this.paddingRight + t.width;
+		this._owner.height = this.paddingTop + this.paddingBottom + t.getRenderingHeight();
+		this._owner.width = this.paddingLeft + this.paddingRight + t.getRenderingWidth();
 	};
 	
 	MatchedSize.prototype._matchDeleted = function(e) {

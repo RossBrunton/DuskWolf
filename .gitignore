@@ -5,6 +5,7 @@
 *.mf
 tcheck.js
 /data/SMB/
+/data/AW/
 /data/deps.json
 /engine/deps.json
 /tests/deps.json

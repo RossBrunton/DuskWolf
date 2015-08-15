@@ -709,11 +709,7 @@ load.provide("dusk.sgui.Group", (function() {
 	//Width
 	Object.defineProperty(Group.prototype, "width", {
 		get: function() {
-			if(this._width == -1) {
-				return this.getContentsWidth(true);
-			}else{
-				return this._width;
-			}
+			return this._width;
 		},
 		
 		set: function(value) {
@@ -724,11 +720,7 @@ load.provide("dusk.sgui.Group", (function() {
 	//Height
 	Object.defineProperty(Group.prototype, "height", {
 		get: function() {
-			if(this._height == -1) {
-				return this.getContentsHeight(true);
-			}else{
-				return this._height;
-			}
+			return this._height;
 		},
 		
 		set: function(value) {
@@ -736,17 +728,38 @@ load.provide("dusk.sgui.Group", (function() {
 		}
 	});
 	
+	//Width
+	Group.prototype.getRenderingWidth = function() {
+		if(this._width == -1) {
+			return this.getContentsWidth(true, true);
+		}else{
+			return this._width;
+		}
+	};
+	
+	//Height
+	Group.prototype.getRenderingHeight = function() {
+		if(this._height == -1) {
+			return this.getContentsHeight(true, true);
+		}else{
+			return this._height;
+		}
+	};
+	
 	/** Returns the smallest width which has all the components fully drawn inside.
 	 * 
 	 * @param {boolean} includeOffset If true, then the offset is taken into account, and removed from the figure.
+	 * @param {boolean} rendering If true, use their rendering width rather than their stated width.
 	 * @return {integer} The smallest possible width where all the components are fully inside.
 	 * @since 0.0.18-alpha
 	 */
-	Group.prototype.getContentsWidth = function(includeOffset) {
+	Group.prototype.getContentsWidth = function(includeOffset, rendering) {
 		var max = 0;
-		for(var c = this._componentsArr.length-1; c >= 0; c --) {
-			if(this._componentsArr[c].x + this._componentsArr[c].width > max)
-				max = this._componentsArr[c].x + this._componentsArr[c].width;
+		for(var c of this._componentsArr) {
+			var width = !rendering ? c.width : c.getRenderingWidth();
+			if(c.x + width > max) {
+				max = c.x + width;
+			}
 		}
 		
 		return max - (includeOffset?this.xOffset:0);
@@ -755,14 +768,16 @@ load.provide("dusk.sgui.Group", (function() {
 	/** Returns the smallest height which has all the components fully drawn inside.
 	 * 
 	 * @param {boolean} includeOffset If true, then the offset is taken into account, and removed from the figure.
+	 * @param {boolean} rendering If true, use their rendering width rather than their stated width.
 	 * @return {integer} The smallest possible height where all the components are fully inside.
 	 * @since 0.0.18-alpha
 	 */
-	Group.prototype.getContentsHeight = function(includeOffset) {
+	Group.prototype.getContentsHeight = function(includeOffset, rendering) {
 		var max = 0;
-		for(var c = this._componentsArr.length-1; c >= 0; c --) {
-			if(this._componentsArr[c].y + this._componentsArr[c].height > max)
-				max = this._componentsArr[c].y + this._componentsArr[c].height;
+		for(var c of this._componentsArr) {
+			var height = !rendering ? c.height : c.getRenderingHeight();
+			if(c.y + height > max)
+				max = c.y + height;
 		}
 		
 		return max - (includeOffset?this.yOffset:0);

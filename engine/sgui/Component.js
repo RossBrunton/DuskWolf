@@ -584,6 +584,29 @@ load.provide("dusk.sgui.Component", (function() {
 		}
 	});
 	
+	/** Called when this component is to be rendered in "fixed" mode, this should return the original width to render
+	 * with.
+	 * 
+	 * By default it is `this.width`, components may override it to do fancy logic.
+	 * @return {int} The width to render this component.
+	 * @since 0.0.21-alpha
+	 */
+	Component.prototype.getRenderingWidth = function() {
+		return this.width;
+	};
+	
+	/** Called when this component is to be rendered in "fixed" mode, this should return the original height to render
+	 * with.
+	 * 
+	 * By default it is `this.height`, components may override it to do fancy logic.
+	 * @return {int} The height to render this component.
+	 * @since 0.0.21-alpha
+	 */
+	Component.prototype.getRenderingHeight = function() {
+		return this.height;
+	};
+	
+	
 	/** Used by containers, similar to `paint`, but allows you to specify what part of an image to take, and where
 	 *  exactly to put it. Also supports "expand" components.
 	 * 
@@ -616,11 +639,11 @@ load.provide("dusk.sgui.Component", (function() {
 		var dest = PosRect.pool.alloc();
 		
 		// Calculate source
-		source.setWH(0, 0, this.width, this.height);
+		source.setWH(0, 0, this.getRenderingWidth(), this.getRenderingHeight());
 		
 		if(this.xDisplay == "fixed") {
-			if(this.xOrigin == "right") source.shift(container.width - this.width, 0);
-			if(this.xOrigin == "middle") source.shift((container.width - this.width) >> 1, 0);
+			if(this.xOrigin == "right") source.shift(container.width - source.width, 0);
+			if(this.xOrigin == "middle") source.shift((container.width - source.width) >> 1, 0);
 			
 			source.shift(this.x, 0);
 		}else{
@@ -628,8 +651,8 @@ load.provide("dusk.sgui.Component", (function() {
 		}
 		
 		if(this.yDisplay == "fixed") {
-			if(this.yOrigin == "bottom") source.shift(0, container.height - this.height);
-			if(this.yOrigin == "middle") source.shift(0, (container.height - this.height) >> 1);
+			if(this.yOrigin == "bottom") source.shift(0, container.height - source.height);
+			if(this.yOrigin == "middle") source.shift(0, (container.height - source.height) >> 1);
 		
 			source.shift(0, this.y);
 		}else{
@@ -718,8 +741,8 @@ load.provide("dusk.sgui.Component", (function() {
 	Component.prototype.paint = function(ctx, x, y, width, height) {
 		if(x === undefined) x = 0;
 		if(y === undefined) y = 0;
-		if(width === undefined) width = this.width;
-		if(height === undefined) height = this.height;
+		if(width === undefined) width = this.getRenderingWidth();
+		if(height === undefined) height = this.getRenderingHeight();
 		
 		if(!this.visible || this.alpha <= 0) return;
 		

@@ -97,7 +97,9 @@ load.provide("dusk.sgui.PlusText", (function() {
 	 * @private
 	 */
 	var _frame = function(e) {
-		this.get("label").width = this.width - this.get("plus").width - this.spacing;
+		if(this.width >= 0) {
+			this.get("label").width = this.width - this.get("plus").width - this.spacing;
+		}
 		
 		if(this.onLeft) {
 			this.get("plus").x = 0;
@@ -111,15 +113,17 @@ load.provide("dusk.sgui.PlusText", (function() {
 			if(!this.get("label").multiline) {
 				this.get("label").width = -1;
 			}else{
-				this.get("label").width = this.width - this.spacing;
+				if(this.width >= 0) {
+					this.get("label").width = this.width - this.spacing;
+				}
 			}
 			
 			this.get("plus").x = 0;
 			this.get("label").xOrigin = "middle";
 			this.get("label").x = 0;
 			
-			this.get("plus").width = this.width;
-			this.get("plus").height = this.height;
+			if(this.width >= 0) this.get("plus").width = this.width;
+			if(this.height >= 0) this.get("plus").height = this.height;
 		}
 		
 		this.get("label").text = this.text;
