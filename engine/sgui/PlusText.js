@@ -123,12 +123,12 @@ load.provide("dusk.sgui.PlusText", (function() {
 			p.x = 0;
 			l.x = p.width + this.spacing;
 		}else{
-			p.x = this.width - p.width;
+			p.x = l.width;
 			l.x = 0;
 		}
 		
-		if(!this.height) this.height = p.height;
-		l.height = this.height;
+		//if(!this.height) this.height = p.height;
+		//l.height = this.height;
 	};
 	
 	/** Override to enable `{@link dusk.sgui.PlusText.plusProxy}`.

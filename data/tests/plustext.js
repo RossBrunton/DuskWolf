@@ -30,8 +30,8 @@ load.provide("tests.plustext", (function() {
 						behind:false,
 						plusType:"Rect",
 						plus:{
-							width:10,
-							height:10,
+							width:30,
+							height:30,
 							colour:"#999999",
 						}
 					},
@@ -78,6 +78,28 @@ load.provide("tests.plustext", (function() {
 						}
 					}
 				}
+			},
+			
+			multiline:{
+				type:"Grid",
+				x:10,
+				y:150,
+				rows:1,
+				cols:2,
+				globals:{
+					type:"PlusText",
+					plusType:"Rect",
+					text:"Multiline\nText\nBox",
+					label:{
+						multiline:true,
+						width:50,
+					},
+					width:100,
+				},
+				populate:[
+					{behind:true, plus:{xDisplay:"expand", yDisplay:"expand"}},
+					{behind:false, plus:{width:30, height:30}},
+				]
 			},
 			
 			rightgrid:{
