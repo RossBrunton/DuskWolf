@@ -138,9 +138,9 @@ load.provide("tests.plustext", (function() {
 			expandrects:{
 				allowMouse:true,
 				type:"Grid",
-				x:500,
+				x:450,
 				y:10,
-				rows:5,
+				rows:6,
 				cols:1,
 				globals:{
 					type:"PlusText",
@@ -154,10 +154,11 @@ load.provide("tests.plustext", (function() {
 				},
 				populate:[
 					{text:"MMM"},
-					{text:"MMMMMM"},
-					{text:"MMMMMMMMM"},
-					{text:"MMMMMMMMMMMM"},
-					{text:"MMMMMMMMMMMMMMM"},
+					{text:"MMMMMM", label:{height:20}},
+					{text:"MMMMMMMMM", label:{height:25}},
+					{text:"MMMMMMMMMMMM", label:{height:30}},
+					{text:"MMMMMMMMMMMMMMM", label:{height:35}},
+					{text:"MMMMMMMMMMMMMMMMMM", label:{height:40}},
 				]
 			}
 		}

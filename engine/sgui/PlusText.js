@@ -126,8 +126,6 @@ load.provide("dusk.sgui.PlusText", (function() {
 			if(this.height >= 0) this.get("plus").height = this.height;
 		}
 		
-		this.get("label").text = this.text;
-		
 		if(!this.height) this.height = this.get("plus").height;
 		this.get("label").height = this.height;
 	};
@@ -163,6 +161,13 @@ load.provide("dusk.sgui.PlusText", (function() {
 			this.get("label").update(value);
 			this.get("plus").alterLayer("-label");
 		}
+	});
+	
+	//Text
+	Object.defineProperty(PlusText.prototype, "text", {
+		get: function() {return this.get("label").text;},
+		
+		set: function(value) {this.get("label").text = value;}
 	});
 	
 	//plusType
