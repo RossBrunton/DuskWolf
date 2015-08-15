@@ -85,49 +85,50 @@ load.provide("dusk.sgui.PlusText", (function() {
 		this._mapper.map("plusProxy", "plusProxy");
 		
 		//Listeners
-		this.frame.listen(_frame.bind(this));
+		this._onBeforePaintChildren.listen(_obpc.bind(this));
 		
 		//Setup
 		this.focusBehaviour = Group.FOCUS_ALL;
 	};
 	PlusText.prototype = Object.create(Group.prototype);
 	
-	/** Called every frame, to update the location and widths.
+	/** Called before the component is painted to update locations.
 	 * @param {object} e The event object.
 	 * @private
 	 */
-	var _frame = function(e) {
-		if(this.width >= 0) {
-			this.get("label").width = this.width - this.get("plus").width - this.spacing;
-		}
+	var _obpc = function(e) {
+		var l = this.get("label");
+		var p = this.get("plus");
 		
-		if(this.onLeft) {
-			this.get("plus").x = 0;
-			this.get("label").x = this.get("plus").width + this.spacing;
-		}else{
-			this.get("plus").x = this.width - this.get("plus").width;
-			this.get("label").x = 0;
+		if(this.width >= 0) {
+			l.width = this.width - p.width - this.spacing;
 		}
 		
 		if(this.behind) {
-			if(!this.get("label").multiline) {
-				this.get("label").width = -1;
+			if(!l.multiline) {
+				l.width = -1;
 			}else{
 				if(this.width >= 0) {
-					this.get("label").width = this.width - this.spacing;
+					l.width = this.width - this.spacing;
 				}
 			}
 			
-			this.get("plus").x = 0;
-			this.get("label").xOrigin = "middle";
-			this.get("label").x = 0;
+			p.x = 0;
+			l.xOrigin = "middle";
+			l.x = 0;
 			
-			if(this.width >= 0) this.get("plus").width = this.width;
-			if(this.height >= 0) this.get("plus").height = this.height;
+			if(this.width >= 0) p.width = this.width;
+			if(this.height >= 0) p.height = this.height;
+		}else if(this.onLeft) {
+			p.x = 0;
+			l.x = p.width + this.spacing;
+		}else{
+			p.x = this.width - p.width;
+			l.x = 0;
 		}
 		
-		if(!this.height) this.height = this.get("plus").height;
-		this.get("label").height = this.height;
+		if(!this.height) this.height = p.height;
+		l.height = this.height;
 	};
 	
 	/** Override to enable `{@link dusk.sgui.PlusText.plusProxy}`.
