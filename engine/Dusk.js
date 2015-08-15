@@ -24,7 +24,7 @@ load.provide("dusk", (function() {
 	 * 
 	 * If it exists, this is set the value of the DuskWolf element's "data" property.
 	 * @type string
-	 * @defualt "Data/"
+	 * @defualt "data/"
 	 */
 	dusk.dataDir = "data/";
 	
