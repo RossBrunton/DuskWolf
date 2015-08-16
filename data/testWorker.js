@@ -9,6 +9,10 @@ load.provide("testworker", (function(global) {
 		console.log("Worker: Doing...");
 		order.processed = true;
 		
-		return [order];
+		for(var i = 0; i < order.arr.length; i ++) {
+			order.arr[i] = i;
+		}
+		
+		return [order, [order.arr.buffer]];
 	}
 })(this));

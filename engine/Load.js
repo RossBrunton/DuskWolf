@@ -103,8 +103,8 @@ global.load = (function(global) {
 				load.addDependency.apply(load, e.data[1]);
 			}else{
 				load.import(e.data[1]).then(function(pack) {
-					var data = pack(e.data[2]);
-					global.postMessage([e.data[0], data[0]], data[1]);
+					var output = pack(e.data[2]);
+					global.postMessage([e.data[0], output[0]], output[1]);
 				});
 			}
 		}
@@ -155,7 +155,7 @@ global.load = (function(global) {
 			_workerStates.set(w, false);
 			
 			w.onmessage = function(e) {
-				_workerStates.set(w, false);
+				_workerStates.set(e.target, false);
 				
 				var f = _workPromises.get(e.data[0]);
 				_workPromises.delete(e.data[0]);
@@ -173,7 +173,7 @@ global.load = (function(global) {
 					
 					var task = _workOrders.splice(0, 1)[0];
 					
-					worker[0].postMessage(task);
+					worker[0].postMessage(task.slice(0, 3), task[3]);
 					_workerStates.set(worker[0], true);
 					
 					if(!_workOrders.length) return;
