@@ -9,7 +9,7 @@ load.provide("dusk.sgui.SayBox", (function() {
 	var Fade = load.require("dusk.sgui.extras.Fade");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
-	var UserCancelError = load.require("dusk.utils.reversiblePromiseChain.UserCancelError");
+	var Runner = load.suggest("dusk.script.Runner", function(p) {Runner = p});
 	
 	/** Group of components that function as a dialogue box.
 	 * 
@@ -91,11 +91,15 @@ load.provide("dusk.sgui.SayBox", (function() {
 		this._toRight = "";
 		
 		/** The function to be called when fulfilled.
+		 * 
+		 * This will be set to null when the saybox either fulfills or rejects.
 		 * @type function
 		 * @private
 		 */
 		this._fulfill = null;
 		/** The function to be called when rejected.
+		 * 
+		 * This will be set to null when the saybox either fulfills or rejects.
 		 * @type function
 		 * @private
 		 */
@@ -149,8 +153,10 @@ load.provide("dusk.sgui.SayBox", (function() {
 	var _action = function(e) {
 		if(this._streaming) {
 			this._complete();
-		}else{
-			this._fulfill(this._pass);
+		}else if(this._fulfill) {
+			this._fulfill(undefined);
+			this._fulfill = null;
+			this._reject = null;
 			this._continue.visible = false;
 		}
 	};
@@ -162,8 +168,10 @@ load.provide("dusk.sgui.SayBox", (function() {
 	var _cancel = function(e) {
 		if(this._streaming) {
 			this._complete();
-		}else{
-			this._reject(new UserCancelError());
+		}else if(this._reject) {
+			this._reject(new SayBox.CancelError());
+			this._fulfill = null;
+			this._reject = null;
 		}
 	};
 	
@@ -198,9 +206,9 @@ load.provide("dusk.sgui.SayBox", (function() {
 		
 		return new Promise((function(fulfill, reject) {
 			if(context) {
-				left = _format(left, context);
-				right = _format(right, context);
-				body = _format(body, context);
+				if(left) left = _format(left, context);
+				if(right) right = _format(right, context);
+				if(body) body = _format(body, context);
 			}
 			
 			if(!left) {
@@ -222,6 +230,31 @@ load.provide("dusk.sgui.SayBox", (function() {
 			this._fulfill = fulfill;
 			this._reject = reject;
 		}).bind(this));
+	};
+	
+	/** Returns an action for a script runner that runs the say function.
+	 * 
+	 * @param {string} left The text to put in the left box.
+	 * @param {?string} body The text to put in the body.
+	 * @param {?string} right The text to put in the right box after the text has finished filling.
+	 * @param {?string} copy The name value on the passed argument to use as the context for say.
+	 * @param {?array|string} options Currently unused.
+	 * @param {string="sayBoxOption"} optionDest Current unused.
+	 * @return {object} The action
+	 */
+	SayBox.prototype.runnerSayAction = function(left, body, right, copy, options, optionDest) {
+		return Runner.action("dusk.sgui.SayBox.runnerSayAction", (function(x, add) {
+			var loptions = (typeof options == "string") ? x[options] : options;
+			
+			return this.say(left, body, right, copy?x[copy]:{}, loptions).then(function(choice) {
+				x[optionDest?optionDest:"sayBoxOption"] = choice;
+				return x;
+			}, function(except) {
+				if(except instanceof SayBox.CancelError) {
+					throw new Runner.Cancel();
+				}
+			});
+		}).bind(this), function() {});
 	};
 	
 	var _format = function(base, context) {
@@ -320,14 +353,16 @@ load.provide("dusk.sgui.SayBox", (function() {
 				"from":0.5,
 				"to":1.0,
 				"duration":60,
-				"noDelete":true
+				"noDelete":true,
+				"then":"fadeOut",
 			},
 			fadeOut:{
 				"type":"Fade",
 				"from":1.0,
 				"to":0.5,
 				"duration":60,
-				"noDelete":true
+				"noDelete":true,
+				"then":"fadeIn"
 			},
 		}
 	});
@@ -343,6 +378,17 @@ load.provide("dusk.sgui.SayBox", (function() {
 		this.name = "SayBoxFormatError";
 	};
 	SayBox.FormatError.prototype = Object.create(Error.prototype);
+	
+	/** An error raised if the user cancels the message.
+	 * @since 0.0.21-alpha
+	 * @constructor
+	 * @extends Error
+	 */
+	SayBox.CancelError = function() {
+		this.message = "User cancelled message";
+		this.name = "SayBoxCancelError";
+	};
+	SayBox.CancelError.prototype = Object.create(Error.prototype);
 	
 	return SayBox;
 })());
