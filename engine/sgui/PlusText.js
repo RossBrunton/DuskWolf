@@ -151,7 +151,10 @@ load.provide("dusk.sgui.PlusText", (function() {
 	//Plus
 	Object.defineProperty(PlusText.prototype, "plus", {
 		get: function() {return this.get("plus").bundle();},
-		set: function(value) {this.get("plus").update(value);}
+		set: function(value) {
+			this.get("plus").update(value);
+			this.get("plus").alterLayer("-label");
+		}
 	});
 	
 	//Label
