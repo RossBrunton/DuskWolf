@@ -744,50 +744,19 @@ load.provide("dusk.sgui.Component", (function() {
 		if(width === undefined) width = this.getRenderingWidth();
 		if(height === undefined) height = this.getRenderingHeight();
 		
-		if(!this.visible || this.alpha <= 0) return;
+		var container = PosRect.pool.alloc();
+		var containerSlice = PosRect.pool.alloc();
+		var display = PosRect.pool.alloc();
 		
-		// Transparency
-		var oldAlpha = -1;
-		var alpha = this.alpha;
-		if(this.alpha != ctx.globalAlpha && this.alpha != 1) {
-			oldAlpha = ctx.globalAlpha;
-			ctx.globalAlpha *= this.alpha;
-		}
+		container.setWH(0, 0, width, height);
+		containerSlice.setWH(0, 0, width, height);
+		display.setWH(x, y, width, height);
 		
-		// From the component with these dimensions
-		var source = PosRect.pool.alloc();
-		// Slice this bit out of it
-		var slice = PosRect.pool.alloc();
-		// And put it here
-		var dest = PosRect.pool.alloc();
+		this.paintContainer(ctx, container, containerSlice, display);
 		
-		// Calculate source
-		source.setWH(x, y, width, height);
-		
-		// Then calculate the slice and dest
-		dest.setWH(x, y, source.width, source.height);
-		slice.setWH(0, 0, dest.width, dest.height);
-		
-		this.onPaint.fire({"c":ctx, "d":{"dest":dest, "slice":slice, "origin":source}});
-		
-		if(this.activeBorder !== null && this.active) {
-			ctx.strokeStyle = this.activeBorder;
-			ctx.strokeRect(dest.x+0.5, dest.y+0.5, slice.width-1, slice.height-1);
-		}
-		
-		if(this.mark) {
-			ctx.strokeStyle = this.mark;
-			ctx.fillStyle = this.mark;
-			ctx.font = "10px sans";
-			ctx.fillText(this.name, dest.x + 1, dest.y + 10);
-			ctx.strokeRect(dest.x+0.5, dest.y+0.5, slice.width-1, slice.height-1);
-		}
-		
-		if(oldAlpha >= 0) ctx.globalAlpha = oldAlpha;
-		
-		PosRect.pool.free(source);
-		PosRect.pool.free(slice);
-		PosRect.pool.free(dest);
+		PosRect.pool.free(container);
+		PosRect.pool.free(containerSlice);
+		PosRect.pool.free(display);
 	};
 	
 	/** Alters the layer this is on.
