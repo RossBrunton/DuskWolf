@@ -189,23 +189,18 @@ load.provide("dusk.sgui.SayBox", (function() {
 	 * @param {string} left The text to put in the left box.
 	 * @param {?string} body The text to put in the body.
 	 * @param {?string} right The text to put in the right box after the text has finished filling.
+	 * @param {?object} context Used for value formatting.
 	 * @param {?array} options Currently unused.
-	 * @param {?*} pass Passed argument, will be the value the promise fulfills.
 	 * @return {Promise(*)} A promise that fulfills or rejects based on the users interaction to the saybox.
 	 */
-	SayBox.prototype.say = function(left, body, right, options, pass) {
+	SayBox.prototype.say = function(left, body, right, context, options) {
 		if(this.autoActive && !this.active) this.becomeActive();
 		
 		return new Promise((function(fulfill, reject) {
-			if("sayVars" in pass) {
-				for(var v in pass.sayVars) {
-					body = body.split("{{"+v+"}}").join(pass.sayVars[v]);
-					if(left) left = left.split("{{"+v+"}}").join(pass.sayVars[v]);
-					if(right) right = right.split("{{"+v+"}}").join(pass.sayVars[v]);
-					if(options) options = options.map(
-						function(elem) {return elem.split("{{"+v+"}}").join(pass.sayVars[v]);}
-					);
-				}
+			if(context) {
+				left = _format(left, context);
+				right = _format(right, context);
+				body = _format(body, context);
 			}
 			
 			if(!left) {
@@ -226,37 +221,41 @@ load.provide("dusk.sgui.SayBox", (function() {
 			
 			this._fulfill = fulfill;
 			this._reject = reject;
-			this._pass = pass;
 		}).bind(this));
 	};
 	
-	/** Returns `say` with the arguments bound.
-	 * @param {string} left The text to put in the left box.
-	 * @param {string} body The text to put in the body.
-	 * @param {string} right The text to put in the right box after the text has finished filling.
-	 * @param {array} options Currently unused.
-	 * @param {?*} pass Passed argument, will be the value the promise fulfills.
-	 * @return {function(string, ?string, ?string, ?array, ?*}):Promise(*)} The bound function.
-	 */
-	SayBox.prototype.sayBound = function(left, body, right, options, pass) {
-		return this.say.bind(this, left, body, right, options);
-	};
-	
-	/** Returns an array with `say` with the arguments bound as the first argument, and a resolving function as the
-	 *  second for use with ReversiblePromiseChains.
-	 * @param {string} left The text to put in the left box.
-	 * @param {string} body The text to put in the body.
-	 * @param {string} right The text to put in the right box after the text has finished filling.
-	 * @param {array} options Currently unused.
-	 * @param {?*} pass Passed argument, will be the value the promise fulfills.
-	 * @return {array} The functions.
-	 */
-	SayBox.prototype.sayBoundPair = function(left, body, right, options, pass) {
-		return [
-			this.sayBound(left, body, right, options, pass),
-			function(pa) {return Promise.resolve();},
-			"Saybox: "+left+": "+body.substring(0, 30)+"..."
-		];
+	var _format = function(base, context) {
+		var outs = "";
+		
+		for(var p = 0; p < base.length; p ++) {
+			var c = base[p];
+			
+			if(c == "{") {
+				var c = base[++p];
+				
+				var transfn = {
+					"{":function(k) {return context[k];},
+					"%":function(k) {return context[k].apply(undefined, arguments);},
+				}[c];
+				
+				var expr = "";
+				var nc;
+				while((nc = base[++p]) && nc != "}") {
+					if(nc == "\\") {
+						expr += base[++p];
+					}else{
+						expr += nc;
+					}
+				}
+				
+				outs += transfn.apply(undefined, expr.trim().split(/\s/gi));
+				p ++;
+			}else{
+				outs += c;
+			}
+		}
+		
+		return outs;
 	};
 	
 	sgui.registerType("SayBox", SayBox);
@@ -267,6 +266,7 @@ load.provide("dusk.sgui.SayBox", (function() {
 		height:35,
 		mark:"#00ff00",
 		behind:true,
+		visible:false,
 		plus:{
 			xDisplay:"expand"
 		},
@@ -297,6 +297,7 @@ load.provide("dusk.sgui.SayBox", (function() {
 		height:35,
 		mark:"#00ff00",
 		behind:true,
+		visible:false,
 		plus:{
 			xDisplay:"expand"
 		},
@@ -330,6 +331,18 @@ load.provide("dusk.sgui.SayBox", (function() {
 			},
 		}
 	});
+	
+	/** An error raised if there is a problem parsing the formatting syntax.
+	 * @param {string} message The message that this error should display.
+	 * @since 0.0.21-alpha
+	 * @constructor
+	 * @extends Error
+	 */
+	SayBox.FormatError = function(message) {
+		this.message = message;
+		this.name = "SayBoxFormatError";
+	};
+	SayBox.FormatError.prototype = Object.create(Error.prototype);
 	
 	return SayBox;
 })());
