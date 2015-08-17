@@ -4,7 +4,7 @@
 
 load.provide("dusk.sgui.SayBox", (function() {
 	var Group = load.require("dusk.sgui.Group");
-	var TextBack = load.require("dusk.sgui.TextBack");
+	var PlusText = load.require("dusk.sgui.PlusText");
 	var Image = load.require("dusk.sgui.Image");
 	var Fade = load.require("dusk.sgui.extras.Fade");
 	var sgui = load.require("dusk.sgui");
@@ -49,17 +49,17 @@ load.provide("dusk.sgui.SayBox", (function() {
 		 * @type dusk.sgui.TextBack
 		 * @private
 		 */
-		this._body = this.get("body", "TextBack");
+		this._body = this.get("body", "PlusText");
 		/** The right component.
 		 * @type dusk.sgui.TextBack
 		 * @private
 		 */
-		this._right = this.get("right", "TextBack");
+		this._right = this.get("right", "PlusText");
 		/** The left component.
 		 * @type dusk.sgui.TextBack
 		 * @private
 		 */
-		this._left = this.get("left", "TextBack");
+		this._left = this.get("left", "PlusText");
 		/** The continue component.
 		 * @type dusk.sgui.Image
 		 * @private
@@ -267,60 +267,71 @@ load.provide("dusk.sgui.SayBox", (function() {
 	sgui.registerType("SayBox", SayBox);
 	
 	sgui.addStyle("SayBox>#left", {
-		"behind":true,
-		"x":10,
-		"height":35,
-		"label":{
+		behind:true,
+		x:10,
+		height:35,
+		mark:"#00ff00",
+		behind:true,
+		plus:{
+			xDisplay:"expand"
+		},
+		label:{
 			"padding":10,
 		}
 	});
 	sgui.addStyle("SayBox>#body", {
-		"behind":true,
-		"height":100,
-		"xDisplay":"expand",
-		"mark":"#0000ff",
-		"y":40,
-		"label":{
-			"multiline":true,
-			"padding":10,
-			"xDisplay":"expand",
-			"mark":"#00ff00",
+		behind:true,
+		height:100,
+		xDisplay:"expand",
+		y:40,
+		mark:"#00ff00",
+		behind:true,
+		plus:{
+			xDisplay:"expand"
+		},
+		label:{
+			multiline:true,
+			padding:10,
+			xDisplay:"expand",
 		}
 	});
 	sgui.addStyle("SayBox>#right", {
-		"behind":true,
-		"xOrigin":"right",
-		"x":-10,
-		"height":35,
-		"label":{
-			"padding":10,
+		behind:true,
+		xOrigin:"right",
+		x:-10,
+		height:35,
+		mark:"#00ff00",
+		behind:true,
+		plus:{
+			xDisplay:"expand"
+		},
+		label:{
+			padding:10,
 		}
 	});
 	sgui.addStyle("SayBox>#continue", {
-		"behind":true,
-		"xOrigin":"right",
-		"yOrigin":"bottom",
-		"x":-10,
-		"y":-5,
-		"src":"default/next.png",
-		"width":16,
-		"height":16,
-		"extras":{
-			"fadeIn":{
+		behind:true,
+		xOrigin:"right",
+		yOrigin:"bottom",
+		x:-10,
+		y:-5,
+		src:"default/next.png",
+		width:16,
+		height:16,
+		extras:{
+			fadeIn:{
 				"type":"Fade",
 				"from":0.5,
 				"to":1.0,
 				"duration":60,
-				"noDelete":true,
-				"then":"fadeOut"
+				"noDelete":true
 			},
-			"fadeOut":{
+			fadeOut:{
 				"type":"Fade",
 				"from":1.0,
 				"to":0.5,
 				"duration":60,
-				"noDelete":true,
-				"then":"fadeIn"
+				"noDelete":true
 			},
 		}
 	});
