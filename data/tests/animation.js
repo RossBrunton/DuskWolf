@@ -11,7 +11,6 @@ load.provide("tests.animation", (function() {
 	load.require("dusk.sgui.FpsMeter");
 	load.require("dusk.sgui.PlusText");
 	load.require("dusk.entities.sgui.EntityWorkshop");
-	load.require("dusk.sgui.TextBack");
 	load.require("dusk.tiles.sgui.Tile");
 	load.require("dusk.tiles.sgui.extras.AnimatedTile");
 	var atTypes = load.require("dusk.tiles.sgui.extras.animationTypes");

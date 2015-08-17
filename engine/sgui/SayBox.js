@@ -11,22 +11,17 @@ load.provide("dusk.sgui.SayBox", (function() {
 	var c = load.require("dusk.sgui.c");
 	var UserCancelError = load.require("dusk.utils.reversiblePromiseChain.UserCancelError");
 	
-	/** Creates a new SayBox component.
+	/** Group of components that function as a dialogue box.
 	 * 
-	 * @param {dusk.sgui.Group} parent The container that this component is in.
-	 * @param {string} name The name of the component.
-	 * 
-	 * @class dusk.sgui.SayBox
-	 * 
-	 * @classdesc A saybox is a combination of components that are arranged such that they create a "conversation area"
+	 * A saybox is a combination of components that are arranged such that they create a "conversation area"
 	 *  like in RPGs and stuff. It consists of two single line text boxes (one at the left for a "name", one at the
 	 *  right for other things), a larger box below these two (for the main body of the text) and an image which is only
 	 *  visible when the user can advance the text.
 	 * 
 	 * The components of this group may be styled, and are named as follows:
-	 * - body: The main body of the saybox of type TextBack.
-	 * - right: The right text box of type TextBack.
-	 * - left: The left text box of type TextBack.
+	 * - body: The main body of the saybox of type PlusText.
+	 * - right: The right text box of type PlusText.
+	 * - left: The left text box of type PlusText.
 	 * - continue: The image that is displayed when the user can continue of type Image.
 	 * 
 	 * Messages can be set using the method `say` or similar. The textbox will slowly type out the message
@@ -46,17 +41,17 @@ load.provide("dusk.sgui.SayBox", (function() {
 		Group.call(this, parent, name);
 		
 		/** The body component.
-		 * @type dusk.sgui.TextBack
+		 * @type dusk.sgui.PlusText
 		 * @private
 		 */
 		this._body = this.get("body", "PlusText");
 		/** The right component.
-		 * @type dusk.sgui.TextBack
+		 * @type dusk.sgui.PlusText
 		 * @private
 		 */
 		this._right = this.get("right", "PlusText");
 		/** The left component.
-		 * @type dusk.sgui.TextBack
+		 * @type dusk.sgui.PlusText
 		 * @private
 		 */
 		this._left = this.get("left", "PlusText");

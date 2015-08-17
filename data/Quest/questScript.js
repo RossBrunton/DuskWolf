@@ -145,7 +145,7 @@ load.provide("questScript", (function() {
 	window.q = dquest.puppeteer;
 	
 	// Apply styles
-	sgui.addStyle("SayBox>TextBack", {
+	sgui.addStyle("SayBox>PlusText", {
 		"plusType":"FancyRect",
 		"plus":{
 			"back":"fancyRect/back.png",

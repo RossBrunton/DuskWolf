@@ -11,7 +11,7 @@ load.provide("guiTest", (function() {
 	load.require("dusk.sgui.FpsMeter");
 	load.require("dusk.sgui.PlusText");
 	load.require("dusk.entities.sgui.EntityWorkshop");
-	load.require("dusk.sgui.TextBack");
+	load.require("dusk.sgui.PlusText");
 	
 	var SaveSpec = load.require("dusk.save.SaveSpec");
 	var checkpoints = load.require("dusk.checkpoints");
@@ -311,12 +311,13 @@ load.provide("guiTest", (function() {
 			
 			// BackText
 			"btext":{
-				"type":"TextBack",
+				"type":"PlusText",
 				//"visible":false,
 				"x":100,
 				"y":20,
 				"width":100,
 				"height":40,
+				"behind":true,
 				"plus":{
 					"type":"Rect",
 					"colour":"#333333",
