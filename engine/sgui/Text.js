@@ -8,8 +8,10 @@ load.provide("dusk.sgui.Label.textLocation", (function() {
 		
 		this.x = 0;
 		this.y = 0;
-        this.lines = 0;
-        this.chars = 0;
+		this.lines = 0;
+		this.chars = 0;
+		this.maxWidth = 0;
+		this.restrictMaxWidth = -1;
 		
 		this.reset();
 	};
@@ -17,19 +19,19 @@ load.provide("dusk.sgui.Label.textLocation", (function() {
 	Location.prototype.reset = function() {
 		this.x = this._label.padding;
 		this.y = this._label.padding + (this._label.size)/2;
-        this.lines = 1;
-        this.chars = 0;
+		this.lines = 1;
+		this.chars = 0;
 	};
 	
 	Location.prototype.advance = function(ctx, text) {
 		this.x += ctx.measureText(text).width;
-        this.chars += text.length;
+		this.chars += text.length;
 	};
 	
 	Location.prototype.newline = function(ctx) {
 		this.x = this._label.padding;
 		this.y += this._label.size;
-        this.lines ++;
+		this.lines ++;
 	};
 	
 	Location.prototype.measure = function(ctx, text) {
@@ -37,8 +39,8 @@ load.provide("dusk.sgui.Label.textLocation", (function() {
 	};
 	
 	Location.prototype.needsBreak = function(ctx, text) {
-        if(this._label.width < 0) return false;
-		if(this._label.multiline && this.x + this.measure(ctx, text) > this._label.width - this._label.padding*2) {
+		if(this.restrictMaxWidth < 0) return false;
+		if(this._label.multiline && this.x + this.measure(ctx, text) > this.restrictMaxWidth - this._label.padding*2) {
 			return true;
 		}
 		
@@ -46,10 +48,10 @@ load.provide("dusk.sgui.Label.textLocation", (function() {
 	};
 	
 	Location.prototype.lineTooLong = function(ctx, text, base) {
-        if(this._label.width < 0) return false;
-        if(base === undefined) base = 0;
-        
-		if(this._label.multiline && base + this.measure(ctx, text) > this._label.width - this._label.padding*2) {
+		if(this.restrictMaxWidth < 0) return false;
+		if(base === undefined) base = 0;
+		
+		if(this._label.multiline && base + this.measure(ctx, text) > this.restrictMaxWidth - this._label.padding*2) {
 			return true;
 		}
 		
@@ -87,7 +89,7 @@ load.provide("dusk.sgui.Label.textLocation", (function() {
 				curLineSize = this.measure(ctx, word);
 			}else{
 				curLine += word + ws;
-                curLineSize += this.measure(ctx, word + ws);
+				curLineSize += this.measure(ctx, word + ws);
 			}
 		};
 		
@@ -117,6 +119,7 @@ load.provide("dusk.sgui.Label.formatBlock", (function() {
 					first = false;
 					
 					var t = l.substring(0, remainingChars);
+					remainingChars -= l.length;
 					
 					//if(useBorder)
 					//	c.strokeText(textBuffer, cursor, this.padding + (line * this.size) + (this.size >> 1));
@@ -219,12 +222,13 @@ load.provide("dusk.sgui.Label", (function() {
 		 * @private
 		 */
 		this._sig = "";
-		/** The canvas onto which the cache is drawn. Will be null until there is initial text, and then it will store
-		 *  the  formatted version of that text.
-		 * @type HTMLCanvasElement
+		/** The canvas onto which the caches are drawn
+		 * 
+		 * Is a map from a given width to HTML canvas elements. Single line text fields always use -1.
+		 * @type Map.<integer, HTMLCanvasElement>
 		 * @private
 		 */
-		this._cache = utils.createCanvas(0, 0);
+		this._caches = new Map();
 		
 		/** The size of the text, in pixels.
 		 * @type integer
@@ -318,11 +322,11 @@ load.provide("dusk.sgui.Label", (function() {
 		this.validDefault = "";
 		
 		this._location = new Location(this);
-        this.chars = 0;
-        this.displayChars = Number.MAX_SAFE_INTEGER;
-        
-        this.width = -1;
-        this.height = -1;
+		this.chars = 0;
+		this.displayChars = Number.MAX_SAFE_INTEGER;
+		
+		this.width = -1;
+		this.height = -1;
 		
 		//Prop masks
 		this._mapper.map("text", "text");
@@ -341,7 +345,6 @@ load.provide("dusk.sgui.Label", (function() {
 		this._mapper.map("validFilter", "validFilter");
 		this._mapper.map("validCancel", "validCancel");
 		this._mapper.map("validDefault", "validDefault");
-		this._mapper.map("shadowText", "shadowText");
 		
 		//Listeners
 		this.onPaint.listen(_draw.bind(this));
@@ -391,19 +394,22 @@ load.provide("dusk.sgui.Label", (function() {
 		if(this.text !== "" && !this._supressTextDisplay){
 			if(this._sig != this._genSig(e)) {
 				//Rebuild the text cache
-				this._processText(false, undefined, e.d.origin.width);
+				this._clearCache();
 			}
+			
+			this._processText(false, e.d.origin.width);
+			var cache = this._caches.get(this.multiline ? e.d.origin.width : -1);
 			
 			var xDelta = 0;
 			var yDelta = 0;
-			if(e.d.slice.width > this._cache.width) {
-				xDelta = this._cache.width - e.d.slice.width;
+			if(e.d.slice.width > cache.width) {
+				xDelta = cache.width - e.d.slice.width;
 			}
-			if(e.d.slice.height > this._cache.height) {
-				yDelta = this._cache.height - e.d.slice.height;
+			if(e.d.slice.height > cache.height) {
+				yDelta = cache.height - e.d.slice.height;
 			}	
 			
-			e.c.drawImage(this._cache, e.d.slice.x, e.d.slice.x, e.d.slice.width + xDelta,  e.d.slice.height + yDelta,
+			e.c.drawImage(cache, e.d.slice.x, e.d.slice.x, e.d.slice.width + xDelta,  e.d.slice.height + yDelta,
 				e.d.dest.x, e.d.dest.y, e.d.dest.width + xDelta, e.d.dest.height + yDelta
 			);
 		}
@@ -419,56 +425,59 @@ load.provide("dusk.sgui.Label", (function() {
 		
 		if(!this.validFilter.test(this._text)) this._text = this.validDefault;
 	};
-    
-    Label.prototype._configContext = function(ctx) {
-        ctx.font = this.size + "px " + this.font;
+	
+	Label.prototype._configContext = function(ctx) {
+		ctx.font = this.size + "px " + this.font;
 		ctx.fillStyle = this.colour;
 		ctx.strokeStyle = this.borderColour;
 		ctx.lineWidth = this.borderSize;
 		ctx.textBaseline = "middle";
-    };
+	};
 	
 	/** Either draws onto the cache, or measures some text.
 	 * @param {boolean} measure Will only update the dimensions, rather than drawing the text.
-	 * @param {?string} text The text to use, defaults to the contents of this text field. Using other text does not
-	 *  set the internal storage of this label, obviously.
-	 * @param {?integer} knownWidth For multiline text fields only, this is the width of the component (so text wrapping
-	 *  works). Defaults to the component's width, and obviously if your component is in expand mode it won't set
-	 *  correctly.
+	 * @param {?integer} width The width to generate a cache for iff this is a multiline label.
+	 *  If ommited it will be this.width if it is defined.
 	 * @return {Array} A [lines, width] Pair of the dimensions.
 	 * @private
 	 */
-	Label.prototype._processText = function(measure, text, knownWidth) {
-		var textHold = text !== undefined?text:this._text;
-		var textBuffer = "";
+	Label.prototype._processText = function(measure, width) {
+		var width = this.multiline ? (width >= 0 ? width : this.width) : -1;
+		
+		// Don't bother if a value already exists
+		if(this._caches.has(width)) return;
 		
 		//Create the cache
-		var cache = this._cache;
-		
+		var cache = utils.createCanvas(0, 0);
+		if(width > 0) cache.width = width;
 		var c = cache.getContext("2d");
 		
-        this._configContext(c);
-		
-		var useBorder = this.borderSize > 0;
-        
+		// Parse the text
 		var f = new FormatBlock([this.text]);
-        
-        this._location.reset();
-        f.print(c, this._location, Infinity, true);
-        this._cachedWidth = this._location.x + this.padding;
-        this.lines = this._location.lines;
-        this.chars = this._location.chars;
-        
-        cache.width = this.width >= 0 ? this.width : this._cachedWidth;
-        cache.height = this.lines * this.size + (this.padding<<1);
-        this._configContext(c);
+		this._location.reset();
+		this._location.restrictMaxWidth = width;
 		
-        if(!measure) {
-            this._location.reset();
-            f.print(c, this._location, this.displayChars);
+		// Measure the text
+		this._configContext(c);
+		f.print(c, this._location, Number.MAX_SAFE_INTEGER, true);
+		this._cachedWidth = this._location.x + this.padding;
+		this.lines = this._location.lines;
+		this.chars = this._location.chars;
+		
+		// Now actually create the cache
+		if(!measure) {
+			cache.width = width >= 0 ? width : this._cachedWidth;
+			cache.height = this.lines * this.size + (this.padding<<1);
+			
+			this._configContext(c);
+			this._location.reset();
+			f.print(c, this._location, this.displayChars);
 		}
 		
-		return [this.lines, this._cachedWidth];
+		// And set the cache
+		this._caches.set(width, cache);
+		
+		return;
 	};
 	
 	/** Counts the number of lines (if it is a multiline text field) that the given text takes up.
@@ -481,37 +490,26 @@ load.provide("dusk.sgui.Label", (function() {
 		
 		return this._processText(true, text)[0];
 	};
-    
-    Label.prototype.getRenderingWidth = function() {
-        if(this.width > -1) {
-            return this.width
-        }else{
-            return this._cachedWidth+(this.padding<<1);
-        }
-    };
-    
-    Label.prototype.getRenderingHeight = function() {
-        if(this.height > -1) {
-            return this.height;
-        }else{
-            return (this.lines ? this.lines : 1) * this.size + (this.padding<<1);
-        }
-    };
 	
-	//width
-	/*Object.defineProperty(Label.prototype, "width", {
-		get: function() {
-			if(this._width > -1) {
-				return this._width
-			}else{
-				return this._cachedWidth+(this.padding<<1);
-			}
-		},
-		set: function(value) {
-			if(value < 0) this._width = -1;
-			else this._width = value-(this.padding<<1);
+	Label.prototype._clearCache = function() {
+		this._caches = new Map();
+	};
+	
+	Label.prototype.getRenderingWidth = function() {
+		if(this.width > -1) {
+			return this.width
+		}else{
+			return this._cachedWidth+(this.padding<<1);
 		}
-	});*/
+	};
+	
+	Label.prototype.getRenderingHeight = function() {
+		if(this.height > -1) {
+			return this.height;
+		}else{
+			return (this.lines ? this.lines : 1) * this.size + (this.padding<<1);
+		}
+	};
 	
 	//text
 	Object.defineProperty(Label.prototype, "text", {
@@ -523,7 +521,8 @@ load.provide("dusk.sgui.Label", (function() {
 				if(!this.validFilter || !this.validCancel || this.validFilter.test(value)) {
 					if(this.onChange.fireAnd({"component":this, "text":""+value})) {
 						this._text = ""+value;
-                        this._processText(true);
+						this._clearCache();
+						this._processText(true);
 						this.postChange.fire({"component":this, "text":""+value});
 					}
 				}

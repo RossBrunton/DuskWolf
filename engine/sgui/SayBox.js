@@ -180,7 +180,7 @@ load.provide("dusk.sgui.SayBox", (function() {
 	 * @private
 	 */ 
 	SayBox.prototype._complete = function() {
-		this._body.text = this._streaming;
+		this._body.get("label").displayChars = Number.MAX_SAFE_INTEGER;
 		this._streaming = "";
 		
 		if(this._toRight) {
