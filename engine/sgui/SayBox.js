@@ -24,14 +24,19 @@ load.provide("dusk.sgui.SayBox", (function() {
 	 * - left: The left text box of type PlusText.
 	 * - continue: The image that is displayed when the user can continue of type Image.
 	 * 
-	 * Messages can be set using the method `say` or similar. The textbox will slowly type out the message
-	 *  and allow the user a chance to read the text and when they are ready they can trigger an action to continue.
-	 *  The method say returns a promise that resolves when the user has "confirmed" the text box, while it rejects if
-	 *  the user cancels.
+	 * Messages can be set using the method `say`. The textbox will slowly type out the message and allow the user a
+	 *  chance to read the text and when they are ready they can trigger an action to continue. The method returns a
+	 *  promise that resolves when the user has "confirmed" the text box, while it rejects (with `SayBox.CancelError`)
+	 *  if the user cancels.
 	 * 
-	 * The method `sayBoundPair` allows messages to be set using a ReversiblePromiseChain. An argument can be passed
-	 *  through the promise in this way, and if there is a property called `sayVars` on the passed object, it's keys are
-	 *  iterated as `x` and any occurence of `{{x}}` in text will be replaced by the value.
+	 * The say function can be given a context object. If given, all the text given will be parsed and tokens looking
+	 *  like the following will be replaced with their appropriate values:
+	 * - {{ var }}: Directly insert the value of context[var].
+	 * - {% fun arg1 arg2 %}: Call context[fun](fun, arg1, arg2) and insert it's return value. Any number of arguments
+	 *  (even none) is supported, and they are seperated by spaces.
+	 * 
+	 * You can escape characters by adding `\` before them (if you are using JavaScript literals, you'll need to use
+	 * `\\` to actually escape `\`). Spaces in var names and arguments are not supported.
 	 * 
 	 * @extends dusk.sgui.Group
 	 * @constructor
@@ -271,9 +276,13 @@ load.provide("dusk.sgui.SayBox", (function() {
 					"%":function(k) {return context[k].apply(undefined, arguments);},
 				}[c];
 				
+				var close = {"%":"%", "{":"}"}[c];
+				
+				if(!transfn) throw new SayBox.FormatError("Unknown syntax {"+c);
+				
 				var expr = "";
 				var nc;
-				while((nc = base[++p]) && nc != "}") {
+				while((nc = base[++p]) && nc != close) {
 					if(nc == "\\") {
 						expr += base[++p];
 					}else{
@@ -283,6 +292,10 @@ load.provide("dusk.sgui.SayBox", (function() {
 				
 				outs += transfn.apply(undefined, expr.trim().split(/\s/gi));
 				p ++;
+				
+				if(p >= base.length) throw new SayBox.FormatError("Unterminated {"+c);
+			}else if(c == "\\") {
+				outs += base[++p];
 			}else{
 				outs += c;
 			}
