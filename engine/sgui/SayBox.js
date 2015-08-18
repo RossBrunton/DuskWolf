@@ -138,14 +138,10 @@ load.provide("dusk.sgui.SayBox", (function() {
 			if(this._delayCount >= this.delay) {
 				this._delayCount = 0;
 				
-				this._pointer ++;
+				this._body.get("label").displayChars ++;
 				
-				var outText = this._streaming.substring(0, this._pointer);
-				
-				if(this._pointer > this._streaming.length) {
+				if(this._body.get("label").displayChars > this._body.get("label").chars) {
 					this._complete();
-				}else{
-					this._body.text = outText;
 				}
 			}
 		}
@@ -229,8 +225,8 @@ load.provide("dusk.sgui.SayBox", (function() {
 			this._continue.visible = false;
 			
 			this._streaming = body;
-			this._body.get("label").shadowText = body;
-			this._pointer = 0;
+			this._body.get("label").text = body;
+			this._body.get("label").displayChars = 0;
 			
 			this._fulfill = fulfill;
 			this._reject = reject;
@@ -317,7 +313,7 @@ load.provide("dusk.sgui.SayBox", (function() {
 			xDisplay:"expand"
 		},
 		label:{
-			"padding":10,
+			"padding":5,
 		}
 	});
 	sgui.addStyle("SayBox>#body", {
@@ -348,7 +344,7 @@ load.provide("dusk.sgui.SayBox", (function() {
 			xDisplay:"expand"
 		},
 		label:{
-			padding:10,
+			padding:5,
 		}
 	});
 	sgui.addStyle("SayBox>#continue", {

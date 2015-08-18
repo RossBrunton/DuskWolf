@@ -2,6 +2,155 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
+load.provide("dusk.sgui.Label.textLocation", (function() {
+	var Location = function(label) {
+		this._label = label;
+		
+		this.x = 0;
+		this.y = 0;
+        this.lines = 0;
+        this.chars = 0;
+		
+		this.reset();
+	};
+	
+	Location.prototype.reset = function() {
+		this.x = this._label.padding;
+		this.y = this._label.padding + (this._label.size)/2;
+        this.lines = 1;
+        this.chars = 0;
+	};
+	
+	Location.prototype.advance = function(ctx, text) {
+		this.x += ctx.measureText(text).width;
+        this.chars += text.length;
+	};
+	
+	Location.prototype.newline = function(ctx) {
+		this.x = this._label.padding;
+		this.y += this._label.size;
+        this.lines ++;
+	};
+	
+	Location.prototype.measure = function(ctx, text) {
+		return ctx.measureText(text).width;
+	};
+	
+	Location.prototype.needsBreak = function(ctx, text) {
+        if(this._label.width < 0) return false;
+		if(this._label.multiline && this.x + this.measure(ctx, text) > this._label.width - this._label.padding*2) {
+			return true;
+		}
+		
+		return false;
+	};
+	
+	Location.prototype.lineTooLong = function(ctx, text, base) {
+        if(this._label.width < 0) return false;
+        if(base === undefined) base = 0;
+        
+		if(this._label.multiline && base + this.measure(ctx, text) > this._label.width - this._label.padding*2) {
+			return true;
+		}
+		
+		return false;
+	};
+	
+	Location.prototype.lineWrap = function(ctx, text) {
+		if(!this._label.multiline) return [text];
+		
+		var out = [];
+		
+		var curLineSize = this.x;
+		var curLine = "";
+		
+		var p = 0;
+		while(p < text.length-1) {
+			// Consume text
+			var word = "";
+			while(text[p] && !text[p].match(/\s/gi)) {
+				word += text[p];
+				p ++;
+			}
+			
+			// Consume white space
+			var ws = "";
+			while(text[p] && text[p].match(/\s/gi)) {
+				ws += text[p];
+				p ++;
+			}
+			
+			if(this.lineTooLong(ctx, word + ws, curLineSize)) {
+				// Line is too long, wrap it
+				out.push(curLine);
+				curLine = word;
+				curLineSize = this.measure(ctx, word);
+			}else{
+				curLine += word + ws;
+                curLineSize += this.measure(ctx, word + ws);
+			}
+		};
+		
+		out.push(curLine);
+		return out;
+	};
+	
+	return Location;
+})());
+
+load.provide("dusk.sgui.Label.formatBlock", (function() {
+	var FormatBlock = function(body) {
+		this.body = body;
+	};
+	
+	FormatBlock.prototype.print = function(ctx, location, chars, scanOnly) {
+		ctx = this._alterContext(ctx);
+		
+		var remainingChars = chars;
+		for(var b of this.body) {
+			if(typeof b == "string") {
+				var lines = location.lineWrap(ctx, b);
+				
+				var first = true;
+				for(var l of lines) {
+					if(!first) location.newline();
+					first = false;
+					
+					var t = l.substring(0, remainingChars);
+					
+					//if(useBorder)
+					//	c.strokeText(textBuffer, cursor, this.padding + (line * this.size) + (this.size >> 1));
+					
+					if(!scanOnly) ctx.fillText(t, location.x, location.y);
+					
+					location.advance(ctx, t);
+				}
+				
+				if(remainingChars <= 0) {
+					break;
+				}
+			}else{
+				// TODO
+			}
+		}
+	};
+	
+	FormatBlock.prototype._alterContext = function(ctx) {
+		return ctx;
+	};
+	
+	var _registered = new Map();
+	FormatBlock.register = function(tag, block) {
+		_registered.set(tag, block);
+	};
+	
+	FormatBlock.get = function(tag) {
+		_registered.get(tag);
+	};
+	
+	return FormatBlock;
+})());
+
 load.provide("dusk.sgui.Label", (function() {
 	var Component = load.require("dusk.sgui.Component");
 	var sgui = load.require("dusk.sgui");
@@ -9,6 +158,8 @@ load.provide("dusk.sgui.Label", (function() {
 	var utils = load.require("dusk.utils");
 	var Image = load.require("dusk.utils.Image");
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
+	var Location = load.require("dusk.sgui.Label.textLocation");
+	var FormatBlock = load.require("dusk.sgui.Label.formatBlock");
 	
 	/** @class dusk.sgui.Label
 	 * 
@@ -51,7 +202,7 @@ load.provide("dusk.sgui.Label", (function() {
 		 * @type integer
 		 * @since 0.0.21-alpha
 		 */
-		this.lines = 0;
+		this.lines = 1;
 		/** Internal storage for the text this textbox is displaying.
 		 * @type string
 		 * @private
@@ -61,29 +212,6 @@ load.provide("dusk.sgui.Label", (function() {
 		 * @type string
 		 */
 		this.text = "";
-		/** The text this text box will eventually display. When a multiline text field has this set, it will use this
-		 *  value when determining when lines wrap, instead of the text value. This ensures that when the text is being
-		 *  entered into the label character by character, it doesn't wrap in the middle of a word.
-		 * @type string
-		 * @since 0.0.21-alpha
-		 */
-		this.shadowText = "";
-		/** Internal storage for the width of the component that the user has set. It is -1 if the user has set no
-		 *  width.
-		 * 
-		 * This value does not include the padding.
-		 * @type integer
-		 * @private
-		 */
-		this._width = -1;
-		/** Internal storage for the height of the component that the user has set. It is -1 if the user has set no
-		 *  height.
-		 * 
-		 * This value does not include the padding.
-		 * @type integer
-		 * @private
-		 */
-		this._height = -1;
 		/** The "signature" of the text box. This essentially is all the properties that would require the box to redraw
 		 *  its cache stored in a single string. If any value changes, then the generated signature will not match this
 		 *  sig and thus we know to update the cache.
@@ -97,12 +225,6 @@ load.provide("dusk.sgui.Label", (function() {
 		 * @private
 		 */
 		this._cache = utils.createCanvas(0, 0);
-		/** A canvas which is used to measure the width of text. Never actually displayed.
-		 * @type HTMLCanvasElement
-		 * @private
-		 * @since 0.0.21-alpha
-		 */
-		this._widthCache = utils.createCanvas(0, 0);
 		
 		/** The size of the text, in pixels.
 		 * @type integer
@@ -195,61 +317,12 @@ load.provide("dusk.sgui.Label", (function() {
 		 */
 		this.validDefault = "";
 		
-		//Formatting commands
-		/** This is fired when a formatting tag is detected. A listener, which uses the `propsYes` to listen for a
-		 *  specific command, then returns an array. The first element being a "formatting constant" from this class
-		 *  starting with `_EVENT_*` or null if none are to be used. The second element is text to insert at the current
-		 *  location if the formatting constant is null, or some argument if the constant is some value or "".
-		 * 
-		 * The event object contains two properties, `"command"` is the command name, in lower case. The second is
-		 * `"args"` which is an array of arguments in the tag, which are space separated in the command, and different
-		 *  elements in this array. The first element is the command name.
-		 * 
-		 * This is in "Last mode" so only the last non-undefined return value will matter.
-		 * @type dusk.utils.EventDispatcher
-		 * @protected
-		 */
-		this._command = new EventDispatcher("dusk.sgui.Label._command");
-		this._command.listen((function(e){return [null, ""];}).bind(this));
-		this._command.listen((function(e){return [null, "["];}).bind(this), "[");
-		this._command.listen((function(e){return [Label._EVENT_BOLD, ""];}).bind(this),"b");
-		this._command.listen((function(e){return [Label._EVENT_DEBOLD, ""];}).bind(this), "/b");
-		this._command.listen((function(e){return [Label._EVENT_ITALIC, ""];}).bind(this), "i");
-		this._command.listen((function(e){return [Label._EVENT_DEITALIC,""];}).bind(this), "/i");
-		
-		this._command.listen((function(e){
-			return [Label._EVENT_COLOUR, e.args[1]];
-		}).bind(this), "colour");
-		this._command.listen((function(e){
-			return [Label._EVENT_COLOUR, this.colour];
-		}).bind(this), "/colour");
-		
-		this._command.listen((function(e){
-			return [Label._EVENT_FONT, e.args[1]];
-		}).bind(this), "font");
-		this._command.listen((function(e){
-			return [Label._EVENT_FONT, this.font];
-		}).bind(this), "/font");
-		
-		this._command.listen((function(e){
-			return [Label._EVENT_BSIZE, e.args[1]];
-		}).bind(this), "bsize");
-		this._command.listen((function(e){
-			return [Label._EVENT_BSIZE, this.borderSize];
-		}).bind(this), "/bsize");
-		
-		this._command.listen((function(e){
-			return [Label._EVENT_BCOLOUR, e.args[1]];
-		}).bind(this), "bcolour");
-		this._command.listen((function(e){
-			return [Label._EVENT_BCOLOUR, this.borderColour];
-		}).bind(this), "/bcolour");
-		
-		this._command.listen((function(e){
-			var img = new Image(e.args[1], e.args[2]);
-			
-			return [Label._EVENT_IMAGE, [img]];
-		}).bind(this), "img");
+		this._location = new Location(this);
+        this.chars = 0;
+        this.displayChars = Number.MAX_SAFE_INTEGER;
+        
+        this.width = -1;
+        this.height = -1;
 		
 		//Prop masks
 		this._mapper.map("text", "text");
@@ -275,78 +348,6 @@ load.provide("dusk.sgui.Label", (function() {
 		this.onActiveChange.listen(_activeChange.bind(this), false);
 	};
 	Label.prototype = Object.create(Component.prototype);
-	
-	/** A formatting constant meaning the text has terminated.
-	 * @type integer
-	 * @constant
-	 * @value 0
-	 * @protected
-	 */
-	Label._EVENT_TERM = 0;
-	/** A formatting constant meaning the text colour should change to the argument.
-	 * @type integer
-	 * @constant
-	 * @value 1
-	 * @protected
-	 */
-	Label._EVENT_COLOUR = 1;
-	/** A formatting constant meaning an image should be drawn. The argument is an array, the first element being an
-	 *  image object to draw.
-	 * @type integer
-	 * @constant
-	 * @value 2
-	 * @protected
-	 */
-	Label._EVENT_IMAGE = 2;
-	/** A formatting constant meaning that from now on bold text should be used.
-	 * @type integer
-	 * @constant
-	 * @value 3
-	 * @protected
-	 */
-	Label._EVENT_BOLD = 3;
-	/** A formatting constant meaning that any bold text being used should stop.
-	 * @type integer
-	 * @constant
-	 * @value 4
-	 * @protected
-	 */
-	Label._EVENT_DEBOLD = 4;
-	/** A formatting constant meaning that from now on italic text should be used.
-	 * @type integer
-	 * @constant
-	 * @value 5
-	 * @protected
-	 */
-	Label._EVENT_ITALIC = 5;
-	/** A formatting constant meaning that any italic text being used should stop.
-	 * @type integer
-	 * @constant
-	 * @value 6
-	 * @protected
-	 */
-	Label._EVENT_DEITALIC = 6;
-	/** A formatting constant meaning the font should change to the argument.
-	 * @type integer
-	 * @constant
-	 * @value 7
-	 * @protected
-	 */
-	Label._EVENT_FONT = 7;
-	/** A formatting constant meaning the border size should change to the argument.
-	 * @type integer
-	 * @constant
-	 * @value 8
-	 * @protected
-	 */
-	Label._EVENT_BSIZE = 8;
-	/** A formatting constant meaning the border colour should change to the argument.
-	 * @type integer
-	 * @constant
-	 * @value 9
-	 * @protected
-	 */
-	Label._EVENT_BCOLOUR = 9;
 	
 	/** A validator that checks whether the text is a valid number or not (I.E. isNaN(n) will return false).
 	 * @type RegExp
@@ -418,6 +419,14 @@ load.provide("dusk.sgui.Label", (function() {
 		
 		if(!this.validFilter.test(this._text)) this._text = this.validDefault;
 	};
+    
+    Label.prototype._configContext = function(ctx) {
+        ctx.font = this.size + "px " + this.font;
+		ctx.fillStyle = this.colour;
+		ctx.strokeStyle = this.borderColour;
+		ctx.lineWidth = this.borderSize;
+		ctx.textBaseline = "middle";
+    };
 	
 	/** Either draws onto the cache, or measures some text.
 	 * @param {boolean} measure Will only update the dimensions, rather than drawing the text.
@@ -434,175 +443,32 @@ load.provide("dusk.sgui.Label", (function() {
 		var textBuffer = "";
 		
 		//Create the cache
-		var cache = this._widthCache;
-		
-		var width = knownWidth === undefined ? this.width : knownWidth;
-		
-		if(!measure) {
-			this._processText(true, undefined, knownWidth);
-			cache = this._cache;
-			this._cache.width = this._cachedWidth;
-			this._cache.height = (this.lines * this.size) + (this.padding << 1);
-		};
+		var cache = this._cache;
 		
 		var c = cache.getContext("2d");
-		var font = this.font;
 		
-		//Set the formatting
-		c.font = this.size + "px " + this.font;
-		c.fillStyle = this.colour;
-		c.strokeStyle = this.borderColour;
-		c.lineWidth = this.borderSize;
-		c.textBaseline = "middle";
+        this._configContext(c);
 		
 		var useBorder = this.borderSize > 0;
+        
+		var f = new FormatBlock([this.text]);
+        
+        this._location.reset();
+        f.print(c, this._location, Infinity, true);
+        this._cachedWidth = this._location.x + this.padding;
+        this.lines = this._location.lines;
+        this.chars = this._location.chars;
+        
+        cache.width = this.width >= 0 ? this.width : this._cachedWidth;
+        cache.height = this.lines * this.size + (this.padding<<1);
+        this._configContext(c);
 		
-		//Loop through each character in the text, cutting off the processed characters at the end of each loop
-		var drawBuff = (function() {
-			if(textBuffer !== "") {
-				if(useBorder && !measure)
-					c.strokeText(textBuffer, cursor, this.padding + (line * this.size) + (this.size >> 1));
-				
-				if(!measure) c.fillText(textBuffer, cursor, this.padding + (line * this.size) + (this.size>>1));
-				
-				cursor += c.measureText(textBuffer).width;
-				textBuffer = "";
-			}
-		}).bind(this);
-		
-		var longestLine = 0;
-		var cursor = this.padding;
-		var charData = null;
-		var line = 0;
-		var p = 0;
-		while(charData = this._nextChar(textHold, p)) {
-			if(charData[0] == null) {
-				//No formatting
-				if(charData[1] == "\n" && this.multiline) {
-					drawBuff();
-					line ++;
-					if(cursor > longestLine) longestLine = cursor;
-					cursor = this.padding;
-				}else{
-					textBuffer += charData[1];
-				}
-				
-				var fullWord = "";
-				// Check if next word is longer than line
-				if(/\s/.test(charData[1]) && this.multiline) {
-					if(text === undefined && this.shadowText) {
-						var fp = p+1;
-						while(!/\s/.test(this.shadowText[fp]) && fp < this.shadowText.length) {
-							fullWord += this.shadowText[fp];
-							fp ++;
-						}
-					}else{
-						var fp = p+1;
-						while(!/\s/.test(textHold[fp]) && fp < textHold.length) {
-							fullWord += textHold[fp];
-							fp ++;
-						}
-					}
-				}
-				
-				if(this.multiline && c.measureText(textBuffer + fullWord).width + this.padding > width) {
-					//Next world will be too long, so wrap now
-					drawBuff();
-					textBuffer = "";
-					line ++;
-					if(cursor > longestLine) longestLine = cursor;
-					cursor = this.padding;
-				}
-			}else{
-				//Formatting, draw what text we have generated now, and then change the canvas to reflect formatting
-				drawBuff();
-				
-				if(charData[0] == Label._EVENT_TERM) {
-					break;
-				}
-				
-				if(charData[0] == Label._EVENT_COLOUR) {
-					c.fillStyle = charData[1];
-				}
-				
-				if(charData[0] == Label._EVENT_BCOLOUR) {
-					c.strokeStyle = charData[1];
-				}
-				
-				if(charData[0] == Label._EVENT_BSIZE) {
-					c.lineWidth = charData[1];
-					useBorder = charData[1] > 0;
-				}
-				
-				if(charData[0] == Label._EVENT_BOLD && c.font.indexOf("bold") === -1) {
-					if(c.font.indexOf("italic") !== -1) {
-						c.font = c.font.replace("italic", "italic bold");
-					}else{
-						c.font = "bold " + c.font;
-					} 
-				}
-				
-				if(charData[0] == Label._EVENT_DEBOLD && c.font.indexOf("bold") !== -1) {
-					c.font = c.font.replace("bold ", "");
-				}
-				
-				if(charData[0] == Label._EVENT_ITALIC && c.font.indexOf("italic") === -1) {
-					c.font = "italic " + c.font;
-				}
-				
-				if(charData[0] == Label._EVENT_DEITALIC && c.font.indexOf("italic") !== -1) {
-					c.font = c.font.replace("italic ", "");
-				}
-				
-				if(charData[0] == Label._EVENT_FONT) {
-					c.font = c.font.replace(font, charData[1]);
-					font = charData[1];
-				}
-				
-				if(charData[0] == Label._EVENT_IMAGE) {
-					if(!charData[1][1]) {
-						charData[1][1] = (charData[1][0].width() / charData[1][0].height()) * this.size;
-					}
-					
-					if(charData[1][0].isReady() && !measure) {
-						charData[1][0].paint(c, "", false,
-							0, 0, charData[1][0].width(), charData[1][0].height(),
-							cursor, this.padding + line * this.size, charData[1][1], this.size
-						);
-						
-						cursor += charData[1][1];
-					}else if(!measure) {
-						charData[1][0].loadPromise().then((function(e) {
-							if(text === undefined) {
-								this._processText(false, undefined, knownWidth);
-							}
-						}).bind(this));
-						
-						textBuffer += "\ufffd";
-					}else{
-						cursor += charData[1][1];
-					}
-				}
-			}
-			
-			//Cut off the characters we have processed
-			//textHold = textHold.substr(charData[2]);
-			p += charData[2];
+        if(!measure) {
+            this._location.reset();
+            f.print(c, this._location, this.displayChars);
 		}
 		
-		if(cursor > longestLine) longestLine = cursor;
-		
-		//And set the dimensions
-		var width = longestLine + this.padding;
-		if(isNaN(width)) width = this.padding << 1;
-		width = ~~width;
-		
-		if(text === undefined) {
-			this._cachedWidth = width;
-			this.lines = line + 1;
-		}
-		
-		return [line + 1, this._cachedWidth];
+		return [this.lines, this._cachedWidth];
 	};
 	
 	/** Counts the number of lines (if it is a multiline text field) that the given text takes up.
@@ -615,9 +481,25 @@ load.provide("dusk.sgui.Label", (function() {
 		
 		return this._processText(true, text)[0];
 	};
+    
+    Label.prototype.getRenderingWidth = function() {
+        if(this.width > -1) {
+            return this.width
+        }else{
+            return this._cachedWidth+(this.padding<<1);
+        }
+    };
+    
+    Label.prototype.getRenderingHeight = function() {
+        if(this.height > -1) {
+            return this.height;
+        }else{
+            return (this.lines ? this.lines : 1) * this.size + (this.padding<<1);
+        }
+    };
 	
 	//width
-	Object.defineProperty(Label.prototype, "width", {
+	/*Object.defineProperty(Label.prototype, "width", {
 		get: function() {
 			if(this._width > -1) {
 				return this._width
@@ -629,25 +511,7 @@ load.provide("dusk.sgui.Label", (function() {
 			if(value < 0) this._width = -1;
 			else this._width = value-(this.padding<<1);
 		}
-	});
-	
-	//height
-	Object.defineProperty(Label.prototype, "height", {
-		get: function() {
-			if(this._height > -1) {
-				return this._height;
-			}else{
-				return (this.lines ? this.lines : 1) * this.size + (this.padding<<1);
-			}
-		},
-		set: function(value) {
-			if(this.multiline || value < 0) {
-				this._height = value;
-			}else{
-				this.size = value - (this.padding<<1);
-			}
-		}
-	});
+	});*/
 	
 	//text
 	Object.defineProperty(Label.prototype, "text", {
@@ -659,7 +523,7 @@ load.provide("dusk.sgui.Label", (function() {
 				if(!this.validFilter || !this.validCancel || this.validFilter.test(value)) {
 					if(this.onChange.fireAnd({"component":this, "text":""+value})) {
 						this._text = ""+value;
-						this._processText(true);
+                        this._processText(true);
 						this.postChange.fire({"component":this, "text":""+value});
 					}
 				}
@@ -674,32 +538,6 @@ load.provide("dusk.sgui.Label", (function() {
 	Label.prototype._genSig = function() {
 		return this.size+"/"+this.font+"/"+this.colour+"/"+this.borderColour+"/"+this.padding+"/"+this.borderSize
 		+"/"+this.text+"/"+this.format+"/"+this.multiline;
-	};
-	
-	/** Given text, checks if the next character is a formatting tag and processes it. If the string is empty, then a
-	 * "TERM" event will be returned.
-	 * @param {string} The input text. Scanning will start at the beginning of this.
-	 * @return {array} Formatting data. First element is a `_EVENT_*` constant or null, second is either an argument to
-	 * the event (if it is defined) or the string to insert (if it is null). The third element is the number of 
-	 * characters that were "consumed", and thus the pointer can be increased by p.
-	 * @private
-	 */
-	Label.prototype._nextChar = function(text, p) {
-		if(text.length <= p) return [Label._EVENT_TERM, "", 0];
-		
-		if(text.charAt(p) == "[" && this.format) {
-			var offset = text.substring(p);
-			
-			if(text.indexOf("]") != -1) {
-				var commandStr = offset.match(/^\[([^\]]*?)\]/i);
-				var commands = commandStr[1].split(/\s/);
-				
-				return this._command.fireOne({"command":commands[0].toLowerCase(), "args":commands},
-					commands[0].toLowerCase()).concat([commandStr[0].length]);
-			}
-		}
-		
-		return [null, text.charAt(p), 1];
 	};
 	
 	sgui.registerType("Label", Label);
