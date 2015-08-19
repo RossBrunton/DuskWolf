@@ -161,15 +161,42 @@ load.provide("dusk.text.Location", (function() {
 })());
 
 load.provide("dusk.text.FormatBlock", (function() {
+	/** Represents a node of a parsed text entry.
+	 * 
+	 * It should be subclassed, each subclass should add different formatting and function as a tag. For example, one
+	 *  subclass could be for italics, one for bold and so on.
+	 * 
+	 * It is given an array, each entry of the array is either a string (representing raw text) or a `FormatBlock`
+	 *  (representing a child node). The entries are in order of the text appearing in the raw string.
+	 * 
+	 * The block must be registered using `FormatBlock.register` so the parser can use it. If a given block is
+	 *  registered using "i", for example, the parser will use that block to handle the children of an "i" tag.
+	 * 
+	 * @param {array<dusk.text.FormatBlock|string>} The children of this node, as described above.
+	 * @since 0.0.21-alpha
+	 * @constructor
+	 */
 	var FormatBlock = function(body) {
-		this.body = body;
+		/** The array of children.
+		 * @type array<dusk.text.FormatBlock|string>
+		 * @protected
+		 */
+		this._body = body;
 	};
 	
+	/** Prints all the children of this node onto the context at the given location.
+	 * @param {CanvasRenderingContext2D} ctx The rendering context on which to paint.
+	 * @param {dusk.text.Location} location The location on which to paint, this will be advanced.
+	 * @param {integer} chars The number of characters to draw. Once this "runs out" no further characters will be
+	 *  drawn.
+	 * @param {boolean=false} scanOnly If true, then nothing will be actually drawn. The only side effect will be that
+	 *  the location is advanced.
+	 */
 	FormatBlock.prototype.print = function(ctx, location, chars, scanOnly) {
 		ctx = this._alterContext(ctx);
 		
 		var remainingChars = chars;
-		for(var b of this.body) {
+		for(var b of this._body) {
 			if(typeof b == "string") {
 				var lines = location.lineWrap(ctx, b);
 				
@@ -198,15 +225,35 @@ load.provide("dusk.text.FormatBlock", (function() {
 		}
 	};
 	
+	/** Convienience method to alter the context before the main paint logic.
+	 * 
+	 * For subclasses to override.
+	 * @param {CanvasRenderingContext2D} ctx The rendering context provided by the paint function.
+	 * @return {CanvasRenderingContext2D} The rendering context which will be used.
+	 * @protected
+	 */
 	FormatBlock.prototype._alterContext = function(ctx) {
 		return ctx;
 	};
 	
+	/** Map of all registered tags.
+	 * @type Map<string, class extends FormatBlock>
+	 * @private
+	 */
 	var _registered = new Map();
+	
+	/** Registeres a format block to be used with the given tag.
+	 * @param {string} tag The tag to register for.
+	 * @param {class extends FormatBlock} block The FormatBlock to use for that tag.
+	 */
 	FormatBlock.register = function(tag, block) {
 		_registered.set(tag, block);
 	};
 	
+	/** Gets a previously registered block for the given tag.
+	 * @param {string} tag The tag to look for.
+	 * @return {class extends FormatBlock} block The FormatBlock for that tag.
+	 */
 	FormatBlock.get = function(tag) {
 		_registered.get(tag);
 	};
