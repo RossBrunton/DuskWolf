@@ -151,27 +151,6 @@ load.provide("dusk.sgui.Label", (function() {
 		 */
 		this.postChange = new EventDispatcher("dusk.sgui.Label.postChange");
 		
-		/** A regular expression. If the text does not match this then it is invalid. If
-		 *  `validCancel` is true, then the text will never be set an invalid expression (it
-		 *  will revert to the last valid one immediately). If it is false, then when this field looses focus the text
-		 *  will be set to `validDefault`.
-		 * @type RegExp
-		 * @default null
-		 * @since 0.0.21-alpha
-		 */
-		this.validFilter = null;
-		/** If true then an invalid text string will not be set. If false, then it will be reset to the default when
-		 *  this element looses focus.
-		 * @type boolean
-		 * @since 0.0.21-alpha
-		 */
-		this.validCancel = false;
-		/** Default text to set if the label's text does not validate.
-		 * @type string
-		 * @since 0.0.21-alpha
-		 */
-		this.validDefault = "";
-		
 		/** The location instance used for all this label's logic.
 		 * @type dusk.text.Location
 		 * @private
@@ -216,43 +195,8 @@ load.provide("dusk.sgui.Label", (function() {
 		
 		//Listeners
 		this.onPaint.listen(_draw.bind(this));
-		this.onActiveChange.listen(_activeChange.bind(this), false);
 	};
 	Label.prototype = Object.create(Component.prototype);
-	
-	/** A validator that checks whether the text is a valid number or not (I.E. isNaN(n) will return false).
-	 * @type RegExp
-	 * @constant
-	 * @since 0.0.21-alpha
-	 */
-	Label.VALID_NUMBER = /^[+-]?(?:\d+|\d*(?:\.\d+)?)(?:[Ee][+-]?(?:\d+|\d*(?:\.\d+)?))?$/;
-	
-	/** A validator that checks whether the text is a valid integer (I.E. isNaN(n) will return false and n % 1 is 0).
-	 * @type RegExp
-	 * @constant
-	 * @since 0.0.21-alpha
-	 */
-	Label.VALID_INTEGER = /^[+-]?\d+(?:[Ee][+-]?\d+)?$/;
-	/** A validator that checks whether the text is a valid alphanumeric string (a-z and 0-9).
-	 * @type RegExp
-	 * @constant
-	 * @since 0.0.21-alpha
-	 */
-	Label.VALID_ALPHANUMERIC = /^[a-zA-Z0-9]*$/;
-	/** A validator that checks whether the text is a valid alphanumeric string that can contain underscores 
-	 *  (a-z, 0-9 and _).
-	 * @type RegExp
-	 * @constant
-	 * @since 0.0.21-alpha
-	 */
-	Label.VALID_ALPHANUMERIC_UNDERSCORES = /^[a-zA-Z0-9_]*$/;
-	/** A validator that checks whether the text is a valid alphanumeric string that can contain underscores and spaces
-	 *  (a-z, 0-9, _ and space).
-	 * @type RegExp
-	 * @constant
-	 * @since 0.0.21-alpha
-	 */
-	Label.VALID_ALPHANUMERIC_SPACE = /^[a-zA-Z0-9_ ]*$/;
 	
 	/** Draws the current label, updating the cache if needed.
 	 * @param {object} e An event object from `{@link dusk.sgui.Component#onPaint}`.
@@ -281,17 +225,6 @@ load.provide("dusk.sgui.Label", (function() {
 				e.d.dest.x, e.d.dest.y, e.d.dest.width + xDelta, e.d.dest.height + yDelta
 			);
 		}
-	};
-	
-	/** Handles loosing focus, with regards to the validators.
-	 * @param {object} e The event object.
-	 * @private
-	 * @since 0.0.21-alpha
-	 */
-	var _activeChange = function(e) {
-		if(!this.validFilter || this.validCancel) return;
-		
-		if(!this.validFilter.test(this._text)) this._text = this.validDefault;
 	};
 	
 	Label.prototype._configContext = function(ctx) {
@@ -394,13 +327,11 @@ load.provide("dusk.sgui.Label", (function() {
 		},
 		set: function(value) {
 			if(this._text != value) {
-				if(!this.validFilter || !this.validCancel || this.validFilter.test(value)) {
-					if(this.onChange.fireAnd({"component":this, "text":""+value})) {
-						this._text = ""+value;
-						this._clearCache();
-						this._processText(true);
-						this.postChange.fire({"component":this, "text":""+value});
-					}
+				if(this.onChange.fireAnd({"component":this, "text":""+value})) {
+					this._text = ""+value;
+					this._clearCache();
+					this._processText(true);
+					this.postChange.fire({"component":this, "text":""+value});
 				}
 			}
 		}
@@ -418,4 +349,113 @@ load.provide("dusk.sgui.Label", (function() {
 	sgui.registerType("Label", Label);
 	
 	return Label;
+})());
+
+load.provide("dusk.text.sgui.ValidatingLabel", (function() {
+	var Label = load.require("dusk.sgui.Label");
+	var sgui = load.require("dusk.sgui");
+	var c = load.require("dusk.sgui.c");
+	var utils = load.require("dusk.utils");
+	
+	/** A validating label is a type of label that always ensures its text matches a regex
+	 * 
+	 * The validation can be done at one of two times, depending on `validCancel`. If `validCancel` is true, then it is
+	 *  checked whenever the text is set, if it doesn't pass the validation then the setting of that text is cancelled.
+	 *  If it is false, then validation is checked at the instant the component looses focus, in which case the text is
+	 *  set to `validDefault`.
+	 * 
+	 * @param {dusk.sgui.Group} parent The container that this component is in.
+	 * @param {string} name The name of the component.
+	 * @extends dusk.sgui.Label
+	 * @since 0.0.21-alpha
+	 * @constructor
+	 */
+	var ValidatingLabel = function(parent, name) {
+		Label.call(this, parent, name);
+		
+		/** A regular expression. If the text does not match this then it is invalid. If `validCancel` is true, then
+		 *  the text will never be set an invalid expression (it will revert to the last valid one immediately). If it
+		 *  is false, then when this field looses focus the text will be set to `validDefault`.
+		 * @type RegExp
+		 * @default null
+		 * @since 0.0.21-alpha
+		 */
+		this.validFilter = null;
+		/** If true then an invalid text string will never be set. If false, then it will be reset to the default when
+		 *  this element looses focus.
+		 * @type boolean
+		 * @since 0.0.21-alpha
+		 */
+		this.validCancel = false;
+		/** Default text to set if the label's text does not validate.
+		 * @type string
+		 * @since 0.0.21-alpha
+		 */
+		this.validDefault = "";
+		
+		// Prop Masks
+		this._mapper.map("validFilter", "validFilter");
+		this._mapper.map("validCancel", "validCancel");
+		this._mapper.map("validDefault", "validDefault");
+		
+		//Listeners
+		this.onActiveChange.listen(_activeChange.bind(this), false);
+		this.onChange.listen(_textChange.bind(this));
+	};
+	ValidatingLabel.prototype = Object.create(Label.prototype);
+	
+	/** A validator that checks whether the text is a valid number or not (I.E. isNaN(n) will return false).
+	 * @type RegExp
+	 * @constant
+	 * @since 0.0.21-alpha
+	 */
+	ValidatingLabel.VALID_NUMBER = /^[+-]?(?:\d+|\d*(?:\.\d+)?)(?:[Ee][+-]?(?:\d+|\d*(?:\.\d+)?))?$/;
+	
+	/** A validator that checks whether the text is a valid integer (I.E. isNaN(n) will return false and n % 1 is 0).
+	 * @type RegExp
+	 * @constant
+	 * @since 0.0.21-alpha
+	 */
+	ValidatingLabel.VALID_INTEGER = /^[+-]?\d+(?:[Ee][+-]?\d+)?$/;
+	/** A validator that checks whether the text is a valid alphanumeric string (a-z and 0-9).
+	 * @type RegExp
+	 * @constant
+	 * @since 0.0.21-alpha
+	 */
+	ValidatingLabel.VALID_ALPHANUMERIC = /^[a-zA-Z0-9]*$/;
+	/** A validator that checks whether the text is a valid alphanumeric string that can contain underscores 
+	 *  (a-z, 0-9 and _).
+	 * @type RegExp
+	 * @constant
+	 * @since 0.0.21-alpha
+	 */
+	ValidatingLabel.VALID_ALPHANUMERIC_UNDERSCORES = /^[a-zA-Z0-9_]*$/;
+	/** A validator that checks whether the text is a valid alphanumeric string that can contain underscores and spaces
+	 *  (a-z, 0-9, _ and space).
+	 * @type RegExp
+	 * @constant
+	 * @since 0.0.21-alpha
+	 */
+	ValidatingLabel.VALID_ALPHANUMERIC_SPACE = /^[a-zA-Z0-9_ ]*$/;
+	
+	/** Handles loosing focus, with regards to the validators.
+	 * @param {object} e The event object.
+	 * @private
+	 * @since 0.0.21-alpha
+	 */
+	var _activeChange = function(e) {
+		if(!this.validFilter || this.validCancel) return;
+		
+		if(!this.validFilter.test(this._text)) this._text = this.validDefault;
+	};
+	
+	//Check if the set text is valid
+	var _textChange = function(e) {
+		if(this.validFilter && this.validCancel && !this.validFilter.test(e.text)) return false;
+		return true;
+	};
+	
+	sgui.registerType("ValidatingLabel", ValidatingLabel);
+	
+	return ValidatingLabel;
 })());

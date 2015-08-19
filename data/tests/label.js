@@ -8,6 +8,7 @@ load.provide("tests.label", (function() {
 	var Group = load.require("dusk.sgui.Group");
 	var Rect = load.require("dusk.sgui.Rect");
 	var Label = load.require("dusk.sgui.Label");
+	var ValidatingLabel = load.require("dusk.text.sgui.ValidatingLabel");
 	var dusk = load.require("dusk");
 	var Runner = load.require("dusk.script.Runner");
 	
@@ -40,6 +41,16 @@ load.provide("tests.label", (function() {
 					[bsize 2][bcolour #ff0000]Border[/bcolour][/bsize]"
 			},
 			
+			v:{
+				type:"ValidatingLabel",
+				x:450,
+				y:30,
+				text:"Validating Label",
+				validFilter:ValidatingLabel.VALID_NUMBER,
+				validCancel:true,
+				validDefault:"0"
+			},
+			
 			dg:{
 				type:"Group",
 				width:200,
@@ -58,6 +69,7 @@ load.provide("tests.label", (function() {
 	});
 	
 	window.dg = sgui.path("default:/dg");
+	window.v = sgui.path("default:/v");
 	
 	dusk.startGame();
 })());

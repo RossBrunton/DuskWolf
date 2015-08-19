@@ -3,7 +3,7 @@
 "use strict";
 
 load.provide("dusk.sgui.TextBox", (function() {
-	var Label = load.require("dusk.sgui.Label");
+	var ValidatingLabel = load.require("dusk.sgui.ValidatingLabel");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
 	var controls = load.require("dusk.input.controls");
@@ -29,7 +29,7 @@ load.provide("dusk.sgui.TextBox", (function() {
 	 * @constructor
 	 */
 	var TextBox = function(parent, name) {
-		Label.call(this, parent, name);
+		ValidatingLabel.call(this, parent, name);
 		
 		/** The border of the TextBox when it is not active.
 		 * @type string
@@ -87,7 +87,7 @@ load.provide("dusk.sgui.TextBox", (function() {
 		this.activeBorder = "#ff5555";
 		this.format = false;
 	};
-	TextBox.prototype = Object.create(Label.prototype);
+	TextBox.prototype = Object.create(ValidatingLabel.prototype);
 	
 	/** Draws the border around the text when it is not active.
 	 * @param {object} e An event object from `{@link dusk.sgui.Component#onPaint}`.
