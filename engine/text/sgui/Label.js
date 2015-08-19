@@ -2,7 +2,6 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-
 load.provide("dusk.sgui.Label", (function() {
 	var Component = load.require("dusk.sgui.Component");
 	var sgui = load.require("dusk.sgui");
@@ -13,9 +12,7 @@ load.provide("dusk.sgui.Label", (function() {
 	var Location = load.require("dusk.text.location");
 	var FormatBlock = load.require("dusk.text.formatBlock");
 	
-	/** @class dusk.sgui.Label
-	 * 
-	 * @classdesc A label is essentially a component that contains formatted text.
+	/** A label is a component that contains (possibly) formatted text.
 	 * 
 	 * The default text font and colour can be changed using properties on this object.
 	 * 
@@ -31,10 +28,10 @@ load.provide("dusk.sgui.Label", (function() {
 	 * - `[img i]` Displays the image specified by the path at the correct aspect ratio, and at the same height as the
 	 *  text the "no available character" character will be displayed while it is loading.
 	 * 
-	 * Text can have a border round it, using the `{@link dusk.sgui.Label#bsize}` and
-	 * `{@link dusk.sgui.Label#borderColour}` properties.
+	 * Text can have a border round it, using the `bsize` and `borderColour` properties.
 	 * 
-	 * Labels with an xDisplay or yDisplay of "expand" are a bit wonky, and will not work correctly.
+	 * Labels have a default width and height of -1. This means it will automatically render at the correct size to
+	 *  display all the text. Setting it to a value larger than -1 could chop off the text.
 	 * 
 	 * @param {dusk.sgui.Group} parent The container that this component is in.
 	 * @param {string} name The name of the component.
@@ -50,7 +47,10 @@ load.provide("dusk.sgui.Label", (function() {
 		 * @private
 		 */
 		this._cachedWidth = 0;
-		/** The number of lines of text (if multiline). Please do not set this property.
+		/** The number of lines of text, if the text is not multiline then this will be 1.
+		 * 
+		 * Please do not set this property, it won't do anything. Also, this is only accurate if the text box does not
+		 *  have an xDisplay of "expand", since it is impossible to know the width ahead of time.
 		 * @type integer
 		 * @since 0.0.21-alpha
 		 */
@@ -124,7 +124,9 @@ load.provide("dusk.sgui.Label", (function() {
 		 * @protected
 		 */
 		this._supressTextDisplay = false;
-		/** If true, this text will support multiple lines. If it is multiline, please set the height.
+		/** If true, this text will support multiple lines.
+		 * 
+		 * If false, then only one line of text is allowed.
 		 * @type boolean
 		 * @since 0.0.21-alpha
 		 */
@@ -150,9 +152,9 @@ load.provide("dusk.sgui.Label", (function() {
 		this.postChange = new EventDispatcher("dusk.sgui.Label.postChange");
 		
 		/** A regular expression. If the text does not match this then it is invalid. If
-		 *  `{@link dusk.sgui.Label#validCancel}` is true, then the text will never be set an invalid expression (it
+		 *  `validCancel` is true, then the text will never be set an invalid expression (it
 		 *  will revert to the last valid one immediately). If it is false, then when this field looses focus the text
-		 *  will be set to `{@link disk.sgui.Label#validDefault}`.
+		 *  will be set to `validDefault`.
 		 * @type RegExp
 		 * @default null
 		 * @since 0.0.21-alpha
@@ -170,10 +172,27 @@ load.provide("dusk.sgui.Label", (function() {
 		 */
 		this.validDefault = "";
 		
+		/** The location instance used for all this label's logic.
+		 * @type dusk.text.Location
+		 * @private
+		 * @since 0.0.21-alpha
+		 */
 		this._location = new Location(this);
+		/** The total number of characters this label's text has.
+		 * 
+		 * This does not include tags, so "[b]Hi![/b]" has 3 chars rather than 10.
+		 * @type integer
+		 * @since 0.0.21-alpha
+		 */
 		this.chars = 0;
+		/** Only this number of characters (from the beginning of the text) will be displayed.
+		 * @type integer
+		 * @default Number.MAX_SAFE_INTEGER
+		 * @since 0.0.21-alpha
+		 */
 		this.displayChars = Number.MAX_SAFE_INTEGER;
 		
+		// Default dimensions
 		this.width = -1;
 		this.height = -1;
 		
@@ -283,11 +302,12 @@ load.provide("dusk.sgui.Label", (function() {
 		ctx.textBaseline = "middle";
 	};
 	
-	/** Either draws onto the cache, or measures some text.
-	 * @param {boolean} measure Will only update the dimensions, rather than drawing the text.
+	/** Either draws onto the appropriate cache, or measures the text for its dimensions.
+	 * 
+	 * If the cache already exists for the appropriate size, this does nothing.
+	 * @param {boolean} measure If true, will only update the dimensions, rather than drawing the text.
 	 * @param {?integer} width The width to generate a cache for iff this is a multiline label.
 	 *  If ommited it will be this.width if it is defined.
-	 * @return {Array} A [lines, width] Pair of the dimensions.
 	 * @private
 	 */
 	Label.prototype._processText = function(measure, width) {
@@ -329,34 +349,41 @@ load.provide("dusk.sgui.Label", (function() {
 		return;
 	};
 	
-	/** Counts the number of lines (if it is a multiline text field) that the given text takes up.
-	 * @param {string} Text the text to measure.
-	 * @return {integer} The lines the text takes up.
+	/** Empties the cache.
+	 * 
+	 * For when the text changes or something.
+	 * @private
 	 * @since 0.0.21-alpha
 	 */
-	Label.prototype.countLines = function(text) {
-		if(!this.multiline) return 1;
-		
-		return this._processText(true, text)[0];
-	};
-	
 	Label.prototype._clearCache = function() {
-		this._caches = new Map();
+		this._caches.clear();
 	};
 	
+	/** Returns the width to render this component.
+	 * 
+	 * Either the explicit set width, or the minimum width to display all the text.
+	 * @return integer The width to paint.
+	 * @since 0.0.21-alpha
+	 */
 	Label.prototype.getRenderingWidth = function() {
 		if(this.width > -1) {
 			return this.width
 		}else{
-			return this._cachedWidth+(this.padding<<1);
+			return this._cachedWidth+(this.padding*2);
 		}
 	};
 	
+	/** Returns the height to render this component.
+	 * 
+	 * Either the explicit set height, or the minimum height to display all the text.
+	 * @return integer The height to paint.
+	 * @since 0.0.21-alpha
+	 */
 	Label.prototype.getRenderingHeight = function() {
 		if(this.height > -1) {
 			return this.height;
 		}else{
-			return (this.lines ? this.lines : 1) * this.size + (this.padding<<1);
+			return this.lines * this.size + (this.padding*2);
 		}
 	};
 	
