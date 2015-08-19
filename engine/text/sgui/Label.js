@@ -9,8 +9,8 @@ load.provide("dusk.sgui.Label", (function() {
 	var utils = load.require("dusk.utils");
 	var Image = load.require("dusk.utils.Image");
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
-	var Location = load.require("dusk.text.location");
-	var FormatBlock = load.require("dusk.text.formatBlock");
+	var Location = load.require("dusk.text.Location");
+	var FormatBlock = load.require("dusk.text.FormatBlock");
 	
 	/** A label is a component that contains (possibly) formatted text.
 	 * 
