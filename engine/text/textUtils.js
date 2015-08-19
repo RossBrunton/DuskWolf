@@ -151,6 +151,14 @@ load.provide("dusk.text.Location", (function() {
 				curLine += word + ws;
 				curLineSize += this.measure(ctx, word + ws);
 			}
+			
+			if(ws.includes("\n")) {
+				out.push(curLine);
+				curLine = "";
+				curLineSize = 0;
+				for(var i = ws.split("\n").length; i > 2; i --) out.push("");
+			}
+			
 		};
 		
 		out.push(curLine);

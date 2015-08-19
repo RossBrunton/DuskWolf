@@ -29,7 +29,7 @@ load.provide("tests.label", (function() {
 				multiline:true,
 				width:200,
 				text:"Test Multiline...\n[b]Bold[/b]\n[i]Italic[/i]\n[u]Underline[/u]\n[font serif]Font[/font]\
-					\n[bsize 2][bcolour #ff0000]Border[/bcolour][/bsize]"
+					\n[bsize 2][bcolour #ff0000]Border[/bcolour][/bsize]\n\nTwo newlines\n\n\nThree newlines"
 			},
 			
 			c:{
