@@ -106,10 +106,12 @@ load.provide("quest.ui", (function() {
 				"xOrigin":"right",
 				"x":-5,
 				"y":5,
+				"width":150,
 				"globals":{
 					"size":16,
 					"borderColour":"#ffffff",
 					"borderSize":3,
+					"height":22,
 					"type":"Label",
 					"colour":"#000000",
 					"extras":{
