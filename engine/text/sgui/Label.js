@@ -207,6 +207,7 @@ load.provide("dusk.sgui.Label", (function() {
 			if(this._sig != this._genSig(e)) {
 				//Rebuild the text cache
 				this._clearCache();
+				this._sig = this._genSig(e);
 			}
 			
 			this._processText(false, e.d.origin.width);
