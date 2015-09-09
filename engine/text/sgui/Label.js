@@ -11,13 +11,15 @@ load.provide("dusk.sgui.Label", (function() {
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var Location = load.require("dusk.text.Location");
 	var FormatBlock = load.require("dusk.text.FormatBlock");
+	var StandardFormatBlocks = load.require("dusk.text.standardFormatBlocks");
 	
 	/** A label is a component that contains (possibly) formatted text.
 	 * 
 	 * The default text font and colour can be changed using properties on this object.
 	 * 
 	 * Formatting, if enabled, works using `"[name]"` tags. Generally, a `"[/name]"` version of the tag will end or
-	 *  reverse the formatting of the unslashed equivalent. The tags supported on a label are as follows:
+	 *  reverse the formatting of the unslashed equivalent. The tags supported on a label are as follows
+	 *  (from the dusk.text.standardFormatBlocks package):
 	 * 
 	 * - `[b]`, `[/b]` Starts and ends bold text.
 	 * - `[i]`, `[/u]` Starts and ends italic text.
@@ -25,8 +27,9 @@ load.provide("dusk.sgui.Label", (function() {
 	 * - `[font f]`, `[/font]` Sets the font to the value `f`.
 	 * - `[bsize b]`, `[/bsize]` Sets the width of the border around the text to `b`.
 	 * - `[bcolour c]`, `[/bcolour]` Sets the colour of the border around the text to `c`.
-	 * - `[img i]` Displays the image specified by the path at the correct aspect ratio, and at the same height as the
-	 *  text the "no available character" character will be displayed while it is loading.
+	 * - `[img i]`, `[/img]` Displays the image specified by the path at the correct aspect ratio, and at the same
+	 *  height as the text. While the image is loading (and if it fails to download), the contents of the tag will be
+	 *  drawn.
 	 * 
 	 * Text can have a border round it, using the `bsize` and `borderColour` properties.
 	 * 
@@ -98,9 +101,9 @@ load.provide("dusk.sgui.Label", (function() {
 		/** The colour of the text border. This should be a CSS colour value. It can be accessed with the JSON property
 		 * `"borderColour"` as well.
 		 * @type string
-		 * @default "#990000"
+		 * @default "#ffffff"
 		 */
-		this.borderColour = "#990000";
+		this.borderColour = "#ffffff";
 		/** The thickness of the border, in pixels.
 		 * @type integer
 		 * @default 0
@@ -261,8 +264,11 @@ load.provide("dusk.sgui.Label", (function() {
 		this._location.restrictMaxWidth = width;
 		
 		// Measure the text
+		var cclear = this._clearCache.bind(this);
 		this._configContext(c);
-		f.print(c, this._location, Number.MAX_SAFE_INTEGER, true);
+		f.print(c, this._location, Number.MAX_SAFE_INTEGER,
+			{scanOnly:true, drawBorder:this.borderSize > 0, clear:cclear}
+		);
 		this._cachedWidth = this._location.x + this.padding;
 		this.lines = this._location.lines;
 		this.chars = this._location.chars;
@@ -274,7 +280,7 @@ load.provide("dusk.sgui.Label", (function() {
 			
 			this._configContext(c);
 			this._location.reset();
-			f.print(c, this._location, this.displayChars);
+			f.print(c, this._location, this.displayChars, {drawBorder:this.borderSize > 0, clear:cclear});
 		}
 		
 		// And set the cache

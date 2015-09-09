@@ -162,7 +162,10 @@ load.provide("dusk.utils.Image", (function() {
 		if(this._proxy) {
 			this._proxy.paint(ctx, this.transform.concat(extraTrans),true,ox,oy,owidth,oheight,dx,dy, dwidth, dheight);
 		}else{
-			ctx.drawImage(this.asCanvas(extraTrans, ino), ox, oy, owidth, oheight, ~~dx, ~~dy, dwidth, dheight);
+			var argc = owidth === undefined ? 3 : dx === undefined ? 5 : 9;
+			ctx.drawImage.apply(ctx,
+				[this.asCanvas(extraTrans, ino), ox, oy, owidth, oheight, ~~dx, ~~dy, dwidth, dheight].slice(0, argc)
+			);
 		}
 	};
 	

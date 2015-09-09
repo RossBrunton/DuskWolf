@@ -19,6 +19,7 @@ load.provide("tests.saybox", (function() {
 				mark:"#ff0000",
 				yOrigin:"bottom",
 				y:-10,
+				delay:10,
 				xDisplay:"expand",
 				children:{
 					left:{

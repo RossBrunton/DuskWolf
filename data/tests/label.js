@@ -18,18 +18,23 @@ load.provide("tests.label", (function() {
 			a:{
 				type:"Label",
 				x:10,
-				y:10,
-				text:"Test text... [b]Bold[/b] [i]Italic[/i] [u]Underline[/u] [font serif]Font[/font]\
-					[bsize 2][bcolour #ff0000]Border[/bcolour][/bsize]"
+				y:0,
+				text:"Test text... [b]Bold[/b] [i]Italic[/i] [u]Underline[/u] [colour red]Colour[/colour]\
+					[font serif]Font[/font] [bsize 2][bcolour #ff0000]Border[/bcolour][/bsize] Final\
+					[img smile.png]Not found[/img] More text"
 			},
 			b:{
 				type:"Label",
 				x:10,
 				y:30,
 				multiline:true,
+				borderSize:5,
+				borderColour:"#999999",
 				width:200,
 				text:"Test Multiline...\n[b]Bold[/b]\n[i]Italic[/i]\n[u]Underline[/u]\n[font serif]Font[/font]\
-					\n[bsize 2][bcolour #ff0000]Border[/bcolour][/bsize]\n\nTwo newlines\n\n\nThree newlines"
+					\n\n[bsize 2][bcolour #ff0000]Border[/bcolour][/bsize]\n[bsize 0]No Border[/bsize]\
+					\n\nTwo newlines\n\n\nThree newlines\n\
+					[img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img]"
 			},
 			
 			c:{

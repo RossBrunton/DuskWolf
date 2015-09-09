@@ -65,6 +65,15 @@ load.provide("dusk.text.Location", (function() {
 		this.chars += text.length;
 	};
 	
+	/** Advance the cursor right the given size.
+	 * @param {integer} size The amount to advance the text.
+	 * @param {integer} chars The amount of characters to advance.
+	 */
+	Location.prototype.advanceRaw = function(size, chars) {
+		this.x += size;
+		this.chars += chars;
+	};
+	
 	/** Takes a new line and moves the cursor to the start of it. */
 	Location.prototype.newline = function() {
 		this.x = this._label.padding;
@@ -125,8 +134,31 @@ load.provide("dusk.text.Location", (function() {
 		
 		var curLineSize = this.x;
 		var curLine = "";
-		
 		var p = 0;
+		
+		// Consume initial whitespace
+		var ws = "";
+		while(text[p] && text[p].match(/\s/gi)) {
+			ws += text[p];
+			p ++;
+		}
+		
+		if(this.lineTooLong(ctx, ws, curLineSize)) {
+			// Line is too long, wrap it
+			out.push("");
+			curLineSize = this.measure(ctx, word);
+		}else{
+			curLine += ws;
+			curLineSize += this.measure(ctx, word + ws);
+		}
+		
+		if(ws.includes("\n")) {
+			out.push("");
+			curLine = "";
+			curLineSize = 0;
+			for(var i = ws.split("\n").length; i > 2; i --) out.push("");
+		}
+		
 		while(p < text.length-1) {
 			// Consume text
 			var word = "";
@@ -180,6 +212,10 @@ load.provide("dusk.text.FormatBlock", (function() {
 	 * The block must be registered using `FormatBlock.register` so the parser can use it. If a given block is
 	 *  registered using "i", for example, the parser will use that block to handle the children of an "i" tag.
 	 * 
+	 * The print object is given a "settings" object which has the following properties:
+	 * - scanOnly:boolean - If true, nothing will be painted, only the location object is to be updated.
+	 * - drawBorder:boolean - Whether a border is to be drawn around the text.
+	 * 
 	 * @param {array<dusk.text.FormatBlock|string>=[]} The children of this node, as described above.
 	 * @since 0.0.21-alpha
 	 * @constructor
@@ -203,13 +239,12 @@ load.provide("dusk.text.FormatBlock", (function() {
 	 * @param {dusk.text.Location} location The location on which to paint, this will be advanced.
 	 * @param {integer} chars The number of characters to draw. Once this "runs out" no further characters will be
 	 *  drawn.
-	 * @param {boolean=false} scanOnly If true, then nothing will be actually drawn. The only side effect will be that
-	 *  the location is advanced.
+	 * @param {object} settings The settings object as described in the class description.
 	 * @return {integer} The number of characters that still need to be drawn. Basically, chars - (how many characters
 	 *  I drew).
 	 */
-	FormatBlock.prototype.print = function(ctx, location, chars, scanOnly) {
-		ctx = this._alterContext(ctx);
+	FormatBlock.prototype.print = function(ctx, location, chars, settings) {
+		this._alterContext(ctx, settings);
 		
 		var remainingChars = chars;
 		for(var b of this._body) {
@@ -224,10 +259,10 @@ load.provide("dusk.text.FormatBlock", (function() {
 					var t = l.substring(0, remainingChars);
 					remainingChars -= l.length;
 					
-					//if(useBorder)
-					//	c.strokeText(textBuffer, cursor, this.padding + (line * this.size) + (this.size >> 1));
-					
-					if(!scanOnly) ctx.fillText(t, location.x, location.y);
+					if(!settings.scanOnly) {
+						if(settings.drawBorder) ctx.strokeText(t, location.x, location.y);
+						ctx.fillText(t, location.x, location.y);
+					}
 					
 					location.advance(ctx, t);
 				}
@@ -236,11 +271,11 @@ load.provide("dusk.text.FormatBlock", (function() {
 					break;
 				}
 			}else{
-				remainingChars = b.print(ctx, location, remainingChars, scanOnly);
+				remainingChars = b.print(ctx, location, remainingChars, settings);
 			}
 		}
 		
-		this._resetContext(ctx);
+		this._resetContext(ctx, settings);
 		return remainingChars;
 	};
 	
@@ -248,20 +283,21 @@ load.provide("dusk.text.FormatBlock", (function() {
 	 * 
 	 * For subclasses to override.
 	 * @param {CanvasRenderingContext2D} ctx The rendering context provided by the paint function.
-	 * @return {CanvasRenderingContext2D} The rendering context which will be used.
+	 * @param {object} settings The settings object.
 	 * @protected
 	 */
-	FormatBlock.prototype._alterContext = function(ctx) {
-		return ctx;
+	FormatBlock.prototype._alterContext = function(ctx, settings) {
+		// Pass
 	};
 	
 	/** Convienience method to alter the context  after the main paint logic.
 	 * 
 	 * For subclasses to override to reset any changes they made.
 	 * @param {CanvasRenderingContext2D} ctx The rendering context which was used.
+	 * @param {object} settings The settings object.
 	 * @protected
 	 */
-	FormatBlock.prototype._resetContext = function(ctx) {
+	FormatBlock.prototype._resetContext = function(ctx, settings) {
 		// Pass
 	};
 	
