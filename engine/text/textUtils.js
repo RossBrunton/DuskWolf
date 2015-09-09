@@ -180,7 +180,7 @@ load.provide("dusk.text.FormatBlock", (function() {
 	 * The block must be registered using `FormatBlock.register` so the parser can use it. If a given block is
 	 *  registered using "i", for example, the parser will use that block to handle the children of an "i" tag.
 	 * 
-	 * @param {array<dusk.text.FormatBlock|string>} The children of this node, as described above.
+	 * @param {array<dusk.text.FormatBlock|string>=[]} The children of this node, as described above.
 	 * @since 0.0.21-alpha
 	 * @constructor
 	 */
@@ -189,7 +189,7 @@ load.provide("dusk.text.FormatBlock", (function() {
 		 * @type array<dusk.text.FormatBlock|string>
 		 * @protected
 		 */
-		this._body = body;
+		this._body = body ? body : [];
 	};
 	
 	/** Prints all the children of this node onto the context at the given location.
@@ -244,6 +244,74 @@ load.provide("dusk.text.FormatBlock", (function() {
 		return ctx;
 	};
 	
+	/** Returns a string representation of this FormatBlock
+	 * 
+	 * @return {string} A string representation of this FormatBlock
+	 */
+	FormatBlock.prototype.toString = function() {
+		var str = "[FormatBlock";
+		for(var b of this._body) {
+			str += " ";
+			if(typeof b == "string") {
+				str += '"' + b + '"';
+			}else{
+				str += b.toString();
+			}
+		}
+		return str+"]";
+	};
+	
+	/** Appends a node to the end of this FormatBlock's body.
+	 * 
+	 * @param {string|dusk.text.FormatBlock} The node to append.
+	 */
+	FormatBlock.prototype.append = function(node) {
+		this._body.push(node);
+	};
+	
+	/** Creates a tree of FormatBlock elements from a source string.
+	 * 
+	 * @param {string} str The string to parse.
+	 * @return {FormatBlock} The root block of a tree formed from the source string.
+	 */
+	FormatBlock.parse = function(str) {
+		var buffer = "";
+		var stack = [new (FormatBlock.get("default"))()];
+		
+		for(var i = 0; i < str.length; i ++) {
+			var c = str[i];
+			
+			if(c == "[") {
+				stack[stack.length-1].append(buffer);
+				buffer = "";
+				
+				if(str[i+1] == "/") {
+					while((c = str[++i]) != "]") {
+						// Pass
+					}
+					
+					stack[stack.length-2].append(stack.pop());
+				}else{
+					var tbuffer = "";
+					while((c = str[++i]) != "]") {
+						tbuffer += c;
+					}
+					
+					var args = tbuffer.split(" ");
+					var cls = FormatBlock.get(args[0]);
+					stack.push(new (cls.bind.apply(cls, [cls, []].concat(args.splice(1)))));
+				}
+			}else{
+				buffer += c;
+			}
+		}
+		
+		if(stack.length > 1) console.error("Unclosed");
+		
+		stack[stack.length-1].append(buffer);
+		return stack[0];
+	};
+	
 	/** Map of all registered tags.
 	 * @type Map<string, class extends FormatBlock>
 	 * @private
@@ -263,8 +331,10 @@ load.provide("dusk.text.FormatBlock", (function() {
 	 * @return {class extends FormatBlock} block The FormatBlock for that tag.
 	 */
 	FormatBlock.get = function(tag) {
-		_registered.get(tag);
+		return _registered.get(tag);
 	};
+	
+	FormatBlock.register("default", FormatBlock);
 	
 	return FormatBlock;
 })());
