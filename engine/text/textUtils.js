@@ -190,6 +190,12 @@ load.provide("dusk.text.FormatBlock", (function() {
 		 * @protected
 		 */
 		this._body = body ? body : [];
+		
+		/** The name of this FormatBlock, for toString
+		 * @type string
+		 * @protected
+		 */
+		this._name = "FormatBlock";
 	};
 	
 	/** Prints all the children of this node onto the context at the given location.
@@ -199,6 +205,8 @@ load.provide("dusk.text.FormatBlock", (function() {
 	 *  drawn.
 	 * @param {boolean=false} scanOnly If true, then nothing will be actually drawn. The only side effect will be that
 	 *  the location is advanced.
+	 * @return {integer} The number of characters that still need to be drawn. Basically, chars - (how many characters
+	 *  I drew).
 	 */
 	FormatBlock.prototype.print = function(ctx, location, chars, scanOnly) {
 		ctx = this._alterContext(ctx);
@@ -228,9 +236,12 @@ load.provide("dusk.text.FormatBlock", (function() {
 					break;
 				}
 			}else{
-				// TODO
+				remainingChars = b.print(ctx, location, remainingChars, scanOnly);
 			}
 		}
+		
+		this._resetContext(ctx);
+		return remainingChars;
 	};
 	
 	/** Convienience method to alter the context before the main paint logic.
@@ -244,12 +255,22 @@ load.provide("dusk.text.FormatBlock", (function() {
 		return ctx;
 	};
 	
+	/** Convienience method to alter the context  after the main paint logic.
+	 * 
+	 * For subclasses to override to reset any changes they made.
+	 * @param {CanvasRenderingContext2D} ctx The rendering context which was used.
+	 * @protected
+	 */
+	FormatBlock.prototype._resetContext = function(ctx) {
+		// Pass
+	};
+	
 	/** Returns a string representation of this FormatBlock
 	 * 
 	 * @return {string} A string representation of this FormatBlock
 	 */
 	FormatBlock.prototype.toString = function() {
-		var str = "[FormatBlock";
+		var str = "["+this._name;
 		for(var b of this._body) {
 			str += " ";
 			if(typeof b == "string") {
@@ -299,6 +320,12 @@ load.provide("dusk.text.FormatBlock", (function() {
 					
 					var args = tbuffer.split(" ");
 					var cls = FormatBlock.get(args[0]);
+					
+					if(!cls) {
+						console.error("Unknown formatting tag "+args[0]+", using default");
+						cls = FormatBlock.get("default");
+					}
+					
 					stack.push(new (cls.bind.apply(cls, [cls, []].concat(args.splice(1)))));
 				}
 			}else{
