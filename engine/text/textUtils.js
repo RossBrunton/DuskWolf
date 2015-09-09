@@ -177,7 +177,7 @@ load.provide("dusk.text.Location", (function() {
 			if(this.lineTooLong(ctx, word + ws, curLineSize)) {
 				// Line is too long, wrap it
 				out.push(curLine);
-				curLine = word;
+				curLine = word + ws;
 				curLineSize = this.measure(ctx, word);
 			}else{
 				curLine += word + ws;
