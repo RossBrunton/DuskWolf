@@ -344,7 +344,7 @@ load.provide("dusk.sgui.Label", (function() {
 	 */
 	Label.prototype._genSig = function() {
 		return this.size+"/"+this.font+"/"+this.colour+"/"+this.borderColour+"/"+this.padding+"/"+this.borderSize
-		+"/"+this.text+"/"+this.format+"/"+this.multiline;
+		+"/"+this.text+"/"+this.format+"/"+this.multiline+"/"+this.displayChars;
 	};
 	
 	sgui.registerType("Label", Label);
