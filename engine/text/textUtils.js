@@ -343,35 +343,57 @@ load.provide("dusk.text.FormatBlock", (function() {
 				buffer = "";
 				
 				if(str[i+1] == "/") {
+					var closed = true;
 					while((c = str[++i]) != "]") {
-						// Pass
+						if(c === undefined) {
+							// End of string
+							buffer = tbuffer;
+							closed = false;
+							break;
+						}
 					}
 					
-					stack[stack.length-2].append(stack.pop());
+					if(closed) {
+						stack[stack.length-2].append(stack.pop());
+					}
 				}else{
 					var tbuffer = "";
+					var closed = true;
 					while((c = str[++i]) != "]") {
-						tbuffer += c;
+						if(c === undefined) {
+							// End of string
+							buffer = tbuffer;
+							closed = false;
+							break;
+						}else{
+							tbuffer += c;
+						}
 					}
 					
-					var args = tbuffer.split(" ");
-					var cls = FormatBlock.get(args[0]);
-					
-					if(!cls) {
-						console.error("Unknown formatting tag "+args[0]+", using default");
-						cls = FormatBlock.get("default");
+					if(closed) {
+						var args = tbuffer.split(" ");
+						var cls = FormatBlock.get(args[0]);
+						
+						if(!cls) {
+							console.error("Unknown formatting tag "+args[0]+", using default");
+							cls = FormatBlock.get("default");
+						}
+						
+						stack.push(new (cls.bind.apply(cls, [cls, []].concat(args.splice(1)))));
 					}
-					
-					stack.push(new (cls.bind.apply(cls, [cls, []].concat(args.splice(1)))));
 				}
 			}else{
 				buffer += c;
 			}
 		}
 		
-		if(stack.length > 1) console.error("Unclosed");
-		
+		//if(stack.length > 1) console.error("Unclosed");
 		stack[stack.length-1].append(buffer);
+		
+		while(stack.length > 1) {
+			stack[stack.length-2].append(stack.pop());
+		}
+		
 		return stack[0];
 	};
 	

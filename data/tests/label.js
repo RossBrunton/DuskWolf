@@ -5,6 +5,7 @@
 load.provide("tests.label", (function() {
 	var sgui = load.require("dusk.sgui");
 	var PlusText = load.require("dusk.sgui.PlusText");
+	var TextBox = load.require("dusk.sgui.TextBox");
 	var Group = load.require("dusk.sgui.Group");
 	var Rect = load.require("dusk.sgui.Rect");
 	var Label = load.require("dusk.sgui.Label");
@@ -14,6 +15,8 @@ load.provide("tests.label", (function() {
 	
 	sgui.get("default", true).update({
 		allowMouse:true,
+		focus:"tb",
+		active:true,
 		children:{
 			a:{
 				type:"Label",
@@ -35,6 +38,22 @@ load.provide("tests.label", (function() {
 					\n\n[bsize 2][bcolour #ff0000]Border[/bcolour][/bsize]\n[bsize 0]No Border[/bsize]\
 					\n\nTwo newlines\n\n\nThree newlines\n\
 					[img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img]"
+			},
+			
+			tb:{
+				type:"TextBox",
+				x:10,
+				y:300,
+				text:"TAXT",
+				downFlow:"tb2",
+			},
+			
+			tb2:{
+				type:"TextBox",
+				x:10,
+				y:350,
+				text:"TAXT",
+				upFlow:"tb"
 			},
 			
 			c:{

@@ -3,7 +3,7 @@
 "use strict";
 
 load.provide("dusk.sgui.TextBox", (function() {
-	var ValidatingLabel = load.require("dusk.sgui.ValidatingLabel");
+	var ValidatingLabel = load.require("dusk.text.sgui.ValidatingLabel");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
 	var controls = load.require("dusk.input.controls");
