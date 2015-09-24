@@ -259,7 +259,13 @@ load.provide("dusk.sgui.Label", (function() {
 		var c = cache.getContext("2d");
 		
 		// Parse the text
-		var f = FormatBlock.parse(this.text);
+		var f;
+		if(this.format) {
+			f = FormatBlock.parse(this.text);
+		}else{
+			f = new FormatBlock([this.text]);
+		}
+		
 		this._location.reset();
 		this._location.restrictMaxWidth = width;
 		
