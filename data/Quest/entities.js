@@ -129,15 +129,15 @@ load.provide("quest.entities", (function() {
 	});
 	
 	items.items.createNewType("bow", {
-		"minRange":2, "maxRange":2, "displayName":"[img Quest/images/bow.png] Bow"
+		"minRange":2, "maxRange":2, "displayName":"[img Quest/images/bow.png][/img] Bow"
 	}, "weapon");
 	items.items.createNewType("sword", {
-		"minRange":1, "maxRange":1, "displayName":"[img Quest/images/sword.png] Sword"
+		"minRange":1, "maxRange":1, "displayName":"[img Quest/images/sword.png][/img] Sword"
 	}, "weapon");
 	items.items.createNewType("theLongblade", {
-		"minRange":1, "maxRange":2, "displayName":"[img Quest/images/sword.png] The Longblade"
+		"minRange":1, "maxRange":2, "displayName":"[img Quest/images/sword.png][/img] The Longblade"
 	}, "weapon");
 	items.items.createNewType("snipersBow", {
-		"minRange":10, "maxRange":10, "displayName":"[img Quest/images/bow.png] Sniper's Bow"
+		"minRange":10, "maxRange":10, "displayName":"[img Quest/images/bow.png][/img] Sniper's Bow"
 	}, "weapon");
 })());
