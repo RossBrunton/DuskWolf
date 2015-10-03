@@ -4,6 +4,7 @@
 
 load.provide("dusk.sgui.Grid", (function() {
 	var Group = load.require("dusk.sgui.Group");
+	var Component = load.require("dusk.sgui.Component");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
@@ -17,23 +18,20 @@ load.provide("dusk.sgui.Grid", (function() {
 	 *  data.
 	 * 
 	 * Components are named in the form `"x,y"`, where x and y are the coordinates of the component; the second one to
-	 *  the right of the first row will be `"1,0"` for example. This class will, provided the event bubbles from it's
+	 *  the right of the first row will be `"1,0"` for example. This class will, provided the event bubbles from its
 	 *  children, manage focus changing between elements.
 	 * 
 	 * Properties in the `globals` object will be applied to all children in the grid when they are added.
 	 * 
-	 * If the child to add is an array, then it will alternate between all the elements in the array as children in
-	 *  order. If `multiple` is true, then it will loop round when it reaches the end of the array and start again.
-	 *  If `multiple` is false, then it will stop; this makes groups a really usefull way of populating a group of
-	 *  elements dynamically. 
+	 * Objects are added to the array using the `populate` method or JSON property.
 	 * 
 	 * When adding a child with display "expand", it will be sized and located so that it takes up an appropriate amount
-	 *  of the grid. For example, you can create two components next to each other, and have them automatically take up
-	 *  half the grid, by setting both their displays to expand.
+	 * of the grid. For example, you can create two components next to each other, and have them automatically take up
+	 * half the grid, by setting both their displays to expand.
 	 * 
 	 * The grid creates essentially a "grid" of display regions. This means that the x,y coordinate 0,0 will be the top
-	 *  left of its grid square, and the width and height of the drawing area (for expand components) will be the
-	 *  current grid square's width and height.
+	 * left of its grid square, and the width and height of the drawing area (for expand components) will be the
+	 * current grid square's width and height.
 	 * 
 	 * @extends dusk.sgui.Group
 	 * @param {?dusk.sgui.Group} parent The container that this component is in.
@@ -128,17 +126,21 @@ load.provide("dusk.sgui.Grid", (function() {
 	
 	/** Creates a new population of the specified component.
 	 * 
-	 * This will erase all components in this group, and create new ones of the type `value.type`,
-	 *  and then call `{@link dusk.sgui.Component.update}` with a copy of `value`.
+	 * This will erase all components in this group unless `recycle` is set to true.
 	 * 
-	 * The x and y coordinates will be set automatically.
+	 * It will then loop through all entries in the argument array. If it is an object, create a new component of the
+	 * type `value.type`, and then call `dusk.sgui.Component.update` with a copy of `this.globals` then a copy of
+	 * `value`. If it is a Component, then that component is renamed to grid coordinates and inserted into this grid.
+	 * Behaviour is undefined if a component gets added to the grid multiple times.
 	 * 
-	 * This may take an array as it's argument, in which case it will alternate between the components as it places
-	 * them.
+	 * A non-array argument is treated as a single element array with that value in it.
+	 * 
+	 * `rows`*`cols` elements will be created, unless `multiple` is set to false and the argument's length is less than
+	 * this. In which case, only the number of elements in the array are created.
 	 * 
 	 * This may be used in the JSON representation with the property `populate`.
 	 * 
-	 * @param {object|array} child A description of the object or objects to set.
+	 * @param {object|array<object, dusk.sgui.Component>} child A description of the object or objects to set.
 	 */
 	Grid.prototype.populate = function(child) {
 		if(child === undefined) return;
@@ -176,24 +178,30 @@ load.provide("dusk.sgui.Grid", (function() {
 				
 				p = (p + 1) % child.length;
 				
-				// Generate the component
-				var com = null;
-				if(!("type" in child[p]) && this.globals !== null && "type" in this.globals) {
-					com = this.get(hx + "," + hy, this.globals.type);
-				}else if("type" in child[p]) {
-					com = this.get(hx + "," + hy, child[p].type);
+				if(child[p] instanceof Component) {
+					this.set(hx+","+hy, child[p]);
+					child[p].name = hx + "," + hy;
+					child[p].update(utils.copy(this.globals, true));
 				}else{
-					console.warn("Grid tried to populate element with no type.");
+					// Generate the component
+					var com = null;
+					if(!("type" in child[p]) && this.globals !== null && "type" in this.globals) {
+						com = this.get(hx + "," + hy, this.globals.type);
+					}else if("type" in child[p]) {
+						com = this.get(hx + "," + hy, child[p].type);
+					}else{
+						console.warn("Grid tried to populate element with no type.");
+					}
+					
+					// Fire the event
+					com = this._populationEvent.firePass({"action":"create", "current":child[p], "child":child,
+						"component":com, "globals":this.globals
+					}, "create").component;
+					
+					// Give the component properties
+					if(this.globals !== null) com.update(utils.copy(this.globals, true));
+					com.update(utils.copy(child[p], true));
 				}
-				
-				// Fire the event
-				com = this._populationEvent.firePass({"action":"create", "current":child[p], "child":child,
-					"component":com, "globals":this.globals
-				}, "create").component;
-				
-				// Give the component properties
-				if(this.globals !== null) com.update(utils.copy(this.globals, true));
-				com.update(utils.copy(child[p], true));
 			}
 		}
 		
