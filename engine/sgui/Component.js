@@ -616,7 +616,7 @@ load.provide("dusk.sgui.Component", (function() {
 	 * @param {PosRect} container The dimensions of the container that this component is in. The x and y are unused.
 	 * @param {PosRect} containerSlice The slice of the container that is being rendered, anything outwith these
 	 *  dimensions will not be rendered.
-	 * @param {PosRect} display The area (on the canvas) to actually draw onto.
+	 * @param {PosRect} display The location (on the canvas) to actually draw onto. Dimensions are unused.
 	 * @since 0.0.21-alpha
 	 */
 	Component.prototype.paintContainer = function(ctx, container, containerSlice, display) {
@@ -669,8 +669,8 @@ load.provide("dusk.sgui.Component", (function() {
 		// Range check
 		if(dest.x < display.x) dest.startSize(-(display.x - dest.x), 0);
 		if(dest.y < display.y) dest.startSize(0, -(display.y - dest.y));
-		if(dest.ex > display.ex) dest.size(-(dest.ex - display.ex), 0);
-		if(dest.ey > display.ey) dest.size(0, -(dest.ey - display.ey));
+		if(dest.ex > display.x + containerSlice.width) dest.size(-(dest.ex - (display.x + containerSlice.width)), 0);
+		if(dest.ey > display.y + containerSlice.height) dest.size(0, -(dest.ey - (display.y + containerSlice.height)));
 		
 		// Check if on screen
 		var skip = false;
@@ -693,8 +693,8 @@ load.provide("dusk.sgui.Component", (function() {
 		
 		if(!skip && this.visible) {
 			slice.setWH(
-				dest.x - source.x - display.x + container.x + containerSlice.x,
-				dest.y - source.y - display.y + container.y + containerSlice.y,
+				dest.x - source.x - display.x + containerSlice.x,
+				dest.y - source.y - display.y + containerSlice.y,
 				dest.width, dest.height
 			);
 			
