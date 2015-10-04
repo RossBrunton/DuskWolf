@@ -134,7 +134,6 @@ load.provide("tests.gridfeed", (function() {
 				hspacing:5,
 				x:280,
 				y:40,
-				width:100,
 				mark:"#ff0000",
 				varyWidth:true,
 				varyHeight:true,

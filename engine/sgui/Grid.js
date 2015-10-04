@@ -389,18 +389,21 @@ load.provide("dusk.sgui.Grid", (function() {
 	 * @since 0.0.21-alpha
 	 */
 	Grid.prototype.getContentsHeight = function(includeOffset, rendering) {
-		var max = 0;
+		var sum = 0;
 		
-		for(var x = 0; x < this.cols; x ++) {
-			var sum = 0;
-			for(var y = 0; y < this.rows; y ++) {
-				if(this.get(x+","+y))
-					sum += rendering ? this.get(x+","+y).getRenderingHeight() : this.get(x+","+y).height;
+		for(var y = 0; y < this.rows; y ++) {
+			var max = 0;
+			for(var x = 0; x < this.cols; x ++) {
+				if(this.get(x+","+y)) {
+					var val =  rendering ? this.get(x+","+y).getRenderingHeight() : this.get(x+","+y).height;
+					
+					if(val > max) max = val;
+				}
 			}
-			if(sum > max) max = sum;
+			sum += max;
 		}
 		
-		return max - (includeOffset?this.yOffset:0) + ((this.rows-1)* this.vspacing);
+		return sum + ((this.rows-1)* this.vspacing);
 	};
 	
 	sgui.registerType("Grid", Grid);
