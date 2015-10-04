@@ -213,9 +213,23 @@ load.provide("dusk.sgui.Component", (function() {
 		 * @since 0.0.21-alpha
 		 */
 		this.cancel = new EventDispatcher("dusk.sgui.Component.cancel");
-		/** Fired as part of the drawing proccess.
+		/** Fired as part of the drawing proccess to allow components to draw themselves.
 		 * 
-		 * The event object is a 2D canvas rendering context, which is expected to be drawn on.
+		 * The event object is an object with two properties; `c` and `d`. `c` is a canvas rendering context on which
+		 * the component is expected to be drawn onto. 
+		 * 
+		 * `d` is another object with these properties, all of which `PosRect`s:
+		 * - `dest`: The location on the context to draw.
+		 * - `slice`: What part of the component to draw on that destination, you should only draw this part and nothing
+		 *  else.
+		 * - `origin`: The dimensions of the full size of the component. For fixed components this will be their width
+		 *  and height, for expand components this will be the space allocated to them.
+		 * 
+		 * The properties `x`, `y`, `width`, `height`, `xDisplay`, `yDisplay`, `alpha`, `visible` and `margins` are
+		 * already taken into consideration when calculating location and dimensions.
+		 * 
+		 * Currently, the dimensions of `dest` and `slice` are equal.
+		 * 
 		 * @type dusk.utils.EventDispatcher
 		 * @since 0.0.17-alpha
 		 */
