@@ -65,6 +65,22 @@ load.provide("dusk.sgui.Grid", (function() {
 		 */
 		this.vspacing = 0;
 		
+		/** If true, then the grid's rendering areas won't all be the same width.
+		 * 
+		 * Instead, each child's rendering area will be the rendering width of only that child.
+		 * @type boolean
+		 * @since 0.0.21-alpha
+		 */
+		this.varyWidth = false;
+		
+		/** If true, then the grid's rendering areas won't all be the same height.
+		 * 
+		 * Instead, each child's rendering area will be the rendering height of only that child.
+		 * @type boolean
+		 * @since 0.0.21-alpha
+		 */
+		this.varyHeight = false;
+		
 		/** Global properties. These will be set to all children during population.
 		 * @type object
 		 * @since 0.0.18-alpha
@@ -110,13 +126,15 @@ load.provide("dusk.sgui.Grid", (function() {
 		//Prop masks
 		this._mapper.map("vspacing", "vspacing");
 		this._mapper.map("hspacing", "hspacing");
+		this._mapper.map("varyHeight", "varyHeight");
+		this._mapper.map("varyWidth", "varyWidth");
 		this._mapper.map("rows", "rows");
 		this._mapper.map("cols", "cols");
 		this._mapper.map("globals", "globals");
 		this._mapper.map("recycle", "recycle");
 		this._mapper.map("multiple", "multiple");
 		this._mapper.map("populate", [function() {return {};}, this.populate],
-			["rows", "cols", "hspacing", "vspacing", "globals", "recycle", "multiple"]
+			["rows", "cols", "hspacing", "vspacing", "varyWidth", "varyHeight", "globals", "recycle", "multiple"]
 		);
 		
 		//Listeners
@@ -268,36 +286,72 @@ load.provide("dusk.sgui.Grid", (function() {
 		
 		slice.setWH(e.d.slice.x, e.d.slice.y, e.d.slice.width, e.d.slice.height);
 		
-		var initX = e.d.dest.x;
-		
 		var eachWidth = (e.d.origin.width - ((this.cols - 1) * this.hspacing)) / (this.cols);
 		var eachHeight = (e.d.origin.height - ((this.rows - 1) * this.vspacing)) / (this.rows);
 		
-		var widthAndSpace = eachWidth + this.hspacing;
-		var heightAndSpace = eachHeight + this.vspacing;
+		var xp = 0;
+		var yp = 0;
+		var maxHeight = 0;
 		
-		// Origin is always the same size
+		// Origin is always the same size unless *VarySize is true
 		rect.setWH(0, 0, eachWidth, eachHeight);
-		display.sizeTo(eachWidth, eachHeight);
 		
-		for(var x = 0; x < this.cols; x++) {
-			for(var y = 0; y < this.rows; y++) {
+		for(var y = 0; y < this.rows; y++) {
+			for(var x = 0; x < this.cols; x++) {
+				var fail = false;
+				
+				// Vary size
+				if(this.varyWidth) {
+					eachWidth = this._components[x+","+y].getRenderingWidth();
+				}
+				
+				if(this.varyHeight) {
+					if(this._components[x+","+y].getRenderingHeight() > maxHeight) {
+						maxHeight = this._components[x+","+y].getRenderingHeight();
+					}
+					
+					eachHeight = this._components[x+","+y].getRenderingHeight();
+				}
+				
+				if(this.varyHeight || this.varyWidth) {
+					rect.setWH(0, 0, eachWidth, eachHeight);
+				}
+				
 				slice.setWH(0, 0, rect.width, rect.height);
 				display.setWH(
-					e.d.dest.x + (x * widthAndSpace) - e.d.slice.x,
-					e.d.dest.y + (y * heightAndSpace) - e.d.slice.y,
+					e.d.dest.x + xp - e.d.slice.x,
+					e.d.dest.y + yp - e.d.slice.y,
 					eachWidth, eachHeight
 				);
 				
-				if(e.d.slice.x > widthAndSpace * x) {
-					slice.startSize(e.d.slice.x - (widthAndSpace * x), 0);
+				if(e.d.slice.x > xp) {
+					slice.startSize(e.d.slice.x - xp, 0);
 				}
-				if(e.d.slice.y > heightAndSpace * y) {
-					slice.startSize(0, e.d.slice.y - (heightAndSpace * y));
+				if(e.d.slice.y > yp) {
+					slice.startSize(0, e.d.slice.y - yp);
 				}
 				
-				this._components[x+","+y].paintContainer(e.c, rect, slice, display);
+				// Cap dimensions
+				if(e.d.slice.ex < xp + slice.width) {
+					slice.sizeTo(e.d.slice.ex - xp, slice.height);
+					if(slice.width < 0) fail = true;
+				}
+				
+				if(e.d.slice.ey < yp + slice.height) {
+					slice.sizeTo(slice.width, e.d.slice.ey - yp);
+					if(slice.height < 0) fail = true;
+				}
+				
+				xp += eachWidth + this.hspacing;
+				
+				if(!fail) {
+					this._components[x+","+y].paintContainer(e.c, rect, slice, display);
+				}
 			}
+			
+			yp += this.varyHeight ? (maxHeight + this.vspacing) : (eachHeight + this.vspacing);
+			maxHeight = 0;
+			xp = 0;
 		}
 		
 		PosRect.pool.free(rect);

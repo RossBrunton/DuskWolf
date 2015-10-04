@@ -70,7 +70,82 @@ load.provide("tests.gridfeed", (function() {
 				x:150,
 				y:30,
 				populate:coms,
-			}
+			},
+			
+			gridexp:{
+				type:"Grid",
+				rows:5,
+				cols:5,
+				width:200,
+				height:200,
+				x:30,
+				y:150,
+				hspacing:5,
+				vspacing:5,
+				globals:{
+					type:"Rect",
+					width:10,
+					height:10,
+				},
+				populate:[{colour:"#333333", xDisplay:"expand"}, {colour:"#cccccc", yDisplay:"expand"}],
+			},
+			
+			gridvvary:{
+				type:"Grid",
+				rows:5,
+				cols:1,
+				x:250,
+				y:30,
+				varyHeight:true,
+				globals:{
+					type:"Rect",
+					width:10,
+				},
+				populate:[
+					{colour:"#333333", height:10}, {colour:"#cccccc", height:20},
+					{colour:"#333333", height:30}, {colour:"#cccccc", height:40},
+					{colour:"#333333", height:50}
+				],
+			},
+			
+			gridhvary:{
+				type:"Grid",
+				rows:1,
+				cols:5,
+				x:260,
+				y:20,
+				varyWidth:true,
+				globals:{
+					type:"Rect",
+					height:10,
+				},
+				populate:[
+					{colour:"#333333", width:10}, {colour:"#cccccc", width:20},
+					{colour:"#333333", width:30}, {colour:"#cccccc", width:40},
+					{colour:"#333333", width:50}
+				],
+			},
+			
+			gridrvary:{
+				type:"Grid",
+				rows:5,
+				cols:5,
+				vspacing:5,
+				hspacing:5,
+				x:280,
+				y:40,
+				width:100,
+				mark:"#ff0000",
+				varyWidth:true,
+				varyHeight:true,
+				globals:{
+					type:"Rect",
+					colour:"#333333"
+				},
+				populate:(new Array(5*5)).fill(0).map(
+					function(x) {return {width:~~(Math.random()*30)+10, height:~~(Math.random()*30)+10}}
+				),
+			},
 		}
 	});
 	
