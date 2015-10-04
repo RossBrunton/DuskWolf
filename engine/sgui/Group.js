@@ -408,11 +408,9 @@ load.provide("dusk.sgui.Group", (function() {
 		
 		rect.setWH(0, 0, e.d.origin.width, e.d.origin.height);
 		
-		display.setWH(e.d.dest.x, e.d.dest.y, e.d.dest.width, e.d.dest.height);
+		display.setWH(e.d.dest.x, e.d.dest.y, 0, 0);
 		
-		slice.setWH(e.d.slice.x + this.xOffset, e.d.slice.y + this.yOffset, e.d.slice.width - this.xOffset,
-			e.d.slice.height - this.yOffset
-		);
+		slice.setWH(e.d.slice.x + this.xOffset, e.d.slice.y + this.yOffset, e.d.slice.width,e.d.slice.height);
 		
 		for(var i = 0; i < this._drawOrder.length; i++) {
 			if(this._drawOrder[i] in this._components) {
