@@ -10,6 +10,7 @@ load.provide("dusk.sgui.Grid", (function() {
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var utils = load.require("dusk.utils");
 	var PosRect = load.require("dusk.utils.PosRect");
+	var sgui = load.require("dusk.sgui");
 	
 	/** A grid is a group of similar components arranged in a grid.
 	 * 
@@ -93,6 +94,11 @@ load.provide("dusk.sgui.Grid", (function() {
 		 * @default true
 		 */
 		this.recycle = true;
+		/** If true, then old components will be removed rather than deleted.
+		 * @type boolean
+		 * @since 0.0.21-alpha
+		 */
+		this.removeOld = false;
 		/** If false, then each component description while populating will only be used once.
 		 * @type boolean
 		 * @since 0.0.21-alpha
@@ -101,11 +107,11 @@ load.provide("dusk.sgui.Grid", (function() {
 		this.multiple = true;
 		
 		/** This event handler is fired during three stages of the population proccess; when it starts,
-		 *  when a component is created, and when it finishes.
+		 *  when a component is added, and when it finishes.
 		 * 
 		 * The event object has up to three properties:
 		 * - `child` The child object data, this may be changed.
-		 * - `action` Either `"before"`, `"create"` or `"complete"` depending on the population stage.
+		 * - `action` Either `"before"`, `"add"` or `"complete"` depending on the population stage.
 		 * - `component` Only on `create` events. This is the component that was created.
 		 * - `current` Only on `create` events. This is the object that was used to create the component.
 		 * 
@@ -132,6 +138,7 @@ load.provide("dusk.sgui.Grid", (function() {
 		this._mapper.map("cols", "cols");
 		this._mapper.map("globals", "globals");
 		this._mapper.map("recycle", "recycle");
+		this._mapper.map("removeOld", "removeOld");
 		this._mapper.map("multiple", "multiple");
 		this._mapper.map("populate", [function() {return {};}, this.populate],
 			["rows", "cols", "hspacing", "vspacing", "varyWidth", "varyHeight", "globals", "recycle", "multiple"]
@@ -171,12 +178,12 @@ load.provide("dusk.sgui.Grid", (function() {
 		//Delete all the existing ones, or all the out of range one
 		if(!this.recycle) {
 			for(var x in this._components){
-				this.delete(x);
+				this.removeOld ? this.remove(x) : this.delete(x);
 			}
 		}else{
 			for(var x in this._components){
 				if(x.split(",")[0] > this.cols-1 || x.split(",")[1] > this.rows-1)
-					this.delete(x);
+					this.removeOld ? this.remove(x) : this.delete(x);
 			}
 		}
 		
@@ -196,36 +203,43 @@ load.provide("dusk.sgui.Grid", (function() {
 				
 				p = (p + 1) % child.length;
 				
-				if(child[p] instanceof Component) {
-					this.set(hx+","+hy, child[p]);
-					child[p].name = hx + "," + hy;
-					child[p].update(utils.copy(this.globals, true));
-				}else{
-					// Generate the component
-					var com = null;
-					if(!("type" in child[p]) && this.globals !== null && "type" in this.globals) {
-						com = this.get(hx + "," + hy, this.globals.type);
-					}else if("type" in child[p]) {
-						com = this.get(hx + "," + hy, child[p].type);
-					}else{
-						console.warn("Grid tried to populate element with no type.");
-					}
-					
-					// Fire the event
-					com = this._populationEvent.firePass({"action":"create", "current":child[p], "child":child,
-						"component":com, "globals":this.globals
-					}, "create").component;
-					
-					// Give the component properties
-					if(this.globals !== null) com.update(utils.copy(this.globals, true));
-					com.update(utils.copy(child[p], true));
-				}
+				var com = this._makeComponent(child[p])
+				
+				com = this._populationEvent.firePass({"action":"add", "current":child[p], "child":child,
+					"component":com, "globals":this.globals
+				}, "create").component;
+				
+				this.set(hx+","+hy, com);
 			}
 		}
 		
 		this.flow("0,0");
 		
 		this._populationEvent.fire({"action":"complete", "child":child}, "complete");
+	};
+	
+	Grid.prototype._makeComponent = function(object) {
+		if(object instanceof Component) {
+			object.update(utils.copy(this.globals, true));
+			return object;
+		}else{
+			// Generate the component
+			var com = null;
+			if(!("type" in object) && this.globals !== null && "type" in this.globals) {
+				com = new (sgui.getType(this.globals.type))(undefined, "");
+			}else if("type" in object) {
+				com = new (sgui.getType(object.type))(undefined, "");
+			}else{
+				console.warn("Grid tried to populate element with no type.");
+			}
+			
+			// Fire the event
+			
+			// Give the component properties
+			if(this.globals !== null) com.update(utils.copy(this.globals, true));
+			com.update(utils.copy(object, true));
+			return com;
+		}
 	};
 	
 	/** Changes the focused component in a grid-y way.

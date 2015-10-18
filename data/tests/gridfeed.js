@@ -13,6 +13,8 @@ load.provide("tests.gridfeed", (function() {
 	var Feed = load.require("dusk.sgui.Feed");
 	var dusk = load.require("dusk");
 	var Runner = load.require("dusk.script.Runner");
+	var Fade = load.require("dusk.sgui.extras.Fade");
+	var Die = load.require("dusk.sgui.extras.Die");
 	
 	var coms = [1, 2, 3, 4, 5].map(function(x) {var l = new Label(); l.text = ""+x; return l;});
 	
@@ -145,10 +147,47 @@ load.provide("tests.gridfeed", (function() {
 					function(x) {return {width:~~(Math.random()*30)+10, height:~~(Math.random()*30)+10}}
 				),
 			},
+			
+			feed:{
+				type:"Feed",
+				vspacing:5,
+				hspacing:5,
+				x:280,
+				y:250,
+				mark:"#ff0000",
+				varyWidth:true,
+				varyHeight:true,
+				globals:{
+					type:"Rect",
+					colour:"#333333"
+				},
+				populate:(new Array(5*5)).fill(0).map(
+					function(x) {return {width:~~(Math.random()*30)+10, height:~~(Math.random()*30)+10}}
+				),
+			},
 		}
 	});
 	
 	window.sgui = sgui;
+	
+	window.addFeed = function() {
+		sgui.path("default:/feed").append({colour:"#000000", height:~~(Math.random()*30)+10,
+			width:~~(Math.random()*30)+10, extras:{
+				fade:{
+					type:"Fade",
+					from:1.0,
+					to:0.0,
+					delay:~~(Math.random()*120)+10,
+					duration:30,
+					then:"die",
+					on:true,
+				},
+				die:{
+					type:"Die"
+				}
+			}
+		});
+	};
 	
 	dusk.startGame();
 })());
