@@ -1000,14 +1000,14 @@ load.provide("dusk.sgui.Component", (function() {
 	Object.defineProperty(Component.prototype, "type", {
 		set: function(value) {
 			if(value && value != sgui.getTypeName(this)) {
+				var container = this.container;
 				this.deleted = true;
 				
 				var data = this.bundle();
 				data.type = value;
 				data.deleted = false;
 				
-				this.container.get(this.name, value).update(data);
-				sgui.applyStyles(this.container.get(this.name));
+				container.get(this.name, value).update(data);
 			}
 		},
 		

@@ -461,20 +461,27 @@ load.provide("dusk.sgui.Group", (function() {
 	 */
 	Group.prototype.set = function(name, data) {
 		if(data instanceof Component) {
-			this._components[name.toLowerCase()] = data;
-			this._componentsArr.push(data);
-			this._drawOrder.push(name.toLowerCase());
-			sgui.applyStyles(data);
-			if(this.focusBehaviour == Group.FOCUS_ALL) {
-				data.onFocusChange.fire({"focus":true}, true);
-				if(this.active) data.onActiveChange.fire({"active":true}, true);
+			if(data.container && data.container == this) {
+				// Already set, do nothing
+
+			}else{
+				this._components[name.toLowerCase()] = data;
+				this._componentsArr.push(data);
+				this._drawOrder.push(name.toLowerCase());
+				sgui.applyStyles(data);
+				if(this.focusBehaviour == Group.FOCUS_ALL) {
+					data.onFocusChange.fire({"focus":true}, true);
+					if(this.active) data.onActiveChange.fire({"active":true}, true);
+				}
+
+				if(data.container) {
+					throw TypeError("Tried to add component "+data+" to "+this+" but it is already in "+data.container);
+				}
+
+				data.container = this;
 			}
 			
-			if(data.container) {
-				throw TypeError("Tried to add component "+data+" to "+this+" but it is already in "+data.container);
-			}
-			
-			data.container = this;
+			data.name = name;
 			return data;
 		}
 		
@@ -482,22 +489,48 @@ load.provide("dusk.sgui.Group", (function() {
 		return this.modifyComponent(data);
 	};
 	
-	/** Deletes a component in this group.
+	/** Removes a component from this group and then deletes it
 	 * 
-	 * This will not remove any references to it elsewhere
-	 *  but will remove it from the list of components and the draw order.
+	 * As per "remove", but then deletes it by firing it's onDelete listener.
 	 * 
 	 * @param {string} com The name of the component to delete.
 	 * @return {boolean} If the delete was successful, this will return false if the component doesn't exist.
 	 * @since 0.0.21-alpha
 	 */
 	Group.prototype.delete = function(com) {
-		if (this._components[com.toLowerCase()]){
+		if(this._components[com.toLowerCase()]){
+			var c = this._components[com.toLowerCase()]
+			this.remove(com);
+			c.onDelete.fire({"com":c});
+			return true;
+		}
+	};
+	
+	/** Removes a component from this group.
+	 * 
+	 * This will not remove any references to it elsewhere but will remove it from the list of components and the draw
+	 *  order.
+	 * 
+	 * @param {string} com The name of the component to delete.
+	 * @return {boolean} If the delete was successful, this will return false if the component doesn't exist.
+	 * @since 0.0.21-alpha
+	 */
+	Group.prototype.remove = function(com) {
+		if(this._components[com.toLowerCase()]){
+			var c = this._components[com.toLowerCase()];
+			
 			if(this._focusedCom == com.toLowerCase()) this.focus = "";
-			this._components[com.toLowerCase()].onDelete.fire({"com":this._components[com.toLowerCase()]});
 			this._componentsArr.splice(this._componentsArr.indexOf(this._components[com.toLowerCase()]), 1);
-			this._components[com.toLowerCase()] = null;
+			delete this._components[com.toLowerCase()];
 			this._drawOrder.splice(this._drawOrder.indexOf(com.toLowerCase()), 1);
+			
+			// Make removed components lose active status and focus
+			if(c.active) c.onActiveChange.fire({active:false});
+			if(c.focus) c.onFocusChange.fire({focus:false});
+			
+			// And clear the container thing
+			c.container = undefined;
+			
 			return true;
 		}
 	};
