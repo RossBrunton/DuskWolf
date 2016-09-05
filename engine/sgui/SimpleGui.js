@@ -13,8 +13,6 @@ load.provide("dusk.sgui", (function() {
 	var options = load.require("dusk.options");
 	var Pool = load.require("dusk.utils.Pool");
 	var interaction = load.require("dusk.input.interaction");
-	var UserCancelError =
-		load.suggest("dusk.utils.reversiblePromiseChain.UserCancelError", function(p) {UserCancelError = p});
 	var containerUtils = load.require("dusk.utils.containerUtils");
 	var PosRect = load.require("dusk.utils.PosRect");
 	

@@ -238,16 +238,16 @@ load.provide("dusk.sgui.SayBox", (function() {
 	 * @param {string} left The text to put in the left box.
 	 * @param {?string} body The text to put in the body.
 	 * @param {?string} right The text to put in the right box after the text has finished filling.
-	 * @param {?string} copy The name value on the passed argument to use as the context for say.
+	 * @param {?string} vars The name of the value on the passed argument to use as the context for say.
 	 * @param {?array|string} options Currently unused.
 	 * @param {string="sayBoxOption"} optionDest Current unused.
 	 * @return {object} The action
 	 */
-	SayBox.prototype.runnerSayAction = function(left, body, right, copy, options, optionDest) {
+	SayBox.prototype.runnerSayAction = function(left, body, right, vars, options, optionDest) {
 		return Runner.action("dusk.sgui.SayBox.runnerSayAction", (function(x, add) {
 			var loptions = (typeof options == "string") ? x[options] : options;
 			
-			return this.say(left, body, right, copy?x[copy]:{}, loptions).then(function(choice) {
+			return this.say(left, body, right, vars?x[vars]:{}, loptions).then(function(choice) {
 				x[optionDest?optionDest:"sayBoxOption"] = choice;
 				return x;
 			}, function(except) {

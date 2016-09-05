@@ -9,7 +9,7 @@ load.provide("example.saybox", (function() {
 	var sgui = load.require("dusk.sgui");
 	var FancyRect = load.require("dusk.sgui.FancyRect");
 	var FpsMeter = load.require("dusk.sgui.FpsMeter");
-	var reversiblePromiseChain = load.require("dusk.utils.reversiblePromiseChain");
+	var Runner = load.require("dusk.script.Runner");
 	
 	// Apply styles
 	sgui.addStyle("SayBox>PlusText", {
@@ -62,23 +62,23 @@ load.provide("example.saybox", (function() {
 	});
 	
 	// Create speakers
-	var h = sgui.path("default:/say").sayBoundPair.bind(sgui.path("default:/say"), "Lord St. Heroingston");
-	var c = sgui.path("default:/say").sayBoundPair.bind(sgui.path("default:/say"), "\"Wounded\" Child");
+	var h = sgui.path("default:/say").runnerSayAction.bind(sgui.path("default:/say"), "Lord St. Heroingston");
+	var c = sgui.path("default:/say").runnerSayAction.bind(sgui.path("default:/say"), "\"Wounded\" Child");
 	
 	// Say stuff
-	reversiblePromiseChain([
+	(new Runner([
 		h("THIS CHILD IS WOUNDED!aosehusaoceuhasorcehusacoehu saoechu lraoechu laoerc huaolrec uhalorhue laroh ueclrao heulrach ulacho eulrach lreach ularch eularoche ulraoche ulaorech ularhu laorhue lrahc ularo hela huacuehlauhe aloecuh laroechu laochu laorech ulah ulaohue "),
 		c("What? No I'm not."),
-		h("Give this child a healing potion?", "[img item.png] - 15"),
+		h("Give this child a healing potion?", "[img item.png][/img] - 15"),
 		function(pa) {
 			if(!("sayVars" in pa)) pa.sayVars = {};
 			
 			pa.sayVars.no = ""+(~~(Math.random() * 1000));
 			return pa;
 		},
-		h("You are now [b]{{no}}[/b] in the healing queue! That is [b]{{no}}[/b]!\nThanks for waiting!"),
+		h("You are now [b]{{no}}[/b] in the healing queue! That is [b]{{no}}[/b]!\nThanks for waiting!", "", "sayVars"),
 		function() {
-			sgui.path("saybox:/say").updateExtra("fadeOut", {
+			sgui.path("default:/say").updateExtra("fadeOut", {
 				"type":"Fade",
 				"on":true,
 				"duration":60,
@@ -86,8 +86,7 @@ load.provide("example.saybox", (function() {
 				"to":0.0,
 			});
 		}
-	], false, {})
-	.catch(console.error.bind(console));
+	])).start({}).catch(console.error.bind(console));
 	
 	// And begin
 	dusk.startGame();

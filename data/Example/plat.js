@@ -48,7 +48,6 @@ load.provide("example.plat", (function() {
 	
 	load.require("example.plat.rooms.exhall");
 	
-	var reversiblePromiseChain = load.require("dusk.utils.reversiblePromiseChain");
 	var Scriptable = load.require("dusk.entities.behave.Scriptable");
 	
 	var plat = {};
