@@ -138,40 +138,6 @@ load.provide("dusk.rooms.actors.Select", (function() {
 		function() {});
 	};
 	
-	SelectActor.prototype.followPath = function(options) {
-		return Runner.action("dusk.rooms.actors.Select.followPath", (function(x, add) {
-			return new Promise((function(fulfill, reject) {
-					var ent = x.entity;
-					if("which" in options) ent = x[options.which];
-					
-					ent.eProp("gwmoves", utils.copy(x.path.dirs().reverse()));
-					var oldX = ent.x;
-					var oldY = ent.y;
-					
-					x.oldX = oldX;
-					x.oldY = oldY;
-					
-					if(x.path.length()){ 
-						var l = ent.entityEvent.listen((function(e) {
-							if(!ent.eProp("gwmoves").length) {
-								ent.entityEvent.unlisten(l);
-								fulfill(x);
-							}
-						}).bind(this), "gwStopMove");
-					}else{
-						fulfill(x);
-					}
-				}).bind(this));
-		}).bind(this), 
-		
-		(function(x) {
-			x.entity.x = x.oldX;
-			x.entity.y = x.oldY;
-			
-			return Promise.reject(new Runner.Cancel());
-		}).bind(this));
-	};
-	
 	SelectActor.prototype.entitiesInRegion = function(options) {
 		return Runner.action("dusk.rooms.actors.Select.entitiesInRegion", (function(x, add) {
 			var region;

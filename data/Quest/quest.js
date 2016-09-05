@@ -15,6 +15,7 @@ load.provide("quest", (function() {
 	var menu = load.require("dusk.script.actors.menu");
 	var Runner = load.require("dusk.script.Runner");
 	var Actions = load.require("dusk.script.Actions");
+	var EntityActions = load.require("dusk.entities.actors.Standard");
 	
 	var Region = load.require("dusk.tiles.Region");
 	var uniformModifier = load.require("dusk.tiles.UniformModifier");
@@ -97,6 +98,8 @@ load.provide("quest", (function() {
 			|| (visibilityRegion && !visibilityRegion.has(e.tileX(), e.tileY(), 1));
 		});
 	};
+	
+	var ea = new EntityActions(qo.layeredRoom.getPrimaryEntityLayer());
 	
 	// Built in region generator functions
 	window.aarg =
@@ -230,7 +233,7 @@ load.provide("quest", (function() {
 					},
 					
 					// Move the entity to it's destination
-					qo.selectActor.followPath({}),
+					ea.followPath("", {}),
 					
 					// Collision? To bad, turn over
 					Actions.if(function(x) {return !x.collision;}, [

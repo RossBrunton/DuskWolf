@@ -18,6 +18,7 @@ load.provide("weightsTest", (function() {
 	window.TileDisplay = load.require("dusk.tiles.sgui.RegionDisplay");
 	window.RegionActor = load.require("dusk.rooms.actors.Regions");
 	window.SelectActor = load.require("dusk.rooms.actors.Select");
+	window.EntitiesActor = load.require("dusk.entities.actors.Standard");
 	window.menu = load.require("dusk.script.actors.menu");
 	load.require("quest");
 	
@@ -107,6 +108,7 @@ load.provide("weightsTest", (function() {
 	
 	window.ra = new RegionActor(sgui.path("default:/quest"));
 	window.sa = new SelectActor(sgui.path("default:/quest"));
+	window.ea = new EntitiesActor(sgui.path("default:/quest").getPrimaryEntityLayer())
 	window.regionScript = new Runner([
 		Actions.while(function() {return true}, [
 			sa.pickEntity(function() {return true}, {}, {}),
@@ -120,7 +122,7 @@ load.provide("weightsTest", (function() {
 			ra.displayPath("movePath", "default/arrows32.png", {}),
 			sa.pickTile({}, {}),
 			ra.unDisplay(["atk", "mov", "movePath"], {}),
-			sa.followPath({}),
+			ea.followPath("", {}),
 		]),
 		
 		function() {return Promise.reject(new Runner.Cancel());}
