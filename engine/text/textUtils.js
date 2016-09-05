@@ -28,6 +28,8 @@ load.provide("dusk.text.Location", (function() {
 		 */
 		this.y = 0;
 		/** When rendering is complete this will be the total number of lines.
+		 *
+		 * Before then, it is the current line on which the location is on.
 		 * @type integer
 		 */
 		this.lines = 0;
@@ -43,6 +45,10 @@ load.provide("dusk.text.Location", (function() {
 		 * @type integer
 		 */
 		this.restrictMaxWidth = -1;
+		/** The widths of each individual line, this does not include padding
+		 * @type array<integer>
+		 */
+		this.lineWidths = [];
 		
 		// And reset it to start with
 		this.reset();
@@ -54,14 +60,18 @@ load.provide("dusk.text.Location", (function() {
 		this.y = this._label.padding + (this._label.size)/2;
 		this.lines = 1;
 		this.chars = 0;
+		this.lineWidths = [];
 	};
 	
 	/** Advance the cursor the width of the given text with the given context.
+	 * 
+	 * This ignores any newlines, because apparently they have a width.
+	 * 
 	 * @param {CanvasRenderingContext2D} ctx The context that will be used to draw the text.
 	 * @param {string} text The text to draw.
 	 */
 	Location.prototype.advance = function(ctx, text) {
-		this.x += ctx.measureText(text).width;
+		this.x += ctx.measureText(text.replace("\n", "")).width;
 		this.chars += text.length;
 	};
 	
@@ -76,6 +86,7 @@ load.provide("dusk.text.Location", (function() {
 	
 	/** Takes a new line and moves the cursor to the start of it. */
 	Location.prototype.newline = function() {
+		this.lineWidths.push(this.x - this._label.padding);
 		this.x = this._label.padding;
 		this.y += this._label.size;
 		this.lines ++;
@@ -195,6 +206,22 @@ load.provide("dusk.text.Location", (function() {
 		
 		out.push(curLine);
 		return out;
+	};
+	
+	/** Gets the padding of the text field, that is, the distance added to the start of each line and the end
+	 * 
+	 * @return {integer} The padding
+	 */
+	Location.prototype.padding = function() {
+		return this._label.padding;
+	};
+	
+	/** Gets the size of a single line
+	 * 
+	 * @return {integer} Line height
+	 */
+	Location.prototype.lineHeight = function() {
+		return this._label.size;
 	};
 	
 	return Location;

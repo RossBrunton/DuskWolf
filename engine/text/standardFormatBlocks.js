@@ -127,6 +127,69 @@ load.provide("dusk.text.standardFormatBlocks", (function() {
 	FormatBlock.register("bcolour", BorderColourBlock);
 	FormatBlock.register("bcolor", BorderColourBlock);
 	
+	// Underline
+	var UnderlineBlock = function(body, thickness, colour) {
+		FormatBlock.call(this, body);
+		this._thickness = thickness !== undefined ? thickness : 1;
+		this._colour = colour;
+		this._useCtxColour = colour === undefined;
+		this._name = "UnderlineBlock";
+	};
+	UnderlineBlock.prototype = Object.create(FormatBlock.prototype);
+	
+	UnderlineBlock.prototype.print = function(ctx, location, chars, settings) {
+		var height = location.lineHeight();
+		var startX = location.x;
+		var startLine = location.lines - 1;
+		var startY = location.y;
+		
+		var ret = FormatBlock.prototype.print.apply(this, arguments);
+		
+		var resetColour = ctx.strokeStyle;
+		if(!this._useCtxColour) {
+			ctx.strokeStyle = this._colour;
+		}else{
+			ctx.strokeStyle = ctx.fillStyle;
+		}
+		var resetThickness = ctx.lineWidth;
+		ctx.lineWidth = this._thickness;
+		
+		if(location.lines === startLine + 1) {
+			// Single line
+			ctx.beginPath();
+			
+			ctx.moveTo(startX, startY + (height/2));
+			ctx.lineTo(location.x, location.y + (height/2));
+			ctx.stroke();
+		}else{
+			// Multiline
+			ctx.beginPath();
+			
+			// Initial line
+			ctx.moveTo(startX, startY + height/2);
+			ctx.lineTo(location.lineWidths[startLine] + location.padding(), startY + height/2);
+			
+			// Inner lines
+			for(var i = startLine+1; i < location.lineWidths.length; i ++) {
+				ctx.moveTo(location.padding(), location.padding() + ((i + 1) * height));
+				ctx.lineTo(location.lineWidths[i] + location.padding(), location.padding() + ((i + 1) * height));
+			}
+			
+			// Final line
+			ctx.moveTo(location.padding(), location.y + (height/2));
+			ctx.lineTo(location.x, location.y + (height/2));
+			
+			ctx.stroke();
+		}
+		
+		ctx.strokeStyle = resetColour;
+		ctx.lineWidth = resetThickness;
+		
+		return ret;
+	};
+	
+	FormatBlock.register("u", UnderlineBlock);
+	
 	
 	// img
 	var ImgBlock = function(body) {

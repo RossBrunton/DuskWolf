@@ -39,6 +39,14 @@ load.provide("tests.label", (function() {
 					\n\nTwo newlines\n\n\nThree newlines\n\
 					[img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img][img smile.png]Not found[/img]"
 			},
+			d:{
+				type:"Label",
+				x:500,
+				y:30,
+				multiline:true,
+				width:200,
+				text:"Underline [u]test!\na\naaa\naaaaaaa\naaaaaaaaaaaaaa\n[colour #ff0000]aaaaaa[/colour]\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\naa\naaa[/u] is over.",
+			},
 			
 			tb:{
 				type:"TextBox",
