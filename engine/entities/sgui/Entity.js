@@ -413,6 +413,16 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	};
 	
 	/** Takes the output from "verForce" or "horForce" manages acceleration and returns the new dx or dy.
+	 * 
+	 * The algorithm works as follows:
+	 * - For each force from the event:
+	 * -- Store the positive and negative accelerations into psum and nsum
+	 * -- Store the sum of the accumulated speeds into pvelsum and nvelsum
+	 * - With the new accelerations, reduce them a bit because of friction. This can make them negative.
+	 * - If we have collided, remove all accumulated speeds heading towards the wall.
+	 * - 
+	 * 
+	 * 
 	 * @param {array} arr The output of the event.
 	 * @param {integer} base The initial dx or dy.
 	 * @param {object} accum The dyAccum or dxAccum object.
@@ -423,7 +433,6 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 	 */
 	var _sum = function(arr, base, accum, lowCollide, highCollide) {
 		var out = 0;
-		var vels = 0;
 		
 		var pa = 0;
 		var na = 0;
@@ -445,94 +454,114 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 		
 		// First of all, loop through all the supplied velocities and update their accumulators, put them in the
 		// pforces or nforces array, and add them to the sum and velsum counters
-		for(var i = 0; i < arr.length; i ++) {
-			if(arr[i] && Array.isArray(arr[i])) {
-				if(!(arr[i][2] in accum)) {
-					accum[arr[i][2]] = 0;
+		for(var force of arr) {
+			if(force && Array.isArray(force)) {
+				var name = force[2];
+				
+				// No entry? Add it
+				if(!(name in accum)) {
+					accum[name] = 0;
 				}
 				
-				vels ++;
-				if(arr[i][0] > 0) {
-					psum += arr[i][0];
-					pforces.push(arr[i]);
-				}else if(arr[i][0] < 0) {
-					nsum -= arr[i][0];
-					nforces.push(arr[i]);
+				if(force[0] > 0) {
+					psum += force[0];
+					pforces.push(force);
+				}else if(force[0] < 0) {
+					nsum -= force[0];
+					nforces.push(force);
 				}
 				
-				if(accum[arr[i][2]] > 0) {
-					pvelsum += accum[arr[i][2]];
-					pvels.push(arr[i]);
-				}else if(accum[arr[i][2]] < 0) {
-					nvelsum -= accum[arr[i][2]];
-					nvels.push(arr[i]);
+				if(accum[name] > 0) {
+					pvelsum += accum[name];
+					pvels.push(force);
+				}else if(accum[name] < 0) {
+					nvelsum -= accum[name];
+					nvels.push(force);
 				}
 			} 
 		}
 		
 		// Friction, apply a force to oppose the movement
-		if(base > 0) nsum -= 0.05;
+		if(base > 0) nsum += 0.05;
 		if(base < 0) psum += 0.05;
 		
+		// BOTH OF THESE ARE POSITIVE
 		var pleft = psum;
 		var nleft = nsum;
 		
 		// Check collisions and remove accumulated speed if there is a collision
 		if(lowCollide) {
 			for(var i = 0; i < nvels.length; i ++) {
-				if(accum[nvels[i][2]] < 0) accum[nvels[i][2]] = 0;
+				accum[nvels[i][2]] = 0;
 			}
 		}
 		if(highCollide) {
 			for(var i = 0; i < pvels.length; i ++) {
-				if(accum[pvels[i][2]] > 0) accum[pvels[i][2]] = 0;
+				accum[pvels[i][2]] = 0;
 			}
 		}
 		
-		// Reduce the velerations by the forces opposing them
+		// Reduce the accumulated speeds by their opposing forces
+		// The speeds are divided up such that larger accumulated speeds get a larger fraction of the force to decay
+		// them.
+		// The left values are burned by using them to oppose accumulated forces
 		for(var i = 0; i < nvels.length; i ++) {
-			var pleftFrag = (-accum[nvels[i][2]] / nvelsum) * pleft;
+			var pleftShare = (-accum[nvels[i][2]] / nvelsum) * pleft;
 			
-			if(-accum[nvels[i][2]] > pleftFrag) {
-				accum[nvels[i][2]] += pleftFrag;
-				pleft -= pleftFrag;
+			if(-accum[nvels[i][2]] > pleftShare) {
+				accum[nvels[i][2]] += pleftShare;
+				pleft -= pleftShare;
 			}else{
 				accum[nvels[i][2]] = 0;
-				pleft += accum[nvels[i][2]];
+				pleft -= accum[nvels[i][2]];
 			}
 		}
 		
 		for(var i = 0; i < pvels.length; i ++) {
-			var nleftFrag = (accum[pvels[i][2]] / pvelsum) * nleft;
+			var nleftShare = (accum[pvels[i][2]] / pvelsum) * nleft;
 			
-			if(accum[pvels[i][2]] > nleftFrag) {
-				accum[pvels[i][2]] -= nleftFrag;
-				nleft -= nleftFrag;
+			if(accum[pvels[i][2]] > nleftShare) {
+				accum[pvels[i][2]] -= nleftShare;
+				nleft -= nleftShare;
 			}else{
 				accum[pvels[i][2]] = 0;
 				nleft -= accum[pvels[i][2]];
 			}
 		}
 		
-		// Then divy up the remaining force
+		if(pleft < nleft) {
+			nleft -= pleft;
+			pleft = 0;
+		}else if(pleft > nleft) {
+			pleft -= nleft;
+			nleft = 0;
+		}
+
+		//if(pleft < 0.1) pleft = 0;
+		//if(nleft < 0.1) nleft = 0;
+
+		// Then with the remaining force, add them to their accumulated speeds
+		// Again, based on the original fraction
 		if(pleft) {
 			for(var i = 0; i < pforces.length; i ++) {
 				accum[pforces[i][2]] += pleft * (pforces[i][0] / psum);
 				
+				// Limit check
 				if(accum[pforces[i][2]] < -pforces[i][1]) accum[pforces[i][2]] = -pforces[i][1];
 				if(accum[pforces[i][2]] > pforces[i][1]) accum[pforces[i][2]] = pforces[i][1];
 			}
 		}
 		if(nleft) {
 			for(var i = 0; i < nforces.length; i ++) {
-				accum[nforces[i][2]] += nleft * (nforces[i][0] / nsum);
+				accum[nforces[i][2]] += nleft * (nforces[i][0] / nsum); // nforces[i][0] is negative
 				
+				// Limit check
 				if(accum[nforces[i][2]] < -nforces[i][1]) accum[nforces[i][2]] = -nforces[i][1];
 				if(accum[nforces[i][2]] > nforces[i][1]) accum[nforces[i][2]] = nforces[i][1];
 			}
 		}
 		
-		// And generate final velocity
+		// And generate final velocity by simply adding them together
 		var out = 0;
 		for(var i = 0; i < arr.length; i ++) {
 			if(arr[i]) {
@@ -584,50 +613,6 @@ load.provide("dusk.entities.sgui.Entity", (function() {
 		this._touchersNonSolid[c.DIR_DOWN] = [];
 		this._touchersNonSolid[c.DIR_LEFT] = [];
 		this._touchersNonSolid[c.DIR_RIGHT] = [];
-		
-		//Accelerate or decelerate
-		/*for(var p in this._dx) {
-			if(this._dx[p][1] == 0) {
-				delete this._dx[p];
-			}else{
-				if(this._dx[p][1] > 0) this._dx[p][1] --;
-				this._dx[p][0] += this._dx[p][2];
-				if(this._dx[p][3] != undefined && this._dx[p][2] < 0 && this._dx[p][0] < this._dx[p][3])
-					this._dx[p][0] = this._dx[p][3];
-				if(this._dx[p][3] != undefined && this._dx[p][2] > 0 && this._dx[p][0] > this._dx[p][3])
-					this._dx[p][0] = this._dx[p][3];
-			}
-		}
-		
-		for(var p in this._dy) {
-			if(this._dy[p][1] == 0) {
-				delete this._dy[p];
-			}else{
-				if(this._dy[p][1] > 0) this._dy[p][1] --;
-				this._dy[p][0] += this._dy[p][2];
-				if(this._dy[p][3] != undefined && this._dy[p][2] < 0 && this._dy[p][0] < this._dy[p][3])
-					this._dy[p][0] = this._dy[p][3];
-				if(this._dy[p][3] != undefined && this._dy[p][2] > 0 && this._dy[p][0] > this._dy[p][3])
-					this._dy[p][0] = this._dy[p][3];
-			}
-		}
-		
-		//Timeout mults
-		for(var p in this._dxMults) {
-			if(this._dxMults[p][1] == 0) {
-				delete this._dxMults[p];
-			}else{
-				if(this._dxMults[p][1] > 0) this._dxMults[p][1] --;
-			}
-		}
-		
-		for(var p in this._dyMults) {
-			if(this._dyMults[p][1] == 0) {
-				delete this._dyMults[p];
-			}else{
-				if(this._dyMults[p][1] > 0) this._dyMults[p][1] --;
-			}
-		}*/
 		
 		//Fire beforeMove event
 		this.behaviourFire("beforeMove");
