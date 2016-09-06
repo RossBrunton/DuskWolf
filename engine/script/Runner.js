@@ -196,6 +196,16 @@ load.provide("dusk.script.Runner", (function() {
 	};
 	Runner.Cancel.prototype = Object.create(Error.prototype);
 	
+	/** Actions should throw this when they are reversed, but the action cannot be inversed.
+	 * @param {string} msg A message explaining why.
+	 * @extends Error
+	 */
+	Runner.CannotInverseError = function(msg) {
+		this.name = "Cancelled Action";
+		this.msg = msg ? msg : "No reason given";
+	};
+	Runner.CannotInverseError.prototype = Object.create(Error.prototype);
+	
 	/** Returns an action object.
 	 * @param {string} name The name of the action, for debugging.
 	 * @param {function(*):*} forward The forward function.
