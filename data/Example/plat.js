@@ -48,8 +48,6 @@ load.provide("example.plat", (function() {
 	
 	load.require("example.plat.rooms.exhall");
 	
-	var Scriptable = load.require("dusk.entities.behave.Scriptable");
-	
 	var plat = {};
 	
 	entities.twidth = 32;

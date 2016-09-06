@@ -7,7 +7,6 @@ load.provide("quest.entities", (function() {
 	load.require("dusk.entities.behave.Persist");
 	load.require("dusk.entities.behave.MarkTrigger");
 	load.require("dusk.stats.behave.StatLoader");
-	load.require("dusk.entities.behave.Scriptable");
 	var items = load.require("dusk.items");
 	var stats = load.require("dusk.stats");
 	var store = load.require("dusk.stats.store");
@@ -50,7 +49,7 @@ load.provide("quest.entities", (function() {
 			["on panic", "2,2|3,2|2,2|3,2|2,2|/panic", {}]
 		],
 		"particles":[["stat(moved, 3)", "#+mono", {}], ["!stat(moved, 3)", "#-mono", {}]],
-		"behaviours":{"GridWalker":true, "StatLoader":true, "Scriptable":true}
+		"behaviours":{"GridWalker":true, "StatLoader":true}
 	}, "quest");
 	
 	entities.types.createNewType("questEvil", {
