@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("example.floaty", (function() {
+load.provide("example.floaty", function() {
 	load.require("dusk.particles.sgui.ParticleField");
 	load.require("dusk.sgui.Label");
 	load.require("dusk.sgui.extras.SineSlide");
@@ -51,4 +51,4 @@ load.provide("example.floaty", (function() {
 	});
 
 	dusk.startGame();
-})());
+});

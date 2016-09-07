@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.Selection", (function() {
+load.provide("dusk.sgui.Selection", function() {
 	var Grid = load.require("dusk.sgui.Grid");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
@@ -48,4 +48,4 @@ load.provide("dusk.sgui.Selection", (function() {
 	sgui.registerType("Selection", Selection);
 	
 	return Selection;
-})());
+});

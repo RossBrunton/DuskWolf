@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.input.gamepad", (function() {
+load.provide("dusk.input.gamepad", function() {
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var frameTicker = load.require("dusk.utils.frameTicker");
 	var options = load.require("dusk.options");
@@ -170,4 +170,4 @@ load.provide("dusk.input.gamepad", (function() {
 	frameTicker.onFrame.listen(_frame);
 	
 	return gamepad;
-})());
+});

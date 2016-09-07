@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.save.sources.DropboxSource", (function() {
+load.provide("dusk.save.sources.DropboxSource", function() {
 	var save = load.require("dusk.save");
 	var SaveSource = load.require("dusk.save.sources.SaveSource");
 	var SaveData = load.require("dusk.save.SaveData");
@@ -62,4 +62,4 @@ load.provide("dusk.save.sources.DropboxSource", (function() {
 	DropboxSource.prototype.supportsIdentifier = false;
 	
 	return DropboxSource;
-})());
+});

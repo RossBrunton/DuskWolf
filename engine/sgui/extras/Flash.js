@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.extras.Flash", (function() {
+load.provide("dusk.sgui.extras.Flash", function() {
 	var Range = load.require("dusk.utils.Range");
 	var Effect = load.require("dusk.sgui.extras.Effect");
 	var sgui = load.require("dusk.sgui");
@@ -95,4 +95,4 @@ load.provide("dusk.sgui.extras.Flash", (function() {
 	sgui.registerExtra("Flash", Flash);
 	
 	return Flash;
-})());
+});

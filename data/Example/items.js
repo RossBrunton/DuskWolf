@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("example.items", (function() {
+load.provide("example.items", function() {
 	load.require("dusk.items.sgui.ItemSlot");
 	load.require("dusk.sgui.Grid");
 	load.require("dusk.items.sgui.ItemHand");
@@ -101,4 +101,4 @@ load.provide("example.items", (function() {
 	sgui.path("itemsTest:/itemhand/itemGrid/3,3").putItem("blood");
 
 	dusk.startGame();
-})());
+});

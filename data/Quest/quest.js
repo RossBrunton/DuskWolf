@@ -1,6 +1,6 @@
 "use strict";
 
-load.provide("quest", (function() {
+load.provide("quest", function() {
 	var LayeredRoom = load.require("dusk.rooms.sgui.LayeredRoom");
 	var RegionDisplay = load.require("dusk.tiles.sgui.RegionDisplay");
 	
@@ -363,4 +363,4 @@ load.provide("quest", (function() {
 	ss.add("dusk.stats", "stats", {});
 	
 	return quest;
-})());
+});

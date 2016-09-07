@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.save.sources.SaveSource", (function() {
+load.provide("dusk.save.sources.SaveSource", function() {
 	/** Base class for objects that wish to save and load save data from a specific source.
 	 * 
 	 * Inheriters must replace the `save` and `load` functions with their own versions, and not call the versions on
@@ -73,10 +73,10 @@ load.provide("dusk.save.sources.SaveSource", (function() {
 	SaveSource.prototype.identifierSupport = true;
 	
 	return SaveSource;
-})());
+});
 
 
-load.provide("dusk.save.sources.LocalStorageSource", (function() {
+load.provide("dusk.save.sources.LocalStorageSource", function() {
 	var SaveSource = load.require("dusk.save.sources.SaveSource");
 	var SaveData = load.require("dusk.save.SaveData");
 
@@ -122,10 +122,10 @@ load.provide("dusk.save.sources.LocalStorageSource", (function() {
 	};
 	
 	return LocalStorageSource;
-})());
+});
 
 
-load.provide("dusk.save.sources.ConsoleSource", (function() {
+load.provide("dusk.save.sources.ConsoleSource", function() {
 	var SaveSource = load.require("dusk.save.sources.SaveSource");
 	var SaveData = load.require("dusk.save.SaveData");
 	
@@ -183,4 +183,4 @@ load.provide("dusk.save.sources.ConsoleSource", (function() {
 	ConsoleSource.data = "";
 	
 	return ConsoleSource;
-})());
+});

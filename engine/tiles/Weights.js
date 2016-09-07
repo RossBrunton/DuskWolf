@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.tiles.Weights", (function() {
+load.provide("dusk.tiles.Weights", function() {
 	var utils = load.require("dusk.utils");
 	
 	/** Stores weights of tilemap schematic layers.
@@ -176,4 +176,4 @@ load.provide("dusk.tiles.Weights", (function() {
 	};
 	
 	return Weights;
-})());
+});

@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.rooms.actors.Standard", (function() {
+load.provide("dusk.rooms.actors.Standard", function() {
 	var Runner = load.require("dusk.script.Runner");
 	
 	/** An actor that contains standard actions for a LayeredRoom
@@ -55,4 +55,4 @@ load.provide("dusk.rooms.actors.Standard", (function() {
 	};
 	
 	return Standard;
-})());
+});

@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.extras.MatchedSize", (function() {
+load.provide("dusk.sgui.extras.MatchedSize", function() {
 	var Extra = load.require("dusk.sgui.extras.Extra");
 	var sgui = load.require("dusk.sgui");
 	
@@ -62,4 +62,4 @@ load.provide("dusk.sgui.extras.MatchedSize", (function() {
 	sgui.registerExtra("MatchedSize", MatchedSize);
 	
 	return MatchedSize;
-})());
+});

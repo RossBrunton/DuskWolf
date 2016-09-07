@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
+load.provide("dusk.rooms.sgui.LayeredRoom", function() {
 	var sgui = load.require("dusk.sgui");
 	var Group = load.require("dusk.sgui.Group");
 	var EditableTileMap = load.require("dusk.tiles.sgui.EditableTileMap");
@@ -377,14 +377,14 @@ load.provide("dusk.rooms.sgui.LayeredRoom", (function() {
 	sgui.registerType("LayeredRoom", LayeredRoom);
 	
 	return LayeredRoom;
-})());
+});
 
 
-load.provide("dusk.rooms.sgui.ILayeredRoomLayer", (function() {
+load.provide("dusk.rooms.sgui.ILayeredRoomLayer", function() {
 	var ILayeredRoomLayer = function() {};
 	
 	ILayeredRoomLayer.saveBM = function() {};
 	ILayeredRoomLayer.loadBM = function() {};
 	
 	return ILayeredRoomLayer;
-})());
+});

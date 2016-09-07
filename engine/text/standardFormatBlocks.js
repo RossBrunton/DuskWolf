@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.text.standardFormatBlocks", (function() {
+load.provide("dusk.text.standardFormatBlocks", function() {
 	var FormatBlock = load.require("dusk.text.FormatBlock");
 	var Image = load.require("dusk.utils.Image");
 	
@@ -231,4 +231,4 @@ load.provide("dusk.text.standardFormatBlocks", (function() {
 	};
 	
 	FormatBlock.register("img", ImgBlock);
-})());
+});

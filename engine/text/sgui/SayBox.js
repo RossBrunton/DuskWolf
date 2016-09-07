@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.SayBox", (function() {
+load.provide("dusk.sgui.SayBox", function() {
 	var Group = load.require("dusk.sgui.Group");
 	var PlusText = load.require("dusk.sgui.PlusText");
 	var Image = load.require("dusk.sgui.Image");
@@ -400,4 +400,4 @@ load.provide("dusk.sgui.SayBox", (function() {
 	SayBox.CancelError.prototype = Object.create(Error.prototype);
 	
 	return SayBox;
-})());
+});

@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.text.Location", (function() {
+load.provide("dusk.text.Location", function() {
 	/** Represents a location to draw text while drawing it.
 	 * 
 	 * This is like a "cursor". Text is drawn at the cursor's point, and then the cursor is advanced to after that text
@@ -225,9 +225,9 @@ load.provide("dusk.text.Location", (function() {
 	};
 	
 	return Location;
-})());
+});
 
-load.provide("dusk.text.FormatBlock", (function() {
+load.provide("dusk.text.FormatBlock", function() {
 	/** Represents a node of a parsed text entry.
 	 * 
 	 * It should be subclassed, each subclass should add different formatting and function as a tag. For example, one
@@ -449,4 +449,4 @@ load.provide("dusk.text.FormatBlock", (function() {
 	FormatBlock.register("default", FormatBlock);
 	
 	return FormatBlock;
-})());
+});

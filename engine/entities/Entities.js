@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.entities", (function() {
+load.provide("dusk.entities", function() {
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var InheritableContainer = load.require("dusk.utils.InheritableContainer");
 	
@@ -178,4 +178,4 @@ load.provide("dusk.entities", (function() {
 	};
 	
 	return entities;
-})());
+});

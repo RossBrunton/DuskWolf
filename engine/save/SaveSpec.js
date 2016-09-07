@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.save.SaveSpec", (function() {
+load.provide("dusk.save.SaveSpec", function() {
 	var load = window.load.require("load");
 	var utils = load.require("dusk.utils");
 	var save = load.require("dusk.save");
@@ -245,4 +245,4 @@ load.provide("dusk.save.SaveSpec", (function() {
 	};
 	
 	return SaveSpec;
-})());
+});

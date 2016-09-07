@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.tiles.sgui.Tile", (function() {
+load.provide("dusk.tiles.sgui.Tile", function() {
 	var Image = load.require("dusk.utils.Image");
 	var Component = load.require("dusk.sgui.Component");
 	var sgui = load.require("dusk.sgui");
@@ -180,4 +180,4 @@ load.provide("dusk.tiles.sgui.Tile", (function() {
 	sgui.registerType("Tile", Tile);
 	
 	return Tile;
-})());
+});

@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.extras.SmoothSlide", (function() {
+load.provide("dusk.sgui.extras.SmoothSlide", function() {
 	var Effect = load.require("dusk.sgui.extras.Effect");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
@@ -128,4 +128,4 @@ load.provide("dusk.sgui.extras.SmoothSlide", (function() {
 	sgui.registerExtra("SmoothSlide", SmoothSlide);
 	
 	return SmoothSlide;
-})());
+});

@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("example.plat", (function() {
+load.provide("example.plat", function() {
 	load.require("dusk.entities.behave.HitDam");
 	load.require("dusk.entities.behave.Killable");
 	load.require("dusk.entities.behave.PlayerControl");
@@ -437,4 +437,4 @@ load.provide("example.plat", (function() {
 	}
 	
 	return plat;
-})());
+});

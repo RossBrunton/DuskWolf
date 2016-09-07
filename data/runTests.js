@@ -2,9 +2,9 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("runTests", (function() {
+load.provide("runTests", function() {
 	var test = load.require("test");
 	
 	test.debug = true;
 	test.loadAndTestAll("tests/deps.json");
-})());
+});

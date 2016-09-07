@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.extras.Radiobox", (function() {
+load.provide("dusk.sgui.extras.Radiobox", function() {
 	var Extra = load.require("dusk.sgui.extras.Extra");
 	var sgui = load.require("dusk.sgui");
 	
@@ -70,4 +70,4 @@ load.provide("dusk.sgui.extras.Radiobox", (function() {
 	sgui.registerExtra("Radiobox", Radiobox);
 	
 	return Radiobox;
-})());
+});

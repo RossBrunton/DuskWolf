@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.tiles.SelectorManager", (function() {
+load.provide("dusk.tiles.SelectorManager", function() {
 	var utils = load.require("dusk.utils");
 	var EntityGroup = load.require("dusk.entities.sgui.EntityGroup");
 	var LayeredRoom = load.require("dusk.rooms.sgui.LayeredRoom");
@@ -196,4 +196,4 @@ load.provide("dusk.tiles.SelectorManager", (function() {
 	}, "quest");
 	
 	return SelectorManager;
-})());
+});

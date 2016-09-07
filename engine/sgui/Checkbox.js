@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.Checkbox", (function() {
+load.provide("dusk.sgui.Checkbox", function() {
 	var FocusCheckerTile = load.require("dusk.sgui.FocusCheckerTile");
 	var sgui = load.require("dusk.sgui");
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
@@ -103,4 +103,4 @@ load.provide("dusk.sgui.Checkbox", (function() {
 	sgui.registerType("Checkbox", Checkbox);
 	
 	return Checkbox;
-})());
+});

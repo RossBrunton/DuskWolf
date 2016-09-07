@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.rooms.actors.Regions", (function() {
+load.provide("dusk.rooms.actors.Regions", function() {
 	var Runner = load.require("dusk.script.Runner");
 	var LayeredRoom = load.require("dusk.rooms.sgui.LayeredRoom");
 	var Region = load.require("dusk.tiles.Region");
@@ -168,4 +168,4 @@ load.provide("dusk.rooms.actors.Regions", (function() {
 	
 	
 	return RegionActor;
-})());
+});

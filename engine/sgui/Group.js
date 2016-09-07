@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.Group", (function() {
+load.provide("dusk.sgui.Group", function() {
 	var Component = load.require("dusk.sgui.Component");
 	var utils = load.require("dusk.utils");
 	var c = load.require("dusk.sgui.c");
@@ -945,4 +945,4 @@ load.provide("dusk.sgui.Group", (function() {
 	sgui.registerType("Group", Group);
 	
 	return Group;
-})());
+});

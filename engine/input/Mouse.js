@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.input.mouse", (function() {
+load.provide("dusk.input.mouse", function() {
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var Pool = load.require("dusk.utils.Pool");
 	var dusk = load.require("dusk");
@@ -58,4 +58,4 @@ load.provide("dusk.input.mouse", (function() {
 	}
 	
 	return mouse;
-})());
+});

@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.rooms.sgui.FluidLayer", (function() {
+load.provide("dusk.rooms.sgui.FluidLayer", function() {
 	var Component = load.require("dusk.sgui.Component");
 	var sgui = load.require("dusk.sgui");
 	var controls = load.require("dusk.input.controls");
@@ -85,4 +85,4 @@ load.provide("dusk.rooms.sgui.FluidLayer", (function() {
 	sgui.registerType("FluidLayer", FluidLayer);
 	
 	return FluidLayer;
-})());
+});

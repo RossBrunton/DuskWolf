@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.rooms.RoomTransitions", (function() {
+load.provide("dusk.rooms.RoomTransitions", function() {
 	var functionStore = load.require("dusk.utils.functionStore");
 	var MarkTrigger = load.require("dusk.entities.behave.MarkTrigger");
 	var dusk = load.require("dusk");
@@ -149,4 +149,4 @@ load.provide("dusk.rooms.RoomTransitions", (function() {
 	);
 	
 	return RoomTransitions;
-})());
+});

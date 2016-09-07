@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.tiles.TerrainModifier", (function() {
+load.provide("dusk.tiles.TerrainModifier", function() {
 	var dirs = load.require("dusk.utils.dirs");
 	var Weights = load.require("dusk.tiles.Weights");
 	
@@ -28,9 +28,9 @@ load.provide("dusk.tiles.TerrainModifier", (function() {
 	}
 	
 	return terrainModifier;
-})());
+});
 
-load.provide("dusk.tiles.lrTerrainModifier", (function() {
+load.provide("dusk.tiles.lrTerrainModifier", function() {
 	var dirs = load.require("dusk.utils.dirs");
 	var Weights = load.require("dusk.tiles.Weights");
 	
@@ -75,9 +75,9 @@ load.provide("dusk.tiles.lrTerrainModifier", (function() {
 	}
 	
 	return lrTerrainModifier;
-})());
+});
 
-load.provide("dusk.tiles.EntityModifier", (function() {
+load.provide("dusk.tiles.EntityModifier", function() {
 	var dirs = load.require("dusk.utils.dirs");
 	var EntityGroup = load.require("dusk.entities.sgui.EntityGroup");
 	
@@ -103,9 +103,9 @@ load.provide("dusk.tiles.EntityModifier", (function() {
 	};
 	
 	return entityModifier;
-})());
+});
 
-load.provide("dusk.tiles.EntityValidator", (function() {
+load.provide("dusk.tiles.EntityValidator", function() {
 	var dirs = load.require("dusk.utils.dirs");
 	var EntityGroup = load.require("dusk.entities.sgui.EntityGroup");
 	
@@ -131,9 +131,9 @@ load.provide("dusk.tiles.EntityValidator", (function() {
 	};
 	
 	return entityValidator; 
-})());
+});
 
-load.provide("dusk.tiles.UniformModifier", (function() {
+load.provide("dusk.tiles.UniformModifier", function() {
 	var uniformModifier = function(n) {
 		if(n === undefined) n = 1;
 		return function(v, opt, dir, sx, sy, sz, dx, dy, dz) {
@@ -142,4 +142,4 @@ load.provide("dusk.tiles.UniformModifier", (function() {
 	};
 	
 	return uniformModifier 
-})());
+});

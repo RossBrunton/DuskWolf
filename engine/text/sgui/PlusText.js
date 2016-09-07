@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.PlusText", (function() {
+load.provide("dusk.sgui.PlusText", function() {
 	var Group = load.require("dusk.sgui.Group");
 	var sgui = load.require("dusk.sgui");
 	var Label = load.require("dusk.sgui.Label");
@@ -187,4 +187,4 @@ load.provide("dusk.sgui.PlusText", (function() {
 	sgui.registerType("PlusText", PlusText);
 	
 	return PlusText;
-})());
+});

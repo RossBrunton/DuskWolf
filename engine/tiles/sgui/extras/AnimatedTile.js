@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.tiles.sgui.extras.animationTypes", (function() {
+load.provide("dusk.tiles.sgui.extras.animationTypes", function() {
 	/** This namespace contains functions that do an action in an animation.
 	 * 
 	 * The functions return objects that can be used for an AnimatedTile's action list.
@@ -90,9 +90,9 @@ load.provide("dusk.tiles.sgui.extras.animationTypes", (function() {
 	};
 	
 	return types;
-})());
+});
 
-load.provide("dusk.tiles.sgui.extras.AnimatedTile", (function() {
+load.provide("dusk.tiles.sgui.extras.AnimatedTile", function() {
 	var Extra = load.require("dusk.sgui.extras.Extra");
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var sgui = load.require("dusk.sgui");
@@ -477,4 +477,4 @@ load.provide("dusk.tiles.sgui.extras.AnimatedTile", (function() {
 	sgui.registerExtra("AnimatedTile", AnimatedTile);
 	
 	return AnimatedTile;
-})());
+});

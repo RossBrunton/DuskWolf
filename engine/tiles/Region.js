@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.tiles.Path", (function() {
+load.provide("dusk.tiles.Path", function() {
 	var Region = load.suggest("dusk.tiles.Region", function(p) {Region = p;});
 	var dirs = load.require("dusk.utils.dirs");
 	
@@ -135,9 +135,9 @@ load.provide("dusk.tiles.Path", (function() {
 	};
 	
 	return Path;
-})());
+});
 
-load.provide("dusk.tiles.Region", (function() {
+load.provide("dusk.tiles.Region", function() {
 	var utils = load.require("dusk.utils");
 	var Weights = load.require("dusk.tiles.Weights");
 	var dirs = load.require("dusk.utils.dirs");
@@ -512,4 +512,4 @@ load.provide("dusk.tiles.Region", (function() {
 	};
 	
 	return Region;
-})());
+});

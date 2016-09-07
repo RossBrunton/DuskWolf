@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.save.SaveTest", (function() {
+load.provide("dusk.save.SaveTest", function() {
 	var save = load.require("dusk.save");
 
 	var saveTest = {};
@@ -38,9 +38,9 @@ load.provide("dusk.save.SaveTest", (function() {
 	};
 	
 	return saveTest;
-})());
+});
 
-load.provide("dusk.save.SaveTestInstance", (function() {
+load.provide("dusk.save.SaveTestInstance", function() {
 	var save = load.require("dusk.save");
 	
 	var SaveTestInstance = function(value) {
@@ -60,4 +60,4 @@ load.provide("dusk.save.SaveTestInstance", (function() {
 	};
 	
 	return SaveTestInstance;
-})());
+});

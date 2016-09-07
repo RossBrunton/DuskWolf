@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.particles.particleAnimation", (function() {
+load.provide("dusk.particles.particleAnimation", function() {
 	/** This action (for AnimatedTiles) will perform a particle effect on the given field. This will not wait until the
 	 * effect is over before going on to the next action.
 	 * 
@@ -26,4 +26,4 @@ load.provide("dusk.particles.particleAnimation", (function() {
 	};
 	
 	return particleAnimation;
-})());
+});

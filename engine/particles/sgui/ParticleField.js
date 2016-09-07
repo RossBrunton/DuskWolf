@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.particles.sgui.ParticleField", (function() {
+load.provide("dusk.particles.sgui.ParticleField", function() {
 	var Component = load.require("dusk.sgui.Component");
 	var core = load.require("dusk.particles.particleEffects.core");
 	var sgui = load.require("dusk.sgui");
@@ -228,4 +228,4 @@ load.provide("dusk.particles.sgui.ParticleField", (function() {
 	sgui.registerType("ParticleField", ParticleField);
 	
 	return ParticleField;
-})());
+});

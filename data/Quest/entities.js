@@ -1,6 +1,6 @@
 "use strict";
 
-load.provide("quest.entities", (function() {
+load.provide("quest.entities", function() {
 	var entities = load.require("dusk.entities");
 	load.require("dusk.entities.behave.BackForth");
 	load.require("dusk.entities.behave.GridWalker");
@@ -139,4 +139,4 @@ load.provide("quest.entities", (function() {
 	items.items.createNewType("snipersBow", {
 		"minRange":10, "maxRange":10, "displayName":"[img Quest/images/bow.png][/img] Sniper's Bow"
 	}, "weapon");
-})());
+});

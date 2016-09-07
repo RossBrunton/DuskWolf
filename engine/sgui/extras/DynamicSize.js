@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.extras.DynamicWidth", (function() {
+load.provide("dusk.sgui.extras.DynamicWidth", function() {
 	var Range = load.require("dusk.utils.Range");
 	var Extra = load.require("dusk.sgui.extras.Extra");
 	var sgui = load.require("dusk.sgui");
@@ -82,10 +82,10 @@ load.provide("dusk.sgui.extras.DynamicWidth", (function() {
 	sgui.registerExtra("DynamicWidth", DynamicWidth);
 	
 	return DynamicWidth;
-})());
+});
 
 
-load.provide("dusk.sgui.extras.DynamicHeight", (function() {
+load.provide("dusk.sgui.extras.DynamicHeight", function() {
 	var Range = load.require("dusk.utils.Range");
 	var Extra = load.require("dusk.sgui.extras.Extra");
 	var sgui = load.require("dusk.sgui");
@@ -165,4 +165,4 @@ load.provide("dusk.sgui.extras.DynamicHeight", (function() {
 	sgui.registerExtra("DynamicHeight", DynamicHeight);
 	
 	return DynamicHeight;
-})());
+});

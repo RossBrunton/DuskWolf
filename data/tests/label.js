@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("tests.label", (function() {
+load.provide("tests.label", function() {
 	var sgui = load.require("dusk.sgui");
 	var PlusText = load.require("dusk.sgui.PlusText");
 	var TextBox = load.require("dusk.sgui.TextBox");
@@ -104,4 +104,4 @@ load.provide("tests.label", (function() {
 	window.v = sgui.path("default:/v");
 	
 	dusk.startGame();
-})());
+});

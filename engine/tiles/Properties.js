@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.tiles.Properties", (function() {
+load.provide("dusk.tiles.Properties", function() {
 	var utils = load.require("dusk.utils");
 	var TileMap = load.require("dusk.tiles.sgui.TileMap");
 	
@@ -57,4 +57,4 @@ load.provide("dusk.tiles.Properties", (function() {
 	};
 	
 	return Properties;
-})());
+});

@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.Component", (function() {
+load.provide("dusk.sgui.Component", function() {
 	var utils = load.require("dusk.utils");
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var controls = load.require("dusk.input.controls");
@@ -1024,9 +1024,9 @@ load.provide("dusk.sgui.Component", (function() {
 	var _onPaintPool = new Pool(Object);
 	
 	return Component;
-})());
+});
 
-load.provide("dusk.sgui.NullCom", (function() {
+load.provide("dusk.sgui.NullCom", function() {
 	var Component = load.require("dusk.sgui.Component");
 	var sgui = load.require("dusk.sgui");
 	
@@ -1056,4 +1056,4 @@ load.provide("dusk.sgui.NullCom", (function() {
 	sgui.registerType("NullCom", NullCom);
 	
 	return NullCom;
-})());
+});

@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.rooms.tileAnimations", (function() {
+load.provide("dusk.rooms.tileAnimations", function() {
 	var particleAnimation = load.require("dusk.particles.particleAnimation");
 	var LayeredRoom = load.require("dusk.rooms.sgui.LayeredRoom");
 	
@@ -24,4 +24,4 @@ load.provide("dusk.rooms.tileAnimations", (function() {
 	};
 	
 	return tileAnimations;
-})());
+});

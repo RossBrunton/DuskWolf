@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.c", (function() {
+load.provide("dusk.sgui.c", function() {
 	var dirs = load.require("dusk.utils.dirs");
 	
 	/** @namespace dusk.sgui.c
@@ -84,4 +84,4 @@ load.provide("dusk.sgui.c", (function() {
 	c.ORIGIN_MIDDLE = 2;
 	
 	return c;
-})());
+});

@@ -3,7 +3,7 @@
 "use strict";
 
 
-load.provide("dusk.particles.particleEffects.core", (function() {
+load.provide("dusk.particles.particleEffects.core", function() {
 	var Image = load.require("dusk.utils.Image");
 	var utils = load.require("dusk.utils");
 	var PosRect = load.require("dusk.utils.PosRect");
@@ -52,10 +52,10 @@ load.provide("dusk.particles.particleEffects.core", (function() {
 	};
 	
 	return core;
-})());
+});
 
 
-load.provide("dusk.particles.particleEffects.core.spew", (function() {
+load.provide("dusk.particles.particleEffects.core.spew", function() {
 	var core = load.require("dusk.particles.particleEffects.core");
 	var spew = function(field, data) {
 		for(var i = 0; i < data.count; i ++) {
@@ -81,10 +81,10 @@ load.provide("dusk.particles.particleEffects.core.spew", (function() {
 	
 	core.registerEffect("spew", spew);
 	return spew;
-})());
+});
 
 
-load.provide("dusk.particles.particleEffects.core.spread", (function() {
+load.provide("dusk.particles.particleEffects.core.spread", function() {
 	var core = load.require("dusk.particles.particleEffects.core");
 	var spread = function(field, data) {
 		for(var i = 0; i < data.count; i ++) {
@@ -115,10 +115,10 @@ load.provide("dusk.particles.particleEffects.core.spread", (function() {
 	
 	core.registerEffect("spread", spread);
 	return spread;
-})());
+});
 
 
-load.provide("dusk.particles.particleEffects.core.image", (function() {
+load.provide("dusk.particles.particleEffects.core.image", function() {
 	var core = load.require("dusk.particles.particleEffects.core");
 	var utils = load.require("dusk.utils");
 	
@@ -171,4 +171,4 @@ load.provide("dusk.particles.particleEffects.core.image", (function() {
 	
 	core.registerEffect("image", image);
 	return image;
-})());
+});

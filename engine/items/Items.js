@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.items", (function() {
+load.provide("dusk.items", function() {
 	var utils = load.require("dusk.utils");
 	var Inheritable = load.require("dusk.utils.Inheritable");
 	var InheritableContainer = load.require("dusk.utils.InheritableContainer");
@@ -579,4 +579,4 @@ load.provide("dusk.items", (function() {
 	window.extraInvent = new items.Invent(5, "1");
 	
 	return items;
-})(), {"alsoSeal":["Invent"]});
+}, {"alsoSeal":["Invent"]});

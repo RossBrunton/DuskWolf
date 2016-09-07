@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("example.newGui", (function() {
+load.provide("example.newGui", function() {
 	load.require("dusk.sgui.Pane");
 	load.require("dusk.sgui.Rect");
 	load.require("dusk.sgui.Label");
@@ -298,4 +298,4 @@ load.provide("example.newGui", (function() {
 	window.range = _testRange;
 
 	dusk.startGame();
-})());
+});

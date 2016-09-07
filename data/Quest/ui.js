@@ -1,6 +1,6 @@
 "use strict";
 
-load.provide("quest.ui", (function() {
+load.provide("quest.ui", function() {
 	load.require("dusk.sgui.FancyRect");
 	load.require("dusk.sgui.Grid");
 	load.require("dusk.sgui.PlusText");
@@ -137,4 +137,4 @@ load.provide("quest.ui", (function() {
 	});
 	
 	return root;
-})());
+});

@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("tests.animation", (function() {
+load.provide("tests.animation", function() {
 	load.require("dusk.sgui.DynamicGrid");
 	load.require("dusk.input.sgui.ControlConfig");
 	load.require("dusk.sgui.Label");
@@ -73,4 +73,4 @@ load.provide("tests.animation", (function() {
 	window.at = root.get("gr").get("0,0").getExtra("animation");
 	
 	dusk.startGame();
-})());
+});

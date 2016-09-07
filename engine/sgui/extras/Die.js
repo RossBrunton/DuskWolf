@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.extras.Die", (function() {
+load.provide("dusk.sgui.extras.Die", function() {
 	var Effect = load.require("dusk.sgui.extras.Effect");
 	var sgui = load.require("dusk.sgui");
 	
@@ -30,4 +30,4 @@ load.provide("dusk.sgui.extras.Die", (function() {
 	sgui.registerExtra("Die", Die);
 	
 	return Die;
-})());
+});

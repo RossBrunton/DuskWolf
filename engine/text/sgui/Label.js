@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.Label", (function() {
+load.provide("dusk.sgui.Label", function() {
 	var Component = load.require("dusk.sgui.Component");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
@@ -362,9 +362,9 @@ load.provide("dusk.sgui.Label", (function() {
 	sgui.registerType("Label", Label);
 	
 	return Label;
-})());
+});
 
-load.provide("dusk.text.sgui.ValidatingLabel", (function() {
+load.provide("dusk.text.sgui.ValidatingLabel", function() {
 	var Label = load.require("dusk.sgui.Label");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
@@ -471,4 +471,4 @@ load.provide("dusk.text.sgui.ValidatingLabel", (function() {
 	sgui.registerType("ValidatingLabel", ValidatingLabel);
 	
 	return ValidatingLabel;
-})());
+});

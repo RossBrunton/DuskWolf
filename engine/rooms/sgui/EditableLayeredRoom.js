@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.rooms.sgui.EditableLayeredRoom", (function() {
+load.provide("dusk.rooms.sgui.EditableLayeredRoom", function() {
 	var sgui = load.require("dusk.sgui");
 	var Group = load.require("dusk.sgui.Group");
 	var TileMap = load.require("dusk.tiles.sgui.TileMap");
@@ -370,4 +370,4 @@ load.provide("dusk.rooms.sgui.EditableLayeredRoom", (function() {
 	sgui.registerType("EditableLayeredRoom", EditableLayeredRoom);
 	
 	return EditableLayeredRoom;
-})());
+});

@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.input.sgui.ControlConfig", (function() {
+load.provide("dusk.input.sgui.ControlConfig", function() {
 	var Group = load.require("dusk.sgui.Group");
 	var Tile = load.require("dusk.tiles.sgui.Tile");
 	var Label = load.require("dusk.sgui.Label");
@@ -124,4 +124,4 @@ load.provide("dusk.input.sgui.ControlConfig", (function() {
 	});
 	
 	return ControlConfig;
-})());
+});

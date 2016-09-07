@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.Image", (function() {
+load.provide("dusk.sgui.Image", function() {
 	var Component = load.require("dusk.sgui.Component");
 	var sgui = load.require("dusk.sgui");
 	var DImage = load.require("dusk.utils.Image");
@@ -88,4 +88,4 @@ load.provide("dusk.sgui.Image", (function() {
 	sgui.registerType("Image", Image);
 	
 	return Image;
-})());
+});

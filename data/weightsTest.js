@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("weightsTest", (function() {
+load.provide("weightsTest", function() {
 	window.Runner = load.require("dusk.script.Runner");
 	window.Actions = load.require("dusk.script.Actions");
 	window.sgui = load.require("dusk.sgui");
@@ -129,4 +129,4 @@ load.provide("weightsTest", (function() {
 	]);
 	
 	return undefined;
-})());
+});

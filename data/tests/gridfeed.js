@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("tests.gridfeed", (function() {
+load.provide("tests.gridfeed", function() {
 	var sgui = load.require("dusk.sgui");
 	var PlusText = load.require("dusk.sgui.PlusText");
 	var Checkbox = load.require("dusk.sgui.Checkbox");
@@ -190,4 +190,4 @@ load.provide("tests.gridfeed", (function() {
 	};
 	
 	dusk.startGame();
-})());
+});

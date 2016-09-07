@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.stats.behave.StatLoader", (function() {
+load.provide("dusk.stats.behave.StatLoader", function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.entities.behave.Behave");
 	var stats = load.require("dusk.stats");
@@ -72,4 +72,4 @@ load.provide("dusk.stats.behave.StatLoader", (function() {
 	entities.registerBehaviour("StatLoader", StatLoader);
 	
 	return StatLoader;
-})());
+});

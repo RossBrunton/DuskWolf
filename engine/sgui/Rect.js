@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.Rect", (function() {
+load.provide("dusk.sgui.Rect", function() {
 	var Component = load.require("dusk.sgui.Component");
 	var sgui = load.require("dusk.sgui");
 	
@@ -112,4 +112,4 @@ load.provide("dusk.sgui.Rect", (function() {
 	sgui.registerType("Rect", Rect);
 	
 	return Rect;
-})());
+});

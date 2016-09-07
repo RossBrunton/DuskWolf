@@ -4,7 +4,7 @@
 
 
 
-load.provide("example.particles", (function() {
+load.provide("example.particles", function() {
 	var sgui = load.require("dusk.sgui");
 	var dusk = load.require("dusk");
 	load.require("dusk.particles.sgui.ParticleField");
@@ -41,4 +41,4 @@ load.provide("example.particles", (function() {
 	}, this);
 
 	dusk.startGame();
-})());
+});

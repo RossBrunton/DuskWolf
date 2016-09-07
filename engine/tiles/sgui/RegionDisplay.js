@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.tiles.sgui.RegionDisplay", (function() {
+load.provide("dusk.tiles.sgui.RegionDisplay", function() {
 	var Component = load.require("dusk.sgui.Component");
 	var TileMap = load.require("dusk.tiles.sgui.TileMap");
 	var sgui = load.require("dusk.sgui");
@@ -415,4 +415,4 @@ load.provide("dusk.tiles.sgui.RegionDisplay", (function() {
 	sgui.registerType("RegionDisplay", RegionDisplay);
 	
 	return RegionDisplay;
-})());
+});

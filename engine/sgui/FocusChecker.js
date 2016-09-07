@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.FocusChecker", (function() {
+load.provide("dusk.sgui.FocusChecker", function() {
 	var Image = load.require("dusk.sgui.Image");
 	var sgui = load.require("dusk.sgui");
 	
@@ -55,10 +55,10 @@ load.provide("dusk.sgui.FocusChecker", (function() {
 	sgui.registerType("FocusChecker", FocusChecker);
 	
 	return FocusChecker;
-})());
+});
 
 
-load.provide("dusk.sgui.FocusCheckerTile", (function() {
+load.provide("dusk.sgui.FocusCheckerTile", function() {
 	var Tile = load.require("dusk.tiles.sgui.Tile");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
@@ -134,10 +134,10 @@ load.provide("dusk.sgui.FocusCheckerTile", (function() {
 	sgui.registerType("FocusCheckerTile", FocusCheckerTile);
 	
 	return FocusCheckerTile;
-})());
+});
 
 
-load.provide("dusk.sgui.FocusCheckerRect", (function() {
+load.provide("dusk.sgui.FocusCheckerRect", function() {
 	var Rect = load.require("dusk.sgui.Rect");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
@@ -256,4 +256,4 @@ load.provide("dusk.sgui.FocusCheckerRect", (function() {
 	sgui.registerType("FocusCheckerRect", FocusCheckerRect);
 	
 	return FocusCheckerRect;
-})());
+});

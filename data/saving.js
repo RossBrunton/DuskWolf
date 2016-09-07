@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("saving", (function() {
+load.provide("saving", function() {
 	window.save = load.require("dusk.save");
 	window.SS = load.require("dusk.save.SaveSpec");
 	window.lss = load.require("dusk.save.sources.LocalStorageSource");
@@ -11,4 +11,4 @@ load.provide("saving", (function() {
 	window.sti = load.require("dusk.save.SaveTestInstance");
 	
 	window.ss = new SS("saving_test", "Saving Test");
-})());
+});

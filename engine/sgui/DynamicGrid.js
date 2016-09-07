@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.DynamicGrid", (function() {
+load.provide("dusk.sgui.DynamicGrid", function() {
 	var Grid = load.require("dusk.sgui.Grid");
 	var Range = load.require("dusk.utils.Range");
 	var sgui = load.require("dusk.sgui");
@@ -111,4 +111,4 @@ load.provide("dusk.sgui.DynamicGrid", (function() {
 	sgui.registerType("DynamicGrid", DynamicGrid);
 	
 	return DynamicGrid;
-})());
+});

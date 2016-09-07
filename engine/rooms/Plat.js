@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.rooms.plat", (function() {
+load.provide("dusk.rooms.plat", function() {
 	var sgui = load.require("dusk.sgui");
 	var LayeredRoom = load.require("dusk.rooms.sgui.LayeredRoom");
 	load.require("dusk.rooms.sgui.EditableLayeredRoom");
@@ -88,4 +88,4 @@ load.provide("dusk.rooms.plat", (function() {
 	};
 	
 	return plat;
-})());
+});

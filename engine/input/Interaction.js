@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.input.interaction", (function() {
+load.provide("dusk.input.interaction", function() {
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var keyboard = load.require("dusk.input.keyboard");
 	var gamepad = load.require("dusk.input.gamepad");
@@ -128,4 +128,4 @@ load.provide("dusk.input.interaction", (function() {
 	var _interactions = new Pool(Object);
 	
 	return interaction;
-})());
+});

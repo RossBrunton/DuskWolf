@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.input.controls", (function() {
+load.provide("dusk.input.controls", function() {
 	var keyboard = load.require("dusk.input.keyboard");
 	var gamepad = load.require("dusk.input.gamepad");
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
@@ -319,4 +319,4 @@ load.provide("dusk.input.controls", (function() {
 	};
 	
 	return controls;
-})());
+});

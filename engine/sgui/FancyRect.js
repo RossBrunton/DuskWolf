@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.FancyRect", (function() {
+load.provide("dusk.sgui.FancyRect", function() {
 	var Rect = load.require("dusk.sgui.Rect");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
@@ -236,4 +236,4 @@ load.provide("dusk.sgui.FancyRect", (function() {
 	sgui.registerType("FancyRect", FancyRect);
 	
 	return FancyRect;
-})());
+});

@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.tiles.sgui.EditableTileMap", (function() {
+load.provide("dusk.tiles.sgui.EditableTileMap", function() {
 	var TileMap = load.require("dusk.tiles.sgui.TileMap");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
@@ -566,4 +566,4 @@ load.provide("dusk.tiles.sgui.EditableTileMap", (function() {
 	sgui.registerType("EditableTileMap", EditableTileMap);
 	
 	return EditableTileMap;
-})());
+});

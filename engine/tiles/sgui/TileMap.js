@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.tiles.sgui.TileMap", (function() {
+load.provide("dusk.tiles.sgui.TileMap", function() {
 	var Component = load.require("dusk.sgui.Component");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
@@ -671,4 +671,4 @@ load.provide("dusk.tiles.sgui.TileMap", (function() {
 	sgui.registerType("TileMap", TileMap);
 	
 	return TileMap;
-})());
+});

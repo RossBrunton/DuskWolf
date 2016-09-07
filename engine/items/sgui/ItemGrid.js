@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.items.sgui.ItemGrid", (function() {
+load.provide("dusk.items.sgui.ItemGrid", function() {
 	var Grid = load.require("dusk.sgui.Grid");
 	var ItemSlot = load.require("dusk.items.sgui.ItemSlot");
 	var sgui = load.require("dusk.sgui");
@@ -59,4 +59,4 @@ load.provide("dusk.items.sgui.ItemGrid", (function() {
 	};
 	
 	sgui.registerType("ItemGrid", ItemGrid);
-})());
+});

@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.TextBox", (function() {
+load.provide("dusk.sgui.TextBox", function() {
 	var ValidatingLabel = load.require("dusk.text.sgui.ValidatingLabel");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
@@ -174,10 +174,10 @@ load.provide("dusk.sgui.TextBox", (function() {
 	sgui.registerType("TextBox", TextBox);
 	
 	return TextBox;
-})());
+});
 
 
-load.provide("dusk.sgui.NumberBox", (function() {
+load.provide("dusk.sgui.NumberBox", function() {
 	var TextBox = load.require("dusk.sgui.TextBox");
 	var Label = load.require("dusk.sgui.Label");
 	var sgui = load.require("dusk.sgui");
@@ -318,4 +318,4 @@ load.provide("dusk.sgui.NumberBox", (function() {
 	sgui.registerType("NumberBox", NumberBox);
 	
 	return NumberBox;
-})());
+});

@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.extras.Extra", (function() {
+load.provide("dusk.sgui.extras.Extra", function() {
 	var sgui = load.require("dusk.sgui");
 	var Mapper = load.require("dusk.utils.Mapper");
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
@@ -83,4 +83,4 @@ load.provide("dusk.sgui.extras.Extra", (function() {
 	};
 	
 	return Extra;
-})());
+});

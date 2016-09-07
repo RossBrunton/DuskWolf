@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("tests.saybox", (function() {
+load.provide("tests.saybox", function() {
 	var sgui = load.require("dusk.sgui");
 	var PlusText = load.require("dusk.sgui.PlusText");
 	var Group = load.require("dusk.sgui.Group");
@@ -62,4 +62,4 @@ load.provide("tests.saybox", (function() {
 	])).start({}).then(console.log.bind(console), console.warn.bind(console));
 	
 	dusk.startGame();
-})());
+});

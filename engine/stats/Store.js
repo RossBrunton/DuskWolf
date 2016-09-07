@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.stats.store", (function() {
+load.provide("dusk.stats.store", function() {
 	var utils = load.require("dusk.utils");
 	var Range = load.require("dusk.utils.Range");
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
@@ -66,4 +66,4 @@ load.provide("dusk.stats.store", (function() {
 	};
 	
 	return store;
-})());
+});

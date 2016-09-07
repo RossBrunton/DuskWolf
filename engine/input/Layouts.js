@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.input.layouts", (function() {
+load.provide("dusk.input.layouts", function() {
 	var keyboard = load.require("dusk.input.keyboard");
 	
 	var layouts = [
@@ -72,4 +72,4 @@ load.provide("dusk.input.layouts", (function() {
 	}
 	
 	return layouts;
-})());
+});

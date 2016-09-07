@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.extras.SineSlide", (function() {
+load.provide("dusk.sgui.extras.SineSlide", function() {
 	var Effect = load.require("dusk.sgui.extras.Effect");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
@@ -113,4 +113,4 @@ load.provide("dusk.sgui.extras.SineSlide", (function() {
 	sgui.registerExtra("SineSlide", SineSlide);
 	
 	return SineSlide;
-})());
+});

@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.Scroller", (function() {
+load.provide("dusk.sgui.Scroller", function() {
 	var FocusCheckerTile = load.require("dusk.sgui.FocusCheckerTile");
 	var sgui = load.require("dusk.sgui");
 	var controls = load.require("dusk.input.controls");
@@ -131,4 +131,4 @@ load.provide("dusk.sgui.Scroller", (function() {
 	});
 	
 	return Scroller;
-})());
+});

@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("guiTest", (function() {
+load.provide("guiTest", function() {
 	load.require("dusk.sgui.DynamicGrid");
 	load.require("dusk.input.sgui.ControlConfig");
 	load.require("dusk.sgui.Label");
@@ -353,4 +353,4 @@ load.provide("guiTest", (function() {
 	root.flow("body");
 	
 	dusk.startGame();
-})());
+});

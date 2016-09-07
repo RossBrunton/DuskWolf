@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.Root", (function() {
+load.provide("dusk.sgui.Root", function() {
 	var Group = load.require("dusk.sgui.Group");
 	var sgui = load.require("dusk.sgui");
 	var keyboard = load.require("dusk.input.keyboard");
@@ -266,4 +266,4 @@ load.provide("dusk.sgui.Root", (function() {
 	sgui.registerType("Root", Root);
 	
 	return Root;
-})());
+});

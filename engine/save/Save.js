@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.save", (function() {
+load.provide("dusk.save", function() {
 	var load = window.load.require("load");
 	var utils = load.require("dusk.utils");
 	var dusk = load.require("dusk");
@@ -199,4 +199,4 @@ load.provide("dusk.save", (function() {
 	save.SaveSourceError.prototype = Object.create(Error.prototype);
 	
 	return save;
-})(), {"alsoSeal":["SaveIntegrityError", "SaveSourceError", "ISavable", "IRefSavable", "IRefSavableInstance"]});
+}, {"alsoSeal":["SaveIntegrityError", "SaveSourceError", "ISavable", "IRefSavable", "IRefSavableInstance"]});

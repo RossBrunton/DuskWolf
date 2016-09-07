@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("example.saybox", (function() {
+load.provide("example.saybox", function() {
 	load.require("dusk.sgui.SayBox");
 	var dusk = load.require("dusk");
 	var c = load.require("dusk.sgui.c");
@@ -92,4 +92,4 @@ load.provide("example.saybox", (function() {
 	dusk.startGame();
 	
 	return {};
-})());
+});

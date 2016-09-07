@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.Grid", (function() {
+load.provide("dusk.sgui.Grid", function() {
 	var Group = load.require("dusk.sgui.Group");
 	var Component = load.require("dusk.sgui.Component");
 	var sgui = load.require("dusk.sgui");
@@ -423,4 +423,4 @@ load.provide("dusk.sgui.Grid", (function() {
 	sgui.registerType("Grid", Grid);
 	
 	return Grid;
-})());
+});

@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui", (function() {
+load.provide("dusk.sgui", function() {
 	var Root = load.require(">dusk.sgui.Root", function(p){Root = p});
 	var keyboard = load.require("dusk.input.keyboard");
 	var frameTicker = load.require("dusk.utils.frameTicker");
@@ -563,10 +563,10 @@ load.provide("dusk.sgui", (function() {
 	//sgui.height = _getCanvas().height;
 	
 	return sgui;
-})());
+});
 
 
-load.provide("dusk.sgui.pause", (function() {
+load.provide("dusk.sgui.pause", function() {
 	var controls = load.require("dusk.input.controls");
 	var sgui = load.require("dusk.sgui");
 	
@@ -680,4 +680,4 @@ load.provide("dusk.sgui.pause", (function() {
 	}, "pause");
 	
 	return pause;
-})());
+});

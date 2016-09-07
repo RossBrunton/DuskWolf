@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.input.keyboard", (function() {
+load.provide("dusk.input.keyboard", function() {
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var dusk = load.require("dusk");
 	var sgui = load.suggest("dusk.sgui", function(p) {sgui = p});
@@ -243,4 +243,4 @@ load.provide("dusk.input.keyboard", (function() {
 	}
 	
 	return keyboard;
-})());
+});

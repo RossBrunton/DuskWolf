@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("scriptTest", (function() {
+load.provide("scriptTest", function() {
 	window.Runner = load.require("dusk.script.Runner");
 	window.Actions = load.require("dusk.script.Actions");
 	
@@ -87,4 +87,4 @@ load.provide("scriptTest", (function() {
 	}
 	
 	return undefined;
-})());
+});

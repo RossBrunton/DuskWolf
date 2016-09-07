@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("tests.checkbox", (function() {
+load.provide("tests.checkbox", function() {
 	var sgui = load.require("dusk.sgui");
 	var Checkbox = load.require("dusk.sgui.Checkbox");
 	var Group = load.require("dusk.sgui.Group");
@@ -64,4 +64,4 @@ load.provide("tests.checkbox", (function() {
 	});
 	
 	dusk.startGame();
-})());
+});

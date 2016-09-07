@@ -1,6 +1,6 @@
 "use strict";
 
-load.provide("example.plat.rooms.long", (function() {
+load.provide("example.plat.rooms.long", function() {
 	var manager = load.require("dusk.rooms.plat");
 	load.require("dusk.entities");
 	
@@ -10,4 +10,4 @@ load.provide("example.plat.rooms.long", (function() {
 	
 	//Remember to add extra code!
 	return room;
-})()); 
+}); 

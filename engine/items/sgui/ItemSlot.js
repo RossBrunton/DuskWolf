@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.items.sgui.ItemSlot", (function() {
+load.provide("dusk.items.sgui.ItemSlot", function() {
 	var Group = load.require("dusk.sgui.Group");
 	var sgui = load.require("dusk.sgui");
 	var items = load.require("dusk.items");
@@ -194,4 +194,4 @@ load.provide("dusk.items.sgui.ItemSlot", (function() {
 	});
 	
 	return ItemSlot;
-})());
+});

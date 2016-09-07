@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("tests.plustext", (function() {
+load.provide("tests.plustext", function() {
 	var sgui = load.require("dusk.sgui");
 	var PlusText = load.require("dusk.sgui.PlusText");
 	var Group = load.require("dusk.sgui.Group");
@@ -187,4 +187,4 @@ load.provide("tests.plustext", (function() {
 	});
 	
 	dusk.startGame();
-})());
+});

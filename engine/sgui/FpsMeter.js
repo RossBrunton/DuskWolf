@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.FpsMeter", (function() {
+load.provide("dusk.sgui.FpsMeter", function() {
 	var Label = load.require("dusk.sgui.Label");
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
@@ -59,4 +59,4 @@ load.provide("dusk.sgui.FpsMeter", (function() {
 	sgui.registerType("FpsMeter", FpsMeter);
 	
 	return FpsMeter;
-})());
+});

@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.sgui.extras.Effect", (function() {
+load.provide("dusk.sgui.extras.Effect", function() {
 	var Extra = load.require("dusk.sgui.extras.Extra");
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var Range = load.require("dusk.utils.Range");
@@ -321,4 +321,4 @@ load.provide("dusk.sgui.extras.Effect", (function() {
 	};
 	
 	return Effect;
-})());
+});
