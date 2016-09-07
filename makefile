@@ -1,5 +1,5 @@
 PYTHON=python
-TOOLS=tools
+TOOLS=engine/lib/Load.js/tools
 SHELL=sh
 
 all: deps dataDeps testDeps
