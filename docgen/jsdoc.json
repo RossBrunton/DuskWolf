@@ -7,5 +7,14 @@
 	"opts":{
 		"destination":"doc",
 		"recurse":true
+	},
+	"templates":{
+		"default":{
+			"useLongnameInNav":true,
+			"staticFiles": {
+				"include": ["docgen/extrastyles.css"]
+			},
+			"layoutFile":"layout.tmpl"
+		}
 	}
 }

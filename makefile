@@ -15,3 +15,9 @@ testDeps:
 
 clean:
 	rm -rf data/deps.json engine/deps.json tests/deps.json doc/*
+
+docs:
+	jsdoc -c docgen/jsdoc.json
+
+docsPrivate:
+	jsdoc -p -c docgen/jsdoc.json
