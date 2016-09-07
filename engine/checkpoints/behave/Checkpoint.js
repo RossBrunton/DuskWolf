@@ -2,7 +2,13 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.checkpoint.behave.Checkpoint", (function() {
+/** Behaviours for the checkpoint system.
+ *
+ * @namespace behave
+ * @memberof dusk.checkpoints
+ */
+
+load.provide("dusk.checkpoint.behave.Checkpoint", function() {
 	var entities = load.require("dusk.entities");
 	var checkpoints = load.require("dusk.checkpoints");
 	
@@ -15,6 +21,8 @@ load.provide("dusk.checkpoint.behave.Checkpoint", (function() {
 	 * - checkpointActive:boolean - Whether this is the checkpoint that was last triggered.
 	 * 
 	 * This is a classless behaviour.
+	 *
+	 * @memberof dusk.checkpoints.behave
 	 */
 	var Checkpoint = {
 		"checkpointName":"",
@@ -42,4 +50,4 @@ load.provide("dusk.checkpoint.behave.Checkpoint", (function() {
 	entities.registerBehaviour("Checkpoint", Checkpoint);
 	
 	return Checkpoint;
-})());
+});

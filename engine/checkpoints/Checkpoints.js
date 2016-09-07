@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.checkpoints", (function() {
+load.provide("dusk.checkpoints", function() {
 	var InteractableTarget = load.require("dusk.entities.behave.InteractableTarget");
 	var containerUtils = load.require("dusk.utils.containerUtils");
 	
@@ -36,21 +36,21 @@ load.provide("dusk.checkpoints", (function() {
 	 * 
 	 * On interaction event:
 	 * - For every checkpoint
-	 * -- If the interaction event name matches the checkpoint's saveType
-	 * --- Call their checkSave method with the interaction event. If it returns true:
-	 * ---- Save the checkpoint's saveSpec
-	 * ---- Call their postSave method with onLoad=false and the interaction event.
-	 * ---- Store the room name and entity name of the checkpoint such that the entity can check if it is active.
+	 *  - If the interaction event name matches the checkpoint's saveType
+	 *  - Call their checkSave method with the interaction event. If it returns true:
+	 *    - Save the checkpoint's saveSpec
+	 *    - Call their postSave method with onLoad=false and the interaction event.
+	 *    - Store the room name and entity name of the checkpoint such that the entity can check if it is active.
 	 * 
 	 * On loadCheckpoint (method of this class, with required argument type and optional argument):
 	 * - For the checkpoint that has not been checked yet, and has the highest priority:
-	 * -- If the type argument is the same as the loadType on the checkpoint:
-	 * --- Call their checkLoad method with the name and argument. If it returns true:
-	 * ---- Load the checkpoint's saveSpec
-	 * ---- Call the postLoad method with the name and optional argument
-	 * ---- Save the checkpoint's saveSpec
-	 * ---- Call its postSave method with onLoad=true
-	 * ---- Exit loadCheckpoint
+	 *   - If the type argument is the same as the loadType on the checkpoint:
+	 *     - Call their checkLoad method with the name and argument. If it returns true:
+	 *       - Load the checkpoint's saveSpec
+	 *       -  Call the postLoad method with the name and optional argument
+	 *       - Save the checkpoint's saveSpec
+	 *       - Call its postSave method with onLoad=true
+	 *       - Exit loadCheckpoint
 	 * 
 	 * Checkpoints do not, and should not be used as, normal "saving" points. Although checkpoints can be saved, they
 	 *  do not save their own checkpoints to sources; if you want that functionality, autosave after saving.
@@ -59,23 +59,28 @@ load.provide("dusk.checkpoints", (function() {
 	 * @implements dusk.utils.IContainer
 	 * @implements dusk.save.ISavable
 	 * @see dusk.checkpoints.behave.Checkpoint
+	 * @namespace
+	 * @memberof dusk
 	 */
 	var checkpoints = {};
 	
 	/** An object conataining checkpoint objects.
 	 * @type object
 	 * @private
+	 * @memberof dusk.checkpoints
 	 */
 	var _points = {};
 	/** The data saved by the save sources. Key is the checkpoint name, value is the save data object.
 	 * @type object
 	 * @private
+	 * @memberof dusk.checkpoints
 	 */
 	var _savedData = {};
 	/** Which entity has activated this checkpoint, key is checkpoint name, value is a `[room, name]` pair for the
 	 *  InteractableTarget entity that triggered it.
 	 * @type object
 	 * @private
+	 * @memberof dusk.checkpoints
 	 */
 	var _activeCheckpoints = {};
 	
@@ -212,4 +217,4 @@ load.provide("dusk.checkpoints", (function() {
 	};
 	
 	return checkpoints;
-})());
+});
