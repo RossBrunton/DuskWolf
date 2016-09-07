@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.entities.behave.Volatile", (function() {
+load.provide("dusk.entities.behave.Volatile", function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.entities.behave.Behave");
 
@@ -17,23 +17,26 @@ load.provide("dusk.entities.behave.Volatile", (function() {
 	 * @extends dusk.entities.behave.Behave
 	 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
 	 * @constructor
+	 * @memberof dusk.entities.behave
+	 * @extends dusk.entities.behave.Behave
 	 */
-	var Volatile = function(entity) {
-		Behave.call(this, entity);
-		
-		this.entityEvent.listen(this._vCollide.bind(this), "collide");
-	};
-	Volatile.prototype = Object.create(Behave.prototype);
+	class Volatile extends Behave {
+		constructor(entity) {
+			super(entity);
+			
+			this.entityEvent.listen(this._vCollide.bind(this), "collide");
+		}
 
-	/** Used to manage collisions internally.
-	 * @param {object} e A "collide" event dispatched from `{@link dusk.entities.behave.Behave.entityEvent}`.
-	 * @private
-	 */
-	Volatile.prototype._vCollide = function(e) {
-		if(this._data("killedBy") && !this._data("killedBy")(e.target, this._entity)) return;
-		
-		this._entity.terminate();
-	};
+		/** Used to manage collisions internally.
+		 * @param {object} e A "collide" event dispatched from `{@link dusk.entities.behave.Behave.entityEvent}`.
+		 * @private
+		 */
+		_vCollide(e) {
+			if(this._data("killedBy") && !this._data("killedBy")(e.target, this._entity)) return;
+			
+			this._entity.terminate();
+		}
+	}
 
 	/** Workshop data used by `{@link dusk.entities.sgui.EntityWorkshop}`.
 	 * @static
@@ -45,10 +48,7 @@ load.provide("dusk.entities.behave.Volatile", (function() {
 		]
 	};
 
-	Object.seal(Volatile);
-	Object.seal(Volatile.prototype);
-
 	entities.registerBehaviour("Volatile", Volatile);
 	
 	return Volatile;
-})());
+});

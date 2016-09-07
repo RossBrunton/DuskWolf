@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.entities.behave.BackForth", (function() {
+load.provide("dusk.entities.behave.BackForth", function() {
 	var entities = load.require("dusk.entities");
 	var c = load.require("dusk.sgui.c");
 	
@@ -19,7 +19,8 @@ load.provide("dusk.entities.behave.BackForth", (function() {
 	 * - backforthif:function(dusk.entities.sgui.Entity) - If this function exists, it must return true given the entity
 	 *  for it to move.
 	 * 
-	 * This is a classless behaviour.
+	 * This is a classless behaviour.)
+	 * @memberof dusk.entities.behave
 	 */
 	var BackForth = {
 		"hspeed":5,
@@ -57,4 +58,4 @@ load.provide("dusk.entities.behave.BackForth", (function() {
 	entities.registerBehaviour("BackForth", BackForth);
 	
 	return BackForth;
-})());
+});

@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.entities.behave.AutoAttach", (function() {
+load.provide("dusk.entities.behave.AutoAttach", function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.entities.behave.Behave");
 	var Entity = load.require("dusk.entities.sgui.Entity");
@@ -18,6 +18,7 @@ load.provide("dusk.entities.behave.AutoAttach", (function() {
 	 * - attachType = "" - The type of the entity to create and attach.
 	 * 
 	 * This is a classless behaviour.
+	 * @memberof dusk.entities.behave
 	 */
 	var AutoAttach = {
 		typeChange: function(entity, e) {
@@ -44,15 +45,16 @@ load.provide("dusk.entities.behave.AutoAttach", (function() {
 	entities.registerBehaviour("AutoAttach", AutoAttach);
 	
 	return AutoAttach;
-})());
+});
 
 
-load.provide("dusk.entities.behave.TermOnAttachParentDie", (function() {
+load.provide("dusk.entities.behave.TermOnAttachParentDie", function() {
 	var entities = load.require("dusk.entities");
 	
 	/** An entity with this behaviour will be terminated if its attached parent dies.
 	 * 
 	 * This is a classless behaviour.
+	 * @memberof dusk.entities.behave
 	 */
 	var TermOnAttachParentDie = {
 		"attachParentDie":function(entity, e) {
@@ -69,4 +71,4 @@ load.provide("dusk.entities.behave.TermOnAttachParentDie", (function() {
 	});
 	
 	return TermOnAttachParentDie;
-})());
+});

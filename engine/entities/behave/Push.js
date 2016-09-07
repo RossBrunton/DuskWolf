@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.entities.behave.Push", (function() {
+load.provide("dusk.entities.behave.Push", function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.entities.behave.Behave");
 	var c = load.require("dusk.sgui.c");
@@ -16,6 +16,7 @@ load.provide("dusk.entities.behave.Push", (function() {
 	 * - pspeed:integer = 1 - The speed to move when pushed.
 	 * 
 	 * This is a classless behaviour.
+	 * @memberof dusk.entities.behave
 	 */
 	var Push = {
 		"pspeed":1,
@@ -49,10 +50,10 @@ load.provide("dusk.entities.behave.Push", (function() {
 	entities.registerBehaviour("Push", Push);
 	
 	return Push;
-})());
+});
 
 
-load.provide("dusk.entities.behave.Fall", (function() {
+load.provide("dusk.entities.behave.Fall", function() {
 	var entities = load.require("dusk.entities");
 	var c = load.require("dusk.sgui.c");
 	
@@ -66,6 +67,7 @@ load.provide("dusk.entities.behave.Fall", (function() {
 	 * - fallSpeed:integer = 1 - The speed to fall at.
 	 * 
 	 * This is a classless behaviour.
+	 * @memberof dusk.entities.behave
 	 */
 	var Fall = {
 		"fallSpeed":1,
@@ -93,4 +95,4 @@ load.provide("dusk.entities.behave.Fall", (function() {
 	entities.registerBehaviour("Fall", Fall);
 	
 	return Fall;
-})());
+});

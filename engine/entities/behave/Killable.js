@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.entities.behave.Killable", (function() {
+load.provide("dusk.entities.behave.Killable", function() {
 	var entities = load.require("dusk.entities");
 	
 	/** Gives the entity the notion of health, allows it to be damaged or healed, and terminates it when it runs out of
@@ -25,6 +25,7 @@ load.provide("dusk.entities.behave.Killable", (function() {
 	 * - currentMercy:integer - The number of frames left until this entity can be hit again.
 	 * 
 	 * This is a classless behaviour.
+	 * @memberof dusk.entities.behave
 	 */
 	var Killable = {
 		"hp":1,
@@ -86,4 +87,4 @@ load.provide("dusk.entities.behave.Killable", (function() {
 	entities.registerBehaviour("Killable", Killable);
 	
 	return Killable;
-})());
+});

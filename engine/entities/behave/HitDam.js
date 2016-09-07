@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.entities.behave.HitDam", (function() {
+load.provide("dusk.entities.behave.HitDam", function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.entities.behave.Behave");
 
@@ -19,31 +19,33 @@ load.provide("dusk.entities.behave.HitDam", (function() {
 	 * @extends dusk.entities.behave.Behave
 	 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
 	 * @constructor
+	 * @memberof dusk.entities.behave
 	 */
-	var HitDam = function(entity) {
-		Behave.call(this, entity);
-		
-		this._data("types", [], true);
-		this._data("damage", 1, true);
-		
-		this.entityEvent.listen(this._hdCollide.bind(this), "collide");
-		this.entityEvent.listen(this._hdCollide.bind(this), "collidedInto");
-	};
-	HitDam.prototype = Object.create(Behave.prototype);
+	class HitDam extends Behave {
+		constructor(entity) {
+			super(entity);
+			
+			this._data("types", [], true);
+			this._data("damage", 1, true);
+			
+			this.entityEvent.listen(this._hdCollide.bind(this), "collide");
+			this.entityEvent.listen(this._hdCollide.bind(this), "collidedInto");
+		};
 
-	/** Used to manage collisions internally.
-	 * @param {object} e A "collide" or "collidedInto" event dispatched from `{@link dusk.entities.behave.Behave.entityEvent}`.
-	 * @private
-	 */
-	HitDam.prototype._hdCollide = function(e) {
-		if(e.target === "wall") return;
-		if(this._data("damages") && !this._data("damages")(e.target, this._entity, e)) return;
-		
-		e.target.behaviourFire("takeDamage", {
-			"damage":this._data("damage"), "source":this._entity, "types":this._data("types")
-		});
-	};
-
+		/** Used to manage collisions internally.
+		 * @param {object} e A "collide" or "collidedInto" event dispatched from `{@link dusk.entities.behave.Behave.entityEvent}`.
+		 * @private
+		 */
+		_hdCollide(e) {
+			if(e.target === "wall") return;
+			if(this._data("damages") && !this._data("damages")(e.target, this._entity, e)) return;
+			
+			e.target.behaviourFire("takeDamage", {
+				"damage":this._data("damage"), "source":this._entity, "types":this._data("types")
+			});
+		}
+	}
+	
 	/** Workshop data used by `{@link dusk.entities.sgui.EntityWorkshop}`.
 	 * @static
 	 */
@@ -56,10 +58,7 @@ load.provide("dusk.entities.behave.HitDam", (function() {
 		]
 	};
 
-	Object.seal(HitDam);
-	Object.seal(HitDam.prototype);
-
 	entities.registerBehaviour("HitDam", HitDam);
 	
 	return HitDam;
-})());
+});

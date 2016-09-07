@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.entities.behave.PlayerControl", (function() {
+load.provide("dusk.entities.behave.PlayerControl", function() {
 	var entities = load.require("dusk.entities");
 	var controls = load.require("dusk.input.controls");
 	
@@ -33,10 +33,10 @@ load.provide("dusk.entities.behave.PlayerControl", (function() {
 	entities.registerBehaviour("PlayerControl", PlayerControl);
 	
 	return PlayerControl;
-})());
+});
 
 
-load.provide("dusk.entities.behave.LeftRightControl", (function() {
+load.provide("dusk.entities.behave.LeftRightControl", function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.entities.behave.Behave");
 	var c = load.require("dusk.sgui.c");
@@ -97,4 +97,4 @@ load.provide("dusk.entities.behave.LeftRightControl", (function() {
 	entities.registerBehaviour("LeftRightControl", LeftRightControl);
 	
 	return LeftRightControl;
-})());
+});

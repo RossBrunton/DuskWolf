@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.entities.behave.PlayerGridWalker", (function() {
+load.provide("dusk.entities.behave.PlayerGridWalker", function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.entities.behave.Behave");
 	var controls = load.require("dusk.input.controls");
@@ -17,6 +17,7 @@ load.provide("dusk.entities.behave.PlayerGridWalker", (function() {
 	 * 
 	 * This is a classless behaviour.
 	 * @see dusk.entities.behave.PlayerControl
+	 * @memberof dusk.entities.behave
 	 */
 	var PlayerGridWalker = {
 		"playerControl":true,
@@ -43,10 +44,10 @@ load.provide("dusk.entities.behave.PlayerGridWalker", (function() {
 	controls.addControl("entity_down", 40, "1+0.5");
 	
 	return PlayerGridWalker;
-})());
+});
 
 
-load.provide("dusk.entities.behave.GridWalker", (function() {
+load.provide("dusk.entities.behave.GridWalker", function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.entities.behave.Behave");
 	var c = load.require("dusk.sgui.c");
@@ -71,149 +72,154 @@ load.provide("dusk.entities.behave.GridWalker", (function() {
 	 * @extends dusk.entities.behave.Behave
 	 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
 	 * @constructor
+	 * @memberof dusk.entities.behave
 	 */
-	var GridWalker = function(entity) {
-		Behave.call(this, entity);
-		
-		this._data("gwspeed", 4, true);
-		this._data("gwmoving", false, true);
-		this._data("gwtargetx", 0, true);
-		this._data("gwtargety", 0, true);
-		this._data("gwregion", null, true);
-		this._data("gwfacing", c.DIR_DOWN, true);
-		this._data("gwmoves", [], true);
-		
-		this.entityEvent.listen(_frame.bind(this), "frame");
-		this.entityEvent.listen(_horForce.bind(this), "horForce");
-		this.entityEvent.listen(_verForce.bind(this), "verForce");
-	};
-	GridWalker.prototype = Object.create(Behave.prototype);
-	
-	/** Called on the `horForce` behaviour event to manage motion.
-	 * @param e {object} The behaviour event.
-	 */
-	var _horForce = function(e) {
-		if(this._data("gwmoving")) {
-			var d = this._data("gwfacing");
+	class GridWalker extends Behave {
+		constructor(entity) {
+			Behave.call(this, entity);
 			
-			if(d == c.DIR_RIGHT) {
-				return this._data("gwspeed");
-			}else if(d == c.DIR_LEFT) {
-				return -this._data("gwspeed");
-			}
+			this._data("gwspeed", 4, true);
+			this._data("gwmoving", false, true);
+			this._data("gwtargetx", 0, true);
+			this._data("gwtargety", 0, true);
+			this._data("gwregion", null, true);
+			this._data("gwfacing", c.DIR_DOWN, true);
+			this._data("gwmoves", [], true);
+			
+			this.entityEvent.listen(this._frame.bind(this), "frame");
+			this.entityEvent.listen(this._horForce.bind(this), "horForce");
+			this.entityEvent.listen(this._verForce.bind(this), "verForce");
 		}
 		
-		return 0;
-	};
-	
-	/** Called on the `verForce` behaviour event to manage motion.
-	 * @param e {object} The behaviour event.
-	 */
-	var _verForce = function(e) {
-		if(this._data("gwmoving")) {
-			var d = this._data("gwfacing");
-			
-			if(d == c.DIR_DOWN) {
-				return this._data("gwspeed");
-			}else if(d == c.DIR_UP) {
-				return -this._data("gwspeed");
-			}
-		}
-		
-		return 0;
-	};
-	
-	/** Called on the `frame` entity event to manage motion.
-	 * @param e {object} The entity event.
-	 */
-	var _frame = function(e) {
-		var startMove = false;
-		var d = 0;
-		
-		// Check to see if there are any moves in the move stack or inputs
-		if(!this._data("gwmoving") && e.active) {
-			if(this._data("gwmoves").length) {
-				startMove = true;
-				d = this._data("gwmoves").pop();
-			}else if(this._controlActive("left")) {
-				startMove = true;
-				d = c.DIR_LEFT;
-			}else if(this._controlActive("right")) {
-				startMove = true;
-				d = c.DIR_RIGHT;
-			}else if(this._controlActive("up")) {
-				startMove = true;
-				d = c.DIR_UP;
-			}else if(this._controlActive("down")) {
-				startMove = true;
-				d = c.DIR_DOWN;
-			}
-		}
-		
-		if(startMove && this._entity.scheme) {
-			//Try to move
-			
-			// Old location
-			var oldT = this._entity.scheme.tilePointIn(this._entity.x, this._entity.y);
-			
-			// New location
-			var newT = this._entity.scheme.tilePointIn(this._entity.x, this._entity.y);
-			this._entity.scheme.shiftTile(newT, d);
-			
-			// Check if the locations are different
-			if(((oldT[2] != newT[2] || oldT[3] != newT[3]) && !newT[5]) || !this._data("collides")) {
-				if(this._data("gwregion") == null || this._data("gwregion").isIn(newT[2], newT[3])) {
-					this._entity.behaviourFire("gwStartMove", {"dir":d, "targetX":newT[2], "targetY":newT[3]});
-					this._data("gwmoving", true);
-					this._data("gwfacing", d);
-					this._data("gwtargetx", newT[2] * this._entity.scheme.tileWidth());
-					this._data("gwtargety", newT[3] * this._entity.scheme.tileHeight());
-				}
-			}
-			
-			TileMap.tileData.free(oldT);
-			TileMap.tileData.free(newT);
-		}
-		
-		if(this._data("gwmoving")) {
-			// If we are currently moving
-			// We must be going in the direction we are facing
-			var d = this._data("gwfacing");
-			
-			// For each direction, check if we have reached the target, otherwise keep moving
-			if(d == c.DIR_RIGHT) {
-				if(this._entity.x >= this._data("gwtargetx")) {
-					this._entity.x = this._data("gwtargetx");
-					this._data("gwmoving", false);
-				}
-			}else if(d == c.DIR_LEFT) {
-				if(this._entity.x <= this._data("gwtargetx")) {
-					this._entity.x = this._data("gwtargetx");
-					this._data("gwmoving", false);
-				}
-			}else if(d == c.DIR_DOWN) {
-				if(this._entity.y >= this._data("gwtargety")) {
-					this._entity.y = this._data("gwtargety");
-					this._data("gwmoving", false);
-				}
-			}else if(d == c.DIR_UP) {
-				if(this._entity.y <= this._data("gwtargety")) {
-					this._entity.y = this._data("gwtargety");
-					this._data("gwmoving", false);
-				}
-			}
-			
-			// If we have stopped moving, fire the event and run this handler again
-			if(!this._data("gwmoving")) {
-				this._entity.behaviourFire("gwStopMove", 
-					{"dir":d, "targetX":this._data("gwtargetx")/this._entity.width, 
-					"targetY":this._data("gwtargety")/this._entity.height}
-				);
+		/** Called on the `horForce` behaviour event to manage motion.
+		 * @param e {object} The behaviour event.
+		 * @private
+		 */
+		_horForce(e) {
+			if(this._data("gwmoving")) {
+				var d = this._data("gwfacing");
 				
-				_frame.call(this, e);
+				if(d == c.DIR_RIGHT) {
+					return this._data("gwspeed");
+				}else if(d == c.DIR_LEFT) {
+					return -this._data("gwspeed");
+				}
+			}
+			
+			return 0;
+		}
+		
+		/** Called on the `verForce` behaviour event to manage motion.
+		 * @param e {object} The behaviour event.
+		 * @private
+		 */
+		_verForce(e) {
+			if(this._data("gwmoving")) {
+				var d = this._data("gwfacing");
+				
+				if(d == c.DIR_DOWN) {
+					return this._data("gwspeed");
+				}else if(d == c.DIR_UP) {
+					return -this._data("gwspeed");
+				}
+			}
+			
+			return 0;
+		}
+		
+		/** Called on the `frame` entity event to manage motion.
+		 * @param e {object} The entity event.
+		 * @private
+		 */
+		_frame(e) {
+			var startMove = false;
+			var d = 0;
+			
+			// Check to see if there are any moves in the move stack or inputs
+			if(!this._data("gwmoving") && e.active) {
+				if(this._data("gwmoves").length) {
+					startMove = true;
+					d = this._data("gwmoves").pop();
+				}else if(this._controlActive("left")) {
+					startMove = true;
+					d = c.DIR_LEFT;
+				}else if(this._controlActive("right")) {
+					startMove = true;
+					d = c.DIR_RIGHT;
+				}else if(this._controlActive("up")) {
+					startMove = true;
+					d = c.DIR_UP;
+				}else if(this._controlActive("down")) {
+					startMove = true;
+					d = c.DIR_DOWN;
+				}
+			}
+			
+			if(startMove && this._entity.scheme) {
+				//Try to move
+				
+				// Old location
+				var oldT = this._entity.scheme.tilePointIn(this._entity.x, this._entity.y);
+				
+				// New location
+				var newT = this._entity.scheme.tilePointIn(this._entity.x, this._entity.y);
+				this._entity.scheme.shiftTile(newT, d);
+				
+				// Check if the locations are different
+				if(((oldT[2] != newT[2] || oldT[3] != newT[3]) && !newT[5]) || !this._data("collides")) {
+					if(this._data("gwregion") == null || this._data("gwregion").isIn(newT[2], newT[3])) {
+						this._entity.behaviourFire("gwStartMove", {"dir":d, "targetX":newT[2], "targetY":newT[3]});
+						this._data("gwmoving", true);
+						this._data("gwfacing", d);
+						this._data("gwtargetx", newT[2] * this._entity.scheme.tileWidth());
+						this._data("gwtargety", newT[3] * this._entity.scheme.tileHeight());
+					}
+				}
+				
+				TileMap.tileData.free(oldT);
+				TileMap.tileData.free(newT);
+			}
+			
+			if(this._data("gwmoving")) {
+				// If we are currently moving
+				// We must be going in the direction we are facing
+				var d = this._data("gwfacing");
+				
+				// For each direction, check if we have reached the target, otherwise keep moving
+				if(d == c.DIR_RIGHT) {
+					if(this._entity.x >= this._data("gwtargetx")) {
+						this._entity.x = this._data("gwtargetx");
+						this._data("gwmoving", false);
+					}
+				}else if(d == c.DIR_LEFT) {
+					if(this._entity.x <= this._data("gwtargetx")) {
+						this._entity.x = this._data("gwtargetx");
+						this._data("gwmoving", false);
+					}
+				}else if(d == c.DIR_DOWN) {
+					if(this._entity.y >= this._data("gwtargety")) {
+						this._entity.y = this._data("gwtargety");
+						this._data("gwmoving", false);
+					}
+				}else if(d == c.DIR_UP) {
+					if(this._entity.y <= this._data("gwtargety")) {
+						this._entity.y = this._data("gwtargety");
+						this._data("gwmoving", false);
+					}
+				}
+				
+				// If we have stopped moving, fire the event and run this handler again
+				if(!this._data("gwmoving")) {
+					this._entity.behaviourFire("gwStopMove", 
+						{"dir":d, "targetX":this._data("gwtargetx")/this._entity.width, 
+						"targetY":this._data("gwtargety")/this._entity.height}
+					);
+					
+					_frame.call(this, e);
+				}
 			}
 		}
-	};
+	}
 	
 	/** Workshop data used by `dusk.entities.sgui.EntityWorkshop`.
 	 * @static
@@ -228,10 +234,10 @@ load.provide("dusk.entities.behave.GridWalker", (function() {
 	entities.registerBehaviour("GridWalker", GridWalker);
 	
 	return GridWalker;
-})());
+});
 
 
-load.provide("dusk.entities.behave.GridRecorder", (function() {
+load.provide("dusk.entities.behave.GridRecorder", function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.entities.behave.Behave");
 	var c = load.require("dusk.sgui.c");
@@ -254,71 +260,73 @@ load.provide("dusk.entities.behave.GridRecorder", (function() {
 	 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
 	 * @constructor
 	 */
-	var GridRecorder = function(entity) {
-		Behave.call(this, entity);
+	class GridRecorder extends Behave {
+		constructor(entity) {
+			super(entity);
+			
+			this._data("grmoves", [], true);
+			this._data("grrecording", false, true);
+			this._data("grrange", 0, true);
+			this._data("grregion", null, true);
+			this._data("grregionto", null, true);
+			this._data("grsnap", false, true);
+			
+			/** If the entity has left the region, this is set to true so we know to calculate the path next time it's in
+			 *  the region.
+			 * @type boolean
+			 * @private
+			 * @memberof! dusk.entities.behave.GridRecorder#
+			 */
+			this._leftRegion = false;
+			
+			this.entityEvent.listen(this._startMove.bind(this), "gwStartMove");
+			this.entityEvent.listen(this._stopMove.bind(this), "gwStopMove");
+		}
 		
-		this._data("grmoves", [], true);
-		this._data("grrecording", false, true);
-		this._data("grrange", 0, true);
-		this._data("grregion", null, true);
-		this._data("grregionto", null, true);
-		this._data("grsnap", false, true);
-		
-		/** If the entity has left the region, this is set to true so we know to calculate the path next time it's in
-		 *  the region.
-		 * @type boolean
+		/** Manages the start of a move.
+		 * @param {object} e An event object.
 		 * @private
 		 */
-		this._leftRegion = false;
+		_startMove(e) {
+			if(this._data("grrecording")
+			&& this._data("grregion").isIn(e.targetX, e.targetY)) {
+				var moves = this._data("grmoves");
+				
+				if("dir" in e && moves.length) {
+					moves.push(e.dir);
+					
+					if((moves[moves.length-1] | moves[moves.length-2]) == (c.DIR_UP | c.DIR_DOWN))
+						moves.splice(-2, 2);
+					
+					if((moves[moves.length-1] | moves[moves.length-2]) == (c.DIR_LEFT | c.DIR_RIGHT))
+						moves.splice(-2, 2);
+				}
+				
+				if(this._leftRegion || (this._data("grsnap") && moves.length > this._data("grrange")) || !("dir" in e)
+				|| !moves.length) {
+					this._data("grmoves", 
+						this._data("grregion").pathTo(e.targetX, e.targetY)
+					);
+					this._leftRegion = false;
+				}
+			}else if(this._data("grrecording")) {
+				this._leftRegion = true;
+			}
+		}
 		
-		this.entityEvent.listen(_startMove.bind(this), "gwStartMove");
-		this.entityEvent.listen(_stopMove.bind(this), "gwStopMove");
-	};
-	GridRecorder.prototype = Object.create(Behave.prototype);
-	
-	/** Manages the start of a move.
-	 * @param {object} e An event object.
-	 * @private
-	 */
-	var _startMove = function(e) {
-		if(this._data("grrecording")
-		&& this._data("grregion").isIn(e.targetX, e.targetY)) {
-			var moves = this._data("grmoves");
-			
-			if("dir" in e && moves.length) {
-				moves.push(e.dir);
-				
-				if((moves[moves.length-1] | moves[moves.length-2]) == (c.DIR_UP | c.DIR_DOWN))
-					moves.splice(-2, 2);
-				
-				if((moves[moves.length-1] | moves[moves.length-2]) == (c.DIR_LEFT | c.DIR_RIGHT))
-					moves.splice(-2, 2);
-			}
-			
-			if(this._leftRegion || (this._data("grsnap") && moves.length > this._data("grrange")) || !("dir" in e)
-			|| !moves.length) {
-				this._data("grmoves", 
-					this._data("grregion").pathTo(e.targetX, e.targetY)
-				);
-				this._leftRegion = false;
-			}
-		}else if(this._data("grrecording")) {
-			this._leftRegion = true;
-		}
-	};
-	
-	/** Manages the end of a move.
-	 * @param {object} e An event object.
-	 * @private
-	 */
-	var _stopMove = function(e) {
-		if(this._data("grrecording") && this._data("grregion").isIn(e.targetX, e.targetY)) {
-			if(this._data("grregionto")) {
-				this._data("grregionto").clear();
-				this._data("grregion").followPathInto(this._data("grmoves"), this._data("grregionto"));
+		/** Manages the end of a move.
+		 * @param {object} e An event object.
+		 * @private
+		 */
+		_stopMove(e) {
+			if(this._data("grrecording") && this._data("grregion").isIn(e.targetX, e.targetY)) {
+				if(this._data("grregionto")) {
+					this._data("grregionto").clear();
+					this._data("grregion").followPathInto(this._data("grmoves"), this._data("grregionto"));
+				}
 			}
 		}
-	};
+	}
 	
 	/** Workshop data used by `dusk.entities.sgui.EntityWorkshop`.
 	 * @static
@@ -334,10 +342,10 @@ load.provide("dusk.entities.behave.GridRecorder", (function() {
 	entities.registerBehaviour("GridRecorder", GridRecorder);
 	
 	return GridRecorder;
-})());
+});
 
 
-load.provide("dusk.entities.behave.GridMouse", (function() {
+load.provide("dusk.entities.behave.GridMouse", function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.entities.behave.Behave");
 	var options = load.require("dusk.options");
@@ -355,36 +363,37 @@ load.provide("dusk.entities.behave.GridMouse", (function() {
 	 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
 	 * @constructor
 	 */
-	var GridMouse = function(entity) {
-		Behave.call(this, entity);
-		
-		this._data("gmMouseMove", true, true);
-		
-		this.entityEvent.listen(_mouseMove.bind(this), "mouseMove");
-	};
-	GridMouse.prototype = Object.create(Behave.prototype);
-	
-	/** Manages mouse motion.
-	 * @param {object} e An event object.
-	 * @private
-	 */
-	var _mouseMove = function(e) {
-		if(this._data("gmMouseMove") && options.get("controls.mouseGrid") && this._entity.active) {
-			var destX = ~~((this._entity.x + this._entity.mouseX) / this._entity.width);
-			var destY = ~~((this._entity.y + this._entity.mouseY) / this._entity.height);
+	class GridMouse extends Behave {
+		constructor(entity) {
+			super(entity);
 			
-			if(this._data("gwregion") == null || this._data("gwregion").isIn(destX, destY)) {
-				this._entity.behaviourFire("gwStartMove", {"targetX":destX, "targetY":destY});
-				var dir = dirs.findDir(
-					~~(this._entity.x/this._entity.width), ~~(this._entity.y/this._entity.height), 0,
-					destX, destY, 0
-				);
-				this._entity.x = destX * this._entity.width;
-				this._entity.y = destY * this._entity.height;
-				this._entity.behaviourFire("gwStopMove", {"targetX":destX, "targetY":destY, "dir":dir});
+			this._data("gmMouseMove", true, true);
+			
+			this.entityEvent.listen(this._mouseMove.bind(this), "mouseMove");
+		}
+		
+		/** Manages mouse motion.
+		 * @param {object} e An event object.
+		 * @private
+		 */
+		_mouseMove(e) {
+			if(this._data("gmMouseMove") && options.get("controls.mouseGrid") && this._entity.active) {
+				var destX = ~~((this._entity.x + this._entity.mouseX) / this._entity.width);
+				var destY = ~~((this._entity.y + this._entity.mouseY) / this._entity.height);
+				
+				if(this._data("gwregion") == null || this._data("gwregion").isIn(destX, destY)) {
+					this._entity.behaviourFire("gwStartMove", {"targetX":destX, "targetY":destY});
+					var dir = dirs.findDir(
+						~~(this._entity.x/this._entity.width), ~~(this._entity.y/this._entity.height), 0,
+						destX, destY, 0
+					);
+					this._entity.x = destX * this._entity.width;
+					this._entity.y = destY * this._entity.height;
+					this._entity.behaviourFire("gwStopMove", {"targetX":destX, "targetY":destY, "dir":dir});
+				}
 			}
 		}
-	};
+	}
 	
 	/** Workshop data used by `dusk.entities.sgui.EntityWorkshop`.
 	 * @static
@@ -403,4 +412,4 @@ load.provide("dusk.entities.behave.GridMouse", (function() {
 	entities.registerBehaviour("GridMouse", GridMouse);
 	
 	return GridMouse;
-})());
+});

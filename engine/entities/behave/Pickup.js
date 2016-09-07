@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.entities.behave.Pickup", (function() {
+load.provide("dusk.entities.behave.Pickup", function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.entities.behave.Behave");
 	
@@ -14,53 +14,55 @@ load.provide("dusk.entities.behave.Pickup", (function() {
 	 * @extends dusk.entities.behave.Behave
 	 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
 	 * @constructor
+	 * @memberof dusk.entities.behave
 	 */
-	var Pickup = function(entity) {
-		Behave.call(this, entity);
-		
-		this._data("type", "coin", true);
-		this._data("value", 1, true);
-		this._data("roomLinked", true, true);
-		this._data("pickupName", "", true);
-		
-		this.entityEvent.listen(this._pickCollided.bind(this), "collidedInto");
-		this.entityEvent.listen(this._pickLoad.bind(this), "typeChange");
-	};
-	Pickup.prototype = Object.create(Behave.prototype);
-	
-	/** Used to manage collisions internally.
-	 * @param {object} e A "collidedInto" event dispatched from `{@link dusk.entities.behave.Behave.entityEvent}`.
-	 * @private
-	 */
-	Pickup.prototype._pickCollided = function(e) {
-		var name = this._entity.name;
-		if(this._data("pickupName")) name = this._data("pickupName");
-		if(this._data("pickupBy") && !this._data("pickupBy")(e.target, e._entity, e)) return;
-		
-		var room = "*";
-		if(this._data("roomLinked") && this._entity.path("..")) room = this._entity.path("../..").roomName;
-		
-		if(!Pickup.collected(this._data("type"), name, room)
-		&& this._entity.behaviourFireWithReturn("pickup",
-		  {"type":this._data("type"), "value":this._data("value"), "target":e.target}).indexOf(true) === -1
-		) {
-			this._entity.animate("ent_pickup").then((function() {
-				Pickup.collect(this._data("type"), this._data("value"), name, room);
-				
-				this._entity.terminate();
-			}).bind(this));
+	class Pickup extends Behave {
+		constructor(entity) {
+			super(entity);
+			
+			this._data("type", "coin", true);
+			this._data("value", 1, true);
+			this._data("roomLinked", true, true);
+			this._data("pickupName", "", true);
+			
+			this.entityEvent.listen(this._pickCollided.bind(this), "collidedInto");
+			this.entityEvent.listen(this._pickLoad.bind(this), "typeChange");
 		}
-	};
-	
-	Pickup.prototype._pickLoad = function(e) {
-		var name = this._entity.name;
-		if(this._data("pickupName")) name = this._data("pickupName");
 		
-		var room = "*";
-		if(this._data("roomLinked") && this._entity.path("../..")) room = this._entity.path("../..").roomName;
+		/** Used to manage collisions internally.
+		 * @param {object} e A "collidedInto" event dispatched from `{@link dusk.entities.behave.Behave.entityEvent}`.
+		 * @private
+		 */
+		_pickCollided(e) {
+			var name = this._entity.name;
+			if(this._data("pickupName")) name = this._data("pickupName");
+			if(this._data("pickupBy") && !this._data("pickupBy")(e.target, e._entity, e)) return;
+			
+			var room = "*";
+			if(this._data("roomLinked") && this._entity.path("..")) room = this._entity.path("../..").roomName;
+			
+			if(!Pickup.collected(this._data("type"), name, room)
+			&& this._entity.behaviourFireWithReturn("pickup",
+			  {"type":this._data("type"), "value":this._data("value"), "target":e.target}).indexOf(true) === -1
+			) {
+				this._entity.animate("ent_pickup").then((function() {
+					Pickup.collect(this._data("type"), this._data("value"), name, room);
+					
+					this._entity.terminate();
+				}).bind(this));
+			}
+		}
 		
-		if(Pickup.collected(this._data("type"), name, room)) this._entity.deleted = true;
-	};
+		_pickLoad(e) {
+			var name = this._entity.name;
+			if(this._data("pickupName")) name = this._data("pickupName");
+			
+			var room = "*";
+			if(this._data("roomLinked") && this._entity.path("../..")) room = this._entity.path("../..").roomName;
+			
+			if(Pickup.collected(this._data("type"), name, room)) this._entity.deleted = true;
+		}
+	}
 	
 	var _collected = {};
 	var _counts = {};
@@ -142,4 +144,4 @@ load.provide("dusk.entities.behave.Pickup", (function() {
 	entities.registerBehaviour("Pickup", Pickup);
 	
 	return Pickup;
-})());
+});

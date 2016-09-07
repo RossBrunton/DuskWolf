@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.entities.behave.HealthRestore", (function() {
+load.provide("dusk.entities.behave.HealthRestore", function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.entities.behave.Behave");
 
@@ -15,23 +15,26 @@ load.provide("dusk.entities.behave.HealthRestore", (function() {
 	 * @extends dusk.entities.behave.Behave
 	 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
 	 * @constructor
+	 * @memberof dusk.entities.behave
+	 * @extends dusk.entities.behave.Behave
 	 */
-	var HealthRestore = function(entity) {
-		Behave.call(this, entity);
-		
-		this._data("pickupHealth", 1, true);
-		
-		this.entityEvent.listen(this._healthPickup.bind(this), "pickup");
-	};
-	HealthRestore.prototype = Object.create(Behave.prototype);
+	class HealthRestore extends Behave {
+		constructor(entity) {
+			super(entity);
+			
+			this._data("pickupHealth", 1, true);
+			
+			this.entityEvent.listen(this._healthPickup.bind(this), "pickup");
+		}
 
-	/** Used internally to manage the restoring of health.
-	 * @param {object} e A `"pickup"` event dispatched from `{@link dusk.entities.behave.Behave.entityEvent}`.
-	 */
-	HealthRestore.prototype._healthPickup = function(e) {
-		e.target.behaviourFire("heal", {"amount":this._data("pickupHealth")});
-	};
-
+		/** Used internally to manage the restoring of health.
+		 * @param {object} e A `"pickup"` event dispatched from `{@link dusk.entities.behave.Behave.entityEvent}`.
+		 */
+		_healthPickup(e) {
+			e.target.behaviourFire("heal", {"amount":this._data("pickupHealth")});
+		}
+	}
+	
 	/** Workshop data used by `{@link dusk.entities.sgui.EntityWorkshop}`.
 	 * @static
 	 */
@@ -40,12 +43,9 @@ load.provide("dusk.entities.behave.HealthRestore", (function() {
 		"data":[
 			["pickupHealth", "integer", "Health restored when picked up."]
 		]
-	};
-
-	Object.seal(HealthRestore);
-	Object.seal(HealthRestore.prototype);
+	}
 
 	entities.registerBehaviour("HealthRestore", HealthRestore);
 	
 	return HealthRestore;
-})());
+});

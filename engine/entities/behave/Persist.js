@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.entities.behave.Persist", (function() {
+load.provide("dusk.entities.behave.Persist", function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.entities.behave.Behave");
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
@@ -20,32 +20,35 @@ load.provide("dusk.entities.behave.Persist", (function() {
 	 * @implements dusk.save.ISavable
 	 * @constructor
 	 * @since 0.0.21-alpha
+	 * @memberof dusk.entities.behave
+	 * @extends dusk.entities.behave.Behave
 	 */
-	var Persist = function(entity) {
-		Behave.call(this, entity);
-		
-		this.entityEvent.listen(_frame.bind(this), "frame");
-		this.entityEvent.listen(_load.bind(this), "typeChange");
-	};
-	Persist.prototype = Object.create(Behave.prototype);
-	
-	/** Used to handle entity loading; to restore the persistent data.
-	 * @param {object} data The event object.
-	 * @private
-	 */
-	var _load = function(data) {
-		if(Persist.getPersist(this._entity.name)) {
-			this._entity.setState(Persist.getPersist(this._entity.name));
+	class Persist extends Behave {
+		constructor(entity) {
+			super(entity);
+			
+			this.entityEvent.listen(this._frame.bind(this), "frame");
+			this.entityEvent.listen(this._load.bind(this), "typeChange");
 		}
-	};
-	
-	/** Used to handle ever frame; saving the data.
-	 * @param {object} data The event object.
-	 * @private
-	 */
-	var _frame = function(data) {
-		_storePersist(this._entity.name, this._entity.getState(), this._entity.entType);
-	};
+		
+		/** Used to handle entity loading; to restore the persistent data.
+		 * @param {object} data The event object.
+		 * @private
+		 */
+		_load(data) {
+			if(Persist.getPersist(this._entity.name)) {
+				this._entity.setState(Persist.getPersist(this._entity.name));
+			}
+		}
+		
+		/** Used to handle ever frame; saving the data.
+		 * @param {object} data The event object.
+		 * @private
+		 */
+		_frame(data) {
+			_storePersist(this._entity.name, this._entity.getState(), this._entity.entType);
+		}
+	}
 	
 	/** An event dispatcher that is fired when persistent entity data is updated.
 	 * 
@@ -133,7 +136,7 @@ load.provide("dusk.entities.behave.Persist", (function() {
 	 * @param {object} data The data that was saved.
 	 * @param {string} type The type of data that was saved.
 	 * @param {array} arg The argument that was used in saving.
-	 * @param {function(array|integer):*} The unreffing function.
+	 * @param {function((array|integer)):*} The unreffing function.
 	 * @since 0.0.21-alpha
 	 */
 	Persist.load = function(data, type, arg, unref) {
@@ -157,4 +160,4 @@ load.provide("dusk.entities.behave.Persist", (function() {
 	entities.registerBehaviour("Persist", Persist);
 	
 	return Persist;
-})());
+});

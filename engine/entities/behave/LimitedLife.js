@@ -2,12 +2,13 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.entities.behave.LimitedLife", (function() {
+load.provide("dusk.entities.behave.LimitedLife", function() {
 	var entities = load.require("dusk.entities");
 	
 	/** 
 	 * 
 	 * This is a classless behaviour.
+	 * @memberof dusk.entities.behave
 	 */
 	var LimitedLife = {
 		"lifespan":60,
@@ -30,4 +31,4 @@ load.provide("dusk.entities.behave.LimitedLife", (function() {
 	entities.registerBehaviour("LimitedLife", LimitedLife);
 	
 	return LimitedLife;
-})());
+});

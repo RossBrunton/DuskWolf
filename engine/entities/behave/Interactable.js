@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.entities.behave.InteractableTarget", (function() {
+load.provide("dusk.entities.behave.InteractableTarget", function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.entities.behave.Behave");
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
@@ -29,33 +29,36 @@ load.provide("dusk.entities.behave.InteractableTarget", (function() {
 	 * @constructor
 	 * @since 0.0.21-alpha
 	 * @see dusk.entities.behave.InteractableHost
+	 * @memberof dusk.entities.behave
+	 * @extends dusk.entities.behave.Behave
 	 */
-	var InteractableTarget = function(entity) {
-		Behave.call(this, entity);
-		
-		this._data("interactType", "", true);
-		this._data("interactUpRequired", false, true);
-		
-		this.entityEvent.listen(_interactedWith.bind(this), "interactedWith");
-	};
-	InteractableTarget.prototype = Object.create(Behave.prototype);
-	
-	/** Handles interactions.
-	 * @param {object} e The event object.
-	 * @private
-	 */
-	var _interactedWith = function(e) {
-		if(!e.up || !this._data("interactUpRequired")) {
-			InteractableTarget.interact.fire(
-				{
-					"type":this._data("interactType"), "name":this._entity.name, "interacter":e.interacter,
-					"target":this._entity, "up":e.up,
-					"room":this._entity.path("../../")?this._entity.path("../../").roomName:undefined
-				}, this._data("interactType")
-			);
+	class InteractableTarget extends Behave {
+		constructor(entity) {
+			super(entity);
+			
+			this._data("interactType", "", true);
+			this._data("interactUpRequired", false, true);
+			
+			this.entityEvent.listen(this._interactedWith.bind(this), "interactedWith");
 		}
-	};
-	
+		
+		/** Handles interactions.
+		 * @param {object} e The event object.
+		 * @private
+		 */
+		_interactedWith(e) {
+			if(!e.up || !this._data("interactUpRequired")) {
+				InteractableTarget.interact.fire(
+					{
+						"type":this._data("interactType"), "name":this._entity.name, "interacter":e.interacter,
+						"target":this._entity, "up":e.up,
+						"room":this._entity.path("../../")?this._entity.path("../../").roomName:undefined
+					}, this._data("interactType")
+				);
+			}
+		}
+	}
+		
 	/** Fired when this entity is interacted with. The properties of the event object are detailed in the documentation
 	 *  for the class.
 	 * @type dusk.utils.EventDispatcher
@@ -78,10 +81,10 @@ load.provide("dusk.entities.behave.InteractableTarget", (function() {
 	entities.registerBehaviour("InteractableTarget", InteractableTarget);
 	
 	return InteractableTarget;
-})());
+});
 
 
-load.provide("dusk.entities.behave.InteractableHost", (function() {
+load.provide("dusk.entities.behave.InteractableHost", function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.entities.behave.Behave");
 	var controls = load.require("dusk.input.controls");
@@ -103,50 +106,53 @@ load.provide("dusk.entities.behave.InteractableHost", (function() {
 	 * @since 0.0.21-alpha
 	 * @see dusk.entities.behave.MarkTrigger
 	 * @see dusk.entities.behave.InteractableTarget
+	 * @memberof dusk.entities.behave
+	 * @extends dusk.entities.behave.Behave
 	 */
-	var InteractableHost = function(entity) {
-		Behave.call(this, entity);
-		
-		this._interactingWith = [];
-		this._controlActiveActive = false;
-		
-		this.entityEvent.listen(_frame.bind(this), "frame");
-	};
-	InteractableHost.prototype = Object.create(Behave.prototype);
-	
-	/** Manages frame actions.
-	 * @param {object} e The event object.
-	 * @private
-	 */
-	var _frame = function(e) {
-		var touchers = this._entity.allTouchersNonSolid();
-		
-		var active = false;
-		if(this._controlActiveActive) {
-			if(!this._controlActive("interact")) this._controlActiveActive = false;
-		}else{
-			if(this._controlActive("interact")) {
-				this._controlActiveActive = true;
-				active = true;
-			}
+	class InteractableHost extends Behave {
+		constructor(entity) {
+			super(entity);
+			
+			this._interactingWith = [];
+			this._controlActiveActive = false;
+			
+			this.entityEvent.listen(this._frame.bind(this), "frame");
 		}
 		
-		for(var i = 0; i < touchers.length; i ++) {
-			if(this._interactingWith.indexOf(touchers[i]) === -1) {
-				if(touchers[i] !== "wall") {
-					touchers[i].behaviourFire("interactedWith", {"up":false, "interacter":this._entity});
+		/** Manages frame actions.
+		 * @param {object} e The event object.
+		 * @private
+		 */
+		_frame(e) {
+			var touchers = this._entity.allTouchersNonSolid();
+			
+			var active = false;
+			if(this._controlActiveActive) {
+				if(!this._controlActive("interact")) this._controlActiveActive = false;
+			}else{
+				if(this._controlActive("interact")) {
+					this._controlActiveActive = true;
+					active = true;
 				}
 			}
 			
-			if(active) {
-				if(touchers[i] !== "wall") {
-					touchers[i].behaviourFire("interactedWith", {"up":true, "interacter":this._entity});
+			for(var i = 0; i < touchers.length; i ++) {
+				if(this._interactingWith.indexOf(touchers[i]) === -1) {
+					if(touchers[i] !== "wall") {
+						touchers[i].behaviourFire("interactedWith", {"up":false, "interacter":this._entity});
+					}
+				}
+				
+				if(active) {
+					if(touchers[i] !== "wall") {
+						touchers[i].behaviourFire("interactedWith", {"up":true, "interacter":this._entity});
+					}
 				}
 			}
+			
+			this._interactingWith = touchers;
 		}
-		
-		this._interactingWith = touchers;
-	};
+	}
 	
 	/** Workshop data used by `dusk.entities.sgui.EntityWorkshop`.
 	 * @static
@@ -163,4 +169,4 @@ load.provide("dusk.entities.behave.InteractableHost", (function() {
 	entities.registerBehaviour("InteractableHost", InteractableHost);
 	
 	return InteractableHost;
-})());
+});

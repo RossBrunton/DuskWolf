@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.entities.behave.Gravity", (function() {
+load.provide("dusk.entities.behave.Gravity", function() {
 	var entities = load.require("dusk.entities");
 	var c = load.require("dusk.sgui.c");
 	
@@ -16,6 +16,7 @@ load.provide("dusk.entities.behave.Gravity", (function() {
 	 * - terminal:integer = 7 - Maximum speed that gravity applies.
 	 * 
 	 * This is a classless behaviour.
+	 * @memberof dusk.entities.behave
 	 */
 	var Gravity = {
 		"gravity":1.5,
@@ -37,10 +38,10 @@ load.provide("dusk.entities.behave.Gravity", (function() {
 	entities.registerBehaviour("Gravity", Gravity);
 	
 	return Gravity;
-})());
+});
 
 
-load.provide("dusk.entities.behave.Buoyancy", (function() {
+load.provide("dusk.entities.behave.Buoyancy", function() {
 	var entities = load.require("dusk.entities");
 	var c = load.require("dusk.sgui.c");
 	
@@ -54,6 +55,7 @@ load.provide("dusk.entities.behave.Buoyancy", (function() {
 	 * - terminalBuoyancy:object = {} - Maximum speed that buoyancy applies.
 	 * 
 	 * This is a classless behaviour.
+	 * @memberof dusk.entities.behave
 	 */
 	var Buoyancy = {
 		"buoyancy":{},
@@ -96,4 +98,4 @@ load.provide("dusk.entities.behave.Buoyancy", (function() {
 	entities.registerBehaviour("Buoyancy", Buoyancy);
 	
 	return Buoyancy;
-})());
+});
