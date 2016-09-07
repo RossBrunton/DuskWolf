@@ -2,15 +2,17 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.script.Actions", (function() {
+load.provide("dusk.script.Actions", function() {
 	var Runner = load.require("dusk.script.Runner");
 	
-	/** A selection of helpfull actions for scripts.
+	/** A selection of helpful actions for scripts.
 	 * 
 	 * These are designed to be used as actions in `dusk.script.Runner`.
 	 * 
 	 * @see dusk.script.Runner
 	 * @since 0.0.21-alpha
+	 * @namespace
+	 * @memberof dusk.script
 	 */
 	var Actions = {};
 	
@@ -22,6 +24,7 @@ load.provide("dusk.script.Actions", (function() {
 	/** This action does not cause the cancel action to go any further behind it, and is to be used when a user should
 	 * be unable to cancel an action after it.
 	 * @return {object} The action object.
+	 * @function
 	 */
 	Actions.block = constfn(Runner.action("block", id, function() {}));
 	
@@ -38,9 +41,9 @@ load.provide("dusk.script.Actions", (function() {
 	
 	/** If the function cond returns true (when this action is ran), then add the `thenClause` actions to the script,
 	 * otherwise, add the `elseClause` actions.
-	 * @param {function(*):boolean} The condition to check.
-	 * @param {array=[]} thenClause An array of actions to do if the condition is true.
-	 * @param {array=[]} elseClause An array of actions to do if the condition is false.
+	 * @param {function(*):boolean} cond The condition to check.
+	 * @param {array=} thenClause An array of actions to do if the condition is true, defaults to empty.
+	 * @param {array=} elseClause An array of actions to do if the condition is false, defaults to empty.
 	 * @return {object} The action object.
 	 */
 	Actions.if = function(cond, thenClause, elseClause) {
@@ -58,8 +61,8 @@ load.provide("dusk.script.Actions", (function() {
 	/** Keep repeating the body actions while the condition returns true.
 	 * 
 	 * The condition will be given the resolution value of the last action in the body if it has ran yet.
-	 * @param {function(*):boolean} The condition to check.
-	 * @param {array=[]} thenClause An array of actions to do while the condition is true.
+	 * @param {function(*):boolean} cond The condition to check.
+	 * @param {array=} thenClause An array of actions to do while the condition is true, defaults to empty
 	 * @return {object} The action object.
 	 */
 	Actions.while = function(cond, body) {
@@ -78,10 +81,10 @@ load.provide("dusk.script.Actions", (function() {
 	 * Iterable may be a string, in which case the object specified by that name on the passed argument will be used.
 	 * It also may be a function, in which case it is called and should return an iterable.
 	 * 
-	 * @param {iterable|string|function(object):iterable} iterable The object, name of object or a function that returns
-	 *  an object to iterate.
+	 * @param {(iterable|string|function(object):iterable)} iterable The object, name of object or a function that
+	 *  returns an object to iterate.
 	 * @param {string} bind The iterable element will be bound to this value.
-	 * @param {array=[]} body An array of actions to do with each element.
+	 * @param {array=} body An array of actions to do with each element, defaults to empty.
 	 * @return {object} The action object.
 	 */
 	Actions.forEach = function(iterable, bind, body) {
@@ -125,7 +128,7 @@ load.provide("dusk.script.Actions", (function() {
 	};
 	
 	/** Simply calls "addActions" with it's body.
-	 * @param {array=[]} thenClause An array of actions to do.
+	 * @param {array=} thenClause An array of actions to do, defaults to empty.
 	 * @return {object} The action object.
 	 */
 	Actions.actions = function(body) {
@@ -150,4 +153,4 @@ load.provide("dusk.script.Actions", (function() {
 	};
 	
 	return Actions;
-})());
+});

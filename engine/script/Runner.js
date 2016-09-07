@@ -2,7 +2,14 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.script.Runner", (function() {
+/** The script module allows you to create `scripts` of actions.
+ *
+ * @namespace
+ * @name dusk.script
+ * @memberof dusk
+ */
+
+load.provide("dusk.script.Runner", function() {
 	var dusk = load.require("dusk");
 	var utils = load.require("dusk.utils");
 	
@@ -31,130 +38,137 @@ load.provide("dusk.script.Runner", (function() {
 	 * optional second is a function that will be called when the actions are exhausted. If this function returns true
 	 * then the actions will be repeated.
 	 * 
-	 * @param {array<object|function(*):*>} script The script to run.
 	 * @since 0.0.21-alpha
+	 * @memberof dusk.script
 	 */
-	var Runner = function(script) {
-		this._script = script;
-	};
-	
-	/** Starts the script.
-	 * @param {*} init The initial value.
-	 * @return {Promise(*)} A promise that resolves to the final value of the script.
-	 */
-	Runner.prototype.start = function(init) {
-		return new Promise((function(fulfill, reject) {
-			var currentAction = _scriptToLL(this._script)[0];
-			
-			var addActions = function(actions, loopif) {
-				if(!actions.length) {
-					actions = [Runner.action("nop", function(x) {return x})];
-				}else if(loopif) {
-					actions.push(Runner.action("nop", function(x) {return x}));
-				}
+	class Runner {
+		/** Creates a new script runner
+		 * 
+		 * @param {array<object|function(*):*>} script The script to run.
+		 * @since 0.0.21-alpha
+		 */
+		constructor(script) {
+			this._script = script;
+		};
+		
+		/** Starts the script.
+		 * @param {*} init The initial value.
+		 * @return {Promise(*)} A promise that resolves to the final value of the script.
+		 */
+		start(init) {
+			return new Promise((function(fulfill, reject) {
+				var currentAction = _scriptToLL(this._script)[0];
 				
-				var all = _scriptToLL(actions);
-				
-				all[1].next = currentAction.next;
-				if(currentAction.next) currentAction.next.prev = all[1];
-				
-				all[0].prev = currentAction;
-				currentAction.next = all[0];
-				
-				// Looping
-				if(loopif) {
-					all[1].loopCond = loopif;
-					all[1].loopBack = all[0];
-				}
-			}
-			
-			var next = function(value) {
-				if(Runner.log) {
-					if("name" in currentAction.action && currentAction.action.name) {
-						console.log("%cRunning action "+currentAction.action.name+" with %o", "color:#999999", value);
-					}else{
-						console.log("%cRunning unnamed action with %o", "color:#999999", value);
+				var addActions = function(actions, loopif) {
+					if(!actions.length) {
+						actions = [Runner.action("nop", function(x) {return x})];
+					}else if(loopif) {
+						actions.push(Runner.action("nop", function(x) {return x}));
+					}
+					
+					var all = _scriptToLL(actions);
+					
+					all[1].next = currentAction.next;
+					if(currentAction.next) currentAction.next.prev = all[1];
+					
+					all[0].prev = currentAction;
+					currentAction.next = all[0];
+					
+					// Looping
+					if(loopif) {
+						all[1].loopCond = loopif;
+						all[1].loopBack = all[0];
 					}
 				}
 				
-				var ret = undefined;
-				
-				if(typeof currentAction.action == "function") {
-					ret = currentAction.action(value, addActions);
-				}else{
-					ret = currentAction.action.forward(value, addActions);
-				}
-				
-				if(!(ret instanceof Promise)) ret = Promise.resolve(ret);
-				
-				ret.then(function(x) {
-					currentAction.output = utils.copy(x);
-					var hold = currentAction;
-					
-					if(currentAction.loopCond && currentAction.loopCond(x)) {
-						currentAction = currentAction.loopBack;
-						currentAction.forcedInput = true; // Have it read the input specified here
-						currentAction.forceInputValue = x;
-						next(x);
-					}else{
-						currentAction = currentAction.next;
-						if(currentAction) {
-							currentAction.prev.next = currentAction.prev.originalNext;
-							currentAction.prev = hold;
-							currentAction.forcedInput = false; // Have it read the output from the previous action
-							next(x);
+				var next = function(value) {
+					if(Runner.log) {
+						if("name" in currentAction.action && currentAction.action.name) {
+							console.log("%cRunning action "+currentAction.action.name+" with %o", "color:#999999", value);
 						}else{
-							fulfill(x);
+							console.log("%cRunning unnamed action with %o", "color:#999999", value);
 						}
 					}
-				}, prev);
-			}
-			
-			var prev = function(error) {
-				if(!(error instanceof Runner.Cancel)) {
-					reject(error);
-					return;
-				}
-				
-				// Go back one
-				currentAction = currentAction.prev;
-				if(!currentAction) {
-					reject(error);
-					return;
-				}
-				currentAction.next = currentAction.originalNext;
-				
-				if(Runner.log) {
-					if("name" in currentAction.action && currentAction.action.name) {
-						console.log("%cRunning inverse action "+currentAction.action.name+"", "color:#999999");
+					
+					var ret = undefined;
+					
+					if(typeof currentAction.action == "function") {
+						ret = currentAction.action(value, addActions);
 					}else{
-						console.log("%cRunning unnamed inverse action", "color:#999999");
-					}
-				}
-				
-				var ret = undefined;
-				if(typeof currentAction.action == "function" || !("inverse" in currentAction.action)) {
-					ret = Promise.reject(new Runner.Cancel());
-				}else{
-					ret = currentAction.action.inverse(utils.copy(currentAction.output));
-				}
-				
-				if(!(ret instanceof Promise)) ret = Promise.resolve(ret);
-				
-				ret.then(function(x) {
-					var input;
-					if(currentAction.forcedInput) {
-						input = currentAction.forceInputValue;
-					}else{
-						input = currentAction.prev ? currentAction.prev.output : init;
+						ret = currentAction.action.forward(value, addActions);
 					}
 					
-					next(utils.copy(input));
-				}, prev);
-			}
-			
-			next(init);
-		}).bind(this));
+					if(!(ret instanceof Promise)) ret = Promise.resolve(ret);
+					
+					ret.then(function(x) {
+						currentAction.output = utils.copy(x);
+						var hold = currentAction;
+						
+						if(currentAction.loopCond && currentAction.loopCond(x)) {
+							currentAction = currentAction.loopBack;
+							currentAction.forcedInput = true; // Have it read the input specified here
+							currentAction.forceInputValue = x;
+							next(x);
+						}else{
+							currentAction = currentAction.next;
+							if(currentAction) {
+								currentAction.prev.next = currentAction.prev.originalNext;
+								currentAction.prev = hold;
+								currentAction.forcedInput = false; // Have it read the output from the previous action
+								next(x);
+							}else{
+								fulfill(x);
+							}
+						}
+					}, prev);
+				}
+				
+				var prev = function(error) {
+					if(!(error instanceof Runner.Cancel)) {
+						reject(error);
+						return;
+					}
+					
+					// Go back one
+					currentAction = currentAction.prev;
+					if(!currentAction) {
+						reject(error);
+						return;
+					}
+					currentAction.next = currentAction.originalNext;
+					
+					if(Runner.log) {
+						if("name" in currentAction.action && currentAction.action.name) {
+							console.log("%cRunning inverse action "+currentAction.action.name+"", "color:#999999");
+						}else{
+							console.log("%cRunning unnamed inverse action", "color:#999999");
+						}
+					}
+					
+					var ret = undefined;
+					if(typeof currentAction.action == "function" || !("inverse" in currentAction.action)) {
+						ret = Promise.reject(new Runner.Cancel());
+					}else{
+						ret = currentAction.action.inverse(utils.copy(currentAction.output));
+					}
+					
+					if(!(ret instanceof Promise)) ret = Promise.resolve(ret);
+					
+					ret.then(function(x) {
+						var input;
+						if(currentAction.forcedInput) {
+							input = currentAction.forceInputValue;
+						}else{
+							input = currentAction.prev ? currentAction.prev.output : init;
+						}
+						
+						next(utils.copy(input));
+					}, prev);
+				}
+				
+				next(init);
+			}).bind(this));
+		}
 	}
 	
 	/** Converts an array of actions to a linked list.
@@ -178,7 +192,7 @@ load.provide("dusk.script.Runner", (function() {
 		}
 		
 		return [head, now];
-	}
+	};
 	
 	/** Whether script runners should describe each action they perfrom.
 	 * @type boolean
@@ -189,22 +203,30 @@ load.provide("dusk.script.Runner", (function() {
 	/** Forward functions should reject with this error to indicate that the script should go back one action.
 	 * @param {string} msg A message explaining why.
 	 * @extends Error
+	 * @memberof dusk.script.Runner
 	 */
-	Runner.Cancel = function(msg) {
-		this.name = "Cancelled Action";
-		this.msg = msg ? msg : "No reason given";
-	};
-	Runner.Cancel.prototype = Object.create(Error.prototype);
+	class Cancel extends Error {
+ 		constructor(msg) {
+ 			super();
+			this.name = "Cancelled Action";
+			this.msg = msg ? msg : "No reason given";
+		}
+	}
+	Runner.Cancel = Cancel;
 	
 	/** Actions should throw this when they are reversed, but the action cannot be inversed.
 	 * @param {string} msg A message explaining why.
 	 * @extends Error
+	 * @memberof dusk.script.Runner
 	 */
-	Runner.CannotInverseError = function(msg) {
-		this.name = "Cancelled Action";
-		this.msg = msg ? msg : "No reason given";
-	};
-	Runner.CannotInverseError.prototype = Object.create(Error.prototype);
+	class CannotInverseError extends Error {
+ 		constructor() {
+ 			super();
+			this.name = "Cancelled Action";
+			this.msg = msg ? msg : "No reason given";
+		}
+	}
+	Runner.CannotInverseError = CannotInverseError;
 	
 	/** Returns an action object.
 	 * @param {string} name The name of the action, for debugging.
@@ -221,4 +243,4 @@ load.provide("dusk.script.Runner", (function() {
 	};
 	
 	return Runner;
-})());
+});

@@ -2,21 +2,41 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.script.actors.menu", (function() {
+/** Basic actors
+ *
+ * @namespace actors
+ * @memberof dusk.script
+ */
+
+load.provide("dusk.script.actors.menu", function() {
 	var Runner = load.require("dusk.script.Runner");
 	var utils = load.require("dusk.utils");
 	
-	/** A selection of helpfull actions for scripts.
-	 * 
-	 * These are designed to be used as actions in `dusk.script.Runner`.
+	/** Creating and using a sgui menu to make choices
 	 * 
 	 * @see dusk.script.Runner
 	 * @since 0.0.21-alpha
+	 * @memberof dusk.script.actors
+	 * @namespace
 	 */
 	var menu = {};
 	
-	/** Simply calls "addActions" with it's body.
-	 * @param {array=[]} thenClause An array of actions to do.
+	/** Given an array of choices, it creates a vertical menu allowing the user to choose them.
+	 *
+	 * The choices are specified as `[display, result]`, with the first element being displayed to the user, and the
+	 *  second argument either being the script to run, or a value to pass through.
+	 *
+	 * If the second argument is falsey, then the menu cancels.
+	 *
+	 * The options param can have the following properties:
+	 * - `copyChoices`: If defined, choices from the passed arg's `menuChoices` properties will be joined with the
+	 *  provided choices.
+	 * - `noAdd`: If true, the result of the menu option will not be appended to the script, and instead be written to
+	 *  the `menuChoice` property of the passed arg.
+	 *
+	 * @param {array<string, *>} choices The choices for the user to pick from.
+	 * @param {dusk.sgui.DynamicGrid} com The component to use for the menu.
+	 * @param {object} options An options object as described above.
 	 * @return {object} The action object.
 	 */
 	menu.gridMenu = function(choices, com, options) {
@@ -39,8 +59,6 @@ load.provide("dusk.script.actors.menu", (function() {
 					var s = com.getFocusedChild();
 					var choice = nowChoices[s.name.split(",")[1]];
 					
-					x.menuChoice = choice[1];
-					
 					com.visible = false;
 					com.action.unlisten(l);
 					com.cancel.unlisten(can);
@@ -51,6 +69,8 @@ load.provide("dusk.script.actors.menu", (function() {
 					}else{
 						if(!options.noAdd) {
 							add(choice[1]);
+						}else{
+							x.menuChoice = choice[1];
 						}
 					}
 					
@@ -73,4 +93,4 @@ load.provide("dusk.script.actors.menu", (function() {
 	};
 	
 	return menu;
-})());
+});

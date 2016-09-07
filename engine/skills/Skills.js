@@ -2,16 +2,15 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.skills", (function() {
-	/** @namespace dusk.skills
-	 * @name dusk.skills
-	 * 
-	 * @description The skills namespace manages skills that the player has.
+load.provide("dusk.skills", function() {
+	/** The skills namespace manages skills that the player has.
 	 * 
 	 * At the moment, this is just adding and setting values to an array, but in future it will be much better,
 	 *  probably.
+	 * @namespace
+	 * @memberof dusk
 	 */
-	var skills = [];
+	var skills = {};
 	
 	/** All the current skills that the player has.
 	 * 
@@ -53,4 +52,4 @@ load.provide("dusk.skills", (function() {
 	};
 	
 	return skills;
-})());
+});

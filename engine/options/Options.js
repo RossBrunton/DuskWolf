@@ -2,52 +2,58 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.options.OptionType", (function() {
+load.provide("dusk.options.OptionType", function() {
 	/** An OptionType is a handler for an option key which handles validation and casting
 	 * 
 	 * It has two main methods, `validate` which returns whether the value is valid or not, and `cast` which converts
 	 *  an arbitary valid value to the appropriate type to be stored in the option.
 	 * 
-	 * @param {string} name The name of the type, as displayed to the user if needed.
-	 * @param {function(*, *):boolean} validate The validation function, takes a potential new option value and an
-	 *  argument set at register, and should return true iff it is a valid value for this option.
-	 * @param {function(*, *):*} cast The casting function, takes the same arguments as `validate` and should return a 
-	 *  value cast to the appropriate type for the option.
-	 * @constructor
 	 * @since 0.0.21-alpha
+	 * @memberof dusk.options
 	 */
-	var OptionType = function(name, validate, cast) {
-		this._validator = validate;
-		this.name = name;
-		this._cast = cast;
-	};
-	
-	/** Returns true iff the given value is a valid value.
-	 * @param {*} value The value to check.
-	 * @param {*} arg A value stored when the option is registered.
-	 * @return {boolean} Whether this value is valid.
-	 */
-	OptionType.prototype.validate = function(value, arg) {
-		return this._validator(value, arg);
-	};
-	
-	/** Converts the value to the correct type for this option.
-	 * @param {*} value The value to convert.
-	 * @param {*} arg A value stored when the option is registered.
-	 * @return {*} The appropriate value in its correct type.
-	 */
-	OptionType.prototype.cast = function(value, arg) {
-		return this._cast(value, arg);
-	};
-	
-	OptionType.prototype.toString = function() {
-		return "[OptionType "+this.name+"]";
-	};
+	class OptionType {
+		/** Makes a new option type
+		 * 
+		 * @param {string} name The name of the type, as displayed to the user if needed.
+		 * @param {function(*, *):boolean} validate The validation function, takes a potential new option value and an
+		 *  argument set at register, and should return true iff it is a valid value for this option.
+		 * @param {function(*, *):*} cast The casting function, takes the same arguments as `validate` and should return
+		 *  a value cast to the appropriate type for the option.
+		 * @since 0.0.21-alpha
+		 */
+		constructor(name, validate, cast) {
+			this._validator = validate;
+			this.name = name;
+			this._cast = cast;
+		}
+		
+		/** Returns true iff the given value is a valid value.
+		 * @param {*} value The value to check.
+		 * @param {*} arg A value stored when the option is registered.
+		 * @return {boolean} Whether this value is valid.
+		 */
+		validate(value, arg) {
+			return this._validator(value, arg);
+		}
+		
+		/** Converts the value to the correct type for this option.
+		 * @param {*} value The value to convert.
+		 * @param {*} arg A value stored when the option is registered.
+		 * @return {*} The appropriate value in its correct type.
+		 */
+		cast(value, arg) {
+			return this._cast(value, arg);
+		}
+		
+		toString() {
+			return "[OptionType "+this.name+"]";
+		}
+	}
 	
 	return OptionType;
-})());
+});
 
-load.provide("dusk.options", (function() {
+load.provide("dusk.options", function() {
 	var OptionType = load.require("dusk.options.OptionType");
 	
 	/** Options provide a simple way to allow user or per-game configurable settings on how DuskWolf runs
@@ -80,8 +86,10 @@ load.provide("dusk.options", (function() {
 	 * 
 	 * It also creates a function called "optionClear" on window if it doesn't exist. This is given an option name and
 	 *  resets it to default.
+	 *
+	 * @namespace
+	 * @memberof dusk
 	 */
-	
 	var options = {};
 	
 	/** Storage for the actual option data
@@ -181,9 +189,9 @@ load.provide("dusk.options", (function() {
 	 * 
 	 * If the option does not exist or the value is invalid this logs an error to the console.
 	 * 
-	 * @param {string} The option to set.
-	 * @param {*} The value to set the option.
-	 * @param {integer=1} The priority on which to set the option.
+	 * @param {string} name The option to set.
+	 * @param {*} value The value to set the option.
+	 * @param {integer=} priority The priority on which to set the option, default is 1.
 	 */
 	options.set = function(name, value, priority) {
 		if(priority === undefined) priority = 1;
@@ -301,4 +309,4 @@ load.provide("dusk.options", (function() {
 		new OptionType("select", function(x, a) {return a.includes(x)}, function(x, a) {return x});
 	
 	return options;
-})());
+});

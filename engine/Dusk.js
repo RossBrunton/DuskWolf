@@ -2,14 +2,14 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk", (function() {
+load.provide("dusk", function() {
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var utils = load.require("dusk.utils");
 	var polyfills = load.require("dusk.utils.polyfills");
 	
-	/** @namespace dusk
-	 * 
-	 * @description This is the "root" package for DuskWolf, and provides a few functions and configuration thingies.
+	/** This is the "root" namespace for DuskWolf, and provides a few functions and configuration thingies.
+	 * @namespace
+	 * @alias dusk
 	 */
 	var dusk = {};
 	
@@ -83,10 +83,8 @@ load.provide("dusk", (function() {
 			console.log("Using alternate package "+pack);
 		}
 		
-		load.importList(_elem.getAttribute("data-deps")).then(function() {
-			load.import(pack);
-		});
+		load.lie(_elem.getAttribute("data-deps"), pack);
 	}
 	
 	return dusk;
-})());
+});
