@@ -1,0 +1,11 @@
+{
+	"plugins":["plugins/markdown"],
+	"source":{
+		"include":["engine", "README.md"],
+		"exclude":["engine/lib"]
+	},
+	"opts":{
+		"destination":"doc",
+		"recurse":true
+	}
+}
