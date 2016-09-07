@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.utils.frameTicker", (function() {
+load.provide("dusk.utils.frameTicker", function() {
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var options = load.require("dusk.options");
 	
@@ -12,6 +12,8 @@ load.provide("dusk.utils.frameTicker", (function() {
 	 * by default this is autodetected.
 	 * 
 	 * @since 0.0.14-alpha
+	 * @namespace
+	 * @memberof dusk.utils
 	 */
 	var frameTicker = {};
 	
@@ -87,4 +89,4 @@ load.provide("dusk.utils.frameTicker", (function() {
 	);
 	
 	return frameTicker;
-})());
+});

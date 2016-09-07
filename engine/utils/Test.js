@@ -2,9 +2,11 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("test", (function() {
+load.provide("test", function() {
 	/** This is a namespace that allows tests to be ran.
 	 * @since 0.0.20-alpha
+	 * @namespace
+	 * @alias test
 	 */
 	var test = {};
 	
@@ -21,7 +23,6 @@ load.provide("test", (function() {
 	
 	/** Whether to invoke the debugger if a test fails.
 	 * @type boolean
-	 * @default false
 	 */
 	test.debug = false;
 	
@@ -103,115 +104,133 @@ load.provide("test", (function() {
 		test.loadTests(url).then(test.testAll);
 	}
 	
-	test.Tester = function(pack) {
-		this.package = pack;
-		this.failed = false;
-	}
-	
-	/** Starts running a test, it is assumed it passes unless it explictly fails.
-	 * @param {string} name The name of the test.
+	/** A test runner
+	 * @memberof test
 	 */
-	test.Tester.prototype.start = function(name) {
-		if(!(this.package in test.results)) test.results[this.package] = {};
+	class Tester {
+		/** Creates a new test runner
+		 *
+		 * @param {string} pack The package name to test
+		 */
+		constructor(pack) {
+			/** The package name
+			 * @type string
+			 * @memberof! test.Tester#
+			 */
+			this.package = pack;
+			/** Whether the test has failed or not
+			 * @type boolean
+			 * @memberof! test.Tester#
+			 */
+			this.failed = false;
+		}
 		
-		console.log("%c"+this.package, "color:#999999", name);
-		test.results[this.package][name] = true;
-		this._current = name;
-	};
-	
-	/** Fails a test, with the given reason.
-	 * @param {string} reason The reason for failure.
-	 * @param {function()} reject If it fails, this function will be called with the reason.
-	 */
-	test.Tester.prototype.fail = function(reason, reject) {
-		if(this._current) {
-			test.results[this.package][this._current] = false;
+		/** Starts running a test, it is assumed it passes unless it explictly fails.
+		 * @param {string} name The name of the test.
+		 */
+		start(name) {
+			if(!(this.package in test.results)) test.results[this.package] = {};
 			
-			console.error("***** Test '"+this._current+"' of "+this.package+" failed!");
-			console.error(reason);
-		}else {
-			console.error("***** Package "+this.package+" failed before reaching a package!");
-			console.error(reason);
+			console.log("%c"+this.package, "color:#999999", name);
+			test.results[this.package][name] = true;
+			this._current = name;
 		}
 		
-		this.failed = true;
-		if(test.debug) debugger;
-		if(reject) reject(reason);
-	};
-	
-	/** If an exception happens somewhere (from whatever is running the tests), feed it to this.
-	 * @param {Error} e The exception.
-	 */
-	test.Tester.prototype.except = function(e) {
-		console.error("***** Package "+this.package+" threw a "+e.name+"!");
-		console.error(e);
+		/** Fails a test, with the given reason.
+		 * @param {string} reason The reason for failure.
+		 * @param {function()} reject If it fails, this function will be called with the reason.
+		 */
+		fail(reason, reject) {
+			if(this._current) {
+				test.results[this.package][this._current] = false;
+				
+				console.error("***** Test '"+this._current+"' of "+this.package+" failed!");
+				console.error(reason);
+			}else {
+				console.error("***** Package "+this.package+" failed before reaching a package!");
+				console.error(reason);
+			}
+			
+			this.failed = true;
+			if(test.debug) debugger;
+			if(reject) reject(reason);
+		}
 		
-		this.failed = true;
-		if(test.debug) debugger;
-	};
-	
-	/** Fails the test if the assertion that the arguments are equal fails.
-	 * @param {*} a The first object.
-	 * @param {*} b The second object.
-	 * @param {function()} reject If it fails, this function will be called with the reason.
-	 */
-	test.Tester.prototype.assertEqual = function(a, b, reject) {
-		if(!_equals(a, b)) {
-			this.fail("Assertion "+a+" = "+b+" failed.", reject);
+		/** If an exception happens somewhere (from whatever is running the tests), feed it to this.
+		 * @param {Error} e The exception.
+		 */
+		except(e) {
+			console.error("***** Package "+this.package+" threw a "+e.name+"!");
+			console.error(e);
+			
+			this.failed = true;
+			if(test.debug) debugger;
 		}
-	};
-	
-	/** Fails the test if the assertion that the arguments are not equal fails.
-	 * @param {*} a The first object.
-	 * @param {*} b The second object.
-	 * @param {function()} reject If it fails, this function will be called with the reason.
-	 */
-	test.Tester.prototype.assertNotEqual = function(a, b, reject) {
-		if(_equals(a, b)) {
-			this.fail("Assertion "+a+" != "+b+" failed.", reject);
+		
+		/** Fails the test if the assertion that the arguments are equal fails.
+		 * @param {*} a The first object.
+		 * @param {*} b The second object.
+		 * @param {function()} reject If it fails, this function will be called with the reason.
+		 */
+		assertEqual(a, b, reject) {
+			if(!_equals(a, b)) {
+				this.fail("Assertion "+a+" = "+b+" failed.", reject);
+			}
 		}
-	};
-	
-	/** Fails the test if the assertion that the argument is not null or undefined fails.
-	 * @param {*} a The object to check.
-	 * @param {function()} reject If it fails, this function will be called with the reason.
-	 */
-	test.Tester.prototype.assertExists = function(a, reject) {
-		if(a === undefined || a === null) {
-			this.fail("Assertion "+a+" exists failed.", reject);
+		
+		/** Fails the test if the assertion that the arguments are not equal fails.
+		 * @param {*} a The first object.
+		 * @param {*} b The second object.
+		 * @param {function()} reject If it fails, this function will be called with the reason.
+		 */
+		assertNotEqual(a, b, reject) {
+			if(_equals(a, b)) {
+				this.fail("Assertion "+a+" != "+b+" failed.", reject);
+			}
 		}
-	};
-	
-	/** Fails the test if the assertion that the argument is not null or undefined fails.
-	 * @param {*} a The object to check.
-	 * @param {function()} reject If it fails, this function will be called with the reason.
-	 * @since 0.0.21-alpha
-	 */
-	test.Tester.prototype.assertNotExists = function(a, reject) {
-		if(!(a === undefined || a === null)) {
-			this.fail("Assertion "+a+" does not exist failed.", reject);
+		
+		/** Fails the test if the assertion that the argument is not null or undefined fails.
+		 * @param {*} a The object to check.
+		 * @param {function()} reject If it fails, this function will be called with the reason.
+		 */
+		assertExists(a, reject) {
+			if(a === undefined || a === null) {
+				this.fail("Assertion "+a+" exists failed.", reject);
+			}
 		}
-	};
-	
-	/** Fails the test if the assertion that the argument is true fails.
-	 * @param {*} a The object to check.
-	 * @param {function()} reject If it fails, this function will be called with the reason.
-	 */
-	test.Tester.prototype.assertTrue = function(a, reject) {
-		if(!a) {
-			this.fail("Assertion "+a+" is true failed.", reject);
+		
+		/** Fails the test if the assertion that the argument is not null or undefined fails.
+		 * @param {*} a The object to check.
+		 * @param {function()} reject If it fails, this function will be called with the reason.
+		 * @since 0.0.21-alpha
+		 */
+		assertNotExists(a, reject) {
+			if(!(a === undefined || a === null)) {
+				this.fail("Assertion "+a+" does not exist failed.", reject);
+			}
 		}
-	};
-	
-	/** Fails the test if the assertion that the argument is false fails.
-	 * @param {*} a The object to check.
-	 * @param {function()} reject If it fails, this function will be called with the reason.
-	 */
-	test.Tester.prototype.assertFalse = function(a, reject) {
-		if(a) {
-			this.fail("Assertion "+a+" is false failed.", reject);
+		
+		/** Fails the test if the assertion that the argument is true fails.
+		 * @param {*} a The object to check.
+		 * @param {function()} reject If it fails, this function will be called with the reason.
+		 */
+		assertTrue(a, reject) {
+			if(!a) {
+				this.fail("Assertion "+a+" is true failed.", reject);
+			}
 		}
-	};
+		
+		/** Fails the test if the assertion that the argument is false fails.
+		 * @param {*} a The object to check.
+		 * @param {function()} reject If it fails, this function will be called with the reason.
+		 */
+		assertFalse(a, reject) {
+			if(a) {
+				this.fail("Assertion "+a+" is false failed.", reject);
+			}
+		}
+	}
+	test.Tester = Tester;
 	
 	/** Returns true if the two arguments are equal, this works intuitivley, and compares the elements
 	 *  for objects and arrays.
@@ -248,4 +267,4 @@ load.provide("test", (function() {
 	};
 	
 	return test;
-})(), {"alsoSeal":["Tester"]});
+}, {"alsoSeal":["Tester"]});

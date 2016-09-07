@@ -2,8 +2,11 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.utils", (function() {
+load.provide("dusk.utils", function() {
 	/** This namespace contains general functions for manipulating data, nothing specific to any other namespace.
+	 *
+	 * @namespace
+	 * @memberof dusk
 	 */
 	var utils = {};
 	
@@ -11,8 +14,8 @@ load.provide("dusk.utils", (function() {
 	 *  anything with prototypes and such like. Anything which isn't a basic object will have its reference copied,
 	 *  rather than its value.
 	 * @param {*} o The source object to copy.
-	 * @param {boolean=false} deep If true, then this function will be called on all the values in arrays or objects, instead
-	 *  of copying them by reference.
+	 * @param {boolean=} deep If true, then this function will be called on all the values in arrays or objects,
+	 *  instead of copying them by reference. Default is false.
 	 * @return {object} A copy of the source object.
 	 */
 	utils.copy = function(o, deep) {
@@ -76,7 +79,7 @@ load.provide("dusk.utils", (function() {
 	 * The object wishing to implement this interface must have all the specified property names be functions.
 	 * 
 	 * @param {object} obj The object you wish to check.
-	 * @param {object|function()|array} inter The interface that you want to check the object by.
+	 * @param {(object|function()|array)} inter The interface that you want to check the object by.
 	 * @return {boolean} Whether the object implements the interface or not.
 	 * @since 0.0.18-alpha
 	 */
@@ -345,7 +348,7 @@ load.provide("dusk.utils", (function() {
 	 * What this string looks like depends on the compression function.
 	 * 
 	 * @param {ArrayBuffer} arr The array buffer to stringify.
-	 * @param {string=dusk.utils.SD_HEX} type The method to stringify.
+	 * @param {string=} type The method to stringify, default is SD_HEX.
 	 * @return {string} A string representing the data.
 	 */
 	utils.dataToString = function(arr, type) {
@@ -523,4 +526,4 @@ load.provide("dusk.utils", (function() {
 	};
 	
 	return utils;
-})());
+});

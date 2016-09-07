@@ -2,13 +2,15 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.utils.dirs", (function() {
+load.provide("dusk.utils.dirs", function() {
 	/** This namespace contains constants and functions representing and manipulating directions.
 	 * 
 	 * This contains the constants `N`, `S`, `E`, `W`, `U`, `D` and `NONE`. Representing north, south, east, west, up,
 	 * down and "no direction". These constants are integers and capable of being used in a bitmask.
 	 * 
 	 * @since 0.0.21-alpha
+	 * @namespace
+	 * @memberof dusk.utils
 	 */
 	var dirs = {
 		"NONE":0x1,
@@ -46,7 +48,7 @@ load.provide("dusk.utils.dirs", (function() {
 	 * @param {integer} y The y coordinate.
 	 * @param {integer} z The z coordinate.
 	 * @param {integer} dir The direction to travel.
-	 * @param {integer=1} n The number of units to travel.
+	 * @param {integer=} n The number of units to travel, default 1.
 	 * @return {array<integer>} An `[x, y, z]` triplet representing the destination.
 	 */
 	dirs.translateDir = function(x, y, z, dir, n) {
@@ -69,7 +71,7 @@ load.provide("dusk.utils.dirs", (function() {
 	 * @param {integer} dx The destination x coordinate.
 	 * @param {integer} dy The destination y coordinate.
 	 * @param {integer} dz The destination z coordinate.
-	 * @param {integer=1} n The number of units to travel.
+	 * @param {integer=} n The number of units to travel, default 1
 	 * @return {integer} The direction taken, or `NONE` if it couldn't be found.
 	 */
 	dirs.findDir = function(ox, oy, oz, dx, dy, dz, n) {
@@ -103,4 +105,4 @@ load.provide("dusk.utils.dirs", (function() {
 	};
 	
 	return dirs;
-})());
+});

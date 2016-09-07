@@ -2,8 +2,11 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.utils.polyfills", (function() {
+load.provide("dusk.utils.polyfills", function() {
 	/** This namespace includes general functions for manipulating data, nothing specific to any other namespace.
+	 *
+	 * @namespace
+	 * @memberof dusk.utils
 	 */
 	var polyfills = {};
 	
@@ -301,4 +304,4 @@ load.provide("dusk.utils.polyfills", (function() {
 	}
 	
 	return polyfills;
-})());
+});

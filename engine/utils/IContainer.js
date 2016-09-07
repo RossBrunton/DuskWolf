@@ -2,14 +2,15 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.utils.IContainer", (function() {
+load.provide("dusk.utils.IContainer", function() {
 	/** The IContainer interface is an interface for objects that contain other objects. It provides a standard set of
 	 *  functions that they should implement.
 	 * 
 	 * In addition, containers must have the property `implementsIContainer` set to true, to allow quickly checking if
 	 *  something implements this interface or not.
 	 * 
-	 * @interface
+	 * @interface IContainer
+	 * @memberof dusk.utils
 	 * @since 0.0.21-alpha
 	 */
 	var IContainer = {};
@@ -18,6 +19,7 @@ load.provide("dusk.utils.IContainer", (function() {
 	 *  `undefined`.
 	 * @param {*} key The key to look up, can be any type.
 	 * @return {?*} The value of that key.
+	 * @memberof dusk.utils.IContainer
 	 */
 	IContainer.get = function(key) {};
 	
@@ -25,6 +27,7 @@ load.provide("dusk.utils.IContainer", (function() {
 	 * @param {*} key The key to set, can be any type.
 	 * @param {*} value The value to set.
 	 * @return {boolean} Whether setting was successfull.
+	 * @memberof dusk.utils.IContainer
 	 */
 	IContainer.set = function(key, value) {};
 	
@@ -32,11 +35,13 @@ load.provide("dusk.utils.IContainer", (function() {
 	 *  `false` if the object is not in this container.
 	 * @param {*} key The key to remove, can be any type.
 	 * @return {boolean} Whether removing was successfull.
+	 * @memberof dusk.utils.IContainer
 	 */
 	IContainer.remove = function(key) {};
 	
 	/** Should return the number of elements in this container.
 	 * @return {int} The number of elements in this container.
+	 * @memberof dusk.utils.IContainer
 	 */
 	IContainer.length = function() {};
 	
@@ -47,30 +52,34 @@ load.provide("dusk.utils.IContainer", (function() {
 	 * 
 	 * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/The_Iterator_protocol
 	 * @return {object} The iterator.
+	 * @memberof dusk.utils.IContainer
 	 */
 	IContainer.iterate = function() {};
 	
 	/** Return true if the provided object can be stored in this container.
 	 * @param {*} element The object to test validity.
 	 * @return {*} Whether the object can be stored in this container.
+	 * @memberof dusk.utils.IContainer
 	 */
 	IContainer.valid = function(element) {};
 	
 	/** Return true if the provided object is in this container.
 	 * @param {*} element The object to test if it is in this container.
 	 * @return {boolean} Whether the specified object is in this container.
+	 * @memberof dusk.utils.IContainer
 	 */
 	IContainer.contains = function(element) {};
 	
 	return Object.keys(IContainer);
-})());
+});
 
 
-load.provide("dusk.utils.containerUtils", (function() {
+load.provide("dusk.utils.containerUtils", function() {
 	/** This namespace provides a number of methods that operate on objects implementing IContainer, objects themselves
 	 *  and arrays.
 	 * 
 	 * @namespace
+	 * @memberof dusk.utils
 	 * @since 0.0.21-alpha
 	 */
 	var containerUtils = {};
@@ -78,7 +87,7 @@ load.provide("dusk.utils.containerUtils", (function() {
 	/** Takes an element that is either an IContainer, object or array, and returns a "wrapper" around it making it
 	 *  implement IContainer. IContainer instances are just passed straight through, but arrays and objects are 
 	 *  given "wrappers".
-	 * @param {object|array|IContainer} container The object to wrap.
+	 * @param {(object|array|IContainer)} container The object to wrap.
 	 * @return {IContainer} The wrapped container.
 	 */
 	containerUtils.wrap = function(container) {
@@ -161,7 +170,7 @@ load.provide("dusk.utils.containerUtils", (function() {
 	/** For each element in the container, it calls the callback once. The function will be provided with three
 	 *  arguments. The first is the value of the element, the second is the key of the element (if available), and the
 	 *  third is the container being used. The third element may be either an IContainer, an object or an array.
-	 * @param {object|array|IContainer} container The object to iterate.
+	 * @param {(object|array|IContainer)} container The object to iterate.
 	 * @param {function(*, ?*, array|object|IContainer)} callback The function to call for each element.
 	 * @param {*} thisArg Will be the "this" value of the function called.
 	 */
@@ -215,7 +224,7 @@ load.provide("dusk.utils.containerUtils", (function() {
 	/** Takes an IContainer, object or array and returns an array containing the properties of the container.
 	 * 
 	 * Arrays are returned exactly.
-	 * @param {object|array|IContainer} container The container to create an object from.
+	 * @param {(object|array|IContainer)} container The container to create an object from.
 	 * @return {object} An object with all the objects being those in the container.
 	 */
 	containerUtils.toArray = function(container) {
@@ -247,7 +256,7 @@ load.provide("dusk.utils.containerUtils", (function() {
 	 *  `get("key")` on the package would get the key on the object.
 	 * 
 	 * @param {object} pack The package to implement.
-	 * @param {object|string} object The object to forward the methods to. If it is a string, then `this[object]` will
+	 * @param {(object|string)} object The object to forward the methods to. If it is a string, then `this[object]` will
 	 *  be set rather than `object`.
 	 * @param {?function(*):boolean} validate The (optional) value to set as the `valid` function.
 	 * @param {?function(string, *):boolean} onSet A function called just before the value is set. If this returns
@@ -339,4 +348,4 @@ load.provide("dusk.utils.containerUtils", (function() {
 	};
 	
 	return containerUtils;
-})());
+});
