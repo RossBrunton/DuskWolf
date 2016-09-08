@@ -4,6 +4,8 @@ load.provide("quest.entities", function() {
 	var entities = load.require("dusk.entities");
 	load.require("dusk.entities.behave.BackForth");
 	load.require("dusk.entities.behave.GridWalker");
+	load.require("dusk.entities.behave.PlayerGridWalker");
+	load.require("dusk.entities.behave.GridMouse");
 	load.require("dusk.entities.behave.Persist");
 	load.require("dusk.entities.behave.MarkTrigger");
 	load.require("dusk.stats.behave.StatLoader");

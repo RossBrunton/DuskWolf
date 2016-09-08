@@ -16,46 +16,47 @@ load.provide("dusk.stats.behave.StatLoader", function() {
 	 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
 	 * @constructor
 	 */
-	var StatLoader = function(entity) {
-		Behave.call(this, entity);
-		
-		this._data("statsName", "", true);
-		this._data("statsPutBack", false, true);
-		this._data("statsLoadImage", false, true);
-		
-		this.entityEvent.listen(this._slLoad.bind(this), "typeChange");
-		this.entityEvent.listen(this._slSaveBM.bind(this), "saveBM");
-	};
-	StatLoader.prototype = Object.create(Behave.prototype);
-	
-	StatLoader.prototype._slLoad = function(e) {
-		if(this._data("statsName")) {
-			var room = "*";
-			if(this._entity.path("..")) room = this._entity.path("../..").roomName;
+	class StatLoader extends Behave {
+		constructor(entity) {
+			super(entity);
 			
-			if(store.getStats("putback_"+room+"_"+this._entity.name)) {
-				this._entity.stats = store.getStats("putback_"+room+"_"+this._entity.name)
-			}else{
-				this._entity.stats = store.getGenerator(this._data("statsName"))();
-				
-				if(this._data("statsPutBack")) {
-					store.addStats("putback_"+room+"_"+this._entity.name, this._entity.stats);
+			this._data("statsName", "", true);
+			this._data("statsPutBack", false, true);
+			this._data("statsLoadImage", false, true);
+
+			this.entityEvent.listen(this._slLoad.bind(this), "typeChange");
+			this.entityEvent.listen(this._slSaveBM.bind(this), "saveBM");
+		};
+
+		_slLoad(e) {
+			if(this._data("statsName")) {
+				var room = "*";
+				if(this._entity.path("..")) room = this._entity.path("../..").roomName;
+
+				if(store.getStats("putback_"+room+"_"+this._entity.name)) {
+					this._entity.stats = store.getStats("putback_"+room+"_"+this._entity.name)
+				}else{
+					this._entity.stats = store.getGenerator(this._data("statsName"))();
+
+					if(this._data("statsPutBack")) {
+						store.addStats("putback_"+room+"_"+this._entity.name, this._entity.stats);
+					}
 				}
+			}else{
+				this._entity.stats = store.getGenerator(this._entity.name)();
 			}
-		}else{
-			this._entity.stats = store.getGenerator(this._entity.name)();
-		}
-		
-		if(this._data("statsLoadImage")) {
-			this._entity.src = this._entity.stats.getValue("image");
-		}
-	};
-	
-	StatLoader.prototype._slSaveBM = function(e) {
-		if(this._entity.stats) {
-			e.addDep(this._entity.stats.pack);
-		}
-	};
+
+			if(this._data("statsLoadImage")) {
+				this._entity.src = this._entity.stats.getValue("image");
+			}
+		};
+
+		_slSaveBM(e) {
+			if(this._entity.stats) {
+				e.addDep(this._entity.stats.pack);
+			}
+		};
+	}
 	
 	/** Workshop data used by `{@link dusk.entities.sgui.EntityWorkshop}`.
 	 * @static

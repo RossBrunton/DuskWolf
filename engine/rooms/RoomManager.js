@@ -117,7 +117,7 @@ load.provide("dusk.rooms.RoomManager", function() {
 		if(this._rooms.has(name)) {
 			return Promise.resolve(this._rooms.get(name));
 		}else{
-			return load.import(name).then((function(p) {
+			return load.importAndEvaluate(name).then((function(p) {
 				this._rooms.set(name, p);
 				return p;
 			}).bind(this));

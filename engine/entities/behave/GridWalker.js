@@ -76,7 +76,7 @@ load.provide("dusk.entities.behave.GridWalker", function() {
 	 */
 	class GridWalker extends Behave {
 		constructor(entity) {
-			Behave.call(this, entity);
+			super(entity);
 			
 			this._data("gwspeed", 4, true);
 			this._data("gwmoving", false, true);
@@ -215,7 +215,7 @@ load.provide("dusk.entities.behave.GridWalker", function() {
 						"targetY":this._data("gwtargety")/this._entity.height}
 					);
 					
-					_frame.call(this, e);
+					this._frame.call(this, e);
 				}
 			}
 		}

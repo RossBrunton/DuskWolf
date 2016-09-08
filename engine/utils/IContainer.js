@@ -268,7 +268,7 @@ load.provide("dusk.utils.containerUtils", function() {
 		
 		pack.implementsIContainer = true;
 		
-		pack.get = function(name) {
+		if(!("get" in pack)) pack.get = function(name) {
 			if(stringMode) {
 				return this[object][name];
 			}else{
@@ -276,7 +276,7 @@ load.provide("dusk.utils.containerUtils", function() {
 			}
 		};
 		
-		pack.set = function(name, value) {
+		if(!("set" in pack)) pack.set = function(name, value) {
 			if(!pack.valid(value)) return false;
 			if(onSet && !onSet(name, value)) return false;
 			
@@ -288,7 +288,7 @@ load.provide("dusk.utils.containerUtils", function() {
 			return true;
 		};
 		
-		pack.remove = function(name) {
+		if(!("remove" in pack)) pack.remove = function(name) {
 			if(name in object) {
 				if(stringMode) {
 					delete this[object][name];
@@ -301,7 +301,7 @@ load.provide("dusk.utils.containerUtils", function() {
 			}
 		};
 		
-		pack.length = function() {
+		if(!("length" in pack)) pack.length = function() {
 			if(stringMode) {
 				return Object.keys(this[object]).length;
 			}else{
@@ -309,7 +309,7 @@ load.provide("dusk.utils.containerUtils", function() {
 			}
 		};
 		
-		pack.iterate = function() {
+		if(!("iterate" in pack)) pack.iterate = function() {
 			var i = -1;
 			var keys = [];
 			if(stringMode) {
@@ -332,7 +332,7 @@ load.provide("dusk.utils.containerUtils", function() {
 		
 		pack.valid = validate;
 		
-		pack.contains = function(value) {
+		if(!("contains" in pack)) pack.contains = function(value) {
 			if(stringMode) {
 				for(var p in this[object]) {
 					if(this[object][p] == value) return true;

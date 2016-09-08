@@ -94,7 +94,7 @@ load.provide("dusk.tiles.SelectorManager", function() {
 				this._taskRunning = false;
 				this._endMoveHandlers.splice(p, 1);
 				controls.controlPressed.unlisten(controlListener);
-				mouse.onClick.unlisten(controlListener);
+				mouse.onClick.unlisten(clickListener);
 				fulfillFn(x);
 			}).bind(this);
 			

@@ -5,6 +5,7 @@ load.provide("quest.ui", function() {
 	load.require("dusk.sgui.Grid");
 	load.require("dusk.sgui.PlusText");
 	load.require("dusk.sgui.FocusChecker");
+	load.require("dusk.sgui.FocusCheckerRect");
 	load.require("dusk.sgui.extras.MatchedSize");
 	load.require("dusk.sgui.FpsMeter");
 	var LayeredRoom = load.require("dusk.rooms.sgui.LayeredRoom");

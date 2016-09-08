@@ -249,7 +249,7 @@ load.provide("dusk.entities.sgui.EntityWorkshop", function() {
 			}).bind(this), controls.addControl("workshop_close", "ESC"));
 		}
 		
-		_frame = function(e) {
+		_frame(e) {
 			// Behaviour help display
 			if(this.path("bodies/behaviours/list").getFocusedChild()
 			&& entities.getWorkshop(this.path("bodies/behaviours/list").getFocusedChild().text)) {

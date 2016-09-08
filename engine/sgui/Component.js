@@ -11,7 +11,7 @@ load.provide("dusk.sgui.Component", function() {
 	var Pool = load.require("dusk.utils.Pool");
 	var Group = load.suggest("dusk.sgui.Group", function(p) {Group = p});
 	var c = load.require("dusk.sgui.c");
-	var Root = load.suggest("dusk.sgui.Root", function(p) {Root = p});
+	var Root = load.suggest(">dusk.sgui.Root", function(p) {Root = p});
 	var interaction = load.require("dusk.input.interaction");
 	var mouse = load.suggest("dusk.input.mouse", function(p) {mouse = p});
 	var PosRect = load.require("dusk.utils.PosRect");

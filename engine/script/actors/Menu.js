@@ -23,8 +23,8 @@ load.provide("dusk.script.actors.menu", function() {
 	
 	/** Given an array of choices, it creates a vertical menu allowing the user to choose them.
 	 *
-	 * The choices are specified as `[display, result]`, with the first element being displayed to the user, and the
-	 *  second argument either being the script to run, or a value to pass through.
+	 * The choices are specified as `[display, result]`, with the first element being properties to set to the menu,
+	 * option, and the second argument either being the script to run, or a value to pass through.
 	 *
 	 * If the second argument is falsey, then the menu cancels.
 	 *

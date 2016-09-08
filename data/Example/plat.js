@@ -6,6 +6,7 @@ load.provide("example.plat", function() {
 	load.require("dusk.entities.behave.HitDam");
 	load.require("dusk.entities.behave.Killable");
 	load.require("dusk.entities.behave.PlayerControl");
+	load.require("dusk.entities.behave.LeftRightControl");
 	load.require("dusk.entities.behave.Jumper");
 	load.require("dusk.entities.behave.Spawner");
 	load.require("dusk.entities.behave.MarkTrigger");
@@ -21,6 +22,7 @@ load.provide("example.plat", function() {
 	var Pickup = load.require("dusk.entities.behave.Pickup");
 	load.require("dusk.entities.behave.HealthRestore");
 	var InteractableTarget = load.require("dusk.entities.behave.InteractableTarget");
+	load.require("dusk.entities.behave.InteractableHost");
 	var at = load.require("dusk.tiles.sgui.extras.animationTypes");
 	var ta = load.require("dusk.rooms.tileAnimations");
 	
@@ -29,6 +31,8 @@ load.provide("example.plat", function() {
 	load.require("dusk.sgui.Label");
 	load.require("dusk.sgui.Image");
 	load.require("dusk.particles.particleEffects.core.spread");
+	load.require("dusk.particles.particleEffects.core.image");
+	load.require("dusk.particles.particleEffects.core.spew");
 	load.require("dusk.sgui.FpsMeter");
 	load.require("dusk.sgui.PlusText");
 	load.require("dusk.entities.sgui.EntityWorkshop");
@@ -171,7 +175,7 @@ load.provide("example.plat", function() {
 	entities.types.createNewType("player", {
 		"behaviours":{
 			"Persist":true, "PlayerControl":true, "Jumper":true, "MarkTrigger":true, "Killable":true,
-			"Gravity":true, "LeftRightControl":true, "Spawner":true, "Scriptable":true, "InteractableHost":true
+			"Gravity":true, "LeftRightControl":true, "Spawner":true, "InteractableHost":true
 		},
 		"data":{
 			"hp":5, "maxHp":5, "collisionOffsetX":10, "collisionWidth":22, "collisionOffsetY":3, "hspeed":5,

@@ -4,9 +4,10 @@
 
 load.provide("dusk.sgui.Group", function() {
 	var Component = load.require("dusk.sgui.Component");
+	var NullCom = load.require("dusk.sgui.NullCom");
 	var utils = load.require("dusk.utils");
 	var c = load.require("dusk.sgui.c");
-	var sgui = load.require(">dusk.sgui", function(p) {sgui = p});
+	var sgui = load.require("dusk.sgui", function(p) {sgui = p});
 	var interaction = load.require("dusk.input.interaction");
 	var containerUtils = load.require("dusk.utils.containerUtils");
 	var PosRect = load.require("dusk.utils.PosRect");
