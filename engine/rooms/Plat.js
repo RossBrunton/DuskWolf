@@ -16,6 +16,8 @@ load.provide("dusk.rooms.plat", function() {
 	 * 
 	 * Use `make` to add a child to a component to have a platformer engine run in it.
 	 * @implements dusk.save.ISavable
+	 * @memberof dusk.rooms
+	 * @namespace
 	 */
 	var plat = {};
 	
