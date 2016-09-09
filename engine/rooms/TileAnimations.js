@@ -3,7 +3,7 @@
 "use strict";
 
 load.provide("dusk.rooms.tileAnimations", function() {
-	var particleAnimation = load.require("dusk.particles.particleAnimation");
+	var particles = load.require("dusk.particles");
 	var LayeredRoom = load.require("dusk.rooms.sgui.LayeredRoom");
 	
 	var tileAnimations = {};
@@ -19,7 +19,7 @@ load.provide("dusk.rooms.tileAnimations", function() {
 	 */
 	tileAnimations.particle = function(bm, data, name) {
 		return function(state, tile) {
-			return particleAnimation(bm.getFirstLayerOfType(LayeredRoom.LAYER_PARTICLES), data, name)(state, tile);
+			return particles.animation(bm.getFirstLayerOfType(LayeredRoom.LAYER_PARTICLES), data, name)(state, tile);
 		};
 	};
 	

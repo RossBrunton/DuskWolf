@@ -2,15 +2,15 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-/** This namespace manages particle animations.
- *
- * TODO: Document me!
- * @memberof dusk
- * @name particles
- * @namespace
- */
-
-load.provide("dusk.particles.particleAnimation", function() {
+load.provide("dusk.particles", function() {
+	/** This namespace manages particle animations.
+	 *
+	 * TODO: Document me!
+	 * @memberof dusk
+	 * @namespace
+	 */
+	var particles = {};
+	
 	/** This action (for AnimatedTiles) will perform a particle effect on the given field. This will not wait until the
 	 * effect is over before going on to the next action.
 	 * 
@@ -19,9 +19,8 @@ load.provide("dusk.particles.particleAnimation", function() {
 	 *  function it will be called with the animation state and tile.
 	 * @param {?string} name The name of the particle effect to perform. 
 	 * @return {object} An animation action.
-	 * @memberof dusk.particles
 	 */
-	var particleAnimation = function(field, data, name) {
+	particles.animation = function(field, data, name) {
 		return function(state, owner) {
 			var lfield = field;
 			var ldata = data;
@@ -34,5 +33,5 @@ load.provide("dusk.particles.particleAnimation", function() {
 		};
 	};
 	
-	return particleAnimation;
+	return particles;
 });
