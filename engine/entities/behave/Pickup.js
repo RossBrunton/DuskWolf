@@ -6,14 +6,10 @@ load.provide("dusk.entities.behave.Pickup", function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.entities.behave.Behave");
 	
-	/* * @class dusk.entities.behave.Pickup
-	 * @memberof dusk.entities.behave
-	 * 
-	 * @classdesc 
+	/** 
 	 * 
 	 * @extends dusk.entities.behave.Behave
 	 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
-	 * @constructor
 	 * @memberof dusk.entities.behave
 	 */
 	class Pickup extends Behave {

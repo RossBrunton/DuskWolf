@@ -6,9 +6,7 @@ load.provide("dusk.entities.behave.HitDam", function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.entities.behave.Behave");
 
-	/** @class dusk.entities.behave.HitDam
-	 * 
-	 * @classdesc An entity with this behaviour, on colliding into or with another entity will attempt to damage it.
+	/** An entity with this behaviour, on colliding into or with another entity will attempt to damage it.
 	 * 
 	 * The target must make the function in the entity data `"damages"` (if it exists) return true for it to try to be
 	 * damaged. The type of damage is given by the behaviour property `"types"` which is an array (default []) and the

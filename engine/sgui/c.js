@@ -5,12 +5,10 @@
 load.provide("dusk.sgui.c", function() {
 	var dirs = load.require("dusk.utils.dirs");
 	
-	/** @namespace dusk.sgui.c
-	 * @name dusk.sgui.c
-	 * 
-	 * @description  This namespace contains a number of constants that various components in the SGui system use.
-	 * 
-	 * You may assume that this has been imported if any SGui component has been imported.
+	/** This namespace contains a number of constants that various components in the SGui system use.
+	 *
+	 * @namespace
+	 * @memberof dusk.sgui
 	 * @since 0.0.19-alpha
 	 */
 	var c = {};

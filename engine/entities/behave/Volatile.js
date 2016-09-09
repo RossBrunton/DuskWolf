@@ -6,10 +6,7 @@ load.provide("dusk.entities.behave.Volatile", function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.entities.behave.Behave");
 
-	/** @class dusk.entities.behave.Volatile
-	 * @memberof dusk.entities.behave
-	 * 
-	 * @classdesc An entity with this behaviour will be terminated when it collides with a specific entity or a wall.
+	/** An entity with this behaviour will be terminated when it collides with a specific entity or a wall.
 	 * 
 	 * The entity it collides with must match a function (i.e. make it return true) specified by the behaviour property
 	 * `"killedBy"`. If this function is absent, then any collision will terminate it.

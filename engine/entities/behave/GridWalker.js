@@ -256,6 +256,7 @@ load.provide("dusk.entities.behave.GridRecorder", function() {
 	 *  given region.
 	 * 
 	 * @extends dusk.entities.behave.Behave
+	 * @memberof dusk.entities.behave
 	 */
 	class GridRecorder extends Behave {
 		/** Creates a new GridRecorder behaviour
@@ -361,6 +362,7 @@ load.provide("dusk.entities.behave.GridMouse", function() {
 	 *  disable.
 	 * 
 	 * @extends dusk.entities.behave.Behave
+	 * @memberof dusk.entities.behave
 	 */
 	class GridMouse extends Behave {
 		/** Creates a new GridMouse behaviour
