@@ -7,10 +7,7 @@ load.provide("dusk.input.gamepad", function() {
 	var frameTicker = load.require("dusk.utils.frameTicker");
 	var options = load.require("dusk.options");
 	
-	/** @namespace dusk.input.gamepad
-	 * @name dusk.input.gamepad
-	 * 
-	 * @description Provides an interface for game controllers.
+	/** Provides an interface for game controllers.
 	 * 
 	 * Gamepads are automatically detected and set up and consist of buttons and axes. Buttons are numbered from 0 to
 	 *  however many buttons there are, and this is the number used to identify them.
@@ -22,6 +19,8 @@ load.provide("dusk.input.gamepad", function() {
 	 *  `gamepad.threshold` (default 0.5).
 	 * 
 	 * @since 0.0.21-alpha
+	 * @namespace
+	 * @memberof dusk.input
 	 */
 	var gamepad = {};
 

@@ -2,6 +2,19 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
+/** A number of different namespaces that handle getting input from the user in various forms.
+ *
+ * There is also `{@link dusk.input.Interaction}` that takes all these different sources, and fires a single event for
+ *  them.
+ * 
+ * Also included is a controls system `{@link dusk.input.Controls}` which abstracts this away, and allows you to specify
+ *  for example a "jump" control that can be triggered from a number of different ways (keyboard or gamepad).
+ *
+ * @namespace
+ * @name input
+ * @memberof dusk
+ */
+
 load.provide("dusk.input.controls", function() {
 	var keyboard = load.require("dusk.input.keyboard");
 	var gamepad = load.require("dusk.input.gamepad");

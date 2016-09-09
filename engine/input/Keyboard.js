@@ -7,10 +7,10 @@ load.provide("dusk.input.keyboard", function() {
 	var dusk = load.require("dusk");
 	var sgui = load.suggest("dusk.sgui", function(p) {sgui = p});
 	
-	/** @namespace dusk.keyboard
-	 * @name dusk.keyboard
-	 * 
-	 * @description This module contains methods for interacting with the keyboard.
+	/** This module contains methods for interacting with the keyboard.
+	 *
+	 * @namespace
+	 * @memberof dusk.input
 	 */
 	var keyboard = {};
 	
