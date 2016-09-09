@@ -8,6 +8,7 @@ load.provide("dusk.stats.LayeredStatsLayer", function() {
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var functionStore = load.require("dusk.utils.functionStore");
 	var items = load.suggest("dusk.items", function(p) {items = p});
+	var Invent = load.suggest("dusk.items.Inventory", function(p) {Invent = p});
 	
 	/** A LayeredStatsLayer is a single layer for a `dusk.stats.LayeredStats` instance.
 	 * 
@@ -44,7 +45,7 @@ load.provide("dusk.stats.LayeredStatsLayer", function() {
 		if(copy) block = utils.copy(block, true);
 		this._blocks.set(name, block);
 		
-		if(items && block instanceof items.Invent) {
+		if(items && block instanceof Invent) {
 			//this._inventListeners.set(name, block.contentsChanged.listen((function() {
 				//this.update(layer);
 			//}).bind(this)))
@@ -138,7 +139,7 @@ load.provide("dusk.stats.LayeredStatsLayer", function() {
 	 * @private
 	 */
 	var _toList = function(block, field) {
-		if(items && block instanceof items.Invent) {
+		if(items && block instanceof Invent) {
 			var out = [];
 			block.forEach((function(item, slot) {
 				if(item.get("stats")) {

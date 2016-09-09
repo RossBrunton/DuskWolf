@@ -9,6 +9,8 @@ load.provide("example.items", function() {
 	load.require("dusk.input.sgui.ControlConfig");
 	load.require("dusk.sgui.FocusChecker");
 	load.require("dusk.items.sgui.ItemGrid");
+	load.require("dusk.items.testItems");
+	load.require("dusk.sgui.TextBox");
 	load.require("dusk.sgui.Rect");
 	var dusk = load.require("dusk");
 	var sgui = load.require("dusk.sgui");
@@ -16,7 +18,7 @@ load.provide("example.items", function() {
 	var items = load.require("dusk.items");
 	
 	//Items test
-	sgui.getPane("itemsTest").update({
+	sgui.get("default", true).update({
 		"active":true,
 		"focus":"itemHand",
 		"children":[
@@ -93,12 +95,12 @@ load.provide("example.items", function() {
 		]
 	});
 
-	sgui.path("itemsTest:/itemhand/itemGrid/1,1").getInventory().addItem(items.items.create("heal"), 4);
-	sgui.path("itemsTest:/itemhand/itemGrid/1,3").getInventory().addItem(items.items.create("blood"), 10);
-	sgui.path("itemsTest:/itemhand/itemGrid/2,2").getInventory().addItem(items.items.create("magic"), 23);
-	sgui.path("itemsTest:/itemhand/itemGrid/4,3").getInventory().addItem(items.items.create("heal"), 1);
-	sgui.path("itemsTest:/itemhand/itemGrid/4,3").getInventory().putItemIntoSlot(items.items.create("heal"), 12);
-	sgui.path("itemsTest:/itemhand/itemGrid/3,3").putItem("blood");
+	sgui.path("default:/itemhand/itemGrid/1,1").getInventory().addItem(items.items.create("heal"), 4);
+	sgui.path("default:/itemhand/itemGrid/1,3").getInventory().addItem(items.items.create("blood"), 10);
+	sgui.path("default:/itemhand/itemGrid/2,2").getInventory().addItem(items.items.create("magic"), 23);
+	sgui.path("default:/itemhand/itemGrid/4,3").getInventory().addItem(items.items.create("heal"), 1);
+	sgui.path("default:/itemhand/itemGrid/4,3").getInventory().putItemIntoSlot(items.items.create("heal"), 12);
+	sgui.path("default:/itemhand/itemGrid/3,3").putItem("blood");
 
 	dusk.startGame();
 });

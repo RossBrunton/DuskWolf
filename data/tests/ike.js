@@ -9,6 +9,7 @@ load.provide("tests.ike", function() {
 	window.save = load.require("dusk.save");
 	window.LocalStorageSource = load.require("dusk.save.sources.LocalStorageSource");
 	window.items = load.require("dusk.items");
+	window.Invent = load.require("dusk.items.Inventory");
 	
 	var ranger = {
 		"hp_max":40,
@@ -133,7 +134,7 @@ load.provide("tests.ike", function() {
 	
 	items.items.createNewType("ragnel", {"stats":{"def":"(+ 5)"}});
 	
-	window.ikeInvent = new items.Invent(1, "1", 1);
+	window.ikeInvent = new Invent(1, "1", 1);
 	ike.layer("items").addBlock("invent", ikeInvent);
 	
 	return undefined;

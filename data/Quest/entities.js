@@ -10,6 +10,7 @@ load.provide("quest.entities", function() {
 	load.require("dusk.entities.behave.MarkTrigger");
 	load.require("dusk.stats.behave.StatLoader");
 	var items = load.require("dusk.items");
+	var Invent = load.require("dusk.items.Inventory");
 	var stats = load.require("dusk.stats");
 	var store = load.require("dusk.stats.store");
 	var at = load.require("dusk.tiles.sgui.extras.animationTypes");
@@ -75,7 +76,7 @@ load.provide("quest.entities", function() {
 		l.layer(1).addBlock("baseRange", {"possibleRange":[], "vis":2});
 		l.layer(1).addBlock("initialMoved", {"moved":false});
 		
-		var inv = new items.Invent(4, "1", 1);
+		var inv = new Invent(4, "1", 1);
 		l.layer(2).addBlock("weapons", inv);
 		if(Math.random() > 0.3) inv.addItem("sword");
 		if(Math.random() > 0.3) inv.addItem("bow");

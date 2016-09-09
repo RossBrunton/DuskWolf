@@ -8,55 +8,55 @@ load.provide("dusk.items.sgui.ItemGrid", function() {
 	var sgui = load.require("dusk.sgui");
 	var c = load.require("dusk.sgui.c");
 	var items = load.require("dusk.items");
+	var Invent = load.require("dusk.items.Inventory");
 	
-	var ItemGrid = function (parent, name) {
-		Grid.call(this, parent, name);
-		
-		this.maxStack = 0xffffffff;
-		this._invent = new items.Invent(this.rows*this.cols, true, this.maxStack);
-		
-		this._counter = 0;
-		
-		//Prop masks
-		this._mapper.map("maxStack", "maxStack");
-		this._mapper.map("invent", "__invent", ["maxStack"]);
-		this._mapper.addDepends("populate", "invent");
-		
-		//Listeners
-		this._populationEvent.listen(this._igBefore.bind(this), "before");
-		this._populationEvent.listen(this._igCreate.bind(this), "create");
-	};
-	ItemGrid.prototype = Object.create(Grid.prototype);
-	
-	ItemGrid.prototype.setInventory = function(invent) {
-		if(!(invent instanceof items.Invent)) {
-			invent = new items.Invent(this.rows*this.cols, invent, this.maxStack);
+	class ItemGrid extends Grid {
+		constructor(parent, name) {
+			super(parent, name);
+			
+			this.maxStack = 0xffffffff;
+			this._invent = new Invent(this.rows*this.cols, "1", this.maxStack);
+			
+			this._counter = 0;
+			
+			//Prop masks
+			this._mapper.map("maxStack", "maxStack");
+			this._mapper.map("invent", [() => [], this.setInventory], ["maxStack"]);
+			this._mapper.addDepends("populate", "invent");
+			
+			//Listeners
+			this._populationEvent.listen(this._igBefore.bind(this), "before");
+			this._populationEvent.listen(this._igCreate.bind(this), "create");
 		}
 		
-		this._invent.sendAllToInvent(invent);
-		this._invent = invent;
-	};
-	Object.defineProperty(ItemGrid.prototype, "__invent", {
-		set: function(value) {this.setInventory(value);},
-		get: function(){return [];}
-	});
-	
-	ItemGrid.prototype._igBefore = function(e) {
-		if("slot" in e.child) delete e.child.slot;
-		if("invent" in e.child) delete e.child.invent;
-		
-		this._counter = 0;
-		return e;
-	};
-	
-	ItemGrid.prototype._igCreate = function(e) {
-		if(e.component instanceof ItemSlot) {
-			e.component.setInventory(this._invent);
-			e.component.slot = this._counter++;
+		setInventory(invent) {
+			if(!(invent instanceof Invent)) {
+				invent = new Invent(this.rows*this.cols, invent, this.maxStack);
+			}
+			
+			this._invent.sendAllToInvent(invent);
+			this._invent = invent;
 		}
 		
-		return e;
-	};
+		_igBefore(e) {
+			if("slot" in e.child) delete e.child.slot;
+			if("invent" in e.child) delete e.child.invent;
+			
+			this._counter = 0;
+			return e;
+		}
+		
+		_igCreate(e) {
+			if(e.component instanceof ItemSlot) {
+				e.component.setInventory(this._invent);
+				e.component.slot = this._counter++;
+			}
+			
+			return e;
+		}
+	}
 	
 	sgui.registerType("ItemGrid", ItemGrid);
+	
+	return ItemGrid;
 });

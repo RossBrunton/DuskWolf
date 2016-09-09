@@ -6,135 +6,133 @@ load.provide("dusk.items.sgui.ItemSlot", function() {
 	var Group = load.require("dusk.sgui.Group");
 	var sgui = load.require("dusk.sgui");
 	var items = load.require("dusk.items");
+	var Invent = load.require("dusk.items.Inventory");
 	var Image = load.require("dusk.sgui.Image");
 	var Label = load.require("dusk.sgui.Label");
 	var Tile = load.require("dusk.tiles.sgui.Tile");
 	var ItemHand = load.require("dusk.items.sgui.ItemHand");
 	
-	var ItemSlot = function (parent, name) {
-		Group.call(this, parent, name);
-		
-		this._invent = new items.Invent(1, "true", 0xffffffff);
-		this.maxStack = 0xffffffff;
-		this.slot = 0;
-		
-		this._itemChild = this.get("item", "Tile");
-		this._handItemChild = this.get("handitem", "Tile");
-		this._textChild = this.get("count", "Label");
-		this._handTextChild = this.get("handcount", "Label");
-		this._selectChild = this.get("select", "Image");
-		this.alterChildLayer("count", "+");
-		
-		//Prop masks
-		this._mapper.map("maxStack", "maxStack");
-		this._mapper.map("invent", "__invent", ["maxStack"]);
-		
-		//Listeners
-		this.frame.listen(this._itemSlotFrame.bind(this));
-		this.action.listen(this._itemSlotAction.bind(this));
-	};
-	ItemSlot.prototype = Object.create(Group.prototype);
-	
-	ItemSlot.prototype.setInventory = function(invent) {
-		if(!(invent instanceof items.Invent)) {
-			invent = new items.Invent(1, invent, this.maxStack);
+	class ItemSlot extends Group {
+		constructor(parent, name) {
+			super(parent, name);
+			
+			this._invent = new Invent(1, "true", 0xffffffff);
+			this.maxStack = 0xffffffff;
+			this.slot = 0;
+			
+			this._itemChild = this.get("item", "Tile");
+			this._handItemChild = this.get("handitem", "Tile");
+			this._textChild = this.get("count", "Label");
+			this._handTextChild = this.get("handcount", "Label");
+			this._selectChild = this.get("select", "Image");
+			this.alterChildLayer("count", "+");
+			
+			//Prop masks
+			this._mapper.map("maxStack", "maxStack");
+			this._mapper.map("invent", [this.setInventory, ()=>[]], ["maxStack"]);
+			
+			//Listeners
+			this.frame.listen(this._itemSlotFrame.bind(this));
+			this.action.listen(this._itemSlotAction.bind(this));
 		}
 		
-		this._invent.sendAllToInvent(invent);
-		this._invent = invent;
-	};
-	
-	ItemSlot.prototype.getInventory = function() {
-		return this._invent;
-	};
-	Object.defineProperty(ItemSlot.prototype, "__invent", {
-		set: function(value) {this.setInventory(value);},
-		get: function(){return [];}
-	});
-	
-	ItemSlot.prototype.putItem = function(item) {
-		return this._invent.putItemIntoSlot(item, this.slot);
-	};
-	
-	ItemSlot.prototype.getItem = function(item) {
-		return this._invent.getItemFromSlot(this.slot);
-	};
-	
-	ItemSlot.prototype._itemSlotFrame = function() {
-		if(!this._itemChild) return;
-		
-		if(this._invent.getItemFromSlot(this.slot)) {
-			this._itemChild.src = this._invent.getItemFromSlot(this.slot).get("src");
-			this._itemChild.tileStr = this._invent.getItemFromSlot(this.slot).get("tile");
-			this._textChild.text = this._invent.countSlot(this.slot)>1?this._invent.countSlot(this.slot):"";
-		}else{
-			this._itemChild.src = "";
-			this._itemChild.tileStr = "0,0";
-			this._textChild.text = "";
+		setInventory(invent) {
+			if(!(invent instanceof Invent)) {
+				invent = new Invent(1, invent, this.maxStack);
+			}
+			
+			this._invent.transferAllToInvent(invent);
+			this._invent = invent;
 		}
 		
-		if(this.active) {
-			this._selectChild.visible = true;
-			var h = this._getHand();
-			if(h && h.getHand().getItemFromSlot(0)) {
-				this._handItemChild.visible = true;
-				this._handItemChild.src = h.getHand().getItemFromSlot(0).get("src");
-				this._handItemChild.tileStr = h.getHand().getItemFromSlot(0).get("tile");
-				
-				this._handTextChild.visible = true;
-				this._handTextChild.text = h.getHand().countSlot(0)>1?h.getHand().countSlot(0):"";
+		getInventory() {
+			return this._invent;
+		}
+		
+		putItem(item) {
+			return this._invent.putItemIntoSlot(item, this.slot);
+		}
+		
+		getItem(item) {
+			return this._invent.getItemFromSlot(this.slot);
+		}
+		
+		_itemSlotFrame() {
+			if(!this._itemChild) return;
+			
+			if(this._invent.getItemFromSlot(this.slot)) {
+				this._itemChild.src = this._invent.getItemFromSlot(this.slot).get("src");
+				this._itemChild.tileStr = this._invent.getItemFromSlot(this.slot).get("tile");
+				this._textChild.text = this._invent.countSlot(this.slot)>1?this._invent.countSlot(this.slot):"";
 			}else{
+				this._itemChild.src = "";
+				this._itemChild.tileStr = "0,0";
+				this._textChild.text = "";
+			}
+			
+			if(this.active) {
+				this._selectChild.visible = true;
+				var h = this._getHand();
+				if(h && h.getHand().getItemFromSlot(0)) {
+					this._handItemChild.visible = true;
+					this._handItemChild.src = h.getHand().getItemFromSlot(0).get("src");
+					this._handItemChild.tileStr = h.getHand().getItemFromSlot(0).get("tile");
+					
+					this._handTextChild.visible = true;
+					this._handTextChild.text = h.getHand().countSlot(0)>1?h.getHand().countSlot(0):"";
+				}else{
+					this._handItemChild.visible = false;
+					this._handTextChild.visible = false;
+				}
+			}else{
+				this._selectChild.visible = false;
 				this._handItemChild.visible = false;
 				this._handTextChild.visible = false;
 			}
-		}else{
-			this._selectChild.visible = false;
-			this._handItemChild.visible = false;
-			this._handTextChild.visible = false;
 		}
-	};
-	
-	ItemSlot.prototype._itemSlotAction = function(e) {
-		var h = this._getHand();
 		
-		if(h) {
-			if(h.getHand().countSlot(0) > 0) {
-				//Holding something
-				if(this._invent.isValidAddition(h.getHand().getItemFromSlot(0))
-				&& this._invent.isValidAdditionToSlot(h.getHand().getItemFromSlot(0), this.slot)) {
-					//Can add the item
-					h.getHand().transferToInventSlot(this._invent, this.slot, e.shift?1:0xffffffff);
-				}else if(this._invent.isValidAddition(h.getHand().getItemFromSlot(0))) {
-					//Swap them round
-					var temp = new items.Invent(1, "true");
-					this._invent.transferSlotToInvent(temp, this.slot, 0xffffffff);
-					h.getHand().transferToInventSlot(this._invent, this.slot, 0xffffffff);
-					temp.transferToInventSlot(h.getHand(), 0, 0xffffffff);
-				}
-					
-			}else{
-				//Not holding anything
-				if(h.getHand().isValidAddition(this._invent.getItemFromSlot(this.slot))) {
-					this._invent.transferSlotToInvent(h.getHand(), this.slot,
-						e.shift?(this._invent.countSlot(this.slot)>>1):0xffffffff
-					);
+		_itemSlotAction(e) {
+			var h = this._getHand();
+			
+			if(h) {
+				if(h.getHand().countSlot(0) > 0) {
+					//Holding something
+					if(this._invent.isValidAddition(h.getHand().getItemFromSlot(0))
+					&& this._invent.isValidAdditionToSlot(h.getHand().getItemFromSlot(0), this.slot)) {
+						//Can add the item
+						h.getHand().transferToInventSlot(this._invent, this.slot, e.shift?1:0xffffffff);
+					}else if(this._invent.isValidAddition(h.getHand().getItemFromSlot(0))) {
+						//Swap them round
+						var temp = new Invent(1, "true");
+						this._invent.transferSlotToInvent(temp, this.slot, 0xffffffff);
+						h.getHand().transferToInventSlot(this._invent, this.slot, 0xffffffff);
+						temp.transferToInventSlot(h.getHand(), 0, 0xffffffff);
+					}
+						
 				}else{
-					//..?
+					//Not holding anything
+					if(h.getHand().isValidAddition(this._invent.getItemFromSlot(this.slot))) {
+						this._invent.transferSlotToInvent(h.getHand(), this.slot,
+							e.shift?(this._invent.countSlot(this.slot)>>1):0xffffffff
+						);
+					}else{
+						//..?
+					}
 				}
 			}
 		}
-	};
-	
-	ItemSlot.prototype._getHand = function() {
-		var c = this;
-		while(c = c.path("..")) {
-			if(c instanceof ItemHand && !c.supressHand) {
-				return c;
-			}
-		}
 		
-		return null;
-	};
+		_getHand() {
+			var c = this;
+			while(c = c.path("..")) {
+				if(c instanceof ItemHand && !c.supressHand) {
+					return c;
+				}
+			}
+			
+			return null;
+		}
+	}
 	
 	sgui.registerType("ItemSlot", ItemSlot);
 	
