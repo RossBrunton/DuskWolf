@@ -23,12 +23,14 @@ load.provide("dusk.entities.behave.MarkTrigger", function() {
 	 * 
 	 * This behaviour does not use any behaviour properties.
 	 * 
-	 * @param {dusk.entities.sgui.Entity} entity The entity this behaviour will act with.
-	 * @constructor
 	 * @memberof dusk.entities.behave
 	 * @extends dusk.entities.behave.Behave
 	 */
 	class MarkTrigger extends Behave {
+		/** Creates a new MarkTrigger behaviour.
+		 * 
+		 * @param {dusk.entities.sgui.Entity} entity The entity this behaviour will act with.
+		 */
 		constructor(entity) {
 			super(entity);
 			

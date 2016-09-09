@@ -80,13 +80,14 @@ load.provide("dusk.entities.behave.Spawner", function() {
 	 *  This is fired before the entity is spawned, and must be ended (i.e. Using the animation event `/spawn_name`) to
 	 *  spawn the entity. The second is fired after the entity is spawned, and is named `spawn_after_name`.
 	 * 
-	 * @extends dusk.entities.behave.Behave
-	 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
-	 * @constructor
 	 * @memberof dusk.entities.behave
 	 * @extends dusk.entities.behave.Behave
 	 */
 	class Spawner extends Behave {
+		/** Creates a new Spawner behaviour.
+		 * 
+		 * @param {dusk.entities.sgui.Entity} entity The entity this behaviour will act with.
+		 */
 		constructor(entity) {
 			super(entity);
 			

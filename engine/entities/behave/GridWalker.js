@@ -71,7 +71,6 @@ load.provide("dusk.entities.behave.GridWalker", function() {
 	 * 
 	 * @extends dusk.entities.behave.Behave
 	 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
-	 * @constructor
 	 * @memberof dusk.entities.behave
 	 */
 	class GridWalker extends Behave {
@@ -242,8 +241,8 @@ load.provide("dusk.entities.behave.GridRecorder", function() {
 	var Behave = load.require("dusk.entities.behave.Behave");
 	var c = load.require("dusk.sgui.c");
 	
-	/** While the entity moves around (via `dusk.entities.behave.GridWalker`) this records the movements and stores them in an
-	 *  array.
+	/** While the entity moves around (via `dusk.entities.behave.GridWalker`) this records the movements and stores them
+	 * in an array.
 	 * 
 	 * This behaviour uses the following behaviour properties:
 	 * - grmoves:array - Every time a move is made and `grrecording` is true, the move is pushed onto this stack.
@@ -251,16 +250,18 @@ load.provide("dusk.entities.behave.GridRecorder", function() {
 	 * - grrange:integer = 0 - If `grsnap` is true, this is the maximum length a path can be.
 	 * - grsnap:boolean = false - If true, if the length of the recorded moves is longer than `grrange` then the
 	 *  shortest route that goes to the same tile is calculated and replaces the current one.
-	 * - grregion:dusk.tiles.sgui.TileRegion = null - If set, the recorded path won't lead out of this region. If it tries, 
-	 *  no moves are added, and the next time it enters the region a new path is calculated.
-	 * - grregionto:dusk.tiles.sgui.TileRegion = null - If set, the path this entity takes will be inserted into the given
-	 *  region.
+	 * - grregion:dusk.tiles.sgui.TileRegion = null - If set, the recorded path won't lead out of this region. If it
+	 *  tries, no moves are added, and the next time it enters the region a new path is calculated.
+	 * - grregionto:dusk.tiles.sgui.TileRegion = null - If set, the path this entity takes will be inserted into the
+	 *  given region.
 	 * 
 	 * @extends dusk.entities.behave.Behave
-	 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
-	 * @constructor
 	 */
 	class GridRecorder extends Behave {
+		/** Creates a new GridRecorder behaviour
+		 *
+		 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
+		 */
 		constructor(entity) {
 			super(entity);
 			
@@ -360,10 +361,12 @@ load.provide("dusk.entities.behave.GridMouse", function() {
 	 *  disable.
 	 * 
 	 * @extends dusk.entities.behave.Behave
-	 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
-	 * @constructor
 	 */
 	class GridMouse extends Behave {
+		/** Creates a new GridMouse behaviour
+		 * 
+		 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
+		 */
 		constructor(entity) {
 			super(entity);
 			

@@ -25,14 +25,16 @@ load.provide("dusk.entities.behave.InteractableTarget", function() {
 	 * - interactUpRequired:boolean = false - Whether the `entity_interact` control on the sender is requried for the
 	 *  event to fire.
 	 * 
-	 * @param {dusk.entities.sgui.Entity} entity The entity this behaviour will act with.
-	 * @constructor
 	 * @since 0.0.21-alpha
 	 * @see dusk.entities.behave.InteractableHost
 	 * @memberof dusk.entities.behave
 	 * @extends dusk.entities.behave.Behave
 	 */
 	class InteractableTarget extends Behave {
+		/** Creates a new InteractableTarget behaviour.
+		 * 
+		 * @param {dusk.entities.sgui.Entity} entity The entity this behaviour will act with.
+		 */
 		constructor(entity) {
 			super(entity);
 			
@@ -101,8 +103,6 @@ load.provide("dusk.entities.behave.InteractableHost", function() {
 	 * 
 	 * This behaviour does not use any behaviour properties.
 	 * 
-	 * @param {dusk.entities.sgui.Entity} entity The entity this behaviour will act with.
-	 * @constructor
 	 * @since 0.0.21-alpha
 	 * @see dusk.entities.behave.MarkTrigger
 	 * @see dusk.entities.behave.InteractableTarget
@@ -110,6 +110,10 @@ load.provide("dusk.entities.behave.InteractableHost", function() {
 	 * @extends dusk.entities.behave.Behave
 	 */
 	class InteractableHost extends Behave {
+		/** Creates a new InteractableHost behaviour.
+		 * 
+		 * @param {dusk.entities.sgui.Entity} entity The entity this behaviour will act with.
+		 */
 		constructor(entity) {
 			super(entity);
 			

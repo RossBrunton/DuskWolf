@@ -27,7 +27,6 @@ load.provide("dusk.entities.behave.Behave", function() {
 	 * Messages are passed to the behaviour using `{@link dusk.entities.sgui.Entity.behaviourFire}`, which fires an
 	 *  event.
 	 * 
-	 * @constructor
 	 * @see dusk.entities.sgui.Entity
 	 * @memberof dusk.entities.behave
 	 */

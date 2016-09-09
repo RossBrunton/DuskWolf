@@ -16,14 +16,16 @@ load.provide("dusk.entities.behave.Persist", function() {
 	 * 
 	 * This behaviour does not use any behaviour properties.
 	 * 
-	 * @param {dusk.entities.sgui.Entity} entity The entity this behaviour will act with.
 	 * @implements dusk.save.ISavable
-	 * @constructor
 	 * @since 0.0.21-alpha
 	 * @memberof dusk.entities.behave
 	 * @extends dusk.entities.behave.Behave
 	 */
 	class Persist extends Behave {
+		/** Creates a new Persist behaviour.
+		 * 
+		 * @param {dusk.entities.sgui.Entity} entity The entity this behaviour will act with.
+		 */
 		constructor(entity) {
 			super(entity);
 			

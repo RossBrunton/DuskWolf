@@ -17,6 +17,10 @@ load.provide("dusk.entities.behave.Pickup", function() {
 	 * @memberof dusk.entities.behave
 	 */
 	class Pickup extends Behave {
+		/** Creates a new Pickup behaviour.
+		 * 
+		 * @param {dusk.entities.sgui.Entity} entity The entity this behaviour will act with.
+		 */
 		constructor(entity) {
 			super(entity);
 			

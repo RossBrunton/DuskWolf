@@ -6,19 +6,20 @@ load.provide("dusk.entities.behave.HealthRestore", function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.entities.behave.Behave");
 
-	/** @class dusk.entities.behave.HealthRestore
+	/** Restores health on pickup.
 	 * 
-	 * @classdesc When picked up (and thus the entity must have the `{@link dusk.entities.behave.Pickup}` behaviour as well) this
-	 * will restore the value of the behaviour property `"pickupHealth"` (default 1) to the entity's health (meaning it also
-	 * needs `{@link dusk.entities.behave.Killable}`).
+	 * When picked up (and thus the entity must have the `{@link dusk.entities.behave.Pickup}` behaviour as well) this
+	 *  will restore the value of the behaviour property `"pickupHealth"` (default 1) to the entity's health (meaning it
+	 *  also needs `{@link dusk.entities.behave.Killable}`).
 	 * 
-	 * @extends dusk.entities.behave.Behave
-	 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
-	 * @constructor
 	 * @memberof dusk.entities.behave
 	 * @extends dusk.entities.behave.Behave
 	 */
 	class HealthRestore extends Behave {
+		/** Creates a new HealthRestore behaviour
+		 * 
+		 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
+		 */
 		constructor(entity) {
 			super(entity);
 			

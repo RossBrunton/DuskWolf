@@ -17,11 +17,13 @@ load.provide("dusk.entities.behave.HitDam", function() {
 	 * Understandably, the target must have the behaviour `{@link dusk.entities.behave.Killable}` to react to this.
 	 * 
 	 * @extends dusk.entities.behave.Behave
-	 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
-	 * @constructor
 	 * @memberof dusk.entities.behave
 	 */
 	class HitDam extends Behave {
+		/** Creates a new HitDam behaviour
+		 * 
+		 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
+		 */
 		constructor(entity) {
 			super(entity);
 			

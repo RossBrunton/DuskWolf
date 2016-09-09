@@ -6,10 +6,7 @@ load.provide("dusk.entities", function() {
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
 	var InheritableContainer = load.require("dusk.utils.InheritableContainer");
 	
-	/** @namespace dusk.entities
-	 * @name dusk.entities
-	 * 
-	 * @description This manages entities.
+	/** This manages entities.
 	 * 
 	 * Entities are essentially "things that do stuff" in games, they are the player, enemies, pickups.
 	 * 	In general, if it is animated, it's an entity.
@@ -29,9 +26,11 @@ load.provide("dusk.entities", function() {
 	 * The `animation` property describes animation, and is described at `{@link dusk.entities.sgui.Entity}`.
 	 * 
 	 * @since 0.0.17-alpha
-	 * @see {@link dusk.entities.sgui.Entity}
-	 * @see {@link dusk.entities.sgui.EntityGroup}
-	 * @see {@link dusk.rooms.sgui.LayeredRoom}
+	 * @see dusk.entities.sgui.Entity
+	 * @see dusk.entities.sgui.EntityGroup
+	 * @see dusk.rooms.sgui.LayeredRoom
+	 * @memberof dusk
+	 * @namespace
 	 */
 	var entities = {};
 	
@@ -101,6 +100,7 @@ load.provide("dusk.entities", function() {
 	 * @type object
 	 * @private
 	 * @since 0.0.18-alpha
+	 * @memberof dusk.entities
 	 */
 	var _behaviours = {};
 	
@@ -108,12 +108,14 @@ load.provide("dusk.entities", function() {
 	 * @type object
 	 * @private
 	 * @since 0.0.21-alpha
+	 * @memberof dusk.entities
 	 */
 	var _workshop = {};
 
 	/** Adds a new behaviour that can be added to entities. This must be called before the behaviour can be used.
 	 * @param {string} name The name of the added behaviour.
-	 * @param {class(dusk.entities.sgui.Entity) extends dusk.entities.behave.Behave} behaviour The behaviour to register.
+	 * @param {(class|object)} behaviour The behaviour to register, must be a subclass of dusk.sgui.behave.Behave or a
+	 *  classless behaviour.
 	 * @since 0.0.18-alpha
 	 */
 	entities.registerBehaviour = function(name, behaviour) {
@@ -128,8 +130,7 @@ load.provide("dusk.entities", function() {
 	/** Returns a constructor for the specified behaviour, 
 	 *  provided it has been registered beforehand with {@link dusk.entities.registerBehaviour}.
 	 * @param {string} name The name of the behaviour to look up.
-	 * @return {?class(dusk.entities.sgui.Entity) extends dusk.entities.behave.Behave} A constructor for the specified type, 
-	 *  or null if it doesn't exist.
+	 * @return {?(class|object)} A constructor for the specified type, or null if it doesn't exist.
 	 * @since 0.0.18-alpha
 	 */
 	entities.getBehaviour = function(name) {

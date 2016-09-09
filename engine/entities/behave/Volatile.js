@@ -14,13 +14,14 @@ load.provide("dusk.entities.behave.Volatile", function() {
 	 * The entity it collides with must match a function (i.e. make it return true) specified by the behaviour property
 	 * `"killedBy"`. If this function is absent, then any collision will terminate it.
 	 * 
-	 * @extends dusk.entities.behave.Behave
-	 * @param {?dusk.entities.sgui.Entity} entity The entity this behaviour is attached to.
-	 * @constructor
 	 * @memberof dusk.entities.behave
 	 * @extends dusk.entities.behave.Behave
 	 */
 	class Volatile extends Behave {
+		/** Creates a new Volatile behaviour.
+		 * 
+		 * @param {dusk.entities.sgui.Entity} entity The entity this behaviour will act with.
+		 */
 		constructor(entity) {
 			super(entity);
 			
