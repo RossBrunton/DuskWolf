@@ -23,7 +23,7 @@ load.provide("dusk.input.sgui.ControlConfig", function() {
 	 * @extends dusk.sgui.Group
 	 * @memberof dusk.input.sgui
 	 */
-	class ControlConfig extends Component {
+	class ControlConfig extends Group {
 		/** Creates a new ControlConfig component.
 		 * 
 		 * @param {dusk.sgui.Component} parent The container that this component is in.
