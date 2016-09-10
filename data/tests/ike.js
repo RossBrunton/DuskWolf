@@ -132,7 +132,7 @@ load.provide("tests.ike", function() {
 		});
 	};
 	
-	items.items.createNewType("ragnel", {"stats":{"def":"(+ 5)"}});
+	items.items.createNewType("ragnel", {"stats":{"def_mod":"(+ 5)"}});
 	
 	window.ikeInvent = new Invent(1, "1", 1);
 	ike.layer("items").addBlock("invent", ikeInvent);

@@ -572,7 +572,7 @@ load.provide("dusk.items.Inventory", function() {
 		 * @static
 		 */
 		static refLoad(data, unref) {
-			var invent = new items.Invent(data[1], data[2], data[3]);
+			var invent = new Inventory(data[1], data[2], data[3]);
 			var items = data[0];
 			
 			for(var i = 0; i < items.length; i ++) {
@@ -589,15 +589,7 @@ load.provide("dusk.items.Inventory", function() {
 		 * @since 0.0.21-alpha
 		 */
 		refClass() {
-			return "dusk.items.Invent";
-		}
-		
-		/** Returns the name of the class for use in saving.
-		 * @return {string} The string "dusk.items.Invent".
-		 * @since 0.0.21-alpha
-		 */
-		static refClass() {
-			return "dusk.items.Invent";
+			return "dusk.items.Inventory";
 		}
 		
 		/** Returns a string representation of the inventory, and all it's items.

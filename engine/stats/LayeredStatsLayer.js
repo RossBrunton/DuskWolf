@@ -145,7 +145,7 @@ load.provide("dusk.stats.LayeredStatsLayer", function() {
 		 * @private
 		 */
 		_toList(block, field) {
-			if(items && block instanceof Invent) {
+			if(Invent && block instanceof Invent) {
 				var out = [];
 				block.forEach((function(item, slot) {
 					if(item.get("stats")) {
