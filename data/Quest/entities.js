@@ -11,7 +11,7 @@ load.provide("quest.entities", function() {
 	load.require("dusk.stats.behave.StatLoader");
 	var items = load.require("dusk.items");
 	var Invent = load.require("dusk.items.Inventory");
-	var stats = load.require("dusk.stats");
+	var LayeredStats = load.require("dusk.stats.LayeredStats");
 	var store = load.require("dusk.stats.store");
 	var at = load.require("dusk.tiles.sgui.extras.animationTypes");
 	
@@ -96,7 +96,7 @@ load.provide("quest.entities", function() {
 	};
 	
 	store.addGenerator("evil", function() {
-		var l = new stats.LayeredStats("evil", "quest.entities");
+		var l = new LayeredStats("evil", "quest.entities");
 		
 		_basic(l);
 		
@@ -106,7 +106,7 @@ load.provide("quest.entities", function() {
 	});
 	
 	store.addGenerator("ally", function() {
-		var l = new stats.LayeredStats("ally", "quest.entities");
+		var l = new LayeredStats("ally", "quest.entities");
 		
 		_basic(l);
 		

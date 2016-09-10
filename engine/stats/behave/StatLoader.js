@@ -5,7 +5,7 @@
 load.provide("dusk.stats.behave.StatLoader", function() {
 	var entities = load.require("dusk.entities");
 	var Behave = load.require("dusk.entities.behave.Behave");
-	var stats = load.require("dusk.stats");
+	var LayeredStats = load.require("dusk.stats.LayeredStats");
 	var store = load.require("dusk.stats.store");
 	
 	/* @class dusk.stats.behave.StatLoader

@@ -360,7 +360,7 @@ load.provide("quest", function() {
 	dusk.startGame();
 	
 	window.ss = new SaveSpec("ss", "ss");
-	ss.add("dusk.stats", "stats", {});
+	ss.add("dusk.stats.LayeredStats", "stats", {});
 	
 	return quest;
 });

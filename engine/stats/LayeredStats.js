@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.stats", function() {
+load.provide("dusk.stats.LayeredStats", function() {
 	var utils = load.require("dusk.utils");
 	var Range = load.require("dusk.utils.Range");
 	var EventDispatcher = load.require("dusk.utils.EventDispatcher");
@@ -63,232 +63,243 @@ load.provide("dusk.stats", function() {
 	 * - layeredstats-block: The block being processed.
 	 * 
 	 * @since 0.0.21-alpha
-	 * @constructor
-	 * @param {string} name The name of this particular LayeredStats.
-	 * @param {string} pack A package that should be imported as a dependency for this layeredstats. Probably pointless.
-	 * @param {array<string>} layerNames An array of layer names, used to refer to them rather than numbers. This should
-	 * be specified in bottom-up order.
+	 * @memberof dusk.stats
 	 */
-	stats.LayeredStats = function(name, pack, layerNames) {
-		/** The name of this particular LayeredStats.
-		 * @type string
-		 */
-		this.name = name;
-		/** The package required to import this LayeredStats.
+	class LayeredStats {
+		/** Creates a new LayeredStats instance
 		 * 
-		 * I don't see why this would be usefull...
-		 * @type string
+		 * @param {string} name The name of this particular LayeredStats.
+		 * @param {string} pack A package that should be imported as a dependency for this layeredstats. Probably
+		 *  pointless.
+		 * @param {array<string>} layerNames An array of layer names, used to refer to them rather than numbers. This
+		 *  should be specified in bottom-up order.
 		 */
-		this.pack = pack;
-		
-		/** An array storing all the LayeredStatsLayer instances.
-		 * @type array<dusk.stats.LayeredStatsLayer>
-		 * @private
-		 */
-		this._layers = [];
-		
-		/** The layer names, in the same order as the layers.
-		 * @type array<string>
-		 */
-		this.layerNames = layerNames?layerNames:[];
-		
-		/** The extras associated with this LayeredStats.
-		 * @type Map<string, *>
-		 * @private
-		 */
-		this._extras = new Map();
-	};
-	
-	/** Returns the LayeredStatsLayer with the given name or at the location.
-	 * @param {string|integer} The location or name of the layer.
-	 * @return {dusk.stats.LayeredStatsLayer} The layer at this location.
-	 */
-	stats.LayeredStats.prototype.layer = function(layer) {
-		var layerno = this._lookupLayer(layer);
-		
-		if(!this._layers[layerno]) {
-			this._layers[layerno] = new LayeredStatsLayer(layer);
-		}
-		
-		return this._layers[layerno];
-	};
-	
-	/** Returns the value, minimum and maximums of the specified field.
-	 * @param {string} field The field to look up.
-	 * @param {integer|string=Number.MAX_SAFE_INTEGER} until Any layers higher than this one will not be processed.
-	 * @return {array<*>} A `[value, min, max]` triplet with the calculated values.
-	 */
-	stats.LayeredStats.prototype.getAll = function(field, until) {
-		var min = Number.MIN_SAFE_INTEGER;
-		var max = Number.MAX_SAFE_INTEGER;
-		var value = 0;
-		if(until == undefined) {
-			until = Number.MAX_SAFE_INTEGER;
-		}else{
-			until = this._lookupLayer(until);
-		}
-		
-		for(var l of this._layers) {
-			if(until-- < 0) break;
+		constructor(name, pack, layerNames) {
+			/** The name of this particular LayeredStats.
+			 * @type string
+			 * @memberof! dusk.stats.LayeredStats#
+			 */
+			this.name = name;
+			/** The package required to import this LayeredStats.
+			 * 
+			 * I don't see why this would be usefull...
+			 * @type string
+			 * @memberof! dusk.stats.LayeredStats#
+			 */
+			this.pack = pack;
 			
-			if(l) {
-				var out = l.getAll(field, value, min, max);
-				value = out[0];
-				min = out[1];
-				max = out[2];
+			/** An array storing all the LayeredStatsLayer instances.
+			 * @type array<dusk.stats.LayeredStatsLayer>
+			 * @private
+			 * @memberof! dusk.stats.LayeredStats#
+			 */
+			this._layers = [];
+			
+			/** The layer names, in the same order as the layers.
+			 * @type array<string>
+			 * @memberof! dusk.stats.LayeredStats#
+			 */
+			this.layerNames = layerNames?layerNames:[];
+			
+			/** The extras associated with this LayeredStats.
+			 * @type Map<string, *>
+			 * @private
+			 * @memberof! dusk.stats.LayeredStats#
+			 */
+			this._extras = new Map();
+		}
+		
+		/** Returns the LayeredStatsLayer with the given name or at the location.
+		 * @param {(string|integer)} The location or name of the layer.
+		 * @return {dusk.stats.LayeredStatsLayer} The layer at this location.
+		 */
+		layer(layer) {
+			var layerno = this._lookupLayer(layer);
+			
+			if(!this._layers[layerno]) {
+				this._layers[layerno] = new LayeredStatsLayer(layer);
+			}
+			
+			return this._layers[layerno];
+		}
+		
+		/** Returns the value, minimum and maximums of the specified field.
+		 * @param {string} field The field to look up.
+		 * @param {(integer|string)=} until Layers higher than this one will not be processed, deafult is all layers.
+		 * @return {array<*>} A `[value, min, max]` triplet with the calculated values.
+		 */
+		getAll(field, until) {
+			var min = Number.MIN_SAFE_INTEGER;
+			var max = Number.MAX_SAFE_INTEGER;
+			var value = 0;
+			if(until == undefined) {
+				until = Number.MAX_SAFE_INTEGER;
+			}else{
+				until = this._lookupLayer(until);
+			}
+			
+			for(var l of this._layers) {
+				if(until-- < 0) break;
+				
+				if(l) {
+					var out = l.getAll(field, value, min, max);
+					value = out[0];
+					min = out[1];
+					max = out[2];
+				}
+			}
+			
+			return [value, min, max];
+		}
+		
+		/** Returns the value the specified field.
+		 * @param {string} field The field to look up.
+		 * @param {(integer|string)=} until Layers higher than this one will not be processed, default is all layers.
+		 * @return {*} The value of the field.
+		 */
+		getValue(field, until) {
+			return this.getAll(field, until)[0];
+		}
+		
+		/** Returns the value the specified field.
+		 * @param {string} field The field to look up.
+		 * @param {(integer|string)=} until Layers higher than this one will not be processed, default is all layers.
+		 * @return {*} The value of the field.
+		 */
+		get(field, until) {
+			return this.getAll(field, until)[0];
+		}
+		
+		/** Returns the minimum value the specified field.
+		 * @param {string} field The field to look up.
+		 * @param {(integer|string)=} until Layers higher than this one will not be processed, default is all layers.
+		 * @return {*} The minimum value of the field.
+		 */
+		getMin(field, until) {
+			return this.getAll(field, until)[1];
+		}
+		
+		/** Returns the maximum value the specified field.
+		 * @param {string} field The field to look up.
+		 * @param {(integer|string)=} until Layers higher than this one will not be processed, default is all layers.
+		 * @return {*} The maximum value of the field.
+		 */
+		getMax(field, until) {
+			return this.getAll(field, until)[2];
+		}
+		
+		/** Returns the value of the specified field, and rounds it to the nearest integer.
+		 * @param {string} field The field to look up.
+		 * @param {(integer|string)=} until Layers higher than this one will not be processed, default is all layers.
+		 * @return {integer} The value of the field.
+		 */
+		getValueInt(field, until) {
+			return ~~this.getValue(field, until);
+		}
+		
+		/** Returns the number of the layer, possibly from a string.
+		 * 
+		 * If the param is a string, the layer number with that name will be returned. If it is an integer, then it is
+		 * just returned.
+		 * @param {(string|integer)} layer The layer name or value to look up.
+		 * @return {integer} The layer this value refers to.
+		 * @private
+		 */
+		_lookupLayer(layer) {
+			if(!isNaN(layer)) return layer;
+			
+			for(var i = 0; i < this.layerNames.length; i ++) {
+				if(this.layerNames[i] == layer) return i;
+			}
+			
+			//if(!layer) return this._layers.length-1;
+			
+			console.log("Unknown layer "+layer);
+			return undefined;
+		}
+		
+		/** For each layer, calls it's `tickDown` method, which will reduce the field value by 1 on all blocks. If the field
+		 * value goes to 0, then that block is removed.
+		 * 
+		 * This can be used for status conditions that expire after a few turns, for example.
+		 * @param {string} field The field to tick down.
+		 */
+		tickDown(field) {
+			for(var l of this._layers) {
+				l.tickDown(field);
 			}
 		}
 		
-		return [value, min, max];
-	};
-	
-	/** Returns the value the specified field.
-	 * @param {string} field The field to look up.
-	 * @param {integer|string=Number.MAX_SAFE_INTEGER} until Any layers higher than this one will not be processed.
-	 * @return {*} The value of the field.
-	 */
-	stats.LayeredStats.prototype.getValue = function(field, until) {
-		return this.getAll(field, until)[0];
-	};
-	
-	/** Returns the value the specified field.
-	 * @param {string} field The field to look up.
-	 * @param {integer|string=Number.MAX_SAFE_INTEGER} until Any layers higher than this one will not be processed.
-	 * @return {*} The value of the field.
-	 */
-	stats.LayeredStats.prototype.get = function(field, until) {
-		return this.getAll(field, until)[0];
-	};
-	
-	/** Returns the minimum value the specified field.
-	 * @param {string} field The field to look up.
-	 * @param {integer|string=Number.MAX_SAFE_INTEGER} until Any layers higher than this one will not be processed.
-	 * @return {*} The minimum value of the field.
-	 */
-	stats.LayeredStats.prototype.getMin = function(field, until) {
-		return this.getAll(field, until)[1];
-	};
-	
-	/** Returns the maximum value the specified field.
-	 * @param {string} field The field to look up.
-	 * @param {integer|string=Number.MAX_SAFE_INTEGER} until Any layers higher than this one will not be processed.
-	 * @return {*} The maximum value of the field.
-	 */
-	stats.LayeredStats.prototype.getMax = function(field, until) {
-		return this.getAll(field, until)[2];
-	};
-	
-	/** Returns the value of the specified field, and rounds it to the nearest integer.
-	 * @param {string} field The field to look up.
-	 * @param {integer|string=Number.MAX_SAFE_INTEGER} until Any layers higher than this one will not be processed.
-	 * @return {integer} The value of the field.
-	 */
-	stats.LayeredStats.prototype.getValueInt = function(field, until) {
-		return ~~this.getValue(field, until);
-	};
-	
-	/** Returns the number of the layer, possibly from a string.
-	 * 
-	 * If the param is a string, the layer number with that name will be returned. If it is an integer, then it is
-	 * just returned.
-	 * @param {string|integer} layer The layer name or value to look up.
-	 * @return {integer} The layer this value refers to.
-	 * @private
-	 */
-	stats.LayeredStats.prototype._lookupLayer = function(layer) {
-		if(!isNaN(layer)) return layer;
-		
-		for(var i = 0; i < this.layerNames.length; i ++) {
-			if(this.layerNames[i] == layer) return i;
+		/** Gets the extra data with the given key.
+		 * @param {string} name The extra's name.
+		 * @return {*} The data stored under this name.
+		 */
+		getExtra(name) {
+			if(!this._extras.has(name)) return null;
+			return this._extras.get(name);
 		}
 		
-		//if(!layer) return this._layers.length-1;
+		/** Sets the extra data to the given key.
+		 * @param {string} name The extra's name.
+		 * @param {*} The value to set to this extra.
+		 */
+		setExtra(name, object) {
+			this._extras.set(name, object);
+		}
 		
-		console.log("Unknown layer "+layer);
-		return undefined;
-	};
-	
-	/** For each layer, calls it's `tickDown` method, which will reduce the field value by 1 on all blocks. If the field
-	 * value goes to 0, then that block is removed.
-	 * 
-	 * This can be used for status conditions that expire after a few turns, for example.
-	 * @param {string} field The field to tick down.
-	 */
-	stats.LayeredStats.prototype.tickDown = function(field) {
-		for(var l of this._layers) {
-			l.tickDown(field);
+		/** Stores a reference to this LayeredStats so it can be saved with the save system.
+		 * @param {function(*):*} ref The reffing function.
+		 * @return {array} Data describing this LayeredStats.
+		 */
+		refSave(ref) {
+			var out = [];
+			
+			for(var i = 0; i < this._layers.length; i ++) {
+				out[i] = ref(this._layers[i]);
+			}
+			
+			var extras = {};
+			for(var e of this._extras) {
+				extras[e[0]] = ref(e[1]);
+			}
+			
+			return [out, this.name, this.pack, this.layerNames, extras];
+		}
+		
+		/** The load function for a LayeredStats.
+		 * @param {array} data The data to load.
+		 * @param {function(*):*} The unreffing function.
+		 * @return {dusk.stats.LayeredStats} The LayeredStats represented by the save data reference.
+		 */
+		static refLoad(data, unref) {
+			var inst = new stats.LayeredStats(data[1], data[2], data[3]);
+			var layers = data[0];
+			
+			for(var i = 0; i < layers.length; i ++) {
+				inst._layers[i] = unref(layers[i]);
+			}
+			
+			for(var p in data[4]) {
+				inst.setExtra(p, unref(data[4][p]));
+			}
+			
+			return inst;
+		}
+		
+		/** Returns the package used to load a LayeredStats from save data.
+		 * @return {string} The string "dusk.stats.LayeredStats".
+		 */
+		refClass() {
+			return "dusk.stats.LayeredStats";
+		}
+		
+		/** Returns a string representation of this LayeredStats.
+		 * @return {string} A string representation of this LayeredStats.
+		 */
+		toString() {
+			return "[LayeredStats "+this.name+"]";
 		}
 	}
 	
-	/** Gets the extra data with the given key.
-	 * @param {string} name The extra's name.
-	 * @return {*} The data stored under this name.
-	 */
-	stats.LayeredStats.prototype.getExtra = function(name) {
-		if(!this._extras.has(name)) return null;
-		return this._extras.get(name);
-	};
-	
-	/** Sets the extra data to the given key.
-	 * @param {string} name The extra's name.
-	 * @param {*} The value to set to this extra.
-	 */
-	stats.LayeredStats.prototype.setExtra = function(name, object) {
-		this._extras.set(name, object);
-	};
-	
-	/** Stores a reference to this LayeredStats so it can be saved with the save system.
-	 * @param {function(*):*} ref The reffing function.
-	 * @return {array} Data describing this LayeredStats.
-	 */
-	stats.LayeredStats.prototype.refSave = function(ref) {
-		var out = [];
-		
-		for(var i = 0; i < this._layers.length; i ++) {
-			out[i] = ref(this._layers[i]);
-		}
-		
-		var extras = {};
-		for(var e of this._extras) {
-			extras[e[0]] = ref(e[1]);
-		}
-		
-		return [out, this.name, this.pack, this.layerNames, extras];
-	};
-	
-	/** The load function for a LayeredStats.
-	 * @param {array} data The data to load.
-	 * @param {function(*):*} The unreffing function.
-	 * @return {dusk.stats.LayeredStats} The LayeredStats represented by the save data reference.
-	 */
-	stats.refLoad = function(data, unref) {
-		var inst = new stats.LayeredStats(data[1], data[2], data[3]);
-		var layers = data[0];
-		
-		for(var i = 0; i < layers.length; i ++) {
-			inst._layers[i] = unref(layers[i]);
-		}
-		
-		for(var p in data[4]) {
-			inst.setExtra(p, unref(data[4][p]));
-		}
-		
-		return inst;
-	};
-	
-	/** Returns the package used to load a LayeredStats from save data.
-	 * @return {string} The string "dusk.stats".
-	 */
-	stats.LayeredStats.prototype.refClass = stats.LayeredStats.refClass = function() {
-		return "dusk.stats";
-	};
-	
-	/** Returns a string representation of this LayeredStats.
-	 * @return {string} A string representation of this LayeredStats.
-	 */
-	stats.LayeredStats.prototype.toString = function() {
-		return "[LayeredStats "+this.name+"]";
-	};
-	
-	return stats;
+	return LayeredStats;
 });

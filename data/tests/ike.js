@@ -3,7 +3,7 @@
 "use strict";
 
 load.provide("tests.ike", function() {
-	var stats = load.require("dusk.stats");
+	var LayeredStats = load.require("dusk.stats.LayeredStats");
 	var store = load.require("dusk.stats.store");
 	var SaveSpec = load.require("dusk.save.SaveSpec");
 	window.save = load.require("dusk.save");
@@ -77,7 +77,7 @@ load.provide("tests.ike", function() {
 	};
 	
 	store.addGenerator("fe_character", function(level) {
-		var ls = new stats.LayeredStats("fe_character", "ike",
+		var ls = new LayeredStats("fe_character", "ike",
 			["base", "starting_stats", "class_1", "levels_1", "class_2", "levels_2", "items"]
 		);
 		ls.setExtra("level", level);

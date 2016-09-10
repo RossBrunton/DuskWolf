@@ -2,6 +2,13 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
+/** TODO: Document
+ *
+ * @namespace
+ * @name stats
+ * @memberof dusk
+ */
+
 load.provide("dusk.stats.store", function() {
 	var utils = load.require("dusk.utils");
 	var Range = load.require("dusk.utils.Range");
