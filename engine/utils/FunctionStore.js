@@ -2,7 +2,7 @@
 //Licensed under the MIT license, see COPYING.txt for details
 "use strict";
 
-load.provide("dusk.utils.functionStore", function() {
+load.provide("dusk.utils.functionStore", function(self) {
 	var utils = load.require("dusk.utils");
 	
 	/** Function stores provide a way to store functions and refer to them as strings.
@@ -72,6 +72,7 @@ load.provide("dusk.utils.functionStore", function() {
 	functionStore.vars.set("undefined", undefined);
 	functionStore.vars.set("null", null);
 	functionStore.vars.set("NaN", NaN);
+	functionStore.vars.set("self", self);
 	
 	/** Stores the raw functions
 	 * 
@@ -133,7 +134,7 @@ load.provide("dusk.utils.functionStore", function() {
 				return _raws.get(this.val);
 			}
 			
-			throw TypeError("Token "+this.val+" is not a stored function or variable");
+			throw ReferenceError("Token "+this.val+" is not a stored function or variable");
 		}
 	}
 	
@@ -264,8 +265,17 @@ load.provide("dusk.utils.functionStore", function() {
 						return Function.prototype.bind.apply(_letfn, [undefined].concat(sexpr.splice(1)));
 					}
 				}else{
+					var fnToBind = sexpr[0];
+					if(fnToBind instanceof _fsToken) {
+						fnToBind = fnToBind.resolve();
+					}else if(Array.isArray(fnToBind)) {
+						fnToBind = _bindSexpr(true, fnToBind);
+					}else{
+						throw new TypeError("Tried to call "+fnToBind+" as a function!");
+					}
+					
 					var fn = Function.prototype.bind.apply(
-						sexpr[0].resolve(), [undefined].concat(sexpr.splice(1).map(_bindSexpr.bind(undefined, true)))
+						fnToBind, [undefined].concat(sexpr.splice(1).map(_bindSexpr.bind(undefined, true)))
 					);
 					if(call) return fn.call(undefined);
 					return fn;
@@ -346,7 +356,6 @@ load.provide("dusk.utils.functionStore", function() {
 	functionStore.register("getf", function(a, b){return a.get(b)});
 	functionStore.register("setf", function(a, b, c){return a.set(b, c), c});
 	functionStore.register("callf", function(a, b){return a[b].apply(a, Array.prototype.splice.call(arguments, 2))});
-	functionStore.register("global", function(){return window});
 	
 	return functionStore;
 });
