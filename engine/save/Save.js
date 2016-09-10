@@ -23,6 +23,8 @@ load.provide("dusk.save", function() {
 	 * and `dusk.save.IRefSavableInstance`.
 	 * 
 	 * @since 0.0.21-alpha
+	 * @memberof dusk
+	 * @namespace
 	 */
 	var save = {};
 	
@@ -54,9 +56,7 @@ load.provide("dusk.save", function() {
 	};
 	
 	
-	/** @class dusk.save.ISavable
-	 * 
-	 * @classdesc Objects implementing this interface will be able to load and save data.
+	/** Objects implementing this interface will be able to load and save data.
 	 *
 	 * An interface; it is expected all subclasses of this supply the methods on this class.
 	 * 
@@ -70,32 +70,34 @@ load.provide("dusk.save", function() {
 	 * - `save`
 	 * - `load`
 	 * 
-	 * @constructor
+	 * @interface
+	 * @memberof dusk.save
 	 * @since 0.0.21-alpha
 	 */
-	save.ISavable = {};
+	var ISavable = {};
+	save.ISavable = ISavable;
 
 	/** Should save data of the specified type, and return what was saved.
 	 * 
 	 * @param {string} type The type of thing to save, will be supplied to the load function.
 	 * @param {?*} args Any extra data required to save. This is set when this is added to the scheme, and is also sent
 	 *  to the load function.
-	 * @param {function(*):integer|array} ref A function that takes in a basic object or an IRefSavable returns a
+	 * @param {function(*):(integer|array)} ref A function that takes in a basic object or an IRefSavable returns a
 	 *  reference to that variable which will be stored in the save data.
 	 * @return {object} The data that was saved. When it's time to load, this object will be the one loaded. Must be a
 	 *  simple object (no prototypes).
 	 */
-	save.ISavable.save = function(type, args, ref) {};
+	ISavable.save = function(type, args, ref) {};
 	/** Should load previously saved data of the specified type.
 	 * 
 	 * @param {object} data The data that was previously saved.
 	 * @param {string} type The type of thing to load.
-	 * @param {function(integer|array):*} unref A function that takes in a reference saved with the ref function on
+	 * @param {function((integer|array)):*} unref A function that takes in a reference saved with the ref function on
 	 *  saving, and returns the object that was saved.
 	 * @param {?*} args The arguments to load, this will be the same as the `args` parameter used in the saving
 	 *  function.
 	 */
-	save.ISavable.load = function(data, type, args, unref) {};
+	ISavable.load = function(data, type, args, unref) {};
 	
 	if("tcheckIgnore" in window) window.tcheckIgnore("dusk.save.ISavable");
 	
@@ -113,22 +115,24 @@ load.provide("dusk.save", function() {
 	 * 
 	 * - `refLoad`
 	 * 
-	 * @constructor
+	 * @interface
+	 * @memberof dusk.save
 	 * @since 0.0.21-alpha
 	 */
-	save.IRefSavable = {};
+	var IRefSavable = {};
+	save.IRefSavable = IRefSavable;
 	
 	/** Should load previously saved data of the specified type.
 	 * 
 	 * The data comes from `IRefSavableInstance#refSave`, and loading should create an equivalent object.
 	 * 
-	 * @param {function(integer|array):*} unref A function that takes in a reference saved with the ref function on
+	 * @param {function((integer|array)):*} unref A function that takes in a reference saved with the ref function on
 	 *  saving, and returns the object that was saved.
 	 * @param {*} data The data that was previously saved.
 	 * @return {?promise(*)} A promise that resolves when the data is loaded, if undefined is returned, it will be
 	 *  considered loaded.
 	 */
-	save.IRefSavable.refLoad = function(data, unref) {};
+	IRefSavable.refLoad = function(data, unref) {};
 	
 	if("tcheckIgnore" in window) window.tcheckIgnore("dusk.save.IRefSavable");
 	
@@ -146,26 +150,30 @@ load.provide("dusk.save", function() {
 	 * - `refSave`
 	 * - `refClass`
 	 * 
-	 * @constructor
+	 * @interface
+	 * @memberof dusk.save
 	 * @since 0.0.21-alpha
 	 */
-	save.IRefSavableInstance = {};
+	var IRefSavableInstance = {};
+	save.IRefSavableInstance = IRefSavableInstance;
 	
 	/** Should save this object such that it can be loaded via `{@link dusk.save.IRefSavable#refLoad}` of its
 	 *  constructor.
 	 * 
-	 * @param {function(*):integer|array} ref A function that takes in a basic object or an IRefSavable returns a
+	 * @param {function(*):(integer|array)} ref A function that takes in a basic object or an IRefSavable returns a
 	 *  reference to that variable which will be stored in the save data.
 	 * @return {*} A representation of this object. Must be a simple object (no prototypes).
+	 * @instance
 	 */
-	save.IRefSavableInstance.refSave = function(ref) {};
+	IRefSavableInstance.refSave = function(ref) {};
 	
 	/** Should return the path (from window) of this object's constructor. This object must implement
 	 *  `{@link dusk.save.IRefSavable}`. This will be used to load this object.
-	 * 
+	 *  
+	 * @instance
 	 * @return {string} Path to this object's constructor.
 	 */
-	save.IRefSavableInstance.refClass = function() {};
+	IRefSavableInstance.refClass = function() {};
 	
 	if("tcheckIgnore" in window) window.tcheckIgnore("dusk.save.IRefSavableInstance");
 	
@@ -173,30 +181,38 @@ load.provide("dusk.save", function() {
 	/** Exception representing that save data is invalid or corrupt.
 	 * 
 	 * @extends Error
-	 * @constructor
+	 * @memberof dusk.save
 	 * @since 0.0.21-alpha
 	 */
-	save.SaveIntegrityError = function() {
-		Error.call(this);
-		
-		this.name = "SaveIntegrityError";
-		this.message = "The save data is corrupt";
-	};
-	save.SaveIntegrityError.prototype = Object.create(Error.prototype);
+	class SaveIntegrityError extends Error {
+		/** Creates a new SaveIntegrityError.
+		 */
+		constructor() {
+			super();
+			
+			this.name = "SaveIntegrityError";
+			this.message = "The save data is corrupt";
+		}
+	}
+	save.SaveIntegrityError = SaveIntegrityError;
 	
 	/** Exception representing some error loading from or saving to a source.
 	 * 
 	 * @extends Error
-	 * @constructor
+	 * @memberof dusk.save
 	 * @since 0.0.21-alpha
 	 */
-	save.SaveSourceError = function(msg) {
-		Error.call(this);
-		
-		this.name = "SaveSourceError";
-		this.message = msg;
-	};
-	save.SaveSourceError.prototype = Object.create(Error.prototype);
+	class SaveSourceError extends Error {
+		/** Creates a new SaveSourceError
+		 */
+		constructor(msg) {
+			Error.call(this);
+			
+			this.name = "SaveSourceError";
+			this.message = msg;
+		}
+	}
+	save.SaveSourceError = SaveSourceError;
 	
 	return save;
 }, {"alsoSeal":["SaveIntegrityError", "SaveSourceError", "ISavable", "IRefSavable", "IRefSavableInstance"]});

@@ -43,21 +43,23 @@ load.provide("dusk.save.SaveTest", function() {
 load.provide("dusk.save.SaveTestInstance", function() {
 	var save = load.require("dusk.save");
 	
-	var SaveTestInstance = function(value) {
-		this.value = value;
-	};
-	
-	SaveTestInstance.refLoad = function(data, unref) {
-		return new SaveTestInstance(unref(data));
-	};
-	
-	SaveTestInstance.prototype.refSave = function(ref) {
-		return ref(this.value);
-	};
-	
-	SaveTestInstance.prototype.refClass = function() {
-		return "dusk.save.SaveTestInstance";
-	};
+	class SaveTestInstance {
+		constructor(value) {
+			this.value = value;
+		}
+		
+		static refLoad(data, unref) {
+			return new SaveTestInstance(unref(data));
+		}
+		
+		refSave(ref) {
+			return ref(this.value);
+		}
+		
+		refClass() {
+			return "dusk.save.SaveTestInstance";
+		}
+	}
 	
 	return SaveTestInstance;
 });
