@@ -272,7 +272,7 @@ load.provide("dusk.stats.LayeredStats", function() {
 		 * @return {dusk.stats.LayeredStats} The LayeredStats represented by the save data reference.
 		 */
 		static refLoad(data, unref) {
-			var inst = new LayeredStats(data[1], data[2], data[3]);
+			var inst = new stats.LayeredStats(data[1], data[2], data[3]);
 			var layers = data[0];
 			
 			for(var i = 0; i < layers.length; i ++) {

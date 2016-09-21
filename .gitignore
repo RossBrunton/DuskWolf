@@ -10,3 +10,4 @@ tcheck.js
 /engine/deps.json
 /tests/deps.json
 /doc/
+/node_modules/
