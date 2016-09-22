@@ -22,6 +22,7 @@ load.provide("dusk.sgui.TextBox", function() {
 	 * switch away from the TextBox.
 	 * 
 	 * @extends dusk.sgui.Label
+	 * @memberof dusk.text.sgui
 	 * @constructor
 	 */
 	class TextBox extends ValidatingLabel {
