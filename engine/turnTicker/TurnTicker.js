@@ -99,7 +99,7 @@ load.provide("dusk.TurnTicker", function() {
 		
 		/** Ensures the order of the turn takers, called automatically when a turn function is added, but should be called
 		 *  manually if the turn order may change later.
-		 * @return {Promise(boolean}} A promise that resolves to true when the order has been reset.
+		 * @return {Promise(boolean)} A promise that resolves to true when the order has been reset.
 		 */
 		ensureOrder() {
 			return new Promise((function(fulfill, reject) {

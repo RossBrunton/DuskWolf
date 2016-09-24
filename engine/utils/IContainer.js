@@ -171,7 +171,7 @@ load.provide("dusk.utils.containerUtils", function() {
 	 *  arguments. The first is the value of the element, the second is the key of the element (if available), and the
 	 *  third is the container being used. The third element may be either an IContainer, an object or an array.
 	 * @param {(object|array|IContainer)} container The object to iterate.
-	 * @param {function(*, ?*, array|object|IContainer)} callback The function to call for each element.
+	 * @param {function(*, ?*, (array|object|IContainer))} callback The function to call for each element.
 	 * @param {*} thisArg Will be the "this" value of the function called.
 	 */
 	containerUtils.forEach = function(container, callback, thisArg) {

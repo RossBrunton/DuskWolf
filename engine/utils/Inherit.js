@@ -255,7 +255,7 @@ load.provide("dusk.utils.Inheritable", function(){
 			 */
 			this.type = type;
 			/** The container this inheritable is connected to.
-			 * @type dusk.utils.InheritableContainer}
+			 * @type dusk.utils.InheritableContainer
 			 * @memberof! dusk.utils.Inheritable#
 			 */
 			this.container = container;

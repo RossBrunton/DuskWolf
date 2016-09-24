@@ -94,8 +94,8 @@ load.provide("dusk.input.controls", function() {
 	 * 
 	 * If the control is already registered, this does nothing.
 	 * @param {string} name The name of the controll to add.
-	 * @param {integer|string} defaultKey The default key to fire this control on, as a keycode or name.
-	 * @param {?integer|string} defaultButton The default button to fire this control on, either a button ID, or an
+	 * @param {(integer|string)} defaultKey The default key to fire this control on, as a keycode or name.
+	 * @param {?(integer|string)} defaultButton The default button to fire this control on, either a button ID, or an
 	 *  axis description.
 	 * @param {?string} The translation (I.E. layout) that the key was specified in, but only if you want this control
 	 *  to be translated.
@@ -135,7 +135,7 @@ load.provide("dusk.input.controls", function() {
 	
 	/** Registers a key to a control; when that key is pressed, the control will fire.
 	 * @param {string} name The name of the control to add the key to.
-	 * @param {integer|string} key The key to set the control to, as a keycode or name.
+	 * @param {(integer|string)} key The key to set the control to, as a keycode or name.
 	 */
 	controls.mapKey = function(name, key) {
 		if(!(name in _mappings)) return;
@@ -152,7 +152,7 @@ load.provide("dusk.input.controls", function() {
 	/** Registers a button or axis to a control; when that button is pressed, or the axis is greater than the threshold,
 	 *  the control will fire.
 	 * @param {string} name The name of the control to add the button/axis to.
-	 * @param {integer|string} button The button ID, or the axis description to register to the control.
+	 * @param {(integer|string)} button The button ID, or the axis description to register to the control.
 	 */
 	controls.mapButton = function(name, button) {
 		if(!(name in _mappings)) return;
@@ -176,7 +176,7 @@ load.provide("dusk.input.controls", function() {
 	 * If either of the specified values match the control, then this will be true.
 	 * @param {string} name The name of the control to check.
 	 * @param {integer} key The keycode of the key to check.
-	 * @param {integer|string} button The button ID or an axis description to check.
+	 * @param {(integer|string)} button The button ID or an axis description to check.
 	 * @return {boolean} Whether either the button or the key match the specified control.
 	 */
 	controls.check = function(name, key, button) {
@@ -196,7 +196,7 @@ load.provide("dusk.input.controls", function() {
 	
 	/** Checks if a button or axis description matches the specified control.
 	 * @param {string} name The control to check.
-	 * @param {integer|string} button The axis or button to check.
+	 * @param {(integer|string)} button The axis or button to check.
 	 * @return {boolean} Whether the specified button or axis matches the control.
 	 */
 	controls.checkButton = function(name, button) {
@@ -288,7 +288,7 @@ load.provide("dusk.input.controls", function() {
 	 * 
 	 * @param {string} type The type of thing to save; must be `"bindings"`.
 	 * @param {array} arg The argument to the save, as described above.
-	 * @param {function(*):integer|array} The reffing function.
+	 * @param {function(*):(integer|array)} The reffing function.
 	 * @return {object} Save data that can be loaded later.
 	 * @since 0.0.21-alpha
 	 */
@@ -317,7 +317,7 @@ load.provide("dusk.input.controls", function() {
 	 * @param {object} data The data that was saved.
 	 * @param {string} type The type of data that was saved.
 	 * @param {array} arg The argument that was used in saving.
-	 * @param {function(array|integer):*} The unreffing function.
+	 * @param {function((array|integer)):*} The unreffing function.
 	 * @since 0.0.21-alpha
 	 */
 	controls.load = function(data, type, arg, unref) {
