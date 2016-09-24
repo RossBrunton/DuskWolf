@@ -95,6 +95,9 @@ load.provide("dusk.sgui", function() {
 	 *  0.
 	 * - `dusk_carcel` is used to trigger the "cancel" event on a component, by default this is the `ESC` key or button
 	 *  1.
+	 *
+	 * @namespace
+	 * @memberof dusk
 	 */
 	var sgui = {};
 	
@@ -283,7 +286,7 @@ load.provide("dusk.sgui", function() {
 	};
 	
 	/** Returns whether the given argument can be used for `set`. It must be either a `Pane` or an object.
-	 * @param {*} An object to check.
+	 * @param {*} root An object to check.
 	 * @return {boolean} Whether the argument is valid.
 	 * @since 0.0.21-alpha
 	 */
@@ -414,7 +417,7 @@ load.provide("dusk.sgui", function() {
 	
 	/** Adds a new type that can be added by specifying it's type. The component must be registered before use.
 	 * @param {string} name The name of the added type.
-	 * @param {class(dusk.sgui.Component, string) extends dusk.sgui.Component} type The type to add.
+	 * @param {class} type The type to add, must extend dusk.sgui.Component.
 	 * @since 0.0.17-alpha
 	 */
 	sgui.registerType = function(name, type) {
@@ -424,8 +427,8 @@ load.provide("dusk.sgui", function() {
 	/** Returns a constructor for the specified component, 
 	 *  provided it has been registered beforehand with {@link dusk.sgui.registerType}.
 	 * @param {string} name The name of the type to look up.
-	 * @return {?class(dusk.sgui.Component, string) extends dusk.sgui.Component} A constructor for the specified type,
-	 *  or null if it doesn't exist.
+	 * @return {?class} A constructor for the specified type (as a subclass of
+	 *  dusk.sgui.Component), or null if it doesn't exist.
 	 * @since 0.0.17-alpha
 	 */
 	sgui.getType = function(name) {
@@ -452,7 +455,7 @@ load.provide("dusk.sgui", function() {
 	
 	/** Adds a new extra that can be accessed using `{@link dusk.sgui.getExtra}`.
 	 * @param {string} name The name of the added extra.
-	 * @param {class(dusk.sgui.Component, string) extends dusk.sgui.extras.Extra} extra The extra to add.
+	 * @param {class} extra The extra to add, must be a subclass of dusk.sgui.extras.Extra.
 	 * @since 0.0.18-alpha
 	 */
 	sgui.registerExtra = function(name, extra) {
@@ -462,8 +465,8 @@ load.provide("dusk.sgui", function() {
 	/** Returns a constructor for the specified extra,
 	 *  provided it has been registered beforehand with `{@link dusk.sgui.registerExtra}`.
 	 * @param {string} name The name of the extra to look up.
-	 * @return {?class(dusk.sgui.Component, string) extends dusk.sgui.extra.Extra} A constructor for the specified extra
-	 *  or null if it doesn't exist.
+	 * @return {?class} A constructor for the specified extra (as a subclass of
+	 *  dusk.sgui.extras.Extra) or null if it doesn't exist.
 	 * @since 0.0.18-alpha
 	 */
 	sgui.getExtra = function(name) {
@@ -580,6 +583,9 @@ load.provide("dusk.sgui.pause", function() {
 	 * 
 	 * When pausing is enabled for a root, the "pause" component will be made invisible, but if it is disabled later,
 	 *  the component will not be made visible again.
+	 *
+	 * @namespace
+	 * @memberof dusk.sgui
 	 */
 	var pause = {};
 	

@@ -9,14 +9,7 @@ load.provide("dusk.sgui.Scroller", function() {
 	var c = load.require("dusk.sgui.c");
 	var Range = load.require("dusk.utils.Range");
 	
-	/** Creates a new Scroller.
-	 * 
-	 * @param {dusk.sgui.Component} parent The container that this component is in.
-	 * @param {string} name The name of the component.
-	 * 
-	 * @class dusk.sgui.Scroller
-	 * 
-	 * @classdesc A scroller is pretty much a scroll bar without the bar. When it is active, the
+	/** A scroller is pretty much a scroll bar without the bar. When it is active, the
 	 *  `{@link dusk.sgui.IContainer.horScroll}` or `{@link dusk.sgui.IContainer.horScroll}` of a container can be
 	 *  altered using the arrow keys.
 	 * 
@@ -29,90 +22,100 @@ load.provide("dusk.sgui.Scroller", function() {
 	 * 
 	 * @extends dusk.sgui.FocusCheckerTile
 	 * @since 0.0.19-alpha
-	 * @constructor
+	 * @memberof dusk.sgui
 	 */
-	var Scroller = function (parent, name) {
-		FocusCheckerTile.call(this, parent, name);
-		
-		/** The orientation of the scroller. Vertical means it scrolls up and down, while horizontal means it scrolls left
-		 *   and right.
+	class Scroller extends FocusCheckerTile {
+		/** Creates a new Scroller.
 		 * 
-		 * Must be a `dusk.sgui.c.ORIENT_*` constant.
-		 * @type integer
-		 * @default dusk.sgui.c.ORIENT_VER
+		 * @param {dusk.sgui.Component} parent The container that this component is in.
+		 * @param {string} name The name of the component.
 		 */
-		this.orientation = c.ORIENT_VER;
-		/** The target that this scroller is scrolling.
-		 * 
-		 * Must be a container, if set to a string, then the string will be interpreted as a path from this component.
-		 * @type dusk.sgui.IContainer|string
+		constructor(parent, name) {
+			super(parent, name);
+			
+			/** The orientation of the scroller. Vertical means it scrolls up and down, while horizontal means it
+			 * scrolls left and right.
+			 * 
+			 * Must be a `dusk.sgui.c.ORIENT_*` constant.
+			 * @type integer
+			 * @default dusk.sgui.c.ORIENT_VER
+			 * @memberof! dusk.sgui.Scroller#
+			 */
+			this.orientation = c.ORIENT_VER;
+			/** The target that this scroller is scrolling.
+			 * 
+			 * Must be a container, if set to a string, then the string will be interpreted as a path from this
+			 *  component.
+			 * 
+			 * @type (dusk.sgui.IContainer|string)
+			 * @memberof! dusk.sgui.Scroller#
+			 */
+			this.target = null;
+			
+			//Prop masks
+			this._mapper.map("orientation", "orientation");
+			this._mapper.map("target", "target");
+			
+			//Listeners
+			this.frame.listen(this._sFrame.bind(this));
+			this.dirPress.listen(this._sDir.bind(this));
+		}
+		
+		/** Called every frame to update the coordianates and check for input.
+		 * @param {object} e The event object.
+		 * @private
 		 */
-		this.target = null;
-		
-		//Prop masks
-		this._mapper.map("orientation", "orientation");
-		this._mapper.map("target", "target");
-		
-		//Listeners
-		this.frame.listen(this._sFrame.bind(this));
-		this.dirPress.listen(this._sDir.bind(this));
-	};
-	Scroller.prototype = Object.create(FocusCheckerTile.prototype);
-	
-	/** Called every frame to update the coordianates and check for input.
-	 * @param {object} e The event object.
-	 * @private
-	 */
-	Scroller.prototype._sFrame = function(e) {
-		if(!this.target) return;
-		
-		if(typeof this.target == "string") {
-			this.target = this.path(this.target);
-		}
-		
-		if(this.orientation == c.ORIENT_HOR) {
-			if(controls.controlActive("sgui_left") && this.active) {
-				this.target.horScroll.value -= this.target.horScroll.stepDown / 60;
-			}
-			if(controls.controlActive("sgui_right") && this.active) {
-				this.target.horScroll.value += this.target.horScroll.stepUp / 60;
+		_sFrame(e) {
+			if(!this.target) return;
+			
+			if(typeof this.target == "string") {
+				this.target = this.path(this.target);
 			}
 			
-			if(this.target.horScroll == null) this.target.horScroll = new Range(0.0, 1.0, 0.0, 0.1, 0.1);
-			
-			this.y = this.target.y + this.target.height - this.height;
-			this.x = this.target.x +~~(((this.target.width - this.width) * this.target.horScroll.getFraction()));
-		}else{
-			if(controls.controlActive("sgui_up") && this.active) {
-				this.target.verScroll.value -= this.target.verScroll.stepDown / 60;
-			}
-			if(controls.controlActive("sgui_down") && this.active) {
-				this.target.verScroll.value += this.target.verScroll.stepUp / 60;
-			}
-			
-			if(this.target.verScroll == null) this.target.verScroll = new Range(0.0, 1.0, 0.0, 0.1, 0.1);
-			this.x = this.target.x + this.target.width - this.width;
-			this.y = this.target.y + ~~(((this.target.height - this.height) * this.target.verScroll.getFraction()));
-		}
-	};
-	
-	/** Called on direction, supresses key behaviour if it would move the scroller.
-	 * @param {object} e The event object.
-	 * @private
-	 */
-	Scroller.prototype._sDir = function(e) {
-		if(!this.active) return true;
-		if(this.orientation == c.ORIENT_HOR) {
-			if(e.dir == c.DIR_RIGHT || e.dir == c.DIR_LEFT) {
-				return false;
-			}
-		}else if(this.orientation == c.ORIENT_VER) {
-			if(e.dir == c.DIR_UP || e.dir == c.DIR_DOWN) {
-				return false;
+			if(this.orientation == c.ORIENT_HOR) {
+				if(controls.controlActive("sgui_left") && this.active) {
+					this.target.horScroll.value -= this.target.horScroll.stepDown / 60;
+				}
+				if(controls.controlActive("sgui_right") && this.active) {
+					this.target.horScroll.value += this.target.horScroll.stepUp / 60;
+				}
+				
+				if(this.target.horScroll == null) this.target.horScroll = new Range(0.0, 1.0, 0.0, 0.1, 0.1);
+				
+				this.y = this.target.y + this.target.height - this.height;
+				this.x = this.target.x +~~(((this.target.width - this.width) * this.target.horScroll.getFraction()));
+			}else{
+				if(controls.controlActive("sgui_up") && this.active) {
+					this.target.verScroll.value -= this.target.verScroll.stepDown / 60;
+				}
+				if(controls.controlActive("sgui_down") && this.active) {
+					this.target.verScroll.value += this.target.verScroll.stepUp / 60;
+				}
+				
+				if(this.target.verScroll == null) this.target.verScroll = new Range(0.0, 1.0, 0.0, 0.1, 0.1);
+				this.x = this.target.x + this.target.width - this.width;
+				this.y = this.target.y + ~~(((this.target.height - this.height) * this.target.verScroll.getFraction()));
 			}
 		}
-		return true;
-	};
+		
+		/** Called on direction, supresses key behaviour if it would move the scroller.
+		 * @param {object} e The event object.
+		 * @private
+		 */
+		_sDir(e) {
+			if(!this.active) return true;
+			if(this.orientation == c.ORIENT_HOR) {
+				if(e.dir == c.DIR_RIGHT || e.dir == c.DIR_LEFT) {
+					return false;
+				}
+			}else if(this.orientation == c.ORIENT_VER) {
+				if(e.dir == c.DIR_UP || e.dir == c.DIR_DOWN) {
+					return false;
+				}
+			}
+			return true;
+		}
+	}
 	
 	sgui.registerType("Scroller", Scroller);
 	

@@ -7,9 +7,7 @@ load.provide("dusk.sgui.Image", function() {
 	var sgui = load.require("dusk.sgui");
 	var DImage = load.require("dusk.utils.Image");
 	
-	/** @class dusk.sgui.Image
-	 * 
-	 * @classdesc An image.
+	/** An image.
 	 *
 	 * It is given an URL pointing to an image which is then downloaded and displayed.
 	 * 
@@ -19,71 +17,76 @@ load.provide("dusk.sgui.Image", function() {
 	 * 
 	 * This uses the theme key `img.src` (default "default/img.png") as the default image.
 	 * 
-	 * @param {dusk.sgui.IContainer} parent The container that this component is in.
-	 * @param {string} name The name of the component.
+	 * @memberof dusk.sgui
 	 * @extends dusk.sgui.Component
-	 * @constructor
 	 */
-	var Image = function(parent, name) {
-		Component.call(this, parent, name);
-
-		/** The current image.
-		 * @type dusk.utils.Image
-		 * @protected
-		 */
-		this._img = null;
-		/** Image options for the image.
+	class Image extends Component {
+		/** Creates a new Image.
 		 * 
-		 * @type array
-		 * @since 0.0.21-alpha
+		 * @param {dusk.sgui.Component} parent The container that this component is in.
+		 * @param {string} name The name of the component.
 		 */
-		this.imageTrans = [];
-		
-		/** Sets the image to draw, this should be a URL, potentially relative to `{@link dusk.dataDir}`.
-		 * @type string
-		 * @default "default/img.png"
-		 */
-		this.src = "default/img.png";
-		
-		//Prop masks
-		this._mapper.map("src", "src");
-		this._mapper.map("imageTrans", "imageTrans");
-		
-		//Listeners
-		this.onPaint.listen(this._imageDraw.bind(this));
-	};
-	Image.prototype = Object.create(Component.prototype);
-	
-	/** Used to draw the image.
-	 * @param {object} e A draw event.
-	 * @private
-	 */
-	Image.prototype._imageDraw = function(e) {
-		if(this._img && this._img.isReady() && this._img.width() && this._img.height()){
-			/*this._img.paintScaled(e.c, this.imageTrans, false,
-				e.d.sourceX, e.d.sourceY, e.d.width, e.d.height,
-				e.d.destX, e.d.destY, e.d.width, e.d.height,
-				this._img.width()/this.width, this._img.height()/this.height
-			);*/
-			this._img.paintRanges(e.c, this.imageTrans, false, e.d.origin, e.d.slice, e.d.dest);
+		constructor(parent, name) {
+			super(parent, name);
+			
+			/** The current image.
+			 * @type dusk.utils.Image
+			 * @protected
+			 * @memberof! dusk.sgui.Image#
+			 */
+			this._img = null;
+			/** Image options for the image.
+			 * 
+			 * @type array
+			 * @since 0.0.21-alpha
+			 * @memberof! dusk.sgui.Image#
+			 */
+			this.imageTrans = [];
+			
+			/** Sets the image to draw, this should be a URL, potentially relative to `{@link dusk.dataDir}`.
+			 * @type string
+			 * @default "default/img.png"
+			 * @memberof! dusk.sgui.Image#
+			 */
+			this.src = "default/img.png";
+			
+			//Prop masks
+			this._mapper.map("src", "src");
+			this._mapper.map("imageTrans", "imageTrans");
+			
+			//Listeners
+			this.onPaint.listen(this._imageDraw.bind(this));
 		}
-	};
-	
-	//src
-	Object.defineProperty(Image.prototype, "src", {
-		get: function() {
+		
+		/** Used to draw the image.
+		 * @param {object} e A draw event.
+		 * @private
+		 */
+		_imageDraw(e) {
+			if(this._img && this._img.isReady() && this._img.width() && this._img.height()){
+				/*this._img.paintScaled(e.c, this.imageTrans, false,
+					e.d.sourceX, e.d.sourceY, e.d.width, e.d.height,
+					e.d.destX, e.d.destY, e.d.width, e.d.height,
+					this._img.width()/this.width, this._img.height()/this.height
+				);*/
+				this._img.paintRanges(e.c, this.imageTrans, false, e.d.origin, e.d.slice, e.d.dest);
+			}
+		}
+		
+		//src
+		get src() {
 			if(!this._img) return "";
 			return this._img.src;
-		},
+		}
 		
-		set: function(value) {
+		set src(value) {
 			if(value === undefined) {
 				this._img = null;
 			}else{
 				this._img = new DImage(value);
 			}
 		}
-	});
+	}
 	
 	sgui.registerType("Image", Image);
 	
